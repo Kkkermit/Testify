@@ -2444,7 +2444,11 @@ The month is always a word, which matters most on an audit trail. Formatters are
 language never reuses the old one. **No other file builds an `Intl` formatter or calls `toLocaleDateString`**, because
 only `formattingLocale` is guaranteed a tag the browser accepts: four screens passed `i18n.language` instead, which is
 whatever the browser reported, and Chromium's `en-US@posix` made `Intl.DateTimeFormat` throw and took the birthdays page
-down. `src/test/formatters.test.ts` fails on one anywhere else, and was proved to name all four.
+down. `src/test/formatters.test.ts` fails on one anywhere else, and was proved to name all four. **i18next's own
+`{{count, number}}` is one of these too**: its built-in formatter is built from `i18n.language`, so the same tag left
+every count in the dashboard ungrouped — `1234 members` — and wrote `lang="en-US@posix"` onto the page. The language
+detector now hands i18next `readableTag` of what the browser said, the `number` format is `formatNumber`, and `lang`
+is the resolved locale. `src/i18n/index.test.ts` pins both, and reproduces `1234` without the fix.
 
 **Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
 places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
@@ -2553,14 +2557,22 @@ and watches the attribute with a `MutationObserver` so a change reaches what is 
 applied while the appearance page itself was mounted, so a reader who picked light and then landed on `/guilds`
 got the system theme back — remembered, and never applied. `preferences.test.ts` pins it.
 
-**An accent is a block of three tokens, and every one is measured.** `--color-primary`, `--color-accent` and
-`--color-ring` move; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
-`contrast.test.ts` reads the blocks out of `index.css` and checks all twelve accents against both backgrounds — an
+**An accent is a block of four tokens, and every one is measured.** `--color-primary`, `--color-accent`,
+`--color-accent-wash` and `--color-ring` move — the wash too, or a chip of blue text sat on plum's pink tint; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
+`contrast.test.ts` reads the blocks out of `index.css` and checks all twelve accents against both backgrounds, and
+each one's text on its own wash — an
 accent nobody measured is worse than no accent, because a control invites everybody to try it. **A dark fill has
 a narrow band to sit in**: at least 3:1 against the dark ground, so a button is seen, and at least 4.5:1 under
 white, so its label is read. That is a relative luminance between about 0.15 and 0.18 whatever the hue, so each
 dark fill is its light fill moved into that band. A new accent is a block in `index.css`, a name in `ACCENTS` and a
 label in every locale; the test tells you if its colours fail.
+
+**`primary` is a fill and never a text colour.** It only ever wears white, and as text on the dark ground it reads at
+3.3:1; `accent` is the cut for links, live state and anything else written in the accent. `src/test/accentText.test.ts`
+fails on `text-primary` anywhere, and was proved to. **Nor is anything faded to say it is not in effect**: an `opacity`
+on a card takes its muted text below AA with it, which is what the browser sweep found on the server picker and the
+command switches. A card that is not in effect has a dashed border and keeps its text; only a disabled control may be
+faded, since WCAG exempts an inactive one.
 
 Two things about the blocks are load-bearing:
 
@@ -2574,7 +2586,7 @@ Two things about the blocks are load-bearing:
 **A reader's own colour is fitted, never trusted.** Appearance takes any colour, picked or typed as a hex code, RGB or
 HSL (`parseColour` in `lib/colour.ts`), and `customAccent` in `lib/customAccent.ts` keeps its hue and saturation and
 moves its lightness only as far as each token's luminance band needs — the bands that hold every preset to the same
-thresholds, with the wash added, since a custom accent is the one that moves it. The shades go onto the root as
+thresholds, the wash included. The shades go onto the root as
 `--custom-*` properties, which `[data-accent="custom"]` reads with plum as the fallback, and the colour is stored apart
 from the accent (`testify:accent-colour`), so choosing a swatch does not forget it. Three things are load-bearing:
 

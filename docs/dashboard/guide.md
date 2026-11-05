@@ -1530,6 +1530,7 @@ A screen is done when all of this is true:
 - [ ] `jest-axe` clean; existing tests still pass unchanged
 - [ ] Motion is feedback only, and the screen loses nothing under `prefers-reduced-motion`
 - [ ] Copy is sentence case, British spelling, and says what to do next
+- [ ] Accent text is `text-accent`, never `text-primary`, and nothing with text in it is faded with `opacity`
 
 ### The commands
 
@@ -1562,14 +1563,18 @@ done
 
 jsdom computes no layout, so a real browser is the only thing that measures a page. The sweep is deliberately
 **not** in the repository — it needs Playwright, and a self-hosted bot should not carry a browser download for a
-design check. Rebuild it per session: start Vite, route `**/api/**` to fixtures, and walk every route at 1440 and
-390 checking:
+design check. Rebuild it per session: serve the built `dashboard/dist`, answer `/api/**` from the test handlers
+through MSW's `getResponse`, and walk every route at 320, 390, 820 and 1440 in both themes, with reduced motion, and
+once more at 1440 under `prefers-contrast: more` (Playwright's `contrast` option). At 390 and 1440, inject
+`axe-core` — `jest-axe` ships it — and run it in the page: a real browser computes styles, so its `color-contrast`
+rule measures what jsdom cannot. The last sweep was 570 page loads with nothing found. Check:
 
 - exactly one `<h1>`, and no heading level skipped
 - `documentElement.scrollWidth` against the viewport
 - every `button`, `a[href]`, `input`, `select` and `textarea` has an accessible name
 - every target is at least 24×24 (WCAG 2.2 AA, 2.5.8)
 - no `<table>` wider than the card that holds it
+- no script error, and `<html lang>` one of the six locales
 
 The script is quick to rewrite; **the exemptions are the part worth keeping**, because each one cost a round of
 chasing a finding that was not a defect:
