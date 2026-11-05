@@ -1063,6 +1063,11 @@
 		"unitDays": "giorni"
 	},
 	"levelling": {
+		"summaryIn": "I membri guadagnano XP mentre parlano, e ogni passaggio di livello viene annunciato in {{channel}}.",
+		"summaryWhereTalking": "I membri guadagnano XP mentre parlano, e ogni passaggio di livello viene annunciato dove stanno parlando.",
+		"summaryQuiet": "I membri guadagnano XP mentre parlano, e i passaggi di livello non vengono annunciati.",
+		"summaryOff": "I livelli sono disattivati, quindi nessuno guadagna XP.",
+		"generalBody": "Se i membri guadagnano XP e come viene annunciato un passaggio di livello.",
 		"title": "Livelli",
 		"subtitle": "Chi guadagna XP, cosa ottiene e dove viene annunciato.",
 		"earnXp": "I membri guadagnano XP",

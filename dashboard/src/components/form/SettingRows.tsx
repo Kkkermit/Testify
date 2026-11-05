@@ -22,12 +22,14 @@ export function SettingRows({
 			{...(title === undefined ? {} : { "aria-labelledby": headingId })}
 			className="bg-card border-border rounded-card divide-border divide-y border [&>*]:px-6 [&>*]:py-4"
 		>
-			{title !== undefined && (
+			{(title !== undefined || description !== undefined) && (
 				<div className="flex items-start justify-between gap-3">
 					<div>
-						<h2 id={headingId} className={CARD_HEADING}>
-							{title}
-						</h2>
+						{title !== undefined && (
+							<h2 id={headingId} className={CARD_HEADING}>
+								{title}
+							</h2>
+						)}
 						{description !== undefined && <p className="text-muted-foreground text-sm">{description}</p>}
 					</div>
 					{action}

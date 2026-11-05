@@ -113,7 +113,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/channels`, `…/channels/:channelId`        | Channels      | Its posts           | Built in phases 3 and 4 |
 | `…/welcome` (greeting and goodbye)           | Community     | Both messages       | Done                    |
 | `…/birthdays`                                | Community     | The birthday post   | Done                    |
-| `…/levelling`                                | Community     | —                   | To do                   |
+| `…/levelling`                                | Community     | —                   | Done                    |
 | `…/role-menus`                               | Community     | —                   | To do                   |
 | `…/ideas`                                    | Community     | —                   | Done                    |
 | `…/starboard`                                | Community     | —                   | Done                    |

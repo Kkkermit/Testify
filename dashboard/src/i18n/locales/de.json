@@ -1040,6 +1040,11 @@
 		"unitDays": "Tage"
 	},
 	"levelling": {
+		"summaryIn": "Mitglieder verdienen XP, während sie schreiben, und jeder Level-Aufstieg wird in {{channel}} angekündigt.",
+		"summaryWhereTalking": "Mitglieder verdienen XP, während sie schreiben, und jeder Level-Aufstieg wird dort angekündigt, wo sie gerade schreiben.",
+		"summaryQuiet": "Mitglieder verdienen XP, während sie schreiben, und Level-Aufstiege werden nicht angekündigt.",
+		"summaryOff": "Level sind aus, daher verdient niemand XP.",
+		"generalBody": "Ob Mitglieder XP verdienen und wie ein Level-Aufstieg angekündigt wird.",
 		"title": "Level",
 		"subtitle": "Wer XP verdient, was es dafür gibt und wo es angekündigt wird.",
 		"earnXp": "Mitglieder verdienen XP",

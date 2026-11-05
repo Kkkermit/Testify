@@ -2,7 +2,7 @@ import { LEVEL_LIMITS, type LevelRewardInput } from "@testify/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, FIELD, savingStateOf, SELECT, Warning } from "@/components/form";
+import { Field, FIELD, RowLayout, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button, DividedList } from "@/components/primitives";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
@@ -32,70 +32,75 @@ export function RewardsTab({
 			{rewards.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("levelling.noRewards")}</p>
 			) : (
-				<DividedList>
-					{rewards.map((reward) => (
-						<li
-							key={`${String(reward.level)}-${reward.roleId}`}
-							className="hover:bg-muted/40 flex items-center gap-3 px-3 py-2 text-sm transition-colors duration-150"
-						>
-							<span className="bg-muted rounded-chip px-2 py-0.5 font-mono text-xs tabular-nums">
-								{t("levelling.levelN", { level: reward.level })}
-							</span>
-							<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId)}</span>
-							<Button
-								variant="ghost"
-								aria-label={t("levelling.removeReward", { level: reward.level })}
-								onClick={() => {
-									update.mutate(rewards.filter((candidate) => candidate.level !== reward.level));
-								}}
+				<div>
+					<DividedList>
+						{rewards.map((reward) => (
+							<li
+								key={`${String(reward.level)}-${reward.roleId}`}
+								className="hover:bg-muted/40 flex items-center gap-3 px-3 py-2 text-sm transition-colors duration-150"
 							>
-								<Trash2 size={16} aria-hidden="true" />
-							</Button>
-						</li>
-					))}
-				</DividedList>
+								<span className="bg-muted rounded-chip px-2 py-0.5 font-mono text-xs tabular-nums">
+									{t("levelling.levelN", { level: reward.level })}
+								</span>
+								<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId)}</span>
+								<Button
+									variant="ghost"
+									aria-label={t("levelling.removeReward", { level: reward.level })}
+									onClick={() => {
+										update.mutate(rewards.filter((candidate) => candidate.level !== reward.level));
+									}}
+								>
+									<Trash2 size={16} aria-hidden="true" />
+								</Button>
+							</li>
+						))}
+					</DividedList>
+				</div>
 			)}
 
-			<div className="flex flex-wrap items-end gap-3">
-				<Field label={t("levelling.level")} className="w-24">
-					<input
-						type="number"
-						inputMode="numeric"
-						min={1}
-						max={LEVEL_LIMITS.maxRewardLevel}
-						value={level}
-						onChange={(event) => {
-							setLevel(Number(event.target.value));
+			{/* The new reward's two boxes and its button read as one line, so they keep the stacked field layout. */}
+			<RowLayout.Provider value={false}>
+				<div className="flex flex-wrap items-end gap-3">
+					<Field label={t("levelling.level")} className="w-24">
+						<input
+							type="number"
+							inputMode="numeric"
+							min={1}
+							max={LEVEL_LIMITS.maxRewardLevel}
+							value={level}
+							onChange={(event) => {
+								setLevel(Number(event.target.value));
+							}}
+							className={FIELD}
+						/>
+					</Field>
+					<Field label={t("levelling.role")} className="min-w-48 flex-1">
+						<select
+							value={roleId}
+							onChange={(event) => {
+								setRoleId(event.target.value);
+							}}
+							className={SELECT}
+						>
+							<option value="">{t("levelling.chooseRole")}</option>
+							{assignable.map((role) => (
+								<option key={role.id} value={role.id}>
+									{role.name}
+								</option>
+							))}
+						</select>
+					</Field>
+					<Button
+						disabled={roleId === "" || full || taken}
+						onClick={() => {
+							update.mutate([...rewards, { level, roleId }]);
+							setRoleId("");
 						}}
-						className={FIELD}
-					/>
-				</Field>
-				<Field label={t("levelling.role")} className="min-w-48 flex-1">
-					<select
-						value={roleId}
-						onChange={(event) => {
-							setRoleId(event.target.value);
-						}}
-						className={SELECT}
 					>
-						<option value="">{t("levelling.chooseRole")}</option>
-						{assignable.map((role) => (
-							<option key={role.id} value={role.id}>
-								{role.name}
-							</option>
-						))}
-					</select>
-				</Field>
-				<Button
-					disabled={roleId === "" || full || taken}
-					onClick={() => {
-						update.mutate([...rewards, { level, roleId }]);
-						setRoleId("");
-					}}
-				>
-					<Plus size={16} aria-hidden="true" /> {t("levelling.add")}
-				</Button>
-			</div>
+						<Plus size={16} aria-hidden="true" /> {t("levelling.add")}
+					</Button>
+				</div>
+			</RowLayout.Provider>
 
 			{full && <Warning>{t("levelling.rewardsFull")}</Warning>}
 			{taken && <Warning>{t("levelling.levelTaken", { level })}</Warning>}

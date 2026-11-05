@@ -1040,6 +1040,11 @@
 		"unitDays": "days"
 	},
 	"levelling": {
+		"summaryIn": "Members earn XP as they talk, and each level-up is announced in {{channel}}.",
+		"summaryWhereTalking": "Members earn XP as they talk, and each level-up is announced where they are talking.",
+		"summaryQuiet": "Members earn XP as they talk, and level-ups are not announced.",
+		"summaryOff": "Levelling is off, so nobody earns XP.",
+		"generalBody": "Whether members earn XP, and how a level-up is told.",
 		"title": "Levelling",
 		"subtitle": "Who earns XP, what they get for it, and where it is announced.",
 		"earnXp": "Members earn XP",

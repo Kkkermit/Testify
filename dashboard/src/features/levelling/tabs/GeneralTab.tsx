@@ -14,7 +14,7 @@ export function GeneralTab({
 	const update = useUpdateLevelling(guildId);
 
 	return (
-		<TabPanel saving={savingStateOf(update.isPending, update.isSuccess)}>
+		<TabPanel description={t("levelling.generalBody")} saving={savingStateOf(update.isPending, update.isSuccess)}>
 			<Toggle
 				label={t("levelling.earnXp")}
 				hint={t("levelling.earnXpHint")}
@@ -30,21 +30,20 @@ export function GeneralTab({
 					update.mutate({ announce });
 				}}
 			/>
-			<Toggle
-				label={t("levelling.stack")}
-				hint={t("levelling.stackHint")}
-				checked={config.stackRewards}
-				onChange={(stackRewards) => {
-					update.mutate({ stackRewards });
-				}}
-			/>
-
 			<ChannelPicker
 				label={t("levelling.announceIn")}
 				channels={channels}
 				value={config.levelUpChannelId}
 				onChange={(levelUpChannelId) => {
 					update.mutate({ levelUpChannelId });
+				}}
+			/>
+			<Toggle
+				label={t("levelling.stack")}
+				hint={t("levelling.stackHint")}
+				checked={config.stackRewards}
+				onChange={(stackRewards) => {
+					update.mutate({ stackRewards });
 				}}
 			/>
 

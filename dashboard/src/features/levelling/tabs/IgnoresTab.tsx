@@ -18,11 +18,7 @@ export function IgnoresTab({
 	const update = useUpdateIgnores(guildId);
 
 	return (
-		<TabPanel
-			description={t("levelling.ignoresBody")}
-			saving={savingStateOf(update.isPending, update.isSuccess)}
-			className="gap-6"
-		>
+		<TabPanel description={t("levelling.ignoresBody")} saving={savingStateOf(update.isPending, update.isSuccess)}>
 			<CheckList
 				label={t("levelling.ignoredChannels")}
 				items={seenChannels(postableChannels(channels)).map((channel) => ({

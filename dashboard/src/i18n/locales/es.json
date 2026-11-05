@@ -1063,6 +1063,11 @@
 		"unitDays": "días"
 	},
 	"levelling": {
+		"summaryIn": "Los miembros ganan XP al hablar, y cada subida de nivel se anuncia en {{channel}}.",
+		"summaryWhereTalking": "Los miembros ganan XP al hablar, y cada subida de nivel se anuncia donde están hablando.",
+		"summaryQuiet": "Los miembros ganan XP al hablar, y las subidas de nivel no se anuncian.",
+		"summaryOff": "Los niveles están desactivados, así que nadie gana XP.",
+		"generalBody": "Si los miembros ganan XP y cómo se anuncia una subida de nivel.",
 		"title": "Niveles",
 		"subtitle": "Quién gana XP, qué recibe por ello y dónde se anuncia.",
 		"earnXp": "Los miembros ganan XP",
