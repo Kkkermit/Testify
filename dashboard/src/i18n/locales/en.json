@@ -1900,7 +1900,7 @@
 		"enforcementP3": "If you think you were blacklisted by mistake, contact the operator of this instance. Lifting a blacklist is at their discretion.",
 		"usingDashboard": "Using the dashboard",
 		"usingDashboardP1": "You sign in with your Discord account. You can only configure a server where you have Manage Server, and that permission is checked live on every request, so losing it takes effect on your next click.",
-		"usingDashboardP2": "Every change made here is written to an audit log with your Discord account attached, so the server’s other managers can see who changed what. A settings change also keeps what the setting held before, so it can be put back. A test you send yourself is recorded the same way, by the kind of post and never its words.",
+		"usingDashboardP2": "Every change made here is written to an audit log with your Discord account attached, so the server’s other managers can see who changed what. A setting changed with one of {{bot}}’s commands in Discord is recorded the same way. A settings change also keeps what the setting held before, so it can be put back. A test you send yourself is recorded the same way, by the kind of post and never its words.",
 		"usingDashboardP3": "Do not share your session, automate requests against the dashboard, or try to reach a server or page you have not been given. Requests are rate limited, and abusing the dashboard is treated the same as abusing commands.",
 		"inBot": "Economy, levels and other in-bot things",
 		"inBotP1": "Coins, levels, items, pets and anything else the bot tracks are virtual. They have no monetary value, cannot be exchanged for money or for anything outside the bot, and may be reset at any time by a server’s moderators or by the operator.",
@@ -1946,7 +1946,7 @@
 		"dashboard": "Signing in and the dashboard",
 		"dashboardP1": "Signing in goes through Discord’s own authorisation page. The dashboard asks for two scopes: identify, for your user id, username and avatar, and guilds, for the list of servers you are in so it can show the ones you manage. It never sees your password or email, and cannot read your messages, post as you or join servers for you.",
 		"dashboardP2": "Your session stores your user id, username, avatar and the tokens Discord issues, which are encrypted at rest. It ends after a few days without use — the operator chooses how many, up to 90 — and signing out deletes it straight away.",
-		"dashboardP3": "Every change you make is recorded with your user id and username, what changed and when, and the server’s other managers can read it. Commands the operator runs from the owner console are recorded with the options they were given.",
+		"dashboardP3": "Every change you make is recorded with your user id and username, what changed and when, and the server’s other managers can read it. A setting you change with one of {{bot}}’s commands in Discord is recorded the same way, so the dashboard’s Changes page shows it too. Commands the operator runs from the owner console are recorded with the options they were given.",
 		"dashboardP4": "Screen counts: which dashboard screen was opened, per day. They are counted bot-wide — no user id and no server id is stored with these — so they show which screens get used and nothing about who used them.",
 		"dashboardP5": "Requests are rate limited by session and by network address. The address is held in memory only for the length of that limit and is never written down.",
 		"blacklist": "The blacklist",
@@ -2262,6 +2262,7 @@
 		"sourceLabel": "Made",
 		"sourceAll": "Anywhere",
 		"sourceDashboard": "On the dashboard",
+		"sourceCommand": "With {{bot}}’s commands",
 		"sourceDiscord": "In Discord",
 		"windowLabel": "Period",
 		"window1": "Last 24 hours",
@@ -2276,6 +2277,7 @@
 		"noMatch": "No changes match that search.",
 		"byline": "By {{who}} {{where}}",
 		"onDashboard": "on the dashboard",
+		"withCommand": "with a command in Discord",
 		"inDiscord": "in Discord",
 		"reason": "Reason: {{reason}}",
 		"kindSettings": "Bot setting",
@@ -2309,8 +2311,7 @@
 		"verbBotAdded": "Bot added",
 		"verbOther": "Changed",
 		"discordWithheld": "You need the {{permission}} permission in this server to see changes made in Discord. Only dashboard changes are listed.",
-		"moderationWithheld": "You need the {{permission}} permission to see the warnings, timeouts, kicks and bans made here.",
-		"commandsNotListed": "Changes made with {{bot}}’s commands in Discord are not listed here."
+		"moderationWithheld": "You need the {{permission}} permission to see the warnings, timeouts, kicks and bans made here."
 	},
 	"restore": {
 		"putBack": "Put back",

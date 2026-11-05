@@ -1900,7 +1900,7 @@
 		"enforcementP3": "Wenn du glaubst, irrtümlich auf der Blacklist zu stehen, wende dich an die Betreiberin dieser Instanz. Ob die Sperre aufgehoben wird, liegt in ihrem Ermessen.",
 		"usingDashboard": "Das Dashboard nutzen",
 		"usingDashboardP1": "Du meldest dich mit deinem Discord-Konto an. Du kannst nur einen Server einrichten, auf dem du Server verwalten hast. Diese Berechtigung wird bei jeder Anfrage live geprüft, ihr Verlust wirkt also schon beim nächsten Klick.",
-		"usingDashboardP2": "Jede Änderung hier wird mit deinem Discord-Konto in ein Audit-Log geschrieben, damit die anderen Verwalter des Servers sehen, wer was geändert hat. Eine Änderung an Einstellungen behält auch, was vorher eingestellt war, damit sie zurückgesetzt werden kann. Ein Test, den du dir selbst schickst, wird genauso festgehalten, mit der Art des Beitrags und nie mit seinem Text.",
+		"usingDashboardP2": "Jede Änderung hier wird mit deinem Discord-Konto in ein Audit-Log geschrieben, damit die anderen Verwalter des Servers sehen, wer was geändert hat. Eine Einstellung, die mit einem Befehl von {{bot}} in Discord geändert wird, wird genauso festgehalten. Eine Änderung an Einstellungen behält auch, was vorher eingestellt war, damit sie zurückgesetzt werden kann. Ein Test, den du dir selbst schickst, wird genauso festgehalten, mit der Art des Beitrags und nie mit seinem Text.",
 		"usingDashboardP3": "Gib deine Sitzung nicht weiter, automatisiere keine Anfragen an das Dashboard und versuche nicht, Server oder Seiten zu erreichen, für die du keinen Zugriff hast. Anfragen sind begrenzt, und Missbrauch des Dashboards wird genauso behandelt wie Missbrauch von Befehlen.",
 		"inBot": "Wirtschaft, Level und anderes im Bot",
 		"inBotP1": "Münzen, Level, Gegenstände, Haustiere und alles andere, was der Bot führt, sind virtuell. Sie haben keinen Geldwert, lassen sich weder gegen Geld noch gegen etwas außerhalb des Bots tauschen und können jederzeit von den Moderatoren eines Servers oder der Betreiberin zurückgesetzt werden.",
@@ -1946,7 +1946,7 @@
 		"dashboard": "Anmeldung und das Dashboard",
 		"dashboardP1": "Die Anmeldung läuft über Discords eigene Autorisierungsseite. Das Dashboard fragt nach zwei Berechtigungen: identify, für deine Benutzer-ID, deinen Benutzernamen und dein Avatar, und guilds, für die Liste deiner Server, damit es die zeigen kann, die du verwaltest. Es sieht nie dein Passwort oder deine E-Mail und kann weder deine Nachrichten lesen noch in deinem Namen posten oder Servern beitreten.",
 		"dashboardP2": "Deine Sitzung speichert deine Benutzer-ID, deinen Benutzernamen, dein Avatar und die Tokens, die Discord ausstellt; diese werden verschlüsselt gespeichert. Sie endet nach einigen Tagen ohne Nutzung – wie vielen, legt die Betreiberin fest, höchstens 90 –, und Abmelden löscht sie sofort.",
-		"dashboardP3": "Jede Änderung, die du vornimmst, wird mit deiner Benutzer-ID und deinem Benutzernamen festgehalten, samt was sich wann geändert hat, und die anderen Verwalter des Servers können sie lesen. Befehle, die die Betreiberin aus der Inhaber-Konsole ausführt, werden mit den übergebenen Optionen festgehalten.",
+		"dashboardP3": "Jede Änderung, die du vornimmst, wird mit deiner Benutzer-ID und deinem Benutzernamen festgehalten, samt was sich wann geändert hat, und die anderen Verwalter des Servers können sie lesen. Eine Einstellung, die du mit einem Befehl von {{bot}} in Discord änderst, wird genauso festgehalten, damit die Seite „Änderungen“ im Dashboard sie ebenfalls zeigt. Befehle, die die Betreiberin aus der Inhaber-Konsole ausführt, werden mit den übergebenen Optionen festgehalten.",
 		"dashboardP4": "Bildschirmzahlen: welcher Dashboard-Bildschirm geöffnet wurde, pro Tag. Sie werden botweit gezählt – weder Benutzer-ID noch Server-ID wird dabei gespeichert –, zeigen also, welche Bildschirme genutzt werden, und nichts darüber, wer sie genutzt hat.",
 		"dashboardP5": "Anfragen sind pro Sitzung und pro Netzwerkadresse begrenzt. Die Adresse wird nur für die Dauer dieser Begrenzung im Arbeitsspeicher gehalten und nie gespeichert.",
 		"blacklist": "Die Blacklist",
@@ -2262,6 +2262,7 @@
 		"sourceLabel": "Gemacht",
 		"sourceAll": "Überall",
 		"sourceDashboard": "Im Dashboard",
+		"sourceCommand": "Mit Befehlen von {{bot}}",
 		"sourceDiscord": "In Discord",
 		"windowLabel": "Zeitraum",
 		"window1": "Letzte 24 Stunden",
@@ -2276,6 +2277,7 @@
 		"noMatch": "Keine Änderung passt zu dieser Suche.",
 		"byline": "Von {{who}} {{where}}",
 		"onDashboard": "im Dashboard",
+		"withCommand": "mit einem Befehl in Discord",
 		"inDiscord": "in Discord",
 		"reason": "Grund: {{reason}}",
 		"kindSettings": "Bot-Einstellung",
@@ -2309,8 +2311,7 @@
 		"verbBotAdded": "Bot hinzugefügt",
 		"verbOther": "Geändert",
 		"discordWithheld": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um in Discord vorgenommene Änderungen zu sehen. Es werden nur Dashboard-Änderungen angezeigt.",
-		"moderationWithheld": "Du brauchst die Berechtigung „{{permission}}“, um hier vergebene Verwarnungen, Timeouts, Kicks und Banns zu sehen.",
-		"commandsNotListed": "Änderungen über die Befehle von {{bot}} in Discord werden hier nicht aufgeführt."
+		"moderationWithheld": "Du brauchst die Berechtigung „{{permission}}“, um hier vergebene Verwarnungen, Timeouts, Kicks und Banns zu sehen."
 	},
 	"restore": {
 		"putBack": "Zurücksetzen",

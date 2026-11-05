@@ -1961,7 +1961,7 @@
 		"enforcementP3": "Si vous pensez avoir été mis sur liste noire par erreur, contactez l’exploitant de cette instance. La levée de la liste noire est à sa discrétion.",
 		"usingDashboard": "Utiliser le tableau de bord",
 		"usingDashboardP1": "Vous vous connectez avec votre compte Discord. Vous ne pouvez configurer qu’un serveur où vous avez Gérer le serveur, et cette permission est vérifiée en direct à chaque requête : la perdre prend effet dès votre clic suivant.",
-		"usingDashboardP2": "Chaque changement fait ici est écrit dans un journal d’audit avec votre compte Discord, pour que les autres gestionnaires du serveur voient qui a changé quoi. Une modification de réglage garde aussi ce qu’il valait avant, pour pouvoir le rétablir. Un test que vous vous envoyez est noté de la même façon, avec le type de publication et jamais son texte.",
+		"usingDashboardP2": "Chaque changement fait ici est écrit dans un journal d’audit avec votre compte Discord, pour que les autres gestionnaires du serveur voient qui a changé quoi. Un réglage modifié avec une commande de {{bot}} dans Discord est enregistré de la même façon. Une modification de réglage garde aussi ce qu’il valait avant, pour pouvoir le rétablir. Un test que vous vous envoyez est noté de la même façon, avec le type de publication et jamais son texte.",
 		"usingDashboardP3": "Ne partagez pas votre session, n’automatisez pas de requêtes vers le tableau de bord et n’essayez pas d’atteindre un serveur ou une page auxquels vous n’avez pas accès. Les requêtes sont limitées, et abuser du tableau de bord est traité comme abuser des commandes.",
 		"inBot": "Économie, niveaux et autres éléments du bot",
 		"inBotP1": "Les pièces, niveaux, objets, animaux et tout ce que le bot suit sont virtuels. Ils n’ont aucune valeur monétaire, ne s’échangent ni contre de l’argent ni contre quoi que ce soit en dehors du bot, et peuvent être réinitialisés à tout moment par les modérateurs d’un serveur ou par l’exploitant.",
@@ -2007,7 +2007,7 @@
 		"dashboard": "Connexion et tableau de bord",
 		"dashboardP1": "La connexion passe par la page d’autorisation de Discord lui-même. Le tableau de bord demande deux autorisations : identify, pour votre identifiant, votre nom d’utilisateur et votre avatar, et guilds, pour la liste de vos serveurs afin d’afficher ceux que vous gérez. Il ne voit jamais votre mot de passe ni votre e-mail, et ne peut ni lire vos messages, ni publier en votre nom, ni rejoindre des serveurs à votre place.",
 		"dashboardP2": "Votre session enregistre votre identifiant, votre nom d’utilisateur, votre avatar et les jetons émis par Discord, qui sont chiffrés au repos. Elle prend fin après quelques jours d’inactivité — l’exploitant choisit combien, jusqu’à 90 — et la déconnexion la supprime aussitôt.",
-		"dashboardP3": "Chaque modification que vous faites est enregistrée avec votre identifiant et votre nom d’utilisateur, ce qui a changé et quand, et les autres gestionnaires du serveur peuvent la lire. Les commandes que l’exploitant lance depuis la console propriétaire sont enregistrées avec les options fournies.",
+		"dashboardP3": "Chaque modification que vous faites est enregistrée avec votre identifiant et votre nom d’utilisateur, ce qui a changé et quand, et les autres gestionnaires du serveur peuvent la lire. Un réglage que vous modifiez avec une commande de {{bot}} dans Discord est enregistré de la même façon, pour que la page Modifications du tableau de bord l’affiche aussi. Les commandes que l’exploitant lance depuis la console propriétaire sont enregistrées avec les options fournies.",
 		"dashboardP4": "Comptages d’écrans : quel écran du tableau de bord a été ouvert, par jour. Ils sont comptés pour tout le bot — ni identifiant d’utilisateur ni identifiant de serveur n’y est joint —, et montrent donc quels écrans servent, sans rien dire de qui les a utilisés.",
 		"dashboardP5": "Les requêtes sont limitées par session et par adresse réseau. L’adresse n’est gardée en mémoire que le temps de cette limite et n’est jamais enregistrée.",
 		"blacklist": "La liste noire",
@@ -2328,6 +2328,7 @@
 		"sourceLabel": "Fait",
 		"sourceAll": "Partout",
 		"sourceDashboard": "Sur le tableau de bord",
+		"sourceCommand": "Avec les commandes de {{bot}}",
 		"sourceDiscord": "Dans Discord",
 		"windowLabel": "Période",
 		"window1": "Dernières 24 heures",
@@ -2343,6 +2344,7 @@
 		"noMatch": "Aucune modification ne correspond à cette recherche.",
 		"byline": "Par {{who}} {{where}}",
 		"onDashboard": "sur le tableau de bord",
+		"withCommand": "avec une commande dans Discord",
 		"inDiscord": "dans Discord",
 		"reason": "Motif : {{reason}}",
 		"kindSettings": "Réglage du bot",
@@ -2376,8 +2378,7 @@
 		"verbBotAdded": "Bot ajouté",
 		"verbOther": "Modifié",
 		"discordWithheld": "Il te faut la permission {{permission}} sur ce serveur pour voir les modifications faites dans Discord. Seules celles du tableau de bord sont listées.",
-		"moderationWithheld": "Il te faut la permission {{permission}} pour voir les avertissements, exclusions temporaires, expulsions et bannissements faits ici.",
-		"commandsNotListed": "Les modifications faites avec les commandes de {{bot}} dans Discord ne figurent pas ici."
+		"moderationWithheld": "Il te faut la permission {{permission}} pour voir les avertissements, exclusions temporaires, expulsions et bannissements faits ici."
 	},
 	"restore": {
 		"putBack": "Rétablir",

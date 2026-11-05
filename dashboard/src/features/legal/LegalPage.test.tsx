@@ -119,6 +119,8 @@ describe("the legal pages", () => {
 		expect(erasure).toMatch(/blacklist: \{ userId: "keep" \}/);
 		expect(erasure).toMatch(/modcases: \{ userId: "keep", moderatorId: "anonymise" \}/);
 		expect(text).toMatch(/delete their own data at any time.* can’t be undone/);
+		// `recordsSettings` writes a change made with a command to the same audit log, with the person who made it.
+		expect(text).toMatch(/A setting you change with one of .* commands in Discord is recorded the same way/);
 		// `/delete-my-data` is private and asks for the username before anything goes; `deleteMyData.test.ts` pins both.
 		expect(botSource("src/commands/info/deleteMyData.command.ts")).toMatch(/private: true/);
 		expect(text).toMatch(/with \/delete-my-data in Discord, whose answer only the person who ran it can see/);

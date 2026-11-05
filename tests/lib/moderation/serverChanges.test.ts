@@ -127,6 +127,22 @@ describe("dashboardChange", () => {
 		});
 		expect(record("member.kick", { userId: "1" }, undefined).restore).toBeNull();
 	});
+
+	/** A record made before commands were recorded has no source, and was made on the dashboard. */
+	it("says a command's record came from a command, and an older one from the dashboard", () => {
+		expect(record("starboard.update", {}, {}).source).toBe("dashboard");
+		expect(
+			dashboardChange({
+				actorId: MOD,
+				actorTag: "kate",
+				guildId: "1",
+				action: "x",
+				summary: "y",
+				source: "command",
+				at: new Date(NOW),
+			}).source,
+		).toBe("command");
+	});
 });
 
 describe("pageChanges", () => {
@@ -150,9 +166,11 @@ describe("pageChanges", () => {
 		const all = [
 			change({ id: "d", source: "dashboard", kind: "settings", summary: "Turned levelling on" }),
 			change({ id: "c" }),
+			change({ id: "m", source: "command", kind: "settings", summary: "Turned the starboard on" }),
 		];
 
 		expect(pageChanges(all, query({ source: "dashboard" }), NOW).items.map((c) => c.id)).toEqual(["d"]);
+		expect(pageChanges(all, query({ source: "command" }), NOW).items.map((c) => c.id)).toEqual(["m"]);
 		expect(pageChanges(all, query({ q: "LEVELLING" }), NOW).items.map((c) => c.id)).toEqual(["d"]);
 	});
 

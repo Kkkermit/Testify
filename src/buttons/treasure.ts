@@ -5,7 +5,7 @@ import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/tr
 import { confirmRow, errorEmbed, modalForm, type RenderedScreen } from "@lib/discord";
 import { normaliseTreasure } from "@lib/economy";
 import { formatDuration, formatNumber } from "@lib/format";
-import { parseRange, parseWholeNumber, settingsPanel, statusValue } from "@lib/settings";
+import { parseRange, parseWholeNumber, settingsPanel, statusValue, recordsSettings } from "@lib/settings";
 import { TREASURE_DEFAULTS, TREASURE_LIMITS, type TreasureSettings } from "@testify/shared";
 
 export const TREASURE_PANEL_ID = "treasure";
@@ -56,143 +56,146 @@ async function render(guildId: string): Promise<RenderedScreen> {
 
 const MINUTE = 60_000;
 
-export default defineButton({
-	id: TREASURE_PANEL_ID,
+export default recordsSettings(
+	["treasure.update"],
+	defineButton({
+		id: TREASURE_PANEL_ID,
 
-	async run(interaction, context) {
-		if (interaction.guild === null) return;
-		const guildId = interaction.guild.id;
+		async run(interaction, context) {
+			if (interaction.guild === null) return;
+			const guildId = interaction.guild.id;
 
-		// The panel is public, so anyone could press it — the permission is the gate.
-		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
-			throw new UserFacingError("You need the Manage Server permission to change these settings.");
-		}
-
-		const current = settingsOf(await getTreasureConfig(guildId));
-
-		if (interaction.isButton()) {
-			switch (context.action) {
-				case "toggle":
-					await saveTreasureConfig(guildId, {
-						...toStored(current),
-						isEnabled: !current.enabled,
-						lastModifiedBy: interaction.user.id,
-					});
-					await interaction.update(await render(guildId));
-					return;
-
-				case "edit-messages":
-					await interaction.showModal(
-						modalForm({
-							id: TREASURE_PANEL_ID,
-							action: "save-messages",
-							title: "Messages between drops",
-							fields: [
-								{ id: "min", label: "Fewest messages", value: String(current.minMessages) },
-								{ id: "max", label: "Most messages", value: String(current.maxMessages) },
-							],
-						}),
-					);
-					return;
-
-				case "edit-amount":
-					await interaction.showModal(
-						modalForm({
-							id: TREASURE_PANEL_ID,
-							action: "save-amount",
-							title: "Drop size",
-							fields: [
-								{ id: "min", label: "Smallest drop", value: String(current.minAmount) },
-								{ id: "max", label: "Largest drop", value: String(current.maxAmount) },
-							],
-						}),
-					);
-					return;
-
-				case "edit-cooldown":
-					await interaction.showModal(
-						modalForm({
-							id: TREASURE_PANEL_ID,
-							action: "save-cooldown",
-							title: "Cooldown",
-							fields: [
-								{
-									id: "minutes",
-									label: "Minutes between drops",
-									value: String(Math.round(current.cooldownMs / MINUTE)),
-								},
-							],
-						}),
-					);
-					return;
-
-				case "reset":
-					await interaction.update({
-						embeds: [errorEmbed("Reset every treasure setting back to its default?")],
-						components: [confirmRow(TREASURE_PANEL_ID, "reset", interaction.user.id)],
-					});
-					return;
-
-				case "reset-yes":
-					await saveTreasureConfig(guildId, {
-						...TREASURE_DEFAULTS,
-						isEnabled: current.enabled,
-						lastModifiedBy: interaction.user.id,
-					});
-					await interaction.update(await render(guildId));
-					return;
-
-				case "reset-no":
-					await interaction.update(await render(guildId));
-					return;
-
-				default:
-					return;
+			// The panel is public, so anyone could press it — the permission is the gate.
+			if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
+				throw new UserFacingError("You need the Manage Server permission to change these settings.");
 			}
-		}
 
-		if (!interaction.isModalSubmit()) return;
+			const current = settingsOf(await getTreasureConfig(guildId));
 
-		const fields = interaction.fields;
-		const problems: string[] = [];
-		const next: Settings = { ...current };
+			if (interaction.isButton()) {
+				switch (context.action) {
+					case "toggle":
+						await saveTreasureConfig(guildId, {
+							...toStored(current),
+							isEnabled: !current.enabled,
+							lastModifiedBy: interaction.user.id,
+						});
+						await interaction.update(await render(guildId));
+						return;
 
-		if (context.action === "save-messages" || context.action === "save-amount") {
-			const messages = context.action === "save-messages";
-			const range = parseRange(
-				{ min: fields.getTextInputValue("min"), max: fields.getTextInputValue("max") },
-				messages
-					? { min: "Fewest messages", max: "Most messages", order: "The fewest cannot be more than the most." }
-					: { min: "Smallest drop", max: "Largest drop", order: "The smallest cannot be more than the largest." },
-				messages
-					? { min: TREASURE_LIMITS.minMessages, max: TREASURE_LIMITS.maxMessages }
-					: { min: TREASURE_LIMITS.minAmount, max: TREASURE_LIMITS.maxAmount },
-			);
+					case "edit-messages":
+						await interaction.showModal(
+							modalForm({
+								id: TREASURE_PANEL_ID,
+								action: "save-messages",
+								title: "Messages between drops",
+								fields: [
+									{ id: "min", label: "Fewest messages", value: String(current.minMessages) },
+									{ id: "max", label: "Most messages", value: String(current.maxMessages) },
+								],
+							}),
+						);
+						return;
 
-			if (!range.ok) problems.push(...range.problems);
-			else if (messages) Object.assign(next, { minMessages: range.min, maxMessages: range.max });
-			else Object.assign(next, { minAmount: range.min, maxAmount: range.max });
-		} else if (context.action === "save-cooldown") {
-			const minutes = parseWholeNumber(fields.getTextInputValue("minutes"), "Minutes", {
-				min: TREASURE_LIMITS.minCooldownMinutes,
-				max: TREASURE_LIMITS.maxCooldownMinutes,
-			});
+					case "edit-amount":
+						await interaction.showModal(
+							modalForm({
+								id: TREASURE_PANEL_ID,
+								action: "save-amount",
+								title: "Drop size",
+								fields: [
+									{ id: "min", label: "Smallest drop", value: String(current.minAmount) },
+									{ id: "max", label: "Largest drop", value: String(current.maxAmount) },
+								],
+							}),
+						);
+						return;
 
-			if (!minutes.ok) problems.push(minutes.reason);
-			else next.cooldownMs = minutes.value * MINUTE;
-		} else {
-			return;
-		}
+					case "edit-cooldown":
+						await interaction.showModal(
+							modalForm({
+								id: TREASURE_PANEL_ID,
+								action: "save-cooldown",
+								title: "Cooldown",
+								fields: [
+									{
+										id: "minutes",
+										label: "Minutes between drops",
+										value: String(Math.round(current.cooldownMs / MINUTE)),
+									},
+								],
+							}),
+						);
+						return;
 
-		if (problems.length > 0) {
-			await interaction.reply({ embeds: [errorEmbed(problems.join("\n"))], flags: MessageFlags.Ephemeral });
-			return;
-		}
+					case "reset":
+						await interaction.update({
+							embeds: [errorEmbed("Reset every treasure setting back to its default?")],
+							components: [confirmRow(TREASURE_PANEL_ID, "reset", interaction.user.id)],
+						});
+						return;
 
-		await saveTreasureConfig(guildId, { ...toStored(next), lastModifiedBy: interaction.user.id });
+					case "reset-yes":
+						await saveTreasureConfig(guildId, {
+							...TREASURE_DEFAULTS,
+							isEnabled: current.enabled,
+							lastModifiedBy: interaction.user.id,
+						});
+						await interaction.update(await render(guildId));
+						return;
 
-		// A modal opened elsewhere cannot edit this message, so it answers privately.
-		if (interaction.isFromMessage()) await interaction.update(await render(guildId));
-		else await interaction.reply({ ...(await render(guildId)), flags: MessageFlags.Ephemeral });
-	},
-});
+					case "reset-no":
+						await interaction.update(await render(guildId));
+						return;
+
+					default:
+						return;
+				}
+			}
+
+			if (!interaction.isModalSubmit()) return;
+
+			const fields = interaction.fields;
+			const problems: string[] = [];
+			const next: Settings = { ...current };
+
+			if (context.action === "save-messages" || context.action === "save-amount") {
+				const messages = context.action === "save-messages";
+				const range = parseRange(
+					{ min: fields.getTextInputValue("min"), max: fields.getTextInputValue("max") },
+					messages
+						? { min: "Fewest messages", max: "Most messages", order: "The fewest cannot be more than the most." }
+						: { min: "Smallest drop", max: "Largest drop", order: "The smallest cannot be more than the largest." },
+					messages
+						? { min: TREASURE_LIMITS.minMessages, max: TREASURE_LIMITS.maxMessages }
+						: { min: TREASURE_LIMITS.minAmount, max: TREASURE_LIMITS.maxAmount },
+				);
+
+				if (!range.ok) problems.push(...range.problems);
+				else if (messages) Object.assign(next, { minMessages: range.min, maxMessages: range.max });
+				else Object.assign(next, { minAmount: range.min, maxAmount: range.max });
+			} else if (context.action === "save-cooldown") {
+				const minutes = parseWholeNumber(fields.getTextInputValue("minutes"), "Minutes", {
+					min: TREASURE_LIMITS.minCooldownMinutes,
+					max: TREASURE_LIMITS.maxCooldownMinutes,
+				});
+
+				if (!minutes.ok) problems.push(minutes.reason);
+				else next.cooldownMs = minutes.value * MINUTE;
+			} else {
+				return;
+			}
+
+			if (problems.length > 0) {
+				await interaction.reply({ embeds: [errorEmbed(problems.join("\n"))], flags: MessageFlags.Ephemeral });
+				return;
+			}
+
+			await saveTreasureConfig(guildId, { ...toStored(next), lastModifiedBy: interaction.user.id });
+
+			// A modal opened elsewhere cannot edit this message, so it answers privately.
+			if (interaction.isFromMessage()) await interaction.update(await render(guildId));
+			else await interaction.reply({ ...(await render(guildId)), flags: MessageFlags.Ephemeral });
+		},
+	}),
+);

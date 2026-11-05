@@ -8,11 +8,12 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { botName } from "@core/brand";
-import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
-import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
-import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
-import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
-import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
+import { disableAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
+import { setAutoRoles } from "@database/repositories/autoRoleRepository";
+import { disableCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
+import { setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
+import { setVoiceCounter } from "@database/repositories/voiceCounterRepository";
+import { readServerSettings } from "@lib/settings";
 import {
 	type AntiLinkPatch,
 	antiLinkPatch,
@@ -23,12 +24,10 @@ import {
 	DEFAULT_BYPASS,
 	type GuildNickname,
 	nicknamePatch,
-	isBypassPermission,
 	type PrefixPatch,
 	prefixPatch,
 	type RestorableAction,
 	type ServerSettings,
-	SETTINGS_LIMITS,
 	voiceStatsPatch,
 } from "@testify/shared";
 
@@ -38,38 +37,7 @@ export const settings = new Hono<ApiBindings>();
 
 settings.use("*", requireGuild);
 
-async function settingsOf(guildId: string): Promise<ServerSettings> {
-	const [prefix, antiLink, autoRoles, counting, voice] = await Promise.all([
-		getPrefixConfig(guildId),
-		getAntiLink(guildId),
-		getAutoRoles(guildId),
-		getCounting(guildId),
-		getVoiceCounter(guildId),
-	]);
-
-	return {
-		prefix: { prefix: prefix.prefix, enabled: prefix.isEnabled },
-		antiLink: {
-			// No record means off, and the stored flag is normalised so an old value cannot reach the form.
-			enabled: antiLink !== null,
-			bypassPermission:
-				antiLink !== null && isBypassPermission(antiLink.bypassPermission) ? antiLink.bypassPermission : DEFAULT_BYPASS,
-		},
-		autoRoles: { roleIds: autoRoles?.roleIds ?? [] },
-		counting: {
-			enabled: counting !== null,
-			channelId: counting?.channelId ?? null,
-			maxCount: counting?.maxCount ?? SETTINGS_LIMITS.maxCount,
-			count: counting?.count ?? 0,
-		},
-		voiceStats: {
-			memberChannelId: voice?.memberChannelId ?? null,
-			botChannelId: voice?.botChannelId ?? null,
-		},
-	};
-}
-
-settings.get("/", async (context) => context.json(await settingsOf(guildIdOf(context))));
+settings.get("/", async (context) => context.json(await readServerSettings(guildIdOf(context))));
 
 settings.get("/nickname", (context) => {
 	const me = guildOf(context).members.me;
@@ -113,7 +81,7 @@ settings.patch("/nickname", requirePermission(PermissionFlagsBits.ManageNickname
 settings.patch("/prefix", async (context) => {
 	const guildId = guildIdOf(context);
 	const patch = await parseBody(context, prefixPatch);
-	const before = await settingsOf(guildId);
+	const before = await readServerSettings(guildId);
 
 	if (patch.prefix !== undefined) await setPrefix(guildId, patch.prefix);
 	if (patch.enabled !== undefined) await setPrefixEnabled(guildId, patch.enabled);
@@ -124,7 +92,7 @@ settings.patch("/prefix", async (context) => {
 settings.patch("/anti-link", async (context) => {
 	const guildId = guildIdOf(context);
 	const patch = await parseBody(context, antiLinkPatch);
-	const before = await settingsOf(guildId);
+	const before = await readServerSettings(guildId);
 
 	if (patch.enabled === false) {
 		await disableAntiLink(guildId);
@@ -139,7 +107,7 @@ settings.put("/auto-roles", requirePermission(PermissionFlagsBits.ManageRoles), 
 	const guildId = guildIdOf(context);
 	const body: AutoRolePut = await parseBody(context, autoRolePut);
 	requireGrantable(context, body.roleIds);
-	const before = await settingsOf(guildId);
+	const before = await readServerSettings(guildId);
 
 	await setAutoRoles(guildId, body.roleIds);
 
@@ -155,7 +123,7 @@ settings.put("/auto-roles", requirePermission(PermissionFlagsBits.ManageRoles), 
 settings.patch("/counting", async (context) => {
 	const guildId = guildIdOf(context);
 	const patch = await parseBody(context, countingPatch);
-	const before = await settingsOf(guildId);
+	const before = await readServerSettings(guildId);
 
 	if (patch.enabled === false) {
 		await disableCounting(guildId);
@@ -175,7 +143,7 @@ settings.patch("/counting", async (context) => {
 settings.patch("/voice-stats", async (context) => {
 	const guildId = guildIdOf(context);
 	const patch = await parseBody(context, voiceStatsPatch);
-	const before = await settingsOf(guildId);
+	const before = await readServerSettings(guildId);
 
 	// An absent key means "leave it", so only the keys that were sent reach `$set`.
 	await setVoiceCounter(guildId, {
@@ -193,7 +161,7 @@ async function answer(
 	action: RestorableAction,
 	summary: string,
 ): Promise<Response> {
-	const after = await settingsOf(guildId);
+	const after = await readServerSettings(guildId);
 	await auditSettings(context, { action, summary, before, after });
 
 	return context.json(after);

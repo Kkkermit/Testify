@@ -3136,8 +3136,8 @@ wrote. Four things about it are load-bearing:
 
 ### The changes page
 
-`/guilds/:id/changes` puts two records in one list: what managers did here (`dashboardaudit`) and what Discord's own
-audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
+`/guilds/:id/changes` puts two records in one list: what managers did here and with the bot's commands
+(`dashboardaudit`), and what Discord's own audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
 and three things about it are load-bearing:
 
 - **Discord's side is read, never stored.** `readAuditWindow` pages back a hundred entries at a time until it passes
@@ -3155,8 +3155,7 @@ and three things about it are load-bearing:
 `RESTORABLE` in `shared/src/restore.ts` lists the eighteen settings writes this covers — welcome, goodbye, birthdays,
 levelling, the starboard, the idea board, join to create, raid protection, cases, verification, music, treasure, the
 lottery and the settings page's five sections — each with its route, where it is read and the fields it may send.
-There is no slider back through a server's setup, because the records cannot rebuild one: settings changed with the
-bot's commands in Discord are recorded nowhere, and the page says so. Four things about Put back are load-bearing:
+Four things about Put back are load-bearing:
 
 - **Every one of those writes keeps what it replaced.** `auditSettings` records every restorable field as stored
   before and after, read with the same function the route's `GET` uses, and `auditChange` refuses a restorable action
@@ -3172,6 +3171,26 @@ bot's commands in Discord are recorded nowhere, and the page says so. Four thing
   the route asks and its validation decide a put-back exactly as they decided the change, and the route records it as
   a change of its own, which can itself be put back. Nothing new can be reached this way: the request is one the
   reader could already have made by hand.
+
+**A setting changed with a command or a panel in Discord is recorded the same way**, with `source: "command"` on the
+record, so the Changes page lists it, filters it under its own source and can put it back. A record with no source is
+the dashboard's, which is every record written before commands were. Four things about it are load-bearing:
+
+- **The handler is wrapped, not the write.** `recordsSettings(["starboard.update"], defineButton({…}))` in
+  `src/lib/settings/settingsRecord.util.ts` reads the setting before a press or a run, runs it, and reads it again in a
+  `finally`, so a change is recorded even when the reply after it fails. Recording inside each `apply*` function
+  would record every dashboard change twice, since the route already records its own, and half the settings —
+  the prefix, counting, roles on join — are written straight to their repository with no `apply*` to put it in.
+- **It reads with the route's own readers.** `SETTING_READERS` in `settingsReaders.util.ts` is what each route's `GET`
+  answers with — the welcome, levelling, verification and settings routes import their readers from there — so a
+  record from Discord has exactly the shape Put back expects, and `stillAsLeft` guards it the same way.
+- **The words are written, not derived.** `describeChange` names a switch as one ("Turned the starboard on") and every
+  other field from `WORDS`, so the page never shows `lobbyChannelId`; `settingsRecord.test.ts` fails on a field with
+  no words.
+- **A record never fails the change.** A reading that fails records nothing, and a record that cannot be written is
+  logged as `[SETTINGS]` and dropped, because the setting has already changed. `settingsWriters.test.ts` names the
+  writers of every restorable setting and fails on a button or command that calls one without `recordsSettings`
+  naming that setting, which was proved to go red.
 
 ### The status page
 

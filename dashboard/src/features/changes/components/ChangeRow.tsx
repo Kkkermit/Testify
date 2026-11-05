@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { Badge, Button } from "@/components/primitives";
-import { KIND_LABELS, VERB_LABELS, verbTone } from "@/features/changes/changes.utils";
+import { KIND_LABELS, VERB_LABELS, verbTone, WHERE_LABELS } from "@/features/changes/changes.utils";
 import { RestorePanel } from "@/features/changes/components/RestorePanel";
 import { dateAndTime, since } from "@/lib/datetime";
 import { personName } from "@/lib/people";
@@ -37,7 +37,7 @@ export function ChangeRow({ change }: { change: ServerChange }): React.JSX.Eleme
 					<p className="text-muted-foreground text-xs">
 						{t("changes.byline", {
 							who: personName(change.actorTag, t),
-							where: change.source === "dashboard" ? t("changes.onDashboard") : t("changes.inDiscord"),
+							where: t(WHERE_LABELS[change.source]),
 						})}
 						{" · "}
 						<time dateTime={change.at} title={dateAndTime(change.at)} className="tabular-nums">

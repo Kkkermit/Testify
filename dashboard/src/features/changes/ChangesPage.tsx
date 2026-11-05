@@ -96,7 +96,6 @@ export function ChangesPage(): React.JSX.Element {
 							{t("changes.count", { count: changes.data.total })}
 							{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
 						</p>
-						<p>{t("changes.commandsNotListed")}</p>
 					</div>
 					{changes.data.items.length === 0 ? (
 						<Card>
