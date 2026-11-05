@@ -7,6 +7,7 @@ export { Card, cardClass } from "@/components/primitives/Card";
 export { CARD_ROW, HoverChevron } from "@/components/primitives/CardRow";
 export { DataList, Figure } from "@/components/primitives/DataList";
 export { CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives/DataTable";
+export { DiscordPreview } from "@/components/primitives/DiscordPreview";
 export { DividedList } from "@/components/primitives/DividedList";
 export { Disclosure } from "@/components/primitives/Disclosure";
 export { EmptyState } from "@/components/primitives/EmptyState";

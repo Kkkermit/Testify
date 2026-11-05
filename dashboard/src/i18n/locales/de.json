@@ -2369,6 +2369,11 @@
 		"licenseOwn": "Lizenz: eigene"
 	},
 	"channel": {
+		"openPage": "Seite öffnen",
+		"openPageLabel": "Seite für {{feature}} öffnen",
+		"editMessage": "Nachricht ändern",
+		"message": "Nachricht",
+		"doneEditing": "Fertig",
 		"placeIn": "Platzieren in",
 		"placeInLabel": "{{feature}} in einem Kanal platzieren",
 		"noChannelFits": "Kein Kanal hier kann sie aufnehmen.",

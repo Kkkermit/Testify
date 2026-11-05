@@ -2413,6 +2413,11 @@
 		"licenseOwn": "Licenza: propria"
 	},
 	"channel": {
+		"openPage": "Apri la sua pagina",
+		"openPageLabel": "Apri la pagina di {{feature}}",
+		"editMessage": "Cambia il messaggio",
+		"message": "Messaggio",
+		"doneEditing": "Fatto",
 		"placeIn": "Metti in",
 		"placeInLabel": "Metti {{feature}} in un canale",
 		"noChannelFits": "Nessun canale qui può accoglierla.",

@@ -2369,6 +2369,11 @@
 		"licenseOwn": "Licence: its own"
 	},
 	"channel": {
+		"openPage": "Open its page",
+		"openPageLabel": "Open the {{feature}} page",
+		"editMessage": "Change the message",
+		"message": "Message",
+		"doneEditing": "Done",
 		"placeIn": "Place in",
 		"placeInLabel": "Place {{feature}} in a channel",
 		"noChannelFits": "No channel here can take it.",

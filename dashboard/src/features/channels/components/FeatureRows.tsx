@@ -3,21 +3,17 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Badge, DividedList, HoverChevron } from "@/components/primitives";
 import { featureLook } from "@/config/features";
-import { ROLE_LABELS } from "@/features/channels/place.labels";
 import { describeDetail, featureLabel } from "@/features/guild-overview/featureStatus.labels";
 import { cn } from "@/lib/cn";
 
-/** One row per feature, each opening its own page; on a channel page each also says what it does there. */
+/** One row per feature, saying what it is doing and opening its own page. */
 export function FeatureRows({
 	features,
 	guildId,
-	channelId,
 	channelName,
 }: {
 	features: readonly FeaturePlaces[];
 	guildId: string;
-	/** Set on a channel's page, so each row can say what the feature does in that channel. */
-	channelId?: string;
 	channelName: (id: string) => string;
 }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -26,13 +22,7 @@ export function FeatureRows({
 		<DividedList className="bg-card">
 			{features.map((feature) => {
 				const { icon: Icon, path } = featureLook(feature.key);
-				const roles = channelId === undefined ? [] : feature.places.filter((place) => place.channelId === channelId);
-				const line =
-					roles.length > 0
-						? roles.map((place) => t(ROLE_LABELS[place.role])).join(" · ")
-						: feature.detail === null
-							? t("overview.notSetUp")
-							: describeDetail(feature.detail, t, channelName);
+				const line = feature.detail === null ? t("overview.notSetUp") : describeDetail(feature.detail, t, channelName);
 
 				const body = (
 					<>

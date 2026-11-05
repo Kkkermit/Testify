@@ -1,6 +1,6 @@
 import { fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Avatar } from "@/components/primitives";
+import { DiscordPreview } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
 import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
@@ -33,34 +33,25 @@ export function GreetingPreview({
 	});
 
 	return (
-		<div className="bg-background border-border rounded-card border p-4">
-			<div className="flex gap-3">
-				<Avatar name={name} url={bot.data?.avatarUrl ?? null} size={36} seed={guildName} />
-				<div className="min-w-0 flex-1">
-					<p className="text-sm font-medium">
-						{name} <span className="bg-primary/20 text-accent ml-1 rounded-chip px-1 py-0.5 text-[0.625rem]">BOT</span>
-					</p>
-
-					<div
-						className={cn(
-							"mt-1 text-sm break-words",
-							style === "embed" && "border-primary bg-card rounded-r-field border-l-4 p-3",
-						)}
-					>
-						<p className="whitespace-pre-wrap">
-							{markSpans(filled).map((span, index) => (
-								<Marked key={index} span={span} />
-							))}
-						</p>
-						{style === "card" && (
-							<div className="bg-accent-wash mt-2 flex h-24 items-center justify-center rounded-field">
-								<span className="text-muted-foreground text-xs">{t("welcome.cardAlt")}</span>
-							</div>
-						)}
+		<DiscordPreview name={name} avatarUrl={bot.data?.avatarUrl ?? null} seed={guildName}>
+			<div
+				className={cn(
+					"mt-1 text-sm break-words",
+					style === "embed" && "border-primary bg-card rounded-r-field border-l-4 p-3",
+				)}
+			>
+				<p className="whitespace-pre-wrap">
+					{markSpans(filled).map((span, index) => (
+						<Marked key={index} span={span} />
+					))}
+				</p>
+				{style === "card" && (
+					<div className="bg-accent-wash mt-2 flex h-24 items-center justify-center rounded-field">
+						<span className="text-muted-foreground text-xs">{t("welcome.cardAlt")}</span>
 					</div>
-				</div>
+				)}
 			</div>
-		</div>
+		</DiscordPreview>
 	);
 }
 

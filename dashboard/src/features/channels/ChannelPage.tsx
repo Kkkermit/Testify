@@ -5,12 +5,11 @@ import { ErrorState } from "@/app/ErrorState";
 import { EmptyState, PageHeader, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featuresIn } from "@/features/channels/channelMap.utils";
-import { FeatureRows } from "@/features/channels/components/FeatureRows";
+import { ChannelBlocks } from "@/features/channels/components/ChannelBlocks";
 import { usePlaces } from "@/features/channels/usePlaces";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
 /** What the bot does in one channel, each feature linking to its own page. */
@@ -40,13 +39,12 @@ export function ChannelPage(): React.JSX.Element {
 
 	const here = featuresIn(places.data.features, channel.id);
 	const name = channel.kind === "voice" ? channel.name : `#${channel.name}`;
-	const channelName = (id: string): string => channelLabel(channels.data, id, t);
 
 	return (
 		<>
 			<PageHeader server={overview.data} title={name} subtitle={t("channel.subtitle")} />
 			{here.length > 0 ? (
-				<FeatureRows features={here} guildId={guildId} channelId={channel.id} channelName={channelName} />
+				<ChannelBlocks features={here} channelId={channel.id} channels={channels.data} guildId={guildId} />
 			) : (
 				<EmptyState
 					icon={<Hash size={20} />}

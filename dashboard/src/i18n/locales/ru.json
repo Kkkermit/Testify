@@ -2457,6 +2457,11 @@
 		"licenseOwn": "Лицензия: собственная"
 	},
 	"channel": {
+		"openPage": "Открыть страницу",
+		"openPageLabel": "Открыть страницу «{{feature}}»",
+		"editMessage": "Изменить сообщение",
+		"message": "Сообщение",
+		"doneEditing": "Готово",
 		"placeIn": "Разместить в",
 		"placeInLabel": "Разместить «{{feature}}» в канале",
 		"noChannelFits": "Ни один канал здесь не подходит.",

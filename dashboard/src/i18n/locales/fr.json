@@ -2413,6 +2413,11 @@
 		"licenseOwn": "Licence : propre au projet"
 	},
 	"channel": {
+		"openPage": "Ouvrir sa page",
+		"openPageLabel": "Ouvrir la page {{feature}}",
+		"editMessage": "Modifier le message",
+		"message": "Message",
+		"doneEditing": "Terminé",
 		"placeIn": "Placer dans",
 		"placeInLabel": "Placer {{feature}} dans un salon",
 		"noChannelFits": "Aucun salon ici ne peut l’accueillir.",
