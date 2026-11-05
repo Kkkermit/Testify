@@ -1078,6 +1078,10 @@
 		"permissionViewChannel": "Voir les salons"
 	},
 	"giveaways": {
+		"summaryNone": "Aucun tirage au sort n’est en cours.",
+		"summaryRunning_one": "{{count, number}} tirage au sort est en cours, et il se termine le {{when}}.",
+		"summaryRunning_many": "{{count, number}} de tirages au sort sont en cours, et le prochain se termine le {{when}}.",
+		"summaryRunning_other": "{{count, number}} tirages au sort sont en cours, et le prochain se termine le {{when}}.",
 		"title": "Tirages au sort",
 		"subtitle": "Lancez-en un, terminez-le plus tôt ou retirez au sort, sans aller chercher un identifiant de message dans Discord.",
 		"start": "Lancer un tirage",

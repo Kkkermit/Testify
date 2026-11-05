@@ -1078,6 +1078,10 @@
 		"permissionViewChannel": "Visualizzare i canali"
 	},
 	"giveaways": {
+		"summaryNone": "Nessun giveaway è in corso.",
+		"summaryRunning_one": "{{count, number}} giveaway è in corso, e l’estrazione è il {{when}}.",
+		"summaryRunning_many": "{{count, number}} di giveaway sono in corso, e la prossima estrazione è il {{when}}.",
+		"summaryRunning_other": "{{count, number}} giveaway sono in corso, e la prossima estrazione è il {{when}}.",
 		"title": "Giveaway",
 		"subtitle": "Avviane uno, chiudilo prima o riestrai, senza andare a prendere un ID messaggio da Discord.",
 		"start": "Avvia un giveaway",

@@ -1046,6 +1046,9 @@
 		"permissionViewChannel": "View Channels"
 	},
 	"giveaways": {
+		"summaryNone": "No giveaway is running.",
+		"summaryRunning_one": "{{count, number}} giveaway is running, and it draws on {{when}}.",
+		"summaryRunning_other": "{{count, number}} giveaways are running, and the next draws on {{when}}.",
 		"title": "Giveaways",
 		"subtitle": "Start one, end it early, or draw again — without reading a message ID out of Discord.",
 		"start": "Start a giveaway",

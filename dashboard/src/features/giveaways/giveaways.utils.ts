@@ -1,5 +1,6 @@
-import { type GiveawayRow } from "@testify/shared";
+import { GIVEAWAY_POST, type GiveawayRow } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
+import { ahead } from "@/lib/datetime";
 
 export const DURATION_UNITS = [
 	{ value: "minutes", labelKey: "giveaways.unitMinutes", ms: 60_000 },
@@ -38,4 +39,30 @@ export function runningCount(rows: GiveawayRow[]): number {
 /** Reroll only makes sense once it has drawn, and only when it actually drew somebody. */
 export function canReroll(row: GiveawayRow): boolean {
 	return row.ended && row.winners.length > 0;
+}
+
+/** When the soonest running giveaway draws, for the page's summary. */
+export function nextDraw(rows: GiveawayRow[]): string | null {
+	const ends = rows.filter((row) => !row.ended).map((row) => row.endAt);
+
+	return ends.length === 0 ? null : ends.reduce((soonest, at) => (Date.parse(at) < Date.parse(soonest) ? at : soonest));
+}
+
+export interface GiveawayPost {
+	content: string;
+	lines: string[];
+	footer: string;
+}
+
+/** The bot's own copy with its placeholders filled as Discord shows them; the prize is the embed's title. */
+export function giveawayPost(draft: { winnerCount: number; durationMs: number }, host: string | null): GiveawayPost {
+	return {
+		content: GIVEAWAY_POST.giveaway,
+		lines: [
+			GIVEAWAY_POST.inviteToParticipate,
+			GIVEAWAY_POST.drawing.replace("{timestamp}", ahead(draft.durationMs)),
+			...(host === null ? [] : [GIVEAWAY_POST.hostedBy.replace("{this.hostedBy}", `@${host}`)]),
+		],
+		footer: GIVEAWAY_POST.embedFooter.replace("{this.winnerCount}", String(draft.winnerCount)),
+	};
 }

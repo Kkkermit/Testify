@@ -4,23 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { Giveaway, type GiveawayRecord } from "@database/models/giveaway.schema";
 import { requireSendable } from "@lib/discord/channelPick.util";
 import { giveaways } from "@lib/giveaways/giveaways.util";
-import { type GiveawayRow } from "@testify/shared";
-
-/** The copy every giveaway is posted with, so a giveaway started from the web reads the same as one from Discord. */
-const MESSAGES = {
-	giveaway: "\u{1f389} **Giveaway** \u{1f389}",
-	giveawayEnded: "\u{1f389} **Giveaway ended** \u{1f389}",
-	inviteToParticipate: "React with \u{1f389} to enter",
-	winMessage: "Congratulations {winners}, you won **{this.prize}**!",
-	// Discord draws the relative timestamp as "in 3 hours", so the line must not say "in" itself.
-	drawing: "Draws {timestamp}",
-	dropMessage: "Be the first to react to win!",
-	embedFooter: "{this.winnerCount} winner(s)",
-	noWinner: "Nobody entered, so there is no winner.",
-	hostedBy: "Hosted by {this.hostedBy}",
-	winners: "Winner(s)",
-	endedAt: "Ended at",
-} as const;
+import { GIVEAWAY_POST, type GiveawayRow } from "@testify/shared";
 
 export interface StartGiveaway {
 	channelId: string;
@@ -41,7 +25,7 @@ export async function startGiveaway(client: TestifyClient, guild: Guild, draft: 
 		winnerCount: draft.winnerCount,
 		duration: draft.durationMs,
 		hostedBy: draft.hostedBy,
-		messages: MESSAGES,
+		messages: GIVEAWAY_POST,
 	});
 }
 

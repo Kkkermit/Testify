@@ -1078,6 +1078,10 @@
 		"permissionViewChannel": "Ver canales"
 	},
 	"giveaways": {
+		"summaryNone": "No hay ningún sorteo en marcha.",
+		"summaryRunning_one": "Hay {{count, number}} sorteo en marcha, y se sortea el {{when}}.",
+		"summaryRunning_many": "Hay {{count, number}} de sorteos en marcha, y el próximo se sortea el {{when}}.",
+		"summaryRunning_other": "Hay {{count, number}} sorteos en marcha, y el próximo se sortea el {{when}}.",
 		"title": "Sorteos",
 		"subtitle": "Empieza uno, termínalo antes o vuelve a sortear, sin sacar un ID de mensaje de Discord.",
 		"start": "Empezar un sorteo",

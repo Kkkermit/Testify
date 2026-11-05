@@ -1046,6 +1046,9 @@
 		"permissionViewChannel": "Kanäle ansehen"
 	},
 	"giveaways": {
+		"summaryNone": "Gerade läuft keine Verlosung.",
+		"summaryRunning_one": "{{count, number}} Verlosung läuft und wird am {{when}} gezogen.",
+		"summaryRunning_other": "{{count, number}} Verlosungen laufen, und die nächste wird am {{when}} gezogen.",
 		"title": "Verlosungen",
 		"subtitle": "Starte eine, beende sie früher oder lose neu — ohne eine Nachrichten-ID aus Discord herauszusuchen.",
 		"start": "Verlosung starten",

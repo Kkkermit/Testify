@@ -1110,6 +1110,11 @@
 		"permissionViewChannel": "Просматривать каналы"
 	},
 	"giveaways": {
+		"summaryNone": "Сейчас не идёт ни одного розыгрыша.",
+		"summaryRunning_one": "Идёт {{count, number}} розыгрыш, итоги — {{when}}.",
+		"summaryRunning_few": "Идут {{count, number}} розыгрыша, ближайшие итоги — {{when}}.",
+		"summaryRunning_many": "Идут {{count, number}} розыгрышей, ближайшие итоги — {{when}}.",
+		"summaryRunning_other": "Идут {{count, number}} розыгрыша, ближайшие итоги — {{when}}.",
 		"title": "Розыгрыши",
 		"subtitle": "Запустите, завершите раньше или переразыграйте — не выискивая ID сообщения в Discord.",
 		"start": "Начать розыгрыш",

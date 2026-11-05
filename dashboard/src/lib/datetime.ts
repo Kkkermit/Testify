@@ -63,6 +63,14 @@ export function since(iso: string, now = Date.now()): string {
 	return ago.format(-Math.floor(elapsed / DAY), "day");
 }
 
+/** How far ahead, as Discord writes a relative timestamp: `in 3 hours`. */
+export function ahead(ms: number): string {
+	const later = made("ahead", (locale) => new Intl.RelativeTimeFormat(locale, { numeric: "always" }));
+	if (ms < HOUR) return later.format(Math.max(1, Math.round(ms / MINUTE)), "minute");
+	if (ms < DAY) return later.format(Math.round(ms / HOUR), "hour");
+	return later.format(Math.round(ms / DAY), "day");
+}
+
 /** `1d 1h`: the two largest units, each as short as the reader's language writes it. */
 export function formatUptime(ms: number): string {
 	const minutes = Math.floor(ms / 60_000);

@@ -15,6 +15,22 @@ export const GIVEAWAY_LIMITS = {
 	maxDurationMs: 30 * 24 * 60 * 60 * 1000,
 } as const;
 
+/** The copy every giveaway is posted with, here so the dashboard's preview shows the very words the bot sends. */
+export const GIVEAWAY_POST = {
+	giveaway: "\u{1f389} **Giveaway** \u{1f389}",
+	giveawayEnded: "\u{1f389} **Giveaway ended** \u{1f389}",
+	inviteToParticipate: "React with \u{1f389} to enter",
+	winMessage: "Congratulations {winners}, you won **{this.prize}**!",
+	// Discord draws the relative timestamp as "in 3 hours", so the line must not say "in" itself.
+	drawing: "Draws {timestamp}",
+	dropMessage: "Be the first to react to win!",
+	embedFooter: "{this.winnerCount} winner(s)",
+	noWinner: "Nobody entered, so there is no winner.",
+	hostedBy: "Hosted by {this.hostedBy}",
+	winners: "Winner(s)",
+	endedAt: "Ended at",
+} as const;
+
 /** The tag is null when Discord no longer knows the account; the id still identifies the entry. */
 export interface GiveawayWinner {
 	id: string;
