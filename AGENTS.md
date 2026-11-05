@@ -2023,6 +2023,7 @@ four tabs, three shared components and two testable modules.
 | `/source-code/*`                  | The repository at the running release, its numbers and traffic. Public                      |
 | `/sign-in`                        | One button; also the setup screen for a half-install                                        |
 | `/guilds`                         | Picker, with an invite card for guilds without the bot                                      |
+| `/guilds/compare`                 | Two to four servers side by side, feature by feature, each read through its own overview    |
 | `/guilds/:id`                     | Stat tiles, a setup checklist, feature grid, permission warnings, changes                   |
 | `/guilds/:id/channels`            | What the bot does in each channel, then what works across the whole server                  |
 | `/guilds/:id/inbox`               | Unclaimed tickets, ideas waiting, missing permissions and channels a feature cannot post in |
@@ -2771,6 +2772,22 @@ load-bearing:
 
 Tickets and giveaways have no button: a ticket's Open button and a giveaway's entry cannot work in a direct message,
 so a test of either would show a control that does nothing.
+
+### Side by side reads each server as its own page would
+
+`/guilds/compare` puts two to four servers the reader manages in columns and every feature in rows, so somebody running
+several servers sees at a glance where one is set up differently. Three things about it are load-bearing:
+
+- **It has no route of its own.** Each column is that server's own `GET /guilds/:id/overview` and `/channels`, so
+  `requireGuild` asks about every column live, exactly as on that server's page, and a server the reader can no
+  longer manage says so in its column while the others stay readable. It sits outside `RequireGuild` because no one
+  server is in its path.
+- **What is offered comes from `/auth/me`, and what is shown from each answer.** `comparable` offers servers with the
+  bot where the reader could manage it, and `chosenFrom` drops any id in `?servers=` that is not one of them, so a
+  typed address cannot ask about a server the reader was never shown.
+- **It is read-only.** Every cell links to the feature on that server, and "only where they differ" leaves out which
+  channel a feature posts in, because two servers can never share one. Copying a setup across servers is a write
+  across several permission checks and is not built.
 
 ### Getting every command onto the dashboard
 

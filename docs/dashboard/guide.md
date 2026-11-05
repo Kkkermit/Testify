@@ -1205,6 +1205,10 @@ page they wanted preserved in `returnTo`.
 missing until the next sign-in. The **permission** check is live per request (`guild.members.fetch()`), so this
 is a staleness problem in the picker only, never a security one.
 
+**Several servers.** With two or more servers the bot is in, the picker links **Compare your servers side by side**
+(`/guilds/compare`), a table of features by server read through each server's own overview, with a switch to show only
+where they differ. It changes nothing; each cell opens that feature on that server.
+
 ### 20.5 Configuring a feature
 
 **Who:** a manager who has picked a server. This is the dominant journey — most screens are this shape.
