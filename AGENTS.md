@@ -2748,6 +2748,30 @@ none of them asks more of the reader than Manage Server, as those screens do. Fo
 - **The places query sits under the overview's key**, so every write that already refreshes the overview refreshes
   the Channels page and every channel's page with it.
 
+### Send me a test sends the real post, to its reader and nobody else
+
+**Send me a test** sits beside every preview of something the bot posts: the greeting, the goodbye, a birthday, an
+announcement, a sticky, a scheduled message and an auto-responder's reply, on their own screens and on a channel's
+page. It sends the draft as it stands, saved or not, through `POST /guilds/:id/test-post`. Four things about it are
+load-bearing:
+
+- **There is no recipient field.** The test goes to whoever asked, fetched as a member so the placeholders fill in for
+  them, and somebody not in the server — an owner looking round — is refused with `not_a_member`. Nothing a request
+  says can make the bot message anybody else.
+- **It is built by the function the real post uses** (`testPostMessage` calls `greetingFor`, `farewellFor`,
+  `birthdayPost` and `announcementMessage`), so what arrives is what members get, and then `allowedMentions` becomes
+  `{ parse: [] }`: a draft reading `@everyone` pings nobody, and an announcement's chosen ping is dropped. A note goes
+  first naming the server it came from.
+- **Three a minute per person per server** (`TEST_POST_LIMITS.perMinute`), because a direct message is cheap to send
+  and easy to flood somebody with. Each one is audit-logged as `test.send` with its kind and never its words, which
+  the privacy notice says (`legal.usingDashboardP2`) and a route test pins.
+- **Closed direct messages are the reader's setting, not a fault.** `sendTestPost` answers `closed` for
+  `CannotSendMessagesToThisUser`, the route answers 403 `dm_closed`, and the line beside the button says which setting
+  to change.
+
+Tickets and giveaways have no button: a ticket's Open button and a giveaway's entry cannot work in a direct message,
+so a test of either would show a control that does nothing.
+
 ### Getting every command onto the dashboard
 
 The goal is that everything the bot does is reachable from the web, and the conclusion that governs it is: **the

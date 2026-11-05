@@ -1,8 +1,9 @@
-import { type WelcomePlaceholder, type WelcomeStyle } from "@testify/shared";
+import { type TestPost, type WelcomePlaceholder, type WelcomeStyle } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
+import { SendTest } from "@/features/test-post/SendTest";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { ApiError } from "@/lib/api";
@@ -19,6 +20,7 @@ export function EditablePost({
 	max,
 	saving,
 	error,
+	testOf,
 	onSave,
 }: {
 	id: string;
@@ -31,6 +33,8 @@ export function EditablePost({
 	max?: number;
 	saving: boolean;
 	error: Error | null;
+	/** The test this message makes, so Send me a test sends the draft while editing and the saved text otherwise. */
+	testOf: (message: string) => TestPost;
 	onSave: (message: string, done: () => void) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -59,16 +63,18 @@ export function EditablePost({
 				>
 					{preview}
 				</div>
-				<Button
-					variant="secondary"
-					className="self-start"
-					onClick={() => {
-						setDraft(message);
-						setEditing(true);
-					}}
-				>
-					{t("channel.editMessage")}
-				</Button>
+				<div className="flex flex-wrap items-center gap-3">
+					<Button
+						variant="secondary"
+						onClick={() => {
+							setDraft(message);
+							setEditing(true);
+						}}
+					>
+						{t("channel.editMessage")}
+					</Button>
+					<SendTest test={testOf(message)} />
+				</div>
 			</div>
 		);
 	}
@@ -91,7 +97,9 @@ export function EditablePost({
 				}}
 				{...(tokens === undefined ? {} : { tokens })}
 				{...(max === undefined ? {} : { max })}
-			/>
+			>
+				<SendTest test={testOf(draft)} />
+			</MessageEditor>
 			{error !== null && <Warning>{error instanceof ApiError ? error.message : t("common.couldNotSave")}</Warning>}
 			<Button
 				variant="secondary"

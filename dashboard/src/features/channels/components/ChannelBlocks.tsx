@@ -111,6 +111,7 @@ function WelcomePost({ guildId }: { guildId: string }): React.JSX.Element {
 	return (
 		<EditablePost
 			id="welcome-message"
+			testOf={(message) => ({ kind: "greeting", message, style: welcome.data.style })}
 			message={welcome.data.message}
 			style={welcome.data.style}
 			guildName={overview.data.name}
@@ -135,6 +136,7 @@ function GoodbyePost({ guildId }: { guildId: string }): React.JSX.Element {
 	return (
 		<EditablePost
 			id="goodbye-message"
+			testOf={(message) => ({ kind: "goodbye", message, style: goodbye.data.style })}
 			message={goodbye.data.message}
 			style={goodbye.data.style}
 			leaving
@@ -160,6 +162,7 @@ function BirthdayPost({ guildId }: { guildId: string }): React.JSX.Element {
 	return (
 		<EditablePost
 			id="birthday-message"
+			testOf={(message) => ({ kind: "birthday", message })}
 			message={birthdays.data.message}
 			guildName={overview.data.name}
 			memberCount={overview.data.memberCount}

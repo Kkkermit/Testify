@@ -84,6 +84,16 @@ describe("the test-post route", () => {
 		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "test.send" }));
 	});
 
+	/** The privacy notice promises a test is recorded by its kind and never by its words. */
+	it("keeps the kind of post in the audit record and none of its text", async () => {
+		const { instance } = app();
+
+		await post(instance, { kind: "plain", message: "a secret only the draft holds" });
+
+		expect(JSON.stringify(jest.mocked(recordAudit).mock.calls)).not.toContain("secret only the draft holds");
+		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ after: { kind: "plain" } }));
+	});
+
 	/** A direct message is cheap to send and easy to flood somebody with, so each person gets a few a minute. */
 	it("refuses a fourth test inside a minute", async () => {
 		const { instance } = app();

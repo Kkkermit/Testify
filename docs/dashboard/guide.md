@@ -503,6 +503,10 @@ summary. Five things about the rows are easy to get wrong:
 - **Anything that posts shows the post beside its editor**, through `PostPreview`, in the bot's own name and
   picture. A post whose words are the bot's own, like a giveaway's, reads them from `@testify/shared`, where the bot
   reads them too, so the preview cannot drift from what is sent.
+- **Beside the preview, `SendTest`** sends the draft to the reader's own direct messages. It reads the server from
+  the route, takes a `TestPost` and disables itself while the message is blank; the line beside it is its status and
+  every refusal (`sendTestStatus`). A post whose controls cannot work in a direct message, a ticket panel or a
+  giveaway, does not get one.
 
 ### Tooltips describe, they never name
 
