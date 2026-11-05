@@ -642,6 +642,9 @@
 		"unban": "Entbannung"
 	},
 	"bans": {
+		"summary_other": "{{count, number}} Konten sind von diesem Server gebannt.",
+		"summary_one": "{{count, number}} Konto ist von diesem Server gebannt.",
+		"summaryNone": "Niemand ist von diesem Server gebannt.",
 		"title": "Banns",
 		"subtitle": "Alle, die von diesem Server gebannt sind, so wie Discord sie führt. Das Aufheben eines Banns wird als Fall festgehalten.",
 		"list": "Gebannt",

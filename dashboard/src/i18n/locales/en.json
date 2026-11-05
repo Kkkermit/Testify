@@ -642,6 +642,9 @@
 		"unban": "Unban"
 	},
 	"bans": {
+		"summary_other": "{{count, number}} accounts are banned from this server.",
+		"summary_one": "{{count, number}} account is banned from this server.",
+		"summaryNone": "Nobody is banned from this server.",
 		"title": "Bans",
 		"subtitle": "Everybody banned from this server, as Discord holds them. Lifting a ban is recorded as a case.",
 		"list": "Banned",

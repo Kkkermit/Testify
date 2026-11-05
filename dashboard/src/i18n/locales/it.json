@@ -662,6 +662,10 @@
 		"unban": "Revoca del ban"
 	},
 	"bans": {
+		"summary_other": "{{count, number}} account sono bannati da questo server.",
+		"summary_many": "{{count, number}} di account sono bannati da questo server.",
+		"summary_one": "{{count, number}} account è bannato da questo server.",
+		"summaryNone": "Nessuno è bannato da questo server.",
 		"title": "Ban",
 		"subtitle": "Tutti i bannati da questo server, come li tiene Discord. Revocare un ban viene registrato come caso.",
 		"list": "Bannati",

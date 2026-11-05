@@ -662,6 +662,10 @@
 		"unban": "Débannissement"
 	},
 	"bans": {
+		"summary_other": "{{count, number}} comptes sont bannis de ce serveur.",
+		"summary_many": "{{count, number}} de comptes sont bannis de ce serveur.",
+		"summary_one": "{{count, number}} compte est banni de ce serveur.",
+		"summaryNone": "Personne n’est banni de ce serveur.",
 		"title": "Bannissements",
 		"subtitle": "Toutes les personnes bannies de ce serveur, telles que Discord les garde. Lever un bannissement est enregistré comme un cas.",
 		"list": "Bannis",

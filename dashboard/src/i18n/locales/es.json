@@ -662,6 +662,10 @@
 		"unban": "Desbaneo"
 	},
 	"bans": {
+		"summary_other": "{{count, number}} cuentas están baneadas de este servidor.",
+		"summary_many": "{{count, number}} de cuentas están baneadas de este servidor.",
+		"summary_one": "{{count, number}} cuenta está baneada de este servidor.",
+		"summaryNone": "Nadie está baneado de este servidor.",
 		"title": "Baneos",
 		"subtitle": "Todos los baneados de este servidor, tal como los tiene Discord. Levantar un baneo queda registrado como caso.",
 		"list": "Baneados",
