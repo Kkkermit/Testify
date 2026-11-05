@@ -107,7 +107,7 @@
 	--color-popover: light-dark(#ffffff, #2e3137);
 	--color-border: light-dark(#d9dde4, #383c43);
 	--color-input: light-dark(#767d8a, #7d838e);
-	/* The column a server's channels are listed in, a step back from the page as Discord's own is. */
+	/* The sidebar, a step back from the page as Discord's own column is. */
 	--color-sidebar: light-dark(#e7e9ee, #191b1f);
 	--color-primary: light-dark(#8a2a6b, #bf3a94);
 	--color-primary-foreground: #ffffff;

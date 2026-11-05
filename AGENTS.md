@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 207, in 30 domain folders         |
 | Schemas/repositories | 47 / 45                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,711 across 469 suites           |
+| Tests                | 3,833 across 500 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 319 suites; the dashboard's 150 sit beside its code.
+tests/                    Mirrors src/. 325 suites; the dashboard's 175 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -2005,7 +2005,8 @@ components/
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
 hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced
-lib/            api, cn, paging, queries, redirect, tint, and tokens for reading a colour in JavaScript
+lib/            api, cn, datetime and intl, colour and customAccent, paging, queries, redirect, tint, and tokens
+                for reading a colour in JavaScript
 ```
 
 A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL
@@ -2067,7 +2068,7 @@ four tabs, three shared components and two testable modules.
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
-| `/appearance`                     | Theme, accent, motion and language; public, in whichever frame suits                        |
+| `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 | Command                 | What it does                                                  |

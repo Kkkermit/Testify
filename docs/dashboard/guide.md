@@ -201,10 +201,10 @@ src/
 │   └── ui/             Reserved for shadcn's CLI. Excluded from coverage — keep your own out.
 ├── config/
 │   ├── navigation.ts   The sidebar, as data
-│   └── features.ts     Each bot feature's icon and dashboard path
+│   └── features.ts     Each bot feature's icon, hue and dashboard path
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
 ├── hooks/              usePageTitle usePrefersReducedMotion useDocumentVisible useDebounced
-├── lib/                api cn queries redirect sanitise tint tokens
+├── lib/                api cn colour customAccent datetime intl queries redirect sanitise tint tokens
 └── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
 
@@ -885,7 +885,7 @@ and a cool grey light one, with plum as the accent.
 | ---------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | `--color-background`         | ![](https://img.shields.io/badge/%20-%20-1f2125?style=flat-square) `#1f2125` | ![](https://img.shields.io/badge/%20-%20-f2f3f6?style=flat-square) `#f2f3f6` | The page. Everything else sits on it                                               |
 | `--color-foreground`         | ![](https://img.shields.io/badge/%20-%20-eceef1?style=flat-square) `#eceef1` | ![](https://img.shields.io/badge/%20-%20-1b1e24?style=flat-square) `#1b1e24` | Body text, headings, an active icon                                                |
-| `--color-sidebar`            | ![](https://img.shields.io/badge/%20-%20-191b1f?style=flat-square) `#191b1f` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | The column the server's channels are listed in                                     |
+| `--color-sidebar`            | ![](https://img.shields.io/badge/%20-%20-191b1f?style=flat-square) `#191b1f` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | The sidebar, a step back from the page as Discord's own column is                  |
 | `--color-muted`              | ![](https://img.shields.io/badge/%20-%20-33363c?style=flat-square) `#33363c` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | A recessed fill: secondary buttons, hover states, icon tiles                       |
 | `--color-muted-foreground`   | ![](https://img.shields.io/badge/%20-%20-a2a7b0?style=flat-square) `#a2a7b0` | ![](https://img.shields.io/badge/%20-%20-565d6b?style=flat-square) `#565d6b` | Secondary text, meta lines, an inactive icon                                       |
 | `--color-card`               | ![](https://img.shields.io/badge/%20-%20-282b30?style=flat-square) `#282b30` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Every card and panel surface                                                       |
