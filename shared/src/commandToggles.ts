@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-/** Commands that can never be switched off; `/help` is how somebody finds out what is left. */
-export const ALWAYS_ENABLED = ["help"] as const;
+/** Commands that can never be switched off: `/help` is how somebody finds out what is left, and nobody may be kept from deleting their own data. */
+export const ALWAYS_ENABLED = ["help", "delete-my-data"] as const;
 
 export function isAlwaysEnabled(name: string): boolean {
 	return (ALWAYS_ENABLED as readonly string[]).includes(name);

@@ -118,7 +118,13 @@ describe("the legal pages", () => {
 		const erasure = botSource("src/database/repositories/accountRepository.ts");
 		expect(erasure).toMatch(/blacklist: \{ userId: "keep" \}/);
 		expect(erasure).toMatch(/modcases: \{ userId: "keep", moderatorId: "anonymise" \}/);
-		expect(text).toMatch(/delete their own data at any time .* can’t be undone/);
+		expect(text).toMatch(/delete their own data at any time.* can’t be undone/);
+		// `/delete-my-data` is private and asks for the username before anything goes; `deleteMyData.test.ts` pins both.
+		expect(botSource("src/commands/info/deleteMyData.command.ts")).toMatch(/private: true/);
+		expect(text).toMatch(/with \/delete-my-data in Discord, whose answer only the person who ran it can see/);
+		expect(text).toMatch(/Both ask you to confirm with your username/);
+		// `blacklistWriters.test.ts` fails on anything but the owner command and the owner console changing the list.
+		expect(text).toMatch(/only the bot’s owners can add or lift a block/);
 		expect(text).toMatch(/Warnings, cases, softbans and blocks against you are kept/);
 		expect(text).toMatch(/stays with your name taken off/);
 		// `purgeGuild` keeps member records, so the notice must not promise they go with the bot.

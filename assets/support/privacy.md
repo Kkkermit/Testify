@@ -4,7 +4,7 @@ title: What {bot} stores about you
 topic: getting-started
 keywords: privacy, data, stored, gdpr, delete my data, personal data, information collected, tracking, safe, secure, security
 questions: What data does the bot store? | Is my data safe? | How do I delete my data? | Can I delete my account? | Wipe everything you have on me
-commands: profile, economy
+commands: delete-my-data, profile, economy
 related: sign-in
 ---
 {bot} keeps only what a feature needs. Messages in servers are never stored.
@@ -21,8 +21,8 @@ related: sign-in
 - Nothing is sold or shared for advertising.
 
 ### Removing your data
-- [Your data](/account) on the dashboard deletes everything that is yours, in every server, at once. It cannot be undone.
-- Warnings, cases and blocks against you are kept, because they protect the servers you are in.
+- `/delete-my-data` in Discord, or [Your data](/account) on the dashboard, deletes everything that is yours, in every server, at once. Only you see it, it asks for your username first, and it cannot be undone.
+- Warnings, cases and blocks against you are kept, because they protect the servers you are in. Only the bot's owners can add or lift a block.
 - `/profile delete` removes only your public profile, and `/economy delete` only your account in one server.
 
 The [privacy notice](/privacy) lists everything that is stored and for how long.

@@ -59,11 +59,11 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 92, across 14 categories          |
-| Command files        | 113 (incl. folded-in subcommands) |
+| Commands             | 93, across 14 categories          |
+| Command files        | 114 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 106                               |
-| Button handlers      | 44                                |
+| Button handlers      | 45                                |
 | Events               | 31, in 6 groups                   |
 | `src/lib` helpers    | 207, in 30 domain folders         |
 | Schemas/repositories | 47 / 45                           |
@@ -1904,10 +1904,10 @@ they do not vanish while being read.
 
 ### Delete my data wipes what is theirs, at once and for good
 
-Anybody who can sign in to the dashboard can open **Your data** (`/account`) and delete everything the bot keeps about
-them, in every server, after typing their username or Discord ID back (`confirmsName`, compared by the server). Nothing
-is held for a grace period and nothing can bring it back, which the page says before the button. Five things about it
-are load-bearing:
+Anybody can delete everything the bot keeps about them, in every server: on the dashboard's **Your data** (`/account`)
+or with `/delete-my-data` in Discord, both ending in `eraseAccount`. Each asks for their username or Discord ID back
+(`confirmsName`, compared on the server) before anything goes. Nothing is held for a grace period and nothing can bring
+it back, which both say before the button. Six things about it are load-bearing:
 
 - **`ERASURE` in `src/database/repositories/accountRepository.ts` is the contract**, one line per field that names a
   person, saying whether its record is deleted, its id pulled from a list, its id and name replaced, or the record
@@ -1930,6 +1930,15 @@ are load-bearing:
   not delete is not worth failing over), and the route then ends every session they have and clears the cookies.
 - **It writes no audit record**, since a record of who erased themselves is the one thing that must not be left, and
   `/api/auth/erase` has a rate limit of its own (three a minute), because one request touches every collection.
+- **The command answers only the person who ran it, and deletes nothing until the third step.** It is `private`, so a
+  slash run is ephemeral, and a prefix run, which would answer in the open, sends the panel to their direct messages
+  instead. The panel (`erasePanel`) says what goes and what stays, with **Cancel** and **Delete**; Delete only opens a
+  form (`eraseConfirmForm`) saying it is the last step and asking for the username, and only a submit that matches
+  calls `eraseAccount`. Discord's forms cannot hold buttons, which is why the warning with its buttons is a message
+  and the form is the confirmation. `buttons/deleteMyData.ts` is `ownerOnly` and checks the presser again. The
+  command is in `ALWAYS_ENABLED`, so no server can switch it off, and it is the one command `runChecks` lets a
+  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`), as the dashboard already did: the blacklist entry stays.
+  `deleteMyData.test.ts` pins every step, and Delete erasing straight away was proved to turn it red.
 
 ### Global by design
 
@@ -3037,7 +3046,8 @@ Four things about it are load-bearing:
   `TitledRefusal` — "under maintenance", and that the command may come back — which `refusalEmbed` shows as a
   warning with its own heading; `refusalText` flattens it where a surface has no heading to give it.
 - **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
-  that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
+  that turned it off would have no way back inside Discord. `/delete-my-data` is there because no server may keep
+  somebody from deleting their own data. The API refuses rather than trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
   out, so a hand-written request cannot make one visible or switch one off.
 

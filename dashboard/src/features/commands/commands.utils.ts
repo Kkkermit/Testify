@@ -41,6 +41,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	say: { path: (guildId) => `/guilds/${guildId}/announcements`, screen: "Announcements" },
 	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 	"bot-notifications": { path: () => "/notifications", screen: "Notifications" },
+	"delete-my-data": { path: () => "/account", screen: "Your data" },
 };
 
 export interface CommandPlace {

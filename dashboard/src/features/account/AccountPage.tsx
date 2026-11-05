@@ -48,7 +48,10 @@ export function AccountPage(): React.JSX.Element {
 				</ul>
 			</SettingRows>
 
-			<SettingRows title={t("account.eraseTitle")} description={t("account.eraseBody")}>
+			<SettingRows
+				title={t("account.eraseTitle")}
+				description={`${t("account.eraseBody")} ${t("account.orInDiscord")}`}
+			>
 				{asking ? (
 					<>
 						<Warning>{t("account.eraseWarning")}</Warning>

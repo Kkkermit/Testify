@@ -35,6 +35,9 @@ export const OWNER_ONLY_REFUSAL = "This command is only for the bot owner. The a
 
 const cooldowns = new Map<string, number>();
 
+/** Deleting your own data is not something the blacklist takes away; the blacklist entry itself is never deleted. */
+const OPEN_TO_THE_BLACKLISTED: ReadonlySet<string> = new Set(["delete-my-data"]);
+
 export async function runChecks(
 	interaction: CommandInput,
 	command: Command,
@@ -49,7 +52,7 @@ export async function runChecks(
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
-	if (blacklisted) return blacklistRefusal(blacklisted);
+	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) return blacklistRefusal(blacklisted);
 
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId);
 	if (switchedOff !== null) return switchedOff;
