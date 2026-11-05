@@ -1,5 +1,6 @@
 {
 	"common": {
+		"previewEmpty": "Tu mensaje aparece aquí.",
 		"saved": "Guardado",
 		"retry": "Reintentar",
 		"couldNotSave": "No se ha podido guardar.",
@@ -728,7 +729,6 @@
 		"needMessage": "Escribe el mensaje.",
 		"tooLong": "El mensaje es más largo de lo que permite Discord.",
 		"preview": "Vista previa",
-		"previewEmpty": "Tu mensaje aparece aquí.",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord lo dibuja algo distinto, pero el texto y la mención son exactamente estos.",
 		"colourAqua": "Aguamarina",
@@ -774,6 +774,10 @@
 		"memory": "Un pico que continúa se vuelve a avisar cada {{minutes}} minutos. Las entradas se cuentan en memoria y nunca se guardan."
 	},
 	"sticky": {
+		"summary_other": "{{count, number}} canales mantienen un mensaje al final, que se vuelve a publicar mientras otros hablan.",
+		"summary_many": "{{count, number}} de canales mantienen un mensaje al final, que se vuelve a publicar mientras otros hablan.",
+		"summary_one": "{{count, number}} canal mantiene un mensaje al final, que se vuelve a publicar mientras otros hablan.",
+		"summaryNone": "Ningún canal tiene aún un mensaje fijo.",
 		"title": "Mensajes fijos",
 		"subtitle": "Un mensaje que {{bot}} vuelve a publicar para mantenerlo al final de un canal con movimiento.",
 		"emptyTitle": "Todavía no hay mensajes fijos",

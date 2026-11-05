@@ -1,5 +1,6 @@
 {
 	"common": {
+		"previewEmpty": "Votre message apparaît ici.",
 		"saved": "Enregistré",
 		"retry": "Réessayer",
 		"couldNotSave": "Cela n’a pas pu être enregistré.",
@@ -728,7 +729,6 @@
 		"needMessage": "Écrivez le message.",
 		"tooLong": "Le message est plus long que ce que Discord permet.",
 		"preview": "Aperçu",
-		"previewEmpty": "Votre message apparaît ici.",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord l’affiche un peu différemment, mais le texte et la mention sont exactement ceux-ci.",
 		"colourAqua": "Cyan",
@@ -774,6 +774,10 @@
 		"memory": "Un pic qui dure est signalé à nouveau toutes les {{minutes}} minutes. Les arrivées sont comptées en mémoire et jamais enregistrées."
 	},
 	"sticky": {
+		"summary_other": "{{count, number}} salons gardent un message tout en bas, republié pendant que les autres discutent.",
+		"summary_many": "{{count, number}} de salons gardent un message tout en bas, republié pendant que les autres discutent.",
+		"summary_one": "{{count, number}} salon garde un message tout en bas, republié pendant que les autres discutent.",
+		"summaryNone": "Aucun salon n’a encore de message épinglé.",
 		"title": "Messages épinglés",
 		"subtitle": "Un message que {{bot}} republie pour le garder en bas d’un salon actif.",
 		"emptyTitle": "Aucun message épinglé pour l’instant",

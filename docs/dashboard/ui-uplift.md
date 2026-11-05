@@ -120,7 +120,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/temp-voice`                               | Community     | —                   | Done                    |
 | `…/announcements`                            | Messages      | The announcement    | Done                    |
 | `…/scheduled-messages`                       | Messages      | Each post           | To do                   |
-| `…/sticky`                                   | Messages      | Each sticky message | To do                   |
+| `…/sticky`                                   | Messages      | Each sticky message | Done                    |
 | `…/auto-responders`                          | Messages      | Each reply          | To do                   |
 | `…/automod`                                  | Moderation    | —                   | To do                   |
 | `…/raid-protection`                          | Moderation    | —                   | To do                   |

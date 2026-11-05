@@ -202,7 +202,7 @@ function Preview({ draft }: { draft: AnnouncementDraft }): React.JSX.Element {
 	const { t } = useTranslation();
 	const bot = useBotLook();
 	const ping = draft.mentions === "none" ? null : `@${draft.mentions}`;
-	const message = draft.message.trim() === "" ? t("announcements.previewEmpty") : draft.message;
+	const message = draft.message.trim() === "" ? t("common.previewEmpty") : draft.message;
 
 	return (
 		<DiscordPreview name={bot.name ?? BUILT_IN_BOT_NAME} avatarUrl={bot.avatarUrl}>

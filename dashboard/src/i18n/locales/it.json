@@ -1,5 +1,6 @@
 {
 	"common": {
+		"previewEmpty": "Qui compare il tuo messaggio.",
 		"saved": "Salvato",
 		"retry": "Riprova",
 		"couldNotSave": "Non è stato possibile salvare.",
@@ -728,7 +729,6 @@
 		"needMessage": "Scrivi il messaggio.",
 		"tooLong": "Il messaggio è più lungo di quanto Discord consenta.",
 		"preview": "Anteprima",
-		"previewEmpty": "Qui compare il tuo messaggio.",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord lo disegna un po’ diversamente, ma il testo e la menzione sono proprio questi.",
 		"colourAqua": "Ciano",
@@ -774,6 +774,10 @@
 		"memory": "Un picco che continua viene segnalato di nuovo ogni {{minutes}} minuti. Gli ingressi sono contati in memoria e mai salvati."
 	},
 	"sticky": {
+		"summary_other": "{{count, number}} canali tengono un messaggio in fondo, ripubblicato mentre gli altri parlano.",
+		"summary_many": "{{count, number}} di canali tengono un messaggio in fondo, ripubblicato mentre gli altri parlano.",
+		"summary_one": "{{count, number}} canale tiene un messaggio in fondo, ripubblicato mentre gli altri parlano.",
+		"summaryNone": "Nessun canale ha ancora un messaggio fisso.",
 		"title": "Messaggi fissi",
 		"subtitle": "Un messaggio che {{bot}} ripubblica per tenerlo in fondo a un canale movimentato.",
 		"emptyTitle": "Ancora nessun messaggio fisso",

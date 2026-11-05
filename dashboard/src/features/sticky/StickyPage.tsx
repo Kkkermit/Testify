@@ -5,12 +5,23 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	RowActions,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Warning,
+} from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { StickyRow } from "@/features/sticky/components/StickyRow";
+import { stickySummary } from "@/features/sticky/sticky.utils";
 import { useRemoveSticky, useSaveSticky, useSticky } from "@/features/sticky/useSticky";
+import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
@@ -63,6 +74,8 @@ export function StickyPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(save.isPending || remove.isPending, save.isSuccess)} />}
 			/>
 
+			<Summary>{stickySummary(entries.length, t)}</Summary>
+
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
 				<SectionHeading
 					as="h2"
@@ -100,12 +113,7 @@ export function StickyPage(): React.JSX.Element {
 				)}
 			</section>
 
-			<Card className="motion-pop flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("sticky.add")}</h2>
-					<p className="text-muted-foreground text-sm">{t("sticky.addBody")}</p>
-				</div>
-
+			<SettingRows title={t("sticky.add")} description={t("sticky.addBody")}>
 				<ChannelPicker
 					label={t("sticky.channel")}
 					hint={t("sticky.channelHint")}
@@ -129,6 +137,7 @@ export function StickyPage(): React.JSX.Element {
 					<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 						{t("common.partOf", { part: message.length, whole: STICKY_LIMITS.maxMessage })}
 					</span>
+					<PostPreview text={message} empty={t("common.previewEmpty")} />
 				</Field>
 
 				<Field label={t("sticky.repostAfter")} htmlFor="sticky-cap" hint={t("sticky.repostHint")}>
@@ -156,12 +165,12 @@ export function StickyPage(): React.JSX.Element {
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
-				<div>
+				<RowActions>
 					<Button disabled={blocked !== null || full || save.isPending} onClick={add}>
 						<Plus size={16} aria-hidden="true" /> {t("sticky.addSticky")}
 					</Button>
-				</div>
-			</Card>
+				</RowActions>
+			</SettingRows>
 
 			{remove.error !== null && (
 				<Warning>

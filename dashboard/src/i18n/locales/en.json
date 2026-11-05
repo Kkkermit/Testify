@@ -1,5 +1,6 @@
 {
 	"common": {
+		"previewEmpty": "Your message appears here.",
 		"saved": "Saved",
 		"retry": "Try again",
 		"couldNotSave": "That could not be saved.",
@@ -708,7 +709,6 @@
 		"needMessage": "Write the message.",
 		"tooLong": "The message is longer than Discord allows.",
 		"preview": "Preview",
-		"previewEmpty": "Your message appears here.",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord draws it a little differently, but the words and the ping are exactly these.",
 		"colourAqua": "Aqua",
@@ -754,6 +754,9 @@
 		"memory": "A spike that goes on is reported again every {{minutes}} minutes. Joins are counted in memory and never stored."
 	},
 	"sticky": {
+		"summary_other": "{{count, number}} channels keep a message at the bottom, posted again as others talk.",
+		"summary_one": "{{count, number}} channel keeps a message at the bottom, posted again as others talk.",
+		"summaryNone": "No channel has a sticky message yet.",
 		"title": "Sticky messages",
 		"subtitle": "A message {{bot}} reposts to keep it at the bottom of a busy channel.",
 		"emptyTitle": "No sticky messages yet",

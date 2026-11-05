@@ -1,5 +1,6 @@
 {
 	"common": {
+		"previewEmpty": "Hier erscheint deine Nachricht.",
 		"saved": "Gespeichert",
 		"retry": "Erneut versuchen",
 		"couldNotSave": "Das konnte nicht gespeichert werden.",
@@ -708,7 +709,6 @@
 		"needMessage": "Schreib die Nachricht.",
 		"tooLong": "Die Nachricht ist länger, als Discord erlaubt.",
 		"preview": "Vorschau",
-		"previewEmpty": "Hier erscheint deine Nachricht.",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord zeichnet sie etwas anders, aber Text und Erwähnung sind genau diese.",
 		"colourAqua": "Cyan",
@@ -754,6 +754,9 @@
 		"memory": "Eine anhaltende Welle wird alle {{minutes}} Minuten erneut gemeldet. Beitritte werden nur im Speicher gezählt und nie gespeichert."
 	},
 	"sticky": {
+		"summary_other": "{{count, number}} Kanäle halten eine Nachricht ganz unten, die neu gepostet wird, während andere schreiben.",
+		"summary_one": "{{count, number}} Kanal hält eine Nachricht ganz unten, die neu gepostet wird, während andere schreiben.",
+		"summaryNone": "Noch kein Kanal hat eine Sticky-Nachricht.",
 		"title": "Sticky-Nachrichten",
 		"subtitle": "Eine Nachricht, die {{bot}} erneut sendet, damit sie unten in einem belebten Kanal bleibt.",
 		"emptyTitle": "Noch keine Sticky-Nachrichten",
