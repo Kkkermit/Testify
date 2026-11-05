@@ -119,7 +119,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/starboard`                                | Community     | —                   | Done                    |
 | `…/temp-voice`                               | Community     | —                   | Done                    |
 | `…/announcements`                            | Messages      | The announcement    | Done                    |
-| `…/scheduled-messages`                       | Messages      | Each post           | To do                   |
+| `…/scheduled-messages`                       | Messages      | Each post           | Done                    |
 | `…/sticky`                                   | Messages      | Each sticky message | Done                    |
 | `…/auto-responders`                          | Messages      | Each reply          | To do                   |
 | `…/automod`                                  | Moderation    | —                   | To do                   |

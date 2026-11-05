@@ -1,7 +1,10 @@
 import { type ChannelSummary, SCHEDULE_LIMITS, type ScheduleRepeat } from "@testify/shared";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, SELECT } from "@/components/form";
+import { useRowLayout } from "@/components/form/rowLayout";
 import { REPEAT_LABELS, REPEAT_ORDER, toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
+import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
 
 /** A schedule as the form holds it: the time is the reader's own wall-clock time until it is sent. */
@@ -25,6 +28,7 @@ export function ScheduleFields({
 	onChange: (next: ScheduleDraft) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
+	const row = useRowLayout();
 
 	return (
 		<>
@@ -38,7 +42,7 @@ export function ScheduleFields({
 				}}
 			/>
 
-			<div className="grid gap-3 sm:grid-cols-2">
+			<Pair row={row}>
 				<Field label={t("scheduled.when")} htmlFor={`${id}-when`} hint={t("scheduled.whenHint")}>
 					<input
 						id={`${id}-when`}
@@ -68,7 +72,7 @@ export function ScheduleFields({
 						))}
 					</select>
 				</Field>
-			</div>
+			</Pair>
 
 			<Field label={t("scheduled.message")} htmlFor={`${id}-message`}>
 				<textarea
@@ -84,7 +88,12 @@ export function ScheduleFields({
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 					{t("common.partOf", { part: value.message.length, whole: SCHEDULE_LIMITS.maxMessage })}
 				</span>
+				{row && <PostPreview text={value.message} empty={t("common.previewEmpty")} />}
 			</Field>
 		</>
 	);
+}
+
+function Pair({ row, children }: { row: boolean; children: ReactNode }): React.JSX.Element {
+	return row ? <>{children}</> : <div className="grid gap-3 sm:grid-cols-2">{children}</div>;
 }

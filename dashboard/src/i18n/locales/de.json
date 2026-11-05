@@ -798,6 +798,9 @@
 		"matchStarts": "Am Anfang einer Nachricht"
 	},
 	"scheduled": {
+		"summary_other": "{{count, number}} Posts sind geplant. Der nächste geht am {{when}} in {{channel}}.",
+		"summary_one": "{{count, number}} Post ist geplant, in {{channel}} am {{when}}.",
+		"summaryNone": "Noch ist nichts geplant.",
 		"title": "Geplante Nachrichten",
 		"subtitle": "Nachrichten, die {{bot}} später postet, einmal oder täglich oder wöchentlich. Niemand wird angepingt.",
 		"emptyTitle": "Nichts geplant",

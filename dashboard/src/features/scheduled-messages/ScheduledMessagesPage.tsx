@@ -5,22 +5,13 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import {
-	Button,
-	Card,
-	CARD_HEADING,
-	cardClass,
-	EmptyState,
-	SectionHeading,
-	PageHeader,
-	Skeleton,
-} from "@/components/primitives";
+import { RowActions, SavingIndicator, savingStateOf, SettingRows, Warning } from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { ScheduleFields, type ScheduleDraft } from "@/features/scheduled-messages/components/ScheduleFields";
 import { ScheduleRow } from "@/features/scheduled-messages/components/ScheduleRow";
-import { fromLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
+import { fromLocalInput, scheduleSummary } from "@/features/scheduled-messages/scheduledMessages.utils";
 import {
 	useAddScheduledMessage,
 	useEditScheduledMessage,
@@ -94,6 +85,8 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(saving, add.isSuccess || edit.isSuccess)} />}
 			/>
 
+			<Summary>{scheduleSummary(shown, channelName, t)}</Summary>
+
 			<section aria-labelledby="scheduled-heading" className="flex flex-col gap-3">
 				<SectionHeading
 					as="h2"
@@ -136,28 +129,22 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 				)}
 			</section>
 
-			<section aria-labelledby="add-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
-				<div>
-					<h2 id="add-heading" className={CARD_HEADING}>
-						{t("scheduled.add")}
-					</h2>
-					<p className="text-muted-foreground text-sm">
-						{t("scheduled.addBody", { minutes: SCHEDULE_LIMITS.lateByMinutes })}
-					</p>
-				</div>
-
+			<SettingRows
+				title={t("scheduled.add")}
+				description={t("scheduled.addBody", { minutes: SCHEDULE_LIMITS.lateByMinutes })}
+			>
 				<ScheduleFields id="new-schedule" value={draft} channels={channels.data ?? []} onChange={setDraft} />
 
 				{full && <Warning>{t("scheduled.full")}</Warning>}
 				{blocked !== null && touched && <Warning>{blocked}</Warning>}
 				{add.error !== null && <Warning>{said(add.error)}</Warning>}
 
-				<div>
+				<RowActions>
 					<Button disabled={blocked !== null || full || saving} onClick={submit}>
 						<Plus size={16} aria-hidden="true" /> {t("scheduled.schedule")}
 					</Button>
-				</div>
-			</section>
+				</RowActions>
+			</SettingRows>
 
 			{remove.error !== null && (
 				<Warning>

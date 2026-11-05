@@ -819,6 +819,10 @@
 		"matchStarts": "Al principio del mensaje"
 	},
 	"scheduled": {
+		"summary_other": "Hay {{count, number}} publicaciones programadas. La próxima va a {{channel}} el {{when}}.",
+		"summary_many": "Hay {{count, number}} de publicaciones programadas. La próxima va a {{channel}} el {{when}}.",
+		"summary_one": "Hay {{count, number}} publicación programada, en {{channel}} el {{when}}.",
+		"summaryNone": "Aún no hay nada programado.",
 		"title": "Mensajes programados",
 		"subtitle": "Mensajes que {{bot}} publica más tarde, una vez o cada día o semana. No se menciona a nadie.",
 		"emptyTitle": "Nada programado",

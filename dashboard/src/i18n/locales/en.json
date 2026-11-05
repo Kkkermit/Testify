@@ -798,6 +798,9 @@
 		"matchStarts": "At the start of a message"
 	},
 	"scheduled": {
+		"summary_other": "{{count, number}} posts are scheduled. The next goes to {{channel}} on {{when}}.",
+		"summary_one": "One post is scheduled, in {{channel}} on {{when}}.",
+		"summaryNone": "Nothing is scheduled yet.",
 		"title": "Scheduled messages",
 		"subtitle": "Messages {{bot}} posts later, once or every day or week. Nobody they mention is pinged.",
 		"emptyTitle": "Nothing scheduled",
