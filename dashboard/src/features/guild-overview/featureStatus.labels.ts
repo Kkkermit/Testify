@@ -64,7 +64,10 @@ export function describeDetail(detail: FeatureDetail, t: TFunction, channel: (id
 		case "count":
 			return t(COUNT_LABELS[detail.what], { count: detail.count });
 		case "levelling":
-			return `${t("overview.countRewards", { count: detail.rewards })}, ${t("overview.countBoosts", { count: detail.boosts })}`;
+			return [
+				t("overview.countRewards", { count: detail.rewards }),
+				t("overview.countBoosts", { count: detail.boosts }),
+			].join(t("common.listSeparator"));
 		case "holding":
 			return t("overview.detailHolding", { count: detail.days });
 		case "watching":

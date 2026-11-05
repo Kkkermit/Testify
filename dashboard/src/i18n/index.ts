@@ -8,7 +8,7 @@ import { formatNumber } from "@/lib/intl";
 
 export type TranslationKey = ParseKeys<"translation">;
 
-export const LOCALES = ["en", "de", "es", "fr", "it", "ru"] as const;
+export const LOCALES = ["en", "de", "es", "fr", "it", "ja", "nl", "ru"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const LOCALE_NAMES: Record<Locale, string> = {
@@ -17,6 +17,8 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 	es: "Español",
 	fr: "Français",
 	it: "Italiano",
+	ja: "日本語",
+	nl: "Nederlands",
 	ru: "Русский",
 };
 

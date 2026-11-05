@@ -568,7 +568,7 @@ Discord and served **from inside the bot process** — no second service to depl
 > nothing below applies.
 
 It follows your device's light or dark setting out of the box, comes in twelve accent colours or one you pick yourself, and speaks
-**English, Spanish, German, French, Italian and Russian** — picked from the browser's own language and changeable
+**English, Spanish, German, French, Italian, Russian, Dutch and Japanese** — picked from the browser's own language and changeable
 from the Appearance screen. All of it is per browser: nothing you choose there affects anybody else.
 
 <p align="center">

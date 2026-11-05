@@ -137,7 +137,9 @@ export function ComparePage(): React.JSX.Element {
 												<span className="text-muted-foreground">{t("compare.noneMissing")}</span>
 											) : (
 												<span className="text-warning">
-													{overview.missingPermissions.map((flag) => permissionLabel(flag, t)).join(", ")}
+													{overview.missingPermissions
+														.map((flag) => permissionLabel(flag, t))
+														.join(t("common.listSeparator"))}
 												</span>
 											)}
 										</td>

@@ -7,6 +7,8 @@ import es from "@/i18n/locales/es.json";
 import fr from "@/i18n/locales/fr.json";
 // `it` is Jest's own global, so the Italian dictionary is imported under a name that cannot shadow it.
 import italian from "@/i18n/locales/it.json";
+import ja from "@/i18n/locales/ja.json";
+import nl from "@/i18n/locales/nl.json";
 import russian from "@/i18n/locales/ru.json";
 
 /** Every locale against English, because a missing key falls back silently at runtime. */
@@ -15,7 +17,7 @@ interface Json {
 	[key: string]: string | Json;
 }
 
-const DICTIONARIES: Record<string, Json> = { de, es, fr, it: italian, ru: russian };
+const DICTIONARIES: Record<string, Json> = { de, es, fr, it: italian, ja, nl, ru: russian };
 
 /** Plural suffixes are per-language by design: German has no `_many` and Spanish does. */
 const PLURAL_SUFFIX = /_(?:zero|one|two|few|many|other)$/;

@@ -295,6 +295,12 @@
 		@apply bg-background text-foreground font-sans antialiased;
 	}
 
+	/* Japanese has no spaces to wrap at, so lines break between phrases and never start with ー or a small kana. */
+	:root:lang(ja) {
+		line-break: strict;
+		word-break: auto-phrase;
+	}
+
 	h1,
 	h2,
 	h3 {

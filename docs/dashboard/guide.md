@@ -558,7 +558,7 @@ Tailwind v4, CSS-first. **Everything comes from `@theme` in `src/index.css`.**
 ## 13. Copy and languages
 
 Every string the dashboard renders comes from `src/i18n/locales/*.json`. English is the source; Spanish, German,
-French, Italian and Russian are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
+French, Italian, Russian, Dutch and Japanese are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
 rendering `nav.serrvers`.
 
 Writing a screen:
@@ -958,7 +958,9 @@ every screen is configuring. Fira Mono marks what is typed literally: ids, place
 | `--font-mono`    | Fira Mono | Ids, placeholders, a command name, code in the docs |
 
 Each face is three files, Latin, Latin Extended and Cyrillic, each with its `unicode-range`, so a reader only
-downloads the scripts their language uses and Russian gets Cyrillic from the same family. Rubik is variable from
+downloads the scripts their language uses and Russian gets Cyrillic from the same family. Japanese has no file here:
+a Japanese face is several megabytes, so it falls through `system-ui` to the reader's own (Hiragino, Yu Gothic,
+Noto Sans JP), which is what every other Japanese page they read uses. Rubik is variable from
 300 to 900; Fira Mono ships 400 and 700. Only Rubik's Latin file is `<link rel="preload">`-ed in `index.html`. The
 licences sit beside the files in `public/fonts`. No external host, so the CSP is untouched and a self-hosted bot
 still phones nowhere.

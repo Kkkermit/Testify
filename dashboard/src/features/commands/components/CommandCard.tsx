@@ -83,7 +83,7 @@ export function CommandCard({
 				<p className="text-muted-foreground flex items-center gap-2 text-xs">
 					<Shield size={12} aria-hidden="true" className="shrink-0" />
 					{t("commands.needs", {
-						permissions: command.permissions.map((flag) => permissionLabel(flag, t)).join(", "),
+						permissions: command.permissions.map((flag) => permissionLabel(flag, t)).join(t("common.listSeparator")),
 					})}
 				</p>
 			)}

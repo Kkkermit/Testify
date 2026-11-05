@@ -5,6 +5,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { FIELD, Field, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -64,7 +65,13 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			</div>
 
 			{guild.missingPermissions.length > 0 && (
-				<Warning>{t("owner.missingHere", { permissions: guild.missingPermissions.join(", ") })}</Warning>
+				<Warning>
+					{t("owner.missingHere", {
+						permissions: guild.missingPermissions
+							.map((flag) => permissionLabel(flag, t))
+							.join(t("common.listSeparator")),
+					})}
+				</Warning>
 			)}
 
 			<div className="flex flex-wrap gap-x-6 gap-y-2">

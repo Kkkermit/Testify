@@ -50,7 +50,7 @@ export function DrawHistory({
 									? t("lottery.rolledOver")
 									: draw.winners
 											.map((winner) => `${personName(winner.userTag, t)} (${formatNumber(winner.prizeAmount)})`)
-											.join(", ")}
+											.join(t("common.listSeparator"))}
 							</p>
 						</li>
 					))}

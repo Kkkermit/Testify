@@ -51,7 +51,7 @@ export function GiveawayRow({
 						<dd className="text-foreground">
 							{row.winners.length === 0
 								? t("giveaways.nobodyEntered")
-								: row.winners.map((winner) => winner.tag ?? winner.id).join(", ")}
+								: row.winners.map((winner) => winner.tag ?? winner.id).join(t("common.listSeparator"))}
 						</dd>
 					</div>
 				)}

@@ -184,11 +184,12 @@ as a prefix alias, so `t?dad-joke` still works alongside `/fun dad-joke`, and th
 ## 🌍 Translating the dashboard
 
 Every string the dashboard renders lives in `dashboard/src/i18n/locales/`. English is the source, and Spanish,
-German, French, Italian and Russian are translated from it.
+German, French, Italian, Russian, Dutch and Japanese are translated from it.
 
 - **To add a language,** copy `en.json`, translate the values, and add the code and its endonym — the word the
-  language calls itself — to `LOCALES` and `LOCALE_NAMES` in `dashboard/src/i18n/index.ts`.
-- **To fix a wording,** edit `en.json` and the five files beside it.
+  language calls itself — to `LOCALES` and `LOCALE_NAMES` in `dashboard/src/i18n/index.ts`, then draw its flag in
+  `dashboard/src/components/brand/FlagIcon.tsx`.
+- **To fix a wording,** edit `en.json` and the seven files beside it.
 
 The tests name anything missed: a key English has that yours does not, a stale key left by a rename, or a changed
 `{{placeholder}}`. `dashboard/src/test/voice.test.ts` holds the house style — British spelling, curly apostrophes,

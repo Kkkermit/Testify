@@ -33,7 +33,8 @@ export function RuleRow({
 				</div>
 				<p className="text-muted-foreground text-xs">
 					{rule.trigger}
-					{rule.actions.length > 0 && ` — ${rule.actions.map((action) => t(ACTION_KEY[action])).join(", ")}`}
+					{rule.actions.length > 0 &&
+						` — ${rule.actions.map((action) => t(ACTION_KEY[action])).join(t("common.listSeparator"))}`}
 				</p>
 			</div>
 

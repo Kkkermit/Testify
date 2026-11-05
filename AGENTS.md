@@ -2675,8 +2675,8 @@ which styles text with values rather than classes.
 
 ### Every string comes from i18next
 
-`src/i18n/` holds the setup and six JSON dictionaries. English is the source; Spanish, German, French, Italian
-and Russian sit beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
+`src/i18n/` holds the setup and eight JSON dictionaries. English is the source; Spanish, German, French, Italian,
+Russian, Dutch and Japanese sit beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
 and `TranslationKey` is exported for the places that store a key rather than call `t` — `NavItem.labelKey` and
 every module-level lookup table.
 
@@ -2726,8 +2726,15 @@ table falls back to what the server sent for a key it has not seen, so the API c
 — without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so
 grouping follows the chosen language rather than the browser.
 
-**Adding a language** is three steps: copy `en.json`, translate the values, and add the code to `LOCALES` and
-`LOCALE_NAMES` in `src/i18n/index.ts`. The parity test names anything missed.
+**Japanese is written without spaces, and two things follow.** A list is joined with `common.listSeparator`, which is
+`、` there and `, ` elsewhere, never with a literal comma — `src/test/listSeparator.test.ts` fails on a `.join(", ")`
+and was proved to. And `index.css` gives `:root:lang(ja)` `line-break: strict` and `word-break: auto-phrase`: without
+them the landing page's headline broke サーバー in half and started a line with ー, which a browser showed and jsdom
+cannot. A language with rules of its own gets them the same way, on its `lang`.
+
+**Adding a language** is four steps: copy `en.json`, translate the values, add the code to `LOCALES` and
+`LOCALE_NAMES` in `src/i18n/index.ts`, and draw its flag in `FlagIcon.tsx`, which the `Locale` type demands. The parity
+test names anything missed, and the plural test names a form the language needs that English does not have.
 
 ### Responsiveness, and the label trap
 
@@ -3233,7 +3240,7 @@ are the repository's English, and a page read in another language says so (`docs
 `ReaderShell`, which draws it in the website for somebody signed out, or on a host with no dashboard, and in the
 dashboard for somebody signed in; on a host with no dashboard it never asks `/auth/me`, which would only refuse. The
 site's header links it with a palette icon and the footer by name. Below 640px the header holds only the links and that
-icon, with the language reached through Appearance: measured at 320px in all six languages, the select did not fit
+icon, with the language reached through Appearance: measured at 320px in every language, the select did not fit
 beside Spanish, Italian or Russian, and a link label that wraps reads as two links. Header links never wrap.
 
 **A link followed out of the docs or the source leaves a way back.** `followTrails` in `lib/trail.ts` subscribes to

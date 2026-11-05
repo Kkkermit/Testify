@@ -41,6 +41,19 @@ const FLAGS: Record<Locale, React.JSX.Element> = {
 			<rect x="14" width="7" height="15" fill="#CD212A" />
 		</>
 	),
+	ja: (
+		<>
+			<rect width="21" height="15" fill="#fff" />
+			<circle cx="10.5" cy="7.5" r="4.5" fill="#BC002D" />
+		</>
+	),
+	nl: (
+		<>
+			<rect width="21" height="5" fill="#AE1C28" />
+			<rect y="5" width="21" height="5" fill="#fff" />
+			<rect y="10" width="21" height="5" fill="#21468B" />
+		</>
+	),
 	ru: (
 		<>
 			<rect width="21" height="5" fill="#fff" />

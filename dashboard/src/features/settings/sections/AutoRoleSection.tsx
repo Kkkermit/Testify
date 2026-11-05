@@ -35,7 +35,11 @@ export function AutoRoleSection({
 			/>
 
 			{unassignable.length > 0 && (
-				<Warning>{t("settings.cannotGiveRoles", { roles: unassignable.map((role) => role.name).join(", ") })}</Warning>
+				<Warning>
+					{t("settings.cannotGiveRoles", {
+						roles: unassignable.map((role) => role.name).join(t("common.listSeparator")),
+					})}
+				</Warning>
 			)}
 		</Section>
 	);

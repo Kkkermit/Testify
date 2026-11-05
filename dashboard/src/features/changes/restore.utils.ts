@@ -23,7 +23,9 @@ export function describeValue(field: string, value: unknown, { channels, roles, 
 
 	if (ROLE.test(field)) {
 		const ids = Array.isArray(value) ? value : [value];
-		return ids.map((id) => roles.find((role) => role.id === id)?.name ?? t("roleMenus.deletedRole")).join(", ");
+		return ids
+			.map((id) => roles.find((role) => role.id === id)?.name ?? t("roleMenus.deletedRole"))
+			.join(t("common.listSeparator"));
 	}
 	if (typeof value === "string") {
 		if (CHANNEL.test(field)) return channelLabel(channels, value, t);
