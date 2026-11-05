@@ -54,7 +54,7 @@ export function RestorePanel({
 		return (
 			<div id={id} className={frame}>
 				<Warning>{t("restore.changedSince")}</Warning>
-				<Link to={`/guilds/${guildId}${RESTORE_SCREENS[restore.action]}`} className="text-primary underline">
+				<Link to={`/guilds/${guildId}${RESTORE_SCREENS[restore.action]}`} className="text-accent underline">
 					{t("restore.openPage")}
 				</Link>
 			</div>

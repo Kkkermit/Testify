@@ -29,7 +29,7 @@ export function CommandCard({
 	const off = availability === "off-here" || availability === "off-everywhere";
 
 	return (
-		<Card padding="compact" className={cn("flex flex-col gap-3", off && "opacity-60")}>
+		<Card padding="compact" className={cn("flex flex-col gap-3", off && "border-dashed")}>
 			<div className="flex items-start gap-3">
 				<span className={cn("rounded-card bg-muted mt-0.5 shrink-0 p-2", tint)} aria-hidden="true">
 					<Icon size={18} />
@@ -110,7 +110,7 @@ export function CommandCard({
 								tabIndex={0}
 								className={cn(
 									"rounded-chip px-2 py-0.5 font-mono text-xs",
-									option.required ? "bg-primary/15 text-accent" : "bg-muted text-muted-foreground",
+									option.required ? "bg-accent-wash text-accent" : "bg-muted text-muted-foreground",
 								)}
 							>
 								{option.name}

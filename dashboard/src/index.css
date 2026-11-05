@@ -219,7 +219,7 @@
 	}
 
 	/**
-	 * The accent choices. Only the three accent-carrying tokens move: success, warning and destructive keep their own
+	 * The accent choices. Only the accent-carrying tokens move: success, warning and destructive keep their own
 	 * meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair is measured
 	 * against both grounds by `contrast.test.ts`, which reads these blocks rather than keeping a list of its own.
 	 *
@@ -236,72 +236,84 @@
 	[data-accent="plum"] {
 		--color-primary: light-dark(#8a2a6b, #bf3a94);
 		--color-accent: light-dark(#7a2260, #e08ac4);
+		--color-accent-wash: light-dark(#f6e9f2, #3a2433);
 		--color-ring: light-dark(#8a2a6b, #e08ac4);
 	}
 
 	[data-accent="indigo"] {
 		--color-primary: light-dark(#4338ca, #6961d5);
 		--color-accent: light-dark(#3730a3, #a5b4fc);
+		--color-accent-wash: light-dark(#f0effa, #2a2849);
 		--color-ring: light-dark(#4338ca, #a5b4fc);
 	}
 
 	[data-accent="blue"] {
 		--color-primary: light-dark(#1d4ed8, #3a66e5);
 		--color-accent: light-dark(#1e40af, #93c5fd);
+		--color-accent-wash: light-dark(#ecf0fa, #242b42);
 		--color-ring: light-dark(#1d4ed8, #93c5fd);
 	}
 
 	[data-accent="sky"] {
 		--color-primary: light-dark(#0369a1, #0376b4);
 		--color-accent: light-dark(#075985, #7dd3fc);
+		--color-accent-wash: light-dark(#e6f2f8, #1d2e37);
 		--color-ring: light-dark(#0369a1, #7dd3fc);
 	}
 
 	[data-accent="cyan"] {
 		--color-primary: light-dark(#0e7490, #0f7997);
 		--color-accent: light-dark(#155e75, #67e8f9);
+		--color-accent-wash: light-dark(#e3f3f7, #1c2e34);
 		--color-ring: light-dark(#0e7490, #67e8f9);
 	}
 
 	[data-accent="teal"] {
 		--color-primary: light-dark(#0f766e, #107e75);
 		--color-accent: light-dark(#115e59, #5eead4);
+		--color-accent-wash: light-dark(#ddf5f3, #1a2f2e);
 		--color-ring: light-dark(#0f766e, #5eead4);
 	}
 
 	[data-accent="emerald"] {
 		--color-primary: light-dark(#047857, #04805c);
 		--color-accent: light-dark(#065f46, #6ee7b7);
+		--color-accent-wash: light-dark(#def5ef, #1a3029);
 		--color-ring: light-dark(#047857, #6ee7b7);
 	}
 
 	[data-accent="amber"] {
 		--color-primary: light-dark(#b45309, #b65409);
 		--color-accent: light-dark(#92400e, #fcd34d);
+		--color-accent-wash: light-dark(#f8efe7, #37291e);
 		--color-ring: light-dark(#b45309, #fcd34d);
 	}
 
 	[data-accent="orange"] {
 		--color-primary: light-dark(#c2410c, #c7430c);
 		--color-accent: light-dark(#9a3412, #fdba74);
+		--color-accent-wash: light-dark(#f9eee9, #3b2720);
 		--color-ring: light-dark(#c2410c, #fdba74);
 	}
 
 	[data-accent="rose"] {
 		--color-primary: light-dark(#be123c, #dc1546);
 		--color-accent: light-dark(#9f1239, #fda4af);
+		--color-accent-wash: light-dark(#faedf0, #41232a);
 		--color-ring: light-dark(#be123c, #fda4af);
 	}
 
 	[data-accent="pink"] {
 		--color-primary: light-dark(#be185d, #d71b69);
 		--color-accent: light-dark(#9d174d, #f9a8d4);
+		--color-accent-wash: light-dark(#faedf2, #40232f);
 		--color-ring: light-dark(#be185d, #f9a8d4);
 	}
 
 	[data-accent="slate"] {
 		--color-primary: light-dark(#475569, #5f718c);
 		--color-accent: light-dark(#334155, #cbd5e1);
+		--color-accent-wash: light-dark(#eef0f4, #252c37);
 		--color-ring: light-dark(#475569, #cbd5e1);
 	}
 

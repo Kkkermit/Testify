@@ -27,7 +27,7 @@ function token(name: string, scheme: Scheme): string {
 	return pick(CSS, name, scheme, "index.css");
 }
 
-/** An accent overrides three tokens in a block of its own, and every one of them is measured like the base. */
+/** An accent overrides its tokens in a block of its own, and every one of them is measured like the base. */
 function accentToken(accent: string, name: string, scheme: Scheme): string {
 	const block = new RegExp(`\\[data-accent="${accent}"\\]\\s*\\{([^}]*)\\}`).exec(CSS)?.[1];
 	if (block === undefined) throw new Error(`[data-accent="${accent}"] is not in index.css`);
@@ -136,6 +136,7 @@ it("meets every threshold with each accent, in both themes", () => {
 			return shortfalls([
 				[`${accent} in ${scheme}: a link on the page`, of("accent"), page, TEXT],
 				[`${accent} in ${scheme}: a link on a card`, of("accent"), card, TEXT],
+				[`${accent} in ${scheme}: accent text on its wash`, of("accent"), of("accent-wash"), TEXT],
 				[`${accent} in ${scheme}: a filled button against the page`, of("primary"), page, NON_TEXT],
 				[`${accent} in ${scheme}: the focus ring on the page`, of("ring"), page, NON_TEXT],
 				// The fill only ever wears white, so this is the pair a button actually draws.
@@ -159,7 +160,7 @@ it("keeps every accent's dark fill out of reach as a text colour", () => {
 /** The plum block has to match the base tokens, or its swatch shows a colour it does not select. */
 it("keeps the plum block equal to the base tokens", () => {
 	for (const scheme of SCHEMES) {
-		for (const name of ["primary", "accent", "ring"])
+		for (const name of ["primary", "accent", "accent-wash", "ring"])
 			expect(accentToken("plum", name, scheme)).toBe(token(name, scheme));
 	}
 });

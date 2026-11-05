@@ -55,7 +55,7 @@ export function GuildCard({
 	}
 
 	return (
-		<Card padding="compact" className={`${CARD_ROW} opacity-70`}>
+		<Card padding="compact" className={`${CARD_ROW} border-dashed`}>
 			{body}
 			<Tooltip label={t("guilds.noPermissionHint")}>
 				<span tabIndex={0} className="text-muted-foreground flex shrink-0 items-center gap-2 rounded-full text-xs">

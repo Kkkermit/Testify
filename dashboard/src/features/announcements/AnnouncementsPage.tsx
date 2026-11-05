@@ -211,7 +211,7 @@ function Preview({ draft }: { draft: AnnouncementDraft }): React.JSX.Element {
 		<DiscordPreview name={bot.name ?? BUILT_IN_BOT_NAME} avatarUrl={bot.avatarUrl}>
 			<div className="mt-1 flex flex-col gap-2">
 				{ping !== null && (
-					<span className="bg-primary/15 text-primary w-fit rounded-chip px-1.5 text-sm font-medium">{ping}</span>
+					<span className="bg-accent-wash text-accent w-fit rounded-chip px-1.5 text-sm font-medium">{ping}</span>
 				)}
 				{draft.style === "embed" ? (
 					<div

@@ -51,7 +51,7 @@ export function ComparePage(): React.JSX.Element {
 					title={t("compare.needTwoTitle")}
 					body={t("compare.needTwoBody")}
 					action={
-						<Link to="/guilds" className="text-primary underline">
+						<Link to="/guilds" className="text-accent underline">
 							{t("compare.toServers")}
 						</Link>
 					}

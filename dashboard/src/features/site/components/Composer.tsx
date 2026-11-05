@@ -132,7 +132,7 @@ function Line({ frame, command }: { frame: ComposerFrame; command: string }): Re
 				<span className="text-foreground">/{frame.typing}</span>
 			) : (
 				<>
-					<span className="bg-primary/15 text-accent rounded-chip px-1.5 py-0.5">/{command}</span>
+					<span className="bg-accent-wash text-accent rounded-chip px-1.5 py-0.5">/{command}</span>
 					{frame.options.map((option) => (
 						<span key={option.name} className="flex items-center overflow-hidden">
 							<span className="bg-border/70 text-muted-foreground rounded-l-chip px-1.5 py-0.5">{option.name}</span>
