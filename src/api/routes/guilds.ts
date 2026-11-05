@@ -45,7 +45,7 @@ import {
 import { canPostInChannel, readerSees } from "@lib/discord";
 import { readInsights } from "@lib/info";
 import { readServerChanges } from "@lib/moderation";
-import { isPowerful } from "@lib/roles";
+import { isPowerful, readRoleUses } from "@lib/roles";
 import { featuresOf, missingPermissions, placesOf, readInbox, readWeek } from "@lib/settings";
 import {
 	type AuditEntrySummary,
@@ -57,6 +57,7 @@ import {
 	type GuildOverview,
 	type GuildInbox,
 	type GuildPlaces,
+	type GuildRoleUses,
 	type GuildWeek,
 	guildIdParam,
 	type Paged,
@@ -131,6 +132,12 @@ guilds.get("/:guildId/inbox", async (context) => {
 /** The next seven days: scheduled posts, the lottery draw, giveaways ending and birthdays the server marks. */
 guilds.get("/:guildId/week", async (context) => {
 	const body: GuildWeek = await readWeek(context.get("client"), guildOf(context));
+	return context.json(body);
+});
+
+/** Every feature that gives or reads each role, so a manager can see what deleting one would stop. */
+guilds.get("/:guildId/role-uses", async (context) => {
+	const body: GuildRoleUses = await readRoleUses(guildOf(context).id);
 	return context.json(body);
 });
 

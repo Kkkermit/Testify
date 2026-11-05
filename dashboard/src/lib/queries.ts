@@ -26,6 +26,7 @@ export const keys = {
 		// Under the overview too, since it is read from the same settings and refreshed by the same writes.
 		inbox: () => ["guild", id, "overview", "inbox"] as const,
 		week: () => ["guild", id, "overview", "week"] as const,
+		roleUses: () => ["guild", id, "overview", "role-uses"] as const,
 		setupChecklist: () => ["guild", id, "setup-checklist"] as const,
 		levelling: () => ["guild", id, "levelling"] as const,
 		welcome: () => ["guild", id, "welcome"] as const,

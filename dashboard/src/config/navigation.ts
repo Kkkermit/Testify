@@ -10,6 +10,7 @@ import {
 	ChartLine,
 	LayoutGrid,
 	ScrollText,
+	Shield,
 	ShieldAlert,
 	Siren,
 	Server,
@@ -126,6 +127,8 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				{ to: at("/channels"), labelKey: "nav.channels", icon: Hash, hintKey: "nav.channelsHint", exact: false },
 				// A member's own page lives under this path, and it is still where you are in the sidebar.
 				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
+				// A role's own page lives under this path too.
+				{ to: at("/roles"), labelKey: "nav.roles", icon: Shield, hintKey: "nav.rolesHint", exact: false },
 				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
 			],
 			// Each section holds only the screens it names, so a feature is found where its purpose says it is.

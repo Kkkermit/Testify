@@ -75,6 +75,7 @@ describe("navigationFor", () => {
 				"/music",
 				"/raid-protection",
 				"/role-menus",
+				"/roles",
 				"/scheduled-messages",
 				"/settings",
 				"/starboard",

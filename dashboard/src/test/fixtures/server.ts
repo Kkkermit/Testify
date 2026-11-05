@@ -5,6 +5,7 @@ import {
 	type GuildNickname,
 	type GuildOverview,
 	type GuildPlaces,
+	type GuildRoleUses,
 	type GuildWeek,
 	type InsightsReport,
 	type RoleSummary,
@@ -244,3 +245,13 @@ export function busyWeek(now = Date.now()): GuildWeek {
 		],
 	};
 }
+
+export const noRoleUses: GuildRoleUses = { uses: {} };
+
+/** Member is handed out on join and at level 5, and a deleted role is still the ticket staff role. */
+export const someRoleUses: GuildRoleUses = {
+	uses: {
+		"300000000000000001": [{ kind: "joinRole" }, { kind: "levelReward", level: 5 }],
+		"300000000000000099": [{ kind: "ticketStaff" }],
+	},
+};

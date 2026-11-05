@@ -74,6 +74,7 @@ import {
 	verificationConfig,
 	quietInbox,
 	quietWeek,
+	noRoleUses,
 } from "@/test/fixtures/server";
 import { aGuild, botProfile, configured, healthy, me } from "@/test/fixtures/session";
 import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fixtures/site";
@@ -120,6 +121,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/places", () => HttpResponse.json(guildPlaces)),
 	http.get("/api/guilds/:guildId/inbox", () => HttpResponse.json(quietInbox)),
 	http.get("/api/guilds/:guildId/week", () => HttpResponse.json(quietWeek)),
+	http.get("/api/guilds/:guildId/role-uses", () => HttpResponse.json(noRoleUses)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 	http.get("/api/guilds/:guildId/verification", () => HttpResponse.json(verificationConfig)),
 	http.get("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),

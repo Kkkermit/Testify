@@ -46,6 +46,8 @@ const StarboardPage = page(async () => import("@/features/starboard/StarboardPag
 const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
 const InboxPage = page(async () => import("@/features/inbox/InboxPage"), "InboxPage");
 const WeekPage = page(async () => import("@/features/week/WeekPage"), "WeekPage");
+const RolesPage = page(async () => import("@/features/roles/RolesPage"), "RolesPage");
+const RolePage = page(async () => import("@/features/roles/RolePage"), "RolePage");
 const ChannelsPage = page(async () => import("@/features/channels/ChannelsPage"), "ChannelsPage");
 const TempVoicePage = page(async () => import("@/features/temp-voice/TempVoicePage"), "TempVoicePage");
 const TreasurePage = page(async () => import("@/features/treasure/TreasurePage"), "TreasurePage");
@@ -147,6 +149,8 @@ export const routes = [
 									{ path: "/guilds/:guildId/channels/:channelId", element: lazily(<ChannelPage />) },
 									{ path: "/guilds/:guildId/inbox", element: lazily(<InboxPage />) },
 									{ path: "/guilds/:guildId/week", element: lazily(<WeekPage />) },
+									{ path: "/guilds/:guildId/roles", element: lazily(<RolesPage />) },
+									{ path: "/guilds/:guildId/roles/:roleId", element: lazily(<RolePage />) },
 									{ path: "/guilds/:guildId/channels", element: lazily(<ChannelsPage />) },
 									{ path: "/guilds/:guildId/temp-voice", element: lazily(<TempVoicePage />) },
 									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
