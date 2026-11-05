@@ -2782,5 +2782,17 @@
 		"skipLeft": "They have left the server.",
 		"skipAlready": "Nothing to change.",
 		"skipFailed": "Discord refused it."
+	},
+	"blocked": {
+		"title": "You’re blocked from {{bot}}",
+		"signedInAs": "Signed in as {{name}}.",
+		"body": "The bot’s owners have blocked your account, so the dashboard and every command are closed to you, in every server. You can still delete everything {{bot}} keeps about you, here or with /delete-my-data in Discord.",
+		"reason": "Reason",
+		"noReason": "No reason was given.",
+		"since": "Blocked since",
+		"mistakeTitle": "Think this is a mistake?",
+		"ask_one": "Only the bot’s owner can lift a block; server moderators and admins can’t. Contact them on Discord:",
+		"ask_other": "Only the bot’s owners can lift a block; server moderators and admins can’t. Contact one of them on Discord:",
+		"askNobody": "Only the bot’s owner can lift a block; server moderators and admins can’t, so contact the owner."
 	}
 }

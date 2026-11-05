@@ -1941,8 +1941,29 @@ it back, which both say before the button. Six things about it are load-bearing:
   calls `eraseAccount`. Discord's forms cannot hold buttons, which is why the warning with its buttons is a message
   and the form is the confirmation. `buttons/deleteMyData.ts` is `ownerOnly` and checks the presser again. The
   command is in `ALWAYS_ENABLED`, so no server can switch it off, and it is the one command `runChecks` lets a
-  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`), as the dashboard already did: the blacklist entry stays.
+  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`): the blacklist entry stays. Its refusal of every other command
+  says so, and names the owners Discord can find (`ownerContacts`) as the people to ask.
   `deleteMyData.test.ts` pins every step, and Delete erasing straight away was proved to turn it red.
+
+### A blacklisted account may only see why, sign out and delete its data
+
+The dashboard keeps exactly what Discord keeps for a blocked account, and the server is what enforces it.
+`refuseBlacklisted` in `src/api/middleware/blacklist.ts` runs after the session loads on every `/api/*` request and
+answers 403 `blacklisted` unless the path is one `openToTheBlacklisted` matches whole: the public routes, which
+anybody signed out can read anyway, `GET /auth/me`, and `POST /auth/logout`, `/auth/logout-all` and `/auth/erase`.
+Three things about it are load-bearing:
+
+- **It is one middleware with an allowlist, not a check per route**, so a route added later is closed to a blocked
+  account until somebody lists it. `accessWalk.test.ts` asks every route as a blocked account and fails on any
+  that does not refuse it, and on any kept route that does; `blacklistGuard.test.ts` pins that each pattern matches
+  whole, so `/auth/me` opens nothing beside it. Unmounting the guard, closing erase and dropping an anchor were each
+  proved to go red.
+- **`/auth/me` says why.** It carries `blacklist` — the reason, since when and the owners to ask — and an empty
+  server list, so Discord is not asked for servers the account could not open. `RequireAuth` then draws
+  `BlockedPage` in place of every signed-in screen: the reason, the owners with a link to each one's Discord
+  profile, Sign out and Delete my data. The page is a courtesy; the guard is the boundary.
+- **A block made mid-session shows on the next click.** `createQueryClient` asks `/auth/me` again whenever any
+  query or write is refused as `blacklisted`, so the page turns into `BlockedPage` rather than a screen of errors.
 
 ### Global by design
 
@@ -2178,6 +2199,7 @@ writing it once. Every piece has a test proven able to fail.
 | `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
 | `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
 | `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach     |
+| `middleware/blacklist.ts` | A blacklisted session reaches only who it is, signing out and Delete my data   |
 | `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
 | `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
 | `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
@@ -2942,9 +2964,7 @@ Seven things about it are load-bearing:
   own sessions by that digest and refuses the browser asking, which signs out from the sidebar instead; **Sign out
   everywhere else** keeps the one asking. Nothing about a device is stored, so a sign-in is told apart only by its
   times, and the tab says so.
-- **A blacklisted account may read and delete its own here, and write nothing** (`notBlacklisted` on the profile,
-  reminder edit and delivery routes), because Discord refuses it `/profile set` and `/remind`. Deleting stays open,
-  as Delete my data does.
+- **A blacklisted account sees none of it.** The server refuses it every route here, as below.
 - **Your data is the old page**, unchanged: what goes, what stays, and the typed confirmation. The privacy notice
   still calls it Your data, which is the tab's name.
 - **Nothing here writes an audit record.** These are the reader's own things, and the server's Changes page is no
@@ -2953,7 +2973,8 @@ Seven things about it are load-bearing:
 `tests/api/accountPentest.test.ts` attacks every account route through the real app: forged and stale cookies,
 missing and planted CSRF secrets, another person's id in the query and the body, MongoDB operators and arrays in
 every field, malformed path ids including the cookie itself, `__proto__`, a body ten thousand deep or past the size
-limit, control and direction characters in a public profile, a blacklisted account's writes, the wrong method, and
+limit, control and direction characters in a public profile, a blacklisted account on every route and every
+spelling of one, the wrong method, and
 any answer carrying a cookie, a secret or a cacheable header. Taking away the blacklist guard, the id shape, the
 text cleaning or the session's own id each turns it red; `requireAuth` and the handlers' own `sessionOf` are two
 layers, and only removing both does.

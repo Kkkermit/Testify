@@ -29,6 +29,7 @@ import { requireAuth } from "@api/middleware/session";
 import { missingSettings, type OauthConfig, requireOauth } from "@api/oauth";
 import { parseBody, parseQuery } from "@api/validate";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
+import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import {
 	createSession,
 	deleteSession,
@@ -37,6 +38,7 @@ import {
 	updateTokens,
 } from "@database/repositories/dashboardSessionRepository";
 import { eraseAccount } from "@lib/account";
+import { ownerContacts } from "@lib/bot";
 import {
 	confirmsName,
 	eraseAccountSchema,
@@ -176,11 +178,21 @@ auth.get("/me", requireAuth, async (context) => {
 	const client = context.get("client");
 	const session = sessionOf(context);
 
+	const blocked = await findBlacklistEntry(session.userId);
 	const body: MeResponse = {
 		user: { id: session.userId, username: session.username, avatarUrl: avatarUrl(session.userId, session.avatar) },
 		// Read from the env per request. Removing someone from it and restarting must lock them out immediately.
 		isOwner: client.isOwner(session.userId),
-		guilds: await guildsFor(context, oauth, session),
+		// A blocked account can open no server, so Discord is not asked for its list.
+		guilds: blocked === null ? await guildsFor(context, oauth, session) : [],
+		blacklist:
+			blocked === null
+				? null
+				: {
+						reason: blocked.reason,
+						since: new Date(blocked.createdAt).toISOString(),
+						owners: await ownerContacts(client),
+					},
 	};
 
 	return context.json(body);

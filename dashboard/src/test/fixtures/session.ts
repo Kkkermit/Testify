@@ -60,6 +60,7 @@ export const me: MeResponse = {
 	user: { id: "100000000000000001", username: "someone", avatarUrl: null },
 	isOwner: false,
 	guilds: [aGuild, withoutBot, cannotAdd],
+	blacklist: null,
 };
 
 export const accountHistory: AccountHistory = {

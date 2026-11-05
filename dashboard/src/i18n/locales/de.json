@@ -2782,5 +2782,17 @@
 		"skipLeft": "Sie haben den Server verlassen.",
 		"skipAlready": "Nichts zu ändern.",
 		"skipFailed": "Discord hat es abgelehnt."
+	},
+	"blocked": {
+		"title": "Du bist bei {{bot}} gesperrt",
+		"signedInAs": "Angemeldet als {{name}}.",
+		"body": "Die Inhaber des Bots haben dein Konto gesperrt, deshalb sind das Dashboard und alle Befehle für dich geschlossen, auf jedem Server. Du kannst trotzdem alles löschen, was {{bot}} über dich speichert, hier oder mit /delete-my-data in Discord.",
+		"reason": "Grund",
+		"noReason": "Es wurde kein Grund angegeben.",
+		"since": "Gesperrt seit",
+		"mistakeTitle": "Hältst du das für einen Fehler?",
+		"ask_one": "Nur der Inhaber des Bots kann eine Sperre aufheben, Moderatoren und Admins eines Servers nicht. Kontaktiere ihn auf Discord:",
+		"ask_other": "Nur die Inhaber des Bots können eine Sperre aufheben, Moderatoren und Admins eines Servers nicht. Kontaktiere einen von ihnen auf Discord:",
+		"askNobody": "Nur der Inhaber des Bots kann eine Sperre aufheben, Moderatoren und Admins eines Servers nicht. Wende dich also an ihn."
 	}
 }

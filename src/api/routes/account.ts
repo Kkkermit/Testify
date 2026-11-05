@@ -1,11 +1,9 @@
 import { type Context, Hono } from "hono";
-import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, forbidden, notFound, unauthorised } from "@api/errors";
+import { ApiProblem, badRequest, notFound, unauthorised } from "@api/errors";
 import { requireAuth } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
-import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { auditServersOf, auditsBy } from "@database/repositories/dashboardAuditRepository";
 import { endOtherSessions, endSessionByHandle, sessionsFor } from "@database/repositories/dashboardSessionRepository";
 import { deleteProfile, getProfile } from "@database/repositories/profileRepository";
@@ -45,15 +43,6 @@ function sessionOf(context: Context<ApiBindings>): DashboardSession {
 
 	return session;
 }
-
-/** What Discord refuses a blacklisted account, writing a profile or a reminder, the dashboard refuses too. */
-const notBlacklisted = createMiddleware<ApiBindings>(async (context, next) => {
-	if ((await findBlacklistEntry(sessionOf(context).userId)) !== null) {
-		throw forbidden("blacklisted", "You are blacklisted from using this bot.");
-	}
-
-	await next();
-});
 
 function guildNameOf(context: Context<ApiBindings>, guildId: string | null): string | null {
 	return guildId === null ? null : (context.get("client").guilds.cache.get(guildId)?.name ?? null);
@@ -113,7 +102,7 @@ account.get("/reminders", async (context) => {
 	return context.json(reminders.map((reminder) => toReminder(context, reminder)));
 });
 
-account.put("/reminders/:reminderId/deliver", notBlacklisted, async (context) => {
+account.put("/reminders/:reminderId/deliver", async (context) => {
 	const { userId } = sessionOf(context);
 	const { reminderId } = parseParams(context, reminderParams);
 	const { deliver } = await parseBody(context, reminderRouteSchema);
@@ -131,7 +120,7 @@ account.put("/reminders/:reminderId/deliver", notBlacklisted, async (context) =>
 });
 
 /** Not while it is being delivered, so an edit can never be sent half-applied or lost under the send. */
-account.patch("/reminders/:reminderId", notBlacklisted, async (context) => {
+account.patch("/reminders/:reminderId", async (context) => {
 	const { userId } = sessionOf(context);
 	const { reminderId } = parseParams(context, reminderParams);
 	const { text, dueAt } = await parseBody(context, reminderEditBody);
@@ -161,7 +150,7 @@ account.get("/profile", async (context) => {
 });
 
 /** The same rules `/profile set` keeps: its limits, its word filter and a real birthday. */
-account.put("/profile", notBlacklisted, async (context) => {
+account.put("/profile", async (context) => {
 	const { userId } = sessionOf(context);
 	const fields = await parseBody(context, profileBody);
 

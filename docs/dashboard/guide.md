@@ -1281,6 +1281,9 @@ a setting.
    Discord ID. Delete everything stays disabled until it matches.
 4. On success the query cache is emptied and the reader lands on `/` signed out, with a notice saying it is done.
 
+A blacklisted account signs in to `BlockedPage` whatever address it opens: the reason, since when, the owners to
+contact, Sign out and these same steps. Every other route refuses it on the server (`refuseBlacklisted`).
+
 ### 20.7 The owner journeys
 
 All behind `requireOwner`, which answers **404** so a manager never learns the console is there.

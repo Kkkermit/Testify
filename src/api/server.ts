@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, badRequest, notFound, problemBody, UpstreamProblem } from "@api/errors";
+import { refuseBlacklisted } from "@api/middleware/blacklist";
 import { verifyCsrf } from "@api/middleware/csrf";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
@@ -95,6 +96,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	// Before `verifyCsrf`, which compares against the session's stored secret when there is one.
 	app.use("/api/*", loadSession);
 	app.use("*", verifyCsrf);
+	app.use("/api/*", refuseBlacklisted);
 
 	app.onError((error, context) => {
 		const problem = asProblem(error);

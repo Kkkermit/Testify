@@ -9,6 +9,9 @@ import { createMockClient, createMockRole, grantableRoles } from "@tests/helpers
 /** A manager of this server, reaching through the dashboard for more than Discord would let them do themselves. */
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
+jest.mock("@database/repositories/blacklistRepository", () => ({
+	findBlacklistEntry: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	...jest.requireActual<object>("@database/repositories/dashboardSessionRepository"),
 	findSession: jest.fn(),
