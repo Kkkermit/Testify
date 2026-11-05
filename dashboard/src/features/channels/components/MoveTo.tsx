@@ -28,7 +28,7 @@ export function MoveTo({
 
 	return (
 		<div className="flex flex-col gap-2">
-			<label htmlFor={id} className="text-muted-foreground flex items-center gap-2 text-sm">
+			<label htmlFor={id} className="text-muted-foreground flex items-center gap-2 text-sm whitespace-nowrap">
 				{t("channel.moveTo")}
 				<select
 					id={id}

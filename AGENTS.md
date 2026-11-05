@@ -2015,53 +2015,55 @@ four tabs, three shared components and two testable modules.
 
 **Every screen below is built.** A new one follows the six edits in [Adding to the dashboard](#adding-to-the-dashboard).
 
-| Route                            | Screen                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `/`                              | The landing page; signing in is its main button. Public                                  |
-| `/docs`, `/docs/:slug`           | The docs, read out of the repository's Markdown at build time. Public                    |
-| `/source-code/*`                 | The repository at the running release, its numbers and traffic. Public                   |
-| `/sign-in`                       | One button; also the setup screen for a half-install                                     |
-| `/guilds`                        | Picker, with an invite card for guilds without the bot                                   |
-| `/guilds/:id`                    | Stat tiles, a setup checklist, feature grid, permission warnings, changes                |
-| `/guilds/:id/insights`           | Server facts, messages a day, busiest hours, top channels and members                    |
-| `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                                         |
-| `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                             |
-| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next                        |
-| `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                       |
-| `/guilds/:id/warnings`           | The five latest warnings and a search, the steps, warning a member by name               |
-| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted                |
-| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                                       |
-| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now                     |
-| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                                |
-| `/guilds/:id/changes`            | Two weeks of changes, from the dashboard and Discord's audit log, searched               |
-| `/guilds/:id/automod`            | Discord's own filters — no database behind it                                            |
-| `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                       |
-| `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it                  |
-| `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star                 |
-| `/guilds/:id/temp-voice`         | The lobby, made here if need be, and what each new voice channel is like                 |
-| `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                                   |
-| `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                              |
-| `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first                      |
-| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen                     |
-| `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                            |
-| `/guilds/:id/music`              | The music kill switch and the DJ roles                                                   |
-| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket                     |
-| `/guilds/:id/bot-stats`          | The self-updating statistics message: post, move, remove                                 |
-| `/guilds/:id/member-count`       | People, bots and recent joins, counted at most once a minute                             |
-| `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                               |
-| `/guilds/:id/casino`             | Open or close it, switch single games off, and the bet limits                            |
-| `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row                          |
-| `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page                     |
-| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban             |
-| `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting                  |
-| `/guilds/:id/commands`           | Per-command switches for this server                                                     |
-| `/commands`                      | Every command, searchable, with the coverage tile                                        |
-| `/status`                        | Online or not, uptime, speed, packages and outside services, 30 days back                |
-| `/notifications`                 | What the bot's owners want everybody to know; opening it reads them                      |
-| `/help`                          | Getting started, and the support assistant that answers from help articles               |
-| `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                                          |
-| `/appearance`                    | Theme, accent, motion and language; public, in whichever frame suits                     |
-| `/owner`                         | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control |
+| Route                             | Screen                                                                                       |
+| --------------------------------- | -------------------------------------------------------------------------------------------- |
+| `/`                               | The landing page; signing in is its main button. Public                                      |
+| `/docs`, `/docs/:slug`            | The docs, read out of the repository's Markdown at build time. Public                        |
+| `/source-code/*`                  | The repository at the running release, its numbers and traffic. Public                       |
+| `/sign-in`                        | One button; also the setup screen for a half-install                                         |
+| `/guilds`                         | Picker, with an invite card for guilds without the bot                                       |
+| `/guilds/:id`                     | Where the bot works channel by channel, features waiting for a channel, permissions, changes |
+| `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn as Discord draws them and edited there     |
+| `/guilds/:id/everywhere`          | The features that work across the whole server rather than in one channel                    |
+| `/guilds/:id/insights`            | Server facts, messages a day, busiest hours, top channels and members                        |
+| `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                             |
+| `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                 |
+| `/guilds/:id/birthdays`           | Where birthdays are posted and in what words, and whose come next                            |
+| `/guilds/:id/audit-log`           | Grouped event checklist held as a draft until Save                                           |
+| `/guilds/:id/warnings`            | The five latest warnings and a search, the steps, warning a member by name                   |
+| `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                    |
+| `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                           |
+| `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                         |
+| `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                    |
+| `/guilds/:id/changes`             | Two weeks of changes, from the dashboard and Discord's audit log, searched                   |
+| `/guilds/:id/automod`             | Discord's own filters — no database behind it                                                |
+| `/guilds/:id/role-menus`          | Menus members pick roles from; nothing above you or that moderates                           |
+| `/guilds/:id/ideas`               | The idea board's channel and switch, every idea, and the decision on it                      |
+| `/guilds/:id/starboard`           | Where starred messages go, the stars it takes, and the author's own star                     |
+| `/guilds/:id/temp-voice`          | The lobby, made here if need be, and what each new voice channel is like                     |
+| `/guilds/:id/sticky`              | A list keyed by channel; `PUT` upserts                                                       |
+| `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                  |
+| `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                          |
+| `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                         |
+| `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                                |
+| `/guilds/:id/music`               | The music kill switch and the DJ roles                                                       |
+| `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                         |
+| `/guilds/:id/bot-stats`           | The self-updating statistics message: post, move, remove                                     |
+| `/guilds/:id/member-count`        | People, bots and recent joins, counted at most once a minute                                 |
+| `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                   |
+| `/guilds/:id/casino`              | Open or close it, switch single games off, and the bet limits                                |
+| `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                              |
+| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                         |
+| `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                 |
+| `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                      |
+| `/guilds/:id/commands`            | Per-command switches for this server                                                         |
+| `/commands`                       | Every command, searchable, with the coverage tile                                            |
+| `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                    |
+| `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                          |
+| `/help`                           | Getting started, and the support assistant that answers from help articles                   |
+| `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                              |
+| `/appearance`                     | Theme, accent, motion and language; public, in whichever frame suits                         |
+| `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control     |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -2702,6 +2704,26 @@ where it works. `NavGroup.afterChannels` holds the rows below the channel list, 
 `navigation.test.ts` pins the **sorted** set of every server screen's path rather than their order, because which
 section a screen sits in is a grouping choice and reachability is the rule. Quick search adds the server's channels
 from the same `channelTree`, so a channel found there is one the sidebar would show.
+
+### Placing a feature writes through its own route
+
+The overview's waiting features are dragged onto a channel in the sidebar or placed from **Place in**, and a channel
+page's **Move to** moves one. None of it is a new write path. Four things about it are load-bearing:
+
+- **`PLACEMENTS` in `features/channels/placement.ts` is the whole map**: each feature a channel alone can start, the
+  route it writes to and the body it sends, so `requireReach`, the route's own validation and its audit record apply
+  unchanged. `placement.test.ts` parses every body with the route's own schema, so a placement can never send what its
+  route refuses, and was proved to go red. A feature that needs more than a channel — audit logging's events,
+  verification's role, a ticket's staff role — has no placement and opens its own page instead.
+- **The drag says what it carries in its types.** A drop target cannot read the data until the drop, so a chip sets
+  `application/x-testify-accepts-text` or `-voice` beside the feature, and `ChannelRow` accepts a drag only of the kind
+  its channel takes, and a text channel only when the bot can post there. **Place in** offers exactly the channels a
+  drop would take (`placeableIn`), because it is the same action for a keyboard, a screen reader and a phone.
+- **The map refreshes with the overview.** The places query sits under the overview's key, so every write that
+  already refreshes the overview refreshes the map, and a placement refreshes the whole server's queries.
+- **A post is edited where it is shown.** The welcome, goodbye and birthday blocks on a channel page draw the post
+  with `DiscordPreview` and open `MessageEditor` beside it, writing through the feature's own update hook. Level-ups
+  have no template, so their block says what they do rather than drawing a message.
 
 ### Getting every command onto the dashboard
 
