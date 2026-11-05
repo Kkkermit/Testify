@@ -722,6 +722,9 @@ Rules:
    repository exports a `purge<Feature>(guildId)`, and `purgeGuild` in `guildRepository.ts` calls every one when
    the bot is removed. A new feature adds its purge there, and a test that writes its settings, calls
    `purgeGuild` and finds nothing left — `guildRepository.test.ts` does it for the smaller settings at once.
+   **The levelling, ticket, verification, lottery and giveaway setup is kept on purpose**, with every member record,
+   so a server that adds the bot back finds its standings and the setup they hang on; the privacy notice promises
+   exactly that (`legal.retentionL2`). Do not add them to `purgeGuild` without changing the notice with them.
    **A field that names a person is listed in `ERASURE`** in `accountRepository.ts`, saying what Delete my data does
    to it; the coverage test fails on a new one that is not (see
    [§21](#delete-my-data-wipes-what-is-theirs-at-once-and-for-good)).
