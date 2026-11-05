@@ -2246,7 +2246,23 @@
 		"verbBotAdded": "Bot added",
 		"verbOther": "Changed",
 		"discordWithheld": "You need the {{permission}} permission in this server to see changes made in Discord. Only dashboard changes are listed.",
-		"moderationWithheld": "You need the {{permission}} permission to see the warnings, timeouts, kicks and bans made here."
+		"moderationWithheld": "You need the {{permission}} permission to see the warnings, timeouts, kicks and bans made here.",
+		"commandsNotListed": "Changes made with {{bot}}’s commands in Discord are not listed here."
+	},
+	"restore": {
+		"putBack": "Put back",
+		"reading": "Reading the setting as it is now…",
+		"couldNotRead": "The setting could not be read, so it cannot be put back yet.",
+		"changedSince": "This has been changed since, so putting it back would also undo the later change. Change it on its own page instead.",
+		"openPage": "Open its page",
+		"explain": "Putting this change back sets:",
+		"now": "Now: {{value}}",
+		"backTo": "Back to: {{value}}",
+		"confirm": "Put it back",
+		"putting": "Putting back…",
+		"done": "Put back. That is now the newest change in the list.",
+		"notSet": "Not set",
+		"setting": "A setting"
 	},
 	"insights": {
 		"title": "Insights",

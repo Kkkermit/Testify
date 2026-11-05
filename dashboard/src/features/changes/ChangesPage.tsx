@@ -95,6 +95,7 @@ export function ChangesPage(): React.JSX.Element {
 						{t("changes.count", { count: changes.data.total })}
 						{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
 					</p>
+					<p className="text-muted-foreground text-sm">{t("changes.commandsNotListed")}</p>
 					{changes.data.items.length === 0 ? (
 						<Card>
 							<p className="text-sm">{searched === "" ? t("changes.none") : t("changes.noMatch")}</p>

@@ -2313,7 +2313,23 @@
 		"verbBotAdded": "Bot ajouté",
 		"verbOther": "Modifié",
 		"discordWithheld": "Il te faut la permission {{permission}} sur ce serveur pour voir les modifications faites dans Discord. Seules celles du tableau de bord sont listées.",
-		"moderationWithheld": "Il te faut la permission {{permission}} pour voir les avertissements, exclusions temporaires, expulsions et bannissements faits ici."
+		"moderationWithheld": "Il te faut la permission {{permission}} pour voir les avertissements, exclusions temporaires, expulsions et bannissements faits ici.",
+		"commandsNotListed": "Les modifications faites avec les commandes de {{bot}} dans Discord ne figurent pas ici."
+	},
+	"restore": {
+		"putBack": "Rétablir",
+		"reading": "Lecture du réglage tel qu’il est maintenant…",
+		"couldNotRead": "Le réglage n’a pas pu être lu, il ne peut donc pas encore être rétabli.",
+		"changedSince": "Ce réglage a changé depuis : le rétablir annulerait aussi le changement suivant. Modifiez-le plutôt sur sa propre page.",
+		"openPage": "Ouvrir sa page",
+		"explain": "Rétablir ce changement donne :",
+		"now": "Maintenant : {{value}}",
+		"backTo": "Revient à : {{value}}",
+		"confirm": "Le rétablir",
+		"putting": "Rétablissement…",
+		"done": "Rétabli. C’est maintenant la modification la plus récente de la liste.",
+		"notSet": "Non défini",
+		"setting": "Un réglage"
 	},
 	"insights": {
 		"title": "Statistiques",

@@ -2313,7 +2313,23 @@
 		"verbBotAdded": "Bot añadido",
 		"verbOther": "Cambiado",
 		"discordWithheld": "Necesitas el permiso {{permission}} en este servidor para ver los cambios hechos en Discord. Solo se muestran los cambios del panel.",
-		"moderationWithheld": "Necesitas el permiso {{permission}} para ver los avisos, aislamientos, expulsiones y baneos hechos aquí."
+		"moderationWithheld": "Necesitas el permiso {{permission}} para ver los avisos, aislamientos, expulsiones y baneos hechos aquí.",
+		"commandsNotListed": "Los cambios hechos con los comandos de {{bot}} en Discord no aparecen aquí."
+	},
+	"restore": {
+		"putBack": "Restaurar",
+		"reading": "Leyendo el ajuste tal como está ahora…",
+		"couldNotRead": "No se pudo leer el ajuste, así que todavía no se puede restaurar.",
+		"changedSince": "Esto ha cambiado desde entonces, así que restaurarlo desharía también el cambio posterior. Cámbialo en su propia página.",
+		"openPage": "Abrir su página",
+		"explain": "Restaurar este cambio deja:",
+		"now": "Ahora: {{value}}",
+		"backTo": "Vuelve a: {{value}}",
+		"confirm": "Restaurarlo",
+		"putting": "Restaurando…",
+		"done": "Restaurado. Ahora es el cambio más reciente de la lista.",
+		"notSet": "Sin definir",
+		"setting": "Un ajuste"
 	},
 	"insights": {
 		"title": "Estadísticas",

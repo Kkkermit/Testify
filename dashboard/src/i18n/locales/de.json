@@ -2246,7 +2246,23 @@
 		"verbBotAdded": "Bot hinzugefügt",
 		"verbOther": "Geändert",
 		"discordWithheld": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um in Discord vorgenommene Änderungen zu sehen. Es werden nur Dashboard-Änderungen angezeigt.",
-		"moderationWithheld": "Du brauchst die Berechtigung „{{permission}}“, um hier vergebene Verwarnungen, Timeouts, Kicks und Banns zu sehen."
+		"moderationWithheld": "Du brauchst die Berechtigung „{{permission}}“, um hier vergebene Verwarnungen, Timeouts, Kicks und Banns zu sehen.",
+		"commandsNotListed": "Änderungen über die Befehle von {{bot}} in Discord werden hier nicht aufgeführt."
+	},
+	"restore": {
+		"putBack": "Zurücksetzen",
+		"reading": "Die Einstellung wird gelesen…",
+		"couldNotRead": "Die Einstellung konnte nicht gelesen werden, deshalb kann sie noch nicht zurückgesetzt werden.",
+		"changedSince": "Das wurde seitdem noch einmal geändert. Ein Zurücksetzen würde auch die spätere Änderung rückgängig machen. Ändere es stattdessen auf seiner eigenen Seite.",
+		"openPage": "Seite öffnen",
+		"explain": "Beim Zurücksetzen wird gesetzt:",
+		"now": "Jetzt: {{value}}",
+		"backTo": "Wieder: {{value}}",
+		"confirm": "Jetzt zurücksetzen",
+		"putting": "Wird zurückgesetzt…",
+		"done": "Zurückgesetzt. Das ist jetzt die neueste Änderung in der Liste.",
+		"notSet": "Nicht festgelegt",
+		"setting": "Eine Einstellung"
 	},
 	"insights": {
 		"title": "Einblicke",

@@ -2313,7 +2313,23 @@
 		"verbBotAdded": "Bot aggiunto",
 		"verbOther": "Modificato",
 		"discordWithheld": "Ti serve il permesso {{permission}} in questo server per vedere le modifiche fatte su Discord. Sono elencate solo quelle della dashboard.",
-		"moderationWithheld": "Ti serve il permesso {{permission}} per vedere avvertimenti, timeout, espulsioni e ban fatti qui."
+		"moderationWithheld": "Ti serve il permesso {{permission}} per vedere avvertimenti, timeout, espulsioni e ban fatti qui.",
+		"commandsNotListed": "Le modifiche fatte con i comandi di {{bot}} su Discord non sono elencate qui."
+	},
+	"restore": {
+		"putBack": "Ripristina",
+		"reading": "Lettura dell’impostazione com’è adesso…",
+		"couldNotRead": "Non è stato possibile leggere l’impostazione, quindi non si può ancora ripristinare.",
+		"changedSince": "È stata cambiata da allora, quindi ripristinarla annullerebbe anche la modifica successiva. Cambiala dalla sua pagina.",
+		"openPage": "Apri la sua pagina",
+		"explain": "Ripristinare questa modifica imposta:",
+		"now": "Ora: {{value}}",
+		"backTo": "Torna a: {{value}}",
+		"confirm": "Ripristinala",
+		"putting": "Ripristino…",
+		"done": "Ripristinata. Ora è la modifica più recente dell’elenco.",
+		"notSet": "Non impostato",
+		"setting": "Un’impostazione"
 	},
 	"insights": {
 		"title": "Statistiche",

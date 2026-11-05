@@ -69,6 +69,7 @@ export const keys = {
 		insights: (days: number) => ["guild", id, "insights", days] as const,
 		changes: (days: number, source: string, query: string, page: number) =>
 			["guild", id, "changes", days, source, query, page] as const,
+		restoreRead: (path: string) => ["guild", id, "restore-read", path] as const,
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,
