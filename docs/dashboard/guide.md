@@ -918,21 +918,28 @@ worn through `[data-accent="custom"]`. Nothing on a screen may assume the accent
 
 ### 19.3 Hues
 
-Six colours named by hue rather than by feature, because a feature no longer wears one. Every feature's icon is
-`text-muted-foreground` on `bg-muted`, so the grid, the command cards and the setup checklist are one colour and the
-accent is left for what can be pressed. A tint per feature made a page of twenty tiles read as twenty kinds of thing.
+Six colours, each naming a part of the bot. A feature or command category wears its hue **on its icon only**, over
+the neutral `bg-muted` tile, so the Commands page and the overview's feature grid sort themselves by kind at a glance
+while the accent stays the one colour for what can be pressed. The groups follow the sidebar's sections.
 
-| Token                | Light     | Dark      | Read by                                                       |
-| -------------------- | --------- | --------- | ------------------------------------------------------------- |
-| `--color-hue-violet` | `#6d28d9` | `#a78bfa` | lettered avatars (`lib/tint.ts`)                              |
-| `--color-hue-amber`  | `#a16207` | `#fbbf24` | lettered avatars, code highlighting                           |
-| `--color-hue-red`    | `#b91c1c` | `#f87171` | lettered avatars                                              |
-| `--color-hue-green`  | `#047857` | `#3ddc97` | lettered avatars                                              |
-| `--color-hue-blue`   | `#1d4ed8` | `#60a5fa` | lettered avatars, code highlighting                           |
-| `--color-hue-pink`   | `#be185d` | `#f472b6` | lettered avatars, code highlighting, the docs' important note |
+| Token                   | Light     | Dark      | What it names                                               |
+| ----------------------- | --------- | --------- | ----------------------------------------------------------- |
+| `--color-hue-green`     | `#047857` | `#3ddc97` | Community: welcome, birthdays, levelling, role menus, ideas |
+| `--color-hue-blue`      | `#1d4ed8` | `#60a5fa` | Messages, stats and information: sticky, scheduled, `info`  |
+| `--color-hue-red`       | `#b91c1c` | `#f87171` | Moderation and support: automod, cases, tickets, `owner`    |
+| `--color-hue-amber`     | `#a16207` | `#fbbf24` | Money: the economy, the casino, the lottery, treasure       |
+| `--color-hue-pink`      | `#be185d` | `#f472b6` | Entertainment: music and giveaways                          |
+| `--color-hue-violet`    | `#6d28d9` | `#a78bfa` | Games: `fun` and `games`                                    |
+| `text-muted-foreground` | —         | —         | The bot's own settings: `settings`, `developer`             |
 
-Each is a **text colour at AA on a card** in both themes, and a lettered avatar pairs it with `/20` as a fill;
-`contrast.test.ts` measures every one. A hue used as a fill at full strength will not pass for the letter on it.
+`config/features.ts` holds the mapping. `features.test.ts` fails if the categories fall into fewer hues than there are,
+or one reaches for a colour that is not measured. Stat tiles colour their icon with a `tint`, and the owner console's
+usage panels each draw their bars in a hue at `/20`. Lettered avatars (`lib/tint.ts`), code highlighting and the docs'
+important note read the same tokens.
+
+Each is a **text colour at AA on a card** and at 3:1 on the recessed fill an icon sits on, in both themes;
+`contrast.test.ts` measures every one. A wash of the hue behind the icon is what made a page of twenty tiles loud, so
+the tile stays `bg-muted`.
 
 `featureLook()` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before
 the dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
@@ -1227,7 +1234,7 @@ where they differ. It changes nothing; each cell opens that feature on that serv
 **Who:** a manager who has picked a server. This is the dominant journey — most screens are this shape.
 
 1. `/guilds/:id` shows stat tiles, a feature grid, permission warnings and recent changes. The grid is the
-   navigation: each tile carries the feature's icon and links to its screen where one exists.
+   navigation: each tile carries the feature's icon in its hue and links to its screen where one exists.
 2. They open a feature — say `/guilds/:id/levelling`.
 3. The screen loads its own data and renders skeletons meanwhile. Tabs are in the URL (`?tab=`), so a link to a
    tab is a link to a tab.

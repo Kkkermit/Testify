@@ -100,9 +100,13 @@ it("meets every threshold the base palette is used at, in both themes", () => {
 					// A filled button is measured with the text colour it actually draws, not `foreground`.
 					["white on primary", "#ffffff", of("primary"), TEXT],
 					["white on destructive", "#ffffff", of("destructive"), TEXT],
-					// The hues letter an avatar, colour code and mark an alert, so each is read as text on a card.
+					// The hues letter an avatar, colour code, mark an alert and name a category, so each is read as text on a card.
 					...["violet", "amber", "red", "green", "blue", "pink"].map(
 						(hue) => [`the ${hue} hue on a card`, of(`hue-${hue}`), card, TEXT] as const,
+					),
+					// A category's icon sits on the recessed fill, where it is a graphic rather than text.
+					...["violet", "amber", "red", "green", "blue", "pink"].map(
+						(hue) => [`the ${hue} hue on a recessed fill`, of(`hue-${hue}`), of("muted"), NON_TEXT] as const,
 					),
 				] as [string, string, string, number][]
 			).map(([name, ...rest]) => [`${scheme}: ${name}`, ...rest]),

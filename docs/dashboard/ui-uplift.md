@@ -206,8 +206,8 @@ passes.
   which moved to `lib/`; three.js itself; the body wash; the focal card's gradient and the cards' inset highlight;
   the tinted badges. `Eyebrow` became `SectionHeading`, the page's own type with no letterspacing or rule.
 - **Removed in phase 10:** `Reveal`, `AnimatedNumber` and `useCountUp`, and the fade on every navigation and the
-  pop on the sign-in card, so nothing moves on load. The feature tints became six colours named by hue, kept for
-  lettered avatars, code highlighting and the docs' important note; every feature icon is muted. The overview's
+  pop on the sign-in card, so nothing moves on load. The feature tints became six colours named by hue, one per part
+  of the bot as the sidebar groups it, and came back on icons only, over a neutral tile rather than a wash. The overview's
   stat tiles stay, with their figure in Rubik.
 - **Motion.** CSS transitions only. The `motion` library was planned for the channel pages and turned out not to be
   needed, so it was never added.

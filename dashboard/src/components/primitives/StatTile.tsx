@@ -1,24 +1,28 @@
 import { type LucideIcon } from "lucide-react";
 import { Card } from "@/components/primitives/Card";
 import { Tooltip } from "@/components/primitives/Tooltip";
+import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/intl";
 
 export function StatTile({
 	label,
 	value,
 	icon: Icon,
+	tint = "text-muted-foreground",
 	hint,
 }: {
 	label: string;
 	value: string | number;
 	icon?: LucideIcon;
+	/** A hue for the icon, so a row of tiles reads as different figures at a glance. */
+	tint?: string;
 	/** Explains what the figure counts, for anything a label cannot say in two words. */
 	hint?: string;
 }): React.JSX.Element {
 	const tile = (
 		<Card padding="compact" className="flex flex-col gap-1">
 			<p className="text-muted-foreground flex items-center gap-2 text-xs">
-				{Icon !== undefined && <Icon size={14} aria-hidden="true" className="shrink-0" />}
+				{Icon !== undefined && <Icon size={14} aria-hidden="true" className={cn("shrink-0", tint)} />}
 				{label}
 			</p>
 			{/* Two of these share a 320px row, which is WCAG 1.4.10's reflow width — the full size does not fit. */}

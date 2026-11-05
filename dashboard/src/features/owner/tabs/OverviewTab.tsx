@@ -54,17 +54,34 @@ export function OverviewTab(): React.JSX.Element {
 					[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
 				) : (
 					<>
-						<StatTile label={t("owner.servers")} value={stats.guilds} icon={Server} />
-						<StatTile label={t("owner.members")} value={stats.users} icon={Users} hint={t("owner.membersHint")} />
-						<StatTile label={t("owner.commands")} value={stats.commands} icon={Terminal} />
+						<StatTile label={t("owner.servers")} value={stats.guilds} icon={Server} tint="text-hue-blue" />
+						<StatTile
+							label={t("owner.members")}
+							value={stats.users}
+							icon={Users}
+							tint="text-hue-green"
+							hint={t("owner.membersHint")}
+						/>
+						<StatTile label={t("owner.commands")} value={stats.commands} icon={Terminal} tint="text-hue-violet" />
 						<StatTile
 							label={t("owner.uptime")}
 							value={formatUptime(stats.uptimeMs)}
 							icon={Clock}
+							tint="text-hue-amber"
 							hint={t("owner.uptimeHint")}
 						/>
-						<StatTile label={t("owner.memory")} value={formatUnit(stats.memoryMb, "megabyte")} icon={Cpu} />
-						<StatTile label={t("owner.database")} value={stats.database} icon={Database} />
+						<StatTile
+							label={t("owner.memory")}
+							value={formatUnit(stats.memoryMb, "megabyte")}
+							icon={Cpu}
+							tint="text-hue-amber"
+						/>
+						<StatTile
+							label={t("owner.database")}
+							value={stats.database}
+							icon={Database}
+							tint={stats.database === "connected" ? "text-success" : "text-destructive-text"}
+						/>
 					</>
 				)}
 			</section>

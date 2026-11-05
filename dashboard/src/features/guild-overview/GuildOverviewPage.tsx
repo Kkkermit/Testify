@@ -31,13 +31,14 @@ export function GuildOverviewPage(): React.JSX.Element {
 			<InboxLine guildId={guildId} />
 
 			<section aria-label={t("overview.glance")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-				<StatTile label={t("overview.members")} value={guild.memberCount} icon={Users} />
-				<StatTile label={t("overview.channels")} value={guild.channelCount} icon={Hash} />
-				<StatTile label={t("overview.roles")} value={guild.roleCount} icon={Shield} />
+				<StatTile label={t("overview.members")} value={guild.memberCount} icon={Users} tint="text-hue-green" />
+				<StatTile label={t("overview.channels")} value={guild.channelCount} icon={Hash} tint="text-hue-blue" />
+				<StatTile label={t("overview.roles")} value={guild.roleCount} icon={Shield} tint="text-hue-violet" />
 				<StatTile
 					label={t("overview.featuresOn")}
 					value={guild.features.filter((feature) => feature.enabled).length}
 					icon={Sparkles}
+					tint="text-hue-amber"
 					hint={t("overview.featuresHint")}
 				/>
 			</section>

@@ -26,11 +26,11 @@ export function FeatureGrid({
 		// A grid item defaults to `min-width: auto`, so without this the widest tile sets the row's width.
 		<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
 			{features.map((feature) => {
-				const { icon: Icon, path } = featureLook(feature.key);
+				const { icon: Icon, tint, path } = featureLook(feature.key);
 
 				const body: ReactNode = (
 					<>
-						<span className="rounded-card bg-muted text-muted-foreground shrink-0 p-2" aria-hidden="true">
+						<span className={cn("rounded-card bg-muted shrink-0 p-2", tint)} aria-hidden="true">
 							<Icon size={18} />
 						</span>
 						<span className="min-w-0 flex-1">

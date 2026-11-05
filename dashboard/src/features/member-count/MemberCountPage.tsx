@@ -28,10 +28,15 @@ export function MemberCountPage(): React.JSX.Element {
 			<PageHeader server={overview.data} title={t("memberCount.title")} subtitle={t("memberCount.subtitle")} />
 
 			<section aria-label={t("memberCount.breakdown")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-				<StatTile label={t("memberCount.total")} value={counts.total} icon={Users} />
-				<StatTile label={t("memberCount.people")} value={counts.people} icon={UserRound} />
-				<StatTile label={t("memberCount.bots")} value={counts.bots} icon={Bot} />
-				<StatTile label={t("memberCount.joinedWeek")} value={counts.joinedWeek} icon={CalendarDays} />
+				<StatTile label={t("memberCount.total")} value={counts.total} icon={Users} tint="text-hue-green" />
+				<StatTile label={t("memberCount.people")} value={counts.people} icon={UserRound} tint="text-hue-violet" />
+				<StatTile label={t("memberCount.bots")} value={counts.bots} icon={Bot} tint="text-hue-blue" />
+				<StatTile
+					label={t("memberCount.joinedWeek")}
+					value={counts.joinedWeek}
+					icon={CalendarDays}
+					tint="text-hue-amber"
+				/>
 			</section>
 
 			<Card className="flex flex-col gap-3">

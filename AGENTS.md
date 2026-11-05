@@ -2365,11 +2365,16 @@ single source, the accessibility floor only rises, and the CSP is untouchable.
 `--color-hue-*` colours and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
 `.tsx` is a review comment.
 
-**Nothing moves on load, and no feature wears a colour of its own.** A page arrives whole; motion is kept for a change
-somebody caused — a dialog, a tab, a warning — and for a skeleton's sheen. Every feature icon is muted, so the accent
-marks only what can be pressed, and the six `--color-hue-*` colours are for lettered avatars, code and the docs'
-important note. A figure is the page's face with `tabular-nums`; mono is for what is typed literally. A label is
-sentence case, never letterspaced capitals. The guide's §19.3, §19.4 and §19.8 hold the detail.
+**Nothing moves on load, and a colour names a part of the bot rather than decorating it.** A page arrives whole;
+motion is kept for a change somebody caused — a dialog, a tab, a warning — and for a skeleton's sheen. Each feature
+and command category wears one of the six `--color-hue-*` colours **on its icon only**, over the neutral `bg-muted`
+tile, grouped as the sidebar groups the bot: green community, blue messages, stats and information, red moderation and
+support, amber money, pink entertainment, violet games, grey the bot's own settings. `features.test.ts` fails if the
+categories collapse into fewer hues or reach for one `contrast.test.ts` does not measure. Stat tiles colour their icon
+the same way, and the owner console's usage panels each draw their bars in a hue at a fifth of its strength. A wash
+behind the icon is what made a page of twenty tiles loud, and it stays gone. A figure is the page's face with
+`tabular-nums`; mono is for what is typed literally. A label is sentence case, never letterspaced capitals. The guide's
+§19.3, §19.4 and §19.8 hold the detail.
 
 **The radius scale is four tokens and nothing else**: `--radius-chip` (6px) for inline chips, bars and the
 segmented control's buttons, `--radius-field` (8px) for inputs, list shells and rows, `--radius-card` (10px) for
