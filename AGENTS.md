@@ -2424,13 +2424,16 @@ and names a deleted channel rather than showing another. A form with several req
 still missing (`ticketMissing`), not only the first, so they can be filled in any order.
 
 **Nor does one format its own dates, numbers or units.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`,
-`clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
+`dayAndMonth`, `monthName`, `clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
 All of them write in the language the reader chose and never in the browser's own region: a bare
 `toLocaleString()` renders `7/30/2026` for one admin and `30/07/2026` for another, and the two are unreadable as
 each other. English is British (`formattingLocale` maps `en` to `en-GB`), so `30 Jul 2026` cannot be misread, and
 every other language gets its own month names, separators and unit symbols — `30. Juli 2026`, `7,2 ko`, `42 мс`.
 The month is always a word, which matters most on an audit trail. Formatters are cached per locale, so switching
-language never reuses the old one.
+language never reuses the old one. **No other file builds an `Intl` formatter or calls `toLocaleDateString`**, because
+only `formattingLocale` is guaranteed a tag the browser accepts: four screens passed `i18n.language` instead, which is
+whatever the browser reported, and Chromium's `en-US@posix` made `Intl.DateTimeFormat` throw and took the birthdays page
+down. `src/test/formatters.test.ts` fails on one anywhere else, and was proved to name all four.
 
 **Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
 places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /

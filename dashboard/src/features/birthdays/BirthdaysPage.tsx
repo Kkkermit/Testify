@@ -1,4 +1,4 @@
-import { BIRTHDAY_LIMITS, BIRTHDAY_PLACEHOLDERS, MONTHS } from "@testify/shared";
+import { BIRTHDAY_LIMITS, BIRTHDAY_PLACEHOLDERS } from "@testify/shared";
 import { Cake } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,15 +24,11 @@ import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
-
-/** The month is English on Discord, and shown through the browser's own month names here. */
-function monthName(month: number, locale: string): string {
-	return new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(Date.UTC(2000, month - 1, 1));
-}
+import { monthName } from "@/lib/datetime";
 
 /** Where and how a server's birthdays are posted, and whose come next. */
 export function BirthdaysPage(): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const config = useBirthdays(guildId);
@@ -135,7 +131,7 @@ export function BirthdaysPage(): React.JSX.Element {
 									<span className="text-muted-foreground shrink-0 tabular-nums">
 										{t("birthdays.on", {
 											day: entry.day,
-											month: monthName(entry.month, i18n.language) || MONTHS[entry.month - 1],
+											month: monthName(entry.month),
 										})}
 									</span>
 								</li>

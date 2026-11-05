@@ -7,6 +7,8 @@ const DATE_TIME: Intl.DateTimeFormatOptions = { ...DATE, hour: "2-digit", minute
 const TIME: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
 const WEEKDAY: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long" };
 const HOUR_MINUTE: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
+const DAY_MONTH: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", timeZone: "UTC" };
+const MONTH: Intl.DateTimeFormatOptions = { month: "long", timeZone: "UTC" };
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -51,6 +53,16 @@ export function weekdayDate(iso: string): string {
 /** `14:30`, in the reader's own time zone. */
 export function timeOfDay(iso: string): string {
 	return format(iso, "hourMinute", HOUR_MINUTE);
+}
+
+/** `1 Aug`, a calendar day by itself, read in UTC because it names a stored day rather than a moment. */
+export function dayAndMonth(iso: string): string {
+	return format(iso, "dayMonth", DAY_MONTH);
+}
+
+/** `March` for 3, as the reader's language names it. */
+export function monthName(month: number): string {
+	return made("month", (locale) => new Intl.DateTimeFormat(locale, MONTH)).format(Date.UTC(2000, month - 1, 1));
 }
 
 export function clockTime(iso: string): string {

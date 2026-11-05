@@ -26,7 +26,7 @@ export function TimeoutCard({
 	onTimeout: (minutes: Minutes, reason: string, confirm: string) => void;
 	onLift: () => void;
 }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [minutes, setMinutes] = useState<Minutes>(60);
 	const [reason, setReason] = useState("");
@@ -88,7 +88,7 @@ export function TimeoutCard({
 						>
 							{MEMBER_TIMEOUT_MINUTES.map((entry) => (
 								<option key={entry} value={entry}>
-									{durationText(entry * 60_000, i18n.language)}
+									{durationText(entry * 60_000)}
 								</option>
 							))}
 						</select>

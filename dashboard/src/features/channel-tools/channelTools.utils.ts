@@ -1,17 +1,14 @@
 import { SLOWMODE_SECONDS, type ToolChannel } from "@testify/shared";
+import { formatUnit } from "@/lib/intl";
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 
-/** In the browser's language; 0 is the caller's own word for off. */
-export function slowmodeText(seconds: number, locale: string): string {
-	const [value, unit] =
-		seconds % HOUR === 0
-			? [seconds / HOUR, "hour"]
-			: seconds % MINUTE === 0
-				? [seconds / MINUTE, "minute"]
-				: [seconds, "second"];
-	return new Intl.NumberFormat(locale, { style: "unit", unit, unitDisplay: "long" }).format(value);
+/** In the reader's language; 0 is the caller's own word for off. */
+export function slowmodeText(seconds: number): string {
+	if (seconds % HOUR === 0) return formatUnit(seconds / HOUR, "hour", { display: "long" });
+	if (seconds % MINUTE === 0) return formatUnit(seconds / MINUTE, "minute", { display: "long" });
+	return formatUnit(seconds, "second", { display: "long" });
 }
 
 /** Discord's own lengths, plus whatever the channel is set to when somebody chose another in Discord. */

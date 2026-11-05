@@ -184,7 +184,7 @@ function CaseList({ guildId }: { guildId: string }): React.JSX.Element {
 }
 
 function CaseRow({ guildId, modCase }: { guildId: string; modCase: ModCase }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<li className="flex flex-col gap-1 px-4 py-3">
@@ -203,8 +203,7 @@ function CaseRow({ guildId, modCase }: { guildId: string; modCase: ModCase }): R
 			<p className="text-sm break-words">{modCase.reason}</p>
 			<p className="text-muted-foreground text-xs">
 				{t("cases.by", { name: modCase.moderatorName, when: dateAndTime(modCase.at) })}
-				{modCase.durationMs !== null &&
-					` · ${t("cases.for", { length: durationText(modCase.durationMs, i18n.language) })}`}
+				{modCase.durationMs !== null && ` · ${t("cases.for", { length: durationText(modCase.durationMs) })}`}
 			</p>
 		</li>
 	);

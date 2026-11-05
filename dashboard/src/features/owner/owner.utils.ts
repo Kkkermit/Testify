@@ -11,7 +11,8 @@ import {
 	type ReportedLogLevel,
 } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
-import { formattingLocale, formatPercent, formatUnit } from "@/lib/intl";
+import { dayAndMonth } from "@/lib/datetime";
+import { formatPercent, formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
 export const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
@@ -36,7 +37,7 @@ export function shortDay(day: string): string {
 	const at = new Date(`${day}T00:00:00.000Z`);
 	if (Number.isNaN(at.getTime())) return day;
 
-	return at.toLocaleDateString(formattingLocale(), { day: "numeric", month: "short", timeZone: "UTC" });
+	return dayAndMonth(at.toISOString());
 }
 
 /** The same rule the API validates against, so the form cannot disagree with the refusal it would get. */

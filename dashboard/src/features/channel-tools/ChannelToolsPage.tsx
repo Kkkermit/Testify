@@ -132,7 +132,7 @@ function ChannelControls({
 	busy: boolean;
 	onChange: (patch: { locked?: boolean; slowmodeSeconds?: number }) => void;
 }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<>
@@ -159,7 +159,7 @@ function ChannelControls({
 				>
 					{slowmodeChoices(channel.slowmodeSeconds).map((seconds) => (
 						<option key={seconds} value={seconds}>
-							{seconds === 0 ? t("channelTools.off") : slowmodeText(seconds, i18n.language)}
+							{seconds === 0 ? t("channelTools.off") : slowmodeText(seconds)}
 						</option>
 					))}
 				</select>
@@ -170,7 +170,7 @@ function ChannelControls({
 }
 
 function RestrictedRow({ channel, onChoose }: { channel: ToolChannel; onChoose: () => void }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<li className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
@@ -178,7 +178,7 @@ function RestrictedRow({ channel, onChoose }: { channel: ToolChannel; onChoose: 
 				<span className="text-sm font-medium">#{channel.name}</span>
 				{channel.locked && <Badge tone="warning">{t("channelTools.lockedBadge")}</Badge>}
 				{channel.slowmodeSeconds > 0 && (
-					<Badge>{t("channelTools.slowBadge", { length: slowmodeText(channel.slowmodeSeconds, i18n.language) })}</Badge>
+					<Badge>{t("channelTools.slowBadge", { length: slowmodeText(channel.slowmodeSeconds) })}</Badge>
 				)}
 			</div>
 			<Button variant="ghost" aria-label={t("channelTools.chooseName", { name: channel.name })} onClick={onChoose}>

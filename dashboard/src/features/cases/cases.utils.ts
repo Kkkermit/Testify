@@ -1,5 +1,6 @@
 import { type CaseAction, CASE_ACTIONS } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
+import { formatUnit } from "@/lib/intl";
 
 export const ACTION_LABELS: Record<CaseAction, TranslationKey> = {
 	warn: "cases.warn",
@@ -21,11 +22,11 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-/** In the largest whole unit, worded by the browser in the reader's own language. */
-export function durationText(ms: number, locale: string): string {
-	const [value, unit] =
-		ms % DAY === 0 ? [ms / DAY, "day"] : ms % HOUR === 0 ? [ms / HOUR, "hour"] : [Math.round(ms / MINUTE), "minute"];
-	return new Intl.NumberFormat(locale, { style: "unit", unit, unitDisplay: "long" }).format(value);
+/** In the largest whole unit, worded in the reader's own language. */
+export function durationText(ms: number): string {
+	if (ms % DAY === 0) return formatUnit(ms / DAY, "day", { display: "long" });
+	if (ms % HOUR === 0) return formatUnit(ms / HOUR, "hour", { display: "long" });
+	return formatUnit(Math.round(ms / MINUTE), "minute", { display: "long" });
 }
 
 /** The query the list asks with, leaving out what is at its default so a cache key stays short. */
