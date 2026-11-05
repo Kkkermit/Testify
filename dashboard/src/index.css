@@ -305,6 +305,16 @@
 		--color-ring: light-dark(#475569, #cbd5e1);
 	}
 
+	/* Somebody's own colour. `customAccent` fits it into each theme and writes the shades onto the root, where this reads
+	   them; the fallbacks are plum's, for a page marked custom with nothing stored. The wash moves too, so a tint behind
+	   accent text is drawn from the same colour as the text. */
+	[data-accent="custom"] {
+		--color-primary: light-dark(var(--custom-primary-light, #8a2a6b), var(--custom-primary-dark, #bf3a94));
+		--color-accent: light-dark(var(--custom-accent-light, #7a2260), var(--custom-accent-dark, #e08ac4));
+		--color-accent-wash: light-dark(var(--custom-wash-light, #f6e9f2), var(--custom-wash-dark, #3a2433));
+		--color-ring: light-dark(var(--custom-primary-light, #8a2a6b), var(--custom-accent-dark, #e08ac4));
+	}
+
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
 	}
@@ -345,6 +355,26 @@
 		width: 1rem;
 		height: 1rem;
 		flex-shrink: 0;
+	}
+
+	/** The colour picker draws only its swatch, inside the field's own border, in both engines. */
+	input[type="color"] {
+		appearance: none;
+		cursor: pointer;
+	}
+
+	input[type="color"]::-webkit-color-swatch-wrapper {
+		padding: 0;
+	}
+
+	input[type="color"]::-webkit-color-swatch {
+		border: none;
+		border-radius: var(--radius-chip);
+	}
+
+	input[type="color"]::-moz-color-swatch {
+		border: none;
+		border-radius: var(--radius-chip);
 	}
 
 	/** Firefox and WebKit take different properties for this, and without both a dark page gets the platform's light scrollbar. */

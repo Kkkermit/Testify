@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { contrast, luminance } from "./contrast";
 import { ACCENTS } from "@/hooks/useAccent";
+import { fromHsl, toHex } from "@/lib/colour";
+import { customAccent, customProperties } from "@/lib/customAccent";
 
 /** The palette against WCAG 2.2, read from `index.css`, because jsdom cannot measure contrast. */
 
@@ -156,4 +158,57 @@ it("keeps the plum block equal to the base tokens", () => {
 		for (const name of ["primary", "accent", "ring"])
 			expect(accentToken("plum", name, scheme)).toBe(token(name, scheme));
 	}
+});
+
+/** A spread of what somebody might pick: every twentieth hue, from grey to full colour, from black to white. */
+function pickedColours(): string[] {
+	const picked: string[] = [];
+	for (let h = 0; h < 360; h += 20) {
+		for (const s of [0, 0.2, 0.5, 0.8, 1]) {
+			for (const l of [0, 0.05, 0.15, 0.3, 0.45, 0.5, 0.55, 0.7, 0.85, 0.95, 1])
+				picked.push(toHex(fromHsl({ h, s, l })));
+		}
+	}
+	return [...new Set(picked)];
+}
+
+/** A colour somebody types is held to everything a swatch is, plus the wash, which only a custom accent moves. */
+it("meets every threshold with any colour somebody picks, in both themes", () => {
+	const missed = pickedColours().flatMap((picked) => {
+		const shades = customAccent({
+			r: Number.parseInt(picked.slice(1, 3), 16),
+			g: Number.parseInt(picked.slice(3, 5), 16),
+			b: Number.parseInt(picked.slice(5, 7), 16),
+		});
+
+		return SCHEMES.flatMap((scheme) => {
+			const { primary, accent, wash } = shades[scheme];
+			const ring = scheme === "light" ? primary : accent;
+			const page = token("background", scheme);
+			const card = token("card", scheme);
+
+			return shortfalls([
+				[`${picked} in ${scheme}: a link on the page`, accent, page, TEXT],
+				[`${picked} in ${scheme}: a link on a card`, accent, card, TEXT],
+				[`${picked} in ${scheme}: accent text on its wash`, accent, wash, TEXT],
+				[`${picked} in ${scheme}: a filled button against the page`, primary, page, NON_TEXT],
+				[`${picked} in ${scheme}: the focus ring on the page`, ring, page, NON_TEXT],
+				[`${picked} in ${scheme}: white on its fill`, "#ffffff", primary, TEXT],
+			]).concat(
+				scheme === "dark" && contrast(primary, page) >= TEXT ? [`${picked} in dark: its fill reads as text`] : [],
+			);
+		});
+	});
+
+	expect(missed).toEqual([]);
+});
+
+/** The custom block reads the shades `customAccent` writes, by the names it writes them under. */
+it("lets the custom block read every shade by the name it is written under", () => {
+	const block = /\[data-accent="custom"\]\s*\{([^}]*)\}/.exec(CSS)?.[1] ?? "";
+	const read = [...block.matchAll(/var\((--custom-[a-z-]+)/g)].map((match) => match[1]);
+
+	const written = Object.keys(customProperties(customAccent({ r: 0, g: 0, b: 0 })));
+
+	expect(new Set(read)).toEqual(new Set(written));
 });

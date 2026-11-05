@@ -2566,6 +2566,20 @@ Two things about the blocks are load-bearing:
   swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a swatch drawn in
   amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
 
+**A reader's own colour is fitted, never trusted.** Appearance takes any colour, picked or typed as a hex code, RGB or
+HSL (`parseColour` in `lib/colour.ts`), and `customAccent` in `lib/customAccent.ts` keeps its hue and saturation and
+moves its lightness only as far as each token's luminance band needs — the bands that hold every preset to the same
+thresholds, with the wash added, since a custom accent is the one that moves it. The shades go onto the root as
+`--custom-*` properties, which `[data-accent="custom"]` reads with plum as the fallback, and the colour is stored apart
+from the accent (`testify:accent-colour`), so choosing a swatch does not forget it. Three things are load-bearing:
+
+- **The thresholds are proved over the colour space, not over one colour.** `contrast.test.ts` puts a sweep of hues,
+  saturations and lightnesses through `customAccent` and measures every result against the real grounds in
+  `index.css`; widening a band goes red.
+- **Only `#rrggbb` is read back from storage** (`readHex`), because the value lands in a style property and storage
+  holds whatever was last written to it. Anything else is ignored and the page is plum.
+- **It is applied before the app mounts**, with the other preferences, so a reader who made one lands in it.
+
 That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
 no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
 flash, before any JavaScript loads.

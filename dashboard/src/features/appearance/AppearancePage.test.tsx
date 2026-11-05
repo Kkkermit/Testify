@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AppearancePage } from "@/features/appearance/AppearancePage";
 import { storedPreference } from "@/hooks/rootPreference";
@@ -17,7 +17,7 @@ async function group(name: string) {
 
 beforeEach(() => {
 	window.localStorage.clear();
-	for (const attribute of ["data-theme", "data-accent", "data-motion"]) {
+	for (const attribute of ["data-theme", "data-accent", "data-motion", "style"]) {
 		document.documentElement.removeAttribute(attribute);
 	}
 });
@@ -52,7 +52,7 @@ describe("choosing a theme", () => {
 		const { container } = render();
 		await group("Theme");
 
-		const mocks = container.querySelectorAll("[data-scheme]");
+		const mocks = screen.getByRole("region", { name: "Theme" }).querySelectorAll("[data-scheme]");
 		expect([...mocks].map((mock) => mock.getAttribute("data-scheme"))).toEqual(["light", "dark", "light", "dark"]);
 		expect(container.querySelector('[style*="color-scheme"]')).toBeNull();
 	});
@@ -66,6 +66,48 @@ describe("choosing an accent", () => {
 
 		expect(plum).toHaveAttribute("data-accent", "plum");
 		expect(screen.getByRole("button", { name: "Amber" })).toHaveAttribute("data-accent", "amber");
+	});
+
+	/** A typed colour is applied once it is read, and kept apart from the swatches so choosing one does not forget it. */
+	it("wears a colour typed as RGB, and remembers it beside the swatches", async () => {
+		const user = userEvent.setup();
+		render();
+
+		await user.type(await screen.findByRole("textbox", { name: "Colour" }), "67, 56, 202");
+		await user.click(screen.getByRole("button", { name: "Use this colour" }));
+
+		const root = document.documentElement;
+		expect(root).toHaveAttribute("data-accent", "custom");
+		expect(root.style.getPropertyValue("--custom-primary-light")).toBe("#4338ca");
+		expect(screen.getByText("In use")).toBeInTheDocument();
+		expect(screen.getByText("hsl(245, 58%, 51%)")).toBeInTheDocument();
+
+		await user.click(screen.getByRole("button", { name: "Teal" }));
+		expect(root).toHaveAttribute("data-accent", "teal");
+		expect(window.localStorage.getItem("testify:accent-colour")).toBe("#4338ca");
+		expect(screen.queryByText("In use")).toBeNull();
+	});
+
+	it("wears a colour from the picker as soon as it is picked", async () => {
+		render();
+
+		fireEvent.input(await screen.findByLabelText("Pick a colour"), { target: { value: "#0f766e" } });
+
+		expect(document.documentElement).toHaveAttribute("data-accent", "custom");
+		expect(document.documentElement.style.getPropertyValue("--custom-primary-light")).toBe("#0f766e");
+		expect(screen.getByRole("textbox", { name: "Colour" })).toHaveValue("#0f766e");
+	});
+
+	it("says so when what was typed is not a colour, and leaves the accent alone", async () => {
+		const user = userEvent.setup();
+		render();
+
+		await user.type(await screen.findByRole("textbox", { name: "Colour" }), "aubergine");
+		await user.click(screen.getByRole("button", { name: "Use this colour" }));
+
+		expect(screen.getByText(/That isn’t a colour this page can read/)).toBeInTheDocument();
+		expect(screen.getByRole("textbox", { name: "Colour" })).toHaveAttribute("aria-invalid", "true");
+		expect(document.documentElement.hasAttribute("data-accent")).toBe(false);
 	});
 });
 
@@ -95,9 +137,12 @@ describe("arriving from the sidebar's language button", () => {
 });
 
 describe("AppearancePage accessibility", () => {
+	/** With a colour of the reader's own, so its samples and read-outs are part of the page being checked. */
 	it("has no automatically detectable violations", async () => {
+		window.localStorage.setItem("testify:accent-colour", "#4338ca");
 		const { container } = render();
 		await group("Theme");
+		expect(screen.getByText("rgb(67, 56, 202)")).toBeInTheDocument();
 
 		await expectNoViolations(container);
 	});

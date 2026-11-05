@@ -910,6 +910,12 @@ Two conventions worth keeping:
 - **`--color-ring` is used by exactly one rule** — `:focus-visible` in the base layer. Keeping it separate from
   `--color-accent` means a rebrand can make the focus ring louder than the brand without touching links.
 
+**The accent is the reader's to change.** Appearance offers the twelve accents as swatches and a colour of the
+reader's own, picked or typed as a hex code, RGB or HSL. A colour of their own is fitted to each theme by
+`customAccent` (`lib/customAccent.ts`), which darkens or lightens it only as far as the thresholds above need, and is
+worn through `[data-accent="custom"]`. Nothing on a screen may assume the accent is plum: draw with `primary`,
+`accent`, `accent-wash` and `ring`, never with a hue.
+
 ### 19.3 Hues
 
 Six colours named by hue rather than by feature, because a feature no longer wears one. Every feature's icon is
