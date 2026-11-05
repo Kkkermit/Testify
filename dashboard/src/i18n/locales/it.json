@@ -698,9 +698,11 @@
 		"noneBody": "Questo server non ha canali testuali da bloccare o rallentare."
 	},
 	"announcements": {
+		"summaryPing": "Questo viene pubblicato in {{channel}} e menziona {{ping}}.",
+		"summaryNobody": "Questo viene pubblicato in {{channel}}, senza menzionare nessuno.",
+		"summaryNoChannel": "Scegli un canale, scrivi il messaggio e {{bot}} lo pubblica lì.",
 		"title": "Annunci",
 		"subtitle": "Pubblica un messaggio come {{bot}}, prima con un’anteprima. Nessuno viene menzionato a meno che tu non lo scelga.",
-		"compose": "Scrivi",
 		"channel": "Pubblicato in",
 		"style": "Inviato come",
 		"styleEmbed": "Un embed",

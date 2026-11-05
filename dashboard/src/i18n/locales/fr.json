@@ -698,9 +698,11 @@
 		"noneBody": "Ce serveur n’a aucun salon textuel à verrouiller ou ralentir."
 	},
 	"announcements": {
+		"summaryPing": "Ceci est publié dans {{channel}} et mentionne {{ping}}.",
+		"summaryNobody": "Ceci est publié dans {{channel}}, sans mentionner personne.",
+		"summaryNoChannel": "Choisissez un salon, écrivez le message, et {{bot}} le publie là.",
 		"title": "Annonces",
 		"subtitle": "Publiez un message en tant que {{bot}}, avec un aperçu d’abord. Personne n’est mentionné sauf si vous le choisissez.",
-		"compose": "Rédiger",
 		"channel": "Publié dans",
 		"style": "Envoyé comme",
 		"styleEmbed": "Un embed",

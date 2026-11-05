@@ -678,9 +678,11 @@
 		"noneBody": "This server has no text channels to lock or slow."
 	},
 	"announcements": {
+		"summaryPing": "This is posted in {{channel}} and pings {{ping}}.",
+		"summaryNobody": "This is posted in {{channel}}, pinging nobody.",
+		"summaryNoChannel": "Choose a channel, write the message, and it is posted there as {{bot}}.",
 		"title": "Announcements",
 		"subtitle": "Post a message as {{bot}}, with a preview first. Nobody is pinged unless you choose it.",
-		"compose": "Compose",
 		"channel": "Posted in",
 		"style": "Sent as",
 		"styleEmbed": "An embed",

@@ -678,9 +678,11 @@
 		"noneBody": "Dieser Server hat keine Textkanäle zum Sperren oder Verlangsamen."
 	},
 	"announcements": {
+		"summaryPing": "Das wird in {{channel}} gepostet und pingt {{ping}}.",
+		"summaryNobody": "Das wird in {{channel}} gepostet und pingt niemanden.",
+		"summaryNoChannel": "Wähle einen Kanal, schreib die Nachricht, und {{bot}} postet sie dort.",
 		"title": "Ankündigungen",
 		"subtitle": "Poste eine Nachricht als {{bot}}, vorher mit Vorschau. Niemand wird erwähnt, außer du wählst es.",
-		"compose": "Verfassen",
 		"channel": "Gepostet in",
 		"style": "Gesendet als",
 		"styleEmbed": "Ein Embed",

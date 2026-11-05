@@ -5,6 +5,7 @@ import {
 	type AnnouncementStyle,
 	type EmbedColour,
 } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 import { sanitiseInput } from "@/lib/sanitise";
 
@@ -55,4 +56,16 @@ export function bodyOf(draft: AnnouncementDraft & { channelId: string }): Announ
 		mentions: draft.mentions,
 		...(draft.style === "embed" ? { colour: draft.colour, ...(title === "" ? {} : { title }) } : {}),
 	};
+}
+
+/** Where this draft goes and whom it pings, as the sentence the page opens with. */
+export function announcementSummary(
+	draft: Pick<AnnouncementDraft, "channelId" | "mentions">,
+	channel: string,
+	t: TFunction,
+): string {
+	if (draft.channelId === null) return t("announcements.summaryNoChannel");
+	return draft.mentions === "none"
+		? t("announcements.summaryNobody", { channel })
+		: t("announcements.summaryPing", { channel, ping: `@${draft.mentions}` });
 }

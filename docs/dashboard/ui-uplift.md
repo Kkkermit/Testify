@@ -118,7 +118,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/ideas`                                    | Community     | —                   | Done                    |
 | `…/starboard`                                | Community     | —                   | Done                    |
 | `…/temp-voice`                               | Community     | —                   | Done                    |
-| `…/announcements`                            | Messages      | The announcement    | To do                   |
+| `…/announcements`                            | Messages      | The announcement    | Done                    |
 | `…/scheduled-messages`                       | Messages      | Each post           | To do                   |
 | `…/sticky`                                   | Messages      | Each sticky message | To do                   |
 | `…/auto-responders`                          | Messages      | Each reply          | To do                   |
