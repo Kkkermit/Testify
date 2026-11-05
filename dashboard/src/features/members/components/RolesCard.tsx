@@ -1,24 +1,18 @@
 import { MEMBER_ACTION_LIMITS, type MemberRoles } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckList, Warning } from "@/components/form";
+import { CheckList, RowActions, SettingRows, Warning } from "@/components/form";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
-import { Button, Card, CARD_HEADING, Skeleton } from "@/components/primitives";
+import { Button, Skeleton } from "@/components/primitives";
 import { useMemberRoles, useSetMemberRoles } from "@/features/members/useMemberDetail";
 import { ApiError } from "@/lib/api";
 
-/** The roles the reader could hand out themselves, held as a draft until Save so a list goes in one request. */
 export function RolesCard({ guildId, userId }: { guildId: string; userId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const roles = useMemberRoles(guildId, userId, true);
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("members.rolesTitle")}</h2>
-				<p className="text-muted-foreground text-sm">{t("members.rolesBody")}</p>
-			</div>
-
+		<SettingRows title={t("members.rolesTitle")} description={t("members.rolesBody")}>
 			{roles.isError ? (
 				<Warning>
 					{roles.error instanceof ApiError && roles.error.code === "missing_permission"
@@ -30,7 +24,7 @@ export function RolesCard({ guildId, userId }: { guildId: string; userId: string
 			) : (
 				<RolesForm key={heldKey(roles.data)} guildId={guildId} userId={userId} roles={roles.data} />
 			)}
-		</Card>
+		</SettingRows>
 	);
 }
 
@@ -70,7 +64,7 @@ function RolesForm({
 				max={MEMBER_ACTION_LIMITS.maxRoles}
 				onChange={setDraft}
 			/>
-			<div className="flex flex-wrap gap-3">
+			<RowActions>
 				<Button
 					variant="secondary"
 					disabled={!changed || save.isPending}
@@ -90,7 +84,7 @@ function RolesForm({
 						{t("common.discard")}
 					</Button>
 				)}
-			</div>
+			</RowActions>
 			{save.error !== null && (
 				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 			)}

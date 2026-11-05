@@ -4,24 +4,24 @@ import { LanguagePicker } from "@/components/form/LanguagePicker";
 import { PageHeader, SegmentedControl } from "@/components/primitives";
 import { AccentSwatch } from "@/features/appearance/components/AccentSwatch";
 import { AppearanceCard } from "@/features/appearance/components/AppearanceCard";
+import { OwnColour } from "@/features/appearance/components/OwnColour";
 import { ThemePreview } from "@/features/appearance/components/ThemePreview";
 import { TrailBack } from "@/features/site/components/TrailBack";
-import { ACCENTS, useAccent, type Accent } from "@/hooks/useAccent";
+import { ACCENTS, type PresetAccent, useAccent, useCustomColour } from "@/hooks/useAccent";
 import { useHashTarget } from "@/hooks/useHashTarget";
 import { MOTIONS, useMotion, type Motion } from "@/hooks/useMotion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { THEMES, useTheme, type Theme } from "@/hooks/useTheme";
 import { type TranslationKey } from "@/i18n";
 
-/** One row per theme: the icon, its name and what it does. A template-literal key would hide these from a search. */
 const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hint: TranslationKey }> = {
 	system: { icon: Monitor, label: "appearance.system", hint: "appearance.systemHint" },
 	light: { icon: Sun, label: "appearance.light", hint: "appearance.alwaysLight" },
 	dark: { icon: Moon, label: "appearance.dark", hint: "appearance.alwaysDark" },
 };
 
-const ACCENT_LABELS: Record<Accent, TranslationKey> = {
-	violet: "appearance.accentViolet",
+const ACCENT_LABELS: Record<PresetAccent, TranslationKey> = {
+	plum: "appearance.accentPlum",
 	indigo: "appearance.accentIndigo",
 	blue: "appearance.accentBlue",
 	sky: "appearance.accentSky",
@@ -47,6 +47,7 @@ export function AppearancePage(): React.JSX.Element {
 	useHashTarget();
 	const { theme, setTheme } = useTheme();
 	const { accent, setAccent } = useAccent();
+	const { colour, setColour } = useCustomColour();
 	const { motion, setMotion } = useMotion();
 
 	return (
@@ -95,6 +96,14 @@ export function AppearancePage(): React.JSX.Element {
 						</li>
 					))}
 				</ul>
+
+				<OwnColour
+					colour={colour}
+					inUse={accent === "custom"}
+					onUse={(hex) => {
+						if (setColour(hex)) setAccent("custom");
+					}}
+				/>
 			</AppearanceCard>
 
 			<AppearanceCard id="motion" title={t("appearance.motion")} describes={t("appearance.motionDescribes")}>

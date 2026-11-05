@@ -7,7 +7,6 @@ const config: Config = {
 	testEnvironment: "jest-fixed-jsdom",
 	setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
 	transform: {
-		// "automatic" or every test file would have to import React itself.
 		"^.+\\.[mc]?[tj]sx?$": ["@swc/jest", { jsc: { transform: { react: { runtime: "automatic" } } } }],
 		"\\.(?:md|example)$": "<rootDir>/src/test/rawText.cjs",
 	},
@@ -40,14 +39,7 @@ const config: Config = {
 		"^@testify/shared/(.*)$": "<rootDir>/../shared/src/$1",
 		"\\.css$": "<rootDir>/src/test/styleMock.ts",
 	},
-	// Vendored shadcn is not ours to test, and starfield.ts needs a WebGL context jsdom does not have.
-	collectCoverageFrom: [
-		"src/**/*.{ts,tsx}",
-		"!src/components/ui/**",
-		"!src/lib/three/starfield.ts",
-		"!src/main.tsx",
-		"!src/**/*.d.ts",
-	],
+	collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/components/ui/**", "!src/main.tsx", "!src/**/*.d.ts"],
 	coverageThreshold: { global: { statements: 75, branches: 75, functions: 75, lines: 75 } },
 };
 

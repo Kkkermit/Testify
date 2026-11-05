@@ -1,5 +1,4 @@
 import { BYPASS_LABELS, BYPASS_PERMISSIONS, type AntiLinkPatch, type AntiLinkSetting } from "@testify/shared";
-import { LinkIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Field, savingStateOf, SELECT, Toggle } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
@@ -12,8 +11,6 @@ export function AntiLinkSection({ guildId, value }: { guildId: string; value: An
 
 	return (
 		<Section
-			icon={LinkIcon}
-			tint="text-feature-moderation"
 			title={t("settings.linkTitle")}
 			describes={t("settings.linkBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess)}

@@ -2,8 +2,6 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/** Guild settings that are only configuration; each is independent, so each has its own endpoint. */
-
 export const SETTINGS_LIMITS = {
 	/** Long enough for `!!` or `testify ` and short enough that it cannot swallow a sentence. */
 	maxPrefix: 8,
@@ -11,7 +9,6 @@ export const SETTINGS_LIMITS = {
 	maxCount: 1_000_000,
 } as const;
 
-/** The prefix a server gets before anyone changes it, which the website's examples type too. */
 export const DEFAULT_PREFIX = "t?";
 
 export const BYPASS_PERMISSIONS = ["ManageMessages", "ManageGuild", "ModerateMembers", "Administrator"] as const;
@@ -24,7 +21,6 @@ export function isBypassPermission(value: string): value is BypassPermission {
 	return (BYPASS_PERMISSIONS as readonly string[]).includes(value);
 }
 
-/** What each bypass permission means to somebody choosing one, rather than its flag name. */
 export const BYPASS_LABELS: Record<BypassPermission, string> = {
 	ManageMessages: "Manage Messages — most moderators",
 	ManageGuild: "Manage Server — admins and above",
@@ -51,7 +47,6 @@ export interface CountingSetting {
 	enabled: boolean;
 	channelId: string | null;
 	maxCount: number;
-	/** Where the server has got to, which is the one number here nobody types. */
 	count: number;
 }
 
@@ -86,7 +81,6 @@ export const antiLinkPatch = z
 
 export type AntiLinkPatch = z.infer<typeof antiLinkPatch>;
 
-/** The whole list, because the control is a checklist whose value *is* the list. */
 export const autoRolePut = z.object({
 	roleIds: z.array(snowflake).max(SETTINGS_LIMITS.maxAutoRoles, "is too many roles"),
 });
@@ -98,7 +92,6 @@ export const countingPatch = z
 		enabled: z.boolean(),
 		channelId: snowflake.nullable(),
 		maxCount: z.number().int().min(1).max(SETTINGS_LIMITS.maxCount),
-		/** Puts the count back to zero without touching anything else. */
 		reset: z.literal(true),
 	})
 	.partial()

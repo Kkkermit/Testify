@@ -56,10 +56,11 @@ describe("the welcome page", () => {
 	it("renders Discord's marks rather than showing the asterisks", async () => {
 		renderPage();
 
-		const preview = await screen.findByRole("region", { name: "Preview" });
+		const preview = await screen.findByRole("region", { name: "Greeting" });
 
-		expect(within(preview).getByText("Test Server")).toHaveClass("font-bold");
-		expect(preview.textContent).not.toContain("**");
+		const name = within(preview).getByText("Test Server");
+		expect(name).toHaveClass("font-bold");
+		expect(name.closest("p")?.textContent).not.toContain("**");
 	});
 
 	/** The template is the one field that is typed, so it must not save on every keystroke. */
@@ -131,7 +132,7 @@ describe("the welcome page", () => {
 		expect(await screen.findByRole("switch", { name: /greet new members/i })).toBeDisabled();
 		expect(screen.getByRole("radio", { name: /card/i })).toBeDisabled();
 		expect(screen.getByLabelText("Message")).toBeDisabled();
-		expect(screen.getByText(/pick a channel and the rest of this page turns on/i)).toBeInTheDocument();
+		expect(screen.getByText(/^The greeting has no channel yet, so new members are not greeted\./)).toBeInTheDocument();
 	});
 });
 
@@ -178,7 +179,7 @@ describe("the goodbye card", () => {
 
 		expect(within(goodbye).getByRole("switch", { name: /say goodbye/i })).toBeDisabled();
 		expect(within(goodbye).getByLabelText("Goodbye message")).toBeDisabled();
-		expect(within(goodbye).getByText(/rest of this card turns on/i)).toBeInTheDocument();
+		expect(within(goodbye).getByText("Pick a channel first.")).toBeInTheDocument();
 	});
 
 	/** A goodbye that would never arrive has to say so, or the switch reads as working. */

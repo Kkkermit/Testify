@@ -3,7 +3,6 @@ import { type ApiErrorBody } from "@testify/shared";
 const BASE = "/api";
 const CSRF_COOKIE = "dash_csrf";
 
-/** Carries the API's `code` through, so a screen can tell "signed out" from "not allowed" without matching on prose. */
 export class ApiError extends Error {
 	readonly status: number;
 	readonly code: string;
@@ -18,7 +17,6 @@ export class ApiError extends Error {
 	}
 }
 
-/** The server declining this person, as opposed to failing: signed out, not allowed, or not shown to them at all. */
 export function isRefusal(error: unknown): boolean {
 	return error instanceof ApiError && [401, 403, 404].includes(error.status);
 }
@@ -42,7 +40,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 		method,
 		headers,
 		credentials: "same-origin",
-		// An undoable delete is sent as the page closes, and only a keepalive request outlives the page.
+		// Only a keepalive request outlives the page, which is when an undoable delete is sent.
 		keepalive: method === "DELETE",
 		...(body === undefined ? {} : { body: JSON.stringify(body) }),
 	});
@@ -57,7 +55,7 @@ async function errorBody(response: Response): Promise<ApiErrorBody> {
 	try {
 		return (await response.json()) as ApiErrorBody;
 	} catch {
-		// A proxy or a crash can return HTML. The status is still worth reporting.
+		// A proxy or a crash can return HTML.
 		return { error: { code: "unknown", message: `Request failed with status ${String(response.status)}.` } };
 	}
 }

@@ -8,7 +8,6 @@ import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { markupWarning } from "@/lib/sanitise";
 
-/** One row, edited in place and saved explicitly — a sticky is a posted message, not a switch. */
 export function StickyRow({
 	entry,
 	channels,
@@ -38,7 +37,7 @@ export function StickyRow({
 	return (
 		<li className={cardClass("compact", "flex flex-col gap-3")}>
 			<div className="flex flex-wrap items-center justify-between gap-2">
-				<h3 className="font-mono text-sm font-medium">{channelLabel(channels, entry.channelId, t, "title")}</h3>
+				<h3 className="text-sm font-medium">{channelLabel(channels, entry.channelId, t, "title")}</h3>
 				<span className="text-muted-foreground text-xs tabular-nums">
 					{t("sticky.sinceLast", { done: entry.count, cap: entry.cap })}
 				</span>

@@ -4,7 +4,6 @@ import { defineCommand } from "@core/command";
 import { reply } from "@lib/discord";
 import { ANSWER_SEPARATOR, POLL_COMMAND, POLL_LIMITS, pollMessage } from "@lib/polls";
 
-/** Posts one of Discord's own polls, which Discord counts and closes by itself. */
 export default defineCommand({
 	name: POLL_COMMAND,
 	description: "Posts a poll people vote on.",

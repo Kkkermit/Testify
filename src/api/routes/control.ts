@@ -26,11 +26,6 @@ import {
 	shutdownRequest,
 } from "@testify/shared";
 
-/**
- * What the owner can do to the running bot, behind `requireOwner`; there is no start, because this API runs inside the
- * bot.
- */
-
 export const control = new Hono<ApiBindings>();
 
 control.use("*", requireOwner);
@@ -173,7 +168,6 @@ control.post("/guilds/:guildId/leave", async (context) => {
 	return context.json({ left: guild.id });
 });
 
-/** The same four the fleet table counts, so a row and its detail cannot disagree. */
 async function configuredIn(guild: Guild): Promise<string[]> {
 	const [levels, audit, welcome, counting] = await Promise.all([
 		getLevelSettings(guild.id),

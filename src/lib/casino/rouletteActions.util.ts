@@ -228,10 +228,7 @@ async function payEveryone(round: RoundRecord, view: RoundView, pocket: number):
 	);
 }
 
-/**
- * Closes the table on one pocket and pays it. The claim is the guard: only the call that turns the round from
- * betting to spinning pays, so a timer and the sweep arriving together cannot pay twice.
- */
+/** Closes the table on one pocket and pays it; only the call that claims the round pays, so a timer and the sweep cannot both. */
 export async function spinRound(client: TestifyClient, roundId: string, roll?: Roll): Promise<RoundView | null> {
 	const pocket = spinRoulette(roll);
 	const round = await claimRound(roundId, pocket);

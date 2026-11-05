@@ -12,7 +12,6 @@ import { PLACEHOLDER_HELP, WELCOME_PLACEHOLDERS } from "@lib/welcome/welcome.uti
 export interface WelcomePanelState {
 	/** `null` before anything is configured. */
 	config: WelcomeConfig | null;
-	/** A one-line result from the last press. */
 	note?: string;
 }
 

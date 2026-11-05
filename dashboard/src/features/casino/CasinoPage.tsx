@@ -3,8 +3,17 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, FIELD, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	Field,
+	FIELD,
+	RowActions,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Toggle,
+	Warning,
+} from "@/components/form";
+import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import {
 	draftOf,
 	GAME_HINTS,
@@ -33,7 +42,6 @@ export function CasinoPage(): React.JSX.Element {
 
 	const settings = casino.data;
 	const [draft, setDraft] = useState<LimitsDraft | null>(null);
-	// Which card made the last write, so a refusal lands beside the control that caused it.
 	const [source, setSource] = useState<"state" | "games" | "limits">("state");
 
 	useEffect(() => {
@@ -54,22 +62,19 @@ export function CasinoPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("casino.title")}
 				subtitle={t("casino.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}
 			/>
 
-			<Card className="flex flex-wrap items-center justify-between gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("casino.state")}</h2>
-					<p className="text-muted-foreground text-sm">
-						{settings.enabled
-							? t("casino.stateOpen", { open: openGames(settings), total: CASINO_GAMES.length })
-							: t("casino.stateClosed")}
-					</p>
-				</div>
+			<Summary>
+				{settings.enabled
+					? t("casino.stateOpen", { open: openGames(settings), total: CASINO_GAMES.length })
+					: t("casino.stateClosed")}
+			</Summary>
 
+			<SettingRows>
 				<Toggle
 					label={t("casino.enable")}
 					checked={settings.enabled}
@@ -80,75 +85,61 @@ export function CasinoPage(): React.JSX.Element {
 					}}
 				/>
 				{refusal("state")}
-			</Card>
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("casino.games")}</h2>
-					<p className="text-muted-foreground text-sm">
-						{settings.enabled ? t("casino.gamesBody") : t("casino.gamesClosed")}
-					</p>
-				</div>
-
-				<ul className="grid gap-x-6 sm:grid-cols-2 [&>li]:min-w-0">
-					{CASINO_GAMES.map((game) => (
-						<li key={game}>
-							<Toggle
-								label={t(GAME_LABELS[game])}
-								hint={t(GAME_HINTS[game])}
-								checked={settings.games[game]}
-								disabled={!settings.enabled || save.isPending}
-								onChange={(on) => {
-									setSource("games");
-									save.mutate({ games: { [game]: on } });
-								}}
-							/>
-						</li>
-					))}
-				</ul>
+			<SettingRows
+				title={t("casino.games")}
+				description={settings.enabled ? t("casino.gamesBody") : t("casino.gamesClosed")}
+			>
+				{CASINO_GAMES.map((game) => (
+					<Toggle
+						key={game}
+						label={t(GAME_LABELS[game])}
+						hint={t(GAME_HINTS[game])}
+						checked={settings.games[game]}
+						disabled={!settings.enabled || save.isPending}
+						onChange={(on) => {
+							setSource("games");
+							save.mutate({ games: { [game]: on } });
+						}}
+					/>
+				))}
 				{refusal("games")}
-			</Card>
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("casino.limits")}</h2>
-					<p className="text-muted-foreground text-sm">{t("casino.limitsBody")}</p>
-				</div>
-
-				<div className="grid gap-4 sm:grid-cols-2">
-					<Field label={t("casino.minBet")} hint={t("casino.minHint")} htmlFor="casino-min-bet">
-						<input
-							id="casino-min-bet"
-							type="number"
-							inputMode="numeric"
-							min={1}
-							value={draft.min}
-							onChange={(event) => {
-								setDraft({ ...draft, min: event.target.value });
-							}}
-							className={cn(FIELD, "max-w-48 tabular-nums")}
-						/>
-					</Field>
-					<Field label={t("casino.maxBet")} hint={t("casino.maxHint")} htmlFor="casino-max-bet">
-						<input
-							id="casino-max-bet"
-							type="number"
-							inputMode="numeric"
-							min={1}
-							value={draft.max}
-							placeholder={t("casino.noLimit")}
-							onChange={(event) => {
-								setDraft({ ...draft, max: event.target.value });
-							}}
-							className={cn(FIELD, "max-w-48 tabular-nums")}
-						/>
-					</Field>
-				</div>
+			<SettingRows title={t("casino.limits")} description={t("casino.limitsBody")}>
+				<Field label={t("casino.minBet")} hint={t("casino.minHint")} htmlFor="casino-min-bet">
+					<input
+						id="casino-min-bet"
+						type="number"
+						inputMode="numeric"
+						min={1}
+						value={draft.min}
+						onChange={(event) => {
+							setDraft({ ...draft, min: event.target.value });
+						}}
+						className={cn(FIELD, "max-w-48 tabular-nums")}
+					/>
+				</Field>
+				<Field label={t("casino.maxBet")} hint={t("casino.maxHint")} htmlFor="casino-max-bet">
+					<input
+						id="casino-max-bet"
+						type="number"
+						inputMode="numeric"
+						min={1}
+						value={draft.max}
+						placeholder={t("casino.noLimit")}
+						onChange={(event) => {
+							setDraft({ ...draft, max: event.target.value });
+						}}
+						className={cn(FIELD, "max-w-48 tabular-nums")}
+					/>
+				</Field>
 
 				{problem !== null && <Warning>{problem}</Warning>}
 				{refusal("limits")}
 
-				<div>
+				<RowActions>
 					<Button
 						disabled={!isDirty(draft, settings) || limits === null || problem !== null || save.isPending}
 						onClick={() => {
@@ -159,8 +150,8 @@ export function CasinoPage(): React.JSX.Element {
 					>
 						{t("common.saveChanges")}
 					</Button>
-				</div>
-			</Card>
+				</RowActions>
+			</SettingRows>
 		</>
 	);
 }

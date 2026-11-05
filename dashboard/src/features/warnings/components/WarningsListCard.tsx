@@ -11,7 +11,6 @@ import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
 import { ApiError } from "@/lib/api";
 
-/** The most recent warnings, or every warning for whoever is searched for; absent while the server has none. */
 export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const [query, setQuery] = useState("");
@@ -33,7 +32,6 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 	if (list.isPending) return <Skeleton className="h-64 w-full" />;
 
 	const { items, total, perPage } = list.data;
-	// Nothing to list and nothing being looked for: the card would only say so, which the page does not need.
 	if (total === 0 && !searching && query.trim() === "") return null;
 
 	return (

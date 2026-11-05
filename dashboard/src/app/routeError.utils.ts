@@ -16,7 +16,6 @@ export function classifyRouteError(error: unknown): RouteFailure {
 }
 
 const RELOADED_AT = "testify:staleReloadAt";
-/** Long enough to cover a reload that fails again the same way, short enough that a later deploy still reloads. */
 const RELOAD_WINDOW_MS = 30_000;
 
 /** True at most once per window, so a chunk that is genuinely missing shows the screen instead of reloading for ever. */
@@ -45,7 +44,6 @@ export function reloadPage(): void {
 	window.location.reload();
 }
 
-/** What the development build prints under the message; production never renders it. */
 export function errorDetails(error: unknown): string {
 	if (isRouteErrorResponse(error)) return `${String(error.status)} ${error.statusText}`;
 	if (error instanceof Error) return error.stack ?? `${error.name}: ${error.message}`;

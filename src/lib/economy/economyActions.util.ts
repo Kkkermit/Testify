@@ -54,7 +54,6 @@ export function dailyReady(lastDaily: Date | null, now = Date.now()): boolean {
 	return lastDaily === null || now >= lastDaily.getTime() + ECONOMY_COOLDOWNS.daily;
 }
 
-/** What using each usable item pays out. */
 export const USE_OUTCOMES: Record<string, { verb: string; min: number; max: number }> = {
 	fishing_rod: { verb: "You cast a line and reeled in a decent haul", min: 100, max: 900 },
 	hunting_rifle: { verb: "You went hunting and came back with something worth selling", min: 250, max: 1_800 },

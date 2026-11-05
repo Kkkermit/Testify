@@ -3,7 +3,6 @@ import { listReminders } from "@database/repositories/reminderRepository";
 import { reply } from "@lib/discord";
 import { REMINDER_LIMITS, reminderConfirm, reminderList, setReminder } from "@lib/reminders";
 
-/** Reminders a person sets for themselves, delivered later by a ping where they set it or by a DM. */
 export default defineCommand({
 	name: "remind",
 	description: "Reminds you of something later.",
@@ -22,7 +21,6 @@ export default defineCommand({
 					type: "string",
 					required: true,
 					maxLength: REMINDER_LIMITS.maxText,
-					// Somebody's reminder is their own business, so the operator's logs never see it.
 					unlogged: true,
 				},
 			],

@@ -13,7 +13,6 @@ import {
 } from "@lib/tempVoice";
 import { TEMP_VOICE_LIMITS, type TempVoiceSettings } from "@testify/shared";
 
-/** The controls on `/temp-voice`, each applied the moment it is pressed. */
 export default defineButton({
 	id: TEMP_VOICE_SETTINGS_ID,
 	ownerOnly: true,
@@ -22,7 +21,6 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null) return;
 
-		// Checked on every press, because a role can be taken away while the panel is still open.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change join-to-create channels.");
 		}

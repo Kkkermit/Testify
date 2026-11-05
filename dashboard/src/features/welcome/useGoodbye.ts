@@ -9,7 +9,6 @@ import { type GoodbyePatch, type GoodbyeSettings } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** A spread would let an absent field overwrite a present one with `undefined`. */
 function applyPatch(current: GoodbyeSettings, patch: GoodbyePatch): GoodbyeSettings {
 	return {
 		...current,
@@ -27,7 +26,6 @@ export function useGoodbye(guildId: string): UseQueryResult<GoodbyeSettings> {
 	});
 }
 
-/** Optimistic, with the previous value kept so a refusal puts it back. */
 export function useUpdateGoodbye(guildId: string): UseMutationResult<GoodbyeSettings, Error, GoodbyePatch> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).goodbye();

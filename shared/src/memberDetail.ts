@@ -35,7 +35,6 @@ export interface MemberDetail {
 	isBot: boolean;
 	joinedAt: string | null;
 	nickname: string | null;
-	/** Set while a timeout is still running. */
 	timedOutUntil: string | null;
 	roles: { id: string; name: string; colour: string | null }[];
 	economy: { wallet: number; bank: number; total: number; rank: number | null } | null;
@@ -64,7 +63,6 @@ export const warningBody = z.object({
 export const MEMBER_LIMITS = {
 	maxLevel: 500,
 	maxXpGrant: 1_000_000,
-	/** Both directions: a manager can hand out this much or take it away, per request. */
 	maxMoneyChange: 10_000_000,
 } as const;
 
@@ -94,13 +92,11 @@ export const moneyBody = z.object({
 
 export type MoneyBody = z.infer<typeof moneyBody>;
 
-/** What is wrong with a money change, in the words the form shows — or null when it can be sent. */
 export function moneyProblem(delta: number, purse: MoneyPurse, held: number): Problem | null {
 	if (!Number.isInteger(delta) || delta === 0) return problem("money.amount");
 	if (Math.abs(delta) > MEMBER_LIMITS.maxMoneyChange) {
 		return problem("money.tooLarge", { max: MEMBER_LIMITS.maxMoneyChange });
 	}
-	// Taking more than they hold would leave a negative balance, which nothing else in the economy can produce.
 	if (delta < 0 && held + delta < 0) {
 		return problem(purse === "wallet" ? "money.walletShort" : "money.bankShort", { held });
 	}
@@ -108,7 +104,6 @@ export function moneyProblem(delta: number, purse: MoneyPurse, held: number): Pr
 	return null;
 }
 
-/** What is still missing before a warning can be issued, in the words the form shows. */
 export function warningProblem(reason: string): Problem | null {
 	const trimmed = reason.trim();
 

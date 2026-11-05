@@ -5,12 +5,24 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	RowActions,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Warning,
+} from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { StickyRow } from "@/features/sticky/components/StickyRow";
+import { stickySummary } from "@/features/sticky/sticky.utils";
 import { useRemoveSticky, useSaveSticky, useSticky } from "@/features/sticky/useSticky";
+import { SendTest } from "@/features/test-post/SendTest";
+import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
@@ -18,7 +30,6 @@ import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** A list keyed by channel rather than a page of switches, which is why this is its own screen. */
 export function StickyPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -39,7 +50,6 @@ export function StickyPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	// One waiting to be deleted still holds its channel, so nothing new can be added there before it goes.
 	const taken = list.data.entries.map((entry) => entry.channelId);
 	const keyOf = (channel: string): string => `sticky:${guildId}:${channel}`;
 	const entries = list.data.entries.filter((entry) => !undo.isHidden(keyOf(entry.channelId)));
@@ -57,20 +67,22 @@ export function StickyPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("sticky.title")}
 				subtitle={t("sticky.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending || remove.isPending, save.isSuccess)} />}
 			/>
 
+			<Summary>{stickySummary(entries.length, t)}</Summary>
+
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="current-heading"
 					count={t("sticky.countOf", { used: taken.length, limit: list.data.limit })}
 				>
 					{t("sticky.inUse")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{entries.length === 0 ? (
 					<Card>
@@ -100,12 +112,7 @@ export function StickyPage(): React.JSX.Element {
 				)}
 			</section>
 
-			<Card className="motion-pop flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("sticky.add")}</h2>
-					<p className="text-muted-foreground text-sm">{t("sticky.addBody")}</p>
-				</div>
-
+			<SettingRows title={t("sticky.add")} description={t("sticky.addBody")}>
 				<ChannelPicker
 					label={t("sticky.channel")}
 					hint={t("sticky.channelHint")}
@@ -129,6 +136,8 @@ export function StickyPage(): React.JSX.Element {
 					<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 						{t("common.partOf", { part: message.length, whole: STICKY_LIMITS.maxMessage })}
 					</span>
+					<PostPreview text={message} empty={t("common.previewEmpty")} />
+					<SendTest test={{ kind: "plain", message }} />
 				</Field>
 
 				<Field label={t("sticky.repostAfter")} htmlFor="sticky-cap" hint={t("sticky.repostHint")}>
@@ -156,12 +165,12 @@ export function StickyPage(): React.JSX.Element {
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
-				<div>
+				<RowActions>
 					<Button disabled={blocked !== null || full || save.isPending} onClick={add}>
 						<Plus size={16} aria-hidden="true" /> {t("sticky.addSticky")}
 					</Button>
-				</div>
-			</Card>
+				</RowActions>
+			</SettingRows>
 
 			{remove.error !== null && (
 				<Warning>

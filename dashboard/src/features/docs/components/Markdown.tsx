@@ -26,8 +26,6 @@ import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { highlighted } from "@/lib/highlight";
 
-/** Markdown to React elements by walking the lexer's tokens: HTML in a file is dropped, never passed to the page. */
-
 export interface DocHeading {
 	id: string;
 	text: string;
@@ -35,10 +33,8 @@ export interface DocHeading {
 }
 
 export interface MarkdownSource {
-	/** The file it came from, relative to the repository's root, which every relative link is read against. */
 	file: string;
 	markdown: string;
-	/** A whole file's own `#` title, which the page's heading already says. */
 	dropTitle?: boolean;
 }
 
@@ -50,7 +46,6 @@ export interface PreparedDoc {
 
 const level = (depth: number): number => Math.min(6, Math.max(2, depth));
 
-/** Lexed once, so the contents list and the rendered headings carry the same anchors. */
 export function prepareDoc(sources: readonly MarkdownSource[]): PreparedDoc {
 	const slugger = new Slugger();
 	const ids = new WeakMap<Token, string>();
@@ -155,7 +150,6 @@ function block(token: Token, scope: Scope, key: number): ReactNode {
 		case "hr":
 			return <hr key={key} className="border-border" />;
 		default:
-			// `html`, `space` and link definitions draw nothing.
 			return null;
 	}
 }
@@ -219,10 +213,7 @@ function DocLink({ link, scope }: { link: Tokens.Link; scope: Scope }): React.JS
 	);
 }
 
-/**
- * The policy lets no outside picture in and the repository's own are not bundled, so a picture is its description,
- * linked to the file where there is one.
- */
+/** The CSP lets no outside picture in, so a picture is drawn as its description and a link. */
 function DocImage({ image, scope }: { image: Tokens.Image; scope: Scope }): React.JSX.Element {
 	const label = decodeEntities(image.text);
 	const chip = "bg-muted text-muted-foreground rounded-chip inline-flex items-center gap-1 px-1.5 py-0.5 text-xs";
@@ -279,7 +270,7 @@ const ALERT_LOOK: Record<Alert, { label: TranslationKey; icon: typeof Info; tint
 	important: {
 		label: "docs.alerts.important",
 		icon: MessageSquareWarning,
-		tint: "text-feature-community border-feature-community",
+		tint: "text-hue-pink border-hue-pink",
 	},
 	warning: { label: "docs.alerts.warning", icon: TriangleAlert, tint: "text-warning border-warning" },
 	caution: { label: "docs.alerts.caution", icon: OctagonAlert, tint: "text-destructive-text border-destructive-text" },

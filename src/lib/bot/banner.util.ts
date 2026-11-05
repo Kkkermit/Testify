@@ -6,8 +6,6 @@ import { colourEnabled } from "@core/terminal";
 import { dashboardUrl } from "@lib/bot/dashboard.util";
 import { formatNumber } from "@lib/format/format.util";
 
-/** The start-up banner. */
-
 const ansi = {
 	reset: "\u001b[0m",
 	bold: "\u001b[1m",
@@ -34,7 +32,6 @@ export const ICONS = {
 	dashboard: "\u{1F517}",
 } as const;
 
-/** The shared in-progress glyph. */
 const RELOAD_GLYPH = "\u21BB";
 
 const LETTERS: Record<string, string[]> = {
@@ -94,7 +91,6 @@ export interface BannerFacts {
 	prefix: string;
 	scope: string;
 	startupMs: number;
-	/** What the loader found on disk. */
 	loaded: { commands: number; buttons: number; events: number; messageHandlers: number };
 	/** True under `npm run dev`, where tsx restarts the process whenever a file is saved. */
 	watching: boolean;
@@ -102,7 +98,6 @@ export interface BannerFacts {
 	dashboardUrl: string | null;
 }
 
-/** Kept separate from printing so it can be tested without capturing stdout. */
 export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 	const paint = (code: string, text: string): string => (colour ? `${code}${text}${ansi.reset}` : text);
 

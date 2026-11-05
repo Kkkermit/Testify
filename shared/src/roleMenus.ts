@@ -4,7 +4,6 @@ import { snowflake } from "./schemas";
 import { plainLine, plainText } from "./text";
 
 export const ROLE_MENU_LIMITS = {
-	/** Each menu is a message the bot keeps up to date, and a server rarely needs more. */
 	maxPerGuild: 10,
 	/** Discord's cap on the options in one select menu. */
 	maxRoles: 25,
@@ -25,7 +24,7 @@ export interface RoleMenuEntry {
 	roleIds: string[];
 	mode: RoleMenuMode;
 	posted: boolean;
-	/** False when the bot cannot post in the channel, so a menu that will never appear says so. */
+	/** False when the bot cannot post in the channel. */
 	canSend: boolean;
 }
 
@@ -47,10 +46,8 @@ export const roleMenuBody = z.object({
 
 export type RoleMenuBody = z.infer<typeof roleMenuBody>;
 
-/** A menu's database id, which is what the list hands back. */
 export const roleMenuParams = z.object({ menuId: z.string().regex(/^[a-f\d]{24}$/, "must be a menu id") });
 
-/** Why a menu cannot be saved, in the words each surface shows — the same rules the API enforces. */
 export function roleMenuBlocked(draft: {
 	channelId: string | null;
 	title: string;

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { shortDay } from "@/features/owner/owner.utils";
 import { formatNumber } from "@/lib/intl";
 
-/** A `<table>` rather than a canvas, so a screen reader gets the numbers. No chart library — a bar is a div with a height. */
 export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const max = Math.max(1, ...days.map((day) => day.count));

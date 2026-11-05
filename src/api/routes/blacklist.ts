@@ -15,8 +15,6 @@ import {
 import { blacklistProblem } from "@lib/moderation";
 import { blacklistAdd, type BlacklistRow, blacklistUserParam } from "@testify/shared";
 
-/** The bot-wide block list, owner-only. `/blacklist` in Discord is the same three actions on the same store. */
-
 export const blacklist = new Hono<ApiBindings>();
 
 blacklist.use("*", requireOwner);

@@ -16,7 +16,7 @@ export interface Greeting {
 
 export async function greetingFor(
 	member: GuildMember,
-	config: WelcomeConfig,
+	config: Pick<WelcomeConfig, "message" | "style">,
 	settings: Pick<WelcomeSettings, "background"> | null,
 ): Promise<Greeting> {
 	const message = fillTemplate(config.message, {

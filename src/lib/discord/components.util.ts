@@ -69,7 +69,6 @@ export function select(options: {
 	return builder;
 }
 
-/** A channel picker, which beats asking someone to paste an ID or hunt for a `#channel` mention. */
 export function channelSelect(options: {
 	id: string;
 	placeholder?: string;
@@ -92,7 +91,6 @@ export function channelSelect(options: {
 	return builder;
 }
 
-/** A role picker. */
 export function roleSelect(options: {
 	id: string;
 	placeholder?: string;
@@ -130,7 +128,6 @@ export function option(config: {
 	return builder;
 }
 
-/** Confirm / cancel pair. */
 export function confirmRow(
 	id: string,
 	action: string,
@@ -143,7 +140,6 @@ export function confirmRow(
 	);
 }
 
-/** Pagination controls. */
 export function navRow(
 	id: string,
 	page: number,
@@ -210,12 +206,10 @@ export function quickAmountRow(
 export interface ModalField {
 	id: string;
 	label: string;
-	/** Defaults to a single-line input. */
 	paragraph?: boolean;
 	required?: boolean;
 	placeholder?: string;
 	maxLength?: number;
-	/** Pre-fills the input. */
 	value?: string;
 }
 

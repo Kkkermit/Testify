@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
@@ -10,7 +10,6 @@ export const starboard = new Hono<ApiBindings>();
 
 starboard.use("*", requireGuild);
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: StarboardPatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned the starboard on" : "Turned the starboard off");
@@ -25,9 +24,10 @@ starboard.get("/", async (context) => context.json(await readStarboardSettings(g
 starboard.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, starboardPatch);
+	const before = await readStarboardSettings(guild);
 
 	const settings = await applyStarboardSettings(guild, patch, context.get("session")?.userId ?? null);
-	await auditChange(context, { action: "starboard.update", summary: summarise(patch) });
+	await auditSettings(context, { action: "starboard.update", summary: summarise(patch), before, after: settings });
 
 	return context.json(settings);
 });

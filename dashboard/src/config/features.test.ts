@@ -18,33 +18,45 @@ describe("tintFor", () => {
 	});
 });
 
+const CATEGORIES = [
+	"community",
+	"economy",
+	"casino",
+	"fun",
+	"games",
+	"info",
+	"levelling",
+	"moderation",
+	"settings",
+	"music",
+	"tickets",
+	"giveaway",
+	"developer",
+	"owner",
+];
+
+/** The hues `contrast.test.ts` measures on a card and on a recessed fill, and the neutral grey. */
+const MEASURED = new Set(["violet", "amber", "red", "green", "blue", "pink"].map((hue) => `text-hue-${hue}`));
+
 describe("category coverage", () => {
 	/** A category with no entry renders every one of its commands under the neutral fallback icon. */
 	it("has an icon for every category the bot ships", () => {
-		const categories = [
-			"community",
-			"economy",
-			"fun",
-			"games",
-			"info",
-			"levelling",
-			"moderation",
-			"settings",
-			"tickets",
-			"giveaway",
-			"developer",
-			"owner",
-		];
-
-		// Some categories share the neutral tint on purpose, so the icon is what has to be its own.
-		for (const category of categories) {
+		for (const category of CATEGORIES) {
 			expect(featureLook(category).icon).not.toBe(featureLook("__unknown__").icon);
 		}
+	});
+
+	/** The colour is what tells the categories apart on the Commands page, so they cannot all fall into one or two. */
+	it("spreads the categories over every hue, each one a colour the contrast test measures", () => {
+		const tints = CATEGORIES.map((category) => featureLook(category).tint);
+		const unmeasured = tints.filter((tint) => !MEASURED.has(tint) && tint !== "text-muted-foreground");
+
+		expect(unmeasured).toEqual([]);
+		expect(new Set(tints).size).toBe(MEASURED.size + 1);
 	});
 });
 
 describe("the feature grid's links", () => {
-	/** Every feature with a screen links its overview tile to it. */
 	it("links every feature whose screen exists", () => {
 		const routed: Record<string, string> = {
 			levelling: "levelling",

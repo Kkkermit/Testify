@@ -9,7 +9,6 @@ import { ResponderFields } from "@/features/auto-responders/components/Responder
 import { problemText } from "@/lib/problemText";
 import { markupWarning } from "@/lib/sanitise";
 
-/** One responder, edited in place and saved explicitly, because a reply is a message somebody will read. */
 export function ResponderRow({
 	responder,
 	others,
@@ -21,7 +20,6 @@ export function ResponderRow({
 	responder: AutoResponder;
 	others: readonly AutoResponder[];
 	saving: boolean;
-	/** Why the last save of this row was refused, shown beside it rather than at the foot of the page. */
 	failure: string | null;
 	onSave: (next: AutoResponderInput) => void;
 	onRemove: () => void;

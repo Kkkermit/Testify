@@ -6,7 +6,6 @@ import { SESSION_COOKIE, readCookie } from "@api/cookies";
 import { tooManyRequests } from "@api/errors";
 
 export interface RateLimitOptions {
-	/** How many requests one caller may make inside the window. */
 	limit: number;
 	windowMs: number;
 	/** Distinguishes buckets, so a spent sign-in allowance does not also block reading a page. */

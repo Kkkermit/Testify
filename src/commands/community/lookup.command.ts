@@ -6,7 +6,6 @@ import translate from "@commands/community/subcommands/translate.command";
 import wiki from "@commands/community/subcommands/wiki.command";
 import { asSubcommand, defineCommand } from "@core/command";
 
-/** Discord allows an application 100 commands, so related ones live together here. */
 export default defineCommand({
 	name: "lookup",
 	description: "Looks something up for you.",

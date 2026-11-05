@@ -10,7 +10,6 @@ import { useSupportArticle, useSupportSearch } from "@/features/help/useSupport"
 import { SiteError } from "@/features/site/components/SiteError";
 import { cn } from "@/lib/cn";
 
-/** The help articles `/ask` answers with, filled in by the bot for its own prefix and limits, and readable signed out. */
 export function Guides({ articleId }: { articleId: string | null }): React.JSX.Element {
 	return articleId === null ? <GuideList /> : <Guide id={articleId} />;
 }
@@ -79,9 +78,7 @@ function Guide({ id }: { id: string }): React.JSX.Element {
 					<ArticleBody body={article.body} />
 					{(reply.data?.related.length ?? 0) > 0 && (
 						<div className="border-border flex flex-col gap-2 border-t pt-4">
-							<h3 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-								{t("docs.guides.related")}
-							</h3>
+							<h3 className="text-muted-foreground text-sm font-medium">{t("docs.guides.related")}</h3>
 							<ul className="flex flex-wrap gap-2">
 								{reply.data?.related.map((link) => (
 									<li key={link.id}>

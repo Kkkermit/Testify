@@ -9,6 +9,7 @@ import { auth } from "@api/routes/auth";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { createSession, deleteSession, deleteSessionsFor } from "@database/repositories/dashboardSessionRepository";
+import { eraseAccount } from "@lib/account";
 import { type SetupStatus } from "@testify/shared";
 
 jest.mock("@api/discord", () => {
@@ -33,6 +34,8 @@ jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	readTokens: jest.fn(() => Promise.resolve(null)),
 	updateTokens: jest.fn(() => Promise.resolve()),
 }));
+
+jest.mock("@lib/account", () => ({ eraseAccount: jest.fn(() => Promise.resolve()) }));
 
 const OWNER = "100000000000000001";
 
@@ -255,6 +258,41 @@ describe("POST /auth/logout-all", () => {
 		});
 
 		expect(allSessionsDeleted).toHaveBeenCalledWith(OWNER);
+	});
+});
+
+describe("POST /auth/erase", () => {
+	const signedIn = {
+		_id: "sid",
+		userId: "100000000000000002",
+		username: "someone",
+		tokenExpiresAt: new Date(Date.now() + 604_800_000),
+	};
+	const erase = async (confirm: string, session: object | null = signedIn): Promise<Response> =>
+		app(envFor(), session ?? undefined).request("/auth/erase", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ confirm }),
+		});
+
+	it("is for somebody signed in, about themselves alone", async () => {
+		expect((await erase("someone", null)).status).toBe(401);
+		expect(jest.mocked(eraseAccount)).not.toHaveBeenCalled();
+	});
+
+	/** It cannot be undone, so nothing is touched unless their own username is typed back. */
+	it("erases nothing without the typed confirmation", async () => {
+		expect((await erase("somebody-else")).status).toBe(400);
+		expect(jest.mocked(eraseAccount)).not.toHaveBeenCalled();
+	});
+
+	it("erases their data, signs them out everywhere and clears the cookies", async () => {
+		const response = await erase("  SOMEONE ");
+
+		expect(response.status).toBe(204);
+		expect(jest.mocked(eraseAccount)).toHaveBeenCalledWith(expect.anything(), "100000000000000002");
+		expect(allSessionsDeleted).toHaveBeenCalledWith("100000000000000002");
+		expect(response.headers.get("set-cookie")).toMatch(/Max-Age=0/);
 	});
 });
 

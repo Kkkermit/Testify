@@ -175,10 +175,7 @@ describe("openStream", () => {
 		expect(existsSync(marker)).toBe(true);
 	});
 
-	/**
-	 * Verbatim from production: yt-dlp writes a SoundCloud stream's pieces as `--Frag<n>.part` into its working
-	 * directory, which a container's app folder refused with "[Errno 13] Permission denied", so every track was empty.
-	 */
+	/** yt-dlp writes a SoundCloud stream's pieces as `--Frag<n>.part` into its working directory, which a container's app folder refused. */
 	it("gives each download a writable folder of its own, and clears it once the download ends", async () => {
 		const record = join(directory, "folders");
 		const piecewise = fakeBinary(
@@ -245,10 +242,7 @@ describe("sweepScratchFolders", () => {
 		rmSync(root, { recursive: true, force: true });
 	});
 
-	/**
-	 * A bot killed mid-track never runs its own clean-up, and a development and a production bot can share one
-	 * temporary folder, so only a folder whose process is gone may be removed.
-	 */
+	/** A bot killed mid-track never cleans up, and two bots can share one temporary folder, so only a folder whose process is gone may be removed. */
 	it("removes the folders of runs that died, and leaves every live one alone", async () => {
 		const dead = spawnSync(process.execPath, ["-e", ""]).pid ?? 0;
 		const startedAt = Date.now() - 60_000;
@@ -421,7 +415,7 @@ describe("resolveTracks on a SoundCloud search", () => {
 	const locked = `{"webpage_url":"https://soundcloud.com/a/locked","title":"Locked","formats":[]}`;
 	const open = `{"webpage_url":"https://soundcloud.com/a/open","title":"Open","formats":[{"format_id":"opus"}]}`;
 
-	/** The bug from production: the first result was DRM-protected, and that one track failed the whole search. */
+	/** The first result was DRM-protected, and that one track failed the whole search. */
 	it("steps past a DRM-protected result to one that plays", async () => {
 		const record = join(directory, "args.txt");
 		const binary = fakeYtDlp("mixed", `${recordArgs(record)} ${print(`${locked}\n${open}\n`)}`);

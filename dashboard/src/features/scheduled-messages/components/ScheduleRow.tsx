@@ -26,7 +26,6 @@ function draftOf(entry: ScheduledMessage): ScheduleDraft {
 	};
 }
 
-/** One scheduled message, edited in place and saved explicitly, because it is a message somebody will read. */
 export function ScheduleRow({
 	entry,
 	channels,
@@ -38,7 +37,6 @@ export function ScheduleRow({
 	entry: ScheduledMessage;
 	channels: ChannelSummary[];
 	saving: boolean;
-	/** Why the last save of this row was refused, shown beside it rather than at the foot of the page. */
 	failure: string | null;
 	onSave: (next: ScheduledMessageInput) => void;
 	onRemove: () => void;

@@ -97,7 +97,7 @@ describe("the command runner", () => {
 			await userEvent.selectOptions(await screen.findByLabelText("Command"), "ping");
 			await userEvent.click(screen.getByRole("button", { name: /Run it/ }));
 
-			// The block names what was dropped; the warning below it is the summary. Both are meant to be there.
+			// The block names what was dropped and the warning below it sums it up; both are meant to be there.
 			expect(await screen.findByText(/also carried buttons/)).toBeInTheDocument();
 			expect(screen.getByText(/Run it there to use the controls/)).toBeInTheDocument();
 		});

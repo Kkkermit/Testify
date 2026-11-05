@@ -90,13 +90,11 @@ export interface Entry {
 	emoji: string;
 	price: number;
 	description: string;
-	/** Extra detail shown on the detail screen. */
 	detail?: string;
 	/** Why this entry cannot be bought right now. */
 	blocked?: string;
 	/** Already yours, and sellable — the button becomes Sell rather than Buy. */
 	owned?: boolean;
-	/** What selling it back would pay. */
 	refund?: number;
 }
 
@@ -117,7 +115,6 @@ export function entriesFor(state: ShopState, balances: Balances): Entry[] {
 	switch (state.section) {
 		case "houses":
 			return HOUSES.map((house) => {
-				// The one you own becomes a Sell button.
 				const isMine = balances.ownsHouse && balances.houseId === house.id;
 
 				return {
@@ -204,7 +201,6 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 
 	if (note !== undefined) parts.push(text(`✅ ${note}`), divider());
 
-	// Each entry's Buy button sits beside it.
 	for (const entry of shown) {
 		const owned = entry.owned === true;
 		const note = owned
@@ -309,7 +305,6 @@ function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: str
 						disabled: reason !== undefined,
 					}),
 					button({
-						// Every screen needs a way back.
 						id: encodeShopState(
 							"nav",
 							{ section: state.section, ...(state.rarity ? { rarity: state.rarity } : {}), ...origin(state) },

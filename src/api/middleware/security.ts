@@ -8,7 +8,6 @@ import { type Env } from "@config/env";
  */
 const CSP = [
 	"default-src 'self'",
-	// Avatars and guild icons.
 	"img-src 'self' https://cdn.discordapp.com data:",
 	"script-src 'self'",
 	// Tailwind and Radix set inline styles. A style injection cannot execute script under this policy.

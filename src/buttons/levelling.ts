@@ -18,7 +18,6 @@ import {
 } from "@lib/levelling";
 import { parseWholeNumber } from "@lib/settings";
 
-/** Every control on the levelling panel. */
 async function currentConfig(guildId: string): Promise<LevelConfig> {
 	return normaliseSettings(await getLevelSettings(guildId));
 }

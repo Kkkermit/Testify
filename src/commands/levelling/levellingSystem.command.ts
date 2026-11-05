@@ -5,7 +5,6 @@ import { deleteLevelSettings, getLevelSettings } from "@database/repositories/le
 import { reply, successEmbed } from "@lib/discord";
 import { levelPanel, type LevelTab, normaliseSettings } from "@lib/levelling";
 
-/** One panel, opened on whichever tab was asked for. */
 async function openPanel(interaction: CommandInput, tab: LevelTab): Promise<void> {
 	const guild = inGuild(interaction);
 	const config = normaliseSettings(await getLevelSettings(guild.id));

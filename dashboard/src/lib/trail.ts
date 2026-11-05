@@ -1,6 +1,5 @@
 import { type DataRouter, type Location, NavigationType } from "react-router";
 
-/** The page a docs or source link was followed from, kept per history entry so Back and Forward find it again. */
 export interface Trail {
 	pathname: string;
 	search: string;
@@ -11,7 +10,6 @@ const STORAGE_KEY = "testify:trail";
 const KEPT = 50;
 const remembered = new Map<string, Trail>();
 
-/** The docs and the source browser are where one page leads to another. */
 export function leadsOn(pathname: string): boolean {
 	return /^\/(?:docs|source-code)(?:\/|$)/.test(pathname);
 }

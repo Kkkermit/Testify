@@ -15,10 +15,8 @@ import {
 } from "@lib/scheduledMessages";
 import { SCHEDULE_LIMITS } from "@testify/shared";
 
-/** Every control on `/schedule list`: the list, and the editor each scheduled message opens. */
-
 async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately instead.
+	// A modal opened elsewhere cannot edit this message, so it answers privately.
 	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
 		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
 	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
@@ -39,7 +37,6 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null) return;
 
-		// Checked on every press, because a role can be taken away while the panel is still open.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change scheduled messages.");
 		}

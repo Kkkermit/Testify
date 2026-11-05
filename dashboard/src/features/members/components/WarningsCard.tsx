@@ -2,9 +2,9 @@ import { WARNING_LIMITS, type MemberDetail, warningProblem } from "@testify/shar
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, Warning } from "@/components/form";
+import { Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
-import { Button, Card, CARD_HEADING, DividedList } from "@/components/primitives";
+import { Button, DividedList } from "@/components/primitives";
 import { permissionLabel } from "@/features/commands/permissions.labels";
 import { canChangeWarnings, clearConfirmed, warningSummary } from "@/features/members/memberDetail.utils";
 import { WarningRow } from "@/features/warnings/components/WarningRow";
@@ -22,7 +22,6 @@ export function WarningsCard({
 }: {
 	detail: MemberDetail;
 	busy: boolean;
-	/** What the last warning issued here did to the member, once it has come back. */
 	result: string | null;
 	onWarn: (reason: string, done: () => void) => void;
 	onEdit: (warnId: string, reason: string, done: () => void) => void;
@@ -46,59 +45,58 @@ export function WarningsCard({
 
 	if (warnings === null) {
 		return (
-			<Card className="flex flex-col gap-2">
-				<h2 className={CARD_HEADING}>{t("members.warnings")}</h2>
-				<p className="text-muted-foreground text-sm">
-					{t("members.warningsHidden", { permission: permissionLabel("ModerateMembers", t) })}
-				</p>
-			</Card>
+			<SettingRows
+				title={t("members.warnings")}
+				description={t("members.warningsHidden", { permission: permissionLabel("ModerateMembers", t) })}
+			>
+				{null}
+			</SettingRows>
 		);
 	}
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("members.warnings")}</h2>
-				<p className="text-muted-foreground text-sm">{warningSummary(warnings, t)}</p>
-			</div>
-
+		<SettingRows title={t("members.warnings")} description={warningSummary(warnings, t)}>
 			{!canModerate && <Warning>{detail.moderationProblem}</Warning>}
 
 			{warnings.length > 0 && (
-				<DividedList>
-					{warnings.map((warning) => (
-						<WarningRow
-							key={warning.id}
-							warning={warning}
-							canChange={canChange}
-							busy={busy}
-							onEdit={(next, done) => {
-								onEdit(warning.id, next, done);
-							}}
-							onRemove={() => {
-								onRemove(warning.id);
-							}}
-						/>
-					))}
-				</DividedList>
+				<div>
+					<DividedList>
+						{warnings.map((warning) => (
+							<WarningRow
+								key={warning.id}
+								warning={warning}
+								canChange={canChange}
+								busy={busy}
+								onEdit={(next, done) => {
+									onEdit(warning.id, next, done);
+								}}
+								onRemove={() => {
+									onRemove(warning.id);
+								}}
+							/>
+						))}
+					</DividedList>
+				</div>
 			)}
 
 			{canModerate && (
-				<>
-					<Field label={t("members.issue")} hint={t("members.issueHint")} htmlFor="warn-reason">
-						<input
-							id="warn-reason"
-							className={FIELD}
-							value={reason}
-							maxLength={WARNING_LIMITS.maxReason}
-							placeholder={t("members.reasonPlaceholder")}
-							onChange={(event) => {
-								setReason(event.target.value);
-							}}
-						/>
-					</Field>
+				<Field label={t("members.issue")} hint={t("members.issueHint")} htmlFor="warn-reason">
+					<input
+						id="warn-reason"
+						className={FIELD}
+						value={reason}
+						maxLength={WARNING_LIMITS.maxReason}
+						placeholder={t("members.reasonPlaceholder")}
+						onChange={(event) => {
+							setReason(event.target.value);
+						}}
+					/>
+				</Field>
+			)}
 
-					<div className="flex flex-wrap items-center gap-3">
+			{(canModerate || (canChange && warnings.length > 0 && !confirming)) && (
+				<RowActions>
+					{canModerate && (
 						<Button
 							disabled={problem !== null || busy}
 							onClick={() => {
@@ -109,29 +107,28 @@ export function WarningsCard({
 						>
 							{t("members.addWarning")}
 						</Button>
+					)}
+					{canChange && warnings.length > 0 && !confirming && (
+						<Button
+							variant="ghost"
+							disabled={busy}
+							onClick={() => {
+								setConfirming(true);
+							}}
+						>
+							<Trash2 size={16} aria-hidden="true" /> {t("members.clearEvery")}
+						</Button>
+					)}
+					{canModerate && (
 						<p role="status" className="text-sm">
 							{result}
 						</p>
-					</div>
-				</>
-			)}
-
-			{canChange && warnings.length > 0 && !confirming && (
-				<div>
-					<Button
-						variant="ghost"
-						disabled={busy}
-						onClick={() => {
-							setConfirming(true);
-						}}
-					>
-						<Trash2 size={16} aria-hidden="true" /> {t("members.clearEvery")}
-					</Button>
-				</div>
+					)}
+				</RowActions>
 			)}
 
 			{confirming && (
-				<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
+				<>
 					<Field
 						label={t("members.typeToClear", { name: detail.username })}
 						hint={t("members.confirmHint")}
@@ -149,7 +146,7 @@ export function WarningsCard({
 					</Field>
 					<Warning>{t("members.deleteWarning")}</Warning>
 
-					<div className="flex flex-wrap gap-3">
+					<RowActions>
 						<Button
 							variant="destructive"
 							disabled={!clearConfirmed(typed, detail) || busy}
@@ -162,9 +159,9 @@ export function WarningsCard({
 						<Button variant="ghost" onClick={cancel}>
 							{t("common.cancel")}
 						</Button>
-					</div>
-				</div>
+					</RowActions>
+				</>
 			)}
-		</Card>
+		</SettingRows>
 	);
 }

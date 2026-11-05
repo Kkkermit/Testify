@@ -4,7 +4,6 @@ import { ApiProblem } from "@api/errors";
 import { botName } from "@core/brand";
 import { botIdentity } from "@lib/bot";
 
-/** Unauthenticated: the bot's public profile, which the sign-in screen needs before a session exists. */
 export const bot = new Hono<ApiBindings>().get("/", async (context) => {
 	const identity = await botIdentity(context.get("client"));
 

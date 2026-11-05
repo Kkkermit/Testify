@@ -41,7 +41,6 @@ export function usePunishments(guildId: string): UseQueryResult<WarnLadder> {
 	});
 }
 
-/** The whole list in one request, because the control is the list. */
 export function useSavePunishments(guildId: string): UseMutationResult<WarnLadder, Error, WarnStep[]> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).punishments();
@@ -50,7 +49,6 @@ export function useSavePunishments(guildId: string): UseMutationResult<WarnLadde
 		mutationKey: key,
 		mutationFn: (steps: WarnStep[]) => api.put<WarnLadder>(`/guilds/${guildId}/warnings/punishments`, { steps }),
 		onSuccess: (ladder) => {
-			// A whole-document answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, ladder);
 		},
 		onSettled: () => {
@@ -71,7 +69,6 @@ export function useMemberSearch(guildId: string, query: string): UseQueryResult<
 	});
 }
 
-/** Every warning write touches the server's list and the member's own page, so both are read again afterwards. */
 function useWarningWrite<Body extends { userId: string }, Result>(
 	guildId: string,
 	send: (body: Body) => Promise<Result>,

@@ -1,7 +1,5 @@
 import { MINUTE_MS } from "@config/constants";
 
-/** The identifiers more than one module in this domain reads. */
-
 /** The buttons on each posted idea, and the reason form staff fill in. */
 export const IDEA_ID = "idea";
 

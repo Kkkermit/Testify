@@ -2,10 +2,6 @@ import { type QueryKey, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { isRefusal } from "@/lib/api";
 
-/**
- * A refused request in scope, or any refused write, asks the access question again, so somebody who loses access
- * mid-session is ejected on their next request rather than left on a page of errors.
- */
 export function useRecheckOnRefusal(inScope: (key: readonly unknown[]) => boolean, access: QueryKey): void {
 	const client = useQueryClient();
 	const scope = useRef(inScope);

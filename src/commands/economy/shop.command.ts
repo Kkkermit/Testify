@@ -4,7 +4,6 @@ import { requireAccount } from "@database/repositories/economyRepository";
 import { reply } from "@lib/discord";
 import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/economy";
 
-/** The whole shop is one browsable panel. */
 export default defineCommand({
 	name: "shop",
 	description: "Browses and buys from the shop.",

@@ -78,7 +78,6 @@ export function gatewayRefusal(error: Error, scope: string): number | null {
 	return match === null ? null : Number(match[1]);
 }
 
-/** Records a failure nothing else handled, and returns rather than throwing. */
 export function reportSurvivable(
 	logger: Logger,
 	throttle: ErrorThrottle,

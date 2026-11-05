@@ -16,7 +16,6 @@ export function useRoleMenus(guildId: string): UseQueryResult<RoleMenuList> {
 	});
 }
 
-/** Not optimistic: a menu is a message the bot posts, and every answer is the whole list. */
 export function useCreateRoleMenu(guildId: string): UseMutationResult<RoleMenuList, Error, RoleMenuBody> {
 	return useListMutation(guildId, (body) => api.post<RoleMenuList>(`/guilds/${guildId}/role-menus`, body));
 }
@@ -52,7 +51,6 @@ function useListMutation<Body>(
 		onSuccess: (list) => {
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, list);
 		},
-		// A refused change to a posted menu is still saved, so the list is read again whatever the answer.
 		onSettled: () => {
 			if (client.isMutating({ mutationKey: key }) !== 1) return;
 			void client.invalidateQueries({ queryKey: key });

@@ -53,17 +53,14 @@ const MONEY_COLUMNS: Record<MoneySort, Columns> = {
 
 const LEVEL_COLUMNS: Columns = { heading: "members.boardLevels", primary: "members.level", secondary: "members.xp" };
 
-/** The board's name and its two figures, the one it ranks by first. */
 export function columnsFor(data: Pick<BoardPage, "board" | "sort">): Columns {
 	return data.board === "economy" ? MONEY_COLUMNS[data.sort] : LEVEL_COLUMNS;
 }
 
-/** Only this server's members have a page here; somebody on the bot-wide board who is not has nothing to open. */
 export function opensMember(data: Pick<BoardPage, "scope">, row: { inGuild: boolean }): boolean {
 	return data.scope === "server" || row.inGuild;
 }
 
-/** The jump button only earns its place when it would actually move you. */
 export function jumpTarget(data: BoardPage): number | null {
 	return data.you === null || data.you.page === data.page ? null : data.you.page;
 }

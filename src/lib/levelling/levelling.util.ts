@@ -20,7 +20,6 @@ export const DEFAULT_LEVEL_CONFIG: LevelConfig = {
 	ignoredRoleIds: [],
 };
 
-/** A null covers that now. */
 const CURRENT_CHANNEL = "current";
 
 type AddedLater = "boosts" | "rewards" | "stackRewards" | "announce" | "ignoredChannelIds" | "ignoredRoleIds";
@@ -109,7 +108,6 @@ function unique(values: string[]): string[] {
 export interface LevelProgress {
 	level: number;
 	xp: number;
-	/** XP earned since reaching the current level. */
 	progress: number;
 	/** XP the current level costs, from its floor to the next one. */
 	needed: number;

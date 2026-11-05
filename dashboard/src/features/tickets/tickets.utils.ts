@@ -28,7 +28,6 @@ export function isDirty(draft: Draft, settings: TicketSettings): boolean {
 	return (Object.keys(saved) as (keyof Draft)[]).some((field) => draft[field] !== saved[field]);
 }
 
-/** Everything stopping the panel being posted, all at once, so the fields can be filled in any order. */
 export function draftProblems(draft: Draft, t: TFunction): string[] {
 	return [
 		...ticketMissing(draft).map((missing) => problemText(missing, t)),
@@ -46,4 +45,14 @@ export function staffRoleWarning(roles: RoleSummary[], staffRoleId: string | nul
 	if (role.managed) return t("tickets.roleManaged", { role: role.name });
 
 	return null;
+}
+
+export function ticketSummary(
+	settings: Pick<TicketSettings, "enabled" | "posted" | "openTickets">,
+	panelChannel: string,
+	t: TFunction,
+): string {
+	if (!settings.enabled) return t("tickets.summaryOff");
+	if (!settings.posted) return t("tickets.summaryNotPosted");
+	return t("tickets.summaryOn", { count: settings.openTickets, channel: panelChannel });
 }

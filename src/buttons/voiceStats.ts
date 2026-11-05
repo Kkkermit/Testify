@@ -4,7 +4,6 @@ import { UserFacingError } from "@core/errors";
 import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { syncVoiceCounters, VOICESTATS_PANEL_ID, voiceStatsPanel, type VoiceStatsPanelState } from "@lib/settings";
 
-/** Every control on the voice-counter panel. */
 export async function voiceStatsState(guildId: string): Promise<VoiceStatsPanelState> {
 	const settings = await getVoiceCounter(guildId);
 
@@ -31,7 +30,6 @@ export default defineButton({
 			await setVoiceCounter(guild.id, { memberChannelId: next.memberChannelId, botChannelId: next.botChannelId });
 			await interaction.update(voiceStatsPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId));
 
-			// Written first, then applied, so the names match what the panel now says.
 			await syncVoiceCounters(context.client, guild);
 		};
 

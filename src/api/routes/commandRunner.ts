@@ -19,13 +19,10 @@ import {
 	type CommandCatalogue,
 } from "@testify/shared";
 
-/** Runs an owner command over the allowlist in `commandRunner.util.ts`; behind `requireOwner`. */
-
 export const commandRunner = new Hono<ApiBindings>();
 
 commandRunner.use("*", requireOwner);
 
-/** The same metadata `/help` and Discord are built from, filtered to what may be run. */
 commandRunner.get("/", (context) => {
 	const client = context.get("client");
 	const runnable = [...client.commands.values()].filter((command) => runnableInDashboard(command.name));
@@ -48,7 +45,6 @@ commandRunner.post("/:name", async (context) => {
 	const guild = resolveGuild(client, command, request.guildId ?? null);
 	await assertEnabled(name, guild?.id ?? null);
 
-	// `requireOwner` has already refused an anonymous caller; this narrows the type rather than re-checking.
 	const session = context.get("session");
 	const user = session === undefined ? null : await client.users.fetch(session.userId).catch(() => null);
 	if (user === null) throw badRequest("Discord does not know your account, so the command has nobody to run as.");
@@ -77,7 +73,6 @@ commandRunner.post("/:name", async (context) => {
 	return context.json(body);
 });
 
-/** Refuses a request naming the wrong runner with a sentence rather than crashing in the command body. */
 function pickRunner(command: Command, subcommand: string | null): Runner {
 	if (subcommand !== null) {
 		const found = (command.subcommands ?? []).find((candidate) => candidate.name === subcommand);
@@ -97,7 +92,6 @@ function pickRunner(command: Command, subcommand: string | null): Runner {
 
 type Runner = (input: CommandInput, client: TestifyClient) => Promise<void>;
 
-/** `guildOnly` is the command's own declaration, so the runner honours it rather than passing null and hoping. */
 function resolveGuild(client: TestifyClient, command: Command, guildId: string | null): Guild | null {
 	if (guildId === null) {
 		if (command.guildOnly === true) throw badRequest(`\`/${command.name}\` needs a server. Pick one and try again.`);

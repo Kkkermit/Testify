@@ -2,8 +2,6 @@ import { z } from "zod";
 import { problem, type Problem } from "./problems";
 import { plainLine, plainText } from "./text";
 
-/** Bot-wide notes from the bot's owners, read with `/bot-notifications` and on the dashboard. */
-
 export const NOTICE_LIMITS = {
 	maxTitle: 100,
 	maxBody: 500,
@@ -12,7 +10,6 @@ export const NOTICE_LIMITS = {
 	/** A scheduled one goes up within this many days, and leaves at least this many minutes to say so. */
 	maxAheadDays: 90,
 	minAheadMinutes: 1,
-	/** The longest one can be set to stay up before it takes itself down. */
 	maxUpDays: 90,
 	/** A reader record unused this long is dropped, and every notification then counts as new to them. */
 	readerDays: 90,
@@ -36,7 +33,6 @@ export interface Notice {
 
 export interface NoticeFeed {
 	notices: Notice[];
-	/** How many were published since this reader last looked. */
 	unread: number;
 }
 
@@ -46,7 +42,6 @@ export const noticeInput = z.object({
 	title: plainLine(1, NOTICE_LIMITS.maxTitle),
 	body: plainText(1, NOTICE_LIMITS.maxBody),
 	tone: z.enum(NOTICE_TONES),
-	/** Left out to post it now. */
 	startsAt: when.optional(),
 	endsAt: when.nullable().optional(),
 });
@@ -58,7 +53,6 @@ export const noticePatch = z
 		title: plainLine(1, NOTICE_LIMITS.maxTitle).optional(),
 		body: plainText(1, NOTICE_LIMITS.maxBody).optional(),
 		tone: z.enum(NOTICE_TONES).optional(),
-		/** Only while it is still waiting to go up. */
 		startsAt: when.optional(),
 		/** Null keeps it up until it is removed. */
 		endsAt: when.nullable().optional(),
@@ -86,7 +80,6 @@ export function isScheduled(notice: Pick<Notice, "publishedAt">, now: Date): boo
 	return Date.parse(notice.publishedAt) > now.getTime();
 }
 
-/** What readers are shown, in the order they are given. */
 export function liveNotices<T extends Pick<Notice, "publishedAt" | "endsAt">>(notices: readonly T[], now: Date): T[] {
 	return notices.filter((notice) => isLive(notice, now));
 }

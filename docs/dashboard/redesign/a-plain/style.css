@@ -1,0 +1,380 @@
+/* Direction A — plain settings. Light first, no cards, rules under headings, rows not tiles. */
+:root {
+	--page: #ffffff;
+	--side: #f5f6f7;
+	--ink: #1c1f24;
+	--muted: #5c6370;
+	--rule: #e3e6ea;
+	--field: #c3c9d1;
+	--primary: #5843d1;
+	--primary-ink: #ffffff;
+	--ok: #1d7a4b;
+	--warn: #8a5a00;
+	--warn-wash: #fff7e0;
+	--danger: #c22a2a;
+	--sans: "IBM Plex Sans", system-ui, sans-serif;
+	--mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* {
+	box-sizing: border-box;
+}
+html {
+	color-scheme: light;
+}
+body {
+	margin: 0;
+	background: var(--page);
+	color: var(--ink);
+	font: 400 14px/1.55 var(--sans);
+	-webkit-font-smoothing: antialiased;
+}
+a {
+	color: var(--primary);
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 2px;
+}
+
+.shell {
+	display: grid;
+	grid-template-columns: 248px 1fr;
+	min-height: 100vh;
+}
+
+/* Sidebar: words, not tiles. The current page is bold with a rule beside it. */
+.side {
+	background: var(--side);
+	border-right: 1px solid var(--rule);
+	padding: 16px 12px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+.switcher {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px;
+	border: 1px solid var(--rule);
+	border-radius: 8px;
+	background: var(--page);
+	font-weight: 600;
+}
+.switcher .mark {
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+	background: #2e7d5b;
+	color: #fff;
+	display: grid;
+	place-items: center;
+	font-size: 11px;
+	font-weight: 600;
+}
+.switcher .chev {
+	margin-left: auto;
+	color: var(--muted);
+}
+.nav {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.nav h2 {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--muted);
+	margin: 0 0 4px 8px;
+}
+.nav a {
+	color: var(--ink);
+	padding: 5px 8px 5px 10px;
+	border-left: 2px solid transparent;
+	border-radius: 0 6px 6px 0;
+}
+.nav a:hover {
+	background: #eceef1;
+	text-decoration: none;
+}
+.nav a[aria-current="page"] {
+	font-weight: 600;
+	border-left-color: var(--primary);
+	background: #eceef1;
+}
+.side .foot {
+	margin-top: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	border-top: 1px solid var(--rule);
+	padding-top: 12px;
+}
+.side .foot a {
+	color: var(--muted);
+	padding: 4px 10px;
+}
+
+/* Content: one readable column, left-aligned like a document. */
+main {
+	padding: 32px 56px 64px;
+	max-width: 840px;
+}
+.crumbs {
+	color: var(--muted);
+	font-size: 13px;
+	margin-bottom: 6px;
+}
+.crumbs a {
+	color: var(--muted);
+}
+h1 {
+	font-size: 24px;
+	line-height: 1.25;
+	font-weight: 600;
+	margin: 0 0 8px;
+	letter-spacing: -0.01em;
+}
+.summary {
+	font-size: 15px;
+	color: var(--ink);
+	margin: 0 0 28px;
+	max-width: 62ch;
+}
+.summary strong {
+	font-weight: 600;
+}
+.saved {
+	color: var(--ok);
+	font-size: 13px;
+}
+
+section {
+	margin-bottom: 36px;
+}
+section > h2 {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 0;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--rule);
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+}
+section > h2 .aside {
+	margin-left: auto;
+	font-size: 13px;
+	font-weight: 400;
+}
+
+/* A row: what it is on the left, the control on the right, a rule beneath. */
+.row {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 24px;
+	align-items: center;
+	padding: 14px 0;
+	border-bottom: 1px solid var(--rule);
+}
+.row.stack {
+	grid-template-columns: 1fr;
+	gap: 8px;
+}
+.row .label {
+	font-weight: 500;
+}
+.row .help {
+	color: var(--muted);
+	font-size: 13px;
+	margin-top: 2px;
+}
+.row.off .label {
+	color: var(--muted);
+}
+
+.status {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+}
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #b8bec7;
+}
+.on .dot {
+	background: var(--ok);
+}
+.on {
+	color: var(--ok);
+}
+.features .row {
+	grid-template-columns: 180px 1fr 72px 64px;
+}
+.features .what {
+	color: var(--muted);
+}
+
+.callout {
+	border: 1px solid #f0d58c;
+	background: var(--warn-wash);
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin: 0 0 32px;
+	color: #5a3d00;
+}
+.callout strong {
+	color: #3d2900;
+}
+
+.switch {
+	width: 34px;
+	height: 20px;
+	border-radius: 10px;
+	background: #c9ced6;
+	position: relative;
+	flex: none;
+}
+.switch::after {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+.switch.on {
+	background: var(--primary);
+}
+.switch.on::after {
+	left: 16px;
+}
+
+select,
+textarea,
+input {
+	font: inherit;
+	color: inherit;
+	background: var(--page);
+	border: 1px solid var(--field);
+	border-radius: 6px;
+	padding: 7px 10px;
+}
+select {
+	min-width: 220px;
+}
+textarea {
+	width: 100%;
+	min-height: 84px;
+	resize: vertical;
+	line-height: 1.5;
+}
+code,
+.code {
+	font-family: var(--mono);
+	font-size: 12.5px;
+	background: #f1f2f4;
+	border-radius: 4px;
+	padding: 1px 5px;
+}
+
+.preview {
+	border-left: 3px solid var(--rule);
+	padding: 4px 0 4px 12px;
+	color: var(--ink);
+}
+.preview .who {
+	font-weight: 600;
+}
+.preview .bot {
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--primary);
+	color: #fff;
+	border-radius: 3px;
+	padding: 0 4px;
+	margin-left: 4px;
+	vertical-align: 1px;
+}
+.mention {
+	color: var(--primary);
+	background: #efecfd;
+	border-radius: 3px;
+	padding: 0 3px;
+}
+
+.log {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.log li {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 16px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--rule);
+}
+.log time {
+	color: var(--muted);
+	font-size: 13px;
+}
+
+.topbar {
+	display: none;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--rule);
+	background: var(--side);
+	font-weight: 600;
+}
+.topbar .menu {
+	margin-left: auto;
+	color: var(--muted);
+	font-weight: 400;
+}
+
+@media (max-width: 720px) {
+	.shell {
+		grid-template-columns: 1fr;
+	}
+	.side {
+		display: none;
+	}
+	.topbar {
+		display: flex;
+	}
+	main {
+		padding: 20px 16px 48px;
+	}
+	.features .row {
+		grid-template-columns: 1fr auto;
+	}
+	.features .what {
+		grid-column: 1 / -1;
+		order: 3;
+	}
+	.features .act {
+		display: none;
+	}
+	select {
+		min-width: 0;
+		width: 100%;
+	}
+	.row.select {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+}

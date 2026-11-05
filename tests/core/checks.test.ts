@@ -106,6 +106,17 @@ describe("runChecks", () => {
 		expect(refusalText(refusal!)).toContain("**Reason:** Spamming");
 	});
 
+	/** Deleting your own data is the one thing the blacklist does not take away, and no server can switch it off. */
+	it("lets anybody delete their data, blacklisted or not, wherever commands are switched off", async () => {
+		const erase = { ...plain, name: "delete-my-data" };
+		findBlacklistEntry.mockResolvedValue({ reason: "Spamming", createdAt: new Date() });
+		offGlobally.mockResolvedValue(["delete-my-data", "ping"]);
+		offInGuild.mockResolvedValue(["delete-my-data", "ping"]);
+
+		expect(await runChecks(createMockInteraction(), erase, createMockClient())).toBeNull();
+		expect(await runChecks(createMockInteraction(), plain, createMockClient())).not.toBeNull();
+	});
+
 	it("refuses an owner-only command to anyone else", async () => {
 		const command = { ...plain, ownerOnly: true };
 

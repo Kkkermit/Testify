@@ -32,7 +32,6 @@ export function text(markdown: string): TextDisplayBuilder {
 	return new TextDisplayBuilder().setContent(markdown);
 }
 
-/** A horizontal rule. */
 export function divider(options: { large?: boolean; spacer?: boolean } = {}): SeparatorBuilder {
 	return new SeparatorBuilder()
 		.setDivider(options.spacer !== true)

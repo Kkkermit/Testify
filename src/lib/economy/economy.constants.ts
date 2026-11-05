@@ -1,5 +1,3 @@
-/** The identifiers, limits and defaults more than one module in this domain reads. */
-
 export const BALANCE_PANEL_ID = "balance";
 
 export const MONEY_PANEL_ID = "money";

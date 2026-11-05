@@ -4,7 +4,6 @@ import { defineCommand, inGuild } from "@core/command";
 import { reply } from "@lib/discord";
 import { antiLinkPanel } from "@lib/moderation";
 
-/** One panel instead of `enable`, `disable` and `status`. */
 export default defineCommand({
 	name: "anti-link",
 	description: "Deletes links posted by members without the bypass permission.",

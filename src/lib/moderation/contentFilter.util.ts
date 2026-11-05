@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { dataPath } from "@core/paths";
 
-/** Replaces the thirteen hand-rolled profanity checks the audit found, each with its own matching rules. */
+/** One profanity check, so every filter matches words the same way. */
 
 const filterFileSchema = z.object({ words: z.array(z.string()) });
 

@@ -20,7 +20,6 @@ export default defineCommand({
 		const account = await requireAccount(guild.id, interaction.user.id);
 		const typed = interaction.options.getString("amount");
 
-		// No amount given, so offer the quick-amount buttons rather than an error.
 		if (typed === null) {
 			await reply(interaction, amountPanel("wit", account, interaction.user.id));
 			return;

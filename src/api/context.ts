@@ -6,7 +6,6 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
 
-/** What every route can reach. Middleware adds to this as it authorises a request. */
 export interface ApiBindings {
 	Variables: {
 		client: TestifyClient;
@@ -15,7 +14,6 @@ export interface ApiBindings {
 		oauth: OauthConfig | null;
 		/** Set by the session middleware once one is proven. Absent means the caller is not signed in. */
 		session?: DashboardSession;
-		/** Set by `requireGuild`, and the only guild a handler may act on. */
 		guild?: Guild;
 		/** Absent for a bot owner, who is not necessarily in the guild at all. */
 		member?: GuildMember;
@@ -40,7 +38,6 @@ export function readerOf(context: Context<ApiBindings>): GuildMember | undefined
 	return context.get("isOwner") === true ? undefined : context.get("member");
 }
 
-/** The person acting, as a moderation record names them; `requireGuild` has already insisted on a session. */
 export function actorOf(context: Context<ApiBindings>): { id: string; name: string } {
 	const session = context.get("session");
 	return { id: session?.userId ?? "", name: session?.username ?? "a server manager" };

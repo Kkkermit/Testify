@@ -11,7 +11,6 @@ export default defineCommand({
 
 	async run(interaction, client) {
 		const { notices } = await readNoticeFeed(interaction.user.id, { markRead: true });
-		// The controls, and the ones still waiting to go up, are only for the bot's owners; every press checks again.
 		const ownerId = client.isOwner(interaction.user.id) ? interaction.user.id : null;
 
 		await reply(interaction, noticeBoard(ownerId === null ? notices : await allNotices(), ownerId));

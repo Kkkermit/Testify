@@ -16,7 +16,6 @@ export function useBotStats(guildId: string): UseQueryResult<BotStatsSettings> {
 	});
 }
 
-/** Not optimistic: posting is a message in a public channel, and a control that moved first would claim it was sent. */
 export function usePostBotStats(guildId: string): UseMutationResult<BotStatsSettings, Error, BotStatsPost> {
 	return useBotStatsMutation(guildId, (body) => api.put<BotStatsSettings>(`/guilds/${guildId}/bot-stats`, body));
 }
@@ -36,7 +35,6 @@ function useBotStatsMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (settings) => {
-			// A whole-document answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
 		},
 		onSettled: () => {

@@ -8,10 +8,9 @@ import { UndoProvider } from "@/app/UndoProvider";
 export function renderWithProviders(
 	ui: ReactElement,
 	options: { route?: string; path?: string } = {},
-): RenderResult & { client: QueryClient; search: () => string } {
+): RenderResult & { client: QueryClient; search: () => string; pathname: () => string } {
 	const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-	// AppShell provides undo in the app, and a page rendered on its own still needs somewhere to wait.
 	const router = createMemoryRouter([{ path: options.path ?? "/", element: <UndoProvider>{ui}</UndoProvider> }], {
 		initialEntries: [options.route ?? options.path ?? "/"],
 	});
@@ -25,5 +24,6 @@ export function renderWithProviders(
 		client,
 		// A memory router never touches `window.location`, so a test that pins URL state has to ask the router.
 		search: () => router.state.location.search,
+		pathname: () => router.state.location.pathname,
 	};
 }

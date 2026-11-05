@@ -100,7 +100,6 @@ members.get("/search", async (context) => {
 	const { q } = parseQuery(context, memberSearchQuery);
 	const guild = guildOf(context);
 	const id = idFromQuery(q);
-	// An ID names one member exactly, so it is fetched rather than searched as a name.
 	const found =
 		id === null
 			? await guild.members.search({ query: q, limit: 10 }).catch(() => null)

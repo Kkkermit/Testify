@@ -4,7 +4,6 @@ import { barHeight, HISTORY_FILL, HISTORY_LABEL, millis } from "@/features/statu
 import { cn } from "@/lib/cn";
 import { clockTime } from "@/lib/datetime";
 
-/** Half-hour bars: the colour is how the bot was, the height is how long Discord took to answer it. */
 export function RecentStrip({ buckets }: { buckets: StatusBucket[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const tallest = Math.max(0, ...buckets.map((bucket) => bucket.gatewayPingMs ?? 0));

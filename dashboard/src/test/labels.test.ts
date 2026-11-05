@@ -1,8 +1,18 @@
-import { AUDIT_EVENTS, AUDIT_GROUPS, AUTOMOD_PRESETS, SUPPORT_TOPICS, WELCOME_PLACEHOLDERS } from "@testify/shared";
+import {
+	AUDIT_EVENTS,
+	AUDIT_GROUPS,
+	AUTOMOD_PRESETS,
+	RESTORABLE,
+	type RestorableAction,
+	SUPPORT_TOPICS,
+	WELCOME_PLACEHOLDERS,
+} from "@testify/shared";
 import { EVENT_LABELS, GROUP_LABELS } from "@/features/audit-log/auditLog.labels";
 import { PRESET_LABELS } from "@/features/automod/automod.labels";
+import { RESTORE_FIELD_LABELS } from "@/features/changes/restore.labels";
 import { TOPIC_LABELS } from "@/features/help/help.labels";
 import { PLACEHOLDER_LABELS } from "@/features/welcome/welcome.labels";
+import { type TranslationKey } from "@/i18n";
 import { t } from "@/test/english";
 
 /** A key with no copy behind it renders as the key, which reads to a user as a broken page. */
@@ -27,6 +37,18 @@ describe("the label registries", () => {
 
 	it("names every help topic", () => {
 		for (const topic of SUPPORT_TOPICS) expect(t(TOPIC_LABELS[topic])).not.toContain("help.");
+	});
+
+	it("names every setting a change can put back", () => {
+		const unnamed = Object.entries(RESTORABLE).flatMap(([action, entry]) => {
+			const labels: Record<string, TranslationKey | undefined> = RESTORE_FIELD_LABELS[action as RestorableAction];
+			return entry.fields.filter((field) => {
+				const key = labels[field];
+				return key === undefined || t(key) === key;
+			});
+		});
+
+		expect(unnamed).toEqual([]);
 	});
 
 	it("describes every greeting placeholder", () => {

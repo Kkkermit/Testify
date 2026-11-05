@@ -23,7 +23,6 @@ export function useBans(guildId: string, options: { page: number; query: string 
 	});
 }
 
-/** Every page is read again afterwards, because the person lifted may have been on any of them. */
 export function useUnban(guildId: string): UseMutationResult<BanPage, Error, { userId: string } & UnbanBody> {
 	const client = useQueryClient();
 

@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/** The limits both surfaces enforce, so the browser and the Discord panel accept the same values. */
 export const LEVEL_LIMITS = {
 	maxBoosts: 5,
 	maxRewards: 10,
@@ -37,7 +36,6 @@ export const levellingPatchSchema = z
 
 export type LevellingPatch = z.infer<typeof levellingPatchSchema>;
 
-/** Whole lists, because the control is a multi-select whose value is the list. */
 export const boostsSchema = z
 	.array(xpBoostSchema)
 	.max(LEVEL_LIMITS.maxBoosts, `at most ${String(LEVEL_LIMITS.maxBoosts)} boost roles`)

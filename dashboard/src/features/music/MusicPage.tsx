@@ -1,9 +1,10 @@
 import { MUSIC_LIMITS } from "@testify/shared";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { RoleChecklist, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import { RoleChecklist, SavingIndicator, savingStateOf, SettingRows, Toggle, Warning } from "@/components/form";
+import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useRoles } from "@/features/levelling/useLevelling";
 import { accessOf, missingRoleIds } from "@/features/music/music.utils";
@@ -19,6 +20,7 @@ export function MusicPage(): React.JSX.Element {
 	const roles = useRoles(guildId);
 	const overview = useGuildOverview(guildId);
 	const save = useSaveMusic(guildId);
+	const [source, setSource] = useState<"state" | "roles">("state");
 
 	usePageTitle(t("music.title"), overview.data?.name);
 
@@ -28,44 +30,42 @@ export function MusicPage(): React.JSX.Element {
 	const settings = music.data;
 	const access = accessOf(settings);
 	const stale = missingRoleIds(settings, roles.data ?? []);
+	const refusal = (from: typeof source): React.JSX.Element | null =>
+		save.error !== null && source === from ? (
+			<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
+		) : null;
 
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("music.title")}
 				subtitle={t("music.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}
 			/>
 
-			<Card className="flex flex-wrap items-center justify-between gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("music.system")}</h2>
-					<p className="text-muted-foreground text-sm">
-						{access === "off"
-							? t("music.stateOff")
-							: access === "everybody"
-								? t("music.stateEverybody")
-								: t("music.stateDjs", { count: settings.djRoleIds.length })}
-					</p>
-				</div>
+			<Summary>
+				{access === "off"
+					? t("music.stateOff")
+					: access === "everybody"
+						? t("music.stateEverybody")
+						: t("music.stateDjs", { count: settings.djRoleIds.length })}
+			</Summary>
 
+			<SettingRows>
 				<Toggle
 					label={t("music.enable")}
 					checked={settings.enabled}
 					disabled={save.isPending}
 					onChange={(enabled) => {
+						setSource("state");
 						save.mutate({ enabled });
 					}}
 				/>
-			</Card>
+				{refusal("state")}
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("music.djRoles")}</h2>
-					<p className="text-muted-foreground text-sm">{t("music.djBody")}</p>
-				</div>
-
+			<SettingRows title={t("music.djRoles")} description={t("music.djBody")}>
 				{roles.isError ? (
 					<ErrorState as="h2" error={roles.error} onRetry={() => void roles.refetch()} />
 				) : roles.isPending ? (
@@ -78,16 +78,15 @@ export function MusicPage(): React.JSX.Element {
 						hint={t("music.djHint")}
 						max={MUSIC_LIMITS.maxDjRoles}
 						onChange={(djRoleIds) => {
+							setSource("roles");
 							save.mutate({ djRoleIds });
 						}}
 					/>
 				)}
 
 				{stale.length > 0 && <Warning>{t("music.staleRoles", { count: stale.length })}</Warning>}
-				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-				)}
-			</Card>
+				{refusal("roles")}
+			</SettingRows>
 		</>
 	);
 }

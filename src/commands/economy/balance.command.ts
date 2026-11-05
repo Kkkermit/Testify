@@ -29,7 +29,6 @@ export default defineCommand({
 			);
 		}
 
-		// Controls only on your own balance — you cannot spend someone else's.
 		await reply(
 			interaction,
 			balancePanel(

@@ -151,7 +151,6 @@ describe("pausing and resuming", () => {
 });
 
 describe("shutting down", () => {
-	/** Shutting down is typed rather than clicked. */
 	it("refuses without the typed confirmation", async () => {
 		expect((await send("/shutdown", { method: "POST", body: {} })).status).toBe(400);
 		expect((await send("/shutdown", { method: "POST", body: { confirm: "yes" } })).status).toBe(400);

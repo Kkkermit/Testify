@@ -3,9 +3,7 @@ import { type TestifyClient } from "@core/client";
 
 export type ComponentInteraction = MessageComponentInteraction | ModalSubmitInteraction;
 
-/** Handles the buttons, select menus and modals for one feature. */
 export interface Button {
-	/** The first part of the custom ID. */
 	id: string;
 	/** When true, only the user whose ID is the last argument may use it. */
 	ownerOnly?: boolean;
@@ -14,9 +12,7 @@ export interface Button {
 
 export interface ButtonContext {
 	client: TestifyClient;
-	/** The second part of the custom ID. */
 	action: string;
-	/** Everything after the action. */
 	args: string[];
 }
 

@@ -23,7 +23,6 @@ export interface WelcomeCardData {
 	serverName: string;
 	/** Which member they are — 1 for the very first. */
 	memberCount: number;
-	/** The guild's own background. */
 	background?: Buffer | null;
 }
 

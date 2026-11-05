@@ -6,8 +6,6 @@ import {
 	type SetupStatus,
 } from "@testify/shared";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const healthy: HealthResponse = { ok: true, uptimeMs: 65_000, discord: "ready", database: "connected" };
 
 export const configured: SetupStatus = {

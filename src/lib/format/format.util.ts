@@ -1,5 +1,6 @@
 import { escapeMarkdown as djsEscapeMarkdown } from "discord.js";
 import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS } from "@config/constants";
+import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
 
 /** Compact duration: "2h 5m 3s". */
 export function formatDuration(ms: number): string {
@@ -90,6 +91,11 @@ export function formatBytes(bytes: number): string {
 export type TimestampStyle = "t" | "T" | "d" | "D" | "f" | "F" | "R";
 
 /** Discord renders these in each viewer's own locale and timezone, and keeps them live. */
+/** A mention, or the placeholder name for somebody who deleted their data, whose id would render as nobody. */
+export function mentionOf(userId: string): string {
+	return userId === DELETED_USER_ID ? DELETED_USER_NAME : `<@${userId}>`;
+}
+
 export function discordTime(date: Date | number, style: TimestampStyle = "f"): string {
 	const seconds = Math.floor((date instanceof Date ? date.getTime() : date) / 1_000);
 	return `<t:${seconds}:${style}>`;

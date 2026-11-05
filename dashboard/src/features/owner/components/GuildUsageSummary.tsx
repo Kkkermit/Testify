@@ -61,7 +61,7 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 
 				<UsagePanel title={t("owner.howRun")} hint={t("owner.howRunHint")}>
 					<UsageBars
-						tint="bg-feature-levelling/25"
+						tint="bg-hue-violet/20"
 						empty={t("owner.nothingRecorded")}
 						rows={[
 							{ id: "slash", label: t("owner.slashCommands"), count: report.surfaces.slash },

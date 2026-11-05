@@ -46,14 +46,13 @@ describe("quick search", () => {
 		renderShell();
 
 		await openWithShortcut(user);
-		expect(screen.getByRole("combobox", { name: "Search screens, servers and commands" })).toHaveFocus();
+		expect(screen.getByRole("combobox", { name: "Search screens, channels, servers and commands" })).toHaveFocus();
 
 		await user.keyboard("{Escape}");
 		await user.keyboard("{Meta>}k{/Meta}");
 		expect(await screen.findByRole("dialog", { name: "Quick search" })).toBeInTheDocument();
 	});
 
-	/** Typing "welcome" and pressing Enter is the whole journey the feature was asked for. */
 	it("goes to the best match on Enter", async () => {
 		const user = userEvent.setup();
 		renderShell();

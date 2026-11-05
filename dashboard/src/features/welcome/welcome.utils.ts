@@ -1,4 +1,5 @@
-import { WELCOME_STYLES, type WelcomeStyle } from "@testify/shared";
+import { type GoodbyeSettings, WELCOME_STYLES, type WelcomeConfigResponse, type WelcomeStyle } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 
 export const STYLE_LABELS: Record<WelcomeStyle, { label: TranslationKey; describes: TranslationKey }> = {
@@ -9,7 +10,7 @@ export const STYLE_LABELS: Record<WelcomeStyle, { label: TranslationKey; describ
 
 export const STYLE_ORDER = WELCOME_STYLES;
 
-/** Inserts at the caret when there is one, and appends otherwise, which is what a blurred textarea reports. */
+/** A blurred textarea reports no caret, so the token is appended. */
 export function insertToken(message: string, token: string, caret: number | null): string {
 	if (caret === null || caret < 0 || caret > message.length) return `${message}${token}`;
 	return `${message.slice(0, caret)}${token}${message.slice(caret)}`;
@@ -33,9 +34,7 @@ const MARKS: { open: string; mark: Mark }[] = [
 	{ open: "_", mark: "italic" },
 ];
 
-/**
- * The five inline marks a greeting uses, as spans a preview can render; anything unclosed stays literal, as in Discord.
- */
+/** Anything unclosed stays literal, as in Discord. */
 export function markSpans(text: string): MarkSpan[] {
 	const spans: MarkSpan[] = [];
 	let plain = "";
@@ -64,11 +63,36 @@ export function markSpans(text: string): MarkSpan[] {
 
 		const inner = text.slice(at + found.open.length, close);
 		flush();
-		// Nested marks are resolved by recursion, so `**bold _and italic_**` carries both.
 		for (const span of markSpans(inner)) spans.push({ text: span.text, marks: [found.mark, ...span.marks] });
 		at = close + found.open.length;
 	}
 
 	flush();
 	return spans;
+}
+
+type Post = Pick<WelcomeConfigResponse, "enabled" | "channelId">;
+
+export function welcomeSummary(
+	greeting: Post,
+	greetingChannel: string,
+	goodbye: Pick<GoodbyeSettings, "enabled" | "channelId"> | undefined,
+	goodbyeChannel: string,
+	t: TFunction,
+): string {
+	const hello =
+		greeting.channelId === null
+			? t("welcome.summaryNoChannel")
+			: greeting.enabled
+				? t("welcome.summaryOn", { channel: greetingChannel })
+				: t("welcome.summaryOff");
+	if (goodbye === undefined) return hello;
+
+	const bye =
+		goodbye.channelId === null
+			? t("goodbye.summaryNoChannel")
+			: goodbye.enabled
+				? t("goodbye.summaryOn", { channel: goodbyeChannel })
+				: t("goodbye.summaryOff");
+	return `${hello} ${bye}`;
 }

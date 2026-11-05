@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/** Holding back accounts younger than a server allows, and telling staff when joins spike. It never kicks or bans. */
-
 export const RAID_LIMITS = {
 	/** Discord's longest timeout, so a hold always lasts until the account is old enough. */
 	maxAccountAgeDays: 28,
@@ -12,7 +10,6 @@ export const RAID_LIMITS = {
 	maxSpikeMinutes: 60,
 	/** A spike that goes on is reported again after this long, rather than once a join. */
 	alertEveryMinutes: 10,
-	/** How many of the newest joins an alert names. */
 	listed: 10,
 } as const;
 
@@ -28,7 +25,6 @@ export const DEFAULT_RAID = {
 export interface RaidSettings {
 	enabled: boolean;
 	alertChannelId: string | null;
-	/** Pinged on a spike alert, and the only thing an alert ever pings. */
 	pingRoleId: string | null;
 	/** 0 holds nobody back. */
 	minAccountAgeDays: number;
@@ -37,7 +33,6 @@ export interface RaidSettings {
 }
 
 export interface RaidOverview extends RaidSettings {
-	/** False when the bot cannot post in the alert channel. */
 	canSend: boolean;
 	/** False when the bot lacks Moderate Members, which a hold is a timeout under. */
 	canHold: boolean;

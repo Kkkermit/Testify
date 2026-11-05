@@ -18,10 +18,7 @@ export function mongoAvailable(): boolean {
 	return testUri() !== undefined;
 }
 
-/**
- * `describe` when a database is available and `describe.skip` when not, so a missing one shows as skipped; each worker
- * gets its own database.
- */
+/** `describe` when a database is available and `describe.skip` when not, so a missing one shows as skipped. */
 export function describeWithMongo(name: string, suite: () => void): void {
 	const uri = testUri();
 

@@ -3,6 +3,7 @@ import { History } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, EmptyState } from "@/components/primitives";
 import { dateAndTime, since } from "@/lib/datetime";
+import { personName } from "@/lib/people";
 
 export function RecentChanges({ changes }: { changes: GuildOverview["recentChanges"] }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -28,7 +29,7 @@ export function RecentChanges({ changes }: { changes: GuildOverview["recentChang
 						className="hover:bg-muted/40 flex flex-wrap items-baseline gap-x-3 gap-y-1 px-6 py-3 text-sm transition-colors duration-150"
 					>
 						<span className="min-w-0 flex-1">{change.summary}</span>
-						<span className="text-muted-foreground shrink-0 text-xs">{change.actorTag}</span>
+						<span className="text-muted-foreground shrink-0 text-xs">{personName(change.actorTag, t)}</span>
 						<time
 							dateTime={change.at}
 							title={dateAndTime(change.at)}

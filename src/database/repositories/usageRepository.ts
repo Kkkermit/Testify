@@ -127,7 +127,6 @@ export async function dailyTallies(days: number, now?: Date, guildId?: string): 
 	]).exec();
 }
 
-/** Whether anybody still types the prefix, which is the one thing that decides if it is worth maintaining. */
 export async function surfaceTallies(days: number, now?: Date, guildId?: string): Promise<Record<Surface, number>> {
 	const rows = await CommandUsages.aggregate<{ surface: Surface; count: number }>([
 		{ $match: inWindow(days, now, guildId) },

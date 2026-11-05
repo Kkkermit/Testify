@@ -1,7 +1,5 @@
 import { type BOARD_KINDS, type SHOP_SECTIONS, type PET_RARITIES } from "@lib/economy/economy.constants";
 
-/** The types more than one module in this domain shares. */
-
 export interface HeistState {
 	guildId: string;
 	leaderId: string;
@@ -36,9 +34,7 @@ export interface ShopState {
 	section: ShopSection;
 	/** One level deeper, pets only. */
 	rarity?: PetRarityKey;
-	/** Set on the detail view. */
 	selectedId?: string;
-	/** Which page of the catalogue. */
 	page?: number;
 	/** Opened from the balance panel, which the catalogue then offers a way back to. */
 	from?: "balance";

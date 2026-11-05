@@ -5,7 +5,6 @@ import { modalForm, pickedChannelId } from "@lib/discord";
 import { applyRaidSettings, RAID_PANEL_ID, raidPanel, readRaidOverview, wholeNumber } from "@lib/raid";
 import { RAID_LIMITS, type RaidPatch } from "@testify/shared";
 
-/** The controls on `/raid-protection`, each applied the moment it is pressed. */
 export default defineButton({
 	id: RAID_PANEL_ID,
 	ownerOnly: true,
@@ -14,7 +13,6 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null) return;
 
-		// Checked on every press, because a role can be taken away while the panel is still open.
 		const permissions = interaction.memberPermissions;
 		if (
 			permissions?.has(PermissionFlagsBits.ManageGuild) !== true ||

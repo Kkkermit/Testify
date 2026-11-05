@@ -34,7 +34,6 @@ type Words = Pick<NoticeInput, "title" | "body" | "tone">;
 
 const EMPTY: Words = { title: "", body: "", tone: "info" };
 
-/** The same form posts a new one and changes one; `notice` is the one being changed, or null. */
 function NoticeForm({
 	notice,
 	submitLabel,
@@ -289,7 +288,6 @@ function NoticeRow({ notice }: { notice: Notice }): React.JSX.Element {
 	);
 }
 
-/** Its own read, so a failure here leaves the rest of the tab working. */
 export function NoticesCard(): React.JSX.Element {
 	const { t } = useTranslation();
 	const notices = useOwnerNotices();

@@ -1,23 +1,18 @@
 import { type CommandOptionSummary, type CommandSummary } from "@testify/shared";
 
-/** The rules behind the generated form, kept out of the component so they can be tested without rendering. */
-
 type ArgValue = string | number | boolean;
 
-/** What kind of control an option's declared type earns. */
 type ControlKind = "text" | "number" | "boolean" | "choice" | "id";
 
 export function controlFor(option: CommandOptionSummary): ControlKind {
 	if (option.choices.length > 0) return "choice";
 	if (option.type === "boolean") return "boolean";
 	if (option.type === "integer" || option.type === "number") return "number";
-	// A user, channel or role is an ID here — the browser has no picker for a server the bot may not be in.
 	if (option.type === "user" || option.type === "channel" || option.type === "role") return "id";
 
 	return "text";
 }
 
-/** Which options a form should show: a subcommand's own, or the command's top-level ones. */
 export function optionsShown(command: CommandSummary | undefined, subcommand: string | null): CommandOptionSummary[] {
 	if (command === undefined) return [];
 	if (subcommand === null) return command.options;
@@ -25,7 +20,6 @@ export function optionsShown(command: CommandSummary | undefined, subcommand: st
 	return command.subcommands.find((candidate) => candidate.name === subcommand)?.options ?? [];
 }
 
-/** A command that is nothing but subcommands cannot be run without picking one. */
 export function needsSubcommand(command: CommandSummary | undefined): boolean {
 	return command !== undefined && command.subcommands.length > 0;
 }
@@ -48,14 +42,13 @@ function coerce(option: CommandOptionSummary, value: string): ArgValue {
 	if (controlFor(option) === "boolean") return value === "true";
 	if (controlFor(option) === "number") {
 		const parsed = Number(value);
-		// Left as the string when it is not a number, so the server's refusal names the option rather than NaN.
+		// Left as text when it is not a number, so the server's refusal names the option.
 		return Number.isFinite(parsed) ? parsed : value;
 	}
 
 	return value;
 }
 
-/** The required options with nothing in them, so the button can say why it is refusing. */
 export function missingRequired(options: CommandOptionSummary[], raw: Record<string, string>): string[] {
 	return options.filter((option) => option.required && (raw[option.name] ?? "") === "").map((option) => option.name);
 }

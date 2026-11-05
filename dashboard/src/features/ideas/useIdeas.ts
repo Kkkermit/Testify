@@ -32,7 +32,6 @@ export function useIdeaList(guildId: string, status: IdeaFilter, page: number): 
 	});
 }
 
-/** Not optimistic: turning the board on can be refused for a channel the bot cannot post in. */
 export function useSaveIdeaSettings(guildId: string): UseMutationResult<IdeaSettings, Error, IdeaSettingsPatch> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).ideaSettings();
@@ -50,7 +49,6 @@ export function useSaveIdeaSettings(guildId: string): UseMutationResult<IdeaSett
 	});
 }
 
-/** Both change the counts as well as the list, so everything under the board is read again. */
 export function useDecideIdea(
 	guildId: string,
 ): UseMutationResult<IdeaRow, Error, { ideaId: string; decision: IdeaDecision }> {

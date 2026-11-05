@@ -1,5 +1,3 @@
-/** The types more than one module in the casino shares. */
-
 /** Returns a whole number from 0 up to, but not including, `max`; `crypto.randomInt` in play, a fixed script in tests. */
 export type Roll = (max: number) => number;
 

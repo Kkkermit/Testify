@@ -22,10 +22,8 @@ import {
 } from "@lib/roles";
 import { ROLE_MENU_LIMITS, roleMenuBody } from "@testify/shared";
 
-/** Every control on `/role-menu`: the list of menus, and the editor each one opens. */
-
 async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately instead.
+	// A modal opened elsewhere cannot edit this message, so it answers privately.
 	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
 		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
 	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
@@ -118,7 +116,6 @@ export default defineButton({
 					throw new UserFacingError("That is as many menus as a server can have. Delete one to make another.");
 				}
 
-				// It starts in the channel the panel was opened in; the editor's picker moves it before it is posted.
 				const channelId = interaction.channelId ?? guild.systemChannelId;
 				if (channelId === null) throw new UserFacingError("Open `/role-menu` from a text channel.");
 

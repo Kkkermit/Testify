@@ -3,8 +3,6 @@ import { type Problem, problem } from "./problems";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/** A message the bot posts at a set time, once or every day or week from then. It never pings anybody. */
-
 export const SCHEDULE_LIMITS = {
 	maxMessage: 2_000,
 	maxPerGuild: 10,
@@ -27,7 +25,7 @@ export interface ScheduledMessage {
 	repeat: ScheduleRepeat;
 	/** ISO 8601, in UTC. */
 	nextAt: string;
-	/** False when the bot cannot post in the channel, so a message that will never arrive says so. */
+	/** False when the bot cannot post in the channel. */
 	canSend: boolean;
 }
 
@@ -70,7 +68,6 @@ export function scheduleTimeBlocked(nextAt: Date | null, now: Date): Problem | n
 	return null;
 }
 
-/** Why a new schedule cannot be saved, as the form and the bot both say it. */
 export function scheduleBlocked(
 	entry: { channelId: string | null; message: string; nextAt: Date | null },
 	now: Date,

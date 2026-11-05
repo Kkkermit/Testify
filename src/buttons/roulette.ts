@@ -20,8 +20,6 @@ import {
 } from "@lib/casino";
 import { modalForm } from "@lib/discord";
 
-/** A shared roulette round: anybody in the channel may bet, each through the same gates as the command. */
-
 function seatOf(interaction: ComponentInteraction): Seat | null {
 	if (interaction.guildId === null) return null;
 	const member = interaction.member;
@@ -148,7 +146,6 @@ export default defineButton({
 				}
 
 				await admit(context.client, seat);
-				// On the message the button sits on, so the channel keeps one table rather than a stack of them.
 				const round = await openRound(
 					{ guildId: seat.guildId, channelId: interaction.channelId, messageId: interaction.message.id },
 					{ userId: seat.userId, name: seat.name, private: isPrivate },

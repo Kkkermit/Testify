@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
@@ -10,7 +10,6 @@ export const goodbye = new Hono<ApiBindings>();
 
 goodbye.use("*", requireGuild);
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: GoodbyePatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned goodbyes on" : "Turned goodbyes off");
@@ -25,9 +24,10 @@ goodbye.get("/", async (context) => context.json(await readGoodbye(guildOf(conte
 goodbye.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, goodbyePatch);
+	const before = await readGoodbye(guild);
 
 	const settings = await applyGoodbye(guild, patch, context.get("session")?.userId ?? null);
-	await auditChange(context, { action: "goodbye.update", summary: summarise(patch) });
+	await auditSettings(context, { action: "goodbye.update", summary: summarise(patch), before, after: settings });
 
 	return context.json(settings);
 });

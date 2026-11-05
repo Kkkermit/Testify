@@ -16,7 +16,6 @@ export function useSettings(guildId: string): UseQueryResult<ServerSettings> {
 	});
 }
 
-/** One mutation key across the sections: a whole-document answer is only trusted while it is the only write in flight, and the refetch on settle decides otherwise. */
 export function useSaveSection<Patch>(
 	guildId: string,
 	section: string,

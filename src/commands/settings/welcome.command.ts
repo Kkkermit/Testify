@@ -5,7 +5,6 @@ import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepositor
 import { reply, successEmbed } from "@lib/discord";
 import { checkBackground, goodbyePanel, greetingFor, normaliseWelcome, readGoodbye, welcomePanel } from "@lib/welcome";
 
-/** One panel, plus the two things a panel cannot do: take a file upload, and post a real greeting. */
 export default defineCommand({
 	name: "welcome",
 	description: "Greets new members when they join, and says goodbye when they leave.",

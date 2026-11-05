@@ -35,7 +35,6 @@ function outOfRange(value: number, min: number, max: number): boolean {
 	return !Number.isInteger(value) || value < min || value > max;
 }
 
-/** Why a draft would be refused, in the words the form shows, so nobody saves and gets a 400 back. */
 export function draftProblem(draft: Draft, t: TFunction): string | null {
 	const { minMessages, maxMessages, minAmount, maxAmount, cooldownMinutes } = draft;
 
@@ -67,7 +66,6 @@ export function isDirty(draft: Draft, settings: TreasureSettings): boolean {
 	return (Object.keys(saved) as (keyof Draft)[]).some((field) => draft[field] !== saved[field]);
 }
 
-/** How often a drop can actually appear, which is the pair of numbers read together rather than separately. */
 export function describeRate(draft: Draft, t: TFunction): string {
 	const range = (low: number, high: number): string =>
 		low === high ? formatNumber(low) : `${formatNumber(low)}–${formatNumber(high)}`;

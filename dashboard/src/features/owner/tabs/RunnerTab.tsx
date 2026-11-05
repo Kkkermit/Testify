@@ -11,7 +11,6 @@ import { useRunCommand, useRunnable } from "@/features/owner/useRunner";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/** Runs an allowlisted owner command, with a form generated from the metadata Discord registers. */
 export function RunnerTab(): React.JSX.Element {
 	const { t } = useTranslation();
 	const catalogue = useRunnable();
@@ -23,7 +22,6 @@ export function RunnerTab(): React.JSX.Element {
 	const [values, setValues] = useState<Record<string, string>>({});
 
 	if (catalogue.isPending) return <Skeleton className="h-64 w-full" />;
-	// A picker with nothing in it reads as "no command may be run here" rather than as a failed read.
 	if (catalogue.isError) return <ErrorState as="h2" error={catalogue.error} onRetry={() => void catalogue.refetch()} />;
 
 	const commands = catalogue.data.commands;
@@ -39,7 +37,7 @@ export function RunnerTab(): React.JSX.Element {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<Card focal className="flex flex-col gap-4">
+			<Card className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("owner.runCommand")}</h2>
 					<p className="text-muted-foreground text-sm">{t("owner.runnerBody")}</p>

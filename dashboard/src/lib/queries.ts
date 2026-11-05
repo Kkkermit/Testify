@@ -1,4 +1,3 @@
-/** Query keys in one place, so nothing is a hand-written string that a rename can silently miss. */
 export const keys = {
 	setup: () => ["setup"] as const,
 	me: () => ["me"] as const,
@@ -16,11 +15,16 @@ export const keys = {
 	notices: () => ["notices"] as const,
 	support: () => ["support"] as const,
 	supportArticle: (id: string) => ["support", "article", id] as const,
-	/** Null is the bot-wide scope, which only the owner can read. */
 	commandToggles: (guildId: string | null) => ["command-toggles", guildId ?? "global"] as const,
 	guild: (id: string) => ({
 		all: () => ["guild", id] as const,
 		overview: () => ["guild", id, "overview"] as const,
+		// Under the overview's key, so every write that refreshes the overview refreshes the channel map too.
+		places: () => ["guild", id, "overview", "places"] as const,
+		// Under the overview too, since it is read from the same settings and refreshed by the same writes.
+		inbox: () => ["guild", id, "overview", "inbox"] as const,
+		week: () => ["guild", id, "overview", "week"] as const,
+		roleUses: () => ["guild", id, "overview", "role-uses"] as const,
 		setupChecklist: () => ["guild", id, "setup-checklist"] as const,
 		levelling: () => ["guild", id, "levelling"] as const,
 		welcome: () => ["guild", id, "welcome"] as const,
@@ -63,6 +67,7 @@ export const keys = {
 		insights: (days: number) => ["guild", id, "insights", days] as const,
 		changes: (days: number, source: string, query: string, page: number) =>
 			["guild", id, "changes", days, source, query, page] as const,
+		restoreRead: (path: string) => ["guild", id, "restore-read", path] as const,
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,

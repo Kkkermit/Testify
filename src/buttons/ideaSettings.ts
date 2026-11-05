@@ -4,7 +4,6 @@ import { UserFacingError } from "@core/errors";
 import { pickedChannelId } from "@lib/discord";
 import { applyIdeaSettings, IDEA_SETTINGS_ID, ideaSettingsPanel, readIdeaSettings } from "@lib/ideas";
 
-/** The controls on `/idea settings`, each applied the moment it is pressed. */
 export default defineButton({
 	id: IDEA_SETTINGS_ID,
 	ownerOnly: true,

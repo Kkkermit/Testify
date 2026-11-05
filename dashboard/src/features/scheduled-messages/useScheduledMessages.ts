@@ -16,7 +16,6 @@ export function useScheduledMessages(guildId: string): UseQueryResult<ScheduledM
 	});
 }
 
-/** Not optimistic: every write answers with the whole list, which is what the page then shows. */
 export function useAddScheduledMessage(
 	guildId: string,
 ): UseMutationResult<ScheduledMessageList, Error, ScheduledMessageInput> {
@@ -52,7 +51,6 @@ function useListMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (list) => {
-			// A whole-list answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, list);
 		},
 		onSettled: () => {

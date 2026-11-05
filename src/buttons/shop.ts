@@ -24,7 +24,6 @@ import {
 } from "@lib/economy";
 import { formatNumber } from "@lib/format";
 
-/** What the screen needs to know about the buyer, derived from their account. */
 export function balancesOf(account: EconomyAccount): Balances {
 	return {
 		wallet: account.wallet,
@@ -176,13 +175,11 @@ export default defineButton({
 		if (!interaction.isButton()) return;
 
 		if (context.action === "nav" || context.action === "page") {
-			// A tab or page press clears the selection, so it lands on the catalogue.
 			const { selectedId: _cleared, ...withoutSelection } = state;
 			await interaction.update(shopScreen(withoutSelection, balancesOf(await requireAccount(guildId, userId)), userId));
 			return;
 		}
 
-		// Selling is destructive and pays back half, so it asks first.
 		if (context.action === "sell") {
 			const account = await requireAccount(guildId, userId);
 			if (account.house === null) throw new UserFacingError("You do not own a house.");

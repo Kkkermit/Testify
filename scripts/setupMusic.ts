@@ -63,7 +63,6 @@ async function main(): Promise<void> {
 				),
 	);
 
-	// The bot runs the newest copy it can find, so say which one that is now rather than assume it is this one.
 	const found = findBinaries({});
 	if (found.ytDlp !== null && found.ytDlp !== target) {
 		say(

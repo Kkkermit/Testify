@@ -51,7 +51,6 @@ export const WINDOW_LABELS: Record<ChangeWindow, TranslationKey> = {
 	14: "changes.window14",
 };
 
-/** Removals and moderation read loudest, so a scan down the list stops on them first. */
 export function verbTone(verb: ChangeVerb): BadgeTone {
 	switch (verb) {
 		case "deleted":

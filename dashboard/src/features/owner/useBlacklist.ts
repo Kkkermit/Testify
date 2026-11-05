@@ -16,7 +16,6 @@ export function useBlacklist(): UseQueryResult<BlacklistRow[]> {
 	});
 }
 
-/** Both writes invalidate rather than patch, because neither answer is the whole list. */
 export function useBlockUser(): UseMutationResult<BlacklistRow, Error, BlacklistAdd> {
 	const client = useQueryClient();
 

@@ -20,7 +20,6 @@ describe("CARD_HEADING", () => {
 		expect(CARD_HEADING).toMatch(/\bleading-\w+/);
 	});
 
-	/** It was written out identically 28 times before it had a name. */
 	it("is the only place the card heading is spelled out", () => {
 		const literal = "font-display text-base";
 		const offenders = everySource(SRC)

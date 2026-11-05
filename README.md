@@ -567,8 +567,8 @@ Discord and served **from inside the bot process** — no second service to depl
 > **It is off by default, and a bot-only install needs none of this.** Leave `DASHBOARD_ENABLED` unset and
 > nothing below applies.
 
-It follows your device's light or dark setting out of the box, comes in twelve accent colours, and speaks
-**English, Spanish, German, French, Italian and Russian** — picked from the browser's own language and changeable
+It follows your device's light or dark setting out of the box, comes in twelve accent colours or one you pick yourself, and speaks
+**English, Spanish, German, French, Italian, Russian, Dutch and Japanese** — picked from the browser's own language and changeable
 from the Appearance screen. All of it is per browser: nothing you choose there affects anybody else.
 
 <p align="center">
@@ -591,11 +591,11 @@ from the Appearance screen. All of it is per browser: nothing you choose there a
 </tr>
 <tr>
 <td valign="top"><img alt="Casino settings: the casino switch, a switch per game and the bet limits" src="docs/dashboard/screenshots/casino.png"><br><sub><b>Casino</b> — open it, switch games off, set bet limits</sub></td>
-<td valign="top"><img alt="Server settings, each card a description beside its controls" src="docs/dashboard/screenshots/settings.png"><br><sub><b>Settings</b> — the switches with no screen of their own</sub></td>
+<td valign="top"><img alt="Server settings as rows, each setting's name beside its control" src="docs/dashboard/screenshots/settings.png"><br><sub><b>Settings</b> — the switches with no screen of their own</sub></td>
 </tr>
 <tr>
 <td valign="top"><img alt="The help page: ask a question, first steps and what each section is for" src="docs/dashboard/screenshots/help.png"><br><sub><b>Help</b> — answers from written articles, nothing made up</sub></td>
-<td valign="top"><img alt="The appearance screen: theme, accent, motion and language" src="docs/dashboard/screenshots/appearance.png"><br><sub><b>Appearance</b> — theme, accent, motion and language</sub></td>
+<td valign="top"><img alt="The appearance screen: theme, twelve accents and a colour of your own" src="docs/dashboard/screenshots/appearance.png"><br><sub><b>Appearance</b> — theme, an accent or your own colour, motion and language</sub></td>
 </tr>
 <tr>
 <td colspan="2" align="center"><img alt="The owner console's usage tab" src="docs/dashboard/screenshots/owner-console.png" width="80%"><br><sub><b>Owner console</b> — usage by command and server, and who ran what for 30 days; visible only to the bot's owners</sub></td>

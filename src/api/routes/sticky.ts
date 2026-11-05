@@ -31,7 +31,6 @@ async function listFor(guild: Guild): Promise<StickyList> {
 
 sticky.get("/", async (context) => context.json(await listFor(guildOf(context))));
 
-/** One request replaces the entry for its channel, so creating and editing are the same call. */
 sticky.put("/", async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, stickyPut);

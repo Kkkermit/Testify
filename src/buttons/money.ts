@@ -16,8 +16,6 @@ import {
 } from "@lib/economy";
 import { formatNumber } from "@lib/format";
 
-/** Quick-amount buttons for moving money between wallet and bank. */
-
 async function move(
 	action: MoneyAction,
 	guildId: string,

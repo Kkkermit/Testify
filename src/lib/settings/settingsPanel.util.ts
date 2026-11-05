@@ -23,7 +23,6 @@ export interface SettingsAction {
 }
 
 export interface SettingsPanelOptions {
-	/** The button handler's ID. */
 	id: string;
 	category: Category;
 	title: string;

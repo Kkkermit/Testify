@@ -33,10 +33,7 @@ function bitrateOf(format: RemoteFormat): number {
 	return format.abr ?? format.tbr ?? 0;
 }
 
-/**
- * Highest bitrate first; where none is stated, yt-dlp's own order decides, and it lists formats worst to best, so the
- * later one wins rather than the first — which would be the lowest quality on offer.
- */
+/** Highest bitrate first; with none stated, yt-dlp lists formats worst to best, so the later one wins. */
 function bestFirst(formats: RemoteFormat[]): RemoteFormat[] {
 	return formats
 		.map((format, position) => ({ format, position }))

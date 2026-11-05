@@ -19,19 +19,18 @@ export function CommandCard({
 	command: CommandSummary;
 	prefix: string;
 	place: CommandPlace | null;
-	/** Absent when nobody on this page may switch commands, which is most visitors on `/commands`. */
 	availability?: CommandAvailability;
 	onToggle?: (on: boolean) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const { icon: Icon, tint, wash } = featureLook(command.category);
+	const { icon: Icon, tint } = featureLook(command.category);
 
 	const off = availability === "off-here" || availability === "off-everywhere";
 
 	return (
-		<Card padding="compact" className={cn("flex flex-col gap-3", off && "opacity-60")}>
+		<Card padding="compact" className={cn("flex flex-col gap-3", off && "border-dashed")}>
 			<div className="flex items-start gap-3">
-				<span className={cn("rounded-card mt-0.5 shrink-0 p-2", wash, tint)} aria-hidden="true">
+				<span className={cn("rounded-card bg-muted mt-0.5 shrink-0 p-2", tint)} aria-hidden="true">
 					<Icon size={18} />
 				</span>
 
@@ -84,7 +83,7 @@ export function CommandCard({
 				<p className="text-muted-foreground flex items-center gap-2 text-xs">
 					<Shield size={12} aria-hidden="true" className="shrink-0" />
 					{t("commands.needs", {
-						permissions: command.permissions.map((flag) => permissionLabel(flag, t)).join(", "),
+						permissions: command.permissions.map((flag) => permissionLabel(flag, t)).join(t("common.listSeparator")),
 					})}
 				</p>
 			)}
@@ -110,7 +109,7 @@ export function CommandCard({
 								tabIndex={0}
 								className={cn(
 									"rounded-chip px-2 py-0.5 font-mono text-xs",
-									option.required ? "bg-primary/15 text-accent" : "bg-muted text-muted-foreground",
+									option.required ? "bg-accent-wash text-accent" : "bg-muted text-muted-foreground",
 								)}
 							>
 								{option.name}

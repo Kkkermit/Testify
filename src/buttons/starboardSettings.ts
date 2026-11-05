@@ -11,7 +11,6 @@ import {
 } from "@lib/starboard";
 import { STARBOARD_LIMITS } from "@testify/shared";
 
-/** The controls on `/starboard`, each applied the moment it is pressed. */
 export default defineButton({
 	id: STARBOARD_SETTINGS_ID,
 	ownerOnly: true,
@@ -20,7 +19,6 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null) return;
 
-		// Checked on every press, because a role can be taken away while the panel is still open.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change the starboard.");
 		}

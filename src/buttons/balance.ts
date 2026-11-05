@@ -11,7 +11,6 @@ import {
 	shopScreen,
 } from "@lib/economy";
 
-/** The quick actions on the balance panel. */
 export default defineButton({
 	id: BALANCE_PANEL_ID,
 	ownerOnly: true,
@@ -68,7 +67,6 @@ export default defineButton({
 				await interaction.update(balancePanel(view(), userId));
 				return;
 
-			// Hands off to the quick-amount chooser, which already validates the figure and comes back here.
 			case "dep":
 			case "wit":
 				await interaction.update(amountPanel(context.action, account, userId, "balance"));

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, SavingIndicator, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
+import { Field, SavingIndicator, savingStateOf, SELECT, SettingRows, Toggle, Warning } from "@/components/form";
 import {
 	Badge,
 	Button,
@@ -14,6 +14,7 @@ import {
 	EmptyState,
 	PageHeader,
 	Skeleton,
+	Summary,
 } from "@/components/primitives";
 import { restricted, slowmodeChoices, slowmodeText } from "@/features/channel-tools/channelTools.utils";
 import { useChannelTools, useUpdateChannel } from "@/features/channel-tools/useChannelTools";
@@ -21,7 +22,6 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
-/** Lock a channel or slow it down, from a picker, with every channel already restricted listed beneath. */
 export function ChannelToolsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -42,18 +42,22 @@ export function ChannelToolsPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("channelTools.title")}
 				subtitle={t("channelTools.subtitle")}
 				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}
 			/>
+
+			<Summary>
+				{limited.length === 0 ? t("channelTools.summaryNone") : t("channelTools.summary", { count: limited.length })}
+			</Summary>
 
 			{chosen === undefined ? (
 				<Card>
 					<EmptyState icon={<Lock size={28} />} title={t("channelTools.noneTitle")} body={t("channelTools.noneBody")} />
 				</Card>
 			) : (
-				<Card className="flex flex-col gap-4">
+				<SettingRows>
 					<Field label={t("channelTools.channel")} htmlFor="channel-tools-channel">
 						<select
 							id="channel-tools-channel"
@@ -85,7 +89,7 @@ export function ChannelToolsPage(): React.JSX.Element {
 					{update.error !== null && (
 						<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
 					)}
-				</Card>
+				</SettingRows>
 			)}
 
 			<section aria-labelledby="restricted-heading">
@@ -127,7 +131,7 @@ function ChannelControls({
 	busy: boolean;
 	onChange: (patch: { locked?: boolean; slowmodeSeconds?: number }) => void;
 }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<>
@@ -154,7 +158,7 @@ function ChannelControls({
 				>
 					{slowmodeChoices(channel.slowmodeSeconds).map((seconds) => (
 						<option key={seconds} value={seconds}>
-							{seconds === 0 ? t("channelTools.off") : slowmodeText(seconds, i18n.language)}
+							{seconds === 0 ? t("channelTools.off") : slowmodeText(seconds)}
 						</option>
 					))}
 				</select>
@@ -165,7 +169,7 @@ function ChannelControls({
 }
 
 function RestrictedRow({ channel, onChoose }: { channel: ToolChannel; onChoose: () => void }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<li className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
@@ -173,7 +177,7 @@ function RestrictedRow({ channel, onChoose }: { channel: ToolChannel; onChoose: 
 				<span className="text-sm font-medium">#{channel.name}</span>
 				{channel.locked && <Badge tone="warning">{t("channelTools.lockedBadge")}</Badge>}
 				{channel.slowmodeSeconds > 0 && (
-					<Badge>{t("channelTools.slowBadge", { length: slowmodeText(channel.slowmodeSeconds, i18n.language) })}</Badge>
+					<Badge>{t("channelTools.slowBadge", { length: slowmodeText(channel.slowmodeSeconds) })}</Badge>
 				)}
 			</div>
 			<Button variant="ghost" aria-label={t("channelTools.chooseName", { name: channel.name })} onClick={onChoose}>

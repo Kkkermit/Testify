@@ -1,12 +1,11 @@
 import { CircleDot, Eye, GitFork, Star, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Card, Eyebrow, PAGE_TITLE, Skeleton, StatTile } from "@/components/primitives";
+import { Card, SectionHeading, PAGE_TITLE, Skeleton, StatTile } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { SiteError } from "@/features/site/components/SiteError";
 import { useStanding } from "@/features/source/useSource";
 import { cn } from "@/lib/cn";
 
-/** What GitHub says of the repository without a token, read once an hour at most and only because this page asked. */
 export function Standing(): React.JSX.Element {
 	const { t } = useTranslation();
 	const standing = useStanding();
@@ -15,7 +14,7 @@ export function Standing(): React.JSX.Element {
 	return (
 		<header className="flex flex-col gap-4">
 			<div className="flex flex-col gap-2">
-				<Eyebrow>{t("source.eyebrow")}</Eyebrow>
+				<SectionHeading>{t("source.eyebrow")}</SectionHeading>
 				<h1 className={PAGE_TITLE}>{t("source.title")}</h1>
 				{repo === undefined ? (
 					standing.isError ? null : (
@@ -55,7 +54,7 @@ export function Standing(): React.JSX.Element {
 							<StatTile label={t("source.forks")} value={repo.forks} icon={GitFork} tint="text-accent" />
 						</li>
 						<li>
-							<StatTile label={t("source.watchers")} value={repo.watchers} icon={Eye} tint="text-feature-tickets" />
+							<StatTile label={t("source.watchers")} value={repo.watchers} icon={Eye} tint="text-hue-blue" />
 						</li>
 						<li>
 							<StatTile

@@ -1,12 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@testify/shared";
-import { FileText, LogOut, Palette, Search, ShieldQuestion } from "lucide-react";
+import { type DashboardUser, type ManageableGuild } from "@testify/shared";
+import { FileText, LogOut, Palette, Search, ShieldQuestion, UserCog } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { GuildSwitcher } from "@/app/layout/GuildSwitcher";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
-import { ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
+import { GROUP_HEADING, ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
 import { BotMark } from "@/components/brand/BotMark";
 import { FlagIcon } from "@/components/brand/FlagIcon";
 import { Avatar, Tooltip } from "@/components/primitives";
@@ -14,19 +14,23 @@ import { navigationFor, type NavAudience } from "@/config/navigation";
 import { shortcutLabel } from "@/features/search/quickSearch.utils";
 import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
 import { api } from "@/lib/api";
-import { BUILT_IN_BOT_NAME } from "@/lib/brand";
+import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
-/** Every row shares `ROW`, so all four icons sit on one vertical line and all four labels on another. */
-
 const FOOTER_LINKS = [
+	{ to: "/account", labelKey: "nav.account", hintKey: "nav.accountHint" },
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
 	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint" },
 	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint" },
 ] as const;
 
-const FOOTER_ICON = { "/appearance": Palette, "/terms": FileText, "/privacy": ShieldQuestion } as const;
+const FOOTER_ICON = {
+	"/account": UserCog,
+	"/appearance": Palette,
+	"/terms": FileText,
+	"/privacy": ShieldQuestion,
+} as const;
 
 export function Sidebar({
 	user,
@@ -39,11 +43,8 @@ export function Sidebar({
 	onSearch,
 }: NavAudience & {
 	user: DashboardUser | null;
-	/** Every server this person manages, for the switcher. */
 	guilds?: readonly ManageableGuild[];
-	/** The bot's own profile, so a fork's sidebar carries its identity rather than the original's. */
-	bot?: BotIdentity | undefined;
-	/** True inside the mobile drawer, where there is room for the labels. */
+	bot?: BotLook | undefined;
 	expanded?: boolean;
 	onNavigate?: () => void;
 	onSearch?: () => void;
@@ -63,7 +64,6 @@ export function Sidebar({
 		<nav
 			aria-label={t("nav.sections")}
 			onClick={(event) => {
-				// Only following a link leaves the drawer; a section toggle or the language picker keeps it open.
 				if (event.target instanceof Element && event.target.closest("a") !== null) onNavigate?.();
 			}}
 			className={cnSidebar(expanded)}
@@ -72,9 +72,9 @@ export function Sidebar({
 			<Link to="/guilds" className={cn(ROW, "mb-4")}>
 				{/* Boxed to 18px like every other row icon, so the wordmark starts on the label column too. */}
 				<span aria-hidden="true" className={ICON_SLOT}>
-					<BotMark src={bot?.avatarUrl} size={22} />
+					<BotMark src={bot?.avatarUrl} name={bot?.name ?? null} size={22} />
 				</span>
-				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
+				<span className={label("font-display truncate text-[0.9375rem] font-semibold")}>
 					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>
 			</Link>
@@ -82,7 +82,6 @@ export function Sidebar({
 			{onSearch !== undefined && <SearchRow onSearch={onSearch} expanded={expanded} label={label} />}
 
 			{navigationFor({ guild, isOwner }).map((group, index) => {
-				// A server group is headed by its name; every other group by a translated one.
 				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
 
 				return (
@@ -94,13 +93,9 @@ export function Sidebar({
 								{guild !== undefined && group.guildId === guild.id ? (
 									<GuildSwitcher guild={guild} guilds={guilds} expanded={expanded} />
 								) : (
-									// Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's.
 									<p
 										aria-hidden="true"
-										className={cn(
-											"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
-											expanded ? "" : "hidden lg:block",
-										)}
+										className={cn(GROUP_HEADING, "truncate px-2 pb-1", expanded ? "" : "hidden lg:block")}
 									>
 										{heading}
 									</p>
@@ -141,7 +136,7 @@ export function Sidebar({
 								to={to}
 								className={cn(
 									ROW,
-									"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+									"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 								)}
 							>
 								<Icon size={18} aria-hidden="true" className="shrink-0" />
@@ -156,7 +151,7 @@ export function Sidebar({
 						to="/appearance#language"
 						className={cn(
 							ROW,
-							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+							"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 						)}
 					>
 						<span aria-hidden="true" className={ICON_SLOT}>
@@ -174,7 +169,7 @@ export function Sidebar({
 						onClick={() => void signOut()}
 						className={cn(
 							ROW,
-							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+							"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 						)}
 					>
 						<LogOut size={18} aria-hidden="true" className="shrink-0" />
@@ -206,7 +201,7 @@ function SearchRow({
 				aria-keyshortcuts="Control+K Meta+K"
 				className={cn(
 					ROW,
-					"border-border text-muted-foreground hover:text-foreground hover:bg-muted mb-3 w-full border text-sm transition-colors duration-150",
+					"border-border text-muted-foreground hover:text-foreground hover:bg-card/60 mb-3 w-full border text-sm transition-colors duration-150",
 				)}
 			>
 				<Search size={18} aria-hidden="true" className="shrink-0" />
@@ -226,10 +221,10 @@ function SearchRow({
 	);
 }
 
-/** Opaque in the drawer, and capped to the viewport in the rail — a flex child otherwise stretches to a container that grows with the page. */
+/** Capped to the viewport in the rail — a flex child otherwise stretches to a container that grows with the page. */
 function cnSidebar(expanded: boolean): string {
 	const base = "border-border flex shrink-0 flex-col p-3";
 	return expanded
-		? `${base} bg-card h-full w-64 overflow-y-auto overscroll-contain border-r`
-		: `${base} bg-card/80 scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r backdrop-blur-sm md:flex lg:w-60`;
+		? `${base} bg-sidebar h-full w-64 overflow-y-auto overscroll-contain border-r`
+		: `${base} bg-sidebar scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r md:flex lg:w-60`;
 }

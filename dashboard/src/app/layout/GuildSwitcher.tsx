@@ -10,10 +10,9 @@ import { cn } from "@/lib/cn";
 
 const OPTION = cn(
 	ROW,
-	"text-muted-foreground hover:text-foreground hover:bg-muted/60 text-sm transition-colors duration-150",
+	"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 );
 
-/** The server group's heading, opening onto the same screen in each other server. */
 export function GuildSwitcher({
 	guild,
 	guilds,
@@ -40,7 +39,7 @@ export function GuildSwitcher({
 		<div
 			onKeyDown={(event) => {
 				if (event.key !== "Escape" || !open) return;
-				// The drawer also closes on Escape, and this press was only meant for the list.
+				// The drawer closes on Escape too, and this press is only for the list.
 				event.stopPropagation();
 				setOpen(false);
 				buttonRef.current?.focus();
@@ -56,7 +55,7 @@ export function GuildSwitcher({
 					onClick={() => {
 						setOpen((was) => !was);
 					}}
-					className={cn(ROW, "hover:bg-muted/60 w-full text-left transition-colors duration-150")}
+					className={cn(ROW, "hover:bg-card/60 w-full text-left transition-colors duration-150")}
 				>
 					<span aria-hidden="true" className={ICON_SLOT}>
 						<Avatar name={guild.name} url={iconUrl} size={20} seed={guild.id} />

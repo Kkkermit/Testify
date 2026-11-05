@@ -173,8 +173,8 @@ and CI both do.
 - **`resolve.dedupe` plus explicit `react` / `react-dom` aliases**, resolved through
   `createRequire(import.meta.url)` so they find whichever copy the app itself imports rather than a hardcoded
   path that breaks the day the hoisting changes.
-- **`manualChunks`** gives three.js its own ~513 kB chunk. Left in `vendor` it would be in the initial load,
-  which is the opposite of lazy.
+- **`manualChunks`** gives the docs' Markdown renderer its own chunk and everything else from `node_modules` a
+  `vendor` chunk, so an app change does not invalidate the whole cache.
 - An alias from `@testify/shared` to its **source**, so no build step sits between editing shared and seeing it.
 
 ---
@@ -193,19 +193,18 @@ src/
 │   ├── ErrorState.tsx  What a failed query renders.
 │   └── layout/         Sidebar, SidebarLink, SidebarSection, MobileNav
 ├── components/
-│   ├── brand/          Logo, LogoTile, BotMark — the mark, inheriting currentColor
+│   ├── brand/          BotMark, BotBanner, FlagIcon — the bot's own picture and banner
 │   ├── primitives/     Avatar Badge Button Card DataList EmptyState PageHeader Pager
 │   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
 │   │                   SavingIndicator Toggle Warning + fieldStyles.ts
-│   ├── motion/         Backdrop (three.js), Reveal, AnimatedNumber
 │   └── ui/             Reserved for shadcn's CLI. Excluded from coverage — keep your own out.
 ├── config/
 │   ├── navigation.ts   The sidebar, as data
-│   └── features.ts     Each bot feature's icon, tint and dashboard path
+│   └── features.ts     Each bot feature's icon, hue and dashboard path
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
-├── hooks/              usePageTitle usePrefersReducedMotion useCountUp useDocumentVisible useDebounced
-├── lib/                api cn queries redirect sanitise tint + three/ for the backdrop maths
+├── hooks/              usePageTitle usePrefersReducedMotion useDocumentVisible useDebounced
+├── lib/                api cn colour customAccent datetime intl queries redirect sanitise tint tokens
 └── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
 
@@ -448,18 +447,19 @@ Three files with their own segmented control is three places to fix an `aria-pre
 
 ### Primitives
 
-| Component                                                    | Notes                                                                   |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>` |
-| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`          |
-| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                  |
-| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`             |
-| `PageHeader`                                                 | `title`, `subtitle`, `action`, `eyebrow` — the server, on guild screens |
-| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                    |
-| `Skeleton`                                                   | What `isPending` returns                                                |
-| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike      |
-| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page    |
-| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                         |
+| Component                                                    | Notes                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>`  |
+| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`           |
+| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                   |
+| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`              |
+| `PageHeader`                                                 | `title`, `subtitle`, `action`, `server` — a breadcrumb, on guild screens |
+| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                     |
+| `Skeleton`                                                   | What `isPending` returns                                                 |
+| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike       |
+| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page     |
+| `Summary`                                                    | The one sentence under a page's header saying what the feature does now  |
+| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                          |
 
 ### Form
 
@@ -471,6 +471,9 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Toggle`                     | A real checkbox with `role="switch"`; `hideLabel` for a labelled row                                          |
 | `SavingIndicator`            | `savingStateOf(busy, succeeded)`                                                                              |
 | `Warning`                    | Every refusal and hierarchy warning                                                                           |
+| `SettingRows`                | One panel of rows divided by hairlines; `title`, `description`, `action`, and `onSubmit` to make it a form    |
+| `FieldGroup`                 | A row's name over several controls; `named={false}` when the control inside already carries the name          |
+| `RowActions`                 | A panel's buttons, lined up under the controls rather than under the names                                    |
 | `fieldStyles.ts`             | `FIELD` `LABEL` `SELECT` `FIELD_GROUP` `CHECK_ROW` `SCROLL_LIST`                                              |
 
 > [!WARNING]
@@ -478,6 +481,31 @@ Three files with their own segmented control is three places to fix an `aria-pre
 > Linux and one on macOS or Windows, so the import resolved to the class strings there and the page died at
 > start-up with `does not provide an export named 'Field'`. `tests/core/conventions.test.ts` now fails on any
 > two modules differing only by case.
+
+### A feature page is a summary over rows
+
+Every server screen reads the same way: `PageHeader`, then a `Summary` saying in one sentence what the feature does
+right now, then its settings as `SettingRows`, one panel per decision. A list page keeps its list and gains only the
+summary. Five things about the rows are easy to get wrong:
+
+- **Inside `SettingRows`, `Field`, `Toggle`, `CheckList`, `FieldGroup` and `RowActions` become rows by themselves**,
+  through the `RowLayout` context: the name in an 18rem column on the left, the control on the right. Nothing is
+  passed to them. `RowLayout.Provider value={false}` puts a form back to stacked fields inside a row.
+- **The panel pads and divides its direct children**, so each child is one row. A bordered list — a `DividedList`, a
+  table — goes inside a plain `<div>`, or it is padded and divided twice; a `<form>` as a child is one row however
+  many fields it holds, which is why the panel takes `onSubmit` instead.
+- **The summary is a rule in `<name>.utils.ts`**, tested like any other, because it is where a page states a fact
+  the reader acts on. It leads with the gravest state that is still true, and it is written as a sentence in every
+  language — a count alone ("1 switched off here") is a fragment.
+- **A refusal lands in the panel that caused it.** A page with several panels tracks which one wrote last and renders
+  the error there, never once per panel and never at the foot of the page.
+- **Anything that posts shows the post beside its editor**, through `PostPreview`, in the bot's own name and
+  picture. A post whose words are the bot's own, like a giveaway's, reads them from `@testify/shared`, where the bot
+  reads them too, so the preview cannot drift from what is sent.
+- **Beside the preview, `SendTest`** sends the draft to the reader's own direct messages. It reads the server from
+  the route, takes a `TestPost` and disables itself while the message is blank; the line beside it is its status and
+  every refusal (`sendTestStatus`). A post whose controls cannot work in a direct message, a ticket panel or a
+  giveaway, does not get one.
 
 ### Tooltips describe, they never name
 
@@ -506,7 +534,7 @@ or a taken channel until it has gone.
 Tailwind v4, CSS-first. **Everything comes from `@theme` in `src/index.css`.**
 
 - **No component writes a colour, a radius or a duration.** They are tokens — including the
-  `--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. **A hex value
+  `--color-hue-*` colours and `--radius-card` — which is what makes a fork's rebrand one file. **A hex value
   in a `.tsx` is a review comment.**
 - **Nor does one write its own padding.** `Card` takes `padding`, and all three values use the same 24px inline
   padding so every card's content starts on the same column whatever its density. A card reaching for `p-4`
@@ -525,26 +553,12 @@ Tailwind v4, CSS-first. **Everything comes from `@theme` in `src/index.css`.**
 
 `cn()` in `src/lib/cn.ts` is clsx + tailwind-merge — use it wherever classes are conditional or merged.
 
-### The WebGL backdrop
-
-`components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things keep an
-ornament from costing anything:
-
-- **three is imported dynamically and chunked on its own.**
-- **`prefers-reduced-motion` skips the import entirely**, rather than loading three and then sitting still. So
-  does a machine with no WebGL; `createStarfield` returns null rather than throwing.
-- **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, easing and
-  parallax — pure and unit tested. `starfield.ts` is the one file excluded from coverage.
-- **It reads the palette** off `:root` rather than restating it.
-
-The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never take a click.
-
 ---
 
 ## 13. Copy and languages
 
 Every string the dashboard renders comes from `src/i18n/locales/*.json`. English is the source; Spanish, German,
-French, Italian and Russian are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
+French, Italian, Russian, Dutch and Japanese are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
 rendering `nav.serrvers`.
 
 Writing a screen:
@@ -602,21 +616,26 @@ export interface NavGroup {
 }
 ```
 
-A server's screens are grouped into collapsible sections — **Community**, **Moderation**, **Economy**,
-**Entertainment**, **Channels** — because a flat list grew past what one glance takes. `items` stays for the
-screens that are not a category — Overview and Settings. A screen goes in the section it is decided alongside,
-not the one its command happens to be filed under: automod and audit logging are `settings` commands and still
-sit in Moderation, and Music was once in Economy, which it has nothing to do with. `navigation.test.ts` refuses a
-section of one screen and two screens in one section sharing an icon. Three things are load-bearing:
+Inside a server the sidebar is Overview, Channels, Members and Settings, then **Community**, **Messages**,
+**Moderation**, **Stats**, **Economy** and **Entertainment**, each holding only the screens its name says, with no
+catch-all. It never lists the server's channels: those are on the Channels page, in Discord's order, and a feature's
+channel is chosen on that feature's own page ([AGENTS §24](../../AGENTS.md#24-the-dashboard) says why). Every
+feature's own page sits in one of those sections, which are also what quick search and the help page read.
+`navigation.test.ts` pins the full set of server paths and which screens each section holds, refuses a section of
+one screen, and refuses two screens in one section sharing an icon. Four things are load-bearing:
 
+- **The Channels page names no channel its reader cannot see.** `channelTree` skips every channel whose name is
+  `null`.
 - **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
   toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed
   section at that width would hide the icons and leave nothing to click. The button being `display: none` is
   what keeps `aria-expanded="false"` from contradicting a list the rail is still showing.
 - **The section holding the current page opens itself** (`sectionHolds`), so a collapsed section can never hide
   where you are.
-- **`allNavItems` reaches into sections.** It is what every flat consumer reads; a screen reachable only from a
-  section would otherwise look like it had left the navigation.
+- **`allNavItems` reaches into sections.** It is what every flat consumer reads; a screen
+  reachable only from a section would otherwise look like it had left the navigation.
+- **A highlight in the sidebar is `bg-card`.** The sidebar's own colour is the light theme's `muted`, so a
+  `bg-muted` selection disappears into it.
 
 ### Three widths
 
@@ -722,39 +741,46 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 
 ## 18. Current screens
 
-| Route                            | Screen                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `/sign-in`                       | One button; also the setup screen for a half-install                                     |
-| `/guilds`                        | Picker, with an invite card for guilds without the bot                                   |
-| `/guilds/:id`                    | Stat tiles, feature grid, permission warnings, recent changes                            |
-| `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                                         |
-| `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                             |
-| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next                        |
-| `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                       |
-| `/guilds/:id/automod`            | Discord's own filters — no database behind it                                            |
-| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted                |
-| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                                       |
-| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now                     |
-| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                                |
-| `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                       |
-| `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it                  |
-| `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star                 |
-| `/guilds/:id/temp-voice`         | The lobby, made here if need be, and what each new voice channel is like                 |
-| `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                                   |
-| `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                              |
-| `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first                      |
-| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen                     |
-| `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                            |
-| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket                     |
-| `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                               |
-| `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row                          |
-| `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page                     |
-| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban             |
-| `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats     |
-| `/guilds/:id/commands`           | Per-command switches for this server                                                     |
-| `/commands`                      | Every command, searchable, with the coverage tile                                        |
-| `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                                          |
-| `/owner`                         | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control |
+| Route                             | Screen                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `/sign-in`                        | One button; also the setup screen for a half-install                                        |
+| `/guilds`                         | Picker, with an invite card for guilds without the bot                                      |
+| `/guilds/:id`                     | Stat tiles, a setup checklist, feature grid, permission warnings, changes                   |
+| `/guilds/:id/channels`            | What the bot does in each channel, then the server-wide features                            |
+| `/guilds/:id/inbox`               | Unclaimed tickets, ideas waiting, missing permissions and channels a feature cannot post in |
+| `/guilds/:id/week`                | What the bot will do in the next seven days, a day at a time, in the reader's time zone     |
+| `/guilds/:id/roles`               | Every role and how many features give or read it, deleted roles a setting names first       |
+| `…/roles/:roleId`                 | One role and everything that gives or reads it: what deleting it would stop                 |
+| `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn and edited in place                       |
+| `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                            |
+| `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                |
+| `/guilds/:id/birthdays`           | Where birthdays are posted and in what words, and whose come next                           |
+| `/guilds/:id/audit-log`           | Grouped event checklist held as a draft until Save                                          |
+| `/guilds/:id/automod`             | Discord's own filters — no database behind it                                               |
+| `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                   |
+| `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                          |
+| `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                        |
+| `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                   |
+| `/guilds/:id/role-menus`          | Menus members pick roles from; nothing above you or that moderates                          |
+| `/guilds/:id/ideas`               | The idea board's channel and switch, every idea, and the decision on it                     |
+| `/guilds/:id/starboard`           | Where starred messages go, the stars it takes, and the author's own star                    |
+| `/guilds/:id/temp-voice`          | The lobby, made here if need be, and what each new voice channel is like                    |
+| `/guilds/:id/sticky`              | A list keyed by channel; `PUT` upserts                                                      |
+| `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                 |
+| `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                         |
+| `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                        |
+| `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                               |
+| `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                        |
+| `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                  |
+| `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                             |
+| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                        |
+| `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
+| `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats        |
+| `/guilds/:id/commands`            | Per-command switches for this server                                                        |
+| `/commands`                       | Every command, searchable, with the coverage tile                                           |
+| `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
+| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
+| `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the
@@ -814,8 +840,10 @@ precisely the screen you want when something is wrong.
 
 `GET /api/bot` returns the application's own profile and every brand surface reads it, so a fork looks like its
 own bot without a line of CSS. The banner is **not** in the READY payload — `client.user.banner` is undefined
-until the user is fetched over REST, so `botIdentity()` fetches once and caches for an hour. Everything falls
-back to `components/brand/Logo`; a brand mark is never worth a broken image icon.
+until the user is fetched over REST, so `botIdentity()` fetches once and caches for an hour. The bot's picture and
+banner are always what is drawn: `useBotLook()` answers with the ones it last gave until the live profile lands,
+and `BotMark` draws the bot's initial only when there is no picture at all. There is no built-in logo to fall back
+to, and one must not be added ([AGENTS §24](../../AGENTS.md#the-dashboard-wears-the-bots-face)).
 
 ---
 
@@ -841,7 +869,7 @@ the wrong file.
 | Page title size and header slot | `components/primitives/PageHeader.tsx`                | Every page                              |
 | Labelled-control spacing        | `components/form/fieldStyles.ts`                      | Every form row                          |
 | Page width and vertical rhythm  | `app/AppShell.tsx`                                    | Every page                              |
-| A feature's icon and tint       | `config/features.ts`                                  | Overview grid, anywhere a feature shows |
+| A feature's icon and path       | `config/features.ts`                                  | Overview grid, anywhere a feature shows |
 | Sidebar shape and grouping      | `config/navigation.ts`                                | Sidebar, rail, drawer                   |
 | Native control appearance       | `@layer base` in `src/index.css`                      | Selects, checkboxes, scrollbars         |
 
@@ -851,22 +879,25 @@ Names are **roles, not colours**. `--color-destructive` is red today; the name s
 makes it orange. Renaming a token to its hue is how a palette stops being swappable.
 
 Every value is `light-dark(light, dark)`, so one line carries both themes and neither can be edited without the
-other in view. The dark half is listed first below because it is the theme the product was designed in.
+other in view. The values come from the channels design in [`ui-uplift.md`](ui-uplift.md): a graphite dark theme
+and a cool grey light one, with plum as the accent.
 
 | Token                        | Dark                                                                         | Light                                                                        | What it is for                                                                     |
 | ---------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `--color-background`         | ![](https://img.shields.io/badge/%20-%20-07070b?style=flat-square) `#07070b` | ![](https://img.shields.io/badge/%20-%20-f4f4f9?style=flat-square) `#f4f4f9` | The page. Everything else sits on it                                               |
-| `--color-foreground`         | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | ![](https://img.shields.io/badge/%20-%20-15151f?style=flat-square) `#15151f` | Body text, headings, an active icon                                                |
-| `--color-muted`              | ![](https://img.shields.io/badge/%20-%20-1c1c2a?style=flat-square) `#1c1c2a` | ![](https://img.shields.io/badge/%20-%20-e9e8f2?style=flat-square) `#e9e8f2` | A recessed fill: secondary buttons, hover states, icon tiles                       |
-| `--color-muted-foreground`   | ![](https://img.shields.io/badge/%20-%20-a2a2ba?style=flat-square) `#a2a2ba` | ![](https://img.shields.io/badge/%20-%20-55556e?style=flat-square) `#55556e` | Secondary text, meta lines, an inactive icon                                       |
-| `--color-card`               | ![](https://img.shields.io/badge/%20-%20-12121c?style=flat-square) `#12121c` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Every card and panel surface                                                       |
-| `--color-popover`            | ![](https://img.shields.io/badge/%20-%20-171722?style=flat-square) `#171722` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
-| `--color-border`             | ![](https://img.shields.io/badge/%20-%20-262639?style=flat-square) `#262639` | ![](https://img.shields.io/badge/%20-%20-dcdae8?style=flat-square) `#dcdae8` | Card borders, dividers, table rules                                                |
-| `--color-input`              | ![](https://img.shields.io/badge/%20-%20-7676a0?style=flat-square) `#7676a0` | ![](https://img.shields.io/badge/%20-%20-6b6b8a?style=flat-square) `#6b6b8a` | Field borders — further from the page than a divider, so a control looks touchable |
-| `--color-primary`            | ![](https://img.shields.io/badge/%20-%20-7c3aed?style=flat-square) `#7c3aed` | ![](https://img.shields.io/badge/%20-%20-6d28d9?style=flat-square) `#6d28d9` | The one action colour: primary buttons, the active nav marker                      |
+| `--color-background`         | ![](https://img.shields.io/badge/%20-%20-1f2125?style=flat-square) `#1f2125` | ![](https://img.shields.io/badge/%20-%20-f2f3f6?style=flat-square) `#f2f3f6` | The page. Everything else sits on it                                               |
+| `--color-foreground`         | ![](https://img.shields.io/badge/%20-%20-eceef1?style=flat-square) `#eceef1` | ![](https://img.shields.io/badge/%20-%20-1b1e24?style=flat-square) `#1b1e24` | Body text, headings, an active icon                                                |
+| `--color-sidebar`            | ![](https://img.shields.io/badge/%20-%20-191b1f?style=flat-square) `#191b1f` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | The sidebar, a step back from the page as Discord's own column is                  |
+| `--color-muted`              | ![](https://img.shields.io/badge/%20-%20-33363c?style=flat-square) `#33363c` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | A recessed fill: secondary buttons, hover states, icon tiles                       |
+| `--color-muted-foreground`   | ![](https://img.shields.io/badge/%20-%20-a2a7b0?style=flat-square) `#a2a7b0` | ![](https://img.shields.io/badge/%20-%20-565d6b?style=flat-square) `#565d6b` | Secondary text, meta lines, an inactive icon                                       |
+| `--color-card`               | ![](https://img.shields.io/badge/%20-%20-282b30?style=flat-square) `#282b30` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Every card and panel surface                                                       |
+| `--color-popover`            | ![](https://img.shields.io/badge/%20-%20-2e3137?style=flat-square) `#2e3137` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
+| `--color-border`             | ![](https://img.shields.io/badge/%20-%20-383c43?style=flat-square) `#383c43` | ![](https://img.shields.io/badge/%20-%20-d9dde4?style=flat-square) `#d9dde4` | Card borders, dividers, table rules                                                |
+| `--color-input`              | ![](https://img.shields.io/badge/%20-%20-7d838e?style=flat-square) `#7d838e` | ![](https://img.shields.io/badge/%20-%20-767d8a?style=flat-square) `#767d8a` | Field borders — further from the page than a divider, so a control looks touchable |
+| `--color-primary`            | ![](https://img.shields.io/badge/%20-%20-bf3a94?style=flat-square) `#bf3a94` | ![](https://img.shields.io/badge/%20-%20-8a2a6b?style=flat-square) `#8a2a6b` | The one action colour: primary buttons, the active nav marker                      |
 | `--color-primary-foreground` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Text on primary                                                                    |
-| `--color-accent`             | ![](https://img.shields.io/badge/%20-%20-a78bfa?style=flat-square) `#a78bfa` | ![](https://img.shields.io/badge/%20-%20-5b21b6?style=flat-square) `#5b21b6` | **Every violet that is text**: links, the eyebrow rule, the WebGL field            |
-| `--color-ring`               | ![](https://img.shields.io/badge/%20-%20-a78bfa?style=flat-square) `#a78bfa` | ![](https://img.shields.io/badge/%20-%20-6d28d9?style=flat-square) `#6d28d9` | The focus ring, and nothing else                                                   |
+| `--color-accent`             | ![](https://img.shields.io/badge/%20-%20-e08ac4?style=flat-square) `#e08ac4` | ![](https://img.shields.io/badge/%20-%20-7a2260?style=flat-square) `#7a2260` | **Every accent colour that is text**: links, live state                            |
+| `--color-accent-wash`        | ![](https://img.shields.io/badge/%20-%20-3a2433?style=flat-square) `#3a2433` | ![](https://img.shields.io/badge/%20-%20-f6e9f2?style=flat-square) `#f6e9f2` | Behind a chosen row or chip, under accent text                                     |
+| `--color-ring`               | ![](https://img.shields.io/badge/%20-%20-e08ac4?style=flat-square) `#e08ac4` | ![](https://img.shields.io/badge/%20-%20-8a2a6b?style=flat-square) `#8a2a6b` | The focus ring, and nothing else                                                   |
 | `--color-success`            | ![](https://img.shields.io/badge/%20-%20-3ddc97?style=flat-square) `#3ddc97` | ![](https://img.shields.io/badge/%20-%20-047857?style=flat-square) `#047857` | Saved, connected, healthy                                                          |
 | `--color-warning`            | ![](https://img.shields.io/badge/%20-%20-fbbf24?style=flat-square) `#fbbf24` | ![](https://img.shields.io/badge/%20-%20-a16207?style=flat-square) `#a16207` | A missing permission, a hierarchy problem, "nothing set up"                        |
 | `--color-destructive`        | ![](https://img.shields.io/badge/%20-%20-dc2626?style=flat-square) `#dc2626` | ![](https://img.shields.io/badge/%20-%20-b91c1c?style=flat-square) `#b91c1c` | Delete, leave, block — as a **fill**, always with white on it                      |
@@ -880,43 +911,59 @@ Two conventions worth keeping:
 - **`--color-ring` is used by exactly one rule** — `:focus-visible` in the base layer. Keeping it separate from
   `--color-accent` means a rebrand can make the focus ring louder than the brand without touching links.
 
-### 19.3 Feature tints
+**The accent is the reader's to change.** Appearance offers the twelve accents as swatches and a colour of the
+reader's own, picked or typed as a hex code, RGB or HSL. A colour of their own is fitted to each theme by
+`customAccent` (`lib/customAccent.ts`), which darkens or lightens it only as far as the thresholds above need, and is
+worn through `[data-accent="custom"]`. Nothing on a screen may assume the accent is plum: draw with `primary`,
+`accent`, `accent-wash` and `ring`, never with a hue.
 
-Six hues, used as an icon colour and as a 15% wash behind it. The grouping is by **feel rather than by
-subsystem** — audit logging reads the tickets blue because it is an operational screen, not because it is a
-ticket. Regroup them freely; the only constraint is the contrast rule below.
+### 19.3 Hues
 
-| Token                        | Value     | Feature keys that read it (`config/features.ts`)              |
-| ---------------------------- | --------- | ------------------------------------------------------------- |
-| `--color-feature-levelling`  | `#a78bfa` | `levelling`                                                   |
-| `--color-feature-economy`    | `#fbbf24` | `economy`, `lottery`, `treasure`, `games`                     |
-| `--color-feature-moderation` | `#f87171` | `moderation`, `automod`, `anti-link`, `verification`, `owner` |
-| `--color-feature-welcome`    | `#3ddc97` | `welcome`, `auto-roles`                                       |
-| `--color-feature-tickets`    | `#60a5fa` | `tickets`, `audit-logging`, `voice-stats`, `info`             |
-| `--color-feature-community`  | `#f472b6` | `sticky`, `counting`, `giveaway`, `community`, `fun`          |
+Six colours, each naming a part of the bot. A feature or command category wears its hue **on its icon only**, over
+the neutral `bg-muted` tile, so the Commands page and the overview's feature grid sort themselves by kind at a glance
+while the accent stays the one colour for what can be pressed. The groups follow the sidebar's sections.
 
-Each is a **text colour at AA on the page background** and is paired with `/15` as a fill. A tint used as a fill
-at full strength will not pass contrast for the icon sitting on it — check both if you change one.
+| Token                   | Light     | Dark      | What it names                                               |
+| ----------------------- | --------- | --------- | ----------------------------------------------------------- |
+| `--color-hue-green`     | `#047857` | `#3ddc97` | Community: welcome, birthdays, levelling, role menus, ideas |
+| `--color-hue-blue`      | `#1d4ed8` | `#60a5fa` | Messages, stats and information: sticky, scheduled, `info`  |
+| `--color-hue-red`       | `#b91c1c` | `#f87171` | Moderation and support: automod, cases, tickets, `owner`    |
+| `--color-hue-amber`     | `#a16207` | `#fbbf24` | Money: the economy, the casino, the lottery, treasure       |
+| `--color-hue-pink`      | `#be185d` | `#f472b6` | Entertainment: music and giveaways                          |
+| `--color-hue-violet`    | `#6d28d9` | `#a78bfa` | Games: `fun` and `games`                                    |
+| `text-muted-foreground` | —         | —         | The bot's own settings: `settings`, `developer`             |
+
+`config/features.ts` holds the mapping. `features.test.ts` fails if the categories fall into fewer hues than there are,
+or one reaches for a colour that is not measured. Stat tiles colour their icon with a `tint`, and the owner console's
+usage panels each draw their bars in a hue at `/20`. Lettered avatars (`lib/tint.ts`), code highlighting and the docs'
+important note read the same tokens.
+
+Each is a **text colour at AA on a card** and at 3:1 on the recessed fill an icon sits on, in both themes;
+`contrast.test.ts` measures every one. A wash of the hue behind the icon is what made a page of twenty tiles loud, so
+the tile stays `bg-muted`.
 
 `featureLook()` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before
 the dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
 
 ### 19.4 Type
 
-**Three faces, all self-hosted, 104 kB for the lot.** Before the rewrite `@theme` named `"Inter var"` with no
-`@font-face` behind it, so every install had silently been rendering in `system-ui` — the scale below meant
-nothing until the faces actually existed.
+**Two faces, both self-hosted, split by script.** Rubik is the whole interface, headings included, at a heavier
+weight rather than in a second family; its rounded corners sit close to Discord's own type, which is the thing
+every screen is configuring. Fira Mono marks what is typed literally: ids, placeholders such as `{user}`, code.
 
-| Token            | Face           | Job                                                     |
-| ---------------- | -------------- | ------------------------------------------------------- |
-| `--font-sans`    | Inter          | Everything that is prose or a control                   |
-| `--font-display` | Space Grotesk  | The page title, every card heading, the brand — 32 uses |
-| `--font-mono`    | JetBrains Mono | Numbers, IDs, the eyebrow, a command name — 42 uses     |
+| Token            | Face      | Job                                                 |
+| ---------------- | --------- | --------------------------------------------------- |
+| `--font-sans`    | Rubik     | Everything that is prose or a control               |
+| `--font-display` | Rubik     | The page title, every card heading, the brand       |
+| `--font-mono`    | Fira Mono | Ids, placeholders, a command name, code in the docs |
 
-Inter and Space Grotesk are `<link rel="preload">`-ed in `index.html`; mono is not, because it carries small
-labels where a swap is much less visible than it would be in a heading. Verified in a production build that
-each font is fetched **once** — a preload that does not dedupe is worse than no preload. No external host, so
-the CSP is untouched and a self-hosted bot still phones nowhere.
+Each face is three files, Latin, Latin Extended and Cyrillic, each with its `unicode-range`, so a reader only
+downloads the scripts their language uses and Russian gets Cyrillic from the same family. Japanese has no file here:
+a Japanese face is several megabytes, so it falls through `system-ui` to the reader's own (Hiragino, Yu Gothic,
+Noto Sans JP), which is what every other Japanese page they read uses. Rubik is variable from
+300 to 900; Fira Mono ships 400 and 700. Only Rubik's Latin file is `<link rel="preload">`-ed in `index.html`. The
+licences sit beside the files in `public/fonts`. No external host, so the CSP is untouched and a self-hosted bot
+still phones nowhere.
 
 Sizes, measured across `dashboard/src` rather than aspirational: **three do 96% of the work.**
 
@@ -941,32 +988,35 @@ Rules that hold today and are worth keeping:
 
 - **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them, and it caught the
   owner console mounting the whole of `CommandsPage` — `PageHeader` and all — inside a tab.
-- **A guild screen names its server above that `<h1>`**, in the `eyebrow`. With the drawer closed on a phone
-  nothing else on the page says which server the switches belong to. The overview is exempt: its title is the
-  name already.
+- **A guild screen names its server above that `<h1>`**, as a breadcrumb in `server`. With the drawer closed on a
+  phone nothing else on the page says which server the switches belong to. The overview is exempt: its title is
+  the name already.
 - **Headings never skip a level.** Every card heading is an `<h2>`; two `<h3>`s in the owner console were
   jumping straight from the page's `<h1>` and left a hole in the outline.
 - **A card heading is `CARD_HEADING`**, not a string you write out — it was spelled identically in 28 files
   before it had a name, and the line height has to live on it. The step between a page and a card is carried by
   the size _and_ the face; adding a third size in between makes cards compete with the page.
-- **A section label is an `Eyebrow`, not a heading you style yourself.** 14 uses, and ten of them were
-  hand-rolled copies of the same class string until the primitive grew an `as` prop.
+- **A section label is a `SectionHeading`, not a heading you style yourself.** It is the page's own type at
+  `text-sm font-semibold`, with an optional count in muted text, and takes `as` to become an `<h2>`. Letterspaced
+  uppercase labels are gone: they read as a template rather than as a heading.
 - **An ID is always `font-mono text-xs`** with `--color-muted-foreground`. It is a reference, not a name.
+- **A number is the page's own face with `tabular-nums`, never mono.** A stat tile, a count, a share or a size
+  lines its digits up without changing family; mono is for what is typed literally, and a figure is not.
+- **A label is sentence case** — a stat tile's, a tab's, a sidebar group's. Nothing in the interface is
+  letterspaced capitals.
 - **Headings carry `text-wrap: balance`** from the base layer, so a title never leaves one word on its own line.
 - **`text-xl` appears once** in the whole app. If a rewrite wants it, use it deliberately or delete it.
 
 ### 19.5 Surfaces and elevation
 
-**There are no drop shadows anywhere.** On a near-black background a shadow reads as a smudge, not as height.
-Depth comes from three things instead:
+**There are no shadows, highlights or gradients anywhere.** Depth comes from two things:
 
-1. **Surface colour** — `--color-background` → `--color-card` → `--color-popover`, each a step lighter.
+1. **Surface colour** — `--color-background` → `--color-card` → `--color-popover`, each a step away from the page.
 2. **A 1px `--color-border`** around a card.
-3. **`surface-edge`**, a `@utility` putting a 1px inset white highlight at 6% along the top edge. That single
-   line is what stops a card reading as a flat rectangle.
 
-The body also carries a fixed radial wash of `--color-primary` at 14%, top-left, so the page still has depth
-when WebGL is unavailable and the backdrop never loads.
+A card used to carry an inset highlight along its top edge, the page a radial wash in the accent and a WebGL field
+of points, and the screen's one "focal" card a gradient hairline. Together they were what made the dashboard read
+as generated rather than made, and none of them told the reader anything.
 
 ### 19.6 Spacing and rhythm
 
@@ -1009,14 +1059,18 @@ a button beside an input with a tighter radius looks like part of the input.
 
 ### 19.8 Motion
 
-Four animations, all short, all built from one easing token.
+**Nothing moves on load or at rest.** A page arrives whole: no header rising into place, no number counting up, no
+outlet fading in on every navigation. Motion is kept for a change somebody caused — a dialog opening, a tab
+changing, a warning appearing — and for the one thing that has to say it is still working.
 
-| Utility          | Animation                     | Used for                                    |
-| ---------------- | ----------------------------- | ------------------------------------------- |
-| `motion-reveal`  | 320ms, fade + 6px rise        | A page header, a section arriving           |
-| `motion-fade`    | 200ms, opacity only           | The `<main>` outlet on every navigation     |
-| `motion-pop`     | 200ms, fade + scale from 0.97 | A card that appears in place, e.g. a detail |
-| `skeleton-sheen` | 1.6s linear, infinite         | The highlight sweeping a loading skeleton   |
+| Utility          | Animation                     | Used for                                                      |
+| ---------------- | ----------------------------- | ------------------------------------------------------------- |
+| `motion-fade`    | 200ms, opacity only           | A popover, the drawer, the undo notice, a warning, a tab line |
+| `motion-pop`     | 200ms, fade + scale from 0.97 | The leave-without-saving dialog                               |
+| `skeleton-sheen` | 1.6s linear, infinite         | The highlight sweeping a loading skeleton                     |
+
+The landing page's composer caret blinks, because it is a text box being typed into, and holds still under reduced
+motion with the rest.
 
 `--ease-out-soft` is `cubic-bezier(0.22, 1, 0.36, 1)` — fast out, long settle. Everything decelerating uses it.
 
@@ -1049,25 +1103,22 @@ Tokens cover almost everything, but not quite. Work in this order and the browse
 back clean.
 
 1. **Rewrite the palette in `@theme`.** Keep the role names. Every component follows.
-2. **Then the four things that cannot read a token**, because nothing else will:
+2. **Then the three things that cannot read a token**, because nothing else will:
    - The **select chevron** is an inline SVG data URI in `@layer base` with `stroke='%23a1a1b5'` hardcoded —
      `currentColor` cannot be used inside a `url()`. Change it to the new `--color-muted-foreground` by hand.
-   - The **body wash** hardcodes its geometry (`80rem 50rem at 15% -10%`) though not its colour.
    - The **tippy theme block** (`.tippy-box[data-theme~="testify"]`) reads tokens but restates the radius,
      padding and font size. Check it still matches the new field radius.
    - The **`prefers-contrast: more` block** remaps `--color-border` to `--color-input` and muted text to
      foreground. If the new palette changes their relationship, this remap may need inverting.
-3. **Check the backdrop.** `lib/three/tokens.ts` reads `--color-accent` off `:root` at runtime and falls back
-   rather than rendering a black field, so a token three cannot parse fails quietly. Load a page and look.
-4. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
+3. **Re-check contrast.** Body text, muted text on card, every hue as text, and every badge tone. The
    automated axe pass has `color-contrast` **disabled** — jsdom computes no styles, so it can only report false
    negatives. This step is manual and there is no substitute.
-5. **Run a real browser sweep** at 1440 / 820 / 390. [§22](#22-checking-a-screen) lists what to check and the
+4. **Run a real browser sweep** at 1440 / 820 / 390. [§22](#22-checking-a-screen) lists what to check and the
    manual passes.
-6. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
+5. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
 
 > [!WARNING]
-> **A hex value in a `.tsx` is a review comment.** The four exceptions above are all in `index.css` and all
+> **A hex value in a `.tsx` is a review comment.** The three exceptions above are all in `index.css` and all
 > commented in place. If a rewrite adds a fifth, comment it there too — a hardcoded colour nobody knows about is
 > the thing that makes the _next_ re-skin look half-finished.
 
@@ -1177,18 +1228,25 @@ page they wanted preserved in `returnTo`.
 missing until the next sign-in. The **permission** check is live per request (`guild.members.fetch()`), so this
 is a staleness problem in the picker only, never a security one.
 
+**Several servers.** With two or more servers the bot is in, the picker links **Compare your servers side by side**
+(`/guilds/compare`), a table of features by server read through each server's own overview, with a switch to show only
+where they differ. It changes nothing; each cell opens that feature on that server.
+
 ### 20.5 Configuring a feature
 
 **Who:** a manager who has picked a server. This is the dominant journey — most screens are this shape.
 
 1. `/guilds/:id` shows stat tiles, a feature grid, permission warnings and recent changes. The grid is the
-   navigation: each tile carries the feature's tint and links to its screen where one exists.
+   navigation: each tile carries the feature's icon in its hue and links to its screen where one exists.
 2. They open a feature — say `/guilds/:id/levelling`.
 3. The screen loads its own data and renders skeletons meanwhile. Tabs are in the URL (`?tab=`), so a link to a
    tab is a link to a tab.
 4. They change a control. **What happens next depends on the control's shape** — see 19.8.
 5. The `SavingIndicator` in the header says saved. A refusal appears beside the control instead.
-6. The change is written to the audit log and shows up in "recent changes" on the overview.
+6. The change is written to the audit log and shows up in "recent changes" on the overview. On the Changes page, a
+   settings change carries **Put back**, which sends the old values to the same route while the setting still holds
+   what that change left. A new settings route joins it with one `RESTORABLE` entry, `auditSettings` in place of
+   `auditChange`, and a label per field in `restore.labels.ts`.
 
 **The check that makes this journey trustworthy:** a channel the bot cannot post in is disabled in the picker
 _before_ anybody saves a configuration that would silently do nothing, and a role above the bot's own is warned
@@ -1211,6 +1269,16 @@ a setting.
    to compare, and running the hierarchy check there would refuse every lift.
 
 **The greying is a courtesy; `actOn()` is the gate**, asked again before every write.
+
+### 20.6a Deleting your own data
+
+**Who:** anybody signed in, manager or not. The one journey that needs no server.
+
+1. The sidebar's footer links **Your data** (`/account`), beside Appearance.
+2. The page lists what goes and what stays before it offers anything to press.
+3. **Delete my data** opens a warning that it is immediate and cannot be undone, and a field for their username or
+   Discord ID. Delete everything stays disabled until it matches.
+4. On success the query cache is emptied and the reader lands on `/` signed out, with a notice saying it is done.
 
 ### 20.7 The owner journeys
 
@@ -1262,11 +1330,11 @@ Two corollaries:
 
 ### 20.9 Confirmations — three tiers
 
-| Tier              | Cost of a misclick                     | Examples                           |
-| ----------------- | -------------------------------------- | ---------------------------------- |
-| None              | Reversible from the same screen        | Every toggle, every picker, Pause  |
-| Typed **name**    | Unrecoverable, but scoped to one thing | Clear all warnings, leave a server |
-| Typed **literal** | Ends the process or affects everything | `shut down`                        |
+| Tier              | Cost of a misclick                     | Examples                                           |
+| ----------------- | -------------------------------------- | -------------------------------------------------- |
+| None              | Reversible from the same screen        | Every toggle, every picker, Pause                  |
+| Typed **name**    | Unrecoverable, but scoped to one thing | Clear all warnings, leave a server, Delete my data |
+| Typed **literal** | Ends the process or affects everything | `shut down`                                        |
 
 **The server checks it too.** The browser asking for the name is the warning; `confirm !== guild.name` in the
 route is what makes a hand-written request with an empty body impossible. A confirmation that exists only in the
@@ -1383,7 +1451,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | 23  | Typography hierarchy            | Held    | §19.4                                                                                                                                                                                                                                                                                                   |
 | 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                                                                                                                                                                          |
 | 25  | Reflect brand mood              | Held    | Three self-hosted faces where there had been none, and the section label is the bot's own boot banner in HTML. The type is no longer anonymous                                                                                                                                                          |
-| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                                                                                                                                                                        |
+| 26  | Pair fonts wisely               | Held    | Two: Rubik and Fira Mono, each with one job                                                                                                                                                                                                                                                             |
 | 27  | Limit font and style variations | Held    | §19.4 — four sizes carry 96% of the app                                                                                                                                                                                                                                                                 |
 | 28  | Line spacing, kerning, height   | Held    | Body is 1.55, headings 1.2, card headings `leading-tight` on `CARD_HEADING` because a size utility beats both `@theme` and the base layer. Measured, not assumed                                                                                                                                        |
 | 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `src/test/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette                                                                     |
@@ -1406,14 +1474,14 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🛸 Novelty (41–46)
 
-| #   | Rule                                 | Verdict | Note                                                                                                                                                      |
-| --- | ------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 41  | Originality and uniqueness           | Apply   | Better — a display face, the console voice, a WebGL field. Still recognisably a dashboard, and this one is the reader's call rather than mine             |
-| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19, a WebGL backdrop that costs nothing when unwanted                                                                        |
-| 43  | Most advanced, yet acceptable        | Held    | The backdrop is the whole of the risk taken, and it degrades to a CSS wash                                                                                |
-| 44  | Inspiration from other industries    | Held    | `Eyebrow` is the terminal boot banner `bannerLines()` prints on every start, rendered as HTML. It looks at the bot itself rather than at other dashboards |
-| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                                                                        |
-| 46  | Novelty must enhance, not complicate | Held    | The rule that keeps the backdrop `aria-hidden` and `pointer-events-none`                                                                                  |
+| #   | Rule                                 | Verdict | Note                                                                                                                             |
+| --- | ------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 41  | Originality and uniqueness           | Apply   | A palette and type chosen for the subject, Discord's own type and a plum accent, rather than a template. Still the reader's call |
+| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19                                                                                                  |
+| 43  | Most advanced, yet acceptable        | Held    | The channels design in `ui-uplift.md` is the risk taken; the look around it stays quiet                                          |
+| 44  | Inspiration from other industries    | Held    | The channel map takes its shape from Discord's own channel list rather than from other dashboards                                |
+| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                                               |
+| 46  | Novelty must enhance, not complicate | Held    | Nothing decorative is left to keep out of the reader's way                                                                       |
 
 ### 🎛 Consistency (47–52)
 
@@ -1475,6 +1543,7 @@ A screen is done when all of this is true:
 - [ ] `jest-axe` clean; existing tests still pass unchanged
 - [ ] Motion is feedback only, and the screen loses nothing under `prefers-reduced-motion`
 - [ ] Copy is sentence case, British spelling, and says what to do next
+- [ ] Accent text is `text-accent`, never `text-primary`, and nothing with text in it is faded with `opacity`
 
 ### The commands
 
@@ -1507,14 +1576,18 @@ done
 
 jsdom computes no layout, so a real browser is the only thing that measures a page. The sweep is deliberately
 **not** in the repository — it needs Playwright, and a self-hosted bot should not carry a browser download for a
-design check. Rebuild it per session: start Vite, route `**/api/**` to fixtures, and walk every route at 1440 and
-390 checking:
+design check. Rebuild it per session: serve the built `dashboard/dist`, answer `/api/**` from the test handlers
+through MSW's `getResponse`, and walk every route at 320, 390, 820 and 1440 in both themes, with reduced motion, and
+once more at 1440 under `prefers-contrast: more` (Playwright's `contrast` option). At 390 and 1440, inject
+`axe-core` — `jest-axe` ships it — and run it in the page: a real browser computes styles, so its `color-contrast`
+rule measures what jsdom cannot. The last sweep was 570 page loads with nothing found. Check:
 
 - exactly one `<h1>`, and no heading level skipped
 - `documentElement.scrollWidth` against the viewport
 - every `button`, `a[href]`, `input`, `select` and `textarea` has an accessible name
 - every target is at least 24×24 (WCAG 2.2 AA, 2.5.8)
 - no `<table>` wider than the card that holds it
+- no script error, and `<html lang>` one of the six locales
 
 The script is quick to rewrite; **the exemptions are the part worth keeping**, because each one cost a round of
 chasing a finding that was not a defect:

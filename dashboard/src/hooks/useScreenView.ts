@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useLocation, useParams } from "react-router";
 import { api } from "@/lib/api";
 
-/** Reports the route pattern of each screen opened, never the address; a failure is swallowed. */
 export function useScreenView(): void {
 	const { pathname } = useLocation();
 	const params = useParams();
@@ -17,7 +16,6 @@ export function useScreenView(): void {
 	}, [route, guildId]);
 }
 
-/** The server goes alongside the pattern rather than inside it, and only the API decides whether it counts. */
 export function screenView(pathname: string, params: Readonly<Record<string, string | undefined>>): ScreenView | null {
 	const route = routePattern(pathname, params);
 	if (!isScreenRoute(route)) return null;

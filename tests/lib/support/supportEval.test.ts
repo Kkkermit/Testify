@@ -72,6 +72,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["dark mode", ["appearance"]],
 	["change the language of the dashboard", ["appearance"]],
 	["what data do you store about me", ["privacy"]],
+	["delete everything you have on me", ["privacy", "command-delete-my-data"]],
 	["report a bug", ["report-a-problem"]],
 	["how do I remove the bot", ["remove-the-bot"]],
 	["can I host my own version", ["self-hosting"]],
@@ -150,7 +151,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["stop a raid of brand new accounts", ["raid-protection", "command-raid-protection"]],
 ];
 
-/** Typos and half-typed words: what people actually send, including the ones in the request that asked for this. */
+/** Typos and half-typed words, which is what people actually send. */
 const MISSPELT: [string, string[]][] = [
 	["how do i setup levling", ["levelling"]],
 	["welcom mesage", ["welcome", "welcome-styles", "welcome-not-sending"]],

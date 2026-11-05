@@ -1,8 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
 
-/** The identifiers and limits more than one module in this domain reads. */
-
-/** The public menu members press. */
 export const ROLE_MENU_ID = "rolemenu";
 
 /** The manager's panel behind `/role-menu`. */

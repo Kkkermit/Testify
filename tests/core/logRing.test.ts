@@ -90,7 +90,7 @@ describe("the logger's ring hook", () => {
 		write.mockRestore();
 	});
 
-	/** The whole point: nothing at a call site changes, and the owner console still sees the line. */
+	/** Nothing at a call site changes, and the owner console still sees the line. */
 	it("copies what the bot logs into the ring", () => {
 		const ring = new LogRing(10);
 		const logger = createLogger("info", false, ring);

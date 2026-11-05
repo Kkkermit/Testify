@@ -1,15 +1,12 @@
 import { z } from "zod";
 
-/** Which commands are switched off, shared so the browser greys out what the API refuses. */
-
-/** Commands that can never be switched off; `/help` is how somebody finds out what is left. */
-export const ALWAYS_ENABLED = ["help"] as const;
+/** Commands that can never be switched off: `/help` is how somebody finds out what is left, and nobody may be kept from deleting their own data. */
+export const ALWAYS_ENABLED = ["help", "delete-my-data"] as const;
 
 export function isAlwaysEnabled(name: string): boolean {
 	return (ALWAYS_ENABLED as readonly string[]).includes(name);
 }
 
-/** A command name as the loader knows it: lowercase, hyphens, nothing exotic. */
 export const commandName = z.string().regex(/^[a-z][a-z0-9-]{0,31}$/, "is not a command name");
 
 export const commandTogglePut = z.object({
@@ -22,17 +19,15 @@ export const commandTogglePut = z.object({
 export type CommandTogglePut = z.infer<typeof commandTogglePut>;
 
 export interface CommandToggleState {
-	/** Off in this scope. */
 	disabled: string[];
 	/** Off bot-wide, which a server cannot change; only sent on the guild view. */
 	disabledGlobally: string[];
-	/** Names that may never be switched off, so the form can disable those switches rather than refuse later. */
 	locked: string[];
 }
 
 export type CommandAvailability = "on" | "off-here" | "off-everywhere" | "locked";
 
-/** What a switch should show, given both lists. Bot-wide wins: a server cannot re-enable what the owner turned off. */
+/** Bot-wide wins: a server cannot re-enable what the owner turned off. */
 export function availabilityOf(
 	name: string,
 	{ disabled, disabledGlobally }: Pick<CommandToggleState, "disabled" | "disabledGlobally">,

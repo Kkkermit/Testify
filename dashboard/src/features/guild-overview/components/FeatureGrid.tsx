@@ -2,7 +2,6 @@ import { type GuildOverview } from "@testify/shared";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Reveal } from "@/components/motion";
 import { Badge, CARD_ROW, cardClass, HoverChevron } from "@/components/primitives";
 import { featureLook } from "@/config/features";
 import { describeDetail, featureLabel } from "@/features/guild-overview/featureStatus.labels";
@@ -10,7 +9,6 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
-/** A card links to its settings screen where the dashboard has one, and is inert where the feature is Discord-only. */
 export function FeatureGrid({
 	features,
 	guildId,
@@ -20,18 +18,17 @@ export function FeatureGrid({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const channels = useChannels(guildId);
-	// Until the list answers a channel is "…".
 	const channelName = (id: string): string => (channels.data === undefined ? "…" : channelLabel(channels.data, id, t));
 
 	return (
 		// A grid item defaults to `min-width: auto`, so without this the widest tile sets the row's width.
 		<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
-			{features.map((feature, index) => {
-				const { icon: Icon, tint, wash, path } = featureLook(feature.key);
+			{features.map((feature) => {
+				const { icon: Icon, tint, path } = featureLook(feature.key);
 
 				const body: ReactNode = (
 					<>
-						<span className={cn("rounded-card shrink-0 p-2", wash, tint)} aria-hidden="true">
+						<span className={cn("rounded-card bg-muted shrink-0 p-2", tint)} aria-hidden="true">
 							<Icon size={18} />
 						</span>
 						<span className="min-w-0 flex-1">
@@ -49,7 +46,7 @@ export function FeatureGrid({
 				const surface = cardClass("compact", CARD_ROW);
 
 				return (
-					<Reveal as="li" key={feature.key} index={index}>
+					<li key={feature.key}>
 						{path === undefined ? (
 							<div className={surface}>{body}</div>
 						) : (
@@ -58,7 +55,7 @@ export function FeatureGrid({
 								<HoverChevron />
 							</Link>
 						)}
-					</Reveal>
+					</li>
 				);
 			})}
 		</ul>

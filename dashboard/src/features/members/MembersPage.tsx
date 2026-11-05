@@ -3,7 +3,7 @@ import { Crosshair } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Button, EmptyState, PageHeader, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
+import { Button, EmptyState, PageHeader, Pager, SegmentedControl, Skeleton, Summary } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { BoardTable } from "@/features/members/components/BoardTable";
@@ -29,7 +29,6 @@ export function MembersPage(): React.JSX.Element {
 
 	const board = boardFrom(params.get("board"));
 	const page = pageFrom(params.get("page"));
-	// The levels board has one figure and one server, so a sort or scope left in the URL means nothing there.
 	const sort = board === "economy" ? sortFrom(params.get("sort")) : "total";
 	const scope = board === "economy" ? scopeFrom(params.get("scope")) : "server";
 
@@ -37,9 +36,9 @@ export function MembersPage(): React.JSX.Element {
 	const me = useMe();
 	const data = useBoard(guildId, board, page, sort, scope);
 
-	usePageTitle("Members", overview.data?.name);
+	usePageTitle(t("members.title"), overview.data?.name);
 
-	// Merged rather than replaced, so switching board does not strip the page you came from.
+	// Merged rather than replaced, or switching board drops the rest of the address.
 	function put(changes: Record<string, string>): void {
 		setParams((current) => {
 			const merged = new URLSearchParams(current);
@@ -52,7 +51,13 @@ export function MembersPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("members.title")} subtitle={t("members.subtitle")} />
+			<PageHeader server={overview.data} title={t("members.title")} subtitle={t("members.subtitle")} />
+
+			{data.data !== undefined && data.data.total > 0 && (
+				<div aria-live="polite">
+					<Summary>{summarise(data.data, t)}</Summary>
+				</div>
+			)}
 
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div className="flex flex-wrap items-center gap-3">
@@ -111,10 +116,6 @@ export function MembersPage(): React.JSX.Element {
 				/>
 			) : (
 				<>
-					<p className="text-muted-foreground text-sm" aria-live="polite">
-						{summarise(data.data, t)}
-					</p>
-
 					<BoardTable data={data.data} youId={me.data?.user.id ?? null} guildId={guildId} />
 
 					<Pager

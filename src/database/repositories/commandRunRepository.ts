@@ -35,7 +35,6 @@ export interface MemberTally {
 	runs: number;
 	failures: number;
 	prefix: number;
-	/** Busiest first. */
 	commands: { command: string; count: number }[];
 	lastAt: Date;
 }
@@ -86,7 +85,6 @@ export async function memberTallies(guildId: string, days: number, now?: Date): 
 		.sort((a, b) => b.runs - a.runs || b.lastAt.getTime() - a.lastAt.getTime());
 }
 
-/** How many different people ran a command there. */
 export async function activeMembers(guildId: string, days: number, now?: Date): Promise<number> {
 	return (await CommandRuns.distinct("userId", { guildId, at: { $gte: windowStart(days, now) } }).exec()).length;
 }
@@ -127,7 +125,6 @@ export interface RunFilter {
 	command?: string;
 }
 
-/** Newest first, a page at a time. */
 export async function recentRuns(
 	guildId: string,
 	days: number,

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en-GB">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Welcome and goodbye — Direction B</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Mono:wght@500&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="phonebar">☰ Welcome and goodbye <span>Testify HQ</span></div>
+		<div class="app">
+			<nav class="rail" aria-label="Servers">
+				<a class="srv hq" href="overview.html" aria-current="page" title="Testify HQ">TH</a>
+				<a class="srv" href="#" title="Game Night">GN</a>
+				<a class="srv" href="#" title="Pixel Club">PC</a>
+				<span class="sep" aria-hidden="true"></span>
+				<a class="srv add" href="#" title="Add Testify to a server">+</a>
+			</nav>
+
+			<aside class="list">
+				<div class="srvname">Testify HQ <span>⌄</span></div>
+				<nav aria-label="Testify HQ">
+					<a href="overview.html">Overview</a>
+					<a href="#">Insights</a>
+					<a href="#">Changes</a>
+					<h2>Community</h2>
+					<a href="#" aria-current="page">Welcome and goodbye</a>
+					<a href="#">Levelling</a>
+					<a href="#">Role menus</a>
+					<a href="#">Birthdays</a>
+					<a href="#">Starboard</a>
+					<h2>Moderation</h2>
+					<a href="#">Warnings</a>
+					<a href="#">Cases</a>
+					<a href="#">AutoMod</a>
+					<h2>Economy</h2>
+					<a href="#">Economy</a>
+					<a href="#">Casino</a>
+					<a href="#">Lottery</a>
+					<h2>Server</h2>
+					<a href="#">Tickets</a>
+					<a href="#">Settings</a>
+				</nav>
+				<div class="me">
+					<span class="av">K</span>
+					<div>kkk<small>Manage Server</small></div>
+					<a href="#">Sign out</a>
+				</div>
+			</aside>
+
+			<div class="main">
+				<header class="bar">
+					<h1>Welcome and goodbye</h1>
+					<span class="topic">Greet people as they join, and say goodbye when they leave</span
+					><input type="search" placeholder="Search settings" aria-label="Search settings" />
+				</header>
+
+				<div class="body split">
+					<div class="form">
+						<h2>When someone joins</h2>
+						<p>Changes save as you make them. <span class="saved">Saved</span></p>
+						<div class="field line">
+							<div>
+								<span class="label">Greet new members</span><span class="help">Posted the moment they join.</span>
+							</div>
+							<span class="switch on" role="switch" aria-checked="true" aria-label="Greet new members"></span>
+						</div>
+						<div class="field">
+							<label for="ch">Post in</label>
+							<select id="ch">
+								<option># welcome</option>
+							</select>
+						</div>
+						<div class="field">
+							<label for="msg">Message</label>
+							<textarea id="msg">Welcome to {server}, {user}! Grab some roles in #roles and say hi.</textarea>
+							<div class="chips">
+								Insert <button type="button">{user}</button><button type="button">{server}</button
+								><button type="button">{count}</button>
+							</div>
+						</div>
+						<div class="field line">
+							<div>
+								<span class="label">Add a picture card</span
+								><span class="help">Their avatar, name and member number.</span>
+							</div>
+							<span class="switch on" role="switch" aria-checked="true" aria-label="Add a picture card"></span>
+						</div>
+						<div class="gap"></div>
+						<h2>When someone leaves</h2>
+						<div class="field line">
+							<div>
+								<span class="label">Say goodbye</span
+								><span class="help">Off. Turn it on to choose a channel and a message.</span>
+							</div>
+							<span class="switch" role="switch" aria-checked="false" aria-label="Say goodbye"></span>
+						</div>
+					</div>
+
+					<section class="channel" aria-label="Preview of the welcome message">
+						<div class="head"># welcome <span>Preview, updates as you type</span></div>
+						<div class="feed">
+							<div class="day">Today</div>
+							<div class="sys">
+								<span class="ico">→</span><span><b>Orbit</b> joined the server. <span class="meta">14:02</span></span>
+							</div>
+							<div class="msg">
+								<span class="av bot" aria-hidden="true">T</span>
+								<div><span class="who">Testify</span><span class="tag">APP</span><span class="meta">14:02</span></div>
+								<div>
+									Welcome to Testify HQ, <span class="mention">@Orbit</span>! Grab some roles in
+									<span class="mention">#roles</span> and say hi.
+									<div class="card" role="img" aria-label="Picture card: Welcome to Testify HQ, Orbit, member 1,235">
+										<span class="big" aria-hidden="true">O</span>
+										<div>
+											<div class="l1">Welcome to Testify HQ</div>
+											<div class="l2">Orbit</div>
+											<div class="l3">Member #1,235</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

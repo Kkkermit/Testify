@@ -3,7 +3,7 @@ import { createApi, listenAdvice, startApi, worthRetrying } from "@api/server";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { databaseConnected } from "@database/connection";
-import { type ApiErrorBody, type HealthResponse } from "@testify/shared";
+import { type ApiErrorBody, type HealthResponse, RESTORABLE, type Restorable } from "@testify/shared";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
@@ -96,11 +96,19 @@ describe("the error boundary", () => {
 	});
 });
 
-/**
- * Each settings screen's `guilds.route(…)` line is mounted; a missing one falls through to the SPA silently, so this
- * reads the route table.
- */
+/** Every settings screen's `guilds.route(…)` line is mounted. */
 describe("the guild settings sub-routes", () => {
+	/** Put back sends the old values to the route that made the change, so a path that moved would answer 404 there. */
+	it("serve every route a change is put back through, and the read it is checked against", () => {
+		const mounted = new Set(apiFor(readyClient()).routes.map((route) => `${route.method} ${route.path}`));
+		const missing = Object.values(RESTORABLE as Record<string, Restorable>)
+			.flatMap((entry) => [`${entry.method} ${entry.path}`, `GET ${entry.read ?? entry.path}`])
+			.map((route) => route.replace(" /", " /api/guilds/:guildId/"))
+			.filter((route) => !mounted.has(route));
+
+		expect(missing).toEqual([]);
+	});
+
 	/** A sub-app left unmounted falls through to the SPA, so the route table is the only place it shows. */
 	it("are all mounted", () => {
 		const mounted = new Set(apiFor(readyClient()).routes.map((route) => `${route.method} ${route.path}`));

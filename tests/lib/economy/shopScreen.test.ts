@@ -81,7 +81,7 @@ describe("the catalogue screen", () => {
 		expect(screen.flags).toBe(MessageFlags.IsComponentsV2);
 	});
 
-	/** The ask: the catalogue is readable in the message, not hidden in a dropdown. */
+	/** The catalogue is readable in the message, not hidden in a dropdown. */
 	it("lists each item by name and price in the body", () => {
 		const rendered = textOf(screen);
 
@@ -91,7 +91,6 @@ describe("the catalogue screen", () => {
 		}
 	});
 
-	/** Discord caps a Components V2 message at 40 components. */
 	it("stays well inside the component budget on every section", () => {
 		for (const section of SHOP_SECTIONS) {
 			const built = shopScreen({ section }, RICH, OWNER).components[0]!.toJSON();

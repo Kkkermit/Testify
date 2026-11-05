@@ -2,8 +2,6 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/** The bot-wide block list, global by design (AGENTS.md §12). */
-
 export const BLACKLIST_LIMITS = { maxReason: 200 } as const;
 
 export interface BlacklistRow {

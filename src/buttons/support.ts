@@ -5,7 +5,6 @@ import { getPrefix } from "@database/repositories/prefixRepository";
 import { dashboardUrl } from "@lib/bot";
 import { SUPPORT_PANEL_ID, supportContext, supportDesk, supportScreen } from "@lib/support";
 
-/** Opening one of the related articles under an answer from `/ask`. */
 export default defineButton({
 	id: SUPPORT_PANEL_ID,
 	ownerOnly: true,

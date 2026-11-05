@@ -8,7 +8,7 @@ import { expectNoViolations } from "@/test/axe";
 import { t } from "@/test/english";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
-/** The documents are keys now, so the prose a reader sees is what English resolves them to. */
+/** The documents are translation keys, so the prose under test is what English resolves them to. */
 function english(key: string): string {
 	return (en.legal as Record<string, string>)[key.replace("legal.", "")] ?? key;
 }
@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 31 Oct 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 5 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -114,6 +114,19 @@ describe("the legal pages", () => {
 		expect(text).toMatch(
 			/keeps when you last read them and when it last told you about one, against your user id and nothing else/,
 		);
+		// `ERASURE` keeps the blacklist, warnings, cases and softbans about somebody, and anonymises what they did as staff.
+		const erasure = botSource("src/database/repositories/accountRepository.ts");
+		expect(erasure).toMatch(/blacklist: \{ userId: "keep" \}/);
+		expect(erasure).toMatch(/modcases: \{ userId: "keep", moderatorId: "anonymise" \}/);
+		expect(text).toMatch(/delete their own data at any time.* can’t be undone/);
+		// `/delete-my-data` is private and asks for the username before anything goes; `deleteMyData.test.ts` pins both.
+		expect(botSource("src/commands/info/deleteMyData.command.ts")).toMatch(/private: true/);
+		expect(text).toMatch(/with \/delete-my-data in Discord, whose answer only the person who ran it can see/);
+		expect(text).toMatch(/Both ask you to confirm with your username/);
+		// `blacklistWriters.test.ts` fails on anything but the owner command and the owner console changing the list.
+		expect(text).toMatch(/only the bot’s owners can add or lift a block/);
+		expect(text).toMatch(/Warnings, cases, softbans and blocks against you are kept/);
+		expect(text).toMatch(/stays with your name taken off/);
 		// `purgeGuild` keeps member records, so the notice must not promise they go with the bot.
 		expect(text).toMatch(/every member record .* kept after the bot is removed/);
 	});

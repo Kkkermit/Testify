@@ -4,7 +4,7 @@ import { SiteShell } from "@/features/site/SiteShell";
 import { i18next } from "@/i18n";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
-// Reduced motion skips the WebGL backdrop, which jsdom has no canvas to draw.
+// Reduced motion holds the landing page's composer on its finished line, so nothing keeps typing under the test.
 beforeEach(() => {
 	document.documentElement.setAttribute("data-motion", "reduced");
 });

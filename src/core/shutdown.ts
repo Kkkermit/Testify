@@ -35,7 +35,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 	process.exit(code);
 }
 
-/** Makes Ctrl+C, `docker stop` and crashes all shut down cleanly. */
+/** Makes Ctrl+C and `docker stop` shut down cleanly. */
 export function handleProcessSignals(client: TestifyClient): void {
 	process.once("SIGINT", () => void shutdown(client, "SIGINT"));
 

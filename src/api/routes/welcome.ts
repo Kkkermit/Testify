@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
@@ -49,7 +49,6 @@ welcome.patch("/", async (context) => {
 	} else {
 		const channelId = patch.channelId ?? before.channelId;
 
-		// The greeting has nowhere to go without one, and the stored record requires it.
 		if (channelId === null) throw badRequest("Choose a channel for the greeting before turning it on.");
 
 		await saveWelcome(guildId, {
@@ -60,21 +59,11 @@ welcome.patch("/", async (context) => {
 	}
 
 	const after = await configOf(guildId);
-	await auditChange(context, {
-		action: "welcome.update",
-		summary: summarisePatch(patch),
-		before: pick(before, patch),
-		after: pick(after, patch),
-	});
+	await auditSettings(context, { action: "welcome.update", summary: summarisePatch(patch), before, after });
 
 	return context.json(after);
 });
 
-function pick(config: WelcomeConfigResponse, patch: WelcomePatch): Record<string, unknown> {
-	return Object.fromEntries(Object.keys(patch).map((key) => [key, config[key as keyof WelcomeConfigResponse]]));
-}
-
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarisePatch(patch: WelcomePatch): string {
 	const parts: string[] = [];
 

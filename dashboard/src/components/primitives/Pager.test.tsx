@@ -23,7 +23,6 @@ describe("Pager", () => {
 		expect(status).toHaveAttribute("aria-live", "polite");
 	});
 
-	/** Stepping one page at a time was the only way through a long list. */
 	it("jumps straight to a page two either side, and to either end", async () => {
 		const onChange = jest.fn();
 		render(<Pager page={6} pages={12} onChange={onChange} />);

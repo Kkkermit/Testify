@@ -2,8 +2,6 @@ import { z } from "zod";
 import { WARNING_LIMITS } from "./memberDetail";
 import { plainLine } from "./text";
 
-/** A server's bans, read live from Discord, with Unban beside each. */
-
 export const BAN_LIMITS = {
 	perPage: 25,
 	maxQuery: 100,
@@ -15,7 +13,6 @@ export interface BanEntry {
 	userId: string;
 	username: string;
 	avatarUrl: string | null;
-	/** What Discord holds, which includes who banned them when it came from this bot. */
 	reason: string | null;
 	/** Set while it is a softban that lifts itself. */
 	softbanEndsAt: string | null;

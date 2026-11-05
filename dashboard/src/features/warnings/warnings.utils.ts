@@ -11,8 +11,6 @@ import { type TFunction } from "i18next";
 import { type BadgeTone } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 
-/** The rules behind the warnings screen, kept out of the page so they can be tested without rendering. */
-
 const TIMEOUT_KEYS: Record<number, TranslationKey> = {
 	5: "warnings.timeout5",
 	10: "warnings.timeout10",
@@ -44,7 +42,6 @@ export function stepText(step: WarnStep, t: TFunction): string {
 
 export const STEP_OPTIONS = WARN_STEP_CHOICES.map((step) => ({ step, value: stepValue(step) }));
 
-/** What a stored warning did, and how loudly to say it: a kick or a ban reads as more serious than a timeout. */
 export function actionOf(
 	warning: Pick<MemberWarning, "step" | "stepProblem">,
 	t: TFunction,
@@ -57,7 +54,6 @@ export function actionOf(
 	return { label: stepText(step, t), tone: step.action === "timeout" ? "warning" : "danger" };
 }
 
-/** What happened to the member, in the sentence shown under the form that issued the warning. */
 export function outcomeText(outcome: WarnOutcome, t: TFunction): string {
 	const count = outcome.count;
 	if (outcome.step === null) return t("warnings.outcomeNone", { count });
@@ -77,11 +73,16 @@ export function replaceStep(steps: readonly WarnStep[], index: number, step: War
 	return steps.map((current, at) => (at === index ? step : current));
 }
 
-/** A new step starts as a plain warning, so adding one never punishes anybody until somebody chooses to. */
 export function addStep(steps: readonly WarnStep[]): WarnStep[] {
 	return steps.length >= WARN_LIMITS.maxSteps ? [...steps] : [...steps, { action: "warn" }];
 }
 
 export function pageCountOf(total: number, perPage: number): number {
 	return Math.max(1, Math.ceil(total / perPage));
+}
+
+export function warningsSummary(steps: readonly WarnStep[], t: TFunction): string {
+	const last = steps.at(-1);
+	if (last === undefined) return t("warnings.summaryNone");
+	return t("warnings.summary", { count: steps.length, last: stepText(last, t) });
 }

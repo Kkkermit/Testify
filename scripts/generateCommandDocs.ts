@@ -33,11 +33,9 @@ const aliasesOf = (command: Command): string[] => [
 ];
 const aliasCount = listed.reduce((total, command) => total + aliasesOf(command).length, 0);
 
-/** A shields.io badge whose figure is counted here, so it cannot drift from the code. */
 const badge = (label: string, value: number, colour: string): string =>
 	`![${label}: ${value}](https://img.shields.io/badge/${encodeURIComponent(label)}-${value}-${colour}?style=for-the-badge)`;
 
-/** Every permission a member needs for the command or any of its subcommands, in words. */
 function needs(command: Command): string {
 	const flags = [command.permissions ?? [], ...subcommandsOf(command).map((sub) => sub.permissions ?? [])].flat();
 	const names = [...new Set(new PermissionsBitField(flags).toArray())].map((name) => {

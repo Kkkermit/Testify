@@ -1,7 +1,6 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-/** `__dirname` is `src/core` while developing and `dist/core` after a build. */
 const ASSETS = ((): string => {
 	const candidates = [resolve(__dirname, "..", "assets"), resolve(__dirname, "..", "..", "assets")];
 	return candidates.find((candidate) => existsSync(candidate)) ?? candidates[1]!;

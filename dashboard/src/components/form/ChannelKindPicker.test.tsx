@@ -3,9 +3,9 @@ import { render, screen } from "@testing-library/react";
 import { ChannelKindPicker } from "@/components/form/ChannelKindPicker";
 
 const CHANNELS: ChannelSummary[] = [
-	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
-	{ id: "400000000000000003", name: "Lounge", kind: "voice", position: 2, canSend: false },
-	{ id: "400000000000000005", name: "Support", kind: "category", position: 3, canSend: false },
+	{ id: "400000000000000001", name: "general", kind: "text", position: 1, parentId: null, canSend: true },
+	{ id: "400000000000000003", name: "Lounge", kind: "voice", position: 2, parentId: null, canSend: false },
+	{ id: "400000000000000005", name: "Support", kind: "category", position: 3, parentId: null, canSend: false },
 ];
 
 function renderPicker(kind: "voice" | "category", value: string | null, onChange = jest.fn()): jest.Mock {

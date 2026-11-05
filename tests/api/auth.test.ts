@@ -161,7 +161,7 @@ describe("the OAuth configuration", () => {
 		expect(oauthConfigFrom(envWith())).not.toBeNull();
 	});
 
-	/** Journey 4: enabling the dashboard with nothing filled in must show instructions, not a 500. */
+	/** Enabling the dashboard with nothing filled in must show instructions, not a 500. */
 	it("names each missing setting rather than failing", () => {
 		const env = envWith({ DISCORD_CLIENT_SECRET: undefined, DASHBOARD_SESSION_SECRET: undefined });
 

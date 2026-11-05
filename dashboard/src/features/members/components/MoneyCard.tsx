@@ -1,10 +1,11 @@
 import { MEMBER_LIMITS, type MemberDetail, MONEY_PURSES, type MoneyPurse, moneyProblem } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, Warning } from "@/components/form";
+import { Field, FieldGroup, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
-import { Button, Card, CARD_HEADING, SegmentedControl } from "@/components/primitives";
+import { Button, SegmentedControl } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
+import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/intl";
 import { problemText } from "@/lib/problemText";
 
@@ -27,32 +28,31 @@ export function MoneyCard({
 	const parsed = Number(amount);
 	const valid = amount.trim() !== "" && Number.isInteger(parsed);
 
-	// Both directions are checked against the same amount, so Take can be refused while Add is still offered.
 	const addProblem = valid ? problemText(moneyProblem(Math.abs(parsed), purse, held), t) : null;
 	const takeProblem = valid ? problemText(moneyProblem(-Math.abs(parsed), purse, held), t) : null;
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("members.money")}</h2>
-				<p className="text-muted-foreground text-sm">
-					{detail.economy === null
-						? t("members.noAccountYet")
-						: t("members.holds", { amount: formatNumber(held), purse: t(LABELS[purse]).toLowerCase() })}
-				</p>
-			</div>
-
-			<SegmentedControl
-				label={t("members.whichPurse")}
-				value={purse}
-				segments={MONEY_PURSES.map((one) => ({ value: one, label: t(LABELS[one]) }))}
-				onChange={setPurse}
-			/>
+		<SettingRows
+			title={t("members.money")}
+			description={
+				detail.economy === null
+					? t("members.noAccountYet")
+					: t("members.holds", { amount: formatNumber(held), purse: t(LABELS[purse]).toLowerCase() })
+			}
+		>
+			<FieldGroup label={t("members.whichPurse")} named={false}>
+				<SegmentedControl
+					label={t("members.whichPurse")}
+					value={purse}
+					segments={MONEY_PURSES.map((one) => ({ value: one, label: t(LABELS[one]) }))}
+					onChange={setPurse}
+				/>
+			</FieldGroup>
 
 			<Field label={t("members.amount")} htmlFor="money-amount">
 				<input
 					id="money-amount"
-					className={FIELD}
+					className={cn(FIELD, "max-w-48 tabular-nums")}
 					type="number"
 					inputMode="numeric"
 					min={1}
@@ -66,7 +66,7 @@ export function MoneyCard({
 
 			{valid && takeProblem !== null && <Warning>{takeProblem}</Warning>}
 
-			<div className="flex flex-wrap gap-3">
+			<RowActions>
 				<Button
 					variant="secondary"
 					disabled={!valid || addProblem !== null || busy}
@@ -87,7 +87,7 @@ export function MoneyCard({
 				>
 					{t("members.takeFrom", { purse: t(LABELS[purse]).toLowerCase() })}
 				</Button>
-			</div>
-		</Card>
+			</RowActions>
+		</SettingRows>
 	);
 }

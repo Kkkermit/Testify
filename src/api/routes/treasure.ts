@@ -1,5 +1,5 @@
 import { type Context, Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
@@ -20,11 +20,12 @@ treasure.get("/", async (context) => context.json(await readTreasure(guildIdOf(c
 treasure.patch("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const body = await parseBody(context, treasurePatch);
+	const before = await readTreasure(guildId);
 
 	const result = await applyTreasure(guildId, body, actorOf(context));
 	if ("problem" in result) throw badRequest(result.problem);
 
-	await auditChange(context, { action: "treasure.update", summary: summaryOf(body) });
+	await auditSettings(context, { action: "treasure.update", summary: summaryOf(body), before, after: result.settings });
 
 	return context.json(result.settings);
 });

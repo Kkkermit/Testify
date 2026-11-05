@@ -2,8 +2,6 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/** Joining a server's lobby voice channel makes the joiner a channel of their own, deleted once it empties. */
-
 export const TEMP_VOICE_LIMITS = {
 	maxTemplate: 60,
 	/** Discord's own cap on a voice channel's user limit. */
@@ -11,7 +9,6 @@ export const TEMP_VOICE_LIMITS = {
 	defaultTemplate: "{user}'s channel",
 } as const;
 
-/** What a lobby made from the panel or the dashboard is called. */
 export const TEMP_VOICE_LOBBY_NAME = "➕ New channel";
 
 export interface TempVoiceSettings {
@@ -24,7 +21,6 @@ export interface TempVoiceSettings {
 	userLimit: number;
 	/** False when the bot lacks Manage Channels or Move Members, without which nothing can be made. */
 	canManage: boolean;
-	/** How many made channels are open right now. */
 	active: number;
 }
 

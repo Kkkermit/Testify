@@ -12,8 +12,6 @@ import yaml from "highlight.js/lib/languages/yaml";
 import { createLowlight } from "lowlight";
 import { type ReactNode } from "react";
 
-/** Highlighting as React elements built from a tree, never as an HTML string, so nothing in a file can become markup. */
-
 const lowlight = createLowlight({
 	bash,
 	css,
@@ -59,7 +57,6 @@ const BY_EXTENSION: Record<string, string> = {
 	diff: "diff",
 };
 
-/** The grammar for a file, by its name; null shows it plain rather than guessing. */
 export function languageOfFile(path: string): string | null {
 	const name = path.slice(path.lastIndexOf("/") + 1);
 	if (name === "Dockerfile") return "dockerfile";
@@ -94,7 +91,6 @@ function render(node: TreeNode, key: number): ReactNode {
 	);
 }
 
-/** The code as spans carrying highlight.js's class names, which `index.css` colours from the design tokens. */
 export function highlighted(code: string, language: string | null | undefined): ReactNode {
 	if (!knownLanguage(language)) return code;
 

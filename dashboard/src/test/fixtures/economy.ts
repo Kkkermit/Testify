@@ -1,7 +1,5 @@
 import { type CasinoSettings, type LotterySettings, type TreasureSettings } from "@testify/shared";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const lotterySettings: LotterySettings = {
 	enabled: true,
 	frozen: false,

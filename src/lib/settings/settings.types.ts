@@ -1,5 +1,3 @@
-/** The types more than one module in this domain shares. */
-
 export interface CountingPanelState {
 	channelId: string | null;
 	count: number;

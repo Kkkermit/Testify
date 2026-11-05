@@ -3,7 +3,6 @@ import { FlagIcon } from "@/components/brand/FlagIcon";
 import { isLocale, type Locale, LOCALE_NAMES, LOCALES } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-/** The flag says which language at a glance; the endonym is what names the control. */
 export function LanguagePicker({ className }: { className?: string }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";

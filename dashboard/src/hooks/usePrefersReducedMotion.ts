@@ -14,7 +14,7 @@ export function prefersReducedMotion(): boolean {
 	return window.matchMedia(QUERY).matches;
 }
 
-/** CSS already flattens every transition, but WebGL and JS-driven animation never reach a stylesheet, so they have to ask. */
+/** CSS flattens transitions on its own; animation driven from script has to ask. */
 export function usePrefersReducedMotion(): boolean {
 	const [reduced, setReduced] = useState(prefersReducedMotion);
 
@@ -28,7 +28,6 @@ export function usePrefersReducedMotion(): boolean {
 		const media = typeof window.matchMedia === "function" ? window.matchMedia(QUERY) : null;
 		media?.addEventListener("change", onChange);
 
-		// Watched on the element, so a change on the appearance page reaches the backdrop.
 		const observer = new MutationObserver(onChange);
 		observer.observe(document.documentElement, { attributeFilter: ["data-motion"] });
 

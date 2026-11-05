@@ -2,10 +2,11 @@ import { type MemberDetail, WARN_LIMITS, WARNING_LIMITS, warningProblem } from "
 import { Ban, DoorOpen } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, Warning } from "@/components/form";
+import { Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD, SELECT } from "@/components/form/fieldStyles";
-import { Button, Card, CARD_HEADING } from "@/components/primitives";
+import { Button } from "@/components/primitives";
 import { clearConfirmed } from "@/features/members/memberDetail.utils";
+import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
@@ -13,7 +14,6 @@ type Sanction = "kick" | "ban";
 
 const DELETE_DAYS = Array.from({ length: WARN_LIMITS.maxDeleteDays + 1 }, (_, days) => days);
 
-/** Kick or ban, each behind the member's username typed back, which is what the server checks too. */
 export function SanctionCard({
 	detail,
 	busy,
@@ -31,7 +31,6 @@ export function SanctionCard({
 	const [typed, setTyped] = useState("");
 	const [deleteDays, setDeleteDays] = useState(0);
 
-	// Somebody who has left can still be banned, which is the one thing a kick cannot reach.
 	const canKick = detail.moderationProblem === null;
 	const problem = problemText(warningProblem(reason), t);
 	const ready = problem === null && clearConfirmed(typed, detail) && !busy;
@@ -44,16 +43,12 @@ export function SanctionCard({
 	}
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("members.sanctionTitle")}</h2>
-				<p className="text-muted-foreground text-sm">
-					{canKick ? t("members.sanctionBody") : t("members.sanctionBanOnly")}
-				</p>
-			</div>
-
+		<SettingRows
+			title={t("members.sanctionTitle")}
+			description={canKick ? t("members.sanctionBody") : t("members.sanctionBanOnly")}
+		>
 			{chosen === null ? (
-				<div className="flex flex-wrap gap-3">
+				<RowActions>
 					{canKick && (
 						<Button
 							variant="secondary"
@@ -74,9 +69,9 @@ export function SanctionCard({
 					>
 						<Ban size={16} aria-hidden="true" /> {t("members.ban")}
 					</Button>
-				</div>
+				</RowActions>
 			) : (
-				<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
+				<>
 					<Field label={t("members.sanctionReason")} htmlFor="sanction-reason">
 						<input
 							id="sanction-reason"
@@ -93,7 +88,7 @@ export function SanctionCard({
 						<Field label={t("members.deleteDays")} hint={t("members.deleteDaysHint")} htmlFor="sanction-days">
 							<select
 								id="sanction-days"
-								className={SELECT}
+								className={cn(SELECT, "max-w-64")}
 								value={deleteDays}
 								onChange={(event) => {
 									setDeleteDays(Number(event.target.value));
@@ -126,7 +121,7 @@ export function SanctionCard({
 
 					<Warning>{chosen === "kick" ? t("members.kickWarning") : t("members.banWarning")}</Warning>
 
-					<div className="flex flex-wrap gap-3">
+					<RowActions>
 						<Button
 							variant="destructive"
 							disabled={!ready}
@@ -141,9 +136,9 @@ export function SanctionCard({
 						<Button variant="ghost" onClick={close}>
 							{t("common.cancel")}
 						</Button>
-					</div>
-				</div>
+					</RowActions>
+				</>
 			)}
-		</Card>
+		</SettingRows>
 	);
 }

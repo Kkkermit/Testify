@@ -6,12 +6,12 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { RoleMenuForm } from "@/features/role-menus/components/RoleMenuForm";
 import { RoleMenuRow } from "@/features/role-menus/components/RoleMenuRow";
-import { draftOf, emptyDraft } from "@/features/role-menus/roleMenus.utils";
+import { draftOf, emptyDraft, roleMenuSummary } from "@/features/role-menus/roleMenus.utils";
 import {
 	useCreateRoleMenu,
 	usePublishRoleMenu,
@@ -22,7 +22,6 @@ import {
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
-/** Menus members pick their own roles from; the roles they hand out stay below the manager's own and the bot's. */
 export function RoleMenusPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -47,7 +46,6 @@ export function RoleMenusPage(): React.JSX.Element {
 	const keyOf = (menuId: string): string => `role-menu:${guildId}:${menuId}`;
 	const menus = list.data.menus.filter((menu) => !undo.isHidden(keyOf(menu.id)));
 	const editingMenu = menus.find((menu) => menu.id === editing) ?? null;
-	// One waiting to be deleted still holds its place against the limit until it has gone.
 	const full = list.data.menus.length >= list.data.limit;
 	const busy = create.isPending || update.isPending || publish.isPending || remove.isPending;
 	const message = (error: Error | null, fallback: string): string | null =>
@@ -80,20 +78,22 @@ export function RoleMenusPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("roleMenus.title")}
 				subtitle={t("roleMenus.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, create.isSuccess || update.isSuccess)} />}
 			/>
 
+			<Summary>{roleMenuSummary(menus, t)}</Summary>
+
 			<section aria-labelledby="menus-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="menus-heading"
 					count={t("roleMenus.countOf", { used: list.data.menus.length, limit: list.data.limit })}
 				>
 					{t("roleMenus.inUse")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{menus.length === 0 ? (
 					<Card>
@@ -138,7 +138,6 @@ export function RoleMenusPage(): React.JSX.Element {
 				<Warning>{t("roleMenus.full")}</Warning>
 			) : (
 				<RoleMenuForm
-					// A fresh form per menu, so switching between them never carries one's draft into another.
 					key={editingMenu?.id ?? `new-${String(made)}`}
 					initial={editingMenu === null ? emptyDraft() : draftOf(editingMenu, roleList)}
 					editing={editingMenu?.title ?? null}

@@ -1,7 +1,5 @@
 import { type MusicSource, type ProblemKind, type QueueState } from "@lib/music/music.types";
 
-/** The identifiers, limits and defaults more than one module in this domain reads. */
-
 /** The track's own level, and the only one that plays without passing through FFmpeg. */
 export const UNITY_VOLUME = 100;
 

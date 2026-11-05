@@ -3,8 +3,6 @@ import { type MemberWarning, WARNING_LIMITS } from "./memberDetail";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/** What a server's Nth warning does to the member, and the warnings list both surfaces read. */
-
 /** Timeout lengths a step may use, in minutes; Discord's own ceiling is 28 days. */
 export const WARN_TIMEOUT_MINUTES = [5, 10, 30, 60, 360, 1_440, 10_080] as const;
 
@@ -16,7 +14,6 @@ export const WARN_LIMITS = {
 	/** Discord allows 40 components a message, and each step on the panel costs two. */
 	maxSteps: 10,
 	perPage: 20,
-	/** How many the list shows before anybody searches. */
 	recent: 5,
 	/** Discord's own window for deleting a banned member's messages. */
 	maxDeleteDays: 7,
@@ -66,7 +63,6 @@ export function stepFromValue(value: string): WarnStep | null {
 	return parsed.success ? parsed.data : null;
 }
 
-/** Every step a server can choose, in the order a picker lists them. */
 export const WARN_STEP_CHOICES: readonly WarnStep[] = [
 	{ action: "warn" },
 	...WARN_TIMEOUT_MINUTES.map((minutes) => ({ action: "timeout" as const, minutes })),
@@ -101,7 +97,6 @@ export interface GuildWarningsPage {
 export const warningsQuery = z.object({
 	page: z.coerce.number().int().min(1).max(10_000).default(1),
 	perPage: z.coerce.number().int().min(1).max(50).default(WARN_LIMITS.perPage),
-	/** A name, a Discord ID or a mention; the list then holds only that person's warnings. */
 	q: plainLine(1, 32).optional(),
 });
 
@@ -125,7 +120,6 @@ export const WARN_PROBLEMS = ["left", "outranked", "refused"] as const;
 
 export type WarnProblem = (typeof WARN_PROBLEMS)[number];
 
-/** Where a warning's step landed, so whoever issued it learns what actually happened to the member. */
 export interface WarnOutcome {
 	count: number;
 	step: WarnStep | null;
@@ -147,7 +141,6 @@ export interface MemberMatch {
 	avatarUrl: string | null;
 }
 
-/** The username, typed back, is the confirmation: a kick or a ban cannot be sent by a stray click. */
 export const kickBody = z.object({
 	reason: plainLine(WARNING_LIMITS.minReason, WARNING_LIMITS.maxReason),
 	confirm: z.string().max(64),
@@ -172,7 +165,6 @@ export function confirmsName(typed: string, username: string, userId?: string): 
 	return answer.toLowerCase() === username.trim().toLowerCase() && username.trim() !== "";
 }
 
-/** A pasted ID or a copied `<@mention>`, read as the ID it names; anything else is a name to search for. */
 export function idFromQuery(query: string): string | null {
 	const trimmed = query.trim();
 

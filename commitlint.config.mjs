@@ -1,13 +1,4 @@
-/**
- * The house commit format: `type: Capitalized subject`.
- *
- * No scopes, no bodies required, no `!` markers. `add`, `update` and `remove`
- * are extensions beyond Conventional Commits and are part of the style — see
- * AGENTS.md §19.
- *
- * The wizard (`npm run commit`) helps whoever uses it; this hook is what makes
- * the convention true for everyone else.
- */
+/** The house commit format, `type: Capitalized subject`, as AGENTS.md §19 describes it. */
 export default {
 	rules: {
 		"type-enum": [

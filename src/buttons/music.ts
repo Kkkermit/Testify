@@ -20,14 +20,10 @@ import {
 	stopPlayer,
 } from "@lib/music";
 
-/** The controls under the player, acting on the same session `/music` does. */
-
-/** Pressing Loop walks the modes rather than opening a menu for three options. */
 const NEXT_LOOP: Record<LoopMode, LoopMode> = { off: "track", track: "queue", queue: "off" };
 
 const SYSTEM_ACTIONS = new Set(["system-on", "system-off", "djroles"]);
 
-/** Re-read on every press, because the panel outlives the permission it was rendered with. */
 function requireManager(member: GuildMember): void {
 	if (member.permissions.has(PermissionFlagsBits.ManageGuild)) return;
 

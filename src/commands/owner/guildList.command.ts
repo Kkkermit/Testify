@@ -37,7 +37,6 @@ export function renderGuildPage(items: GuildSummary[]) {
 	});
 }
 
-/** Ownership is now a first-class command flag. */
 export default defineCommand({
 	name: "guild-list",
 	description: "Lists every server the bot is in.",

@@ -62,6 +62,7 @@ describe("which commands answer privately", () => {
 				"counting",
 				"create",
 				"daily",
+				"delete-my-data",
 				"deposit",
 				"dm",
 				"economy",

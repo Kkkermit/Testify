@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/** What audit logging can watch, and how the `all` shorthand is stored, shared by every surface. */
-
 export const AUDIT_EVENTS = [
 	"messageDelete",
 	"messageUpdate",
@@ -26,12 +24,10 @@ export const AUDIT_EVENTS = [
 
 export type AuditEvent = (typeof AUDIT_EVENTS)[number];
 
-/** Which part of a server an event is about, so eighteen checkboxes read as four short lists. */
 export const AUDIT_GROUPS = ["Messages", "Channels", "Roles", "Members", "Server"] as const;
 
 export type AuditGroup = (typeof AUDIT_GROUPS)[number];
 
-/** Which part of a server each event is about; the wording for it belongs to whichever surface shows it. */
 export const AUDIT_EVENT_GROUP: Record<AuditEvent, AuditGroup> = {
 	messageDelete: "Messages",
 	messageUpdate: "Messages",
@@ -82,7 +78,6 @@ export interface AuditLogConfigResponse {
 	all: boolean;
 }
 
-/** The whole configuration in one request, because a channel and its events are one decision. */
 export const auditLogPutSchema = z.object({
 	enabled: z.boolean(),
 	channelId: snowflake.nullable(),
@@ -91,7 +86,6 @@ export const auditLogPutSchema = z.object({
 
 export type AuditLogPut = z.infer<typeof auditLogPutSchema>;
 
-/** Whether Save has anything to do. */
 export function auditLogChanged(saved: AuditLogConfigResponse, draft: AuditLogPut): boolean {
 	if (saved.enabled !== draft.enabled || saved.channelId !== draft.channelId) return true;
 

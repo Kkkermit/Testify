@@ -50,7 +50,6 @@ export const CALCULATOR_FUNCTIONS = new Set([
 	"tanh",
 ]);
 
-/** The first thing in the expression a calculator will not evaluate, or null when there is nothing. */
 export function unsupportedPart(node: MathNode): string | null {
 	let found: string | null = null;
 

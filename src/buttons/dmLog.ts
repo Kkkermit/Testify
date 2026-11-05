@@ -7,7 +7,6 @@ import { modalForm } from "@lib/discord";
 import { escapeMarkdown } from "@lib/format";
 import { userInfoEmbed } from "@lib/info";
 
-/** The DM log's controls: the sender's details and back, and a reply sent as the bot. */
 export default defineButton({
 	id: DM_LOG_ID,
 

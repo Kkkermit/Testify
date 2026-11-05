@@ -40,10 +40,7 @@ const SHOWN_PROPERTIES = new Set([
 ]);
 
 /** Discord's own badge and a keycap read the same in every language. */
-const ALLOWED = new Set([
-	"features/welcome/components/GreetingPreview.tsx: BOT",
-	"features/search/QuickSearch.tsx: Esc",
-]);
+const ALLOWED = new Set(["components/primitives/DiscordPreview.tsx: BOT", "features/search/QuickSearch.tsx: Esc"]);
 
 /** The literal text in a string or a template, without what is substituted into it. */
 function literalOf(node: ts.Node): string | null {

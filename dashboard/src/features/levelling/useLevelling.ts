@@ -19,10 +19,11 @@ export function useLevelling(guildId: string): UseQueryResult<LevelConfigRespons
 	});
 }
 
-export function useChannels(guildId: string): UseQueryResult<ChannelSummary[]> {
+export function useChannels(guildId: string | null): UseQueryResult<ChannelSummary[]> {
 	return useQuery({
-		queryKey: keys.guild(guildId).channels(),
-		queryFn: () => api.get<ChannelSummary[]>(`/guilds/${guildId}/channels`),
+		queryKey: keys.guild(guildId ?? "").channels(),
+		queryFn: () => api.get<ChannelSummary[]>(`/guilds/${guildId ?? ""}/channels`),
+		enabled: guildId !== null,
 		staleTime: 5 * 60_000,
 	});
 }
@@ -35,7 +36,6 @@ export function useRoles(guildId: string): UseQueryResult<RoleSummary[]> {
 	});
 }
 
-/** Optimistic with a rollback, and every mutation here goes through it so none can forget one. */
 function useLevellingMutation<TInput>(
 	guildId: string,
 	send: (input: TInput) => Promise<LevelConfigResponse>,
@@ -59,11 +59,9 @@ function useLevellingMutation<TInput>(
 			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
 		},
 		onSuccess: (config) => {
-			// The server's answer is authoritative — it has been through `normaliseSettings`.
 			client.setQueryData(key, config);
 		},
 		onSettled: () => {
-			// The overview shows which features are on, so it is stale the moment this lands.
 			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
 		},
 	});

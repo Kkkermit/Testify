@@ -16,7 +16,6 @@ export function useTempVoice(guildId: string): UseQueryResult<TempVoiceSettings>
 	});
 }
 
-/** Both answer with the whole document, so they share one key and only the last write in flight is trusted. */
 function useTempVoiceWrite<Body>(
 	guildId: string,
 	send: (body: Body) => Promise<TempVoiceSettings>,

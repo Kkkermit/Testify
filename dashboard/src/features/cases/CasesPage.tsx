@@ -4,7 +4,17 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	postableChannels,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	SettingRows,
+	Warning,
+} from "@/components/form";
 import {
 	Badge,
 	Card,
@@ -14,6 +24,7 @@ import {
 	PageHeader,
 	Pager,
 	Skeleton,
+	Summary,
 } from "@/components/primitives";
 import { ACTION_LABELS, ACTION_ORDER, durationText, isCaseAction } from "@/features/cases/cases.utils";
 import { useCases, useCaseSettings, useUpdateCaseSettings } from "@/features/cases/useCases";
@@ -22,10 +33,11 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
+import { personName } from "@/lib/people";
 
-/** Every warning, timeout, kick, ban and softban in the server, numbered, and where new ones are posted. */
 export function CasesPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -35,7 +47,7 @@ export function CasesPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("cases.title")} subtitle={t("cases.subtitle")} />
+			<PageHeader server={overview.data} title={t("cases.title")} subtitle={t("cases.subtitle")} />
 			<LogCard guildId={guildId} />
 			<CaseList guildId={guildId} />
 		</>
@@ -52,26 +64,34 @@ function LogCard({ guildId }: { guildId: string }): React.JSX.Element {
 	if (settings.isPending) return <Skeleton className="h-36 w-full" />;
 
 	return (
-		<Card className="motion-pop flex flex-col gap-4">
-			<div className="flex items-center justify-between gap-3">
-				<h2 className={CARD_HEADING}>{t("cases.log")}</h2>
-				<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
-			</div>
-			<ChannelPicker
-				label={t("cases.logChannel")}
-				hint={t("cases.logHint")}
-				channels={channels.data ?? []}
-				value={settings.data.logChannelId}
-				noneLabel={t("cases.noLog")}
-				onChange={(logChannelId) => {
-					update.mutate({ logChannelId });
-				}}
-			/>
-			{settings.data.logChannelId !== null && !settings.data.canSend && <Warning>{t("cases.cannotSend")}</Warning>}
-			{update.error !== null && (
-				<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-			)}
-		</Card>
+		<>
+			<Summary>
+				{settings.data.logChannelId === null
+					? t("cases.summaryNoLog")
+					: t("cases.summaryLog", {
+							channel: channelLabel(postableChannels(channels.data ?? []), settings.data.logChannelId, t),
+						})}
+			</Summary>
+			<SettingRows
+				title={t("cases.log")}
+				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}
+			>
+				<ChannelPicker
+					label={t("cases.logChannel")}
+					hint={t("cases.logHint")}
+					channels={channels.data ?? []}
+					value={settings.data.logChannelId}
+					noneLabel={t("cases.noLog")}
+					onChange={(logChannelId) => {
+						update.mutate({ logChannelId });
+					}}
+				/>
+				{settings.data.logChannelId !== null && !settings.data.canSend && <Warning>{t("cases.cannotSend")}</Warning>}
+				{update.error !== null && (
+					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
+				)}
+			</SettingRows>
+		</>
 	);
 }
 
@@ -164,7 +184,7 @@ function CaseList({ guildId }: { guildId: string }): React.JSX.Element {
 }
 
 function CaseRow({ guildId, modCase }: { guildId: string; modCase: ModCase }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 
 	return (
 		<li className="flex flex-col gap-1 px-4 py-3">
@@ -182,9 +202,8 @@ function CaseRow({ guildId, modCase }: { guildId: string; modCase: ModCase }): R
 			</div>
 			<p className="text-sm break-words">{modCase.reason}</p>
 			<p className="text-muted-foreground text-xs">
-				{t("cases.by", { name: modCase.moderatorName, when: dateAndTime(modCase.at) })}
-				{modCase.durationMs !== null &&
-					` · ${t("cases.for", { length: durationText(modCase.durationMs, i18n.language) })}`}
+				{t("cases.by", { name: personName(modCase.moderatorName, t), when: dateAndTime(modCase.at) })}
+				{modCase.durationMs !== null && ` · ${t("cases.for", { length: durationText(modCase.durationMs) })}`}
 			</p>
 		</li>
 	);

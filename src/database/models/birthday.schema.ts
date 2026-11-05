@@ -1,7 +1,6 @@
 import { model, Schema } from "mongoose";
 import { DEFAULT_BIRTHDAY_MESSAGE } from "@testify/shared";
 
-/** Whether a server posts birthdays, and where. */
 export interface BirthdaySettingsRecord {
 	guildId: string;
 	enabled: boolean;

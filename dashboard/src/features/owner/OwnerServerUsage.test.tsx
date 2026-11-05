@@ -73,7 +73,7 @@ describe("the owner's server list", () => {
 });
 
 describe("one server's usage", () => {
-	/** The point of the drill-down: press a name and see only what that person ran. */
+	/** Pressing a name shows only what that person ran. */
 	it("narrows the runs to a member when their name is pressed, and back", async () => {
 		const seen = watch("/api/analytics/guilds/:guildId/runs", { items: [], total: 0, page: 1, perPage: 25 });
 		renderAt(DRILL_DOWN);

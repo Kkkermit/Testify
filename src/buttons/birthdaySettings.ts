@@ -5,7 +5,6 @@ import { applyBirthdaySettings, BIRTHDAY_PANEL_ID, birthdaySettingsPanel, readBi
 import { modalForm, pickedChannelId } from "@lib/discord";
 import { BIRTHDAY_LIMITS, sanitiseText } from "@testify/shared";
 
-/** The controls on `/birthday settings`, each applied the moment it is pressed. */
 export default defineButton({
 	id: BIRTHDAY_PANEL_ID,
 	ownerOnly: true,
@@ -14,7 +13,6 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null) return;
 
-		// Checked on every press, because a role can be taken away while the panel is still open.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change birthday posts.");
 		}

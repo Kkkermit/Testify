@@ -35,7 +35,7 @@ describe("the member detail page", () => {
 		expect(primary).toEqual(["Add warning"]);
 	});
 
-	/** A warning can now mute, kick or ban, so whoever issued it is told what it actually did. */
+	/** A warning can mute, kick or ban, so whoever issued it is told what it actually did. */
 	it("says what the warning did to the member", async () => {
 		renderPage();
 		await screen.findByText("Spamming in general");

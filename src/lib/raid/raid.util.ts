@@ -14,7 +14,7 @@ export interface WatchedJoin {
 	userId: string;
 	username: string;
 	createdAt: number;
-	/** True when the account was held back, false when it was too young but could not be. Absent when old enough. */
+	/** True when the account was held back, false when it was too young but could not be, absent when old enough. */
 	held?: boolean;
 	at: number;
 }

@@ -18,7 +18,7 @@ describe("settingsPanel", () => {
 		],
 	});
 
-	/** The whole point: every setting visible with its current value beside it. */
+	/** Every setting is visible with its current value beside it. */
 	it("shows each setting as a field with its current value", () => {
 		const fields = panel.embeds[0]?.toJSON().fields;
 

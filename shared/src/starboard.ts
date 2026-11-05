@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/** Messages that collect enough ⭐ reactions are reposted to a server's highlights channel. */
-
 export const STARBOARD_EMOJI = "⭐";
 
 export const STARBOARD_LIMITS = {
@@ -14,13 +12,10 @@ export const STARBOARD_LIMITS = {
 export interface StarboardSettings {
 	enabled: boolean;
 	channelId: string | null;
-	/** How many ⭐ a message needs before it is reposted. */
 	threshold: number;
-	/** Whether the author's own ⭐ counts towards it. */
 	selfStar: boolean;
-	/** False when the bot cannot post in the channel, so a board that will never fill says so. */
+	/** False when the bot cannot post in the channel. */
 	canSend: boolean;
-	/** How many messages have reached the board. */
 	posts: number;
 }
 

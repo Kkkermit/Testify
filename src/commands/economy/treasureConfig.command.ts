@@ -108,7 +108,6 @@ export default defineCommand({
 		},
 	],
 
-	// The panel shows every setting with its current value; `configure` stays for typing it in one go.
 	async run(interaction) {
 		const guild = inGuild(interaction);
 		const config = await getTreasureConfig(guild.id);

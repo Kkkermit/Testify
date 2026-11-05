@@ -15,7 +15,6 @@ import { useDocumentVisible } from "@/hooks/useDocumentVisible";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/cn";
 
-/** Discord's own message box typing a real command, which is the one thing a server manager recognises at a glance. */
 export function Composer({ palette }: { palette: readonly PaletteCommand[] }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const reduced = usePrefersReducedMotion();
@@ -55,7 +54,7 @@ export function Composer({ palette }: { palette: readonly PaletteCommand[] }): R
 	return (
 		<figure className="flex flex-col gap-3">
 			{/* The moving box is for the eye; what it types is said once, in words, below it. */}
-			<div aria-hidden="true" className="bg-card border-border surface-edge rounded-card overflow-hidden border">
+			<div aria-hidden="true" className="bg-card border-border rounded-card overflow-hidden border">
 				<div className="text-muted-foreground border-border flex items-center gap-2 border-b px-4 py-2.5 text-sm">
 					<Hash size={15} />
 					<span className="text-foreground font-medium">{t("landing.composer.channel")}</span>
@@ -83,7 +82,6 @@ function slashLine(scene: ComposerScene): string {
 	return [`/${scene.command}`, ...scene.options.map((option) => `${option.name}: ${option.value}`)].join(" ");
 }
 
-/** Faint lines of earlier conversation, so the menu opens over a channel rather than over nothing. */
 function History(): React.JSX.Element {
 	return (
 		<div className="flex flex-1 flex-col justify-end gap-4 overflow-hidden opacity-60">
@@ -123,7 +121,6 @@ function Menu({ commands, typed }: { commands: readonly PaletteCommand[]; typed:
 	);
 }
 
-/** Once picked, the command is a pill and each option a labelled field, which is how Discord draws them. */
 function Line({ frame, command }: { frame: ComposerFrame; command: string }): React.JSX.Element {
 	return (
 		<div className="bg-muted rounded-field flex min-h-12 flex-wrap items-center gap-2 px-3 py-2 font-mono text-sm">
@@ -132,7 +129,7 @@ function Line({ frame, command }: { frame: ComposerFrame; command: string }): Re
 				<span className="text-foreground">/{frame.typing}</span>
 			) : (
 				<>
-					<span className="bg-primary/15 text-accent rounded-chip px-1.5 py-0.5">/{command}</span>
+					<span className="bg-accent-wash text-accent rounded-chip px-1.5 py-0.5">/{command}</span>
 					{frame.options.map((option) => (
 						<span key={option.name} className="flex items-center overflow-hidden">
 							<span className="bg-border/70 text-muted-foreground rounded-l-chip px-1.5 py-0.5">{option.name}</span>

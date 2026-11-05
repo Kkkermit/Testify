@@ -16,7 +16,6 @@ export function useTickets(guildId: string): UseQueryResult<TicketSettings> {
 	});
 }
 
-/** Not optimistic: posting a panel is a message in a public channel, and a control that moved first would claim it had been sent. */
 export function useSaveTickets(guildId: string): UseMutationResult<TicketSettings, Error, TicketPatch> {
 	return useTicketMutation(guildId, (body) => api.patch<TicketSettings>(`/guilds/${guildId}/tickets`, body));
 }
@@ -36,7 +35,6 @@ function useTicketMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (settings) => {
-			// A whole-document answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
 		},
 		onSettled: () => {
@@ -55,7 +53,6 @@ export function useOpenTickets(guildId: string, enabled: boolean): UseQueryResul
 	});
 }
 
-/** The count on the settings card goes down with it, so both are read again. */
 export function useCloseTicket(guildId: string): UseMutationResult<OpenTicketList, Error, string> {
 	const client = useQueryClient();
 

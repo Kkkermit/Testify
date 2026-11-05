@@ -1,7 +1,7 @@
+import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { tintFor } from "@/lib/tint";
 
-/** A lettered tile in a colour derived from the name, because a missing picture is common and a broken image is the first thing anyone sees. */
 export function Avatar({
 	name,
 	url,
@@ -11,12 +11,12 @@ export function Avatar({
 	name: string;
 	url: string | null;
 	size?: number;
-	/** Defaults to the name; pass the id where two servers may share one. */
 	seed?: string;
 }): React.JSX.Element {
 	const style = { width: size, height: size };
+	const [broken, setBroken] = useState<string | null>(null);
 
-	if (url === null) {
+	if (url === null || broken === url) {
 		return (
 			<div
 				className={cn(
@@ -42,6 +42,9 @@ export function Avatar({
 			className="max-w-none shrink-0 rounded-full object-cover"
 			style={style}
 			loading="lazy"
+			onError={() => {
+				setBroken(url);
+			}}
 		/>
 	);
 }

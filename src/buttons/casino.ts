@@ -32,7 +32,6 @@ async function admit(client: TestifyClient, player: Player, game: CasinoGame): P
 	if (refused !== null) throw new UserFacingError(refusalText(refused));
 }
 
-/** Play again on the same message: roulette opens a fresh round there, the rest deal again. */
 async function playAgain(
 	interaction: MessageComponentInteraction,
 	client: TestifyClient,

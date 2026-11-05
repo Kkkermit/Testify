@@ -4,7 +4,6 @@ import { resolveBotName } from "@testify/shared";
 
 let discordName: () => string | null | undefined = () => undefined;
 
-/** Called once by the client, which knows its own username after login. */
 export function nameBot(fromDiscord: () => string | null | undefined): void {
 	discordName = fromDiscord;
 }

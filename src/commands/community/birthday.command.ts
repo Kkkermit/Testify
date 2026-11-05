@@ -12,7 +12,6 @@ import {
 import { embed, reply } from "@lib/discord";
 import { MONTHS } from "@testify/shared";
 
-/** Birthdays a member shares with one server, and the post that server makes on the day. */
 export default defineCommand({
 	name: BIRTHDAY_COMMAND,
 	description: "Shares your birthday with this server, or sets up birthday posts.",

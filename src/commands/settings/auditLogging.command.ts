@@ -5,7 +5,6 @@ import { dashboardHint } from "@lib/bot";
 import { reply } from "@lib/discord";
 import { auditPanel } from "@lib/moderation";
 
-/** One panel instead of three subcommands. */
 export default defineCommand({
 	name: "audit-logging",
 	description: "Chooses which server events get logged, and where.",

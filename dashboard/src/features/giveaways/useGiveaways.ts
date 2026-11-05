@@ -16,7 +16,6 @@ export function useGiveaways(guildId: string): UseQueryResult<GiveawayList> {
 	});
 }
 
-/** Not optimistic: each one posts to or edits a real Discord message. */
 export function useStartGiveaway(guildId: string): UseMutationResult<GiveawayList, Error, GiveawayStart> {
 	return useListMutation(guildId, (body) => api.post<GiveawayList>(`/guilds/${guildId}/giveaways`, body));
 }
@@ -48,7 +47,6 @@ function useListMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (list) => {
-			// A whole-list answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, list);
 		},
 		onSettled: () => {

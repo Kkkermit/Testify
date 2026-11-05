@@ -8,7 +8,6 @@ import { loadEverything, MAX_COMMANDS } from "@core/loader";
 import { createLogger } from "@core/logger";
 import { ALLOWED_IN_DASHBOARD } from "@lib/bot/commandRunner.util";
 
-/** Loads every command, button, event and message handler from disk. */
 const bound: string[] = [];
 
 function fakeClient(): TestifyClient {

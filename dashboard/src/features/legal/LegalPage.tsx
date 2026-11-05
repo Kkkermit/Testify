@@ -9,7 +9,6 @@ import { shortDate } from "@/lib/datetime";
 
 const PROSE = "text-muted-foreground text-sm leading-relaxed";
 
-/** Both documents are public — read before signing in — which is why these routes sit outside `RequireAuth`. */
 export function LegalPage({ document }: { document: LegalDocument }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	usePageTitle(t(document.title));
@@ -25,14 +24,14 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 				{i18n.resolvedLanguage !== "en" && <p className="text-muted-foreground text-xs">{t("legal.englishGoverns")}</p>}
 			</div>
 
-			<Card padding="none" focal>
+			<Card padding="none">
 				<h2 className={cn(CARD_HEADING, "px-6 pt-6 pb-2")}>{t("legal.glance")}</h2>
 				<DataList rows={document.glance.map((row) => ({ label: t(row.label), value: t(row.value) }))} />
 			</Card>
 
 			<Card className="flex flex-col gap-6">
 				<nav aria-labelledby="legal-contents" className="flex flex-col gap-3">
-					<h2 id="legal-contents" className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+					<h2 id="legal-contents" className="text-muted-foreground text-sm font-medium">
 						{t("legal.contents")}
 					</h2>
 					<ol className="gap-x-6 sm:columns-2">

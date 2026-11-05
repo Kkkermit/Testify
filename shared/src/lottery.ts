@@ -18,7 +18,6 @@ export interface LotteryDrawSummary {
 	at: string;
 	prizePool: number;
 	tickets: number;
-	/** Winners are announced in a public channel by the bot, so naming them here reveals nothing new. */
 	winners: { userTag: string; prizeAmount: number }[];
 }
 
@@ -30,7 +29,6 @@ export interface LotterySettings {
 	maxWinners: number;
 	frequency: LotteryFrequency;
 	announcementChannelId: string | null;
-	/** The live pot, which grows as tickets are bought. Read-only here — entering is a Discord command. */
 	prizePool: number;
 	ticketsSold: number;
 	entrants: number;
@@ -51,7 +49,6 @@ export const lotteryPatch = z
 
 export type LotteryPatch = z.infer<typeof lotteryPatch>;
 
-/** What is still missing before a lottery can run, in the words the form shows. */
 export function lotteryBlocked(draft: { announcementChannelId: string | null; entryFee: number }): Problem | null {
 	if (draft.announcementChannelId === null) return problem("lottery.channel");
 	if (!Number.isInteger(draft.entryFee) || draft.entryFee < LOTTERY_LIMITS.minEntryFee) {

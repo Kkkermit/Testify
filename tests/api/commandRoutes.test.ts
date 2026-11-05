@@ -54,7 +54,7 @@ describe("the command catalogue endpoint", () => {
 		expect((await app(null).request("/commands")).status).toBe(401);
 	});
 
-	/** The point of filtering rather than disabling: a manager should not learn what the owner commands are. */
+	/** Filtered rather than disabled, so a manager does not learn what the owner commands are. */
 	it("hides owner commands from a server manager", async () => {
 		const catalogue = await catalogueFor({ userId: MANAGER });
 

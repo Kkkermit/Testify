@@ -52,7 +52,7 @@ describe("publishVerifyPanel", () => {
 		await expect(publishVerifyPanel(guildWith(channel), config())).rejects.toThrow(/cannot post/i);
 	});
 
-	/** Somebody deleted it. Sending a replacement beats failing, which would leave the server with no panel. */
+	/** Somebody deleted it, and sending a replacement beats leaving the server with no panel. */
 	it("sends a replacement when the stored message is gone", async () => {
 		const send = jest.fn(() => Promise.resolve({ id: "new" }));
 		const channel = {

@@ -1,5 +1,12 @@
 import { type GiveawayRow } from "@testify/shared";
-import { canReroll, durationMsOf, ordered, statusOf } from "@/features/giveaways/giveaways.utils";
+import {
+	canReroll,
+	durationMsOf,
+	giveawayPost,
+	nextDraw,
+	ordered,
+	statusOf,
+} from "@/features/giveaways/giveaways.utils";
 
 function row(overrides: Partial<GiveawayRow> = {}): GiveawayRow {
 	return {
@@ -48,5 +55,31 @@ describe("canReroll", () => {
 		expect(canReroll(row({ ended: false }))).toBe(false);
 		expect(canReroll(row({ ended: true, winners: [] }))).toBe(false);
 		expect(canReroll(row({ ended: true, winners: [{ id: "100000000000000002", tag: "winner#0001" }] }))).toBe(true);
+	});
+});
+
+describe("nextDraw", () => {
+	it("names the soonest running giveaway and ignores finished ones", () => {
+		const rows = [
+			row({ endAt: "2026-08-04T10:00:00.000Z" }),
+			row({ endAt: "2026-08-01T12:00:00.000Z", ended: true }),
+			row({ endAt: "2026-08-03T10:00:00.000Z" }),
+		];
+
+		expect(nextDraw(rows)).toBe("2026-08-03T10:00:00.000Z");
+		expect(nextDraw([row({ ended: true })])).toBeNull();
+	});
+});
+
+describe("giveawayPost", () => {
+	/** Discord writes the timestamp as "in 3 hours", so a draw line saying "in" itself read "Drawing in in 3 hours". */
+	it("fills every placeholder and never doubles the word before the time", () => {
+		const post = giveawayPost({ winnerCount: 2, durationMs: 3 * 3_600_000 }, "someone");
+		const text = [post.content, ...post.lines, post.footer].join("\n");
+
+		expect(text).not.toContain("{");
+		expect(text).not.toMatch(/\bin in\b/);
+		expect(post.lines).toContain("Hosted by @someone");
+		expect(post.footer).toBe("2 winner(s)");
 	});
 });

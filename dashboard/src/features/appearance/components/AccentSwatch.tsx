@@ -1,18 +1,17 @@
 import { Check } from "lucide-react";
-import { type Accent } from "@/hooks/useAccent";
+import { type PresetAccent } from "@/hooks/useAccent";
 import { cn } from "@/lib/cn";
 
-/** `data-accent` makes every token inside resolve to that accent, so nothing here names a colour. */
 export function AccentSwatch({
 	accent,
 	label,
 	selected,
 	onSelect,
 }: {
-	accent: Accent;
+	accent: PresetAccent;
 	label: string;
 	selected: boolean;
-	onSelect: (next: Accent) => void;
+	onSelect: (next: PresetAccent) => void;
 }): React.JSX.Element {
 	return (
 		<button

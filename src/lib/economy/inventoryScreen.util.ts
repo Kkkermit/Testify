@@ -64,7 +64,6 @@ export function inventoryScreen(
 					id: customId(INVENTORY_PANEL_ID, "use", item.itemId, current, ownerId),
 					label: "Use",
 					style: ButtonStyle.Success,
-					// Someone else's items are never yours to spend.
 					disabled: !usable || !own,
 				}),
 			),

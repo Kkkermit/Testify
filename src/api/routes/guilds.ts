@@ -1,4 +1,4 @@
-import { ChannelType, type Guild, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
+import { ChannelType, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
 import { type Context, Hono } from "hono";
 import { type ApiBindings, guildOf, readerOf } from "@api/context";
 import { holdsPermission, requireReach } from "@api/middleware/reach";
@@ -30,6 +30,7 @@ import { setup } from "@api/routes/setup";
 import { starboard } from "@api/routes/starboard";
 import { sticky } from "@api/routes/sticky";
 import { tempVoice } from "@api/routes/tempVoice";
+import { testPost } from "@api/routes/testPost";
 import { tickets } from "@api/routes/tickets";
 import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
@@ -45,8 +46,8 @@ import {
 import { canPostInChannel, readerSees } from "@lib/discord";
 import { readInsights } from "@lib/info";
 import { readServerChanges } from "@lib/moderation";
-import { isPowerful } from "@lib/roles";
-import { featuresOf } from "@lib/settings";
+import { isPowerful, readRoleUses } from "@lib/roles";
+import { featuresOf, missingPermissions, placesOf, readInbox, readWeek } from "@lib/settings";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
@@ -55,12 +56,14 @@ import {
 	type InsightWindow,
 	type ChannelSummary,
 	type GuildOverview,
+	type GuildInbox,
+	type GuildPlaces,
+	type GuildRoleUses,
+	type GuildWeek,
 	guildIdParam,
 	type Paged,
 	pagination,
 	type RoleSummary,
-	WATCHED_PERMISSIONS,
-	type WatchedPermission,
 } from "@testify/shared";
 
 export const guilds = new Hono<ApiBindings>();
@@ -101,6 +104,7 @@ guilds.route("/:guildId/warnings", warnings);
 guilds.route("/:guildId/starboard", starboard);
 guilds.route("/:guildId/temp-voice", tempVoice);
 guilds.route("/:guildId/setup", setup);
+guilds.route("/:guildId/test-post", testPost);
 
 guilds.get("/:guildId/overview", async (context) => {
 	const guild = guildOf(context);
@@ -121,10 +125,26 @@ guilds.get("/:guildId/overview", async (context) => {
 	return context.json(body);
 });
 
-/**
- * `canSend` comes from the live client, so the picker can grey out a channel before a configuration that cannot work is
- * saved.
- */
+guilds.get("/:guildId/inbox", async (context) => {
+	const body: GuildInbox = await readInbox(context.get("client"), guildOf(context));
+	return context.json(body);
+});
+
+guilds.get("/:guildId/week", async (context) => {
+	const body: GuildWeek = await readWeek(context.get("client"), guildOf(context));
+	return context.json(body);
+});
+
+guilds.get("/:guildId/role-uses", async (context) => {
+	const body: GuildRoleUses = await readRoleUses(guildOf(context).id);
+	return context.json(body);
+});
+
+guilds.get("/:guildId/places", async (context) => {
+	const body: GuildPlaces = { features: await placesOf(guildOf(context)) };
+	return context.json(body);
+});
+
 guilds.get("/:guildId/channels", (context) => {
 	const guild = guildOf(context);
 	const reader = readerOf(context);
@@ -137,6 +157,7 @@ guilds.get("/:guildId/channels", (context) => {
 			name: readerSees(channel, reader) ? channel.name : null,
 			kind: kindOf(channel),
 			position: "position" in channel ? channel.position : 0,
+			parentId: channel.parentId,
 			canSend: canPostInChannel(guild, channel),
 		}))
 		.sort((a, b) => a.position - b.position || (a.name ?? "").localeCompare(b.name ?? ""));
@@ -156,7 +177,6 @@ guilds.get("/:guildId/roles", (context) => {
 			colour: colourOf(role),
 			position: role.position,
 			managed: role.managed,
-			// The check `applyLevelRewards` already does at runtime, surfaced at configuration time instead.
 			assignableByBot: !role.managed && role.position < highest,
 			powerful: isPowerful(role),
 		}))
@@ -179,7 +199,6 @@ guilds.get("/:guildId/audit", async (context) => {
 	return context.json(body);
 });
 
-/** The last fortnight's changes, from the dashboard and from Discord's own audit log, newest first. */
 guilds.get("/:guildId/changes", async (context) => {
 	const query = parseQuery(context, changesQuery);
 
@@ -221,12 +240,4 @@ function kindOf(channel: GuildBasedChannel): ChannelKind {
 
 function colourOf(role: Role): string | null {
 	return role.color === 0 ? null : `#${role.color.toString(16).padStart(6, "0")}`;
-}
-
-/** Permissions Discord can revoke silently, named so a manager can act on them. */
-function missingPermissions(guild: Guild): WatchedPermission[] {
-	const me = guild.members.me;
-	if (me === null) return [];
-
-	return WATCHED_PERMISSIONS.filter((flag) => !me.permissions.has(PermissionFlagsBits[flag]));
 }

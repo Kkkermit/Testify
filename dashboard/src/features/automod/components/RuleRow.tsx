@@ -5,7 +5,6 @@ import { Toggle } from "@/components/form";
 import { Badge, cardClass, Button } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 
-/** Keys rather than text: a module-level map is built once, long before a locale is chosen. */
 const ACTION_KEY: Record<AutomodAction, TranslationKey> = {
 	block: "automod.blocks",
 	alert: "automod.alerts",
@@ -34,7 +33,8 @@ export function RuleRow({
 				</div>
 				<p className="text-muted-foreground text-xs">
 					{rule.trigger}
-					{rule.actions.length > 0 && ` — ${rule.actions.map((action) => t(ACTION_KEY[action])).join(", ")}`}
+					{rule.actions.length > 0 &&
+						` — ${rule.actions.map((action) => t(ACTION_KEY[action])).join(t("common.listSeparator"))}`}
 				</p>
 			</div>
 

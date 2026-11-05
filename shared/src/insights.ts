@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-/** A server at a glance: facts Discord holds, plus daily counts of messages, joins and leaves. */
-
 export const INSIGHTS_LIMITS = {
 	/** Counts older than this are deleted, so a window can never reach further back. */
 	retentionDays: 30,

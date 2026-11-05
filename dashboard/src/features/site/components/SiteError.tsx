@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Button, Card } from "@/components/primitives";
 
-/** A public page's failure: what went wrong and a retry, with no way back to a dashboard this host may not have. */
 export function SiteError({
 	title,
 	body,

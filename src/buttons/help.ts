@@ -13,7 +13,6 @@ import {
 	resolveSurface,
 } from "@lib/info";
 
-/** Drives the help menu. */
 export default defineButton({
 	id: "help",
 	ownerOnly: true,
@@ -50,7 +49,6 @@ export default defineButton({
 			return;
 		}
 
-		// "page" moves within a category; "swap" shows the same page the other way round.
 		if ((action === "page" || action === "swap") && interaction.isButton()) {
 			const surface = resolveSurface(args[0]);
 			const category = resolveCategory(args[1] ?? "");

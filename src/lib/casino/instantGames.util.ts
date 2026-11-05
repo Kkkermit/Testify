@@ -16,7 +16,6 @@ export interface InstantOutcome {
 	betLine: string;
 	/** Everything handed back, stake included; zero on a loss. */
 	returned: number;
-	/** What happened, in words. */
 	result: string;
 	/** The call, packed small enough to ride in a Play again button. */
 	again: string;

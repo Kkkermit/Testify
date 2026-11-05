@@ -2,4 +2,5 @@ export * from "./memberRoles.util";
 export * from "./roleMenuActions.util";
 export * from "./roleMenuPanel.util";
 export * from "./roleReach.util";
+export * from "./roleUses.util";
 export * from "./roles.constants";

@@ -9,8 +9,6 @@ import {
 	type TicketSettings,
 } from "@testify/shared";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const ticketSettings: TicketSettings = {
 	enabled: true,
 	panelChannelId: "400000000000000001",

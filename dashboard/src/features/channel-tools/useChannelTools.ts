@@ -20,7 +20,6 @@ function replaced(list: ChannelToolList, channel: ToolChannel): ChannelToolList 
 	return { channels: list.channels.map((entry) => (entry.id === channel.id ? channel : entry)) };
 }
 
-/** One channel at a time and answered with that channel alone, so two quick changes cannot undo each other. */
 export function useUpdateChannel(
 	guildId: string,
 ): UseMutationResult<ToolChannel, Error, { channelId: string } & ChannelToolPatch> {

@@ -5,11 +5,20 @@ import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Card, EmptyState, Eyebrow, PageHeader, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
+import {
+	Card,
+	EmptyState,
+	SectionHeading,
+	PageHeader,
+	Pager,
+	SegmentedControl,
+	Skeleton,
+	Summary,
+} from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { IdeaItem } from "@/features/ideas/components/IdeaItem";
-import { IdeaSettingsCard } from "@/features/ideas/components/IdeaSettingsCard";
-import { ideaFilterFrom, pageCount, pageFrom } from "@/features/ideas/ideas.utils";
+import { IdeaSettings } from "@/features/ideas/components/IdeaSettings";
+import { ideaFilterFrom, ideaSummary, pageCount, pageFrom } from "@/features/ideas/ideas.utils";
 import {
 	useDecideIdea,
 	useIdeaList,
@@ -21,6 +30,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 
 const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
 	all: "ideas.filterAll",
@@ -29,7 +39,6 @@ const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
 	declined: "ideas.filterDeclined",
 };
 
-/** The server's idea board: where it posts, and every idea with its votes and the decision on it. */
 export function IdeasPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -54,6 +63,9 @@ export function IdeasPage(): React.JSX.Element {
 	const message = (error: Error | null, fallback: string): string | null =>
 		error === null ? null : error instanceof ApiError ? error.message : fallback;
 	const busy = decide.isPending || remove.isPending;
+	const postable = postableChannels(channels.data ?? []);
+	const channel = channelLabel(postable, settings.data.channelId, t);
+	const saveError = message(save.error, t("common.couldNotSave"));
 	const counts = settings.data.counts;
 	const countOf = (value: IdeaFilter): number =>
 		value === "all" ? counts.open + counts.accepted + counts.declined : counts[value];
@@ -71,27 +83,32 @@ export function IdeasPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("ideas.title")}
 				subtitle={t("ideas.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending || busy, save.isSuccess)} />}
 			/>
 
-			<IdeaSettingsCard
+			<Summary>{ideaSummary(settings.data, channel, t)}</Summary>
+			{settings.data.channelId !== null && !settings.data.canSend && (
+				<Warning>{t("common.cannotPostIn", { channel })}</Warning>
+			)}
+
+			<IdeaSettings
 				settings={settings.data}
-				channels={postableChannels(channels.data ?? [])}
+				channels={postable}
 				saving={save.isPending}
-				error={message(save.error, t("common.couldNotSave"))}
 				onChange={(patch) => {
 					save.mutate(patch);
 				}}
 			/>
+			{saveError !== null && <Warning>{saveError}</Warning>}
 
 			<section aria-labelledby="ideas-heading" className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center justify-between gap-3">
-					<Eyebrow as="h2" id="ideas-heading">
+					<SectionHeading as="h2" id="ideas-heading">
 						{t("ideas.posted")}
-					</Eyebrow>
+					</SectionHeading>
 					<SegmentedControl
 						label={t("ideas.filter")}
 						value={filter}

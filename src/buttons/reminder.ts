@@ -8,7 +8,6 @@ import {
 } from "@database/repositories/reminderRepository";
 import { canPingHere, REMINDER_ID, reminderCancelled, reminderConfirm, reminderList } from "@lib/reminders";
 
-/** The buttons on a reminder's confirmation and on `/remind list`; only the reminder's owner can press them. */
 export default defineButton({
 	id: REMINDER_ID,
 	ownerOnly: true,

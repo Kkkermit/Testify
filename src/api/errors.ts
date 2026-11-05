@@ -34,7 +34,6 @@ export class ApiProblem extends Error {
 	}
 }
 
-/** Discord or GitHub refusing or failing to answer: an outside service having a bad moment, not a bug in the bot. */
 export class UpstreamProblem extends ApiProblem {
 	/** What the service answered, so a log line can tell a rate limit from an outage; 0 when it did not answer. */
 	readonly upstreamStatus: number;

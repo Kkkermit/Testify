@@ -7,7 +7,6 @@ import { cn } from "@/lib/cn";
 
 export const NOTIFICATIONS_PATH = "/notifications";
 
-/** Shown on every screen while anything is unread, and never on the page that reads them. */
 export function NoticeBanner(): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const { pathname } = useLocation();
@@ -21,9 +20,9 @@ export function NoticeBanner(): React.JSX.Element | null {
 			aria-label={t("notices.bannerLabel")}
 			className="border-primary/40 bg-primary/10 rounded-card flex flex-wrap items-center gap-x-3 gap-y-1 border px-6 py-3"
 		>
-			<Bell size={16} className="text-primary shrink-0" aria-hidden="true" />
+			<Bell size={16} className="text-accent shrink-0" aria-hidden="true" />
 			<p className="text-sm">{t("notices.banner", { count: unread })}</p>
-			<Link to={NOTIFICATIONS_PATH} className={cn(INLINE_TARGET, "text-primary text-sm font-medium underline")}>
+			<Link to={NOTIFICATIONS_PATH} className={cn(INLINE_TARGET, "text-accent text-sm font-medium underline")}>
 				{t("notices.open")}
 			</Link>
 		</aside>

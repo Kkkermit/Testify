@@ -11,8 +11,6 @@ import {
 	type WelcomeConfigResponse,
 } from "@testify/shared";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const levelConfig: LevelConfigResponse = {
 	enabled: true,
 	boosts: [{ roleId: "300000000000000002", multiplier: 2 }],

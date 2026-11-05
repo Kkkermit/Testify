@@ -1,21 +1,33 @@
 import { useState } from "react";
-import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/cn";
 
-/** No answer yet, no avatar set and an unreachable CDN all land on the built-in mark rather than a broken image icon. */
 export function BotMark({
 	src,
+	name,
 	size = 22,
 	className,
 }: {
 	src: string | null | undefined;
+	name: string | null;
 	size?: number;
 	className?: string;
 }): React.JSX.Element {
-	const [broken, setBroken] = useState(false);
+	const [broken, setBroken] = useState<string | null>(null);
 
-	if (src === null || src === undefined || broken) {
-		return <Logo size={size} className={cn("text-accent", className)} />;
+	if (src === null || src === undefined || broken === src) {
+		const initial = name === null ? "" : (Array.from(name.trim())[0]?.toLocaleUpperCase() ?? "");
+		return (
+			<span
+				aria-hidden="true"
+				className={cn(
+					"bg-accent-wash text-accent inline-flex shrink-0 items-center justify-center rounded-full font-semibold",
+					className,
+				)}
+				style={{ width: size, height: size, fontSize: Math.round(size * 0.45) }}
+			>
+				{initial}
+			</span>
+		);
 	}
 
 	return (
@@ -24,9 +36,8 @@ export function BotMark({
 			alt=""
 			width={size}
 			height={size}
-			loading="lazy"
 			onError={() => {
-				setBroken(true);
+				setBroken(src);
 			}}
 			className={cn("max-w-none shrink-0 rounded-full object-cover", className)}
 			style={{ width: size, height: size }}

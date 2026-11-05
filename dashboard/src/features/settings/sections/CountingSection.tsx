@@ -1,8 +1,7 @@
 import { type ChannelSummary, type CountingPatch, type CountingSetting } from "@testify/shared";
-import { Hash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { ChannelPicker, Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
+import { ChannelPicker, Field, FIELD, FieldGroup, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { countCapProblem, countProgress } from "@/features/settings/settings.utils";
@@ -37,8 +36,6 @@ export function CountingSection({
 
 	return (
 		<Section
-			icon={Hash}
-			tint="text-feature-community"
 			title={t("settings.countingTitle")}
 			describes={t("settings.countingBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
@@ -74,20 +71,20 @@ export function CountingSection({
 							setCap(event.target.value);
 						}}
 						onBlur={commit}
-						className={cn(FIELD, "max-w-40 font-mono tabular-nums", problem !== null && dirty && "border-destructive")}
+						className={cn(FIELD, "max-w-40 tabular-nums", problem !== null && dirty && "border-destructive")}
 					/>
 					{dirty && problem === null && <Button onClick={commit}>{t("settings.countingSave")}</Button>}
 				</div>
 			</Field>
 
 			{value.enabled && (
-				<div className="flex flex-col gap-2">
+				<FieldGroup label={t("settings.countingSoFar")} named={false}>
 					<div className="flex items-baseline justify-between gap-3">
 						<p className="text-muted-foreground text-sm">
 							<Trans
 								i18nKey="settings.currentlyAt"
 								values={{ count: formatNumber(value.count) }}
-								components={{ count: <span className="text-foreground font-mono" /> }}
+								components={{ count: <span className="text-foreground font-medium tabular-nums" /> }}
 							/>
 						</p>
 						<Button
@@ -105,7 +102,7 @@ export function CountingSection({
 							style={{ width: `${String(countProgress(value.count, value.maxCount))}%` }}
 						/>
 					</div>
-				</div>
+				</FieldGroup>
 			)}
 
 			{dirty && problem !== null && <Warning>{problem}</Warning>}

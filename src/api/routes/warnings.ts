@@ -61,7 +61,6 @@ warnings.get("/", requirePermission(PermissionFlagsBits.ModerateMembers), async 
 
 warnings.get("/punishments", async (context) => context.json(await readWarnLadder(guildOf(context).id)));
 
-/** The whole list in one request, because the control is the list and a partial write would reorder it. */
 warnings.put("/punishments", async (context) => {
 	const guild = guildOf(context);
 	const { steps } = await parseBody(context, warnLadderPut);
@@ -76,7 +75,6 @@ warnings.put("/punishments", async (context) => {
 	return context.json(saved);
 });
 
-/** The same checks `/warn create` makes, against a live fetch of both people. */
 warnings.post("/", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, warningAdd);

@@ -1,10 +1,8 @@
 import { type Message } from "discord.js";
 import { type TestifyClient } from "@core/client";
 
-/** Runs on every message. */
 export interface MessageHandler {
 	name: string;
-	/** Lower numbers run first. */
 	order?: number;
 	/** Set this to also see messages from bots. */
 	allowBots?: boolean;
