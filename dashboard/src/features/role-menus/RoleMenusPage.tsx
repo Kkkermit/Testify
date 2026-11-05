@@ -6,12 +6,12 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Card, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
+import { Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { RoleMenuForm } from "@/features/role-menus/components/RoleMenuForm";
 import { RoleMenuRow } from "@/features/role-menus/components/RoleMenuRow";
-import { draftOf, emptyDraft } from "@/features/role-menus/roleMenus.utils";
+import { draftOf, emptyDraft, roleMenuSummary } from "@/features/role-menus/roleMenus.utils";
 import {
 	useCreateRoleMenu,
 	usePublishRoleMenu,
@@ -85,6 +85,8 @@ export function RoleMenusPage(): React.JSX.Element {
 				subtitle={t("roleMenus.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, create.isSuccess || update.isSuccess)} />}
 			/>
+
+			<Summary>{roleMenuSummary(menus, t)}</Summary>
 
 			<section aria-labelledby="menus-heading" className="flex flex-col gap-3">
 				<SectionHeading

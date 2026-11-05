@@ -816,6 +816,10 @@
 		"weekly": "Jede Woche"
 	},
 	"roleMenus": {
+		"summaryPosted_other": "Mitglieder wählen ihre Rollen selbst aus {{count, number}} geposteten Menüs.",
+		"summaryPosted_one": "Mitglieder wählen ihre Rollen selbst aus {{count, number}} gepostetem Menü.",
+		"summaryNonePosted": "Noch kein Menü ist gepostet, daher können Mitglieder aus keinem Rollen wählen.",
+		"summaryNone": "Es gibt noch keine Rollenmenüs, daher können Mitglieder ihre Rollen nicht selbst wählen.",
 		"title": "Rollenmenüs",
 		"subtitle": "Menüs, in denen Mitglieder ihre Rollen selbst wählen. {{bot}} bietet nur Rollen unter deiner und seiner eigenen an, und nie eine, die moderiert oder verwaltet.",
 		"inUse": "Menüs",

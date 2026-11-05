@@ -5,6 +5,7 @@ import {
 	type RoleMenuMode,
 	type RoleSummary,
 } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 export interface RoleMenuDraft {
 	channelId: string | null;
@@ -60,4 +61,11 @@ export function bodyOf(draft: RoleMenuDraft, clean: (value: string) => string): 
 		roleIds: draft.roleIds,
 		mode: draft.mode,
 	};
+}
+
+/** How many menus members can pick roles from now, as the sentence the page opens with. */
+export function roleMenuSummary(menus: readonly Pick<RoleMenuEntry, "posted">[], t: TFunction): string {
+	if (menus.length === 0) return t("roleMenus.summaryNone");
+	const posted = menus.filter((menu) => menu.posted).length;
+	return posted === 0 ? t("roleMenus.summaryNonePosted") : t("roleMenus.summaryPosted", { count: posted });
 }

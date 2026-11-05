@@ -816,6 +816,10 @@
 		"weekly": "Every week"
 	},
 	"roleMenus": {
+		"summaryPosted_other": "Members pick their own roles from {{count, number}} posted menus.",
+		"summaryPosted_one": "Members pick their own roles from {{count, number}} posted menu.",
+		"summaryNonePosted": "No menu is posted yet, so members cannot pick roles from one.",
+		"summaryNone": "There are no role menus yet, so members cannot pick their own roles.",
 		"title": "Role menus",
 		"subtitle": "Menus members pick their own roles from. {{bot}} only offers roles below yours and its own, and never one that moderates or administers.",
 		"inUse": "Menus",

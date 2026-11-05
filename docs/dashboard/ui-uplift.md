@@ -114,7 +114,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/welcome` (greeting and goodbye)           | Community     | Both messages       | Done                    |
 | `…/birthdays`                                | Community     | The birthday post   | Done                    |
 | `…/levelling`                                | Community     | —                   | Done                    |
-| `…/role-menus`                               | Community     | —                   | To do                   |
+| `…/role-menus`                               | Community     | —                   | Done                    |
 | `…/ideas`                                    | Community     | —                   | Done                    |
 | `…/starboard`                                | Community     | —                   | Done                    |
 | `…/temp-voice`                               | Community     | —                   | Done                    |

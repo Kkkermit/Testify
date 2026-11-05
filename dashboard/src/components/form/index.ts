@@ -6,6 +6,7 @@ export { Field } from "@/components/form/Field";
 export { FieldGroup } from "@/components/form/FieldGroup";
 export { RadioCard } from "@/components/form/RadioCard";
 export { RoleChecklist } from "@/components/form/RoleChecklist";
+export { RowActions } from "@/components/form/RowActions";
 export { RowLayout } from "@/components/form/rowLayout";
 export { SavingIndicator, savingStateOf, type SavingState } from "@/components/form/SavingIndicator";
 export { SearchField } from "@/components/form/SearchField";

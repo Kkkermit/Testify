@@ -836,6 +836,11 @@
 		"weekly": "Ogni settimana"
 	},
 	"roleMenus": {
+		"summaryPosted_other": "I membri scelgono i propri ruoli da {{count, number}} menu pubblicati.",
+		"summaryPosted_many": "I membri scelgono i propri ruoli da {{count, number}} di menu pubblicati.",
+		"summaryPosted_one": "I membri scelgono i propri ruoli da {{count, number}} menu pubblicato.",
+		"summaryNonePosted": "Nessun menu è ancora pubblicato, quindi i membri non possono sceglierne i ruoli.",
+		"summaryNone": "Non ci sono ancora menu dei ruoli, quindi i membri non possono scegliere i propri ruoli.",
 		"title": "Menu dei ruoli",
 		"subtitle": "Menu in cui i membri scelgono i propri ruoli. {{bot}} offre solo ruoli sotto il tuo e il suo, e mai uno che modera o amministra.",
 		"inUse": "Menu",

@@ -6,19 +6,22 @@ import { ROW_GRID, ROW_LABEL, useRowLayout } from "@/components/form/rowLayout";
 export function FieldGroup({
 	label,
 	hint,
+	named = true,
 	children,
 }: {
 	label: string;
 	hint?: string;
+	/** False when the control inside already carries this name, so a screen reader does not hear it twice. */
+	named?: boolean;
 	children: ReactNode;
 }): React.JSX.Element {
 	const row = useRowLayout();
 	const id = useId();
 
 	return (
-		<div role="group" aria-labelledby={id} className={row ? ROW_GRID : FIELD_GROUP}>
+		<div {...(named ? { role: "group", "aria-labelledby": id } : {})} className={row ? ROW_GRID : FIELD_GROUP}>
 			<span className="flex flex-col gap-1">
-				<span id={id} className={row ? ROW_LABEL : LABEL}>
+				<span id={id} aria-hidden={named ? undefined : true} className={row ? ROW_LABEL : LABEL}>
 					{label}
 				</span>
 				{hint !== undefined && <span className="text-muted-foreground text-xs">{hint}</span>}
