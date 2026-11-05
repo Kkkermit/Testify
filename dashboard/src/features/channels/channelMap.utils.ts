@@ -1,4 +1,4 @@
-import { type ChannelSummary, type FeaturePlaces, type PlaceKind } from "@testify/shared";
+import { type ChannelSummary, type FeaturePlaces } from "@testify/shared";
 
 /** A channel the dashboard can show: one its reader can see, of a kind a feature can work in. */
 export type VisibleChannel = ChannelSummary & { name: string };
@@ -38,18 +38,6 @@ export function channelTree(channels: readonly ChannelSummary[]): ChannelGroup[]
 	return groups;
 }
 
-/** How many features work in each channel, counting a feature once however many roles it has there. */
-export function featureCounts(features: readonly FeaturePlaces[]): Map<string, number> {
-	const counts = new Map<string, number>();
-	for (const feature of features) {
-		for (const channelId of new Set(feature.places.map((place) => place.channelId))) {
-			counts.set(channelId, (counts.get(channelId) ?? 0) + 1);
-		}
-	}
-
-	return counts;
-}
-
 /** Everything a channel holds, in the order the features are listed. */
 export function featuresIn(features: readonly FeaturePlaces[], channelId: string): FeaturePlaces[] {
 	return features.filter((feature) => feature.places.some((place) => place.channelId === channelId));
@@ -57,18 +45,4 @@ export function featuresIn(features: readonly FeaturePlaces[], channelId: string
 
 export function channelPath(guildId: string, channelId: string): string {
 	return `/guilds/${guildId}/channels/${channelId}`;
-}
-
-/** The channels a feature taking `accepts` can be placed in: text ones the bot can post in, or any voice one. */
-export function placeableIn(channels: readonly ChannelSummary[], accepts: PlaceKind): VisibleChannel[] {
-	return channelTree(channels)
-		.flatMap((group) => group.channels)
-		.filter((channel) =>
-			accepts === "voice" ? channel.kind === "voice" : channel.kind !== "voice" && channel.canSend,
-		);
-}
-
-/** What a channel can take when something is dragged onto it. */
-export function kindOf(channel: ChannelSummary): PlaceKind {
-	return channel.kind === "voice" ? "voice" : "text";
 }

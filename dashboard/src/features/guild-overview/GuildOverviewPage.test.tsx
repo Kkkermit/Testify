@@ -28,18 +28,48 @@ describe("the guild overview", () => {
 		expect(screen.getByText(/manage roles — needed for level rewards/i)).toBeInTheDocument();
 	});
 
-	/** The overview answers "what happens where": each busy channel, named, with what it does, and what still waits. */
-	it("lists each channel the bot works in and what is still waiting for one", async () => {
+	/** The server sends what each feature is doing as data, so the page names the channel and words the plural. */
+	it("says what each feature is doing, by channel name and in the right plural", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({
+					...overview,
+					features: [
+						{
+							key: "welcome",
+							label: "Welcome messages",
+							enabled: true,
+							detail: { kind: "posting", channelId: "400000000000000001" },
+						},
+						{
+							key: "cases",
+							label: "Moderation cases",
+							enabled: true,
+							detail: { kind: "posting", channelId: "499999999999999999" },
+						},
+						{
+							key: "lottery",
+							label: "Lottery",
+							enabled: true,
+							detail: { kind: "count", what: "ticketsSold", count: 1 },
+						},
+						{
+							key: "tickets",
+							label: "Tickets",
+							enabled: true,
+							detail: { kind: "count", what: "ticketsOpen", count: 3 },
+						},
+					],
+				}),
+			),
+		);
+
 		renderPage();
 
-		const general = await screen.findByRole("link", { name: /#general/ });
-		expect(general).toHaveAttribute("href", `/guilds/${aGuild.id}/channels/400000000000000001`);
-		expect(within(general).getByText("Welcome messages")).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: /#locked/ })).toHaveTextContent("Tickets");
-
-		const waiting = screen.getByRole("region", { name: /Waiting for a channel/ });
-		expect(within(waiting).getByRole("button", { name: "Place Goodbye in a channel" })).toBeInTheDocument();
-		expect(screen.getByText(/1 of 1 features are on/)).toBeInTheDocument();
+		expect(await screen.findByText("Posting in #general")).toBeInTheDocument();
+		expect(screen.getByText("Posting in a deleted channel")).toBeInTheDocument();
+		expect(screen.getByText("1 ticket sold")).toBeInTheDocument();
+		expect(screen.getByText("3 tickets open")).toBeInTheDocument();
 	});
 
 	it("says nothing about permissions when none are missing", async () => {
@@ -133,6 +163,25 @@ describe("the guild overview", () => {
 		renderPage();
 
 		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
+	});
+});
+
+describe("the feature grid", () => {
+	/** A card that looks clickable and goes nowhere is worse than one that plainly does not. */
+	it("leaves a Discord-only feature inert rather than linking it nowhere", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({
+					...overview,
+					features: [{ key: "games", label: "Games", enabled: true, detail: "6 available" }],
+				}),
+			),
+		);
+
+		renderPage();
+
+		expect(await screen.findByText("Games")).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /games/i })).toBeNull();
 	});
 });
 

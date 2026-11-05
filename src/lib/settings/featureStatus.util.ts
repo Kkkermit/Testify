@@ -34,7 +34,6 @@ import {
 	type FeatureStatus,
 	type Place,
 	type PlaceRole,
-	type PlaceRule,
 } from "@testify/shared";
 
 /** What the overview says about each feature and where it works: one read each, through the repositories the panels use. */
@@ -375,13 +374,11 @@ export async function placesOf(guild: Guild): Promise<FeaturePlaces[]> {
 	return Promise.all(
 		FEATURE_SOURCES.map(async (source) => {
 			const { places, ...reading } = await source.read(guild);
-			const rule: PlaceRule = FEATURE_PLACES[source.key];
 			return {
 				key: source.key,
 				label: source.label,
 				...reading,
-				reach: rule.reach,
-				accepts: "accepts" in rule ? rule.accepts : null,
+				reach: FEATURE_PLACES[source.key].reach,
 				places: distinct(places),
 			};
 		}),

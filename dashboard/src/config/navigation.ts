@@ -33,7 +33,7 @@ import {
 	Ticket,
 	type LucideIcon,
 	Gauge,
-	Globe,
+	Hash,
 	Gavel,
 	History,
 	Gift,
@@ -72,8 +72,6 @@ export interface NavGroup {
 	/** Set on a server's own group, whose heading is the switcher to the same screen in another server. */
 	guildId?: string;
 	items: NavItem[];
-	/** A server's group only: rendered after the server's channel list, which sits between these and `items`. */
-	afterChannels?: NavItem[];
 	/** Rendered last, each behind its own toggle. */
 	sections?: NavSection[];
 }
@@ -108,10 +106,10 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 		groups.push({
 			heading: guild.name,
 			guildId: guild.id,
-			items: [{ to: at(""), labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" }],
-			// The server's own channel list sits between these, drawn from Discord rather than from this file.
-			afterChannels: [
-				{ to: at("/everywhere"), labelKey: "nav.everywhere", icon: Globe, hintKey: "nav.everywhereHint" },
+			items: [
+				{ to: at(""), labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
+				// One channel's page lives under this path, so Channels stays marked while it is open.
+				{ to: at("/channels"), labelKey: "nav.channels", icon: Hash, hintKey: "nav.channelsHint", exact: false },
 				// A member's own page lives under this path, and it is still where you are in the sidebar.
 				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
 				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
@@ -199,11 +197,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 }
 
 export function allNavItems(groups: NavGroup[]): NavItem[] {
-	return groups.flatMap((group) => [
-		...group.items,
-		...(group.afterChannels ?? []),
-		...(group.sections ?? []).flatMap((section) => section.items),
-	]);
+	return groups.flatMap((group) => [...group.items, ...(group.sections ?? []).flatMap((section) => section.items)]);
 }
 
 /** Open on arrival when the current page is inside it, so a collapsed section never hides where you are. */

@@ -1,5 +1,5 @@
 import { type ChannelSummary } from "@testify/shared";
-import { channelTree, featureCounts, featuresIn } from "@/features/channels/channelMap.utils";
+import { channelTree, featuresIn } from "@/features/channels/channelMap.utils";
 import { guildPlaces } from "@/test/fixtures/server";
 
 function channel(
@@ -52,12 +52,8 @@ describe("channelTree", () => {
 	});
 });
 
-describe("featureCounts and featuresIn", () => {
-	it("counts a feature once in a channel however many jobs it does there", () => {
-		const counts = featureCounts(guildPlaces.features);
-
-		expect(counts.get("400000000000000002")).toBe(1);
-		expect(counts.get("400000000000000001")).toBe(1);
+describe("featuresIn", () => {
+	it("lists what works in one channel and nothing from any other", () => {
 		expect(featuresIn(guildPlaces.features, "400000000000000002").map((feature) => feature.key)).toEqual(["tickets"]);
 	});
 });

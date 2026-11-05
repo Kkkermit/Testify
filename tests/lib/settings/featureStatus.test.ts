@@ -13,7 +13,7 @@ import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
 import { FEATURE_SOURCES, featuresOf, placesOf } from "@lib/settings/featureStatus.util";
 import { readTickets } from "@lib/tickets/ticketActions.util";
-import { FEATURE_PLACES, type FeatureStatus, isWaiting } from "@testify/shared";
+import { FEATURE_PLACES, type FeatureStatus } from "@testify/shared";
 
 jest.mock("@database/repositories/ideaRepository", () => ({ getIdeaSettings: jest.fn() }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
@@ -153,8 +153,10 @@ describe("placesOf", () => {
 		expect(Object.keys((await featuresOf(guild))[0] ?? {}).sort()).toEqual(["detail", "enabled", "key", "label"]);
 	});
 
-	it("shows a fresh server's channel features as waiting, and nothing else", async () => {
-		const waiting = (await placesOf(guild)).filter(isWaiting).map((feature) => feature.key);
+	it("gives a fresh server's channel features no channel, and nothing else", async () => {
+		const waiting = (await placesOf(guild))
+			.filter((feature) => feature.reach === "channel" && feature.places.length === 0)
+			.map((feature) => feature.key);
 
 		expect(waiting.sort()).toEqual(
 			Object.entries(FEATURE_PLACES)

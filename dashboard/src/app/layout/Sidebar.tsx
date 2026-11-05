@@ -3,11 +3,10 @@ import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@tes
 import { FileText, LogOut, Palette, Search, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { CATEGORY_HEADING, ChannelNav } from "@/app/layout/ChannelNav";
 import { GuildSwitcher } from "@/app/layout/GuildSwitcher";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
-import { ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
+import { GROUP_HEADING, ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
 import { BotMark } from "@/components/brand/BotMark";
 import { FlagIcon } from "@/components/brand/FlagIcon";
 import { Avatar, Tooltip } from "@/components/primitives";
@@ -98,7 +97,7 @@ export function Sidebar({
 									// Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's.
 									<p
 										aria-hidden="true"
-										className={cn(CATEGORY_HEADING, "truncate px-2 pb-1", expanded ? "" : "hidden lg:block")}
+										className={cn(GROUP_HEADING, "truncate px-2 pb-1", expanded ? "" : "hidden lg:block")}
 									>
 										{heading}
 									</p>
@@ -107,16 +106,6 @@ export function Sidebar({
 						)}
 						<ul className="flex flex-col gap-1" {...(heading === undefined ? {} : { "aria-label": heading })}>
 							{group.items.map((item) => (
-								<li key={item.to}>
-									<SidebarLink item={item} expanded={expanded} />
-								</li>
-							))}
-							{group.guildId !== undefined && (
-								<li>
-									<ChannelNav guildId={group.guildId} expanded={expanded} />
-								</li>
-							)}
-							{(group.afterChannels ?? []).map((item) => (
 								<li key={item.to}>
 									<SidebarLink item={item} expanded={expanded} />
 								</li>

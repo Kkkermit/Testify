@@ -1,28 +1,21 @@
-import { isWaiting } from "@testify/shared";
+import { Hash, Shield, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { PageHeader, SectionHeading, Skeleton } from "@/components/primitives";
+import { SectionHeading, PageHeader, Skeleton, StatTile } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
-import { usePlaces } from "@/features/channels/usePlaces";
+import { FeatureGrid } from "@/features/guild-overview/components/FeatureGrid";
 import { MissingPermissions } from "@/features/guild-overview/components/MissingPermissions";
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
 import { SetupChecklist } from "@/features/guild-overview/components/SetupChecklist";
-import { WaitingChips } from "@/features/guild-overview/components/WaitingChips";
-import { WhereItWorks } from "@/features/guild-overview/components/WhereItWorks";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
-import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
-
-const LINK = cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm");
 
 export function GuildOverviewPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 	const { t } = useTranslation();
 	const overview = useGuildOverview(guildId);
-	const places = usePlaces(guildId);
-	const channels = useChannels(guildId);
 
 	usePageTitle(overview.data?.name ?? "Server");
 
@@ -35,48 +28,38 @@ export function GuildOverviewPage(): React.JSX.Element {
 		<>
 			<PageHeader title={guild.name} subtitle={t("overview.subtitle")} />
 
-			<MissingPermissions permissions={guild.missingPermissions} />
-
-			<section aria-labelledby="works-heading" className="flex flex-col gap-3">
-				<SectionHeading as="h2" id="works-heading">
-					{t("overview.whereItWorks")}
-				</SectionHeading>
-				{places.isError || channels.isError ? (
-					<ErrorState
-						as="h2"
-						error={places.error ?? channels.error}
-						onRetry={() => {
-							void places.refetch();
-							void channels.refetch();
-						}}
-					/>
-				) : places.data === undefined || channels.data === undefined ? (
-					<Skeleton className="h-40" />
-				) : (
-					<>
-						<WhereItWorks features={places.data.features} channels={channels.data} guildId={guildId} />
-						<WaitingSection features={places.data.features} channels={channels.data} guildId={guildId} />
-						<p className="text-muted-foreground text-sm">
-							{t("overview.everywhereOn", {
-								on: places.data.features.filter((f) => f.reach === "everywhere" && f.enabled).length,
-								total: places.data.features.filter((f) => f.reach === "everywhere").length,
-							})}{" "}
-							<Link to={`/guilds/${guildId}/everywhere`} className={LINK}>
-								{t("overview.everywhereLink")}
-							</Link>
-						</p>
-					</>
-				)}
+			<section aria-label={t("overview.glance")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+				<StatTile label={t("overview.members")} value={guild.memberCount} icon={Users} tint="text-feature-welcome" />
+				<StatTile label={t("overview.channels")} value={guild.channelCount} icon={Hash} tint="text-feature-tickets" />
+				<StatTile label={t("overview.roles")} value={guild.roleCount} icon={Shield} tint="text-feature-levelling" />
+				<StatTile
+					label={t("overview.featuresOn")}
+					value={guild.features.filter((feature) => feature.enabled).length}
+					icon={Sparkles}
+					tint="text-feature-economy"
+					hint={t("overview.featuresHint")}
+				/>
 			</section>
 
+			<MissingPermissions permissions={guild.missingPermissions} />
 			<SetupChecklist guildId={guildId} />
+
+			<section aria-labelledby="features-heading" className="flex flex-col gap-3">
+				<SectionHeading as="h2" id="features-heading">
+					{t("overview.features")}
+				</SectionHeading>
+				<FeatureGrid features={guild.features} guildId={guildId} />
+			</section>
 
 			<section aria-labelledby="changes-heading" className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-baseline justify-between gap-2">
 					<SectionHeading as="h2" id="changes-heading">
 						{t("overview.recentChanges")}
 					</SectionHeading>
-					<Link to={`/guilds/${guildId}/changes`} className={LINK}>
+					<Link
+						to={`/guilds/${guildId}/changes`}
+						className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}
+					>
 						{t("overview.seeAllChanges")}
 					</Link>
 				</div>
@@ -86,30 +69,15 @@ export function GuildOverviewPage(): React.JSX.Element {
 	);
 }
 
-function WaitingSection({
-	features,
-	channels,
-	guildId,
-}: React.ComponentProps<typeof WaitingChips>): React.JSX.Element | null {
-	const { t } = useTranslation();
-	const waiting = features.filter(isWaiting);
-	if (waiting.length === 0) return null;
-
-	return (
-		<section aria-labelledby="waiting-heading" className="flex flex-col gap-3">
-			<SectionHeading as="h3" id="waiting-heading" count={waiting.length}>
-				{t("overview.waiting")}
-			</SectionHeading>
-			<p className="text-muted-foreground text-sm">{t("overview.waitingHint")}</p>
-			<WaitingChips features={waiting} channels={channels} guildId={guildId} />
-		</section>
-	);
-}
-
 function OverviewSkeleton(): React.JSX.Element {
 	return (
 		<>
 			<Skeleton className="h-8 w-56" />
+			<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+				{[0, 1, 2, 3].map((index) => (
+					<Skeleton key={index} className="h-[86px]" />
+				))}
+			</div>
 			<Skeleton className="h-56 w-full" />
 		</>
 	);

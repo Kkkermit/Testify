@@ -154,7 +154,6 @@ export const guildPlaces: GuildPlaces = {
 			enabled: true,
 			detail: { kind: "levelling", rewards: 2, boosts: 1 },
 			reach: "everywhere",
-			accepts: null,
 			places: [],
 		},
 		{
@@ -163,7 +162,6 @@ export const guildPlaces: GuildPlaces = {
 			enabled: true,
 			detail: { kind: "posting", channelId: "400000000000000001" },
 			reach: "channel",
-			accepts: "text",
 			places: [{ channelId: "400000000000000001", role: "posts" }],
 		},
 		{
@@ -172,7 +170,6 @@ export const guildPlaces: GuildPlaces = {
 			enabled: false,
 			detail: null,
 			reach: "channel",
-			accepts: "text",
 			places: [],
 		},
 		{
@@ -181,7 +178,6 @@ export const guildPlaces: GuildPlaces = {
 			enabled: true,
 			detail: { kind: "count", what: "ticketsOpen", count: 3 },
 			reach: "channel",
-			accepts: "text",
 			places: [
 				{ channelId: "400000000000000002", role: "panel" },
 				{ channelId: "400000000000000002", role: "logs" },

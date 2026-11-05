@@ -339,7 +339,7 @@ describe("the channel map", () => {
 			expect.objectContaining({ enabled: true, reach: "channel", places: [{ channelId: "1", role: "posts" }] }),
 		);
 		expect(features.find((feature) => feature.key === "goodbye")).toEqual(
-			expect.objectContaining({ enabled: false, reach: "channel", accepts: "text", places: [] }),
+			expect.objectContaining({ enabled: false, reach: "channel", places: [] }),
 		);
 	});
 });

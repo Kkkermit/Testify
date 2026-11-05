@@ -6,7 +6,7 @@ import { channelPath, channelTree, featuresIn } from "@/features/channels/channe
 import { featureLabel } from "@/features/guild-overview/featureStatus.labels";
 
 /** Every channel the bot works in, in Discord's order, each naming what it does there and opening that channel. */
-export function WhereItWorks({
+export function ChannelList({
 	features,
 	channels,
 	guildId,
@@ -21,7 +21,7 @@ export function WhereItWorks({
 		.map((channel) => ({ channel, here: featuresIn(features, channel.id) }))
 		.filter(({ here }) => here.length > 0);
 
-	if (busy.length === 0) return <p className="text-muted-foreground text-sm">{t("overview.nothingPlaced")}</p>;
+	if (busy.length === 0) return <p className="text-muted-foreground text-sm">{t("channel.nothingPlaced")}</p>;
 
 	return (
 		<DividedList className="bg-card">

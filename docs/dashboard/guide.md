@@ -583,27 +583,27 @@ tooltips, active marker and mobile drawer all follow.
 ```ts
 export interface NavGroup {
 	heading?: string;
-	items: NavItem[]; // always visible, above a server's channel list
-	afterChannels?: NavItem[]; // a server's group only, below its channel list
+	items: NavItem[]; // always visible
 	sections?: NavSection[]; // collapsible
 }
 ```
 
-Inside a server the sidebar is the server's own channel list, as [`ui-uplift.md`](ui-uplift.md) describes: Overview,
-then the channels in Discord's categories and order (`ChannelNav`, drawn from `/channels` and `/places` rather than
-from this file), then Everywhere, Members and Settings, then **Moderation**, **More** and **Every feature**. Every
-feature's own page stays reachable from that last section, which is also what quick search and the help page read.
+Inside a server the sidebar is Overview, Channels, Members and Settings, then **Moderation**, **More** and **Every
+feature**. It never lists the server's channels: those are on the Channels page, in Discord's order, and a feature's
+channel is chosen on that feature's own page ([AGENTS §24](../../AGENTS.md#24-the-dashboard) says why). Every
+feature's own page stays reachable from the last section, which is also what quick search and the help page read.
 `navigation.test.ts` pins the full set of server paths, refuses a section of one screen, and refuses two screens in
 one section sharing an icon. Four things are load-bearing:
 
-- **The sidebar names no channel its reader cannot see.** `channelTree` skips every channel whose name is `null`.
+- **The Channels page names no channel its reader cannot see.** `channelTree` skips every channel whose name is
+  `null`.
 - **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
   toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed
   section at that width would hide the icons and leave nothing to click. The button being `display: none` is
   what keeps `aria-expanded="false"` from contradicting a list the rail is still showing.
 - **The section holding the current page opens itself** (`sectionHolds`), so a collapsed section can never hide
   where you are.
-- **`allNavItems` reaches into sections and `afterChannels`.** It is what every flat consumer reads; a screen
+- **`allNavItems` reaches into sections.** It is what every flat consumer reads; a screen
   reachable only from a section would otherwise look like it had left the navigation.
 - **A highlight in the sidebar is `bg-card`.** The sidebar's own colour is the light theme's `muted`, so a
   `bg-muted` selection disappears into it.
@@ -712,41 +712,41 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 
 ## 18. Current screens
 
-| Route                             | Screen                                                                                       |
-| --------------------------------- | -------------------------------------------------------------------------------------------- |
-| `/sign-in`                        | One button; also the setup screen for a half-install                                         |
-| `/guilds`                         | Picker, with an invite card for guilds without the bot                                       |
-| `/guilds/:id`                     | Where the bot works channel by channel, features waiting for a channel, permissions, changes |
-| `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn and edited in place                        |
-| `/guilds/:id/everywhere`          | Server-wide features, each opening its page                                                  |
-| `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                             |
-| `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                 |
-| `/guilds/:id/birthdays`           | Where birthdays are posted and in what words, and whose come next                            |
-| `/guilds/:id/audit-log`           | Grouped event checklist held as a draft until Save                                           |
-| `/guilds/:id/automod`             | Discord's own filters — no database behind it                                                |
-| `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                    |
-| `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                           |
-| `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                         |
-| `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                    |
-| `/guilds/:id/role-menus`          | Menus members pick roles from; nothing above you or that moderates                           |
-| `/guilds/:id/ideas`               | The idea board's channel and switch, every idea, and the decision on it                      |
-| `/guilds/:id/starboard`           | Where starred messages go, the stars it takes, and the author's own star                     |
-| `/guilds/:id/temp-voice`          | The lobby, made here if need be, and what each new voice channel is like                     |
-| `/guilds/:id/sticky`              | A list keyed by channel; `PUT` upserts                                                       |
-| `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                  |
-| `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                          |
-| `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                         |
-| `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                                |
-| `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                         |
-| `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                   |
-| `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                              |
-| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                         |
-| `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                 |
-| `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats         |
-| `/guilds/:id/commands`            | Per-command switches for this server                                                         |
-| `/commands`                       | Every command, searchable, with the coverage tile                                            |
-| `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                              |
-| `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control     |
+| Route                             | Screen                                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------------------------- |
+| `/sign-in`                        | One button; also the setup screen for a half-install                                     |
+| `/guilds`                         | Picker, with an invite card for guilds without the bot                                   |
+| `/guilds/:id`                     | Stat tiles, a setup checklist, feature grid, permission warnings, changes                |
+| `/guilds/:id/channels`            | What the bot does in each channel, then the server-wide features                         |
+| `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn and edited in place                    |
+| `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                         |
+| `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                             |
+| `/guilds/:id/birthdays`           | Where birthdays are posted and in what words, and whose come next                        |
+| `/guilds/:id/audit-log`           | Grouped event checklist held as a draft until Save                                       |
+| `/guilds/:id/automod`             | Discord's own filters — no database behind it                                            |
+| `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                |
+| `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                       |
+| `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                     |
+| `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                |
+| `/guilds/:id/role-menus`          | Menus members pick roles from; nothing above you or that moderates                       |
+| `/guilds/:id/ideas`               | The idea board's channel and switch, every idea, and the decision on it                  |
+| `/guilds/:id/starboard`           | Where starred messages go, the stars it takes, and the author's own star                 |
+| `/guilds/:id/temp-voice`          | The lobby, made here if need be, and what each new voice channel is like                 |
+| `/guilds/:id/sticky`              | A list keyed by channel; `PUT` upserts                                                   |
+| `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                              |
+| `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                      |
+| `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                     |
+| `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                            |
+| `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                     |
+| `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                               |
+| `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                          |
+| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                     |
+| `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban             |
+| `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats     |
+| `/guilds/:id/commands`            | Per-command switches for this server                                                     |
+| `/commands`                       | Every command, searchable, with the coverage tile                                        |
+| `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                          |
+| `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the

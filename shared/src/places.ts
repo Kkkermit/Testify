@@ -14,54 +14,46 @@ export interface Place {
 /** "channel" works in one channel chosen for it, "many" in any number added one at a time, "everywhere" across the server. */
 export type PlaceReach = "channel" | "many" | "everywhere";
 
-/** A text channel, announcement channels included, or a voice channel. */
-export type PlaceKind = "text" | "voice";
-
-/** Only a feature that lives in a chosen channel can be placed in one, and it takes one kind of channel. */
-export type PlaceRule = { reach: "everywhere" } | { reach: "channel" | "many"; accepts: PlaceKind };
+export interface PlaceRule {
+	reach: PlaceReach;
+}
 
 export const FEATURE_PLACES = {
 	levelling: { reach: "everywhere" },
-	"audit-logging": { reach: "channel", accepts: "text" },
-	welcome: { reach: "channel", accepts: "text" },
-	goodbye: { reach: "channel", accepts: "text" },
-	birthdays: { reach: "channel", accepts: "text" },
-	verification: { reach: "channel", accepts: "text" },
+	"audit-logging": { reach: "channel" },
+	welcome: { reach: "channel" },
+	goodbye: { reach: "channel" },
+	birthdays: { reach: "channel" },
+	verification: { reach: "channel" },
 	cases: { reach: "everywhere" },
 	"raid-protection": { reach: "everywhere" },
 	"anti-link": { reach: "everywhere" },
-	counting: { reach: "channel", accepts: "text" },
+	counting: { reach: "channel" },
 	"auto-roles": { reach: "everywhere" },
-	"role-menus": { reach: "many", accepts: "text" },
-	ideas: { reach: "channel", accepts: "text" },
-	starboard: { reach: "channel", accepts: "text" },
-	"temp-voice": { reach: "channel", accepts: "voice" },
+	"role-menus": { reach: "many" },
+	ideas: { reach: "channel" },
+	starboard: { reach: "channel" },
+	"temp-voice": { reach: "channel" },
 	"voice-stats": { reach: "everywhere" },
-	sticky: { reach: "many", accepts: "text" },
+	sticky: { reach: "many" },
 	"auto-responders": { reach: "everywhere" },
-	"scheduled-messages": { reach: "many", accepts: "text" },
+	"scheduled-messages": { reach: "many" },
 	treasure: { reach: "everywhere" },
-	tickets: { reach: "channel", accepts: "text" },
+	tickets: { reach: "channel" },
 	lottery: { reach: "everywhere" },
 	casino: { reach: "everywhere" },
-	"bot-stats": { reach: "channel", accepts: "text" },
+	"bot-stats": { reach: "channel" },
 } as const satisfies Record<string, PlaceRule>;
 
 export type FeatureKey = keyof typeof FEATURE_PLACES;
 
-/** A feature's overview reading, where it works, and whether it can be placed and in what. */
+/** A feature's overview reading and where it works. */
 export type FeaturePlaces = FeatureStatus & {
 	reach: PlaceReach;
-	accepts: PlaceKind | null;
 	/** Every channel it uses, whether or not it is switched on, so a switched-off feature still shows where it was. */
 	places: Place[];
 };
 
 export interface GuildPlaces {
 	features: FeaturePlaces[];
-}
-
-/** A feature that needs a channel and has none yet, which the map shows as waiting to be placed. */
-export function isWaiting(feature: Pick<FeaturePlaces, "reach" | "places">): boolean {
-	return feature.reach === "channel" && feature.places.length === 0;
 }

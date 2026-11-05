@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { ChannelPage } from "@/features/channels/ChannelPage";
 import { expectNoViolations } from "@/test/axe";
-import { someChannels } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -53,34 +52,6 @@ describe("a channel's page", () => {
 
 		await waitFor(() => {
 			expect(bodies).toEqual([{ message: "Hello {user}" }]);
-		});
-	});
-
-	/** Moving is the same write that placed it, and offers only channels that could take it. */
-	it("moves a feature that lives in one channel to another", async () => {
-		const user = userEvent.setup();
-		const bodies: unknown[] = [];
-		server.use(
-			http.get(`/api/guilds/${GUILD}/channels`, () =>
-				HttpResponse.json([
-					...someChannels,
-					{ id: "400000000000000009", name: "news", kind: "text", position: 9, parentId: null, canSend: true },
-				]),
-			),
-			http.patch(`/api/guilds/${GUILD}/welcome`, async ({ request }) => {
-				bodies.push(await request.json());
-				return HttpResponse.json({});
-			}),
-		);
-		renderChannel("400000000000000001");
-
-		const welcome = await screen.findByRole("region", { name: "Welcome messages" });
-		const move = within(welcome).getByRole("combobox", { name: "Move to" });
-		expect(within(move).queryByRole("option", { name: "#locked" })).toBeNull();
-		await user.selectOptions(move, "400000000000000009");
-
-		await waitFor(() => {
-			expect(bodies).toEqual([{ channelId: "400000000000000009", enabled: true }]);
 		});
 	});
 

@@ -88,19 +88,16 @@ describe("the app shell", () => {
 		expect(document.getElementById(controls ?? "")).not.toBeNull();
 	});
 
-	/** The sidebar is the server's own channel list, so a channel is found where Discord puts it. */
-	it("lists the server's channels under their categories, each linking to what happens there", async () => {
+	/** The sidebar holds screens, not a server's channels, which can run to hundreds. */
+	it("offers the server's channels as one Channels entry rather than listing them", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
-		const channels = await screen.findByRole("list", { name: "Channels" });
+		const sidebar = await screen.findByTestId("sidebar");
 
-		expect(within(channels).getByRole("link", { name: /general/ })).toHaveAttribute(
+		expect(await within(sidebar).findByRole("link", { name: "Channels" })).toHaveAttribute(
 			"href",
-			`/guilds/${aGuild.id}/channels/400000000000000001`,
+			`/guilds/${aGuild.id}/channels`,
 		);
-		expect(within(channels).getByRole("button", { name: "Support" })).toHaveAttribute("aria-expanded", "true");
-		// Tickets keeps two places in #locked and still counts once.
-		expect(await within(channels).findByRole("link", { name: /locked.*Features here: 1/ })).toBeInTheDocument();
-		expect(within(channels).queryByRole("link", { name: /Support/ })).toBeNull();
+		expect(within(sidebar).queryByRole("link", { name: /general/ })).toBeNull();
 	});
 
 	/** Every screen stays reachable whatever a section is set to — the rail has no toggles to open. */

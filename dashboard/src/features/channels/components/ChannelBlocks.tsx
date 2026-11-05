@@ -8,9 +8,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
 import { useBirthdays, useUpdateBirthdays } from "@/features/birthdays/useBirthdays";
 import { EditablePost } from "@/features/channels/components/EditablePost";
-import { MoveTo } from "@/features/channels/components/MoveTo";
 import { ROLE_LABELS } from "@/features/channels/place.labels";
-import { placementOf } from "@/features/channels/placement";
 import { describeDetail, featureLabel } from "@/features/guild-overview/featureStatus.labels";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useGoodbye, useUpdateGoodbye } from "@/features/welcome/useGoodbye";
@@ -48,7 +46,6 @@ function ChannelBlock({ feature, channelId, channels, guildId }: BlockProps): Re
 		.filter((place) => place.channelId === channelId)
 		.map((place) => t(ROLE_LABELS[place.role]))
 		.join(" · ");
-	const movable = feature.reach === "channel" && placementOf(feature.key) !== undefined;
 
 	return (
 		<Card padding="none">
@@ -62,7 +59,6 @@ function ChannelBlock({ feature, channelId, channels, guildId }: BlockProps): Re
 					</Badge>
 					<span className="text-muted-foreground text-sm">{roles}</span>
 					<div className="ml-auto flex flex-wrap items-center gap-3">
-						{movable && <MoveTo feature={feature} channelId={channelId} channels={channels} guildId={guildId} />}
 						{path !== undefined && (
 							<Link
 								to={path(guildId)}

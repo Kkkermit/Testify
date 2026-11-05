@@ -63,7 +63,7 @@ describe("navigationFor", () => {
 				"/changes",
 				"/channel-tools",
 				"/commands",
-				"/everywhere",
+				"/channels",
 				"/giveaways",
 				"/ideas",
 				"/insights",
