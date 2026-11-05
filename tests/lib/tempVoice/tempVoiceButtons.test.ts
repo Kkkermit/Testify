@@ -4,6 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { applyTempVoiceSettings, makeLobby, readTempVoiceSettings } from "@lib/tempVoice";
 import { type TempVoiceSettings } from "@testify/shared";
 
+jest.mock("@lib/settings/settingsReaders.util", () => ({ SETTING_READERS: {} }));
 jest.mock("@lib/tempVoice", () => ({
 	...jest.requireActual<object>("@lib/tempVoice"),
 	applyTempVoiceSettings: jest.fn(),

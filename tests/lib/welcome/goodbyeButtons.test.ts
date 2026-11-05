@@ -4,6 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { applyGoodbye, readGoodbye } from "@lib/welcome";
 import { type GoodbyeSettings } from "@testify/shared";
 
+jest.mock("@lib/settings/settingsReaders.util", () => ({ SETTING_READERS: {} }));
 jest.mock("@lib/welcome", () => ({
 	...jest.requireActual<object>("@lib/welcome"),
 	applyGoodbye: jest.fn(),

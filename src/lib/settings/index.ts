@@ -6,6 +6,8 @@ export * from "./prefixPanel.util";
 export * from "./settings.constants";
 export * from "./settings.types";
 export * from "./settingsPanel.util";
+export * from "./settingsReaders.util";
+export * from "./settingsRecord.util";
 export * from "./settingsScreen.util";
 export * from "./setupChecklist.util";
 export * from "./testPost.util";

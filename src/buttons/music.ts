@@ -19,6 +19,7 @@ import {
 	skipTrack,
 	stopPlayer,
 } from "@lib/music";
+import { recordsSettings } from "@lib/settings";
 
 const NEXT_LOOP: Record<LoopMode, LoopMode> = { off: "track", track: "queue", queue: "off" };
 
@@ -53,77 +54,80 @@ async function runSystemAction(interaction: ComponentInteraction, action: string
 	await interaction.update(musicSystemPanel(await readMusicSettings(guild.id), interaction.user.id, note));
 }
 
-export default defineButton({
-	id: MUSIC_ID,
-	ownerOnly: true,
+export default recordsSettings(
+	["music.update"],
+	defineButton({
+		id: MUSIC_ID,
+		ownerOnly: true,
 
-	async run(interaction, context) {
-		const guild = interaction.guild;
-		if (guild === null) return;
+		async run(interaction, context) {
+			const guild = interaction.guild;
+			if (guild === null) return;
 
-		// The system settings do not need a player, and refusing them for want of one would be a trap.
-		if (SYSTEM_ACTIONS.has(context.action)) {
-			await runSystemAction(interaction, context.action);
-			return;
-		}
-
-		if (!interaction.isButton()) return;
-
-		const session = requireSession(guild);
-		sameChannelAs(session, interaction.member as GuildMember);
-
-		let note: string | undefined;
-		let page = 0;
-
-		switch (context.action) {
-			case "pause":
-				note = pausePlayer(session);
-				break;
-			case "resume":
-				note = resumePlayer(session);
-				break;
-			case "previous": {
-				if (session.queue.tracks.length === 0) throw new UserFacingError("Nothing has been played yet.");
-				session.previous();
-				note = session.queue.index === 0 ? "Started this one again." : "Back a track.";
-				break;
-			}
-			case "skip":
-				note = skipTrack(session);
-				break;
-			case "stop":
-				note = stopPlayer(session);
-				break;
-			case "loop":
-				note = loopPlayer(session, NEXT_LOOP[session.queue.loop]);
-				break;
-			case "shuffle":
-				note = shufflePlayer(session);
-				break;
-			case "volume":
-				note = setPlayerVolume(session, clampVolume(Number(context.args.at(0))));
-				break;
-			case "refresh": {
-				break;
-			}
-			case "page": {
-				page = Number(context.args.at(0) ?? 0);
-				break;
-			}
-			default:
+			// The system settings do not need a player, and refusing them for want of one would be a trap.
+			if (SYSTEM_ACTIONS.has(context.action)) {
+				await runSystemAction(interaction, context.action);
 				return;
-		}
+			}
 
-		const shown = Number.isFinite(page) ? page : 0;
-		// Deferred, because a track that has just changed may still be drawing its card when the three seconds run out.
-		await interaction.deferUpdate();
-		const { payload, cardFor } = await session.panelMessage(interaction.user.id, note, shown);
-		session.rememberCard(cardFor, await interaction.editReply(payload));
-		// The live panel follows whichever page was last looked at, so a tick cannot snap it back.
-		session.watchPanel({
-			userId: interaction.user.id,
-			page: shown,
-			edit: async (payload) => interaction.message.edit(payload),
-		});
-	},
-});
+			if (!interaction.isButton()) return;
+
+			const session = requireSession(guild);
+			sameChannelAs(session, interaction.member as GuildMember);
+
+			let note: string | undefined;
+			let page = 0;
+
+			switch (context.action) {
+				case "pause":
+					note = pausePlayer(session);
+					break;
+				case "resume":
+					note = resumePlayer(session);
+					break;
+				case "previous": {
+					if (session.queue.tracks.length === 0) throw new UserFacingError("Nothing has been played yet.");
+					session.previous();
+					note = session.queue.index === 0 ? "Started this one again." : "Back a track.";
+					break;
+				}
+				case "skip":
+					note = skipTrack(session);
+					break;
+				case "stop":
+					note = stopPlayer(session);
+					break;
+				case "loop":
+					note = loopPlayer(session, NEXT_LOOP[session.queue.loop]);
+					break;
+				case "shuffle":
+					note = shufflePlayer(session);
+					break;
+				case "volume":
+					note = setPlayerVolume(session, clampVolume(Number(context.args.at(0))));
+					break;
+				case "refresh": {
+					break;
+				}
+				case "page": {
+					page = Number(context.args.at(0) ?? 0);
+					break;
+				}
+				default:
+					return;
+			}
+
+			const shown = Number.isFinite(page) ? page : 0;
+			// Deferred, because a track that has just changed may still be drawing its card when the three seconds run out.
+			await interaction.deferUpdate();
+			const { payload, cardFor } = await session.panelMessage(interaction.user.id, note, shown);
+			session.rememberCard(cardFor, await interaction.editReply(payload));
+			// The live panel follows whichever page was last looked at, so a tick cannot snap it back.
+			session.watchPanel({
+				userId: interaction.user.id,
+				page: shown,
+				edit: async (payload) => interaction.message.edit(payload),
+			});
+		},
+	}),
+);

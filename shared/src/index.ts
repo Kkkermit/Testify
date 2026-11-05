@@ -18,6 +18,7 @@ export * from "./commandRunner";
 export * from "./commandToggles";
 export * from "./commands";
 export * from "./control";
+export * from "./directory";
 export * from "./giveaways";
 export * from "./goodbye";
 export * from "./ideas";

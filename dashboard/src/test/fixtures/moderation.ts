@@ -5,6 +5,7 @@ import {
 	type CasePage,
 	type CaseSettings,
 	type ChannelToolList,
+	type DirectoryPage,
 	type GuildWarningsPage,
 	type MemberDetail,
 	type MemberMatch,
@@ -242,4 +243,37 @@ export const casePage: CasePage = {
 	total: 2,
 	page: 1,
 	perPage: 10,
+};
+
+const directoryRow = (userId: string, name: string, extra: Partial<DirectoryPage["rows"][number]> = {}) => ({
+	userId,
+	displayName: name,
+	username: name.toLowerCase(),
+	avatarUrl: null,
+	isBot: false,
+	joinedAt: "2026-10-01T00:00:00.000Z",
+	timedOutUntil: null,
+	roleIds: [] as string[],
+	warnings: 0,
+	block: null,
+	...extra,
+});
+
+export const memberDirectory: DirectoryPage = {
+	rows: [
+		directoryRow("100000000000000001", "Kermit", { block: "you" }),
+		directoryRow("100000000000000002", "Kate", { roleIds: ["300000000000000001"], warnings: 2 }),
+		directoryRow("100000000000000003", "Sam", { timedOutUntil: "2026-12-01T00:00:00.000Z" }),
+		directoryRow("100000000000000004", "Ada", { block: "outranked" }),
+	],
+	next: null,
+	scanStopped: false,
+	searchCut: false,
+	memberCount: 4,
+	roles: [
+		{ id: "300000000000000002", name: "Admins", colour: null },
+		{ id: "300000000000000001", name: "Regulars", colour: "#336699" },
+	],
+	grantable: ["300000000000000001"],
+	can: { roles: true, timeout: true, warn: true, kick: true, ban: true },
 };

@@ -47,6 +47,7 @@ import {
 	serverChanges,
 	warnLadder,
 	warningAdded,
+	memberDirectory,
 } from "@/test/fixtures/moderation";
 import {
 	blacklistRows,
@@ -142,6 +143,11 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.get("/api/guilds/:guildId/tickets/open", () => HttpResponse.json(openTickets)),
+	http.get("/api/guilds/:guildId/members", () => HttpResponse.json(memberDirectory)),
+	http.post("/api/guilds/:guildId/members/bulk/:kind", async ({ request }) => {
+		const { userIds } = (await request.json()) as { userIds: string[] };
+		return HttpResponse.json({ outcomes: userIds.map((userId) => ({ userId, username: null, skipped: null })) });
+	}),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
 		const query = new URL(request.url).searchParams;
 		return HttpResponse.json({

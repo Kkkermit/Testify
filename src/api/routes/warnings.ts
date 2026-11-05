@@ -8,6 +8,7 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import {
+	blockText,
 	issueWarning,
 	moderationProblem,
 	readGuildWarnings,
@@ -45,9 +46,7 @@ async function mayChange(context: Context<ApiBindings>, userId: string): Promise
 	if (member === null) return;
 
 	const problem =
-		moderator === null
-			? "Only somebody in this server can moderate its members."
-			: moderationProblem(moderator, member, context.get("client").user?.id);
+		moderator === null ? blockText("notMember") : moderationProblem(moderator, member, context.get("client").user?.id);
 	if (problem !== null) throw forbidden("cannot_moderate", problem);
 }
 
@@ -88,9 +87,7 @@ warnings.post("/", requirePermission(PermissionFlagsBits.ModerateMembers), async
 	if (member.user.bot) throw forbidden("cannot_moderate", "Bots cannot be warned.");
 
 	const problem =
-		moderator === null
-			? "Only somebody in this server can moderate its members."
-			: moderationProblem(moderator, member, context.get("client").user?.id);
+		moderator === null ? blockText("notMember") : moderationProblem(moderator, member, context.get("client").user?.id);
 	if (problem !== null) throw forbidden("cannot_moderate", problem);
 
 	const { entry, outcome } = await issueWarning({

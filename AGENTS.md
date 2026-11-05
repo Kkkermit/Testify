@@ -722,6 +722,9 @@ Rules:
    repository exports a `purge<Feature>(guildId)`, and `purgeGuild` in `guildRepository.ts` calls every one when
    the bot is removed. A new feature adds its purge there, and a test that writes its settings, calls
    `purgeGuild` and finds nothing left — `guildRepository.test.ts` does it for the smaller settings at once.
+   **The levelling, ticket, verification, lottery and giveaway setup is kept on purpose**, with every member record,
+   so a server that adds the bot back finds its standings and the setup they hang on; the privacy notice promises
+   exactly that (`legal.retentionL2`). Do not add them to `purgeGuild` without changing the notice with them.
    **A field that names a person is listed in `ERASURE`** in `accountRepository.ts`, saying what Delete my data does
    to it; the coverage test fails on a new one that is not (see
    [§21](#delete-my-data-wipes-what-is-theirs-at-once-and-for-good)).
@@ -2101,7 +2104,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                  |
 | `/guilds/:id/casino`              | Open or close it, switch single games off, and the bet limits                               |
 | `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                             |
-| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                        |
+| `/guilds/:id/members`             | Everybody, searched and filtered, acted on one at a time or 25 at once; the boards a tab    |
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
@@ -2302,6 +2305,31 @@ them are load-bearing:
 
 `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in the
 channel, where they can be seen.
+
+### The member directory reads Discord a page at a time, and acts on one member at a time
+
+`…/members` opens on everybody in the server, with the money and levels boards a tab beside it; a `?board=` link
+still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/memberDirectory.util.ts` is the read and
+`actOnEach` in `memberBulk.util.ts` the write, and nothing new is stored. Five things about it are load-bearing:
+
+- **Never one big list.** `guild.members.list` is read a thousand at a time from a cursor, a search is
+  `guild.members.search` (prefix only, at most a thousand, and the page says when it hit that), and a role filter
+  reads the members themselves rather than `role.members`, which knows only the cached ones. A filter that matches
+  little stops after `DIRECTORY_LIMITS.maxScan` members and hands back a cursor, so no page can stall on a server
+  of 100,000. The warned filter reads the warned ids from the database and fetches only those, and asks Moderate
+  Members, as `/warn list` does; so do the counts on each row.
+- **A row offers what Discord would.** `moderationBlock` is `moderationProblem` as a code, so the page words why a
+  member cannot be acted on, and roles are only those `grantableRoles` allows. The reader, the server's owner and
+  the bot are never acted on by a bulk request, even for roles, where Discord asks no role order of the member.
+- **A bulk request is at most `DIRECTORY_LIMITS.maxBatch` (25) members, acted on in turn.** Each is answered for
+  (`BulkOutcome`): done, or skipped with a `BulkSkip` code, because a kick that has happened cannot be rolled back,
+  so the request is never all or nothing. One Discord refusal is logged at `debug` and the rest carry on.
+- **Confirmation scales with reach** (`bulkConfirmed`, checked on both sides): one member by their username or ID,
+  as on their own page; a kick or ban of several by typing how many. Each kick, ban and timeout still records its
+  own numbered case, and one audit record (`member.kick.bulk` and the rest) lists everybody touched.
+- **The bulk routes are `/members/bulk/*`, mounted before `/:userId`**, each asking its command's permission, and
+  `ASKS_MORE` in `accessWalk.test.ts` names all four. A single warning from a row goes through `POST /warnings`;
+  there is no bulk warning, because a warning's step can kick or ban and would skip the typed count.
 
 ### Rules that carry over
 
@@ -3136,8 +3164,8 @@ wrote. Four things about it are load-bearing:
 
 ### The changes page
 
-`/guilds/:id/changes` puts two records in one list: what managers did here (`dashboardaudit`) and what Discord's own
-audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
+`/guilds/:id/changes` puts two records in one list: what managers did here and with the bot's commands
+(`dashboardaudit`), and what Discord's own audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
 and three things about it are load-bearing:
 
 - **Discord's side is read, never stored.** `readAuditWindow` pages back a hundred entries at a time until it passes
@@ -3155,8 +3183,7 @@ and three things about it are load-bearing:
 `RESTORABLE` in `shared/src/restore.ts` lists the eighteen settings writes this covers — welcome, goodbye, birthdays,
 levelling, the starboard, the idea board, join to create, raid protection, cases, verification, music, treasure, the
 lottery and the settings page's five sections — each with its route, where it is read and the fields it may send.
-There is no slider back through a server's setup, because the records cannot rebuild one: settings changed with the
-bot's commands in Discord are recorded nowhere, and the page says so. Four things about Put back are load-bearing:
+Four things about Put back are load-bearing:
 
 - **Every one of those writes keeps what it replaced.** `auditSettings` records every restorable field as stored
   before and after, read with the same function the route's `GET` uses, and `auditChange` refuses a restorable action
@@ -3172,6 +3199,26 @@ bot's commands in Discord are recorded nowhere, and the page says so. Four thing
   the route asks and its validation decide a put-back exactly as they decided the change, and the route records it as
   a change of its own, which can itself be put back. Nothing new can be reached this way: the request is one the
   reader could already have made by hand.
+
+**A setting changed with a command or a panel in Discord is recorded the same way**, with `source: "command"` on the
+record, so the Changes page lists it, filters it under its own source and can put it back. A record with no source is
+the dashboard's, which is every record written before commands were. Four things about it are load-bearing:
+
+- **The handler is wrapped, not the write.** `recordsSettings(["starboard.update"], defineButton({…}))` in
+  `src/lib/settings/settingsRecord.util.ts` reads the setting before a press or a run, runs it, and reads it again in a
+  `finally`, so a change is recorded even when the reply after it fails. Recording inside each `apply*` function
+  would record every dashboard change twice, since the route already records its own, and half the settings —
+  the prefix, counting, roles on join — are written straight to their repository with no `apply*` to put it in.
+- **It reads with the route's own readers.** `SETTING_READERS` in `settingsReaders.util.ts` is what each route's `GET`
+  answers with — the welcome, levelling, verification and settings routes import their readers from there — so a
+  record from Discord has exactly the shape Put back expects, and `stillAsLeft` guards it the same way.
+- **The words are written, not derived.** `describeChange` names a switch as one ("Turned the starboard on") and every
+  other field from `WORDS`, so the page never shows `lobbyChannelId`; `settingsRecord.test.ts` fails on a field with
+  no words.
+- **A record never fails the change.** A reading that fails records nothing, and a record that cannot be written is
+  logged as `[SETTINGS]` and dropped, because the setting has already changed. `settingsWriters.test.ts` names the
+  writers of every restorable setting and fails on a button or command that calls one without `recordsSettings`
+  naming that setting, which was proved to go red.
 
 ### The status page
 

@@ -11,107 +11,15 @@ Nothing here is promised or scheduled. Each entry says what exists already to bu
 to respect, so whoever picks one up starts from the code rather than from a blank page. When an entry ships, delete
 it from this file in the same pull request.
 
-Checked against the code and the npm registry on **25 October 2026**; the member directory and recording command changes added on **5 November 2026**.
-
----
-
-## 🤖 New bot features
-
-### Record settings changed with commands, as the dashboard records its own
-
-**What it would do.** The Changes page lists what managers did on the dashboard and what Discord's own audit log
-recorded. A setting changed with a command in Discord — `/welcome`, `/starboard`, a settings panel's buttons — is in
-neither, so it never appears, and it cannot be put back. Recording those too would make the list whole, and would let
-the page offer a history of a setting rather than one change at a time.
-
-**What it builds on.**
-
-- `auditSettings` in `src/api/audit.ts` and `RESTORABLE` in `shared/src/restore.ts` already say which fields each
-  setting keeps, and record them before and after.
-- Most panels write through the same `apply*` function the dashboard's route calls (`applyStarboardSettings`,
-  `applyGoodbye`, `applyRaidSettings` and the rest), and those already take who made the change.
-
-**What it would have to respect.**
-
-- **One place records it.** Recording from each `apply*` function, rather than from each command and each route, is
-  what keeps the two surfaces from disagreeing about what was changed.
-- **Who did it is a Discord account either way**, so the record keeps the same actor fields; the source says whether it
-  was the dashboard or a command.
-- **The privacy notice changes**: it says changes made on the dashboard are recorded, and would need to say the same of
-  commands (`legal.usingDashboardP2`, `LegalPage.test.tsx`).
-- **Put back stays guarded by the setting as it is now** (`stillAsLeft`), which already protects against a command's
-  change today.
+Checked against the code and the npm registry on **5 November 2026**.
 
 ---
 
 ## 🖥️ Dashboard screens still missing
 
-`features/commands/commands.utils.ts` is the list that decides which commands have a screen, and the coverage tile on
-`/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool
-than doing it in the channel, where you can see them.
-
-### A member directory, and acting on members from it
-
-**What it would do.** `…/members` today shows only the money and levels boards. It would become a list of everybody
-in the server instead, with the boards as a tab beside it:
-
-- **Find anybody.** Search by name, nickname or ID, and filter by role, by when they joined (the last day, week or
-  month), by person or bot, and by who is timed out. A reader with Moderate Members could also filter by who has
-  warnings.
-- **See who they are at a glance.** Each row shows the avatar, the name, the roles, when they joined, and whether
-  they are timed out.
-- **Act from the row.** Each row opens the member's own page, and also carries the actions the reader is allowed
-  to take there: give a role, take a role away, time out, warn, kick, ban.
-- **Act on several at once.** Tick several members and give or take a role, time them out, kick them or ban them in
-  one go, after a confirmation that names how many and who.
-
-**What it builds on.**
-
-- `GatewayIntentBits.GuildMembers` is already on. `guild.members.search` already backs `GET /members/search`, which
-  the warnings screen uses for its ten-result picker.
-- `…/members/:userId` already does every action, each behind the permission its command asks for (`requirePermission`):
-  - roles, through `grantableRoles` and `PUT /members/:userId/roles`;
-  - nickname, timeout, kick, ban, softban and warnings.
-
-  A row's quick actions would call the same routes.
-
-- `kickMember`, `banUser`, `timeoutMember` and `issueWarning` each record a numbered case through `recordCase`. An
-  action taken from the directory is numbered and logged exactly as one taken from `/kick` is.
-- `moderationProblem` on `MemberDetail` already says why an action cannot be taken: the member outranks the reader,
-  or the bot.
-
-**What it would have to respect.**
-
-- **No route moves.** The directory becomes what `…/members` shows first, and the boards a tab on the same page, so
-  `?board=` links keep working.
-- **Pages, never one big list.** `guild.members.fetch()` with no arguments pulls every member over the gateway. That
-  is fine for a few hundred and a long wait, and a rate limit, on a server of 100,000.
-  - Read a page at a time with `guild.members.list({ limit, after })`.
-  - Search with `guild.members.search`, which matches the start of a username or nickname and returns at most 1,000.
-  - Say when a list was cut short, as the bans screen does with `BAN_LIMITS.maxRead`.
-  - A role filter read from the cache (`role.members`) only knows the members the bot has seen. Either fetch first or
-    say the list may be incomplete, rather than showing part of it as the whole.
-- **Every action asks what its command asks, and the role order too.**
-  - An action the reader lacks the permission for is not offered.
-  - A member the reader cannot act on shows the reason in place of the button.
-  - Roles offered are only those in `grantableRoles`: below the reader's own highest role and below the bot's, and
-    never managed.
-  - Warning counts on rows, and the warnings filter, appear only with Moderate Members (`holdsPermission`), as on the
-    member page.
-- **Acting on several members is the new risk:** one request can act on fifty people.
-  - Cap a batch at about 25 members per request. Act on them one at a time, within Discord's rate limits.
-  - Answer with what happened to each one: done, or skipped and why. Never all or nothing, because a kick that has
-    already happened cannot be rolled back.
-  - A bulk kick or ban needs a stronger confirmation than one member does: type the number of members.
-  - Each member still gets a case of their own. The audit record lists everybody it touched.
-  - Never act on the reader, the server's owner or the bot, even if they are ticked.
-- **Nothing new is stored.** The list is read live from Discord, and the warning counts come from records the bot
-  already keeps, so the privacy notice does not change.
-- **Test it like the other moderation screens.** `accessWalk.test.ts` and `ASKS_MORE` grow with every new route.
-  Each bulk action needs:
-  - a test that it refuses a member above the reader;
-  - a test that it skips the reader and the server's owner;
-  - a test that one member failing does not stop the rest.
+None at the moment. `features/commands/commands.utils.ts` is the list that decides which commands have a screen, and
+the coverage tile on `/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages from a browser
+tab is a worse tool than doing it in the channel, where you can see them.
 
 ---
 
@@ -147,6 +55,9 @@ server, and each should be before it is relied on.
 - **Announcements:** an embed and plain text, and `@everyone` refused to somebody without Mention Everyone.
 - **Open tickets:** a ticket closed from the dashboard, with its transcript naming the person who closed it.
 - **The member page:** a timeout, a rename and a role change, each showing on the page without a reload.
+- **Settings changed in Discord:** a panel press showing on the Changes page as a command change, and Put back on it.
+- **The member directory:** paging through a server of thousands, a role filter on members the bot has never cached, and
+  a bulk kick of several with one refused by Discord.
 
 ---
 
@@ -154,16 +65,14 @@ server, and each should be before it is relied on.
 
 ### Dependencies behind their latest release
 
-| Package                    | Here    | Latest | What it takes                                                                                                                                     |
-| -------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `discord-html-transcripts` | 3.2.0   | 3.3.0  | It moves to undici 7, so the `undici` override in `package.json` can go. It pins React to exactly 19.1.1, so the React pins in Jest and Vite stay |
-| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                 |
-| `mongoose`                 | 8.24.1  | 9.11.4 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                          |
-| `react-router`             | 7.18.2  | 8.5.0  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                               |
-| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `dashboard/screenshots/README.md`                                               |
-| `jest-axe`                 | 10.0.0  | 11.0.0 | A major, test-only                                                                                                                                |
-| `tsup`                     | 8.5.1   | 9.0.0  | A major. The build's `dist/` checks in AGENTS.md §3 are the test                                                                                  |
-| `@anthropic-ai/sdk`        | 0.128.0 | 1.3.0  | Its first major. Only the support assistant's optional model picker uses it                                                                       |
+| Package                    | Here    | Latest | What it takes                                                                                                                                                                                                                                                                 |
+| -------------------------- | ------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `discord-html-transcripts` | 3.2.0   | 3.3.0  | It moves to undici 7, so the `undici` override can go, but it pins React to exactly 19.1.1. Installed over this lockfile, React 18 stays hoisted for its components and a transcript fails with "Objects are not valid as a React child"; it needs React 19 at the root first |
+| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                                                                                                                                             |
+| `mongoose`                 | 8.24.1  | 9.12.0 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                                                                                                                                                      |
+| `react-router`             | 7.18.2  | 8.5.1  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                                                                                                                                                           |
+| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `docs/dashboard/screenshots/README.md`                                                                                                                                                                      |
+| `@anthropic-ai/sdk`        | 0.128.0 | 1.6.0  | Its first major. Only the support assistant's optional model picker uses it                                                                                                                                                                                                   |
 
 `discord-giveaways` is at its latest, 6.0.1, but that was published in **August 2022** and nothing since. Replacing it
 with a giveaway system of the bot's own — records in MongoDB, a job that ends them, entries counted from a button —
@@ -172,13 +81,7 @@ would follow the shape the starboard and idea board already have, and drop a dep
 ### Overrides to look at again
 
 Each `overrides` pin in `package.json` exists because a parent asked for a version with an advisory open. Every one
-is explained in [`security.md`](security.md); check whether each parent now asks for a fixed version by itself, and
-remove the pin when it does: `brace-expansion`, `js-yaml` (both lines), `fast-uri`, and `undici` under
-`discord-html-transcripts`.
-
-### Leaving a server forgets most settings, but not levelling's
-
-`purgeGuild` deletes every feature's settings when the bot is removed from a server, except the levelling setup in
-`levelsetup`. Members' levels and balances are kept as well, which may be deliberate, since a server that adds the
-bot back keeps its standings. The levelling setup is configuration like every other setting, so it most likely
-belongs in the purge. Decide, then either add `purgeLevelSettings` to `guildRepository.ts` or write down why not.
+is explained in [`security.md`](security.md); remove a pin once its parent asks for a fixed version by itself. On
+5 November 2026 none did: minimatch 10 still asks `brace-expansion` `^5.0.5` (only minimatch 11 asks `^5.0.12`),
+cosmiconfig 9 asks `js-yaml` `^4.1.0`, ajv asks `fast-uri` `^3.0.1`, `@istanbuljs/load-nyc-config` asks `js-yaml`
+`^3.13.1`, and `discord-html-transcripts` 3.2.0 still pins undici v5.

@@ -5,6 +5,7 @@ import { applyBirthdaySettings, birthdaySettingsPanel, readBirthdayOverview } fr
 import { type BirthdayOverview } from "@testify/shared";
 import { buttonsOf } from "@tests/helpers/containers";
 
+jest.mock("@lib/settings/settingsReaders.util", () => ({ SETTING_READERS: {} }));
 jest.mock("@lib/birthdays", () => ({
 	...jest.requireActual<object>("@lib/birthdays"),
 	applyBirthdaySettings: jest.fn(),

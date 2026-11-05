@@ -93,6 +93,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["who changed this setting", ["dashboard-overview"]],
 	["change the bot's nickname", ["dashboard-settings"]],
 	["give someone xp from the dashboard", ["dashboard-members"]],
+	["kick a bunch of people at once on the dashboard", ["member-directory"]],
 	["does the dashboard work on my phone", ["dashboard-on-phone"]],
 	["my change won't save", ["dashboard-changes-not-saving"]],
 	["switch to another server on the dashboard", ["dashboard-tour"]],
