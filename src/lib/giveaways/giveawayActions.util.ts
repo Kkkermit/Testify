@@ -12,7 +12,8 @@ const MESSAGES = {
 	giveawayEnded: "\u{1f389} **Giveaway ended** \u{1f389}",
 	inviteToParticipate: "React with \u{1f389} to enter",
 	winMessage: "Congratulations {winners}, you won **{this.prize}**!",
-	drawing: "Drawing in {timestamp}",
+	// Discord draws the relative timestamp as "in 3 hours", so the line must not say "in" itself.
+	drawing: "Draws {timestamp}",
 	dropMessage: "Be the first to react to win!",
 	embedFooter: "{this.winnerCount} winner(s)",
 	noWinner: "Nobody entered, so there is no winner.",
