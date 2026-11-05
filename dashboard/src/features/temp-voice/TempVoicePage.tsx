@@ -191,7 +191,7 @@ function LimitField({ stored, onSave }: { stored: number; onSave: (limit: number
 				onBlur={() => {
 					if (limit !== null && limit !== stored) onSave(limit);
 				}}
-				className={cn(FIELD, "max-w-40 font-mono tabular-nums", limit === null && "border-destructive")}
+				className={cn(FIELD, "max-w-40 tabular-nums", limit === null && "border-destructive")}
 			/>
 			{limit === null && <Warning>{t("tempVoice.limitOutOfRange", { max: TEMP_VOICE_LIMITS.maxUserLimit })}</Warning>}
 		</Field>

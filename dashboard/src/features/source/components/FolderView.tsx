@@ -35,9 +35,7 @@ export function FolderView({ index, folder }: { index: TreeIndex; folder: string
 								)}
 								<span className="min-w-0 flex-1 truncate">{nameOf(entry.path)}</span>
 								{entry.size !== null && (
-									<span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
-										{formatBytes(entry.size)}
-									</span>
+									<span className="text-muted-foreground shrink-0 text-xs tabular-nums">{formatBytes(entry.size)}</span>
 								)}
 							</Link>
 						</li>

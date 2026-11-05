@@ -174,7 +174,7 @@ function History({ report }: { report: StatusResponse }): React.JSX.Element {
 			<section className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-baseline justify-between gap-2">
 					<h2 className={CARD_HEADING}>{t("status.lastThirtyDays")}</h2>
-					<span className="text-muted-foreground font-mono text-sm tabular-nums">
+					<span className="text-muted-foreground text-sm tabular-nums">
 						{average === null ? t("status.noData") : t("status.upFor", { share: percent(average) })}
 					</span>
 				</div>

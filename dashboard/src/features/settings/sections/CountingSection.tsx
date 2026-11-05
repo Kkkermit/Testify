@@ -71,7 +71,7 @@ export function CountingSection({
 							setCap(event.target.value);
 						}}
 						onBlur={commit}
-						className={cn(FIELD, "max-w-40 font-mono tabular-nums", problem !== null && dirty && "border-destructive")}
+						className={cn(FIELD, "max-w-40 tabular-nums", problem !== null && dirty && "border-destructive")}
 					/>
 					{dirty && problem === null && <Button onClick={commit}>{t("settings.countingSave")}</Button>}
 				</div>
@@ -84,7 +84,7 @@ export function CountingSection({
 							<Trans
 								i18nKey="settings.currentlyAt"
 								values={{ count: formatNumber(value.count) }}
-								components={{ count: <span className="text-foreground font-mono" /> }}
+								components={{ count: <span className="text-foreground font-medium tabular-nums" /> }}
 							/>
 						</p>
 						<Button

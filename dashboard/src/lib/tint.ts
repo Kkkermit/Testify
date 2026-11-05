@@ -1,4 +1,4 @@
-/** The tints a lettered fallback avatar can take, over the `--color-feature-*` tokens in `index.css`. */
+/** The tints a lettered fallback avatar can take, over the `--color-hue-*` tokens in `index.css`. */
 const TINTS = [
 	"bg-hue-violet/20 text-hue-violet",
 	"bg-hue-amber/20 text-hue-amber",
