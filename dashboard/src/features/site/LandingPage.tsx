@@ -86,8 +86,8 @@ export function LandingPage(): React.JSX.Element {
 						return (
 							<li key={feature.look}>
 								<Card className="flex h-full flex-col gap-3">
-									<span className={cn("rounded-field flex size-10 items-center justify-center", look.wash)}>
-										<Icon size={20} aria-hidden="true" className={look.tint} />
+									<span className="rounded-field bg-accent-wash flex size-10 items-center justify-center">
+										<Icon size={20} aria-hidden="true" className="text-accent" />
 									</span>
 									<h3 className={CARD_HEADING}>{t(feature.titleKey)}</h3>
 									<p className="text-muted-foreground text-sm">{t(feature.bodyKey)}</p>

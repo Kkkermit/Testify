@@ -115,7 +115,6 @@ function FleetUsage({
 
 				<Panel title={t("owner.busiest")} hint={t("owner.busiestHint")}>
 					<UsageBars
-						tint="bg-feature-tickets/25"
 						empty={t("owner.noServerRun")}
 						rows={report.busiestGuilds.map((row) => guildBar(row, params, t))}
 					/>
@@ -123,7 +122,6 @@ function FleetUsage({
 
 				<Panel title={t("owner.dashboardBusiest")} hint={t("owner.dashboardBusiestHint")}>
 					<UsageBars
-						tint="bg-feature-economy/25"
 						empty={t("owner.noServerDashboard")}
 						rows={report.dashboardGuilds.map((row) => guildBar(row, params, t))}
 					/>
@@ -131,7 +129,6 @@ function FleetUsage({
 
 				<Panel title={t("owner.slowest")} hint={t("owner.slowestHint", { days: report.runDays })}>
 					<UsageBars
-						tint="bg-destructive/20"
 						empty={t("owner.noSlowRuns")}
 						rows={report.slowest.map((row) => ({
 							id: row.command,
@@ -145,7 +142,6 @@ function FleetUsage({
 
 				<Panel title={t("owner.howRun")} hint={t("owner.howRunHint")}>
 					<UsageBars
-						tint="bg-feature-levelling/25"
 						empty={t("owner.nothingRecorded")}
 						rows={[
 							{ id: "slash", label: t("owner.slashCommands"), count: report.surfaces.slash },
@@ -157,7 +153,6 @@ function FleetUsage({
 				{/* The seventh panel, so it spans the row rather than leaving half of one empty. */}
 				<Panel wide title={t("owner.screens")} hint={t("owner.screensHint")}>
 					<UsageBars
-						tint="bg-feature-welcome/25"
 						empty={t("owner.noScreenOpened")}
 						rows={report.screens.map((screen) => ({
 							id: screen.route,

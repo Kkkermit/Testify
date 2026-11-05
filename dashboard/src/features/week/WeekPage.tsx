@@ -69,10 +69,7 @@ export function WeekPage(): React.JSX.Element {
 										to={`/guilds/${guildId}${EVENT_PATHS[event.kind]}`}
 										className="hover:bg-muted/60 group flex items-center gap-3 px-4 py-3 transition-colors duration-150"
 									>
-										<time
-											dateTime={event.at}
-											className="text-muted-foreground w-12 shrink-0 font-mono text-sm tabular-nums"
-										>
+										<time dateTime={event.at} className="text-muted-foreground w-12 shrink-0 text-sm tabular-nums">
 											{timeOfDay(event.at)}
 										</time>
 										<Icon size={18} aria-hidden="true" className="text-muted-foreground shrink-0" />

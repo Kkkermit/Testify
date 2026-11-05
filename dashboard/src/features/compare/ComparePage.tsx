@@ -102,12 +102,12 @@ export function ComparePage(): React.JSX.Element {
 						</thead>
 						<tbody>
 							{rows.map((row) => {
-								const { icon: Icon, tint } = featureLook(row.key);
+								const { icon: Icon } = featureLook(row.key);
 								return (
 									<tr key={row.key}>
 										<th scope="row" className={ROW_HEAD}>
 											<span className="flex items-center gap-2">
-												<Icon size={16} aria-hidden="true" className={tint} />
+												<Icon size={16} aria-hidden="true" className="text-muted-foreground" />
 												{featureLabel(row.key, row.label, t)}
 											</span>
 										</th>

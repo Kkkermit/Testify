@@ -106,7 +106,7 @@ function StepRow({
 				aria-hidden="true"
 				className={cn(
 					"rounded-field flex size-9 shrink-0 items-center justify-center",
-					step.done ? "bg-success/15 text-success" : cn(look.wash, look.tint),
+					step.done ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
 				)}
 			>
 				<Icon size={18} />

@@ -122,12 +122,12 @@
 	--color-destructive-text: light-dark(#b91c1c, #f87171);
 
 	/* Feature tints. Text colours at AA on the card, used as icons and as 15% fills. */
-	--color-feature-levelling: light-dark(#6d28d9, #a78bfa);
-	--color-feature-economy: light-dark(#a16207, #fbbf24);
-	--color-feature-moderation: light-dark(#b91c1c, #f87171);
-	--color-feature-welcome: light-dark(#047857, #3ddc97);
-	--color-feature-tickets: light-dark(#1d4ed8, #60a5fa);
-	--color-feature-community: light-dark(#be185d, #f472b6);
+	--color-hue-violet: light-dark(#6d28d9, #a78bfa);
+	--color-hue-amber: light-dark(#a16207, #fbbf24);
+	--color-hue-red: light-dark(#b91c1c, #f87171);
+	--color-hue-green: light-dark(#047857, #3ddc97);
+	--color-hue-blue: light-dark(#1d4ed8, #60a5fa);
+	--color-hue-pink: light-dark(#be185d, #f472b6);
 
 	/* One scale, so nothing is left to Tailwind's defaults and nothing reads as a corner that was missed. */
 	--radius-chip: 0.375rem;
@@ -525,7 +525,7 @@
 		.hljs-name,
 		.hljs-selector-id,
 		.hljs-selector-class {
-			color: var(--color-feature-tickets);
+			color: var(--color-hue-blue);
 		}
 		.hljs-attr,
 		.hljs-attribute,
@@ -533,12 +533,12 @@
 		.hljs-variable,
 		.hljs-template-variable,
 		.hljs-tag {
-			color: var(--color-feature-community);
+			color: var(--color-hue-pink);
 		}
 		.hljs-built_in,
 		.hljs-type,
 		.hljs-meta {
-			color: var(--color-feature-economy);
+			color: var(--color-hue-amber);
 		}
 		.hljs-deletion {
 			color: var(--color-destructive-text);

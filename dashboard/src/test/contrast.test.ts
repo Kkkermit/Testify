@@ -98,9 +98,9 @@ it("meets every threshold the base palette is used at, in both themes", () => {
 					// A filled button is measured with the text colour it actually draws, not `foreground`.
 					["white on primary", "#ffffff", of("primary"), TEXT],
 					["white on destructive", "#ffffff", of("destructive"), TEXT],
-					// Each tint is an icon colour and a 15% wash, so the icon has to survive on a card.
-					...["levelling", "economy", "moderation", "welcome", "tickets", "community"].map(
-						(feature) => [`the ${feature} tint on a card`, of(`feature-${feature}`), card, TEXT] as const,
+					// The hues letter an avatar, colour code and mark an alert, so each is read as text on a card.
+					...["violet", "amber", "red", "green", "blue", "pink"].map(
+						(hue) => [`the ${hue} hue on a card`, of(`hue-${hue}`), card, TEXT] as const,
 					),
 				] as [string, string, string, number][]
 			).map(([name, ...rest]) => [`${scheme}: ${name}`, ...rest]),

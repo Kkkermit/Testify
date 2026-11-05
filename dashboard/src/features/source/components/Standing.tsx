@@ -49,20 +49,19 @@ export function Standing(): React.JSX.Element {
 				<>
 					<ul className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label={t("source.numbers")}>
 						<li>
-							<StatTile label={t("source.stars")} value={repo.stars} icon={Star} tint="text-warning" />
+							<StatTile label={t("source.stars")} value={repo.stars} icon={Star} />
 						</li>
 						<li>
-							<StatTile label={t("source.forks")} value={repo.forks} icon={GitFork} tint="text-accent" />
+							<StatTile label={t("source.forks")} value={repo.forks} icon={GitFork} />
 						</li>
 						<li>
-							<StatTile label={t("source.watchers")} value={repo.watchers} icon={Eye} tint="text-feature-tickets" />
+							<StatTile label={t("source.watchers")} value={repo.watchers} icon={Eye} />
 						</li>
 						<li>
 							<StatTile
 								label={t("source.openIssues")}
 								value={repo.openIssues}
 								icon={CircleDot}
-								tint="text-success"
 								hint={t("source.openIssuesHint")}
 							/>
 						</li>

@@ -54,7 +54,7 @@ export function UsageBars({
 						<span className="block truncate text-sm font-medium">{row.label}</span>
 						{row.sub !== undefined && <span className="text-muted-foreground block truncate text-xs">{row.sub}</span>}
 					</span>
-					<span className="shrink-0 font-mono text-sm tabular-nums">{row.value ?? formatNumber(row.count)}</span>
+					<span className="shrink-0 text-sm font-medium tabular-nums">{row.value ?? formatNumber(row.count)}</span>
 				</li>
 			))}
 		</ol>

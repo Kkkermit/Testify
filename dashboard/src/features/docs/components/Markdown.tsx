@@ -279,7 +279,7 @@ const ALERT_LOOK: Record<Alert, { label: TranslationKey; icon: typeof Info; tint
 	important: {
 		label: "docs.alerts.important",
 		icon: MessageSquareWarning,
-		tint: "text-feature-community border-feature-community",
+		tint: "text-hue-pink border-hue-pink",
 	},
 	warning: { label: "docs.alerts.warning", icon: TriangleAlert, tint: "text-warning border-warning" },
 	caution: { label: "docs.alerts.caution", icon: OctagonAlert, tint: "text-destructive-text border-destructive-text" },

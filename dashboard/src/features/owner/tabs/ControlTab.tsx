@@ -109,11 +109,11 @@ export function ControlTab(): React.JSX.Element {
 				<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
 					<div className="flex gap-2">
 						<dt>{t("owner.servers")}</dt>
-						<dd className="text-foreground font-mono tabular-nums">{state.guilds}</dd>
+						<dd className="text-foreground tabular-nums">{state.guilds}</dd>
 					</div>
 					<div className="flex gap-2">
 						<dt>{t("owner.gatewayPing")}</dt>
-						<dd className="text-foreground font-mono tabular-nums">
+						<dd className="text-foreground tabular-nums">
 							{state.pingMs === null ? "—" : formatUnit(state.pingMs, "millisecond")}
 						</dd>
 					</div>

@@ -51,9 +51,7 @@ export function Figure({
 	return (
 		<div className={className}>
 			<dt className="text-muted-foreground text-xs">{label}</dt>
-			<dd className={cn("mt-1 font-mono tabular-nums", size === "lg" ? "text-xl" : "font-mono text-lg", tone)}>
-				{value}
-			</dd>
+			<dd className={cn("mt-1 font-semibold tabular-nums", size === "lg" ? "text-xl" : "text-lg", tone)}>{value}</dd>
 		</div>
 	);
 }

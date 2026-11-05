@@ -24,14 +24,14 @@ export function CommandCard({
 	onToggle?: (on: boolean) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const { icon: Icon, tint, wash } = featureLook(command.category);
+	const { icon: Icon } = featureLook(command.category);
 
 	const off = availability === "off-here" || availability === "off-everywhere";
 
 	return (
 		<Card padding="compact" className={cn("flex flex-col gap-3", off && "opacity-60")}>
 			<div className="flex items-start gap-3">
-				<span className={cn("rounded-card mt-0.5 shrink-0 p-2", wash, tint)} aria-hidden="true">
+				<span className="rounded-card bg-muted text-muted-foreground mt-0.5 shrink-0 p-2" aria-hidden="true">
 					<Icon size={18} />
 				</span>
 

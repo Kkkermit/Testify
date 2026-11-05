@@ -32,7 +32,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 
 			<Card className="flex flex-col gap-6">
 				<nav aria-labelledby="legal-contents" className="flex flex-col gap-3">
-					<h2 id="legal-contents" className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
+					<h2 id="legal-contents" className="text-muted-foreground text-sm font-medium">
 						{t("legal.contents")}
 					</h2>
 					<ol className="gap-x-6 sm:columns-2">

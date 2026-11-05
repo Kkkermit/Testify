@@ -1,11 +1,11 @@
 /** The tints a lettered fallback avatar can take, over the `--color-feature-*` tokens in `index.css`. */
 const TINTS = [
-	"bg-feature-levelling/20 text-feature-levelling",
-	"bg-feature-economy/20 text-feature-economy",
-	"bg-feature-welcome/20 text-feature-welcome",
-	"bg-feature-tickets/20 text-feature-tickets",
-	"bg-feature-community/20 text-feature-community",
-	"bg-feature-moderation/20 text-feature-moderation",
+	"bg-hue-violet/20 text-hue-violet",
+	"bg-hue-amber/20 text-hue-amber",
+	"bg-hue-green/20 text-hue-green",
+	"bg-hue-blue/20 text-hue-blue",
+	"bg-hue-pink/20 text-hue-pink",
+	"bg-hue-red/20 text-hue-red",
 ] as const;
 
 /** A stable colour per server, so the picker is scannable by shape and the same server keeps its colour between visits. */

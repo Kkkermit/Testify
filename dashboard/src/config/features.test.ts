@@ -7,7 +7,6 @@ describe("featureLook", () => {
 		const unknown = featureLook("something-added-later");
 
 		expect(unknown.icon).toBeDefined();
-		expect(unknown.tint).toBe("text-muted-foreground");
 	});
 });
 
@@ -36,7 +35,6 @@ describe("category coverage", () => {
 			"owner",
 		];
 
-		// Some categories share the neutral tint on purpose, so the icon is what has to be its own.
 		for (const category of categories) {
 			expect(featureLook(category).icon).not.toBe(featureLook("__unknown__").icon);
 		}
