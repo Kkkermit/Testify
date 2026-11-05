@@ -1240,6 +1240,18 @@
 		"emptyTitle": "Aún no hay roles",
 		"emptyBody": "Los roles creados en Discord aparecen aquí."
 	},
+	"testPost": {
+		"send": "Envíame una prueba",
+		"hint": "Solo la recibes tú, en un mensaje directo de {{bot}}.",
+		"sending": "Enviando…",
+		"sent": "Enviada a tus mensajes directos.",
+		"dmClosed": "Discord no la entregó. Permite los mensajes directos de los miembros de este servidor en tus ajustes de privacidad y vuelve a intentarlo.",
+		"notAMember": "No estás en este servidor, así que no hay nadie a quien enviar la prueba.",
+		"tooMany_one": "Puedes enviar {{count, number}} prueba por minuto. Vuelve a intentarlo en un momento.",
+		"tooMany_many": "Puedes enviar {{count, number}} de pruebas por minuto. Vuelve a intentarlo en un momento.",
+		"tooMany_other": "Puedes enviar {{count, number}} pruebas por minuto. Vuelve a intentarlo en un momento.",
+		"failed": "No se pudo enviar la prueba. Vuelve a intentarlo en un momento."
+	},
 	"members": {
 		"summarySoftbanned": "Con softban, que se levanta el {{when}}.",
 		"summaryLeft": "Salió del servidor.",

@@ -1197,6 +1197,17 @@
 		"emptyTitle": "Noch keine Rollen",
 		"emptyBody": "In Discord erstellte Rollen erscheinen hier."
 	},
+	"testPost": {
+		"send": "Schick mir einen Test",
+		"hint": "Nur du bekommst ihn, als Direktnachricht von {{bot}}.",
+		"sending": "Wird gesendet…",
+		"sent": "An deine Direktnachrichten gesendet.",
+		"dmClosed": "Discord hat sie nicht zugestellt. Erlaube in deinen Privatsphäre-Einstellungen Direktnachrichten von Mitgliedern dieses Servers und versuch es dann noch einmal.",
+		"notAMember": "Du bist nicht auf diesem Server, also gibt es niemanden, dem der Test geschickt werden kann.",
+		"tooMany_one": "Du kannst {{count, number}} Test pro Minute senden. Versuch es gleich noch einmal.",
+		"tooMany_other": "Du kannst {{count, number}} Tests pro Minute senden. Versuch es gleich noch einmal.",
+		"failed": "Der Test konnte nicht gesendet werden. Versuch es gleich noch einmal."
+	},
 	"members": {
 		"summarySoftbanned": "Softgebannt, der Bann endet am {{when}}.",
 		"summaryLeft": "Hat den Server verlassen.",

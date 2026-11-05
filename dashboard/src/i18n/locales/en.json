@@ -1197,6 +1197,17 @@
 		"emptyTitle": "No roles yet",
 		"emptyBody": "Roles made in Discord appear here."
 	},
+	"testPost": {
+		"send": "Send me a test",
+		"hint": "Only you get it, in a direct message from {{bot}}.",
+		"sending": "Sending…",
+		"sent": "Sent to your direct messages.",
+		"dmClosed": "Discord would not deliver it. Allow direct messages from members of this server in your privacy settings, then try again.",
+		"notAMember": "You are not in this server, so there is nobody to send the test to.",
+		"tooMany_one": "You can send {{count, number}} test a minute. Try again shortly.",
+		"tooMany_other": "You can send {{count, number}} tests a minute. Try again shortly.",
+		"failed": "The test could not be sent. Try again in a moment."
+	},
 	"members": {
 		"summarySoftbanned": "Softbanned, and the ban lifts on {{when}}.",
 		"summaryLeft": "They have left the server.",

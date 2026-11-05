@@ -21,6 +21,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { StickyRow } from "@/features/sticky/components/StickyRow";
 import { stickySummary } from "@/features/sticky/sticky.utils";
 import { useRemoveSticky, useSaveSticky, useSticky } from "@/features/sticky/useSticky";
+import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
@@ -138,6 +139,7 @@ export function StickyPage(): React.JSX.Element {
 						{t("common.partOf", { part: message.length, whole: STICKY_LIMITS.maxMessage })}
 					</span>
 					<PostPreview text={message} empty={t("common.previewEmpty")} />
+					<SendTest test={{ kind: "plain", message }} />
 				</Field>
 
 				<Field label={t("sticky.repostAfter")} htmlFor="sticky-cap" hint={t("sticky.repostHint")}>

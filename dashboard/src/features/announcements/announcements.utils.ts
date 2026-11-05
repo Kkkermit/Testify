@@ -4,6 +4,7 @@ import {
 	type AnnouncementMentions,
 	type AnnouncementStyle,
 	type EmbedColour,
+	type TestPost,
 } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
@@ -48,12 +49,19 @@ export function draftProblem(draft: AnnouncementDraft): TranslationKey | null {
 
 /** Only what the chosen style uses is sent, so a title typed and then switched away from never arrives. */
 export function bodyOf(draft: AnnouncementDraft & { channelId: string }): AnnouncementBody {
+	return { channelId: draft.channelId, mentions: draft.mentions, ...contentOf(draft) };
+}
+
+/** The same post as a test, which goes to one person and so has no channel and pings nobody. */
+export function testOf(draft: AnnouncementDraft): Extract<TestPost, { kind: "announcement" }> {
+	return { kind: "announcement", ...contentOf(draft) };
+}
+
+function contentOf(draft: AnnouncementDraft): Pick<AnnouncementBody, "style" | "title" | "message" | "colour"> {
 	const title = sanitiseInput(draft.title).trim();
 	return {
-		channelId: draft.channelId,
 		style: draft.style,
 		message: sanitiseInput(draft.message),
-		mentions: draft.mentions,
 		...(draft.style === "embed" ? { colour: draft.colour, ...(title === "" ? {} : { title }) } : {}),
 	};
 }

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, SELECT } from "@/components/form";
 import { useRowLayout } from "@/components/form/rowLayout";
 import { REPEAT_LABELS, REPEAT_ORDER, toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
+import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
 
@@ -88,7 +89,12 @@ export function ScheduleFields({
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 					{t("common.partOf", { part: value.message.length, whole: SCHEDULE_LIMITS.maxMessage })}
 				</span>
-				{row && <PostPreview text={value.message} empty={t("common.previewEmpty")} />}
+				{row && (
+					<>
+						<PostPreview text={value.message} empty={t("common.previewEmpty")} />
+						<SendTest test={{ kind: "plain", message: value.message }} />
+					</>
+				)}
 			</Field>
 		</>
 	);

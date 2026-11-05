@@ -12,6 +12,7 @@ import {
 	Warning,
 } from "@/components/form";
 import { Skeleton } from "@/components/primitives";
+import { SendTest } from "@/features/test-post/SendTest";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { StyleChoice } from "@/features/welcome/components/StyleChoice";
@@ -106,6 +107,7 @@ export function GoodbyeSettings({
 					leaving
 				/>
 				<p className="text-muted-foreground text-xs">{t("goodbye.mentionNote")}</p>
+				<SendTest test={{ kind: "goodbye", message: draft, style: goodbye.style }} />
 			</MessageEditor>
 
 			{!needsChannel && !goodbye.canSend && <Warning>{t("goodbye.cannotSend")}</Warning>}

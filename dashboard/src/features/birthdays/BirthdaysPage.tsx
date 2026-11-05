@@ -18,6 +18,7 @@ import { birthdaySummary } from "@/features/birthdays/birthdays.utils";
 import { useBirthdays, useUpdateBirthdays } from "@/features/birthdays/useBirthdays";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { SendTest } from "@/features/test-post/SendTest";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -108,6 +109,7 @@ export function BirthdaysPage(): React.JSX.Element {
 						memberCount={overview.data?.memberCount ?? 0}
 					/>
 					<p className="text-muted-foreground text-xs">{t("birthdays.pingNote")}</p>
+					<SendTest test={{ kind: "birthday", message: draft }} />
 				</MessageEditor>
 			</SettingRows>
 

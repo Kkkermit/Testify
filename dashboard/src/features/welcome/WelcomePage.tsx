@@ -15,6 +15,7 @@ import {
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { SendTest } from "@/features/test-post/SendTest";
 import { GoodbyeSettings } from "@/features/welcome/components/GoodbyeSettings";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
@@ -122,6 +123,7 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				>
 					<GreetingPreview message={draft} style={welcome.style} guildName={guildName} memberCount={memberCount} />
+					<SendTest test={{ kind: "greeting", message: draft, style: welcome.style }} />
 				</MessageEditor>
 
 				{update.error !== null && (

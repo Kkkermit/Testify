@@ -128,6 +128,7 @@ export const handlers = [
 	http.post("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),
 	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
+	http.post("/api/guilds/:guildId/test-post", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.get("/api/guilds/:guildId/auto-responders", () => HttpResponse.json(autoResponderList)),
 	http.get("/api/guilds/:guildId/scheduled-messages", () => HttpResponse.json(scheduledMessageList)),

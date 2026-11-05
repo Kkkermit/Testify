@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Field, FIELD, SELECT } from "@/components/form";
 import { useRowLayout } from "@/components/form/rowLayout";
 import { MATCH_LABELS, MATCH_ORDER } from "@/features/auto-responders/autoResponders.utils";
+import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
 
@@ -68,7 +69,12 @@ export function ResponderFields({
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 					{t("common.partOf", { part: value.reply.length, whole: AUTO_RESPONDER_LIMITS.maxReply })}
 				</span>
-				{row && <PostPreview text={value.reply} empty={t("common.previewEmpty")} />}
+				{row && (
+					<>
+						<PostPreview text={value.reply} empty={t("common.previewEmpty")} />
+						<SendTest test={{ kind: "plain", message: value.reply }} />
+					</>
+				)}
 			</Field>
 		</>
 	);

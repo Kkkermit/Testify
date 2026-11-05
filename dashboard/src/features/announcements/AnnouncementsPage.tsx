@@ -25,11 +25,13 @@ import {
 	EMPTY_DRAFT,
 	MENTION_LABELS,
 	STYLE_LABELS,
+	testOf,
 } from "@/features/announcements/announcements.utils";
 import { usePostAnnouncement } from "@/features/announcements/useAnnouncements";
 import { useBotLook } from "@/features/auth/useBot";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { SendTest } from "@/features/test-post/SendTest";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
@@ -158,6 +160,7 @@ export function AnnouncementsPage(): React.JSX.Element {
 
 				<FieldGroup label={t("common.preview")} hint={t("announcements.previewNote")}>
 					<Preview draft={draft} />
+					<SendTest test={testOf(draft)} />
 				</FieldGroup>
 
 				<RowActions>
