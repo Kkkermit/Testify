@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router";
+import { InboxBadge } from "@/app/layout/InboxBadge";
 import { ICON_SLOT } from "@/app/layout/sidebarStyles";
 import { Tooltip } from "@/components/primitives";
 import { type NavItem } from "@/config/navigation";
@@ -8,7 +9,7 @@ import { cn } from "@/lib/cn";
 /** `sr-only` rather than `hidden` at the icon-only width: `display: none` would leave the link named nothing. */
 export function SidebarLink({ item, expanded = false }: { item: NavItem; expanded?: boolean }): React.JSX.Element {
 	const { t } = useTranslation();
-	const { to, labelKey, icon: Icon, hintKey, exact = true } = item;
+	const { to, labelKey, icon: Icon, hintKey, exact = true, badge } = item;
 	const label = t(labelKey);
 
 	return (
@@ -38,6 +39,7 @@ export function SidebarLink({ item, expanded = false }: { item: NavItem; expande
 							<Icon size={18} />
 						</span>
 						<span className={expanded ? "truncate" : "sr-only truncate lg:not-sr-only"}>{label}</span>
+						{badge !== undefined && <InboxBadge guildId={badge.guildId} expanded={expanded} />}
 					</>
 				)}
 			</NavLink>

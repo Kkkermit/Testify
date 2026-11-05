@@ -23,6 +23,8 @@ export const keys = {
 		overview: () => ["guild", id, "overview"] as const,
 		// Under the overview's key, so every write that refreshes the overview refreshes the channel map too.
 		places: () => ["guild", id, "overview", "places"] as const,
+		// Under the overview too, since it is read from the same settings and refreshed by the same writes.
+		inbox: () => ["guild", id, "overview", "inbox"] as const,
 		setupChecklist: () => ["guild", id, "setup-checklist"] as const,
 		levelling: () => ["guild", id, "levelling"] as const,
 		welcome: () => ["guild", id, "welcome"] as const,

@@ -1,6 +1,7 @@
 import {
 	type ChannelSummary,
 	type CommandToggleState,
+	type GuildInbox,
 	type GuildNickname,
 	type GuildOverview,
 	type GuildPlaces,
@@ -183,5 +184,41 @@ export const guildPlaces: GuildPlaces = {
 				{ channelId: "400000000000000002", role: "logs" },
 			],
 		},
+	],
+};
+
+/** Nothing waiting, so a screen that is not about the inbox draws no count and no overview line. */
+export const quietInbox: GuildInbox = {
+	tickets: { total: 0, items: [] },
+	ideas: { total: 0, items: [] },
+	permissions: [],
+	channels: [],
+};
+
+/** One ticket of three shown, one idea, a missing permission and a log channel the bot cannot post in. */
+export const busyInbox: GuildInbox = {
+	tickets: {
+		total: 3,
+		items: [
+			{ channelId: "700000000000000010", ticketId: "12", ownerName: "kate", openedAt: "2026-09-27T10:00:00.000Z" },
+		],
+	},
+	ideas: {
+		total: 1,
+		items: [
+			{
+				id: "idea-1",
+				number: 4,
+				text: "A music quiz night",
+				authorName: "kate",
+				up: 5,
+				down: 1,
+				createdAt: "2026-09-26T10:00:00.000Z",
+			},
+		],
+	},
+	permissions: ["ManageRoles"],
+	channels: [
+		{ feature: "audit-logging", label: "Audit logging", channelId: "400000000000000002", problem: "cannotPost" },
 	],
 };

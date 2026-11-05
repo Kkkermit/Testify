@@ -1,4 +1,4 @@
-import { ChannelType, type Guild, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
+import { ChannelType, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
 import { type Context, Hono } from "hono";
 import { type ApiBindings, guildOf, readerOf } from "@api/context";
 import { holdsPermission, requireReach } from "@api/middleware/reach";
@@ -46,7 +46,7 @@ import { canPostInChannel, readerSees } from "@lib/discord";
 import { readInsights } from "@lib/info";
 import { readServerChanges } from "@lib/moderation";
 import { isPowerful } from "@lib/roles";
-import { featuresOf, placesOf } from "@lib/settings";
+import { featuresOf, missingPermissions, placesOf, readInbox } from "@lib/settings";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
@@ -55,13 +55,12 @@ import {
 	type InsightWindow,
 	type ChannelSummary,
 	type GuildOverview,
+	type GuildInbox,
 	type GuildPlaces,
 	guildIdParam,
 	type Paged,
 	pagination,
 	type RoleSummary,
-	WATCHED_PERMISSIONS,
-	type WatchedPermission,
 } from "@testify/shared";
 
 export const guilds = new Hono<ApiBindings>();
@@ -119,6 +118,12 @@ guilds.get("/:guildId/overview", async (context) => {
 		recentChanges: recent.map(toAuditSummary),
 	};
 
+	return context.json(body);
+});
+
+/** What needs a manager here: tickets nobody has claimed, ideas waiting, permissions and channels that stop a feature. */
+guilds.get("/:guildId/inbox", async (context) => {
+	const body: GuildInbox = await readInbox(context.get("client"), guildOf(context));
 	return context.json(body);
 });
 
@@ -229,12 +234,4 @@ function kindOf(channel: GuildBasedChannel): ChannelKind {
 
 function colourOf(role: Role): string | null {
 	return role.color === 0 ? null : `#${role.color.toString(16).padStart(6, "0")}`;
-}
-
-/** Permissions Discord can revoke silently, named so a manager can act on them. */
-function missingPermissions(guild: Guild): WatchedPermission[] {
-	const me = guild.members.me;
-	if (me === null) return [];
-
-	return WATCHED_PERMISSIONS.filter((flag) => !me.permissions.has(PermissionFlagsBits[flag]));
 }

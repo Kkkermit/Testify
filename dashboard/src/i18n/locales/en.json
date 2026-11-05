@@ -48,6 +48,8 @@
 		"hiddenChannelWarning": "You can’t see this channel in Discord, so only somebody who can may change it."
 	},
 	"nav": {
+		"inbox": "Inbox",
+		"inboxHint": "What needs you in this server",
 		"entertainment": "Entertainment",
 		"economy": "Economy",
 		"community": "Community",
@@ -1118,6 +1120,33 @@
 		"removeReward": "Remove the reward for level {{level}}",
 		"levelTaken": "Level {{level}} already has a reward. Remove it first, or pick another level.",
 		"rewardsBody": "A role handed out when someone reaches a level. {{used, number}} of {{max, number}} used."
+	},
+	"inbox": {
+		"title": "Inbox",
+		"subtitle": "Everything in this server waiting on a manager, each with a link to where it is dealt with.",
+		"summaryClear": "Nothing needs you right now.",
+		"summary_one": "{{count, number}} thing needs you.",
+		"summary_other": "{{count, number}} things need you.",
+		"tickets": "Tickets waiting for staff",
+		"ticketsBody": "Open tickets nobody has claimed yet, oldest first.",
+		"ticket": "Ticket {{id}}",
+		"ticketFrom": "From {{name}}, opened {{when}}",
+		"ideas": "Ideas waiting for a decision",
+		"ideasBody": "Accept or decline them on the idea board, newest first.",
+		"idea": "Idea {{number}}: {{text}}",
+		"ideaVotes": "By {{name}} · 👍 {{up, number}} · 👎 {{down, number}}",
+		"more_one": "{{count, number}} more",
+		"more_other": "{{count, number}} more",
+		"permissions": "Permissions {{bot}} is missing",
+		"channels": "Channels {{bot}} cannot post in",
+		"channelsBody": "A switched-on feature points at each of these. Pick another channel on its page, or give {{bot}} access in Discord.",
+		"cannotPost": "{{feature}} cannot post in {{channel}}",
+		"missing": "{{feature}} posts in a channel that no longer exists",
+		"emptyTitle": "Nothing waiting",
+		"emptyBody": "Tickets nobody has claimed, ideas waiting for a decision and settings that stop a feature working appear here.",
+		"waiting_one": "{{count, number}} waiting",
+		"waiting_other": "{{count, number}} waiting",
+		"open": "Open the inbox"
 	},
 	"members": {
 		"summarySoftbanned": "Softbanned, and the ban lifts on {{when}}.",

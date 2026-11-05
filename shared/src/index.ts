@@ -20,6 +20,7 @@ export * from "./control";
 export * from "./giveaways";
 export * from "./goodbye";
 export * from "./ideas";
+export * from "./inbox";
 export * from "./insights";
 export * from "./levelling";
 export * from "./lottery";

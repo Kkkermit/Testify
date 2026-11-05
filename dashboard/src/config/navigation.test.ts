@@ -66,6 +66,7 @@ describe("navigationFor", () => {
 				"/channels",
 				"/giveaways",
 				"/ideas",
+				"/inbox",
 				"/insights",
 				"/levelling",
 				"/lottery",

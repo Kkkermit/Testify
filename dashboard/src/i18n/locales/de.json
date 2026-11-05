@@ -48,6 +48,8 @@
 		"hiddenChannelWarning": "Du kannst diesen Kanal in Discord nicht sehen, daher kann ihn nur jemand ändern, der ihn sieht."
 	},
 	"nav": {
+		"inbox": "Posteingang",
+		"inboxHint": "Was auf diesem Server auf dich wartet",
 		"entertainment": "Unterhaltung",
 		"economy": "Wirtschaft",
 		"community": "Community",
@@ -1118,6 +1120,33 @@
 		"removeReward": "Belohnung für Level {{level}} entfernen",
 		"levelTaken": "Level {{level}} hat schon eine Belohnung. Entferne sie zuerst oder wähle ein anderes Level.",
 		"rewardsBody": "Eine Rolle, die vergeben wird, wenn jemand ein Level erreicht. {{used, number}} von {{max, number}} belegt."
+	},
+	"inbox": {
+		"title": "Posteingang",
+		"subtitle": "Alles auf diesem Server, das auf jemanden aus dem Team wartet, jeweils mit einem Link dorthin, wo es erledigt wird.",
+		"summaryClear": "Gerade braucht dich nichts.",
+		"summary_one": "{{count, number}} Sache braucht dich.",
+		"summary_other": "{{count, number}} Sachen brauchen dich.",
+		"tickets": "Tickets, die auf das Team warten",
+		"ticketsBody": "Offene Tickets, die noch niemand übernommen hat, die ältesten zuerst.",
+		"ticket": "Ticket {{id}}",
+		"ticketFrom": "Von {{name}}, geöffnet {{when}}",
+		"ideas": "Ideen, die auf eine Entscheidung warten",
+		"ideasBody": "Nimm sie auf der Ideenwand an oder lehne sie ab, die neuesten zuerst.",
+		"idea": "Idee {{number}}: {{text}}",
+		"ideaVotes": "Von {{name}} · 👍 {{up, number}} · 👎 {{down, number}}",
+		"more_one": "{{count, number}} weitere",
+		"more_other": "{{count, number}} weitere",
+		"permissions": "Berechtigungen, die {{bot}} fehlen",
+		"channels": "Kanäle, in denen {{bot}} nicht posten kann",
+		"channelsBody": "Auf jeden davon zeigt eine eingeschaltete Funktion. Wähle auf ihrer Seite einen anderen Kanal oder gib {{bot}} in Discord Zugriff.",
+		"cannotPost": "{{feature}} kann nicht in {{channel}} posten",
+		"missing": "{{feature}} postet in einem Kanal, den es nicht mehr gibt",
+		"emptyTitle": "Nichts wartet",
+		"emptyBody": "Tickets, die niemand übernommen hat, Ideen, die auf eine Entscheidung warten, und Einstellungen, die eine Funktion stoppen, erscheinen hier.",
+		"waiting_one": "{{count, number}} wartet",
+		"waiting_other": "{{count, number}} warten",
+		"open": "Zum Posteingang"
 	},
 	"members": {
 		"summarySoftbanned": "Softgebannt, der Bann endet am {{when}}.",

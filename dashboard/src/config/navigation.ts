@@ -38,6 +38,7 @@ import {
 	Hash,
 	Gavel,
 	History,
+	Inbox,
 	Gift,
 	Gem,
 	Sparkles,
@@ -56,6 +57,8 @@ export interface NavItem {
 	hintKey?: TranslationKey;
 	/** False when child routes should keep this item marked as current. */
 	exact?: boolean;
+	/** A live count drawn beside the label: what is waiting in this server's inbox. */
+	badge?: { kind: "inbox"; guildId: string };
 }
 
 /** A collapsible run of related screens, so a server's settings stay one scan rather than ten rows. */
@@ -110,6 +113,13 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 			guildId: guild.id,
 			items: [
 				{ to: at(""), labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
+				{
+					to: at("/inbox"),
+					labelKey: "nav.inbox",
+					icon: Inbox,
+					hintKey: "nav.inboxHint",
+					badge: { kind: "inbox", guildId: guild.id },
+				},
 				// One channel's page lives under this path, so Channels stays marked while it is open.
 				{ to: at("/channels"), labelKey: "nav.channels", icon: Hash, hintKey: "nav.channelsHint", exact: false },
 				// A member's own page lives under this path, and it is still where you are in the sidebar.
