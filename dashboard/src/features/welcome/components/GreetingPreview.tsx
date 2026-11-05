@@ -33,7 +33,7 @@ export function GreetingPreview({
 	});
 
 	return (
-		<DiscordPreview name={name} avatarUrl={bot.avatarUrl} seed={guildName}>
+		<DiscordPreview name={name} avatarUrl={bot.avatarUrl}>
 			<div
 				className={cn(
 					"mt-1 text-sm break-words",

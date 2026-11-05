@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { tintFor } from "@/lib/tint";
 
@@ -15,8 +16,10 @@ export function Avatar({
 	seed?: string;
 }): React.JSX.Element {
 	const style = { width: size, height: size };
+	// Keyed by address, so a picture that fails falls back to the letter and a new one is tried again.
+	const [broken, setBroken] = useState<string | null>(null);
 
-	if (url === null) {
+	if (url === null || broken === url) {
 		return (
 			<div
 				className={cn(
@@ -42,6 +45,9 @@ export function Avatar({
 			className="max-w-none shrink-0 rounded-full object-cover"
 			style={style}
 			loading="lazy"
+			onError={() => {
+				setBroken(url);
+			}}
 		/>
 	);
 }
