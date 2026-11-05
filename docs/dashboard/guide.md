@@ -459,6 +459,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Skeleton`                                                   | What `isPending` returns                                                 |
 | `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike       |
 | `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page     |
+| `Summary`                                                    | The one sentence under a page's header saying what the feature does now  |
 | `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                          |
 
 ### Form
@@ -471,6 +472,9 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Toggle`                     | A real checkbox with `role="switch"`; `hideLabel` for a labelled row                                          |
 | `SavingIndicator`            | `savingStateOf(busy, succeeded)`                                                                              |
 | `Warning`                    | Every refusal and hierarchy warning                                                                           |
+| `SettingRows`                | One panel of rows divided by hairlines; `title`, `description`, `action`, and `onSubmit` to make it a form    |
+| `FieldGroup`                 | A row's name over several controls; `named={false}` when the control inside already carries the name          |
+| `RowActions`                 | A panel's buttons, lined up under the controls rather than under the names                                    |
 | `fieldStyles.ts`             | `FIELD` `LABEL` `SELECT` `FIELD_GROUP` `CHECK_ROW` `SCROLL_LIST`                                              |
 
 > [!WARNING]
@@ -478,6 +482,27 @@ Three files with their own segmented control is three places to fix an `aria-pre
 > Linux and one on macOS or Windows, so the import resolved to the class strings there and the page died at
 > start-up with `does not provide an export named 'Field'`. `tests/core/conventions.test.ts` now fails on any
 > two modules differing only by case.
+
+### A feature page is a summary over rows
+
+Every server screen reads the same way: `PageHeader`, then a `Summary` saying in one sentence what the feature does
+right now, then its settings as `SettingRows`, one panel per decision. A list page keeps its list and gains only the
+summary. Five things about the rows are easy to get wrong:
+
+- **Inside `SettingRows`, `Field`, `Toggle`, `CheckList`, `FieldGroup` and `RowActions` become rows by themselves**,
+  through the `RowLayout` context: the name in an 18rem column on the left, the control on the right. Nothing is
+  passed to them. `RowLayout.Provider value={false}` puts a form back to stacked fields inside a row.
+- **The panel pads and divides its direct children**, so each child is one row. A bordered list — a `DividedList`, a
+  table — goes inside a plain `<div>`, or it is padded and divided twice; a `<form>` as a child is one row however
+  many fields it holds, which is why the panel takes `onSubmit` instead.
+- **The summary is a rule in `<name>.utils.ts`**, tested like any other, because it is where a page states a fact
+  the reader acts on. It leads with the gravest state that is still true, and it is written as a sentence in every
+  language — a count alone ("1 switched off here") is a fragment.
+- **A refusal lands in the panel that caused it.** A page with several panels tracks which one wrote last and renders
+  the error there, never once per panel and never at the foot of the page.
+- **Anything that posts shows the post beside its editor**, through `PostPreview`, in the bot's own name and
+  picture. A post whose words are the bot's own, like a giveaway's, reads them from `@testify/shared`, where the bot
+  reads them too, so the preview cannot drift from what is sent.
 
 ### Tooltips describe, they never name
 

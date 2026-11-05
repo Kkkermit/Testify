@@ -2398,11 +2398,13 @@ the same way and neither can be reasoned around:
 
 **The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
 with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
-"massive gaps", and correctly. Two columns of cards was the wrong container for it. Each card is now full width
-and splits _inside_: what the setting is on the left in a fixed 288px column, the controls on the right at a
-readable measure. No arrangement of card heights can leave a hole, the descriptions all start on one column,
-and the page reads as the list of settings it is. Reach for that shape before a masonry whenever the cards are
-forms rather than tiles.
+"massive gaps", and correctly. Two columns of cards was the wrong container for it. Every feature page is now
+`SettingRows`: full-width panels of hairline-divided rows, each the setting's name in a fixed 18rem column on the
+left and its control on the right, under a `Summary` sentence saying what the feature does right now. `Field`,
+`Toggle`, `CheckList`, `FieldGroup` and `RowActions` become rows by themselves inside a panel, so no screen lays out a
+row by hand. No arrangement of heights can leave a hole, the names all start on one column, and each page reads as the
+list of settings it is. Reach for that shape before a masonry whenever the cards are forms rather than tiles; the
+guide's §11 has the rules.
 
 **No two modules may differ only by case.** `Field.tsx` beside `field.ts` is two files on Linux and one on
 macOS or Windows, so `@/components/form/Field` resolves to the class strings there and the page dies at start-up
