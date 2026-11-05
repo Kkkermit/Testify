@@ -1,4 +1,14 @@
-import { fromHsl, parseColour, readHex, toHex, toHsl, toHslText, toRgbText } from "@/lib/colour";
+import {
+	COLOUR_TEXT_MAX,
+	fromHsl,
+	parseColour,
+	readHex,
+	sanitiseColourText,
+	toHex,
+	toHsl,
+	toHslText,
+	toRgbText,
+} from "@/lib/colour";
 
 describe("parseColour", () => {
 	/** Each row is what somebody might type and the colour it should be read as, or null for a refusal. */
@@ -43,6 +53,36 @@ describe("parseColour", () => {
 		});
 
 		expect(wrong).toEqual([]);
+	});
+});
+
+describe("hostile input", () => {
+	/** What reaches a style property is always six hex digits written by `toHex`, so anything else is refused unread. */
+	it("refuses markup, script and CSS smuggled in beside or instead of a colour", () => {
+		const hostile = [
+			"<script>alert(1)</script>",
+			"#8b2c6b<img src=x onerror=alert(1)>",
+			"data:text/html,<b>x</b>",
+			"red; background: url(https://example.com/x)",
+			"rgb(1, 2, 3); --x: url(y)",
+			"#8b2c6b;}body{display:none",
+			"expression(alert(1))",
+			"url(https://example.com/x)",
+			"rgb(1, 2, 3)\u202e",
+			"#8b2c6b\u0000",
+			"rgb(1,\t2, 3)",
+			'"#8b2c6b"',
+			"&#35;8b2c6b",
+		];
+
+		expect(hostile.filter((text) => parseColour(text) !== null)).toEqual([]);
+	});
+
+	it("keeps only the characters a colour is written with, and no more of them than any colour needs", () => {
+		expect(sanitiseColourText('<img src="x" onerror=alert(1)>')).toBe("img srcx onerroralert(1)");
+		expect(sanitiseColourText("#8b2c6b;}{\\'\"`<>=:&\u202e\u0000\n")).toBe("#8b2c6b");
+		expect(sanitiseColourText("rgb(139, 44, 107 / 50%)")).toBe("rgb(139, 44, 107 / 50%)");
+		expect(sanitiseColourText("1".repeat(500))).toHaveLength(COLOUR_TEXT_MAX);
 	});
 });
 

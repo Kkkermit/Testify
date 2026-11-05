@@ -2581,8 +2581,12 @@ from the accent (`testify:accent-colour`), so choosing a swatch does not forget 
 - **The thresholds are proved over the colour space, not over one colour.** `contrast.test.ts` puts a sweep of hues,
   saturations and lightnesses through `customAccent` and measures every result against the real grounds in
   `index.css`; widening a band goes red.
-- **Only `#rrggbb` is read back from storage** (`readHex`), because the value lands in a style property and storage
-  holds whatever was last written to it. Anything else is ignored and the page is plum.
+- **Only six hex digits ever reach a style property or storage, whatever the way in.** The field keeps only the
+  characters a colour is written with (`sanitiseColourText`), `parseColour` refuses anything outside that allowlist
+  before reading it, and the picker, `setColour`, `applyCustomColour` and the read back from storage each pass the
+  value through `readHex`, so the only string written is the one `toHex` makes from three integers. What was typed is
+  only ever an input's value, never markup. `colour.test.ts`, `useAccent.test.ts` and the page's test feed it script,
+  markup and CSS, and loosening the allowlist or the check in `setColour` goes red.
 - **It is applied before the app mounts**, with the other preferences, so a reader who made one lands in it.
 
 That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual

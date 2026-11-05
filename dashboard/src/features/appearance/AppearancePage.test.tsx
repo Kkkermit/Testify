@@ -98,6 +98,35 @@ describe("choosing an accent", () => {
 		expect(screen.getByRole("textbox", { name: "Colour" })).toHaveValue("#0f766e");
 	});
 
+	/** The field never renders what was typed as markup, keeps no character a colour cannot hold, and applies nothing. */
+	it("strips markup from what was typed, and refuses it rather than wearing it", async () => {
+		const user = userEvent.setup();
+		const { container } = render();
+		const field = await screen.findByRole("textbox", { name: "Colour" });
+
+		await user.click(field);
+		await user.paste('#8b2c6b"><img src=x onerror=alert(1)>');
+		await user.click(screen.getByRole("button", { name: "Use this colour" }));
+
+		expect(container.querySelector("img")).toBeNull();
+		expect((field as HTMLInputElement).value).not.toMatch(/[<>"=]/);
+		expect(screen.getByText(/That isn’t a colour this page can read/)).toBeInTheDocument();
+		expect(document.documentElement.hasAttribute("data-accent")).toBe(false);
+		expect(document.documentElement.getAttribute("style") ?? "").toBe("");
+		expect(window.localStorage.getItem("testify:accent-colour")).toBeNull();
+	});
+
+	/** The picker's value can be set by a script as well as by the browser, so it is read like anything typed. */
+	it("never wears a string a script set on the picker", async () => {
+		render();
+
+		fireEvent.input(await screen.findByLabelText("Pick a colour"), { target: { value: "red;background:url(x)" } });
+
+		// The browser turns a value that is not a colour into black before the page ever reads it.
+		expect(document.documentElement.getAttribute("style") ?? "").not.toMatch(/url|red|background/);
+		expect(window.localStorage.getItem("testify:accent-colour") ?? "#000000").toMatch(/^#[0-9a-f]{6}$/);
+	});
+
 	it("says so when what was typed is not a colour, and leaves the accent alone", async () => {
 		const user = userEvent.setup();
 		render();

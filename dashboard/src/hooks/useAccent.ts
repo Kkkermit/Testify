@@ -65,11 +65,16 @@ export function useAccent(): { accent: Accent; setAccent: (next: Accent) => void
 	return { accent: value === "custom" && storedCustomColour() === null ? ACCENT.fallback : value, setAccent: choose };
 }
 
-/** The colour somebody made, remembered and applied; choosing it as the accent is the caller's next step. */
-export function useCustomColour(): { colour: string | null; setColour: (hex: string) => void } {
+/** The colour somebody made, remembered and applied; false when it was not a colour, and nothing changed. */
+export function useCustomColour(): { colour: string | null; setColour: (value: string) => boolean } {
 	const [colour, setState] = useState<string | null>(storedCustomColour);
 
-	const setColour = useCallback((hex: string) => {
+	const setColour = useCallback((value: string) => {
+		// Only a colour reaches the page or storage, whoever calls this and with whatever string.
+		const read = readHex(value);
+		if (read === null) return false;
+
+		const hex = toHex(read);
 		applyCustomColour(hex);
 		setState(hex);
 		try {
@@ -77,6 +82,7 @@ export function useCustomColour(): { colour: string | null; setColour: (hex: str
 		} catch {
 			// A colour that cannot be remembered is still worth wearing for this visit.
 		}
+		return true;
 	}, []);
 
 	return { colour, setColour };

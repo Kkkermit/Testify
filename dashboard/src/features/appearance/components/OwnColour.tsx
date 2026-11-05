@@ -5,7 +5,7 @@ import { Warning } from "@/components/form";
 import { FIELD, LABEL } from "@/components/form/fieldStyles";
 import { Button, SectionHeading } from "@/components/primitives";
 import { cn } from "@/lib/cn";
-import { COLOUR_TEXT_MAX, parseColour, readHex, toHex, toHslText, toRgbText } from "@/lib/colour";
+import { COLOUR_TEXT_MAX, parseColour, readHex, sanitiseColourText, toHex, toHslText, toRgbText } from "@/lib/colour";
 import { CUSTOM_STARTING_POINT } from "@/lib/customAccent";
 
 /** `data-scheme` and `data-accent` resolve every token inside, so the sample shows the other theme too. */
@@ -87,8 +87,10 @@ export function OwnColour({
 						aria-label={t("appearance.ownPicker")}
 						value={typed === null ? (colour ?? CUSTOM_STARTING_POINT) : toHex(typed)}
 						onChange={(event) => {
-							setText(event.target.value);
-							use(event.target.value);
+							const picked = readHex(event.target.value);
+							if (picked === null) return;
+							setText(toHex(picked));
+							use(toHex(picked));
 						}}
 						className={cn(FIELD, "h-10 w-14 shrink-0 p-1")}
 					/>
@@ -102,8 +104,11 @@ export function OwnColour({
 						aria-describedby={`${id}-formats`}
 						aria-invalid={unreadable}
 						onChange={(event) => {
-							setText(event.target.value);
+							setText(sanitiseColourText(event.target.value));
 							setUnreadable(false);
+						}}
+						onBlur={() => {
+							setUnreadable(text.trim() !== "" && typed === null);
 						}}
 						className={cn(FIELD, "min-w-40 flex-1 font-mono", unreadable && "border-destructive")}
 					/>

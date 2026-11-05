@@ -102,8 +102,7 @@ export function AppearancePage(): React.JSX.Element {
 					colour={colour}
 					inUse={accent === "custom"}
 					onUse={(hex) => {
-						setColour(hex);
-						setAccent("custom");
+						if (setColour(hex)) setAccent("custom");
 					}}
 				/>
 			</AppearanceCard>

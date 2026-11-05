@@ -19,6 +19,8 @@ export const COLOUR_TEXT_MAX = 40;
 /** Three digits need their hash, or "255" would be read as a hex code rather than as a number. */
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$|^([0-9a-f]{6})$/;
 const SEPARATORS = /[\s,/]+/;
+/** Every character a hex code, `rgb(…)` or `hsl(…)` can be written with; nothing else is ever read or kept. */
+const OUTSIDE_COLOUR = /[^0-9a-z#(),.%/ -]/gi;
 const DECIMAL = /^-?\d+(?:\.\d+)?$/;
 
 function clamp(value: number, low: number, high: number): number {
@@ -78,10 +80,16 @@ function hslFrom(text: string): Rgb | null {
 	return fromHsl({ h, s: s / 100, l: l / 100 });
 }
 
-/** A hex code, `rgb(…)`, three bare numbers read as RGB, or `hsl(…)`; null for anything else. */
+/** What somebody types, with every character no colour is written with removed and the length capped. */
+export function sanitiseColourText(input: string): string {
+	return input.replace(OUTSIDE_COLOUR, "").slice(0, COLOUR_TEXT_MAX);
+}
+
+/** A hex code, `rgb(…)`, three bare numbers read as RGB, or `hsl(…)`; null for anything else, refused unread. */
 export function parseColour(input: string): Rgb | null {
 	const text = input.trim().toLowerCase();
 	if (text === "" || text.length > COLOUR_TEXT_MAX) return null;
+	if (new RegExp(OUTSIDE_COLOUR.source, "i").test(text)) return null;
 
 	const hex = HEX.exec(text);
 	const digits = hex?.[1] ?? hex?.[2];
