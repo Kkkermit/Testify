@@ -1,10 +1,9 @@
 import { type LucideIcon } from "lucide-react";
-import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { Card } from "@/components/primitives/Card";
 import { Tooltip } from "@/components/primitives/Tooltip";
 import { cn } from "@/lib/cn";
+import { formatNumber } from "@/lib/intl";
 
-/** Animated only when the value is a number — counting up to "connected" is meaningless. */
 export function StatTile({
 	label,
 	value,
@@ -27,7 +26,7 @@ export function StatTile({
 			</p>
 			{/* Two of these share a 320px row, which is WCAG 1.4.10's reflow width — the full size does not fit. */}
 			<p className="font-mono text-[1.25rem] leading-none font-medium tabular-nums sm:text-[1.625rem]">
-				{typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+				{typeof value === "number" ? formatNumber(value) : value}
 			</p>
 		</Card>
 	);

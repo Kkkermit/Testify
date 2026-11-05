@@ -73,7 +73,7 @@ export function AppShell(): React.JSX.Element {
 				<main
 					id="content"
 					key={location.pathname}
-					className="motion-fade mx-auto flex w-full max-w-[1100px] min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6"
+					className="mx-auto flex w-full max-w-[1100px] min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6"
 				>
 					<NoticeBanner />
 					<Outlet />

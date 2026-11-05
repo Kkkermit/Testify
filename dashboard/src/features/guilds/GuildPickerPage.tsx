@@ -5,7 +5,6 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { GUILD_REFUSED_NOTICE } from "@/app/RequireGuild";
 import { OWNER_ONLY_NOTICE } from "@/app/RequireOwner";
 import { FIELD, Warning } from "@/components/form";
-import { Reveal } from "@/components/motion";
 import { EmptyState, SectionHeading, PageHeader, Pager, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
@@ -75,7 +74,7 @@ export function GuildPickerPage(): React.JSX.Element {
 			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
 			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused")}</Warning>}
 
-			<label className="motion-reveal relative block">
+			<label className="relative block">
 				<span className="sr-only">{t("guilds.search")}</span>
 				<Search
 					size={18}
@@ -133,10 +132,10 @@ export function GuildPickerPage(): React.JSX.Element {
 							{/* A grid item defaults to `min-width: auto`, so the widest card sets the row and a phone gets a
 							    horizontal scrollbar. */}
 							<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
-								{shown.items.map((guild, index) => (
-									<Reveal as="li" key={guild.id} index={index}>
+								{shown.items.map((guild) => (
+									<li key={guild.id}>
 										<GuildCard guild={guild} group={group.key} clientId={bot.data?.id} />
-									</Reveal>
+									</li>
 								))}
 							</ul>
 

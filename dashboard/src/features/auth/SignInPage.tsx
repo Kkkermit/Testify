@@ -32,7 +32,7 @@ export function SignInPage(): React.JSX.Element {
 		<main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
 			<LanguageSelect className="self-end" />
 
-			<Card padding="none" className="motion-pop overflow-hidden">
+			<Card padding="none" className="overflow-hidden">
 				<BotBanner src={bot.bannerUrl} accent={bot.accentColour} className="h-24" />
 
 				{/* Positioned, or the banner — which is — paints over the avatar lifted into it. */}

@@ -46,7 +46,7 @@ export function LandingPage(): React.JSX.Element {
 				aria-labelledby="landing-title"
 				className="grid items-center gap-6 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-20 [&>*]:min-w-0"
 			>
-				<div className="motion-reveal flex flex-col gap-6">
+				<div className="flex flex-col gap-6">
 					<SectionHeading>{t("landing.eyebrow")}</SectionHeading>
 					<h1
 						id="landing-title"

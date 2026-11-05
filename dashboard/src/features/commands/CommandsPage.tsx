@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SearchField, Warning } from "@/components/form";
-import { Reveal } from "@/components/motion";
 import {
 	Card,
 	EmptyState,
@@ -147,8 +146,8 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 								{categoryLabel(name, t)}
 							</SectionHeading>
 							<ul className="flex flex-col gap-3">
-								{group.map((command, index) => (
-									<Reveal as="li" key={command.name} index={index}>
+								{group.map((command) => (
+									<li key={command.name}>
 										<CommandCard
 											command={command}
 											prefix={catalogue.data.prefix}
@@ -162,7 +161,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 														},
 													})}
 										/>
-									</Reveal>
+									</li>
 								))}
 							</ul>
 						</section>

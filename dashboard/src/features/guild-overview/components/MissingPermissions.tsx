@@ -10,7 +10,7 @@ export function MissingPermissions({ permissions }: { permissions: WatchedPermis
 	if (permissions.length === 0) return null;
 
 	return (
-		<Card className="border-warning/40 motion-reveal flex flex-col gap-2">
+		<Card className="border-warning/40 flex flex-col gap-2">
 			<h2 className="flex items-center gap-2 font-semibold">
 				<AlertTriangle className="text-warning" size={18} aria-hidden="true" />
 				{t("overview.missingTitle")}

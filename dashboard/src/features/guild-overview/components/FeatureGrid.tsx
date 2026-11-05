@@ -2,7 +2,6 @@ import { type GuildOverview } from "@testify/shared";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Reveal } from "@/components/motion";
 import { Badge, CARD_ROW, cardClass, HoverChevron } from "@/components/primitives";
 import { featureLook } from "@/config/features";
 import { describeDetail, featureLabel } from "@/features/guild-overview/featureStatus.labels";
@@ -26,7 +25,7 @@ export function FeatureGrid({
 	return (
 		// A grid item defaults to `min-width: auto`, so without this the widest tile sets the row's width.
 		<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
-			{features.map((feature, index) => {
+			{features.map((feature) => {
 				const { icon: Icon, tint, wash, path } = featureLook(feature.key);
 
 				const body: ReactNode = (
@@ -49,7 +48,7 @@ export function FeatureGrid({
 				const surface = cardClass("compact", CARD_ROW);
 
 				return (
-					<Reveal as="li" key={feature.key} index={index}>
+					<li key={feature.key}>
 						{path === undefined ? (
 							<div className={surface}>{body}</div>
 						) : (
@@ -58,7 +57,7 @@ export function FeatureGrid({
 								<HoverChevron />
 							</Link>
 						)}
-					</Reveal>
+					</li>
 				);
 			})}
 		</ul>

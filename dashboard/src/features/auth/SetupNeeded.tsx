@@ -9,7 +9,7 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 
 	return (
 		<main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 p-6">
-			<Card className="motion-pop flex flex-col gap-4">
+			<Card className="flex flex-col gap-4">
 				<div className="flex flex-col gap-1">
 					<SectionHeading>{t("auth.setup")}</SectionHeading>
 					<h1 className={PAGE_TITLE}>{t("auth.almostThere")}</h1>

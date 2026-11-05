@@ -146,22 +146,10 @@
 
 	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-	--animate-reveal: reveal 320ms var(--ease-out-soft) both;
 	--animate-fade: fade 200ms var(--ease-out-soft) both;
 	--animate-pop: pop 200ms var(--ease-out-soft) both;
 	--animate-sheen: sheen 1.6s linear infinite;
 	--animate-caret: caret 1.1s steps(1) infinite;
-
-	@keyframes reveal {
-		from {
-			opacity: 0;
-			transform: translate3d(0, 6px, 0);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
 
 	@keyframes fade {
 		from {
@@ -410,10 +398,6 @@
 	&::-webkit-scrollbar {
 		display: none;
 	}
-}
-
-@utility motion-reveal {
-	animation: var(--animate-reveal);
 }
 
 @utility motion-fade {
