@@ -4,5 +4,6 @@ export * from "./helpPages.util";
 export * from "./info.constants";
 export * from "./insights.util";
 export * from "./memberCount.util";
+export * from "./profileActions.util";
 export * from "./statsEmbed.util";
 export * from "./userCards.util";

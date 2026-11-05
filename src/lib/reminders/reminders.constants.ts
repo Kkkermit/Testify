@@ -1,12 +1,11 @@
 import { DAY_MS, MINUTE_MS } from "@config/constants";
+import { REMINDER_RULES } from "@testify/shared";
 
 export const REMINDER_ID = "reminder";
 
 export const REMINDER_LIMITS = {
-	minMs: MINUTE_MS,
-	maxMs: 365 * DAY_MS,
+	...REMINDER_RULES,
 	maxActive: 25,
-	maxText: 500,
 	/** How long a delivery may hold a reminder before another run may try it again. */
 	leaseMs: 2 * MINUTE_MS,
 	/** A reminder this overdue that still cannot be sent is dropped, so one broken route cannot retry for ever. */

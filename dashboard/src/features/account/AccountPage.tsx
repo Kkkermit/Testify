@@ -1,4 +1,4 @@
-import { AlarmClock, Database, History, Laptop, Palette } from "lucide-react";
+import { AlarmClock, Database, History, Laptop, Palette, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { Avatar, PageHeader, type TabDefinition, TabBar, TabContent } from "@/components/primitives";
@@ -6,6 +6,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { type AccountTab, accountTabFrom } from "@/features/account/account.utils";
 import { DataTab } from "@/features/account/components/DataTab";
 import { HistoryTab } from "@/features/account/components/HistoryTab";
+import { ProfileTab } from "@/features/account/components/ProfileTab";
 import { RemindersTab } from "@/features/account/components/RemindersTab";
 import { SessionsTab } from "@/features/account/components/SessionsTab";
 import { useMe } from "@/features/auth/useMe";
@@ -13,6 +14,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
 const TABS: readonly TabDefinition<AccountTab>[] = [
+	{ key: "profile", label: "account.tabProfile", icon: UserRound },
 	{ key: "history", label: "account.tabHistory", icon: History },
 	{ key: "reminders", label: "account.tabReminders", icon: AlarmClock },
 	{ key: "sessions", label: "account.tabSessions", icon: Laptop },
@@ -20,6 +22,7 @@ const TABS: readonly TabDefinition<AccountTab>[] = [
 ];
 
 const PANELS: Record<AccountTab, () => React.JSX.Element> = {
+	profile: ProfileTab,
 	history: HistoryTab,
 	reminders: RemindersTab,
 	sessions: SessionsTab,

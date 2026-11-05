@@ -79,6 +79,7 @@ import {
 } from "@/test/fixtures/server";
 import {
 	accountHistory,
+	accountProfile,
 	accountReminders,
 	accountSessions,
 	aGuild,
@@ -116,6 +117,7 @@ export const handlers = [
 	http.get("/api/account/history", () => HttpResponse.json(accountHistory)),
 	http.get("/api/account/reminders", () => HttpResponse.json(accountReminders)),
 	http.get("/api/account/sessions", () => HttpResponse.json(accountSessions)),
+	http.get("/api/account/profile", () => HttpResponse.json({ profile: accountProfile })),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(setupDone)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),

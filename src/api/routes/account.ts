@@ -1,27 +1,36 @@
 import { type Context, Hono } from "hono";
+import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notFound, unauthorised } from "@api/errors";
+import { ApiProblem, badRequest, forbidden, notFound, unauthorised } from "@api/errors";
 import { requireAuth } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
+import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { auditServersOf, auditsBy } from "@database/repositories/dashboardAuditRepository";
 import { endOtherSessions, endSessionByHandle, sessionsFor } from "@database/repositories/dashboardSessionRepository";
+import { deleteProfile, getProfile } from "@database/repositories/profileRepository";
 import {
 	cancelReminder,
+	editReminder,
 	findReminder,
 	listReminders,
 	setReminderDelivery,
 	type StoredReminder,
 } from "@database/repositories/reminderRepository";
+import { type ProfileProblem, profileProblem, saveOwnProfile, toAccountProfile } from "@lib/info";
 import { canPingHere } from "@lib/reminders";
 import {
 	ACCOUNT_LIMITS,
 	type AccountHistory,
 	accountHistoryQuery,
 	type AccountReminder,
+	type AccountProfile,
 	type AccountSession,
+	profileBody,
+	reminderEditBody,
 	reminderParams,
 	reminderRouteSchema,
+	reminderTimeProblem,
 	sessionParams,
 } from "@testify/shared";
 
@@ -37,9 +46,23 @@ function sessionOf(context: Context<ApiBindings>): DashboardSession {
 	return session;
 }
 
+/** What Discord refuses a blacklisted account, writing a profile or a reminder, the dashboard refuses too. */
+const notBlacklisted = createMiddleware<ApiBindings>(async (context, next) => {
+	if ((await findBlacklistEntry(sessionOf(context).userId)) !== null) {
+		throw forbidden("blacklisted", "You are blacklisted from using this bot.");
+	}
+
+	await next();
+});
+
 function guildNameOf(context: Context<ApiBindings>, guildId: string | null): string | null {
 	return guildId === null ? null : (context.get("client").guilds.cache.get(guildId)?.name ?? null);
 }
+
+const PROFILE_REFUSALS: Record<ProfileProblem, string> = {
+	profanity: "Take out the words that are not allowed.",
+	birthday: "Pick a real date, no later than today.",
+};
 
 const reminderGone = () => notFound("reminder_not_found", "That reminder has already gone off or been cancelled.");
 
@@ -90,7 +113,7 @@ account.get("/reminders", async (context) => {
 	return context.json(reminders.map((reminder) => toReminder(context, reminder)));
 });
 
-account.put("/reminders/:reminderId/deliver", async (context) => {
+account.put("/reminders/:reminderId/deliver", notBlacklisted, async (context) => {
 	const { userId } = sessionOf(context);
 	const { reminderId } = parseParams(context, reminderParams);
 	const { deliver } = await parseBody(context, reminderRouteSchema);
@@ -107,9 +130,52 @@ account.put("/reminders/:reminderId/deliver", async (context) => {
 	return context.json(toReminder(context, changed));
 });
 
+/** Not while it is being delivered, so an edit can never be sent half-applied or lost under the send. */
+account.patch("/reminders/:reminderId", notBlacklisted, async (context) => {
+	const { userId } = sessionOf(context);
+	const { reminderId } = parseParams(context, reminderParams);
+	const { text, dueAt } = await parseBody(context, reminderEditBody);
+
+	const when = new Date(dueAt);
+	const problem = reminderTimeProblem(when);
+	if (problem !== null) throw new ApiProblem(400, problem, "Pick a time from a minute to a year from now.");
+
+	const changed = await editReminder(userId, reminderId, { text, dueAt: when });
+	if (changed === null) throw reminderGone();
+
+	return context.json(toReminder(context, changed));
+});
+
 account.delete("/reminders/:reminderId", async (context) => {
 	const { reminderId } = parseParams(context, reminderParams);
 	if (!(await cancelReminder(sessionOf(context).userId, reminderId))) throw reminderGone();
+
+	return context.body(null, 204);
+});
+
+account.get("/profile", async (context) => {
+	const profile = await getProfile(sessionOf(context).userId);
+	const body: { profile: AccountProfile | null } = { profile: profile === null ? null : toAccountProfile(profile) };
+
+	return context.json(body);
+});
+
+/** The same rules `/profile set` keeps: its limits, its word filter and a real birthday. */
+account.put("/profile", notBlacklisted, async (context) => {
+	const { userId } = sessionOf(context);
+	const fields = await parseBody(context, profileBody);
+
+	const problem = profileProblem(fields);
+	if (problem !== null) throw new ApiProblem(400, problem, PROFILE_REFUSALS[problem]);
+
+	const body: { profile: AccountProfile } = { profile: toAccountProfile(await saveOwnProfile(userId, fields)) };
+	return context.json(body);
+});
+
+account.delete("/profile", async (context) => {
+	if (!(await deleteProfile(sessionOf(context).userId))) {
+		throw notFound("profile_not_found", "You do not have a profile to delete.");
+	}
 
 	return context.body(null, 204);
 });

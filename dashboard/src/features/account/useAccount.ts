@@ -8,9 +8,12 @@ import {
 } from "@tanstack/react-query";
 import {
 	type AccountHistory,
+	type AccountProfile,
 	type AccountReminder,
 	type AccountSession,
 	type EraseAccountRequest,
+	type ProfileBody,
+	type ReminderEdit,
 	type ReminderRoute,
 } from "@testify/shared";
 import { api } from "@/lib/api";
@@ -78,5 +81,48 @@ export function useEndOtherSessions(): UseMutationResult<{ ended: number }, Erro
 	return useMutation({
 		mutationFn: () => api.post<{ ended: number }>("/account/sessions/others/end", {}),
 		onSettled: () => client.invalidateQueries({ queryKey: keys.account.sessions() }),
+	});
+}
+
+export function useEditReminder(): UseMutationResult<AccountReminder, Error, { id: string } & ReminderEdit> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, ...edit }) => api.patch<AccountReminder>(`/account/reminders/${id}`, edit),
+		onSuccess: (changed) => {
+			client.setQueryData<AccountReminder[]>(keys.account.reminders(), (list) =>
+				list
+					?.map((row) => (row.id === changed.id ? changed : row))
+					.sort((a, b) => Date.parse(a.dueAt) - Date.parse(b.dueAt)),
+			);
+		},
+	});
+}
+
+interface ProfileAnswer {
+	profile: AccountProfile | null;
+}
+
+export function useAccountProfile(): UseQueryResult<ProfileAnswer> {
+	return useQuery({ queryKey: keys.account.profile(), queryFn: () => api.get<ProfileAnswer>("/account/profile") });
+}
+
+export function useSaveProfile(): UseMutationResult<ProfileAnswer, Error, ProfileBody> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: (body) => api.put<ProfileAnswer>("/account/profile", body),
+		onSuccess: (answer) => {
+			client.setQueryData(keys.account.profile(), answer);
+		},
+	});
+}
+
+export function useDeleteProfile(): UseMutationResult<void, Error, void> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: () => api.delete<void>("/account/profile"),
+		onSettled: () => client.invalidateQueries({ queryKey: keys.account.profile() }),
 	});
 }

@@ -2112,7 +2112,7 @@ four tabs, three shared components and two testable modules.
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
-| `/account`                        | The reader's own: their changes, reminders and sign-ins, and Delete my data                 |
+| `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
@@ -2915,29 +2915,48 @@ a phone has no sidebar on screen, so a screen opened from another one names the 
 ### Your account is the reader's own, and nothing on it is about anybody else
 
 The reader's picture opens `/account`, in the sidebar's foot and in the phone's header; there is no footer link
-beside Appearance any more. It has four tabs — **History**, **Reminders**, **Sign-ins** and **Your data** — over
-`/api/account`, which sits behind `requireAuth` and reads whose data from the session alone. Five things about it are
-load-bearing:
+beside Appearance any more. It has five tabs — **Profile**, **History**, **Reminders**, **Sign-ins** and **Your data**
+— over `/api/account`, which sits behind `requireAuth` and reads whose data from the session alone. The first two
+tabs and Reminders are the command data that is the person's own rather than a server's: `/profile` and `/remind`.
+Seven things about it are load-bearing:
 
+- **The profile is written by the command's rules, in one place.** `PROFILE_LIMITS`, `profileBody` and
+  `birthdayFrom` live in `@testify/shared`, and `profileProblem` and `saveOwnProfile` in `src/lib/info/`, so
+  `/profile set` and `PUT /account/profile` share the lengths, the word filter and the birthday check. A birthday is
+  a real day from 1900 to today: `new Date("2026-02-30")` rolls on to 2 March, which is how the command used to store
+  a day nobody chose. The year shows to anybody who runs `/profile view`, and the tab says so.
 - **History is the reader's own change records, in every server** (`auditsBy`, on an `{ actorId, at }` index), the
   dashboard's and those made with the bot's commands, for the 90 days the records are kept. Each row is the summary,
   the server and the time, never the before and after; a server the bot has left reads as one, and a row links to
   that server's Changes page only while `comparable` still offers it, so a manager who lost Manage Server is not
   sent into a refusal. Delete my data anonymises the records, so the history empties with it.
-- **Reminders are the same records `/remind list` shows**, cancelled and switched through the repository's
-  `userId`-filtered lookups, so an id from anybody else's list finds nothing. The channel a reminder pings in is
-  never named, because the reader may no longer be able to see it; only the server is. A reminder set in a direct
-  message has no channel, so it is offered no switch and the API refuses one (`canPingHere`). Cancelling goes
-  through `UndoProvider` like every other delete.
+- **Reminders are the same records `/remind list` shows**, cancelled, switched and edited through the repository's
+  `userId`-filtered lookups, so an id from anybody else's list finds nothing. An edit takes words and a time within
+  `REMINDER_RULES` (shared with `/remind me`), and `editReminder` refuses a reminder whose delivery holds its lease,
+  so an edit is never lost under a send. The channel a reminder pings in is never named, because the reader may no
+  longer be able to see it; only the server is. A reminder set in a direct message has no channel, so it is offered
+  no switch and the API refuses one (`canPingHere`). Cancelling goes through `UndoProvider`, and so does deleting
+  the profile.
 - **A sign-in is named by a digest of its cookie, never the cookie** (`sessionHandleOf`, 24 hex characters of a
   SHA-256), because the list goes to a browser and the cookie is the session. Ending one finds it among the reader's
   own sessions by that digest and refuses the browser asking, which signs out from the sidebar instead; **Sign out
   everywhere else** keeps the one asking. Nothing about a device is stored, so a sign-in is told apart only by its
   times, and the tab says so.
+- **A blacklisted account may read and delete its own here, and write nothing** (`notBlacklisted` on the profile,
+  reminder edit and delivery routes), because Discord refuses it `/profile set` and `/remind`. Deleting stays open,
+  as Delete my data does.
 - **Your data is the old page**, unchanged: what goes, what stays, and the typed confirmation. The privacy notice
   still calls it Your data, which is the tab's name.
 - **Nothing here writes an audit record.** These are the reader's own things, and the server's Changes page is no
   place for somebody's reminders or browsers.
+
+`tests/api/accountPentest.test.ts` attacks every account route through the real app: forged and stale cookies,
+missing and planted CSRF secrets, another person's id in the query and the body, MongoDB operators and arrays in
+every field, malformed path ids including the cookie itself, `__proto__`, a body ten thousand deep or past the size
+limit, control and direction characters in a public profile, a blacklisted account's writes, the wrong method, and
+any answer carrying a cookie, a secret or a cacheable header. Taking away the blacklist guard, the id shape, the
+text cleaning or the session's own id each turns it red; `requireAuth` and the handlers' own `sessionOf` are two
+layers, and only removing both does.
 
 ### Getting every command onto the dashboard
 

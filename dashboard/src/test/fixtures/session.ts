@@ -1,5 +1,6 @@
 import {
 	type AccountHistory,
+	type AccountProfile,
 	type AccountReminder,
 	type AccountSession,
 	type BotIdentity,
@@ -126,3 +127,12 @@ export const accountSessions: AccountSession[] = [
 		current: true,
 	},
 ];
+
+export const accountProfile: AccountProfile = {
+	about: "I run the music nights.",
+	favouriteSong: "Clair de Lune",
+	favouriteGame: null,
+	hobbies: "Climbing",
+	birthday: "1999-04-02",
+	updatedAt: "2026-11-01T10:00:00.000Z",
+};

@@ -62,6 +62,26 @@ export async function setReminderDelivery(
 	return row === null ? null : toReminder(row);
 }
 
+/** Changes the words and the time of one of this person's reminders, never one already being delivered. */
+export async function editReminder(
+	userId: string,
+	reminderId: string,
+	change: { text: string; dueAt: Date },
+	now: Date = new Date(),
+): Promise<StoredReminder | null> {
+	const filter = owned(userId, reminderId);
+	if (filter === null) return null;
+
+	const row = await Reminder.findOneAndUpdate(
+		{ ...filter, $or: [{ claimedUntil: null }, { claimedUntil: { $lte: now } }] },
+		{ $set: { text: change.text, dueAt: change.dueAt } },
+		{ new: true },
+	)
+		.lean<Lean>()
+		.exec();
+	return row === null ? null : toReminder(row);
+}
+
 export async function cancelReminder(userId: string, reminderId: string): Promise<boolean> {
 	const filter = owned(userId, reminderId);
 	if (filter === null) return false;

@@ -779,7 +779,7 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
-| `/account`                        | The reader's own: their changes, reminders and sign-ins, and Delete my data                 |
+| `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
@@ -1275,7 +1275,7 @@ a setting.
 **Who:** anybody signed in, manager or not. The one journey that needs no server.
 
 1. Their picture, at the foot of the sidebar or in the phone's header, opens **Your account**; the **Your data** tab
-   is the last of four (`/account?tab=data`).
+   is the last of five (`/account?tab=data`).
 2. The page lists what goes and what stays before it offers anything to press.
 3. **Delete my data** opens a warning that it is immediate and cannot be undone, and a field for their username or
    Discord ID. Delete everything stays disabled until it matches.

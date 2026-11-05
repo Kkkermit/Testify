@@ -18,6 +18,7 @@ export const keys = {
 		history: (page: number, server: string) => ["account", "history", page, server] as const,
 		reminders: () => ["account", "reminders"] as const,
 		sessions: () => ["account", "sessions"] as const,
+		profile: () => ["account", "profile"] as const,
 	},
 	support: () => ["support"] as const,
 	supportArticle: (id: string) => ["support", "article", id] as const,

@@ -6,15 +6,20 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { auditServersOf, auditsBy } from "@database/repositories/dashboardAuditRepository";
 import { endOtherSessions, endSessionByHandle, sessionsFor } from "@database/repositories/dashboardSessionRepository";
+import { deleteProfile, getProfile, saveProfile } from "@database/repositories/profileRepository";
 import {
 	cancelReminder,
+	editReminder,
 	findReminder,
 	listReminders,
 	setReminderDelivery,
 	type StoredReminder,
 } from "@database/repositories/reminderRepository";
-import { type AccountHistory, type AccountReminder, type AccountSession } from "@testify/shared";
+import { type AccountHistory, type AccountProfile, type AccountReminder, type AccountSession } from "@testify/shared";
 
+jest.mock("@database/repositories/blacklistRepository", () => ({
+	findBlacklistEntry: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({
 	auditsBy: jest.fn(),
 	auditServersOf: jest.fn(),
@@ -24,8 +29,14 @@ jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	endSessionByHandle: jest.fn(),
 	sessionsFor: jest.fn(),
 }));
+jest.mock("@database/repositories/profileRepository", () => ({
+	deleteProfile: jest.fn(),
+	getProfile: jest.fn(),
+	saveProfile: jest.fn(),
+}));
 jest.mock("@database/repositories/reminderRepository", () => ({
 	cancelReminder: jest.fn(),
+	editReminder: jest.fn(),
 	findReminder: jest.fn(),
 	listReminders: jest.fn(),
 	setReminderDelivery: jest.fn(),
@@ -169,5 +180,58 @@ describe("the account routes", () => {
 		jest.mocked(endOtherSessions).mockResolvedValue(2);
 		expect(await (await send("POST", "/account/sessions/others/end")).json()).toEqual({ ended: 2 });
 		expect(endOtherSessions).toHaveBeenCalledWith(USER, COOKIE);
+	});
+
+	/** The command's own rules, so a word `/profile set` refuses cannot be saved from the browser instead. */
+	it("saves the reader's profile by the command's rules and reads it back in the shape the page uses", async () => {
+		const stored = {
+			userId: USER,
+			about: "Hi",
+			favouriteSong: "Song",
+			favouriteGame: null,
+			hobbies: null,
+			birthday: new Date("1999-04-02T00:00:00.000Z"),
+			createdAt: new Date("2026-11-01T10:00:00.000Z"),
+			updatedAt: new Date("2026-11-05T10:00:00.000Z"),
+		};
+		jest.mocked(saveProfile).mockResolvedValue(stored);
+		const body = { about: "Hi", favouriteSong: "Song", favouriteGame: "", hobbies: null, birthday: "1999-04-02" };
+
+		const saved = await send("PUT", "/account/profile", { ...body, userId: "100000000000000002" });
+		expect(((await saved.json()) as { profile: AccountProfile }).profile).toEqual({
+			about: "Hi",
+			favouriteSong: "Song",
+			favouriteGame: null,
+			hobbies: null,
+			birthday: "1999-04-02",
+			updatedAt: "2026-11-05T10:00:00.000Z",
+		});
+		expect(saveProfile).toHaveBeenCalledWith(USER, expect.objectContaining({ favouriteGame: null }));
+
+		const refused = await send("PUT", "/account/profile", { ...body, birthday: "2026-02-30" });
+		expect(refused.status).toBe(400);
+		expect(((await refused.json()) as { error: { code: string } }).error.code).toBe("birthday");
+		expect(saveProfile).toHaveBeenCalledTimes(1);
+
+		jest.mocked(getProfile).mockResolvedValue(null);
+		expect(await (await send("GET", "/account/profile")).json()).toEqual({ profile: null });
+		expect(getProfile).toHaveBeenCalledWith(USER);
+
+		jest.mocked(deleteProfile).mockResolvedValueOnce(false);
+		expect((await send("DELETE", "/account/profile")).status).toBe(404);
+		expect(deleteProfile).toHaveBeenCalledWith(USER);
+	});
+
+	it("moves a reminder within a minute and a year, and refuses a time outside that", async () => {
+		const soon = new Date(Date.now() + 10_000).toISOString();
+		const later = new Date(Date.now() + 86_400_000).toISOString();
+
+		const early = await send("PATCH", `/account/reminders/${REMINDER_ID}`, { text: "Hi", dueAt: soon });
+		expect(((await early.json()) as { error: { code: string } }).error.code).toBe("tooSoon");
+		expect(editReminder).not.toHaveBeenCalled();
+
+		jest.mocked(editReminder).mockResolvedValueOnce(null);
+		expect((await send("PATCH", `/account/reminders/${REMINDER_ID}`, { text: "Hi", dueAt: later })).status).toBe(404);
+		expect(editReminder).toHaveBeenCalledWith(USER, REMINDER_ID, { text: "Hi", dueAt: new Date(later) });
 	});
 });
