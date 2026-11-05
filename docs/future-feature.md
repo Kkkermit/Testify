@@ -11,7 +11,7 @@ Nothing here is promised or scheduled. Each entry says what exists already to bu
 to respect, so whoever picks one up starts from the code rather than from a blank page. When an entry ships, delete
 it from this file in the same pull request.
 
-Checked against the code and the npm registry on **25 October 2026**.
+Checked against the code and the npm registry on **25 October 2026**; the member directory added on **5 November 2026**.
 
 ---
 
@@ -24,9 +24,72 @@ have to respect.
 
 ## 🖥️ Dashboard screens still missing
 
-Nothing is waiting here. `features/commands/commands.utils.ts` is the list that decides which commands have a
-screen, and the coverage tile on `/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages
-from a browser tab is a worse tool than doing it in the channel, where you can see them.
+`features/commands/commands.utils.ts` is the list that decides which commands have a screen, and the coverage tile on
+`/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool
+than doing it in the channel, where you can see them.
+
+### A member directory, and acting on members from it
+
+**What it would do.** `…/members` today shows only the money and levels boards. It would become a list of everybody
+in the server instead, with the boards as a tab beside it:
+
+- **Find anybody.** Search by name, nickname or ID, and filter by role, by when they joined (the last day, week or
+  month), by person or bot, and by who is timed out. A reader with Moderate Members could also filter by who has
+  warnings.
+- **See who they are at a glance.** Each row shows the avatar, the name, the roles, when they joined, and whether
+  they are timed out.
+- **Act from the row.** Each row opens the member's own page, and also carries the actions the reader is allowed
+  to take there: give a role, take a role away, time out, warn, kick, ban.
+- **Act on several at once.** Tick several members and give or take a role, time them out, kick them or ban them in
+  one go, after a confirmation that names how many and who.
+
+**What it builds on.**
+
+- `GatewayIntentBits.GuildMembers` is already on. `guild.members.search` already backs `GET /members/search`, which
+  the warnings screen uses for its ten-result picker.
+- `…/members/:userId` already does every action, each behind the permission its command asks for (`requirePermission`):
+  - roles, through `grantableRoles` and `PUT /members/:userId/roles`;
+  - nickname, timeout, kick, ban, softban and warnings.
+
+  A row's quick actions would call the same routes.
+
+- `kickMember`, `banUser`, `timeoutMember` and `issueWarning` each record a numbered case through `recordCase`. An
+  action taken from the directory is numbered and logged exactly as one taken from `/kick` is.
+- `moderationProblem` on `MemberDetail` already says why an action cannot be taken: the member outranks the reader,
+  or the bot.
+
+**What it would have to respect.**
+
+- **No route moves.** The directory becomes what `…/members` shows first, and the boards a tab on the same page, so
+  `?board=` links keep working.
+- **Pages, never one big list.** `guild.members.fetch()` with no arguments pulls every member over the gateway. That
+  is fine for a few hundred and a long wait, and a rate limit, on a server of 100,000.
+  - Read a page at a time with `guild.members.list({ limit, after })`.
+  - Search with `guild.members.search`, which matches the start of a username or nickname and returns at most 1,000.
+  - Say when a list was cut short, as the bans screen does with `BAN_LIMITS.maxRead`.
+  - A role filter read from the cache (`role.members`) only knows the members the bot has seen. Either fetch first or
+    say the list may be incomplete, rather than showing part of it as the whole.
+- **Every action asks what its command asks, and the role order too.**
+  - An action the reader lacks the permission for is not offered.
+  - A member the reader cannot act on shows the reason in place of the button.
+  - Roles offered are only those in `grantableRoles`: below the reader's own highest role and below the bot's, and
+    never managed.
+  - Warning counts on rows, and the warnings filter, appear only with Moderate Members (`holdsPermission`), as on the
+    member page.
+- **Acting on several members is the new risk:** one request can act on fifty people.
+  - Cap a batch at about 25 members per request. Act on them one at a time, within Discord's rate limits.
+  - Answer with what happened to each one: done, or skipped and why. Never all or nothing, because a kick that has
+    already happened cannot be rolled back.
+  - A bulk kick or ban needs a stronger confirmation than one member does: type the number of members.
+  - Each member still gets a case of their own. The audit record lists everybody it touched.
+  - Never act on the reader, the server's owner or the bot, even if they are ticked.
+- **Nothing new is stored.** The list is read live from Discord, and the warning counts come from records the bot
+  already keeps, so the privacy notice does not change.
+- **Test it like the other moderation screens.** `accessWalk.test.ts` and `ASKS_MORE` grow with every new route.
+  Each bulk action needs:
+  - a test that it refuses a member above the reader;
+  - a test that it skips the reader and the server's owner;
+  - a test that one member failing does not stop the rest.
 
 ---
 
