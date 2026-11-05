@@ -94,7 +94,7 @@ Inside a server the shell is:
 
 - **Overview** is the stat tiles, the setup checklist, the feature grid, missing permissions and recent changes. Once
   the Inbox exists it gains one line linking to it whenever something needs you.
-- **Inbox**, **This week** and **Roles** arrive in phase 6, at the top beside Overview, because each covers the whole
+- **Inbox**, **This week** and **Roles** arrived in phase 6, at the top beside Overview, because each covers the whole
   server rather than one feature.
 - **Channels** lists the channels the bot works in, each opening its own page, then what works across the whole
   server.
@@ -154,10 +154,10 @@ site keep their routes and are restyled in phase 10.
 
 - `/guilds/:id/channels` (built)
 - `/guilds/:id/channels/:channelId` (built)
-- `/guilds/:id/inbox`
-- `/guilds/:id/week`
-- `/guilds/:id/roles`
-- `/guilds/:id/roles/:roleId`
+- `/guilds/:id/inbox` (built)
+- `/guilds/:id/week` (built)
+- `/guilds/:id/roles` (built)
+- `/guilds/:id/roles/:roleId` (built)
 - `/servers`
 
 A channel is addressed by id, never by name. Names change and can repeat, and the id is a snowflake `parseParams`
@@ -223,7 +223,7 @@ the branch can be reviewed or paused at any point.
 | 3   | **The shell.** The sidebar with Overview, Channels, Members, Settings and a section for each kind of feature; a Channels page and a page per channel listing what works where, each linking to its full page; quick search finds channels. Inbox, This week and Roles join the sidebar with their pages in phase 6. `navigation.test.ts` pins every server path.       | Done   |
 | 4   | **Channel pages.** Each feature working in a channel gets a block drawn with `DiscordPreview`, and the welcome, goodbye and birthday messages are edited in place. Level-ups have no template, so their block describes them. The drag-and-drop overview built here was taken out after review, with the sidebar's channel list: see Decisions.                        | Done   |
 | 5   | **Every feature page restyled**, one per commit, in the order of the table above, each keeping its route and tests: the sentence summary at the top, settings as rows (`SettingRows`, which turns every `Field` and `Toggle` inside it into a row), and the preview beside anything that posts. The table above marks each page.                                       | Done   |
-| 6   | **Inbox, This week, Roles** (ideas 1–3), each with its read route and its page, at the top of the sidebar beside Overview.                                                                                                                                                                                                                                             | To do  |
+| 6   | **Inbox, This week, Roles** (ideas 1–3), each with its read route and its page, at the top of the sidebar beside Overview.                                                                                                                                                                                                                                             | Done   |
 | 7   | **Send me a test** (idea 4).                                                                                                                                                                                                                                                                                                                                           | To do  |
 | 8   | **History and restore** on the Changes page (idea 5).                                                                                                                                                                                                                                                                                                                  | To do  |
 | 9   | **Several servers side by side** (idea 6), read-only.                                                                                                                                                                                                                                                                                                                  | To do  |
