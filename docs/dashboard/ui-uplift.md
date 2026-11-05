@@ -141,7 +141,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/giveaways`                                | Entertainment | —                   | Done                      |
 | `…/members`, `…/members/:userId`             | Members       | —                   | Done                      |
 | `…/settings`                                 | Settings      | —                   | Done                      |
-| `…/commands`                                 | Commands      | —                   | To do                     |
+| `…/commands`                                 | Commands      | —                   | Done                      |
 
 A list page — bans, cases, warnings, changes, members, commands — keeps its list and gains only the summary, since
 its rows are records rather than settings.

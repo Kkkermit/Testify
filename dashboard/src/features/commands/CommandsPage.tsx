@@ -15,6 +15,7 @@ import {
 	SELECTED,
 	Skeleton,
 	StatTile,
+	Summary,
 	UNSELECTED,
 } from "@/components/primitives";
 import { categoryLabel } from "@/features/commands/categories.labels";
@@ -78,16 +79,16 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 		// Its own rhythm rather than the shell's: mounted in an owner console tab there is no gap-6 column above it.
 		<div className="flex flex-col gap-6">
 			{global ? (
-				<p className="text-muted-foreground text-sm">
-					{subtitleFor(global, state !== undefined, t)} {switchedOff(state, global, t)}
-				</p>
+				<p className="text-muted-foreground text-sm">{subtitleFor(global, state !== undefined, t)}</p>
 			) : (
 				<PageHeader
 					server={overview.data}
 					title={t("commands.title")}
-					subtitle={`${subtitleFor(global, state !== undefined, t)} ${switchedOff(state, global, t)}`}
+					subtitle={subtitleFor(global, state !== undefined, t)}
 				/>
 			)}
+
+			{state !== undefined && <Summary>{switchedOff(state, global, t)}</Summary>}
 
 			<section aria-label={t("commands.surface")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 				<StatTile label={t("commands.commands")} value={total} />
@@ -173,8 +174,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 }
 
 /** Says what the switches do wherever there are any, because a row of them with no explanation is a guess. */
-function switchedOff(state: { disabled: string[] } | undefined, global: boolean, t: TFunction): string {
-	if (state === undefined) return "";
+function switchedOff(state: { disabled: string[] }, global: boolean, t: TFunction): string {
 	if (state.disabled.length === 0) return t(global ? "commands.availableEverywhere" : "commands.availableHere");
 
 	return t(global ? "commands.switchedOffEverywhere" : "commands.switchedOffHere", {

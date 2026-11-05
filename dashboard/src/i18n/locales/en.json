@@ -975,6 +975,12 @@
 		"ownerRights": "When {{bot}} has Manage Roles, each channel’s owner can rename it or set its limit."
 	},
 	"commands": {
+		"availableEverywhere": "Every command is switched on everywhere.",
+		"availableHere": "Every command is switched on in this server.",
+		"switchedOffEverywhere_one": "{{count, number}} command is switched off everywhere, so nobody can run it.",
+		"switchedOffEverywhere_other": "{{count, number}} commands are switched off everywhere, so nobody can run them.",
+		"switchedOffHere_one": "{{count, number}} command is switched off in this server, so nobody here can run it.",
+		"switchedOffHere_other": "{{count, number}} commands are switched off in this server, so nobody here can run them.",
 		"title": "Commands",
 		"surface": "Command surface",
 		"commands": "Commands",
@@ -989,10 +995,6 @@
 		"noMatchTitle": "No command matches that",
 		"noMatchBody": "Try part of a name, an alias like ban, or clear the category filter.",
 		"switchRefused": "That switch could not be saved.",
-		"availableEverywhere": "Every one is available everywhere.",
-		"availableHere": "Every one is available here.",
-		"switchedOffEverywhere": "{{count}} switched off everywhere.",
-		"switchedOffHere": "{{count}} switched off here.",
 		"subtitleGlobal": "Everything {{bot}} can do. A command switched off here is off in every server, for everybody.",
 		"subtitleGuild": "Everything {{bot}} can do. Switch one off and nobody in this server can run it, either way.",
 		"subtitlePlain": "Everything {{bot}} can do, on both the slash and prefix surfaces.",

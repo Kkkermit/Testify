@@ -975,6 +975,12 @@
 		"ownerRights": "Hat {{bot}} „Rollen verwalten“, kann der Besitzer jedes Kanals ihn umbenennen oder ein Limit setzen."
 	},
 	"commands": {
+		"availableEverywhere": "Jeder Befehl ist überall eingeschaltet.",
+		"availableHere": "Jeder Befehl ist auf diesem Server eingeschaltet.",
+		"switchedOffEverywhere_one": "{{count, number}} Befehl ist überall abgeschaltet, also kann ihn niemand ausführen.",
+		"switchedOffEverywhere_other": "{{count, number}} Befehle sind überall abgeschaltet, also kann sie niemand ausführen.",
+		"switchedOffHere_one": "{{count, number}} Befehl ist auf diesem Server abgeschaltet, also kann ihn hier niemand ausführen.",
+		"switchedOffHere_other": "{{count, number}} Befehle sind auf diesem Server abgeschaltet, also kann sie hier niemand ausführen.",
 		"title": "Befehle",
 		"surface": "Befehlsoberfläche",
 		"commands": "Befehle",
@@ -989,10 +995,6 @@
 		"noMatchTitle": "Kein Befehl passt dazu",
 		"noMatchBody": "Versuche einen Namensteil, einen Alias wie ban, oder entferne den Kategoriefilter.",
 		"switchRefused": "Dieser Schalter konnte nicht gespeichert werden.",
-		"availableEverywhere": "Alle sind überall verfügbar.",
-		"availableHere": "Alle sind hier verfügbar.",
-		"switchedOffEverywhere": "{{count}} überall abgeschaltet.",
-		"switchedOffHere": "{{count}} hier abgeschaltet.",
 		"subtitleGlobal": "Alles, was {{bot}} kann. Ein hier abgeschalteter Befehl ist auf jedem Server für alle aus.",
 		"subtitleGuild": "Alles, was {{bot}} kann. Schalte einen ab, und niemand auf diesem Server kann ihn ausführen — auf keinem Weg.",
 		"subtitlePlain": "Alles, was {{bot}} kann — als Slash-Befehl und mit Präfix.",
