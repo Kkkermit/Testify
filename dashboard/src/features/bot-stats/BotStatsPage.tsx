@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import { ChannelPicker, RowActions, SavingIndicator, savingStateOf, SettingRows, Warning } from "@/components/form";
+import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { placementOf, postActionOf } from "@/features/bot-stats/botStats.utils";
 import { usePostBotStats, useBotStats, useRemoveBotStats } from "@/features/bot-stats/useBotStats";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -46,44 +46,15 @@ export function BotStatsPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, post.isSuccess || remove.isSuccess)} />}
 			/>
 
-			<Card className="flex flex-wrap items-center justify-between gap-4">
-				<div className="flex flex-col gap-1">
-					<div className="flex flex-wrap items-center gap-3">
-						<h2 className={CARD_HEADING}>{t("botStats.where")}</h2>
-						{placement.kind === "none" ? (
-							<Badge>{t("botStats.notPosted")}</Badge>
-						) : (
-							<Badge tone="success">{t("botStats.posted")}</Badge>
-						)}
-					</div>
-					<p className="text-muted-foreground text-sm">
-						{placement.kind === "none"
-							? t("botStats.noneBody")
-							: placement.kind === "gone"
-								? t("botStats.goneBody")
-								: t("botStats.postedBody", { channel: channelLabel(channels.data ?? [], settings.channelId, t) })}
-					</p>
-				</div>
+			<Summary>
+				{placement.kind === "none"
+					? t("botStats.noneBody")
+					: placement.kind === "gone"
+						? t("botStats.goneBody")
+						: t("botStats.postedBody", { channel: channelLabel(channels.data ?? [], settings.channelId, t) })}
+			</Summary>
 
-				{placement.kind !== "none" && (
-					<Button
-						variant="ghost"
-						disabled={busy}
-						onClick={() => {
-							remove.mutate();
-						}}
-					>
-						<Trash2 size={16} aria-hidden="true" /> {t("botStats.remove")}
-					</Button>
-				)}
-			</Card>
-
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("botStats.chooseTitle")}</h2>
-					<p className="text-muted-foreground text-sm">{t("botStats.chooseBody")}</p>
-				</div>
-
+			<SettingRows title={t("botStats.chooseTitle")} description={t("botStats.chooseBody")}>
 				{channels.isError ? (
 					<ErrorState as="h2" error={channels.error} onRetry={() => void channels.refetch()} />
 				) : (
@@ -101,7 +72,7 @@ export function BotStatsPage(): React.JSX.Element {
 					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
 				)}
 
-				<div>
+				<RowActions>
 					<Button
 						disabled={target === null || busy}
 						onClick={() => {
@@ -123,8 +94,19 @@ export function BotStatsPage(): React.JSX.Element {
 								? t("botStats.moveAction")
 								: t("botStats.repostAction")}
 					</Button>
-				</div>
-			</Card>
+					{placement.kind !== "none" && (
+						<Button
+							variant="ghost"
+							disabled={busy}
+							onClick={() => {
+								remove.mutate();
+							}}
+						>
+							<Trash2 size={16} aria-hidden="true" /> {t("botStats.remove")}
+						</Button>
+					)}
+				</RowActions>
+			</SettingRows>
 		</>
 	);
 }

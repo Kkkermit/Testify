@@ -2009,9 +2009,6 @@
 	"botStats": {
 		"title": "Bot statistics",
 		"subtitle": "A message {{bot}} keeps in one channel with its servers, members, uptime and speed, refreshed every five minutes.",
-		"where": "Where it is posted",
-		"posted": "Posted",
-		"notPosted": "Not posted",
 		"noneBody": "Nothing is posted yet. Choose a channel below.",
 		"goneBody": "The channel it was in has been deleted. Post it somewhere else, or remove it.",
 		"postedBody": "Posted in {{channel}}.",

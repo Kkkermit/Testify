@@ -2059,9 +2059,6 @@
 	"botStats": {
 		"title": "Estadísticas del bot",
 		"subtitle": "Un mensaje que {{bot}} mantiene en un canal con sus servidores, miembros, tiempo activo y velocidad, actualizado cada cinco minutos.",
-		"where": "Dónde está publicado",
-		"posted": "Publicado",
-		"notPosted": "Sin publicar",
 		"noneBody": "Todavía no hay nada publicado. Elige un canal abajo.",
 		"goneBody": "El canal donde estaba se ha eliminado. Publícalo en otro sitio o quítalo.",
 		"postedBody": "Publicado en {{channel}}.",

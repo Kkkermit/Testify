@@ -2009,9 +2009,6 @@
 	"botStats": {
 		"title": "Bot-Statistiken",
 		"subtitle": "Eine Nachricht, die {{bot}} in einem Kanal mit seinen Servern, Mitgliedern, Laufzeit und Geschwindigkeit führt und alle fünf Minuten aktualisiert.",
-		"where": "Wo sie steht",
-		"posted": "Gepostet",
-		"notPosted": "Nicht gepostet",
 		"noneBody": "Noch ist nichts gepostet. Wähle unten einen Kanal.",
 		"goneBody": "Der Kanal, in dem sie stand, wurde gelöscht. Poste sie woanders oder entferne sie.",
 		"postedBody": "Gepostet in {{channel}}.",

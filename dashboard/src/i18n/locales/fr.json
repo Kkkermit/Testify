@@ -2059,9 +2059,6 @@
 	"botStats": {
 		"title": "Statistiques du bot",
 		"subtitle": "Un message que {{bot}} garde dans un salon avec ses serveurs, membres, temps de fonctionnement et vitesse, actualisé toutes les cinq minutes.",
-		"where": "Où il est publié",
-		"posted": "Publié",
-		"notPosted": "Non publié",
 		"noneBody": "Rien n’est encore publié. Choisissez un salon ci-dessous.",
 		"goneBody": "Le salon où il se trouvait a été supprimé. Publiez-le ailleurs ou retirez-le.",
 		"postedBody": "Publié dans {{channel}}.",

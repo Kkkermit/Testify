@@ -107,41 +107,41 @@ On a phone the same sidebar is the drawer behind the menu button.
 No URL changes. This table is phase 5's checklist: where each screen sits in the sidebar, whether it posts a message
 that gets a preview beside its editor, and whether its page has been restyled.
 
-| Screen                                       | Sidebar       | Preview             | Restyled                |
-| -------------------------------------------- | ------------- | ------------------- | ----------------------- |
-| `/guilds/:id`                                | Overview      | —                   | Kept as it is           |
-| `…/channels`, `…/channels/:channelId`        | Channels      | Its posts           | Built in phases 3 and 4 |
-| `…/welcome` (greeting and goodbye)           | Community     | Both messages       | Done                    |
-| `…/birthdays`                                | Community     | The birthday post   | Done                    |
-| `…/levelling`                                | Community     | —                   | Done                    |
-| `…/role-menus`                               | Community     | —                   | Done                    |
-| `…/ideas`                                    | Community     | —                   | Done                    |
-| `…/starboard`                                | Community     | —                   | Done                    |
-| `…/temp-voice`                               | Community     | —                   | Done                    |
-| `…/announcements`                            | Messages      | The announcement    | Done                    |
-| `…/scheduled-messages`                       | Messages      | Each post           | Done                    |
-| `…/sticky`                                   | Messages      | Each sticky message | Done                    |
-| `…/auto-responders`                          | Messages      | Each reply          | Done                    |
-| `…/automod`                                  | Moderation    | —                   | Done                    |
-| `…/raid-protection`                          | Moderation    | —                   | Done                    |
-| `…/warnings`                                 | Moderation    | —                   | Done                    |
-| `…/cases`                                    | Moderation    | —                   | Done                    |
-| `…/bans`                                     | Moderation    | —                   | Done                    |
-| `…/channel-tools`                            | Moderation    | —                   | Done                    |
-| `…/tickets`                                  | Moderation    | The ticket panel    | Done                    |
-| `…/audit-log`                                | Moderation    | —                   | Done                    |
-| `…/changes` (history and restore in phase 8) | Moderation    | —                   | To do                   |
-| `…/insights`                                 | Stats         | —                   | To do                   |
-| `…/member-count`                             | Stats         | —                   | To do                   |
-| `…/bot-stats`                                | Stats         | —                   | To do                   |
-| `…/treasure`                                 | Economy       | —                   | To do                   |
-| `…/lottery`                                  | Economy       | —                   | To do                   |
-| `…/casino`                                   | Economy       | —                   | To do                   |
-| `…/music`                                    | Entertainment | —                   | To do                   |
-| `…/giveaways`                                | Entertainment | —                   | To do                   |
-| `…/members`, `…/members/:userId`             | Members       | —                   | To do                   |
-| `…/settings`                                 | Settings      | —                   | To do                   |
-| `…/commands`                                 | Commands      | —                   | To do                   |
+| Screen                                       | Sidebar       | Preview             | Restyled                  |
+| -------------------------------------------- | ------------- | ------------------- | ------------------------- |
+| `/guilds/:id`                                | Overview      | —                   | Kept as it is             |
+| `…/channels`, `…/channels/:channelId`        | Channels      | Its posts           | Built in phases 3 and 4   |
+| `…/welcome` (greeting and goodbye)           | Community     | Both messages       | Done                      |
+| `…/birthdays`                                | Community     | The birthday post   | Done                      |
+| `…/levelling`                                | Community     | —                   | Done                      |
+| `…/role-menus`                               | Community     | —                   | Done                      |
+| `…/ideas`                                    | Community     | —                   | Done                      |
+| `…/starboard`                                | Community     | —                   | Done                      |
+| `…/temp-voice`                               | Community     | —                   | Done                      |
+| `…/announcements`                            | Messages      | The announcement    | Done                      |
+| `…/scheduled-messages`                       | Messages      | Each post           | Done                      |
+| `…/sticky`                                   | Messages      | Each sticky message | Done                      |
+| `…/auto-responders`                          | Messages      | Each reply          | Done                      |
+| `…/automod`                                  | Moderation    | —                   | Done                      |
+| `…/raid-protection`                          | Moderation    | —                   | Done                      |
+| `…/warnings`                                 | Moderation    | —                   | Done                      |
+| `…/cases`                                    | Moderation    | —                   | Done                      |
+| `…/bans`                                     | Moderation    | —                   | Done                      |
+| `…/channel-tools`                            | Moderation    | —                   | Done                      |
+| `…/tickets`                                  | Moderation    | The ticket panel    | Done                      |
+| `…/audit-log`                                | Moderation    | —                   | Done                      |
+| `…/changes` (history and restore in phase 8) | Moderation    | —                   | Kept; phase 8 rebuilds it |
+| `…/insights`                                 | Stats         | —                   | Kept; a page of figures   |
+| `…/member-count`                             | Stats         | —                   | Kept; a page of figures   |
+| `…/bot-stats`                                | Stats         | —                   | Done                      |
+| `…/treasure`                                 | Economy       | —                   | To do                     |
+| `…/lottery`                                  | Economy       | —                   | To do                     |
+| `…/casino`                                   | Economy       | —                   | To do                     |
+| `…/music`                                    | Entertainment | —                   | To do                     |
+| `…/giveaways`                                | Entertainment | —                   | To do                     |
+| `…/members`, `…/members/:userId`             | Members       | —                   | To do                     |
+| `…/settings`                                 | Settings      | —                   | To do                     |
+| `…/commands`                                 | Commands      | —                   | To do                     |
 
 A list page — bans, cases, warnings, changes, members, commands — keeps its list and gains only the summary, since
 its rows are records rather than settings.
