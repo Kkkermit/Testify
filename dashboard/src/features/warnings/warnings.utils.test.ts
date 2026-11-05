@@ -1,5 +1,5 @@
 import { WARN_LIMITS, WARN_STEP_CHOICES, type WarnStep } from "@testify/shared";
-import { actionOf, addStep, outcomeText, stepText } from "@/features/warnings/warnings.utils";
+import { actionOf, addStep, outcomeText, stepText, warningsSummary } from "@/features/warnings/warnings.utils";
 import { t } from "@/test/english";
 
 describe("stepText", () => {
@@ -29,5 +29,15 @@ describe("the step list", () => {
 	it("stops adding at the limit", () => {
 		const full = Array.from({ length: WARN_LIMITS.maxSteps }, (): WarnStep => ({ action: "warn" }));
 		expect(addStep(full)).toHaveLength(WARN_LIMITS.maxSteps);
+	});
+});
+
+describe("warningsSummary", () => {
+	/** A fifth warning on a four-step list repeats the last step, so the sentence has to say so. */
+	it("says how many steps there are and what repeats after them", () => {
+		expect(warningsSummary([], t)).toBe("A warning is only recorded, and nothing escalates.");
+		expect(warningsSummary([{ action: "warn" }, { action: "kick" }], t)).toBe(
+			"Warnings escalate over 2 steps, and every one after them repeats the last: Kick.",
+		);
 	});
 });

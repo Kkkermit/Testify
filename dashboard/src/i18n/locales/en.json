@@ -2027,6 +2027,9 @@
 		"note": "The count refreshes at most once a minute. The /member-count command posts the same numbers as a chart in Discord."
 	},
 	"warnings": {
+		"summary_other": "Warnings escalate over {{count, number}} steps, and every one after them repeats the last: {{last}}.",
+		"summary_one": "Warnings escalate over {{count, number}} step, and every one after it repeats the last: {{last}}.",
+		"summaryNone": "A warning is only recorded, and nothing escalates.",
 		"title": "Warnings",
 		"subtitle": "Every warning in this server, and what each one does to the member.",
 		"punishmentsTitle": "Punishments",

@@ -2027,6 +2027,9 @@
 		"note": "Die Zahl wird höchstens einmal pro Minute aktualisiert. Der Befehl /member-count postet dieselben Zahlen als Diagramm in Discord."
 	},
 	"warnings": {
+		"summary_other": "Verwarnungen steigern sich über {{count, number}} Stufen, und jede weitere wiederholt die letzte: {{last}}.",
+		"summary_one": "Verwarnungen steigern sich über {{count, number}} Stufe, und jede weitere wiederholt die letzte: {{last}}.",
+		"summaryNone": "Eine Verwarnung wird nur festgehalten, und nichts steigert sich.",
 		"title": "Verwarnungen",
 		"subtitle": "Jede Verwarnung auf diesem Server und was sie für das Mitglied bedeutet.",
 		"punishmentsTitle": "Strafen",

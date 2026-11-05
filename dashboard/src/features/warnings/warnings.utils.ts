@@ -85,3 +85,10 @@ export function addStep(steps: readonly WarnStep[]): WarnStep[] {
 export function pageCountOf(total: number, perPage: number): number {
 	return Math.max(1, Math.ceil(total / perPage));
 }
+
+/** How warnings escalate, as the sentence the page opens with: past the last step, the last one repeats. */
+export function warningsSummary(steps: readonly WarnStep[], t: TFunction): string {
+	const last = steps.at(-1);
+	if (last === undefined) return t("warnings.summaryNone");
+	return t("warnings.summary", { count: steps.length, last: stepText(last, t) });
+}

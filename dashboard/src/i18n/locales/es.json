@@ -2073,6 +2073,10 @@
 		"note": "El recuento se actualiza como mucho una vez por minuto. El comando /member-count publica las mismas cifras como gráfico en Discord."
 	},
 	"warnings": {
+		"summary_other": "Las advertencias se agravan en {{count, number}} pasos, y cada una posterior repite el último: {{last}}.",
+		"summary_many": "Las advertencias se agravan en {{count, number}} de pasos, y cada una posterior repite el último: {{last}}.",
+		"summary_one": "Las advertencias se agravan en {{count, number}} paso, y cada una posterior repite el último: {{last}}.",
+		"summaryNone": "Una advertencia solo se registra, y nada se agrava.",
 		"title": "Advertencias",
 		"subtitle": "Todas las advertencias de este servidor y lo que cada una le hace al miembro.",
 		"punishmentsTitle": "Sanciones",

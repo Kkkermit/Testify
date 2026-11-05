@@ -124,7 +124,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/auto-responders`                          | Messages      | Each reply          | Done                    |
 | `…/automod`                                  | Moderation    | —                   | Done                    |
 | `…/raid-protection`                          | Moderation    | —                   | Done                    |
-| `…/warnings`                                 | Moderation    | —                   | To do                   |
+| `…/warnings`                                 | Moderation    | —                   | Done                    |
 | `…/cases`                                    | Moderation    | —                   | To do                   |
 | `…/bans`                                     | Moderation    | —                   | To do                   |
 | `…/channel-tools`                            | Moderation    | —                   | To do                   |

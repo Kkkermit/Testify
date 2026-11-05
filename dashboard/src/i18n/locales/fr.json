@@ -2073,6 +2073,10 @@
 		"note": "Le nombre est actualisé au plus une fois par minute. La commande /member-count publie les mêmes chiffres sous forme de graphique dans Discord."
 	},
 	"warnings": {
+		"summary_other": "Les avertissements s’aggravent en {{count, number}} étapes, et chacun au-delà répète la dernière : {{last}}.",
+		"summary_many": "Les avertissements s’aggravent en {{count, number}} d’étapes, et chacun au-delà répète la dernière : {{last}}.",
+		"summary_one": "Les avertissements s’aggravent en {{count, number}} étape, et chacun au-delà répète la dernière : {{last}}.",
+		"summaryNone": "Un avertissement est seulement enregistré, et rien ne s’aggrave.",
 		"title": "Avertissements",
 		"subtitle": "Tous les avertissements de ce serveur, et ce que chacun fait au membre.",
 		"punishmentsTitle": "Sanctions",
