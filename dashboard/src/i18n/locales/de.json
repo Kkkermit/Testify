@@ -415,6 +415,10 @@
 		"auditYouCannot": "Einen Kanal anzulegen braucht „Kanäle verwalten“, also wähle einen vorhandenen in der Ansicht Audit-Log."
 	},
 	"automod": {
+		"summary_other": "{{count, number}} AutoMod-Regeln sind an, und Discord selbst setzt sie durch.",
+		"summary_one": "{{count, number}} AutoMod-Regel ist an, und Discord selbst setzt sie durch.",
+		"summaryAllOff": "Jede AutoMod-Regel hier ist ausgeschaltet.",
+		"summaryNone": "Es gibt noch keine AutoMod-Regeln, daher filtert Discord hier nichts.",
 		"addOneBelow": "Füge unten eine hinzu, dann blockiert Discord passende Nachrichten, bevor sie jemand liest.",
 		"addRule": "Regel hinzufügen",
 		"addRuleAction": "Regel hinzufügen",

@@ -10,9 +10,19 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	Field,
+	FIELD,
+	RowActions,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	SettingRows,
+	Warning,
+} from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { PRESET_LABELS } from "@/features/automod/automod.labels";
+import { automodSummary } from "@/features/automod/automod.utils";
 import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -62,7 +72,7 @@ export function AutomodPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, add.isSuccess)} />}
 			/>
 
-			{!canManage && <Warning>{t("automod.needsManageServer")}</Warning>}
+			{canManage ? <Summary>{automodSummary(list, t)}</Summary> : <Warning>{t("automod.needsManageServer")}</Warning>}
 
 			<section aria-labelledby="rules-heading" className="flex flex-col gap-3">
 				<SectionHeading as="h2" id="rules-heading" count={list.length}>
@@ -97,12 +107,7 @@ export function AutomodPage(): React.JSX.Element {
 			</section>
 
 			{canManage && (
-				<Card className="motion-pop flex flex-col gap-4">
-					<div>
-						<h2 className={CARD_HEADING}>{t("automod.addRule")}</h2>
-						<p className="text-muted-foreground text-sm">{t("automod.limitsBody")}</p>
-					</div>
-
+				<SettingRows title={t("automod.addRule")} description={t("automod.limitsBody")}>
 					<Field label={t("automod.whatToBlock")} htmlFor="automod-preset">
 						<select
 							id="automod-preset"
@@ -158,7 +163,7 @@ export function AutomodPage(): React.JSX.Element {
 						<Warning>{add.error instanceof ApiError ? add.error.message : t("automod.refusedRule")}</Warning>
 					)}
 
-					<div>
+					<RowActions>
 						<Button
 							disabled={blocked !== null || busy}
 							onClick={() => {
@@ -168,8 +173,8 @@ export function AutomodPage(): React.JSX.Element {
 						>
 							<Plus size={16} aria-hidden="true" /> {t("automod.addRuleAction")}
 						</Button>
-					</div>
-				</Card>
+					</RowActions>
+				</SettingRows>
 			)}
 
 			{toggle.error !== null && (

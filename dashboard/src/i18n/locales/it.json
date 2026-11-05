@@ -431,6 +431,11 @@
 		"auditYouCannot": "Creare un canale richiede Gestire i canali, quindi scegline uno esistente nella schermata Registro di controllo."
 	},
 	"automod": {
+		"summary_other": "{{count, number}} regole AutoMod sono attive, e le applica Discord stesso.",
+		"summary_many": "{{count, number}} di regole AutoMod sono attive, e le applica Discord stesso.",
+		"summary_one": "{{count, number}} regola AutoMod è attiva, e la applica Discord stesso.",
+		"summaryAllOff": "Tutte le regole AutoMod sono disattivate.",
+		"summaryNone": "Non ci sono ancora regole AutoMod, quindi Discord qui non filtra nulla.",
 		"addOneBelow": "Aggiungine una qui sotto e Discord bloccherà i messaggi corrispondenti prima che qualcuno li legga.",
 		"addRule": "Aggiungi una regola",
 		"addRuleAction": "Aggiungi regola",

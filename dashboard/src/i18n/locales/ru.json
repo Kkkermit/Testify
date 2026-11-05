@@ -447,6 +447,12 @@
 		"auditYouCannot": "Для создания канала нужно право «Управлять каналами», поэтому выберите существующий на экране «Журнал аудита»."
 	},
 	"automod": {
+		"summary_other": "Включено {{count, number}} правила AutoMod, их применяет сам Discord.",
+		"summary_many": "Включено {{count, number}} правил AutoMod, их применяет сам Discord.",
+		"summary_few": "Включено {{count, number}} правила AutoMod, их применяет сам Discord.",
+		"summary_one": "Включено {{count, number}} правило AutoMod, его применяет сам Discord.",
+		"summaryAllOff": "Все правила AutoMod здесь выключены.",
+		"summaryNone": "Правил AutoMod пока нет, поэтому Discord здесь ничего не фильтрует.",
 		"addOneBelow": "Добавьте правило ниже, и Discord заблокирует подходящие сообщения до того, как их прочтут.",
 		"addRule": "Добавить правило",
 		"addRuleAction": "Добавить правило",

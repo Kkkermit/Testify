@@ -431,6 +431,11 @@
 		"auditYouCannot": "Créer un salon demande Gérer les salons, choisissez-en un existant sur l’écran Journal d’audit."
 	},
 	"automod": {
+		"summary_other": "{{count, number}} règles AutoMod sont actives, et Discord lui-même les applique.",
+		"summary_many": "{{count, number}} de règles AutoMod sont actives, et Discord lui-même les applique.",
+		"summary_one": "{{count, number}} règle AutoMod est active, et Discord lui-même l’applique.",
+		"summaryAllOff": "Toutes les règles AutoMod sont désactivées.",
+		"summaryNone": "Il n’y a pas encore de règle AutoMod, donc Discord ne filtre rien ici.",
 		"addOneBelow": "Ajoutez-en une ci-dessous et Discord bloquera les messages correspondants avant que quiconque les lise.",
 		"addRule": "Ajouter une règle",
 		"addRuleAction": "Ajouter la règle",

@@ -415,6 +415,10 @@
 		"auditYouCannot": "Making a channel needs Manage Channels, so choose an existing one on the Audit logging screen."
 	},
 	"automod": {
+		"summary_other": "{{count, number}} AutoMod rules are on, and Discord itself enforces them.",
+		"summary_one": "{{count, number}} AutoMod rule is on, and Discord itself enforces it.",
+		"summaryAllOff": "Every AutoMod rule here is switched off.",
+		"summaryNone": "There are no AutoMod rules yet, so Discord filters nothing here.",
 		"addOneBelow": "Add one below, and Discord blocks matching messages before anyone reads them.",
 		"addRule": "Add a rule",
 		"addRuleAction": "Add rule",
