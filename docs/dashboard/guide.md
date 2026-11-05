@@ -198,13 +198,12 @@ src/
 │   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
 │   │                   SavingIndicator Toggle Warning + fieldStyles.ts
-│   ├── motion/         Reveal, AnimatedNumber
 │   └── ui/             Reserved for shadcn's CLI. Excluded from coverage — keep your own out.
 ├── config/
 │   ├── navigation.ts   The sidebar, as data
-│   └── features.ts     Each bot feature's icon, tint and dashboard path
+│   └── features.ts     Each bot feature's icon and dashboard path
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
-├── hooks/              usePageTitle usePrefersReducedMotion useCountUp useDocumentVisible useDebounced
+├── hooks/              usePageTitle usePrefersReducedMotion useDocumentVisible useDebounced
 ├── lib/                api cn queries redirect sanitise tint tokens
 └── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
@@ -535,7 +534,7 @@ or a taken channel until it has gone.
 Tailwind v4, CSS-first. **Everything comes from `@theme` in `src/index.css`.**
 
 - **No component writes a colour, a radius or a duration.** They are tokens — including the
-  `--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. **A hex value
+  `--color-hue-*` colours and `--radius-card` — which is what makes a fork's rebrand one file. **A hex value
   in a `.tsx` is a review comment.**
 - **Nor does one write its own padding.** `Card` takes `padding`, and all three values use the same 24px inline
   padding so every card's content starts on the same column whatever its density. A card reaching for `p-4`
@@ -869,7 +868,7 @@ the wrong file.
 | Page title size and header slot | `components/primitives/PageHeader.tsx`                | Every page                              |
 | Labelled-control spacing        | `components/form/fieldStyles.ts`                      | Every form row                          |
 | Page width and vertical rhythm  | `app/AppShell.tsx`                                    | Every page                              |
-| A feature's icon and tint       | `config/features.ts`                                  | Overview grid, anywhere a feature shows |
+| A feature's icon and path       | `config/features.ts`                                  | Overview grid, anywhere a feature shows |
 | Sidebar shape and grouping      | `config/navigation.ts`                                | Sidebar, rail, drawer                   |
 | Native control appearance       | `@layer base` in `src/index.css`                      | Selects, checkboxes, scrollbars         |
 
@@ -911,23 +910,23 @@ Two conventions worth keeping:
 - **`--color-ring` is used by exactly one rule** — `:focus-visible` in the base layer. Keeping it separate from
   `--color-accent` means a rebrand can make the focus ring louder than the brand without touching links.
 
-### 19.3 Feature tints
+### 19.3 Hues
 
-Six hues, used as an icon colour and as a 15% wash behind it. The grouping is by **feel rather than by
-subsystem** — audit logging reads the tickets blue because it is an operational screen, not because it is a
-ticket. Regroup them freely; the only constraint is the contrast rule below.
+Six colours named by hue rather than by feature, because a feature no longer wears one. Every feature's icon is
+`text-muted-foreground` on `bg-muted`, so the grid, the command cards and the setup checklist are one colour and the
+accent is left for what can be pressed. A tint per feature made a page of twenty tiles read as twenty kinds of thing.
 
-| Token                        | Value     | Feature keys that read it (`config/features.ts`)              |
-| ---------------------------- | --------- | ------------------------------------------------------------- |
-| `--color-feature-levelling`  | `#a78bfa` | `levelling`                                                   |
-| `--color-feature-economy`    | `#fbbf24` | `economy`, `lottery`, `treasure`, `games`                     |
-| `--color-feature-moderation` | `#f87171` | `moderation`, `automod`, `anti-link`, `verification`, `owner` |
-| `--color-feature-welcome`    | `#3ddc97` | `welcome`, `auto-roles`                                       |
-| `--color-feature-tickets`    | `#60a5fa` | `tickets`, `audit-logging`, `voice-stats`, `info`             |
-| `--color-feature-community`  | `#f472b6` | `sticky`, `counting`, `giveaway`, `community`, `fun`          |
+| Token                | Light     | Dark      | Read by                                                       |
+| -------------------- | --------- | --------- | ------------------------------------------------------------- |
+| `--color-hue-violet` | `#6d28d9` | `#a78bfa` | lettered avatars (`lib/tint.ts`)                              |
+| `--color-hue-amber`  | `#a16207` | `#fbbf24` | lettered avatars, code highlighting                           |
+| `--color-hue-red`    | `#b91c1c` | `#f87171` | lettered avatars                                              |
+| `--color-hue-green`  | `#047857` | `#3ddc97` | lettered avatars                                              |
+| `--color-hue-blue`   | `#1d4ed8` | `#60a5fa` | lettered avatars, code highlighting                           |
+| `--color-hue-pink`   | `#be185d` | `#f472b6` | lettered avatars, code highlighting, the docs' important note |
 
-Each is a **text colour at AA on the page background** and is paired with `/15` as a fill. A tint used as a fill
-at full strength will not pass contrast for the icon sitting on it — check both if you change one.
+Each is a **text colour at AA on a card** in both themes, and a lettered avatar pairs it with `/20` as a fill;
+`contrast.test.ts` measures every one. A hue used as a fill at full strength will not pass for the letter on it.
 
 `featureLook()` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before
 the dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
@@ -985,6 +984,10 @@ Rules that hold today and are worth keeping:
   `text-sm font-semibold`, with an optional count in muted text, and takes `as` to become an `<h2>`. Letterspaced
   uppercase labels are gone: they read as a template rather than as a heading.
 - **An ID is always `font-mono text-xs`** with `--color-muted-foreground`. It is a reference, not a name.
+- **A number is the page's own face with `tabular-nums`, never mono.** A stat tile, a count, a share or a size
+  lines its digits up without changing family; mono is for what is typed literally, and a figure is not.
+- **A label is sentence case** — a stat tile's, a tab's, a sidebar group's. Nothing in the interface is
+  letterspaced capitals.
 - **Headings carry `text-wrap: balance`** from the base layer, so a title never leaves one word on its own line.
 - **`text-xl` appears once** in the whole app. If a rewrite wants it, use it deliberately or delete it.
 
@@ -1040,14 +1043,18 @@ a button beside an input with a tighter radius looks like part of the input.
 
 ### 19.8 Motion
 
-Four animations, all short, all built from one easing token.
+**Nothing moves on load or at rest.** A page arrives whole: no header rising into place, no number counting up, no
+outlet fading in on every navigation. Motion is kept for a change somebody caused — a dialog opening, a tab
+changing, a warning appearing — and for the one thing that has to say it is still working.
 
-| Utility          | Animation                     | Used for                                    |
-| ---------------- | ----------------------------- | ------------------------------------------- |
-| `motion-reveal`  | 320ms, fade + 6px rise        | A page header, a section arriving           |
-| `motion-fade`    | 200ms, opacity only           | The `<main>` outlet on every navigation     |
-| `motion-pop`     | 200ms, fade + scale from 0.97 | A card that appears in place, e.g. a detail |
-| `skeleton-sheen` | 1.6s linear, infinite         | The highlight sweeping a loading skeleton   |
+| Utility          | Animation                     | Used for                                                      |
+| ---------------- | ----------------------------- | ------------------------------------------------------------- |
+| `motion-fade`    | 200ms, opacity only           | A popover, the drawer, the undo notice, a warning, a tab line |
+| `motion-pop`     | 200ms, fade + scale from 0.97 | The leave-without-saving dialog                               |
+| `skeleton-sheen` | 1.6s linear, infinite         | The highlight sweeping a loading skeleton                     |
+
+The landing page's composer caret blinks, because it is a text box being typed into, and holds still under reduced
+motion with the rest.
 
 `--ease-out-soft` is `cubic-bezier(0.22, 1, 0.36, 1)` — fast out, long settle. Everything decelerating uses it.
 
@@ -1087,7 +1094,7 @@ back clean.
      padding and font size. Check it still matches the new field radius.
    - The **`prefers-contrast: more` block** remaps `--color-border` to `--color-input` and muted text to
      foreground. If the new palette changes their relationship, this remap may need inverting.
-3. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
+3. **Re-check contrast.** Body text, muted text on card, every hue as text, and every badge tone. The
    automated axe pass has `color-contrast` **disabled** — jsdom computes no styles, so it can only report false
    negatives. This step is manual and there is no substitute.
 4. **Run a real browser sweep** at 1440 / 820 / 390. [§22](#22-checking-a-screen) lists what to check and the
@@ -1214,7 +1221,7 @@ where they differ. It changes nothing; each cell opens that feature on that serv
 **Who:** a manager who has picked a server. This is the dominant journey — most screens are this shape.
 
 1. `/guilds/:id` shows stat tiles, a feature grid, permission warnings and recent changes. The grid is the
-   navigation: each tile carries the feature's tint and links to its screen where one exists.
+   navigation: each tile carries the feature's icon and links to its screen where one exists.
 2. They open a feature — say `/guilds/:id/levelling`.
 3. The screen loads its own data and renders skeletons meanwhile. Tabs are in the URL (`?tab=`), so a link to a
    tab is a link to a tab.

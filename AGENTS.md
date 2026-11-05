@@ -2001,11 +2001,10 @@ components/
   primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
                 SegmentedControl, DataList/Figure, Tooltip
   form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
-  motion/       Reveal, AnimatedNumber
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
-hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible, useDebounced
+hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced
 lib/            api, cn, paging, queries, redirect, tint, and tokens for reading a colour in JavaScript
 ```
 
@@ -2363,8 +2362,14 @@ where a skill disagrees with it, the skill wins and §19 is updated. What does *
 single source, the accessibility floor only rises, and the CSP is untouchable.
 
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
-`--color-feature-*` tints and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
+`--color-hue-*` colours and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
 `.tsx` is a review comment.
+
+**Nothing moves on load, and no feature wears a colour of its own.** A page arrives whole; motion is kept for a change
+somebody caused — a dialog, a tab, a warning — and for a skeleton's sheen. Every feature icon is muted, so the accent
+marks only what can be pressed, and the six `--color-hue-*` colours are for lettered avatars, code and the docs'
+important note. A figure is the page's face with `tabular-nums`; mono is for what is typed literally. A label is
+sentence case, never letterspaced capitals. The guide's §19.3, §19.4 and §19.8 hold the detail.
 
 **The radius scale is four tokens and nothing else**: `--radius-chip` (6px) for inline chips, bars and the
 segmented control's buttons, `--radius-field` (8px) for inputs, list shells and rows, `--radius-card` (10px) for

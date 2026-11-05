@@ -205,8 +205,10 @@ passes.
 - **Removed in phase 2:** `Backdrop` and `lib/three/`, except `tokens.ts`, which the console greeting reads and
   which moved to `lib/`; three.js itself; the body wash; the focal card's gradient and the cards' inset highlight;
   the tinted badges. `Eyebrow` became `SectionHeading`, the page's own type with no letterspacing or rule.
-- **Still to remove**, with the screens that use them: the feature tints, and `Reveal`, `AnimatedNumber` and
-  `useCountUp`. The overview's stat tiles stay, because the overview is kept as it is.
+- **Removed in phase 10:** `Reveal`, `AnimatedNumber` and `useCountUp`, and the fade on every navigation and the
+  pop on the sign-in card, so nothing moves on load. The feature tints became six colours named by hue, kept for
+  lettered avatars, code highlighting and the docs' important note; every feature icon is muted. The overview's
+  stat tiles stay, with their figure in Rubik.
 - **Motion.** CSS transitions only. The `motion` library was planned for the channel pages and turned out not to be
   needed, so it was never added.
 
@@ -227,7 +229,7 @@ the branch can be reviewed or paused at any point.
 | 7   | **Send me a test** (idea 4), beside every preview of a post on its own screen and on a channel's page. Tickets and giveaways have none, since their controls cannot work in a DM.                                                                                                                                                                                      | Done   |
 | 8   | **History and restore** on the Changes page (idea 5): **Put back** on eighteen kinds of settings change, guarded by what the setting holds now. See Decisions.                                                                                                                                                                                                         | Done   |
 | 9   | **Several servers side by side** (idea 6), read-only: `/guilds/compare`, two to four servers in columns, linked from the server picker and quick search.                                                                                                                                                                                                               | Done   |
-| 10  | **Everything outside a server**: the server picker, commands, status, notifications, help, appearance, the owner console, sign-in and the public site, in the new tokens.                                                                                                                                                                                              | To do  |
+| 10  | **Everything outside a server**: the server picker, commands, status, notifications, help, appearance, the owner console, sign-in and the public site, in the new tokens. Nothing moves on load, no feature wears a tint, and labels and figures are in Rubik, sentence case.                                                                                          | Done   |
 | 11  | **Finish**: re-shoot the README's screenshots, update AGENTS §24 and the guide throughout, run a browser sweep at 320, 390, 820 and 1440 in both themes, with `prefers-contrast: more` and reduced motion, then open a pull request into `develop`.                                                                                                                    | To do  |
 
 ## How a phase is finished
