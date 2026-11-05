@@ -918,6 +918,9 @@
 		"deleting": "Eliminare l’originale toglie anche la sua ripubblicazione, e una ripubblicazione eliminata da un moderatore non torna in bacheca."
 	},
 	"tempVoice": {
+		"summaryOn": "Ogni membro che entra in {{lobby}} riceve un canale vocale tutto suo, eliminato quando si svuota.",
+		"summaryOff": "«Entra per creare» è disattivato. Se attivo, ogni membro che entra in {{lobby}} riceve un canale vocale tutto suo.",
+		"summaryNoLobby": "«Entra per creare» non ha ancora una sala d’attesa, quindi nessuno riceve un canale vocale tutto suo.",
 		"title": "Entra per creare",
 		"subtitle": "Entrare in un canale vocale d’attesa crea un canale tutto proprio, eliminato quando si svuota.",
 		"lobbyCard": "La sala d’attesa",

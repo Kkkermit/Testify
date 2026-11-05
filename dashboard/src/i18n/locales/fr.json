@@ -918,6 +918,9 @@
 		"deleting": "Supprimer l’original retire aussi sa republication, et une republication supprimée par un modérateur ne revient pas."
 	},
 	"tempVoice": {
+		"summaryOn": "Chaque membre qui rejoint {{lobby}} obtient un salon vocal à lui, supprimé dès qu’il se vide.",
+		"summaryOff": "« Rejoindre pour créer » est désactivé. Activé, chaque membre qui rejoint {{lobby}} obtient un salon vocal à lui.",
+		"summaryNoLobby": "« Rejoindre pour créer » n’a pas encore de salon d’attente, donc personne n’obtient de salon vocal à soi.",
 		"title": "Rejoindre pour créer",
 		"subtitle": "Rejoindre un salon vocal d’attente crée un salon à soi, supprimé dès qu’il est vide.",
 		"lobbyCard": "Le salon d’attente",

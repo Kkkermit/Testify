@@ -918,6 +918,9 @@
 		"deleting": "Borrar el original retira también su republicación, y una republicación que borre un moderador no vuelve al tablón."
 	},
 	"tempVoice": {
+		"summaryOn": "Cada miembro que entra en {{lobby}} recibe un canal de voz propio, que se borra cuando se vacía.",
+		"summaryOff": "«Únete y crea» está desactivado. Activado, cada miembro que entra en {{lobby}} recibe un canal de voz propio.",
+		"summaryNoLobby": "«Únete y crea» aún no tiene sala de espera, así que nadie recibe un canal de voz propio.",
 		"title": "Únete y crea",
 		"subtitle": "Entrar en un canal de voz de espera crea un canal propio para quien entra, que se borra cuando se vacía.",
 		"lobbyCard": "La sala de espera",

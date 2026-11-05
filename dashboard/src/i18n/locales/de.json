@@ -897,6 +897,9 @@
 		"deleting": "Wird das Original gelöscht, verschwindet auch der Repost, und ein Repost, den ein Moderator löscht, kommt nicht zurück."
 	},
 	"tempVoice": {
+		"summaryOn": "Wer {{lobby}} betritt, bekommt einen eigenen Sprachkanal, der gelöscht wird, sobald er leer ist.",
+		"summaryOff": "„Beitreten und erstellen“ ist aus. Eingeschaltet bekommt jedes Mitglied, das {{lobby}} betritt, einen eigenen Sprachkanal.",
+		"summaryNoLobby": "„Beitreten und erstellen“ hat noch keine Lobby, daher bekommt niemand einen eigenen Sprachkanal.",
 		"title": "Beitreten und erstellen",
 		"subtitle": "Wer einem Lobby-Sprachkanal beitritt, bekommt einen eigenen Kanal, der gelöscht wird, sobald er leer ist.",
 		"lobbyCard": "Die Lobby",

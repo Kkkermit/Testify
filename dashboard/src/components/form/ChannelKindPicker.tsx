@@ -1,4 +1,5 @@
 import { type ChannelSummary } from "@testify/shared";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Field } from "@/components/form/Field";
 import { SELECT } from "@/components/form/fieldStyles";
@@ -14,6 +15,7 @@ export function ChannelKindPicker({
 	label,
 	hint,
 	noneLabel,
+	children,
 }: {
 	kind: "voice" | "category";
 	channels: ChannelSummary[];
@@ -22,6 +24,8 @@ export function ChannelKindPicker({
 	label: string;
 	hint?: string;
 	noneLabel: string;
+	/** Anything that belongs under the picker, such as a button that makes the channel it lacks. */
+	children?: ReactNode;
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const ofKind = channels.filter((channel) => channel.kind === kind);
@@ -54,6 +58,7 @@ export function ChannelKindPicker({
 
 			{gone && <Warning>{t("common.channelGoneWarning")}</Warning>}
 			{hidden && <Warning>{t("common.hiddenChannelWarning")}</Warning>}
+			{children}
 		</Field>
 	);
 }

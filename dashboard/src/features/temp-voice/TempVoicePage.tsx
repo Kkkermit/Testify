@@ -3,24 +3,34 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelKindPicker, FIELD, Field, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	ChannelKindPicker,
+	FIELD,
+	Field,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Toggle,
+	Warning,
+} from "@/components/form";
+import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
-import { nameTemplateFrom, userLimitFrom } from "@/features/temp-voice/tempVoice.utils";
+import { nameTemplateFrom, tempVoiceSummary, userLimitFrom } from "@/features/temp-voice/tempVoice.utils";
 import { useMakeLobby, useSaveTempVoice, useTempVoice } from "@/features/temp-voice/useTempVoice";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
-type CardName = "lobby" | "channels";
+type GroupName = "lobby" | "channels";
 
 /** The lobby people join, and what the channel each of them gets is called, where it goes and how many it holds. */
 export function TempVoicePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
-	// One write serves both cards, so a refusal is shown in the card whose control sent it.
-	const [origin, setOrigin] = useState<CardName>("lobby");
+	// One write serves both groups, so a refusal is shown under the group whose control sent it.
+	const [origin, setOrigin] = useState<GroupName>("lobby");
 
 	const tempVoice = useTempVoice(guildId);
 	const channels = useChannels(guildId);
@@ -37,11 +47,15 @@ export function TempVoicePage(): React.JSX.Element {
 	const all = channels.data ?? [];
 	const message = (error: Error | null): string | null =>
 		error === null ? null : error instanceof ApiError ? error.message : t("common.couldNotSave");
-	const write = (card: CardName, patch: TempVoicePatch): void => {
-		setOrigin(card);
+	const write = (group: GroupName, patch: TempVoicePatch): void => {
+		setOrigin(group);
 		save.mutate(patch);
 	};
 	const saveFailure = message(save.error);
+	// A voice channel is named without the # Discord gives a text one.
+	const lobbyName =
+		all.find((channel) => channel.id === settings.lobbyChannelId)?.name ??
+		channelLabel(all, settings.lobbyChannelId, t);
 
 	return (
 		<>
@@ -56,12 +70,10 @@ export function TempVoicePage(): React.JSX.Element {
 				}
 			/>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("tempVoice.lobbyCard")}</h2>
-					<p className="text-muted-foreground text-sm">{t("tempVoice.lobbyBody")}</p>
-				</div>
+			<Summary>{tempVoiceSummary(settings, lobbyName, t)}</Summary>
+			{!settings.canManage && <Warning>{t("tempVoice.cannotManage")}</Warning>}
 
+			<SettingRows title={t("tempVoice.lobbyCard")} description={t("tempVoice.lobbyBody")}>
 				<Toggle
 					label={t("tempVoice.enabled")}
 					hint={settings.lobbyChannelId === null ? t("tempVoice.enabledHintNoLobby") : t("tempVoice.enabledHint")}
@@ -82,32 +94,25 @@ export function TempVoicePage(): React.JSX.Element {
 					onChange={(lobbyChannelId) => {
 						write("lobby", { lobbyChannelId });
 					}}
-				/>
+				>
+					{settings.lobbyChannelId === null && (
+						<div>
+							<Button
+								disabled={lobby.isPending}
+								onClick={() => {
+									lobby.mutate(undefined);
+								}}
+							>
+								{lobby.isPending ? t("tempVoice.making") : t("tempVoice.makeLobby")}
+							</Button>
+						</div>
+					)}
+				</ChannelKindPicker>
+			</SettingRows>
+			{message(lobby.error) !== null && <Warning>{message(lobby.error)}</Warning>}
+			{origin === "lobby" && saveFailure !== null && <Warning>{saveFailure}</Warning>}
 
-				{settings.lobbyChannelId === null && (
-					<div>
-						<Button
-							disabled={lobby.isPending}
-							onClick={() => {
-								lobby.mutate(undefined);
-							}}
-						>
-							{lobby.isPending ? t("tempVoice.making") : t("tempVoice.makeLobby")}
-						</Button>
-					</div>
-				)}
-
-				{!settings.canManage && <Warning>{t("tempVoice.cannotManage")}</Warning>}
-				{message(lobby.error) !== null && <Warning>{message(lobby.error)}</Warning>}
-				{origin === "lobby" && saveFailure !== null && <Warning>{saveFailure}</Warning>}
-			</Card>
-
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("tempVoice.channels")}</h2>
-					<p className="text-muted-foreground text-sm">{t("tempVoice.active", { count: settings.active })}</p>
-				</div>
-
+			<SettingRows title={t("tempVoice.channels")} description={t("tempVoice.active", { count: settings.active })}>
 				<ChannelKindPicker
 					kind="category"
 					label={t("tempVoice.category")}
@@ -135,10 +140,9 @@ export function TempVoicePage(): React.JSX.Element {
 						write("channels", { userLimit });
 					}}
 				/>
-
-				<p className="text-muted-foreground text-sm">{t("tempVoice.ownerRights")}</p>
-				{origin === "channels" && saveFailure !== null && <Warning>{saveFailure}</Warning>}
-			</Card>
+			</SettingRows>
+			{origin === "channels" && saveFailure !== null && <Warning>{saveFailure}</Warning>}
+			<p className="text-muted-foreground text-sm">{t("tempVoice.ownerRights")}</p>
 		</>
 	);
 }

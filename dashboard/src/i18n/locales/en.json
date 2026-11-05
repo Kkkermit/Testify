@@ -897,6 +897,9 @@
 		"deleting": "Deleting the original takes its repost down too, and a repost a moderator deletes stays off the board."
 	},
 	"tempVoice": {
+		"summaryOn": "Joining {{lobby}} gives each member a voice channel of their own, deleted once it empties.",
+		"summaryOff": "Join to create is off. Turned on, joining {{lobby}} gives each member a voice channel of their own.",
+		"summaryNoLobby": "Join to create has no lobby yet, so nobody gets a voice channel of their own.",
 		"title": "Join to create",
 		"subtitle": "Joining a lobby voice channel makes the joiner a channel of their own, deleted once it empties.",
 		"lobbyCard": "The lobby",
