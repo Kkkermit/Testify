@@ -1918,6 +1918,9 @@ are load-bearing:
 - **Moderation records about them are kept.** Warnings, cases, softbans and a blacklist entry protect the servers
   they are in, and deleting them would let anybody wipe their own record. The privacy notice says so
   (`legal.removalP3`) and `LegalPage.test.tsx` pins the claim to the `keep` lines in the map.
+  **A blacklist entry above all:** only `/blacklist` and the owner console's Blacklist tab may add or lift one, both
+  owner-only, and `blacklistWriters.test.ts` fails on any other module that touches the model or imports
+  `addToBlacklist` or `removeFromBlacklist`, the deletion included. Each of its guards was proved to go red.
 - **What they did for a server stays, without them.** A case they opened, a ticket, a giveaway they hosted or a
   setting they changed keeps its place in the server's record, with the id replaced by `DELETED_USER_ID` ("0", which
   no Discord id is) and the name by `DELETED_USER_NAME`, because a required field would refuse an empty one.
