@@ -594,11 +594,13 @@
 		"sendTo": "Invia l’addio in"
 	},
 	"birthdays": {
+		"summaryOn": "Ogni compleanno condiviso viene pubblicato in {{channel}} il giorno stesso.",
+		"summaryOff": "I post di compleanno sono disattivati. Se attivi, ogni compleanno condiviso viene pubblicato in {{channel}} il giorno stesso.",
+		"summaryNoChannel": "I compleanni non hanno ancora un canale, quindi non ne viene pubblicato nessuno.",
 		"title": "Compleanni",
 		"subtitle": "Un messaggio nel giorno del compleanno, per i membri che l’hanno condiviso qui. Mai la loro età.",
-		"posts": "Messaggi di compleanno",
 		"channel": "Pubblica i compleanni in",
-		"pickFirst": "Scegli un canale e il resto di questa scheda si attiva.",
+		"pickFirst": "Scegli prima un canale.",
 		"cannotSend": "{{bot}} non può scrivere in quel canale, quindi nessun compleanno verrebbe pubblicato. Dagli Invia messaggi lì, oppure scegline un altro.",
 		"post": "Pubblica i compleanni",
 		"postHint": "Pubblicato il giorno stesso, in UTC. Disattivato, non viene pubblicato nulla; ciò che i membri hanno condiviso resta salvato.",

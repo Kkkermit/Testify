@@ -594,11 +594,13 @@
 		"sendTo": "Enviar la despedida a"
 	},
 	"birthdays": {
+		"summaryOn": "Cada cumpleaños compartido se publica en {{channel}} ese día.",
+		"summaryOff": "Las publicaciones de cumpleaños están desactivadas. Activadas, cada cumpleaños compartido se publica en {{channel}} ese día.",
+		"summaryNoChannel": "Los cumpleaños aún no tienen canal, así que no se publica ninguno.",
 		"title": "Cumpleaños",
 		"subtitle": "Una publicación el día del cumpleaños, para los miembros que lo compartieron aquí. Nunca su edad.",
-		"posts": "Publicaciones de cumpleaños",
 		"channel": "Publicar cumpleaños en",
-		"pickFirst": "Elige un canal y el resto de esta tarjeta se activa.",
+		"pickFirst": "Elige primero un canal.",
 		"cannotSend": "{{bot}} no puede publicar en ese canal, así que no se publicaría ningún cumpleaños. Dale Enviar mensajes allí o elige otro.",
 		"post": "Publicar cumpleaños",
 		"postHint": "Se publica el mismo día, en UTC. Desactivado no se publica nada; lo que compartieron se conserva.",

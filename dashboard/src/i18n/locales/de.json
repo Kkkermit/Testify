@@ -577,11 +577,13 @@
 		"sendTo": "Abschied senden an"
 	},
 	"birthdays": {
+		"summaryOn": "Jeder geteilte Geburtstag wird am Tag selbst in {{channel}} gepostet.",
+		"summaryOff": "Geburtstagsposts sind aus. Eingeschaltet wird jeder geteilte Geburtstag am Tag selbst in {{channel}} gepostet.",
+		"summaryNoChannel": "Geburtstage haben noch keinen Kanal, daher wird keiner gepostet.",
 		"title": "Geburtstage",
 		"subtitle": "Ein Beitrag am Geburtstag, für Mitglieder, die ihren hier geteilt haben. Nie ihr Alter.",
-		"posts": "Geburtstagsbeiträge",
 		"channel": "Geburtstage posten in",
-		"pickFirst": "Wähle einen Kanal, dann wird der Rest dieser Karte aktiv.",
+		"pickFirst": "Wähle zuerst einen Kanal.",
 		"cannotSend": "{{bot}} kann in diesem Kanal nicht posten, also würde kein Geburtstag gepostet. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen.",
 		"post": "Geburtstage posten",
 		"postHint": "Am Tag selbst, in UTC. Aus bedeutet, dass nichts gepostet wird; was Mitglieder geteilt haben, bleibt erhalten.",

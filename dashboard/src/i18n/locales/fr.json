@@ -594,11 +594,13 @@
 		"sendTo": "Envoyer l’au revoir dans"
 	},
 	"birthdays": {
+		"summaryOn": "Chaque anniversaire partagé est publié dans {{channel}} le jour même.",
+		"summaryOff": "Les messages d’anniversaire sont désactivés. Activés, chaque anniversaire partagé est publié dans {{channel}} le jour même.",
+		"summaryNoChannel": "Les anniversaires n’ont pas encore de salon, donc aucun n’est publié.",
 		"title": "Anniversaires",
 		"subtitle": "Une publication le jour de l’anniversaire, pour les membres qui l’ont partagé ici. Jamais leur âge.",
-		"posts": "Publications d’anniversaire",
 		"channel": "Publier les anniversaires dans",
-		"pickFirst": "Choisis un salon et le reste de cette carte s’active.",
+		"pickFirst": "Choisissez d’abord un salon.",
 		"cannotSend": "{{bot}} ne peut pas publier dans ce salon, donc aucun anniversaire ne serait publié. Donne-lui Envoyer des messages là-bas, ou choisis-en un autre.",
 		"post": "Publier les anniversaires",
 		"postHint": "Publié le jour même, en UTC. Désactivé, rien n’est publié ; ce que les membres ont partagé est conservé.",
