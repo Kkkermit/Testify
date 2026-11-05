@@ -5,12 +5,11 @@ import { BotMark } from "@/components/brand/BotMark";
 import { LanguageSelect } from "@/components/form/LanguageSelect";
 import { Button, Card, SectionHeading, PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
-import { useBot } from "@/features/auth/useBot";
+import { useBotLook } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
 import { DashboardOff } from "@/features/site/components/DashboardOff";
 import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { rememberedBotName } from "@/lib/brand";
 import { hardRedirect } from "@/lib/redirect";
 
 /** One button, and the two scopes named — asking for less is a feature, so say what it is. */
@@ -19,11 +18,11 @@ export function SignInPage(): React.JSX.Element {
 	usePageTitle(t("auth.title"));
 	const [params] = useSearchParams();
 	const setup = useSetup();
-	const bot = useBot();
+	const bot = useBotLook();
 	const site = useSite();
 	const returnTo = params.get("returnTo") ?? "/guilds";
 	// Never the built-in name: a bot not called that is misnamed on the one screen everybody sees first.
-	const name = bot.data?.name ?? rememberedBotName();
+	const name = bot.name;
 
 	if (site.data?.dashboard === false) return <DashboardOff />;
 	if (setup.data?.configured === false)
@@ -34,13 +33,13 @@ export function SignInPage(): React.JSX.Element {
 			<LanguageSelect className="self-end" />
 
 			<Card padding="none" className="motion-pop overflow-hidden">
-				<BotBanner src={bot.data?.bannerUrl} accent={bot.data?.accentColour} className="h-24" />
+				<BotBanner src={bot.bannerUrl} accent={bot.accentColour} className="h-24" />
 
 				{/* Positioned, or the banner — which is — paints over the avatar lifted into it. */}
 				<div className="relative flex flex-col gap-4 p-6">
 					{/* Lifted into the banner, the way a profile card reads. */}
 					<div className="-mt-14 flex items-end gap-3">
-						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-tile ring-4" />
+						<BotMark src={bot.avatarUrl} name={name} size={64} className="ring-card rounded-tile ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
 							<SectionHeading>{t("auth.signIn")}</SectionHeading>
 							{name === null ? (

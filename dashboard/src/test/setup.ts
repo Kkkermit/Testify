@@ -17,6 +17,8 @@ beforeAll(() => {
 
 afterEach(() => {
 	server.resetHandlers();
+	// Any test that renders the shell remembers the bot's look, which would answer the next test before its request did.
+	localStorage.removeItem("testify:botLook");
 });
 
 afterAll(() => {

@@ -762,8 +762,9 @@ IDs) and its default.
   gateway is ready:** while it connects, `botIdentity` reads the bot's own user over REST with the token
   (`client.restName`), so `/api/bot` answers from the start rather than 503-ing the sign-in screen into showing the
   built-in name. The dashboard's strings write `{{bot}}`, which i18next fills from `defaultVariables` and
-  `useBot()` updates once the answer lands; the answer is also kept in `localStorage` (`rememberedBotName`), and
-  with nothing remembered the sign-in screen shows a placeholder rather than a name the bot may not have. A help
+  `useBot()` updates once the answer lands; the answer is also kept in `localStorage` (`rememberedBotName`, and
+  the picture with it — see [§24](#the-dashboard-wears-the-bots-face)), and with nothing remembered the sign-in
+  screen shows a placeholder rather than a name the bot may not have. A help
   article writes `{bot}`. `tests/config/brand.test.ts` fails on the name written anywhere else in `src`,
   `shared/src`, `dashboard/src`, the articles or `index.html`.
 - **Every variable reaches every way of running the bot.** `tests/config/setupFiles.test.ts` fails on a variable
@@ -1996,7 +1997,7 @@ Inside `dashboard/src`, the same rule as the bot: technical role first, then dom
 ```
 app/            AppShell, RequireAuth, ErrorState, and layout/ for the sidebar
 components/
-  brand/        Logo and LogoTile — the mark, inline, inheriting currentColor
+  brand/        BotMark and BotBanner — the bot's own picture and banner, FlagIcon
   primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
                 SegmentedControl, DataList/Figure, Tooltip
   form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
@@ -3095,8 +3096,15 @@ own bot without a line of CSS. Two things about it are easy to get wrong:
 
 - **The banner is not in the READY payload.** `client.user.banner` is undefined until the user is fetched over
   REST, so `botIdentity()` fetches once and caches for an hour. A failed fetch still yields the avatar.
-- **Everything falls back to `components/brand/Logo`** — no profile yet, no avatar, or a CDN that will not load.
-  A brand mark is never worth a broken image icon, and `BotMark` handles all three the same way.
+- **The bot's own picture and banner are always what is drawn, never a built-in logo.** There is no logo component:
+  a fork's sign-in screen once wore the shield whenever `/api/bot` had not answered, which under `npm run dev:all`
+  is every bot restart. `useBotLook()` answers with the live profile, or until it lands the picture, banner and
+  colour it last gave, which `rememberBotLook` keeps in `localStorage` beside the name; `rememberedBotLook` reads
+  back only `https://cdn.discordapp.com` addresses and a `#rrggbb` colour, because storage holds whatever was last
+  written to it. The tab's icon becomes the same picture (`showBotIcon`). With nothing remembered, or a CDN that will
+  not load, `BotMark` draws the bot's initial, and a picture that failed is tried again once the address changes.
+- **A restart is waited out like a connection.** `useBot` keeps asking every two seconds for a minute while the
+  answer is `bot_connecting` or the development proxy's `api_down`, rather than giving up after two quick retries.
 
 The endpoint takes no session because the sign-in screen needs it before one exists; it carries nothing beyond
 the public profile, and a test pins the exact key set so nothing private drifts into it.

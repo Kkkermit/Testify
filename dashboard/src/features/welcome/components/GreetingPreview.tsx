@@ -1,7 +1,7 @@
 import { fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { DiscordPreview } from "@/components/primitives";
-import { useBot } from "@/features/auth/useBot";
+import { useBotLook } from "@/features/auth/useBot";
 import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
@@ -22,8 +22,8 @@ export function GreetingPreview({
 	leaving?: boolean;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const bot = useBot();
-	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
+	const bot = useBotLook();
+	const name = bot.name ?? BUILT_IN_BOT_NAME;
 	const person = leaving ? "someone" : "newcomer";
 	const filled = fillTemplate(message, {
 		mention: `@${person}`,
@@ -33,7 +33,7 @@ export function GreetingPreview({
 	});
 
 	return (
-		<DiscordPreview name={name} avatarUrl={bot.data?.avatarUrl ?? null} seed={guildName}>
+		<DiscordPreview name={name} avatarUrl={bot.avatarUrl} seed={guildName}>
 			<div
 				className={cn(
 					"mt-1 text-sm break-words",

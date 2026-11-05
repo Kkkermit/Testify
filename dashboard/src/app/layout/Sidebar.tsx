@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@testify/shared";
+import { type DashboardUser, type ManageableGuild } from "@testify/shared";
 import { FileText, LogOut, Palette, Search, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -14,7 +14,7 @@ import { navigationFor, type NavAudience } from "@/config/navigation";
 import { shortcutLabel } from "@/features/search/quickSearch.utils";
 import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
 import { api } from "@/lib/api";
-import { BUILT_IN_BOT_NAME } from "@/lib/brand";
+import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
@@ -42,7 +42,7 @@ export function Sidebar({
 	/** Every server this person manages, for the switcher. */
 	guilds?: readonly ManageableGuild[];
 	/** The bot's own profile, so a fork's sidebar carries its identity rather than the original's. */
-	bot?: BotIdentity | undefined;
+	bot?: BotLook | undefined;
 	/** True inside the mobile drawer, where there is room for the labels. */
 	expanded?: boolean;
 	onNavigate?: () => void;
@@ -72,7 +72,7 @@ export function Sidebar({
 			<Link to="/guilds" className={cn(ROW, "mb-4")}>
 				{/* Boxed to 18px like every other row icon, so the wordmark starts on the label column too. */}
 				<span aria-hidden="true" className={ICON_SLOT}>
-					<BotMark src={bot?.avatarUrl} size={22} />
+					<BotMark src={bot?.avatarUrl} name={bot?.name ?? null} size={22} />
 				</span>
 				<span className={label("font-display truncate text-[0.9375rem] font-semibold")}>
 					{bot?.name ?? BUILT_IN_BOT_NAME}

@@ -1,11 +1,11 @@
-import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@testify/shared";
+import { type DashboardUser, type ManageableGuild } from "@testify/shared";
 import { Menu, Search, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { BotMark } from "@/components/brand/BotMark";
 import { type NavAudience } from "@/config/navigation";
-import { BUILT_IN_BOT_NAME } from "@/lib/brand";
+import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 
 /** A drawer below `md`, closing on Escape, on a link, and returning focus to its button. */
 export function MobileNav({
@@ -20,7 +20,7 @@ export function MobileNav({
 }: NavAudience & {
 	user: DashboardUser | null;
 	guilds: readonly ManageableGuild[];
-	bot?: BotIdentity | undefined;
+	bot?: BotLook | undefined;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onSearch: () => void;
@@ -70,7 +70,7 @@ export function MobileNav({
 					<Menu size={20} aria-hidden="true" />
 					<span className="sr-only">{t("nav.menu")}</span>
 				</button>
-				<BotMark src={bot?.avatarUrl} size={20} />
+				<BotMark src={bot?.avatarUrl} name={bot?.name ?? null} size={20} />
 				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
 					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>

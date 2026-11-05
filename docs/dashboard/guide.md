@@ -193,7 +193,7 @@ src/
 │   ├── ErrorState.tsx  What a failed query renders.
 │   └── layout/         Sidebar, SidebarLink, SidebarSection, MobileNav
 ├── components/
-│   ├── brand/          Logo, LogoTile, BotMark — the mark, inheriting currentColor
+│   ├── brand/          BotMark, BotBanner, FlagIcon — the bot's own picture and banner
 │   ├── primitives/     Avatar Badge Button Card DataList EmptyState PageHeader Pager
 │   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
@@ -806,8 +806,10 @@ precisely the screen you want when something is wrong.
 
 `GET /api/bot` returns the application's own profile and every brand surface reads it, so a fork looks like its
 own bot without a line of CSS. The banner is **not** in the READY payload — `client.user.banner` is undefined
-until the user is fetched over REST, so `botIdentity()` fetches once and caches for an hour. Everything falls
-back to `components/brand/Logo`; a brand mark is never worth a broken image icon.
+until the user is fetched over REST, so `botIdentity()` fetches once and caches for an hour. The bot's picture and
+banner are always what is drawn: `useBotLook()` answers with the ones it last gave until the live profile lands,
+and `BotMark` draws the bot's initial only when there is no picture at all. There is no built-in logo to fall back
+to, and one must not be added ([AGENTS §24](../../AGENTS.md#the-dashboard-wears-the-bots-face)).
 
 ---
 

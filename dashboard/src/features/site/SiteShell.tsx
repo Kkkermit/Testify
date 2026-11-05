@@ -6,10 +6,9 @@ import { BotMark } from "@/components/brand/BotMark";
 import { LanguageSelect } from "@/components/form/LanguageSelect";
 import { Tooltip } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
-import { useBot } from "@/features/auth/useBot";
+import { useBot, useBotLook } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { useSite } from "@/features/site/useSite";
-import { rememberedBotName } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 
 const NAV_LINK = cn(
@@ -25,8 +24,9 @@ const NAV_LINK = cn(
 export function SiteShell({ column = false }: { column?: boolean }): React.JSX.Element {
 	const { t } = useTranslation();
 	const bot = useBot();
+	const look = useBotLook();
 	const site = useSite();
-	const name = bot.data?.name ?? rememberedBotName();
+	const name = look.name;
 
 	return (
 		<div className="flex min-h-dvh flex-col">
@@ -36,7 +36,7 @@ export function SiteShell({ column = false }: { column?: boolean }): React.JSX.E
 					aria-label={t("site.home")}
 					className={cn(INLINE_TARGET, "font-display mr-auto gap-2 text-lg font-bold tracking-tight")}
 				>
-					<BotMark src={bot.data?.avatarUrl} size={28} className="rounded-field" />
+					<BotMark src={look.avatarUrl} name={name} size={28} className="rounded-field" />
 					{name}
 				</Link>
 

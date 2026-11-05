@@ -5,7 +5,7 @@ import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { UndoProvider } from "@/app/UndoProvider";
-import { useBot } from "@/features/auth/useBot";
+import { useBotLook } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
 import { QuickSearch } from "@/features/search/QuickSearch";
@@ -15,7 +15,7 @@ import { useScreenView } from "@/hooks/useScreenView";
 /** Navigation and the outlet. */
 export function AppShell(): React.JSX.Element {
 	const me = useMe();
-	const bot = useBot();
+	const bot = useBotLook();
 	const { guildId } = useParams();
 	const location = useLocation();
 	const { t } = useTranslation();
@@ -61,12 +61,12 @@ export function AppShell(): React.JSX.Element {
 				<MobileNav
 					{...audience}
 					user={user}
-					bot={bot.data}
+					bot={bot}
 					open={menuOpen}
 					onOpenChange={setMenuOpen}
 					onSearch={openSearch}
 				/>
-				<Sidebar {...audience} user={user} bot={bot.data} onSearch={openSearch} />
+				<Sidebar {...audience} user={user} bot={bot} onSearch={openSearch} />
 				{searching && <QuickSearch {...audience} onClose={closeSearch} />}
 
 				{/* Keyed on the path so each screen fades in on arrival, and `min-w-0` because a flex item will not otherwise shrink below its content. */}

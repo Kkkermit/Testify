@@ -11,8 +11,8 @@ export function BotBanner({
 	accent: string | null | undefined;
 	className?: string;
 }): React.JSX.Element {
-	const [broken, setBroken] = useState(false);
-	const showImage = src !== null && src !== undefined && !broken;
+	const [broken, setBroken] = useState<string | null>(null);
+	const showImage = src !== null && src !== undefined && broken !== src;
 
 	return (
 		<div
@@ -24,9 +24,8 @@ export function BotBanner({
 				<img
 					src={src}
 					alt=""
-					loading="lazy"
 					onError={() => {
-						setBroken(true);
+						setBroken(src);
 					}}
 					className="h-full w-full object-cover"
 				/>
