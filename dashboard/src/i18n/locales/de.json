@@ -731,6 +731,12 @@
 		"colourYellow": "Gelb"
 	},
 	"raid": {
+		"summaryHoldAlert_other": "Konten, die jünger als {{count, number}} Tage sind, werden zurückgehalten, und eine Beitrittswelle wird in {{channel}} gemeldet.",
+		"summaryHoldAlert_one": "Konten, die jünger als {{count, number}} Tag sind, werden zurückgehalten, und eine Beitrittswelle wird in {{channel}} gemeldet.",
+		"summaryHold_other": "Konten, die jünger als {{count, number}} Tage sind, werden zurückgehalten. Eine Beitrittswelle wird nicht gemeldet.",
+		"summaryHold_one": "Konten, die jünger als {{count, number}} Tag sind, werden zurückgehalten. Eine Beitrittswelle wird nicht gemeldet.",
+		"summaryAlert": "Neue Konten kommen herein, und eine Beitrittswelle wird in {{channel}} gemeldet.",
+		"summaryOff": "Der Raid-Schutz ist aus, daher bleiben neue Konten und Beitrittswellen unbemerkt.",
 		"title": "Raid-Schutz",
 		"subtitle": "Halte ganz neue Konten zurück und erfahre, wenn plötzlich viele beitreten. Nichts hier kickt oder bannt.",
 		"enabled": "Neue Beitritte beobachten",

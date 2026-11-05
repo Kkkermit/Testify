@@ -752,6 +752,14 @@
 		"colourYellow": "Amarillo"
 	},
 	"raid": {
+		"summaryHoldAlert_other": "Las cuentas con menos de {{count, number}} días se retienen, y un pico de entradas se avisa en {{channel}}.",
+		"summaryHoldAlert_many": "Las cuentas con menos de {{count, number}} de días se retienen, y un pico de entradas se avisa en {{channel}}.",
+		"summaryHoldAlert_one": "Las cuentas con menos de {{count, number}} día se retienen, y un pico de entradas se avisa en {{channel}}.",
+		"summaryHold_other": "Las cuentas con menos de {{count, number}} días se retienen. Un pico de entradas no se avisa.",
+		"summaryHold_many": "Las cuentas con menos de {{count, number}} de días se retienen. Un pico de entradas no se avisa.",
+		"summaryHold_one": "Las cuentas con menos de {{count, number}} día se retienen. Un pico de entradas no se avisa.",
+		"summaryAlert": "Las cuentas nuevas entran, y un pico de entradas se avisa en {{channel}}.",
+		"summaryOff": "La protección contra raids está desactivada, así que las cuentas nuevas y los picos de entradas pasan desapercibidos.",
 		"title": "Protección contra raids",
 		"subtitle": "Retén las cuentas recién creadas y entérate cuando las entradas se disparan. Nada de esto expulsa ni banea.",
 		"enabled": "Vigilar las entradas nuevas",

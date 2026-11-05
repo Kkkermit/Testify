@@ -11,13 +11,14 @@ import {
 	SavingIndicator,
 	savingStateOf,
 	SELECT,
+	SettingRows,
 	Toggle,
 	Warning,
 } from "@/components/form";
-import { Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
-import { hasWork, numberIn } from "@/features/raid-protection/raid.utils";
+import { hasWork, numberIn, raidSummary } from "@/features/raid-protection/raid.utils";
 import { useRaid, useUpdateRaid } from "@/features/raid-protection/useRaid";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
@@ -57,11 +58,9 @@ export function RaidPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}
 			/>
 
-			{save.error !== null && (
-				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Summary>{raidSummary(settings, channel, t)}</Summary>
 
-			<Card className="flex flex-col gap-4">
+			<SettingRows description={t("raid.neverKicks")}>
 				<Toggle
 					label={t("raid.enabled")}
 					hint={hasWork(settings) ? t("raid.enabledHint") : t("raid.enabledHintNothing")}
@@ -71,15 +70,9 @@ export function RaidPage(): React.JSX.Element {
 						write({ enabled });
 					}}
 				/>
-				<p className="text-muted-foreground text-sm">{t("raid.neverKicks")}</p>
-			</Card>
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("raid.hold")}</h2>
-					<p className="text-muted-foreground text-sm">{t("raid.holdBody")}</p>
-				</div>
-
+			<SettingRows title={t("raid.hold")} description={t("raid.holdBody")}>
 				<NumberField
 					key={`age-${String(settings.minAccountAgeDays)}`}
 					id="raid-age"
@@ -93,14 +86,9 @@ export function RaidPage(): React.JSX.Element {
 					}}
 				/>
 				{settings.minAccountAgeDays > 0 && !settings.canHold && <Warning>{t("raid.cannotHold")}</Warning>}
-			</Card>
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("raid.alerts")}</h2>
-					<p className="text-muted-foreground text-sm">{t("raid.alertsBody")}</p>
-				</div>
-
+			<SettingRows title={t("raid.alerts")} description={t("raid.alertsBody")}>
 				<ChannelPicker
 					label={t("raid.channel")}
 					hint={t("raid.channelHint")}
@@ -134,34 +122,36 @@ export function RaidPage(): React.JSX.Element {
 				</Field>
 				{!settings.canPing && <Warning>{t("raid.cannotPing")}</Warning>}
 
-				<div className="flex flex-wrap gap-4">
-					<NumberField
-						key={`joins-${String(settings.spikeJoins)}`}
-						id="raid-joins"
-						label={t("raid.joins")}
-						hint={t("raid.range", { min: RAID_LIMITS.minSpikeJoins, max: RAID_LIMITS.maxSpikeJoins })}
-						stored={settings.spikeJoins}
-						min={RAID_LIMITS.minSpikeJoins}
-						max={RAID_LIMITS.maxSpikeJoins}
-						onSave={(spikeJoins) => {
-							write({ spikeJoins });
-						}}
-					/>
-					<NumberField
-						key={`minutes-${String(settings.spikeMinutes)}`}
-						id="raid-minutes"
-						label={t("raid.minutes")}
-						hint={t("raid.range", { min: RAID_LIMITS.minSpikeMinutes, max: RAID_LIMITS.maxSpikeMinutes })}
-						stored={settings.spikeMinutes}
-						min={RAID_LIMITS.minSpikeMinutes}
-						max={RAID_LIMITS.maxSpikeMinutes}
-						onSave={(spikeMinutes) => {
-							write({ spikeMinutes });
-						}}
-					/>
-				</div>
-				<p className="text-muted-foreground text-sm">{t("raid.memory", { minutes: RAID_LIMITS.alertEveryMinutes })}</p>
-			</Card>
+				<NumberField
+					key={`joins-${String(settings.spikeJoins)}`}
+					id="raid-joins"
+					label={t("raid.joins")}
+					hint={t("raid.range", { min: RAID_LIMITS.minSpikeJoins, max: RAID_LIMITS.maxSpikeJoins })}
+					stored={settings.spikeJoins}
+					min={RAID_LIMITS.minSpikeJoins}
+					max={RAID_LIMITS.maxSpikeJoins}
+					onSave={(spikeJoins) => {
+						write({ spikeJoins });
+					}}
+				/>
+				<NumberField
+					key={`minutes-${String(settings.spikeMinutes)}`}
+					id="raid-minutes"
+					label={t("raid.minutes")}
+					hint={t("raid.range", { min: RAID_LIMITS.minSpikeMinutes, max: RAID_LIMITS.maxSpikeMinutes })}
+					stored={settings.spikeMinutes}
+					min={RAID_LIMITS.minSpikeMinutes}
+					max={RAID_LIMITS.maxSpikeMinutes}
+					onSave={(spikeMinutes) => {
+						write({ spikeMinutes });
+					}}
+				/>
+			</SettingRows>
+
+			{save.error !== null && (
+				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
+			)}
+			<p className="text-muted-foreground text-sm">{t("raid.memory", { minutes: RAID_LIMITS.alertEveryMinutes })}</p>
 		</>
 	);
 }

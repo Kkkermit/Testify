@@ -752,6 +752,14 @@
 		"colourYellow": "Giallo"
 	},
 	"raid": {
+		"summaryHoldAlert_other": "Gli account con meno di {{count, number}} giorni vengono trattenuti, e un picco di ingressi viene segnalato in {{channel}}.",
+		"summaryHoldAlert_many": "Gli account con meno di {{count, number}} di giorni vengono trattenuti, e un picco di ingressi viene segnalato in {{channel}}.",
+		"summaryHoldAlert_one": "Gli account con meno di {{count, number}} giorno vengono trattenuti, e un picco di ingressi viene segnalato in {{channel}}.",
+		"summaryHold_other": "Gli account con meno di {{count, number}} giorni vengono trattenuti. Un picco di ingressi non viene segnalato.",
+		"summaryHold_many": "Gli account con meno di {{count, number}} di giorni vengono trattenuti. Un picco di ingressi non viene segnalato.",
+		"summaryHold_one": "Gli account con meno di {{count, number}} giorno vengono trattenuti. Un picco di ingressi non viene segnalato.",
+		"summaryAlert": "I nuovi account entrano, e un picco di ingressi viene segnalato in {{channel}}.",
+		"summaryOff": "La protezione anti-raid è disattivata, quindi i nuovi account e i picchi di ingressi passano inosservati.",
 		"title": "Protezione anti-raid",
 		"subtitle": "Trattieni gli account appena creati e scopri quando gli ingressi aumentano di colpo. Niente qui espelle o banna.",
 		"enabled": "Controlla i nuovi ingressi",

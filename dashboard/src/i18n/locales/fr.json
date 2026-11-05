@@ -752,6 +752,14 @@
 		"colourYellow": "Jaune"
 	},
 	"raid": {
+		"summaryHoldAlert_other": "Les comptes de moins de {{count, number}} jours sont retenus, et un pic d’arrivées est signalé dans {{channel}}.",
+		"summaryHoldAlert_many": "Les comptes de moins de {{count, number}} de jours sont retenus, et un pic d’arrivées est signalé dans {{channel}}.",
+		"summaryHoldAlert_one": "Les comptes de moins de {{count, number}} jour sont retenus, et un pic d’arrivées est signalé dans {{channel}}.",
+		"summaryHold_other": "Les comptes de moins de {{count, number}} jours sont retenus. Un pic d’arrivées n’est pas signalé.",
+		"summaryHold_many": "Les comptes de moins de {{count, number}} de jours sont retenus. Un pic d’arrivées n’est pas signalé.",
+		"summaryHold_one": "Les comptes de moins de {{count, number}} jour sont retenus. Un pic d’arrivées n’est pas signalé.",
+		"summaryAlert": "Les nouveaux comptes entrent, et un pic d’arrivées est signalé dans {{channel}}.",
+		"summaryOff": "La protection anti-raid est désactivée, donc les nouveaux comptes et les pics d’arrivées passent inaperçus.",
 		"title": "Protection anti-raid",
 		"subtitle": "Retenez les comptes tout juste créés et soyez prévenu quand les arrivées s’emballent. Rien ici n’expulse ni ne bannit.",
 		"enabled": "Surveiller les nouvelles arrivées",

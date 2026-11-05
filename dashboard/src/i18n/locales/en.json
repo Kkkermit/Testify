@@ -731,6 +731,12 @@
 		"colourYellow": "Yellow"
 	},
 	"raid": {
+		"summaryHoldAlert_other": "Accounts younger than {{count, number}} days are held back, and a spike in joins is reported in {{channel}}.",
+		"summaryHoldAlert_one": "Accounts younger than {{count, number}} day are held back, and a spike in joins is reported in {{channel}}.",
+		"summaryHold_other": "Accounts younger than {{count, number}} days are held back. A spike in joins is not reported.",
+		"summaryHold_one": "Accounts younger than {{count, number}} day are held back. A spike in joins is not reported.",
+		"summaryAlert": "New accounts are let in, and a spike in joins is reported in {{channel}}.",
+		"summaryOff": "Raid protection is off, so new accounts and spikes in joins go unnoticed.",
 		"title": "Raid protection",
 		"subtitle": "Hold back brand new accounts, and hear about it when joins spike. Nothing here kicks or bans.",
 		"enabled": "Watch new joins",

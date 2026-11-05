@@ -123,7 +123,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/sticky`                                   | Messages      | Each sticky message | Done                    |
 | `…/auto-responders`                          | Messages      | Each reply          | Done                    |
 | `…/automod`                                  | Moderation    | —                   | Done                    |
-| `…/raid-protection`                          | Moderation    | —                   | To do                   |
+| `…/raid-protection`                          | Moderation    | —                   | Done                    |
 | `…/warnings`                                 | Moderation    | —                   | To do                   |
 | `…/cases`                                    | Moderation    | —                   | To do                   |
 | `…/bans`                                     | Moderation    | —                   | To do                   |
