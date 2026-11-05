@@ -1421,6 +1421,9 @@
 		"maxBetRange": "La mise maximale doit être un nombre entier entre {{min, number}} et {{max, number}}, ou rester vide."
 	},
 	"settings": {
+		"summaryPrefix": "Les commandes fonctionnent en commandes slash et avec le préfixe {{prefix}}.",
+		"summarySlashOnly": "Les commandes ne fonctionnent qu’en commandes slash, car les commandes à préfixe sont désactivées.",
+		"countingSoFar": "Compté jusqu’ici",
 		"title": "Réglages du serveur",
 		"subtitle": "Les réglages qui n’ont pas d’écran dédié.",
 		"groupBot": "{{bot}} sur ce serveur",

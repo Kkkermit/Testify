@@ -1,5 +1,4 @@
 import { SETTINGS_LIMITS, type AutoRolePut, type AutoRoleSetting, type RoleSummary } from "@testify/shared";
-import { UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RoleChecklist, savingStateOf, Warning } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
@@ -21,8 +20,6 @@ export function AutoRoleSection({
 
 	return (
 		<Section
-			icon={UserPlus}
-			tint="text-feature-welcome"
 			title={t("settings.autoRoleTitle")}
 			describes={t("settings.autoRoleBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess)}

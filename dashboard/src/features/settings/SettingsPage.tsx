@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Disclosure, PageHeader, Skeleton } from "@/components/primitives";
+import { Disclosure, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { AntiLinkSection } from "@/features/settings/sections/AntiLinkSection";
@@ -36,6 +36,12 @@ export function SettingsPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader server={overview.data} title={t("settings.title")} subtitle={t("settings.subtitle")} />
+
+			<Summary>
+				{value.prefix.enabled
+					? t("settings.summaryPrefix", { prefix: value.prefix.prefix })
+					: t("settings.summarySlashOnly")}
+			</Summary>
 
 			<Disclosure label={t("settings.groupBot")}>
 				<Group>

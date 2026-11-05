@@ -1,12 +1,10 @@
 import { type ChannelSummary, type RoleSummary, VERIFY_LIMITS, verificationBlocked } from "@testify/shared";
-import { ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChannelPicker, Field, FIELD, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
+import { ChannelPicker, Field, FIELD, RowActions, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveVerification, useVerification } from "@/features/settings/useVerification";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
@@ -35,8 +33,6 @@ export function VerificationSection({
 
 	return (
 		<Section
-			icon={ShieldCheck}
-			tint="text-feature-moderation"
 			title={t("settings.verifyTitle")}
 			describes={t("settings.verifyBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
@@ -108,7 +104,7 @@ export function VerificationSection({
 					{blocked !== null && <Warning>{blocked}</Warning>}
 
 					{blocked === null && (
-						<div className="flex flex-wrap items-center gap-3">
+						<RowActions>
 							<Button
 								disabled={save.isPending}
 								onClick={() => {
@@ -122,11 +118,7 @@ export function VerificationSection({
 									? t("settings.verifiedSoFar", { verified: value.verifiedCount })
 									: t("settings.notPostedYet")}
 							</p>
-						</div>
-					)}
-
-					{save.error !== null && (
-						<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
+						</RowActions>
 					)}
 				</>
 			)}

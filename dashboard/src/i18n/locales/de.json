@@ -1378,6 +1378,9 @@
 		"maxBetRange": "Der größte Einsatz muss eine ganze Zahl von {{min, number}} bis {{max, number}} sein oder leer bleiben."
 	},
 	"settings": {
+		"summaryPrefix": "Befehle funktionieren als Slash-Befehle und mit dem Präfix {{prefix}}.",
+		"summarySlashOnly": "Befehle funktionieren nur als Slash-Befehle, weil Präfix-Befehle aus sind.",
+		"countingSoFar": "Bisher gezählt",
 		"title": "Servereinstellungen",
 		"subtitle": "Die Schalter, die keine eigene Seite haben.",
 		"groupBot": "{{bot}} auf diesem Server",

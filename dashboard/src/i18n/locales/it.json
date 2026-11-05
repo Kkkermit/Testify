@@ -1421,6 +1421,9 @@
 		"maxBetRange": "La puntata massima deve essere un numero intero tra {{min, number}} e {{max, number}}, oppure restare vuota."
 	},
 	"settings": {
+		"summaryPrefix": "I comandi funzionano come comandi slash e con il prefisso {{prefix}}.",
+		"summarySlashOnly": "I comandi funzionano solo come comandi slash, perché i comandi con prefisso sono disattivati.",
+		"countingSoFar": "Contato finora",
 		"title": "Impostazioni del server",
 		"subtitle": "Gli interruttori che non hanno una schermata propria.",
 		"groupBot": "{{bot}} in questo server",

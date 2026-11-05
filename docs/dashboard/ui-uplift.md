@@ -140,7 +140,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/music`                                    | Entertainment | —                   | Done                      |
 | `…/giveaways`                                | Entertainment | —                   | Done                      |
 | `…/members`, `…/members/:userId`             | Members       | —                   | Done                      |
-| `…/settings`                                 | Settings      | —                   | To do                     |
+| `…/settings`                                 | Settings      | —                   | Done                      |
 | `…/commands`                                 | Commands      | —                   | To do                     |
 
 A list page — bans, cases, warnings, changes, members, commands — keeps its list and gains only the summary, since

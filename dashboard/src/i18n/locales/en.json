@@ -1378,6 +1378,9 @@
 		"maxBetRange": "The largest bet has to be a whole number from {{min, number}} to {{max, number}}, or left empty."
 	},
 	"settings": {
+		"summaryPrefix": "Commands work as slash commands and with the {{prefix}} prefix.",
+		"summarySlashOnly": "Commands work as slash commands only, because prefix commands are off.",
+		"countingSoFar": "Counted so far",
 		"title": "Server settings",
 		"subtitle": "The switches that do not have a screen of their own.",
 		"groupBot": "{{bot}} in this server",

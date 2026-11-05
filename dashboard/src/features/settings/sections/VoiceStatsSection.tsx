@@ -1,5 +1,4 @@
 import { type ChannelSummary, type VoiceStatsPatch, type VoiceStatsSetting } from "@testify/shared";
-import { AudioLines } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ChannelKindPicker, savingStateOf } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
@@ -20,8 +19,6 @@ export function VoiceStatsSection({
 
 	return (
 		<Section
-			icon={AudioLines}
-			tint="text-feature-tickets"
 			title={t("settings.voiceTitle")}
 			describes={t("settings.voiceBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess)}

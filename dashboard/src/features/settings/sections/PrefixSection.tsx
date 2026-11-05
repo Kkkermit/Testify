@@ -1,5 +1,4 @@
 import { type PrefixPatch, type PrefixSetting } from "@testify/shared";
-import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
@@ -30,8 +29,6 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 
 	return (
 		<Section
-			icon={Terminal}
-			tint="text-feature-levelling"
 			title={t("settings.prefixTitle")}
 			describes={t("settings.prefixBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}

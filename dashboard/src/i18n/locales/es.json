@@ -1421,6 +1421,9 @@
 		"maxBetRange": "La apuesta máxima tiene que ser un número entero entre {{min, number}} y {{max, number}}, o quedar vacía."
 	},
 	"settings": {
+		"summaryPrefix": "Los comandos funcionan como comandos de barra y con el prefijo {{prefix}}.",
+		"summarySlashOnly": "Los comandos solo funcionan como comandos de barra, porque los comandos con prefijo están desactivados.",
+		"countingSoFar": "Contado hasta ahora",
 		"title": "Ajustes del servidor",
 		"subtitle": "Los interruptores que no tienen pantalla propia.",
 		"groupBot": "{{bot}} en este servidor",
