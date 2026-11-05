@@ -1,4 +1,4 @@
-import { Search, ServerOff } from "lucide-react";
+import { Columns3, Search, ServerOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
@@ -10,6 +10,7 @@ import { EmptyState, SectionHeading, PageHeader, Pager, Skeleton } from "@/compo
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { comparable } from "@/features/compare/compare.utils";
 import { GuildCard } from "@/features/guilds/GuildCard";
 import {
 	filterGuilds,
@@ -92,6 +93,16 @@ export function GuildPickerPage(): React.JSX.Element {
 					className={cn(FIELD, "py-3 pr-4 pl-12 text-base")}
 				/>
 			</label>
+
+			{comparable(me.data?.guilds ?? []).length >= 2 && (
+				<Link
+					to="/guilds/compare"
+					className={cn(INLINE_TARGET, "text-accent hover:text-foreground gap-2 self-start text-sm")}
+				>
+					<Columns3 size={16} aria-hidden="true" />
+					{t("guilds.compare")}
+				</Link>
+			)}
 
 			{found === 0 ? (
 				<EmptyState

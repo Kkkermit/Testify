@@ -1,6 +1,6 @@
 import { type ChannelSummary, type CommandSummary, type ManageableGuild } from "@testify/shared";
 import { type TFunction } from "i18next";
-import { FileText, Hash, type LucideIcon, Palette, ShieldQuestion, Terminal, Volume2 } from "lucide-react";
+import { Columns3, FileText, Hash, type LucideIcon, Palette, ShieldQuestion, Terminal, Volume2 } from "lucide-react";
 import { allNavItems, type NavAudience, navigationFor } from "@/config/navigation";
 import { channelPath, channelTree } from "@/features/channels/channelMap.utils";
 import { configurableAt } from "@/features/commands/commands.utils";
@@ -23,6 +23,7 @@ export interface SearchEntry {
 
 /** The pages outside the sidebar's groups, which the footer reaches. */
 const EXTRA_PAGES = [
+	{ to: "/guilds/compare", labelKey: "nav.compare", hintKey: "nav.compareHint", icon: Columns3 },
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint", icon: Palette },
 	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint", icon: FileText },
 	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint", icon: ShieldQuestion },

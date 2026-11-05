@@ -160,7 +160,9 @@
 		"source": "Quellcode",
 		"sourceHint": "Jede Datei der Version, auf der diese Seite läuft",
 		"notifications": "Benachrichtigungen",
-		"notificationsHint": "Was die Betreiber des Bots allen mitteilen wollen"
+		"notificationsHint": "Was die Betreiber des Bots allen mitteilen wollen",
+		"compare": "Nebeneinander",
+		"compareHint": "Vergleichen, wie deine Server eingerichtet sind"
 	},
 	"search": {
 		"open": "Suchen",
@@ -337,7 +339,27 @@
 		"invitableBody": "Hier hast du Server verwalten, du kannst {{bot}} also selbst einladen.",
 		"lockedTitle": "Braucht jemand anderen",
 		"lockedBody": "Einen Bot hinzuzufügen braucht Server verwalten — das hast du auf diesen nicht.",
-		"pagesOf": "Seiten von {{group}}"
+		"pagesOf": "Seiten von {{group}}",
+		"compare": "Deine Server nebeneinander vergleichen"
+	},
+	"compare": {
+		"title": "Nebeneinander",
+		"subtitle": "Wie jeder Server, den du verwaltest, eingerichtet ist, Funktion für Funktion.",
+		"choose": "Zu vergleichende Server",
+		"chooseHint": "Bis zu {{max}} Server, auf denen {{bot}} ist.",
+		"chooseTwo": "Wähle mindestens zwei Server, um sie zu vergleichen.",
+		"onlyDifferent": "Nur Unterschiede zeigen",
+		"caption": "Jede Funktion und wie jeder gewählte Server sie eingerichtet hat",
+		"feature": "Funktion",
+		"missing": "Berechtigungen, die {{bot}} fehlen",
+		"noneMissing": "Keine",
+		"unknown": "Unbekannt",
+		"refused": "Du kannst diesen Server nicht mehr verwalten.",
+		"couldNotRead": "Dieser Server konnte nicht gelesen werden.",
+		"allAlike": "Auf diesen Servern ist jede Funktion gleich eingerichtet.",
+		"needTwoTitle": "Dafür braucht es zwei Server",
+		"needTwoBody": "Verglichen werden Server, die du verwaltest und auf denen {{bot}} ist, und bisher ist es höchstens einer.",
+		"toServers": "Zurück zu deinen Servern"
 	},
 	"overview": {
 		"glance": "Der Server auf einen Blick",

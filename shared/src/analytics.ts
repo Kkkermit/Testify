@@ -240,6 +240,7 @@ export interface ScreenTally {
 export const SCREEN_ROUTES = [
 	"/appearance",
 	"/guilds",
+	"/guilds/compare",
 	"/guilds/:guildId",
 	"/guilds/:guildId/insights",
 	"/guilds/:guildId/levelling",

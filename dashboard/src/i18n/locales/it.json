@@ -161,7 +161,9 @@
 		"source": "Codice sorgente",
 		"sourceHint": "Ogni file della versione su cui gira questo sito",
 		"notifications": "Notifiche",
-		"notificationsHint": "Ciò che i proprietari del bot vogliono far sapere a tutti"
+		"notificationsHint": "Ciò che i proprietari del bot vogliono far sapere a tutti",
+		"compare": "Fianco a fianco",
+		"compareHint": "Confronta come sono configurati i tuoi server"
 	},
 	"search": {
 		"open": "Cerca",
@@ -340,7 +342,27 @@
 		"invitableBody": "Qui hai Gestire il server, quindi puoi invitare {{bot}} da solo.",
 		"lockedTitle": "Serve qualcun altro",
 		"lockedBody": "Aggiungere un bot richiede Gestire il server, che qui non hai.",
-		"pagesOf": "Pagine di {{group}}"
+		"pagesOf": "Pagine di {{group}}",
+		"compare": "Confronta i tuoi server fianco a fianco"
+	},
+	"compare": {
+		"title": "Fianco a fianco",
+		"subtitle": "Come è configurato ogni server che gestisci, funzione per funzione.",
+		"choose": "Server da confrontare",
+		"chooseHint": "Fino a {{max}} server in cui c’è {{bot}}.",
+		"chooseTwo": "Scegli almeno due server per confrontarli.",
+		"onlyDifferent": "Mostra solo le differenze",
+		"caption": "Ogni funzione e come la configura ciascun server scelto",
+		"feature": "Funzione",
+		"missing": "Permessi che mancano a {{bot}}",
+		"noneMissing": "Nessuno",
+		"unknown": "Sconosciuto",
+		"refused": "Non puoi più gestire questo server.",
+		"couldNotRead": "Non è stato possibile leggere questo server.",
+		"allAlike": "Ogni funzione è configurata allo stesso modo su questi server.",
+		"needTwoTitle": "Servono due server",
+		"needTwoBody": "Si confrontano i server che gestisci in cui c’è {{bot}}, e per ora ne gestisci uno o nessuno.",
+		"toServers": "Torna ai tuoi server"
 	},
 	"overview": {
 		"glance": "Il server in breve",

@@ -160,7 +160,9 @@
 		"source": "Source code",
 		"sourceHint": "Every file of the release this site runs",
 		"notifications": "Notifications",
-		"notificationsHint": "What the bot’s owners want everybody to know"
+		"notificationsHint": "What the bot’s owners want everybody to know",
+		"compare": "Side by side",
+		"compareHint": "Compare how your servers are set up"
 	},
 	"search": {
 		"open": "Search",
@@ -337,7 +339,27 @@
 		"invitableBody": "You have Manage Server here, so you can invite {{bot}} yourself.",
 		"lockedTitle": "Needs somebody else",
 		"lockedBody": "Adding a bot takes Manage Server, which you do not have in these.",
-		"pagesOf": "Pages of {{group}}"
+		"pagesOf": "Pages of {{group}}",
+		"compare": "Compare your servers side by side"
+	},
+	"compare": {
+		"title": "Side by side",
+		"subtitle": "How each server you manage is set up, feature by feature.",
+		"choose": "Servers to compare",
+		"chooseHint": "Up to {{max}} servers {{bot}} is in.",
+		"chooseTwo": "Choose at least two servers to compare them.",
+		"onlyDifferent": "Only show where they differ",
+		"caption": "Each feature, and how each chosen server has it set up",
+		"feature": "Feature",
+		"missing": "Permissions {{bot}} is missing",
+		"noneMissing": "None",
+		"unknown": "Not known",
+		"refused": "You can no longer manage this server.",
+		"couldNotRead": "This server could not be read.",
+		"allAlike": "Every feature is set up the same way on these servers.",
+		"needTwoTitle": "Side by side needs two servers",
+		"needTwoBody": "It compares servers you manage that {{bot}} is in, and you manage one or none so far.",
+		"toServers": "Back to your servers"
 	},
 	"overview": {
 		"glance": "Server at a glance",

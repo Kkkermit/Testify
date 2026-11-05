@@ -18,6 +18,7 @@ import { followTrails } from "@/lib/trail";
 
 // Lazy per route, so a server manager never downloads the owner console.
 const GuildPickerPage = page(async () => import("@/features/guilds/GuildPickerPage"), "GuildPickerPage");
+const ComparePage = page(async () => import("@/features/compare/ComparePage"), "ComparePage");
 const GuildOverviewPage = page(async () => import("@/features/guild-overview/GuildOverviewPage"), "GuildOverviewPage");
 const LevellingPage = page(async () => import("@/features/levelling/LevellingPage"), "LevellingPage");
 const WelcomePage = page(async () => import("@/features/welcome/WelcomePage"), "WelcomePage");
@@ -123,6 +124,8 @@ export const routes = [
 						errorElement: <RouteError />,
 						children: [
 							{ path: "/guilds", element: lazily(<GuildPickerPage />) },
+							// Each column asks its own server, so this page sits outside the one-server gate.
+							{ path: "/guilds/compare", element: lazily(<ComparePage />) },
 							// Drawn only once the server says this person may manage the guild in the path.
 							{
 								element: <RequireGuild />,
