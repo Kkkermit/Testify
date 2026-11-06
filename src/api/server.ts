@@ -99,7 +99,10 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/support/ask", rateLimit(asking, { name: "support", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/erase", rateLimit(erasing, { name: "erase", trustProxy: env.DASHBOARD_TRUST_PROXY }));
-	app.on("POST", "/api/appeals/*", rateLimit(appealing, { name: "appeal", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	// Sending an appeal posts to a staff channel; reading the list does not, so only the send takes this limit.
+	if (env.DASHBOARD_ENABLED) {
+		app.on("POST", "/api/appeals/*", rateLimit(appealing, { name: "appeal", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	}
 	// Before `verifyCsrf`, which compares against the session's stored secret when there is one.
 	app.use("/api/*", loadSession);
 	app.use("*", verifyCsrf);
