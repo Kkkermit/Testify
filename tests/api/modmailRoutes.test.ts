@@ -66,7 +66,7 @@ describe("the mod mail routes", () => {
 		expect(await shown.json()).toEqual({ visible: true, items: [] });
 	});
 
-	it("closes a conversation as the person signed in, and only with Manage Messages", async () => {
+	it("closes a conversation as the person signed in, only with Manage Messages and the channel in sight", async () => {
 		jest.mocked(closeModmail).mockResolvedValue({
 			id: "c".repeat(24),
 			guildId: GUILD,
@@ -83,6 +83,8 @@ describe("the mod mail routes", () => {
 		const path = `/guilds/${GUILD}/modmail/conversations/${"c".repeat(24)}/close`;
 
 		expect((await app(true).request(path, { method: "POST" })).status).toBe(403);
+		const unseen = app(false, [PermissionsBitField.Flags.ManageMessages]);
+		expect((await unseen.request(path, { method: "POST" })).status).toBe(403);
 		expect(closeModmail).not.toHaveBeenCalled();
 
 		const closed = await app(true, [PermissionsBitField.Flags.ManageMessages]).request(path, { method: "POST" });

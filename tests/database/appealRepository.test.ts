@@ -4,7 +4,6 @@ import {
 	appealGuildIds,
 	createAppeal,
 	decideAppeal,
-	findAppeal,
 	getAppealSettings,
 	latestAppeal,
 	reopenAppeal,
@@ -44,7 +43,7 @@ describeWithMongo("appealRepository", () => {
 		expect([one, two].filter((decided) => decided !== null)).toHaveLength(1);
 
 		await reopenAppeal(GUILD, id);
-		expect(await findAppeal(GUILD, id)).toMatchObject({ status: "open", decidedBy: null, reason: "" });
+		expect(await latestAppeal(GUILD, KATE)).toMatchObject({ status: "open", decidedBy: null, reason: "" });
 	});
 
 	/** A decided appeal is kept a while so a refusal can hold back the next one, then MongoDB lets it go. */
@@ -60,9 +59,8 @@ describeWithMongo("appealRepository", () => {
 	it("never reaches another server's appeal by id", async () => {
 		const appeal = await createAppeal(FIELDS);
 
-		expect(await findAppeal(OTHER, appeal?.id ?? "")).toBeNull();
 		expect(await decideAppeal(OTHER, appeal?.id ?? "", { ...DECISION, status: "accepted" })).toBeNull();
-		expect(await findAppeal(GUILD, "not-an-id")).toBeNull();
+		expect(await decideAppeal(GUILD, "not-an-id", { ...DECISION, status: "accepted" })).toBeNull();
 	});
 
 	it("lists only servers that are on and have a channel", async () => {

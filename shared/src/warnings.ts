@@ -43,8 +43,6 @@ export const warnLadderPut = z.object({
 	expireAfterDays: expiryDays.nullable().optional(),
 });
 
-export type WarnLadderPut = z.infer<typeof warnLadderPut>;
-
 export interface WarnLadder {
 	/** The first entry is what a first warning does, the second a second, and so on. */
 	steps: WarnStep[];

@@ -1,11 +1,12 @@
 import { isValidObjectId, type Types } from "mongoose";
-import { CACHE } from "@config/constants";
+import { CACHE, DAY_MS } from "@config/constants";
 import {
 	ModmailSettingsConfig,
 	type ModmailSettingsRecord,
 	ModmailThread,
 	type ModmailThreadRecord,
 } from "@database/models/modmail.schema";
+import { recordIn } from "@database/recordFilter.util";
 import { MODMAIL_LIMITS } from "@testify/shared";
 
 export type StoredModmailSettings = Pick<ModmailSettingsRecord, "enabled" | "channelId" | "pingRoleId" | "anonymous">;
@@ -36,10 +37,6 @@ function toConversation(row: Lean): StoredConversation {
 }
 
 /** Every lookup by id is scoped to the server too, so one server's staff can never reach another's conversation. */
-function scope(guildId: string, conversationId: string): { guildId: string; _id: string } | null {
-	return isValidObjectId(conversationId) ? { guildId, _id: conversationId } : null;
-}
-
 export async function getModmailSettings(guildId: string): Promise<StoredModmailSettings | null> {
 	const cached = cache.get(guildId);
 	if (cached && cached.expiresAt > Date.now()) return cached.settings;
@@ -92,13 +89,13 @@ export async function claimConversation(
 }
 
 export async function setConversationThread(guildId: string, conversationId: string, threadId: string): Promise<void> {
-	const filter = scope(guildId, conversationId);
+	const filter = recordIn(guildId, conversationId);
 	if (filter !== null) await ModmailThread.updateOne(filter, { $set: { threadId } }).exec();
 }
 
 /** Takes back a claim whose thread could not be made. */
 export async function dropConversation(guildId: string, conversationId: string): Promise<void> {
-	const filter = scope(guildId, conversationId);
+	const filter = recordIn(guildId, conversationId);
 	if (filter !== null) await ModmailThread.deleteOne(filter).exec();
 }
 
@@ -109,14 +106,6 @@ export async function openConversationOf(userId: string): Promise<StoredConversa
 
 export async function conversationByThread(threadId: string): Promise<StoredConversation | null> {
 	const row = await ModmailThread.findOne({ threadId, status: "open" }).lean<Lean>().exec();
-	return row === null ? null : toConversation(row);
-}
-
-export async function findConversation(guildId: string, conversationId: string): Promise<StoredConversation | null> {
-	const filter = scope(guildId, conversationId);
-	if (filter === null) return null;
-
-	const row = await ModmailThread.findOne(filter).lean<Lean>().exec();
 	return row === null ? null : toConversation(row);
 }
 
@@ -137,7 +126,7 @@ export async function closeConversation(
 	closedBy: string | null,
 	at: Date = new Date(),
 ): Promise<StoredConversation | null> {
-	const filter = scope(guildId, conversationId);
+	const filter = recordIn(guildId, conversationId);
 	if (filter === null) return null;
 
 	const row = await ModmailThread.findOneAndUpdate(
@@ -148,7 +137,7 @@ export async function closeConversation(
 				waiting: false,
 				closedAt: at,
 				closedBy,
-				expiresAt: new Date(at.getTime() + MODMAIL_LIMITS.keepDays * 86_400_000),
+				expiresAt: new Date(at.getTime() + MODMAIL_LIMITS.keepDays * DAY_MS),
 			},
 		},
 		{ new: true },

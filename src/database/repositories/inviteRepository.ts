@@ -1,4 +1,4 @@
-import { CACHE } from "@config/constants";
+import { CACHE, DAY_MS } from "@config/constants";
 import {
 	InviteJoin,
 	type InviteJoinRecord,
@@ -58,7 +58,7 @@ export async function recordJoin(join: Omit<StoredInviteJoin, "leftAt">): Promis
 	await InviteJoin.create({
 		...join,
 		leftAt: null,
-		expiresAt: new Date(join.joinedAt.getTime() + INVITE_LIMITS.keepDays * 86_400_000),
+		expiresAt: new Date(join.joinedAt.getTime() + INVITE_LIMITS.keepDays * DAY_MS),
 	});
 }
 

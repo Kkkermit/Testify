@@ -10,6 +10,7 @@ import {
 	ThreadAutoArchiveDuration,
 	type User,
 } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { checkOpenControl, refusalText } from "@core/checks";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
@@ -335,7 +336,7 @@ async function sharedServers(client: TestifyClient, userId: string): Promise<{ i
 export async function offerModmail(client: TestifyClient, message: Message): Promise<boolean> {
 	const userId = message.author.id;
 	const last = offered.get(userId);
-	if (last !== undefined && Date.now() - last < MODMAIL_LIMITS.offerEveryMinutes * 60_000) return false;
+	if (last !== undefined && Date.now() - last < MODMAIL_LIMITS.offerEveryMinutes * MINUTE_MS) return false;
 
 	const servers = await sharedServers(client, userId);
 	if (servers.length === 0) return false;
