@@ -24,6 +24,7 @@ import { INSIGHT_WINDOW_LABELS } from "@/features/insights/insights.utils";
 import { useInsights } from "@/features/insights/useInsights";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { shortDate } from "@/lib/datetime";
+import { currentData } from "@/lib/queries";
 
 export function InsightsPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -53,6 +54,8 @@ export function InsightsPage(): React.JSX.Element {
 	}
 
 	const report = insights.data;
+	// The window's own figures wait for their answer; the server's facts and the switch stay on the last one.
+	const results = currentData(insights);
 
 	return (
 		<>
@@ -77,66 +80,72 @@ export function InsightsPage(): React.JSX.Element {
 						onChange={setDays}
 					/>
 				</div>
-				<p className="text-muted-foreground text-sm">
-					{report.countingSince === null
-						? t("insights.notCountingYet")
-						: t("insights.countingSince", { date: shortDate(report.countingSince) })}
-				</p>
-
-				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-					<StatTile label={t("insights.messages")} value={report.totals.messages} icon={MessageSquare} />
-					<StatTile label={t("insights.activeMembers")} value={report.totals.activeMembers} icon={Users} />
-					<StatTile label={t("insights.joined")} value={report.totals.joins} icon={UserPlus} />
-					<StatTile label={t("insights.left")} value={report.totals.leaves} icon={UserMinus} />
-				</div>
-
-				<Card className="flex flex-col gap-4">
-					<div>
-						<h3 className={CARD_HEADING}>{t("insights.messagesPerDay")}</h3>
+				{results === undefined ? (
+					<Skeleton className="h-96 w-full" />
+				) : (
+					<>
 						<p className="text-muted-foreground text-sm">
-							{t("insights.average", { average: averagePerDay(report.totals.messages, report.days) })}
+							{results.countingSince === null
+								? t("insights.notCountingYet")
+								: t("insights.countingSince", { date: shortDate(results.countingSince) })}
 						</p>
-					</div>
-					<ActivityChart days={report.daily} />
-				</Card>
 
-				<Card className="flex flex-col gap-4">
-					<h3 className={CARD_HEADING}>{t("insights.hoursTitle")}</h3>
-					<HoursChart hours={report.hours} />
-				</Card>
+						<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+							<StatTile label={t("insights.messages")} value={results.totals.messages} icon={MessageSquare} />
+							<StatTile label={t("insights.activeMembers")} value={results.totals.activeMembers} icon={Users} />
+							<StatTile label={t("insights.joined")} value={results.totals.joins} icon={UserPlus} />
+							<StatTile label={t("insights.left")} value={results.totals.leaves} icon={UserMinus} />
+						</div>
 
-				<div className="grid items-start gap-4 lg:grid-cols-2">
-					<Card className="flex flex-col gap-3">
-						<h3 className={CARD_HEADING}>{t("insights.topChannels")}</h3>
-						<UsageBars
-							empty={t("insights.noMessages")}
-							rows={report.topChannels.map((channel) => ({
-								id: channel.channelId,
-								label: channel.name === null ? t("insights.deletedChannel") : `#${channel.name}`,
-								count: channel.messages,
-							}))}
-						/>
-					</Card>
-					<Card className="flex flex-col gap-3">
-						<h3 className={CARD_HEADING}>{t("insights.topMembers")}</h3>
-						<UsageBars
-							empty={t("insights.noMessages")}
-							rows={report.topMembers.map((member) => ({
-								id: member.userId,
-								label: (
-									<Link
-										to={`/guilds/${guildId}/members/${member.userId}`}
-										className="hover:text-accent flex items-center gap-2"
-									>
-										<Avatar name={member.name} url={member.avatarUrl} size={20} seed={member.userId} />
-										<span className="truncate">{member.name}</span>
-									</Link>
-								),
-								count: member.messages,
-							}))}
-						/>
-					</Card>
-				</div>
+						<Card className="flex flex-col gap-4">
+							<div>
+								<h3 className={CARD_HEADING}>{t("insights.messagesPerDay")}</h3>
+								<p className="text-muted-foreground text-sm">
+									{t("insights.average", { average: averagePerDay(results.totals.messages, results.days) })}
+								</p>
+							</div>
+							<ActivityChart days={results.daily} />
+						</Card>
+
+						<Card className="flex flex-col gap-4">
+							<h3 className={CARD_HEADING}>{t("insights.hoursTitle")}</h3>
+							<HoursChart hours={results.hours} />
+						</Card>
+
+						<div className="grid items-start gap-4 lg:grid-cols-2">
+							<Card className="flex flex-col gap-3">
+								<h3 className={CARD_HEADING}>{t("insights.topChannels")}</h3>
+								<UsageBars
+									empty={t("insights.noMessages")}
+									rows={results.topChannels.map((channel) => ({
+										id: channel.channelId,
+										label: channel.name === null ? t("insights.deletedChannel") : `#${channel.name}`,
+										count: channel.messages,
+									}))}
+								/>
+							</Card>
+							<Card className="flex flex-col gap-3">
+								<h3 className={CARD_HEADING}>{t("insights.topMembers")}</h3>
+								<UsageBars
+									empty={t("insights.noMessages")}
+									rows={results.topMembers.map((member) => ({
+										id: member.userId,
+										label: (
+											<Link
+												to={`/guilds/${guildId}/members/${member.userId}`}
+												className="hover:text-accent flex items-center gap-2"
+											>
+												<Avatar name={member.name} url={member.avatarUrl} size={20} seed={member.userId} />
+												<span className="truncate">{member.name}</span>
+											</Link>
+										),
+										count: member.messages,
+									}))}
+								/>
+							</Card>
+						</div>
+					</>
+				)}
 			</section>
 
 			<section aria-labelledby="insights-moves" className="flex flex-col gap-3">

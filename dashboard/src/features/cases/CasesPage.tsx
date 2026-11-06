@@ -37,6 +37,7 @@ import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
 import { personName } from "@/lib/people";
+import { currentData } from "@/lib/queries";
 
 export function CasesPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -100,6 +101,7 @@ function CaseList({ guildId }: { guildId: string }): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const searched = useDebounced(query).trim();
 	const list = useCases(guildId, { page, query: searched, action });
+	const results = currentData(list);
 
 	return (
 		<section aria-labelledby="cases-heading" className="flex flex-col gap-3">
@@ -152,13 +154,13 @@ function CaseList({ guildId }: { guildId: string }): React.JSX.Element {
 
 				{list.isError ? (
 					<ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />
-				) : list.data === undefined ? (
+				) : results === undefined ? (
 					<Skeleton className="h-48 w-full" />
-				) : list.data.items.length === 0 ? (
+				) : results.items.length === 0 ? (
 					<EmptyState icon={<Gavel size={28} />} title={t("cases.emptyTitle")} body={t("cases.emptyBody")} />
 				) : (
 					<DividedList>
-						{list.data.items.map((modCase) => (
+						{results.items.map((modCase) => (
 							<CaseRow
 								key={`${String(modCase.number)}:${modCase.at}:${modCase.userId}`}
 								guildId={guildId}

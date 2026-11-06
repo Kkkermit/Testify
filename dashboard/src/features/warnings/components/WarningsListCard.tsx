@@ -9,6 +9,7 @@ import { WarningRow } from "@/features/warnings/components/WarningRow";
 import { useEditWarning, useGuildWarnings, useRemoveWarning } from "@/features/warnings/useWarnings";
 import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
+import { currentData } from "@/lib/queries";
 
 export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.Element | null {
 	const { t } = useTranslation();
@@ -22,6 +23,7 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 		perPage: searching ? WARN_LIMITS.perPage : WARN_LIMITS.recent,
 		query: searched,
 	});
+	const results = currentData(list);
 	const edit = useEditWarning(guildId);
 	const remove = useRemoveWarning(guildId);
 	const busy = edit.isPending || remove.isPending;
@@ -30,7 +32,7 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 	if (list.isError) return <ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />;
 	if (list.isPending) return <Skeleton className="h-64 w-full" />;
 
-	const { items, total, perPage } = list.data;
+	const { total, perPage } = list.data;
 	if (total === 0 && !searching && query.trim() === "") return null;
 
 	return (
@@ -38,9 +40,10 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 			<div>
 				<h2 className={CARD_HEADING}>{searching ? t("warnings.searchTitle") : t("warnings.recentTitle")}</h2>
 				<p className="text-muted-foreground text-sm" aria-live="polite">
-					{searching
-						? t("warnings.searchCount", { count: total })
-						: t("warnings.recentCount", { shown: items.length, count: total })}
+					{results !== undefined &&
+						(searching
+							? t("warnings.searchCount", { count: results.total })
+							: t("warnings.recentCount", { shown: results.items.length, count: results.total }))}
 				</p>
 			</div>
 
@@ -61,11 +64,13 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 
 			<Refusal error={failure} />
 
-			{items.length === 0 ? (
+			{results === undefined ? (
+				<Skeleton className="h-48 w-full" />
+			) : results.items.length === 0 ? (
 				<p className="text-sm">{t("warnings.searchNone")}</p>
 			) : (
 				<DividedList>
-					{items.map((warning) => (
+					{results.items.map((warning) => (
 						<WarningRow
 							key={`${warning.userId}:${warning.id}`}
 							warning={warning}

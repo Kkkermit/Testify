@@ -14,6 +14,7 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { currentData } from "@/lib/queries";
 
 export function ChangesPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -25,6 +26,7 @@ export function ChangesPage(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const searched = useDebounced(query).trim();
 	const changes = useServerChanges(guildId, { days, source, query: searched, page });
+	const results = currentData(changes);
 
 	usePageTitle(t("changes.title"), overview.data?.name);
 
@@ -79,43 +81,45 @@ export function ChangesPage(): React.JSX.Element {
 
 			{changes.isError ? (
 				<ErrorState as="h2" error={changes.error} onRetry={() => void changes.refetch()} />
-			) : changes.isPending ? (
+			) : results === undefined ? (
 				<Skeleton className="h-64 w-full" />
 			) : (
 				<>
-					{changes.data.discordWithheld ? (
+					{results.discordWithheld ? (
 						<Warning>{t("changes.discordWithheld", { permission: permissionLabel("ViewAuditLog", t) })}</Warning>
 					) : (
-						!changes.data.discordReadable && <Warning>{t("changes.cannotReadDiscord")}</Warning>
+						!results.discordReadable && <Warning>{t("changes.cannotReadDiscord")}</Warning>
 					)}
-					{changes.data.moderationWithheld && (
+					{results.moderationWithheld && (
 						<Warning>{t("changes.moderationWithheld", { permission: permissionLabel("ModerateMembers", t) })}</Warning>
 					)}
 					<div className="text-muted-foreground flex flex-col gap-1 text-sm">
 						<p aria-live="polite">
-							{t("changes.count", { count: changes.data.total })}
-							{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
+							{t("changes.count", { count: results.total })}
+							{results.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
 						</p>
 					</div>
-					{changes.data.items.length === 0 ? (
+					{results.items.length === 0 ? (
 						<Card>
 							<p className="text-sm">{searched === "" ? t("changes.none") : t("changes.noMatch")}</p>
 						</Card>
 					) : (
 						<Card padding="none">
 							<DividedList className="rounded-card border-0">
-								{changes.data.items.map((change) => (
+								{results.items.map((change) => (
 									<ChangeRow key={`${change.source}:${change.id}`} change={change} />
 								))}
 							</DividedList>
 						</Card>
 					)}
-					<Pager
-						page={changes.data.page}
-						pages={pageCountOf(changes.data.total, changes.data.perPage)}
-						onChange={setPage}
-					/>
 				</>
+			)}
+			{changes.data !== undefined && !changes.isError && (
+				<Pager
+					page={changes.data.page}
+					pages={pageCountOf(changes.data.total, changes.data.perPage)}
+					onChange={setPage}
+				/>
 			)}
 		</>
 	);

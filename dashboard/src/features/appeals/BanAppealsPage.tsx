@@ -29,6 +29,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
 import { channelLabel } from "@/lib/channels";
 import { pageCount, pageFrom } from "@/lib/paging";
+import { currentData } from "@/lib/queries";
 
 const FILTERS: readonly AppealFilter[] = ["open", "accepted", "refused", "all"];
 
@@ -43,6 +44,7 @@ export function BanAppealsPage(): React.JSX.Element {
 
 	const settings = useAppealSettings(guildId);
 	const list = useAppealList(guildId, filter, page);
+	const results = currentData(list);
 	const channels = useChannels(guildId);
 	const overview = useGuildOverview(guildId);
 	const save = useSaveAppealSettings(guildId);
@@ -107,15 +109,15 @@ export function BanAppealsPage(): React.JSX.Element {
 
 				{list.isError ? (
 					<ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />
-				) : list.data === undefined ? (
+				) : results === undefined ? (
 					<Skeleton className="h-48 w-full" />
-				) : list.data.items.length === 0 ? (
+				) : results.items.length === 0 ? (
 					<Card>
 						<EmptyState icon={<Scale size={28} />} title={t("appeals.emptyTitle")} body={t("appeals.emptyBody")} />
 					</Card>
 				) : (
 					<ul className="flex flex-col gap-3">
-						{list.data.items.map((appeal) => (
+						{results.items.map((appeal) => (
 							<AppealItem
 								key={appeal.id}
 								appeal={appeal}

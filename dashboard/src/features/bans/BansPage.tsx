@@ -24,6 +24,7 @@ import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
+import { currentData } from "@/lib/queries";
 import { sanitiseInput } from "@/lib/sanitise";
 
 export function BansPage(): React.JSX.Element {
@@ -35,6 +36,7 @@ export function BansPage(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const searched = useDebounced(query).trim();
 	const list = useBans(guildId, { page, query: searched });
+	const results = currentData(list);
 	const all = useBans(guildId, { page: 1, query: "" });
 
 	usePageTitle(t("bans.title"), overview.data?.name);
@@ -52,9 +54,9 @@ export function BansPage(): React.JSX.Element {
 						<h2 id="bans-heading" className={CARD_HEADING}>
 							{t("bans.list")}
 						</h2>
-						{list.data?.readable === true && (
+						{results?.readable === true && (
 							<p className="text-muted-foreground text-sm" aria-live="polite">
-								{t("bans.count", { count: list.data.total })}
+								{t("bans.count", { count: results.total })}
 							</p>
 						)}
 					</div>
@@ -76,11 +78,11 @@ export function BansPage(): React.JSX.Element {
 
 					{list.isError ? (
 						<ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />
-					) : list.data === undefined ? (
+					) : results === undefined ? (
 						<Skeleton className="h-48 w-full" />
-					) : !list.data.readable ? (
+					) : !results.readable ? (
 						<Warning>{t("bans.unreadable")}</Warning>
-					) : list.data.items.length === 0 ? (
+					) : results.items.length === 0 ? (
 						<EmptyState
 							icon={<Ban size={28} />}
 							title={searched === "" ? t("bans.emptyTitle") : t("bans.noMatchTitle")}
@@ -88,13 +90,13 @@ export function BansPage(): React.JSX.Element {
 						/>
 					) : (
 						<DividedList>
-							{list.data.items.map((entry) => (
+							{results.items.map((entry) => (
 								<BanRow key={entry.userId} guildId={guildId} entry={entry} />
 							))}
 						</DividedList>
 					)}
 
-					{list.data?.truncated === true && (
+					{results?.truncated === true && (
 						<p className="text-muted-foreground text-sm">{t("bans.truncated", { max: BAN_LIMITS.maxRead })}</p>
 					)}
 

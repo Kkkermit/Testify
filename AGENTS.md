@@ -2585,6 +2585,11 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
   mutation is counted as pending across `onMutate`, `onSuccess` and `onSettled` — verified in
   `@tanstack/query-core`'s `mutation.ts`, not assumed. `useDocumentMutation.test.tsx` pins both guards, and each
   was proved to go red without it. A write that shows its change before the answer lands is `useOptimisticMutation`.
+- **A changed filter shows a skeleton where its results go, never the last filter's results.** A list's query keeps
+  its previous answer (`keepPreviousData`) so the filters' own options and the pager stay where they are, and the
+  results read `currentData` from `lib/queries.ts`, which is undefined until the answer for the filters as they now
+  stand arrives. Showing the kept answer instead looked as if the filter had done nothing until the new list
+  replaced it. `MembersDirectory.test.tsx` holds an answer back and fails on the last filter's rows.
 - **A refused write is drawn by `Refusal`**, which shows the server's own wording when it gave one and the fallback
   otherwise; `refusalText` is the same rule for a place that needs the string.
 - **A control that is typed into does not write the URL per keystroke.** `?q=` is written with `replace: true`,
