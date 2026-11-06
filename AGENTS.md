@@ -988,6 +988,10 @@ What good tests here look like:
   MongoDB reported **41 passing tests that asserted nothing**, and a mutation replacing an atomic `$inc` with
   `$set` survived all of them. `tests/core/conventions.test.ts` refuses the early-return pattern, and CI sets
   `REQUIRE_DB_TESTS=1` so a runner that cannot start a database fails rather than going quietly green.
+- **The test database never runs MongoDB's TTL sweep.** `mongoGlobal.ts` starts it with `ttlMonitorEnabled=false`,
+  because fixtures carry fixed dates: the command run log's are dated 1 August 2026, so they expired on 31 August
+  and the sweep, which runs once a minute, deleted them partway through a test on CI. A test checks that an expiry is
+  set, never that MongoDB acted on it, and `testDatabase.test.ts` pins the setting.
 - **A worker's database outlives each suite.** Every test starts on emptied collections, but the database is not
   dropped between suites, because dropping it made the next suite build every collection and index again: 464
   collection creations a run instead of 137, and on the Windows runner five suites once timed out together while
