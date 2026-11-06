@@ -1,5 +1,7 @@
 {
 	"common": {
+		"actionNeedsPermission": "{{action}} : il te faut la permission {{permission}} sur ce serveur.",
+		"youNeedPermission": "Il te faut la permission {{permission}} sur ce serveur pour utiliser ceci.",
 		"preview": "Aperçu",
 		"previewEmpty": "Votre message apparaît ici.",
 		"saved": "Enregistré",
@@ -453,7 +455,7 @@
 		"title": "Serveurs",
 		"subtitle": "Partout où vous pouvez modifier les réglages de {{bot}}, ou l’ajouter.",
 		"ownerOnly": "Vous n’avez pas l’autorisation de voir cette page, vous avez donc été ramené ici.",
-		"guildRefused": "Vous n’avez pas l’autorisation de gérer ce serveur, vous avez donc été ramené ici.",
+		"guildRefused": "Il vous faut la permission {{permission}} pour ouvrir ce serveur, vous avez donc été ramené ici.",
 		"search": "Rechercher des serveurs",
 		"emptyTitle": "Rien à configurer pour l’instant",
 		"noMatchTitle": "Aucun serveur ne correspond",
@@ -471,7 +473,8 @@
 		"lockedBody": "Ajouter un bot demande Gérer le serveur, que vous n’avez pas sur ceux-ci.",
 		"pagesOf": "Pages de {{group}}",
 		"compare": "Comparer vos serveurs côte à côte",
-		"appealLink": "Banni d’un serveur ? Faites appel"
+		"appealLink": "Banni d’un serveur ? Faites appel",
+		"manageServerOnly": "Seuls les serveurs où vous avez la permission {{manage}} sont listés. D’autres permissions, comme {{channels}} ou {{ban}}, ne suffisent pas pour en ouvrir un ici."
 	},
 	"compare": {
 		"title": "Côte à côte",
@@ -1525,7 +1528,6 @@
 		"rolesBody": "Seuls les rôles que vous pourriez attribuer vous-même dans Discord sont listés, donc ceux au-dessus du vôtre restent tels quels.",
 		"rolesLabel": "Rôles que vous pouvez donner ou retirer",
 		"rolesNone": "Il n’y a ici aucun rôle que vous pourriez lui donner.",
-		"rolesNeedPermission": "Il vous faut la permission Gérer les rôles pour changer des rôles.",
 		"rolesUnreadable": "Ses rôles n’ont pas pu être lus.",
 		"saveRoles": "Enregistrer les rôles",
 		"levelOnXp": "Niveau {{level}} avec {{xp}} XP.",

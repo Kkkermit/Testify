@@ -132,6 +132,6 @@ describe("the server list after being sent back from a server", () => {
 			</QueryClientProvider>,
 		);
 
-		expect(await screen.findByText(/you don’t have permission to manage that server/i)).toBeInTheDocument();
+		expect(await screen.findByText(/you need the manage server permission to open that server/i)).toBeInTheDocument();
 	});
 });

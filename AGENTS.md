@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 52 / 51                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,113 across 554 suites           |
+| Tests                | 4,115 across 554 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -2489,6 +2489,14 @@ and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and fiv
 - **A role the bot hands out sits below its person's own highest role** (`requireGrantable`), as Discord's own
   Manage Roles rule does, unless they own the server — and never above the bot, never managed, never `@everyone`,
   even for the bot's owner. Boost roles, ignore lists and DJ roles are never handed out, so they only need to exist.
+
+- **The page says so before the server has to.** The overview carries `yourPermissions`, which of
+  `READER_PERMISSIONS` its reader holds, from the same `holdsPermission` the routes ask, so the two cannot disagree.
+  A screen asks `useLacks` and draws `NeedsPermission` — "You need the Ban Members permission in this server to use
+  this." — where the control would be, and a read that asks a permission waits on `useHolds`, so nothing is sent only
+  to be refused. The member directory names each action it leaves out and the permission it needs
+  (`withheldActions`), and the server picker says that a server without Manage Server is not listed at all. The
+  routes are still the boundary; this is the page telling the reader first.
 
 A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each rule and
 `tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody in the

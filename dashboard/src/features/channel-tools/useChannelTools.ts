@@ -9,10 +9,11 @@ import { type ChannelToolList, type ChannelToolPatch, type ToolChannel } from "@
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export function useChannelTools(guildId: string): UseQueryResult<ChannelToolList> {
+export function useChannelTools(guildId: string, enabled = true): UseQueryResult<ChannelToolList> {
 	return useQuery({
 		queryKey: keys.guild(guildId).channelTools(),
 		queryFn: () => api.get<ChannelToolList>(`/guilds/${guildId}/channel-tools`),
+		enabled,
 	});
 }
 

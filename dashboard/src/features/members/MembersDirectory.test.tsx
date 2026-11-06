@@ -133,7 +133,8 @@ describe("the member directory", () => {
 		expect(within(form).getByText("Discord refused it.")).toBeInTheDocument();
 	});
 
-	it("offers no tick boxes or actions to a reader who may do none of them", async () => {
+	/** The actions went missing without a word, so a reader could not tell a closed door from a broken page. */
+	it("offers no tick boxes or actions to a reader who may do none of them, and says which permission each needs", async () => {
 		server.use(
 			http.get(`/api/guilds/${GUILD}/members`, () =>
 				HttpResponse.json({
@@ -148,6 +149,14 @@ describe("the member directory", () => {
 
 		expect(screen.queryByRole("checkbox", { name: /Select/ })).not.toBeInTheDocument();
 		expect(screen.queryByLabelText("Has warnings")).not.toBeInTheDocument();
+		expect(
+			screen.getAllByText(/: you need the .+ permission in this server\.$/).map((line) => line.textContent),
+		).toEqual([
+			"Give a role, Take a role: you need the Manage Roles permission in this server.",
+			"Time out, Warn: you need the Timeout Members permission in this server.",
+			"Kick: you need the Kick Members permission in this server.",
+			"Ban: you need the Ban Members permission in this server.",
+		]);
 	});
 
 	it("has no accessibility violations", async () => {

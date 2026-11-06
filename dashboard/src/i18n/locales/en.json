@@ -1,5 +1,7 @@
 {
 	"common": {
+		"actionNeedsPermission": "{{action}}: you need the {{permission}} permission in this server.",
+		"youNeedPermission": "You need the {{permission}} permission in this server to use this.",
 		"preview": "Preview",
 		"previewEmpty": "Your message appears here.",
 		"saved": "Saved",
@@ -446,7 +448,7 @@
 		"title": "Servers",
 		"subtitle": "Everywhere you can change {{bot}}’s settings, or add it.",
 		"ownerOnly": "You don’t have permission to view that page, so you’ve been brought back here.",
-		"guildRefused": "You don’t have permission to manage that server, so you’ve been brought back here.",
+		"guildRefused": "You need the {{permission}} permission to open that server, so you’ve been brought back here.",
 		"search": "Search servers",
 		"emptyTitle": "Nothing to configure yet",
 		"noMatchTitle": "No server matches that",
@@ -464,7 +466,8 @@
 		"lockedBody": "Adding a bot takes Manage Server, which you do not have in these.",
 		"pagesOf": "Pages of {{group}}",
 		"compare": "Compare your servers side by side",
-		"appealLink": "Banned from a server? Appeal the ban"
+		"appealLink": "Banned from a server? Appeal the ban",
+		"manageServerOnly": "Only servers where you have the {{manage}} permission are listed. Other permissions, such as {{channels}} or {{ban}}, are not enough to open one here."
 	},
 	"compare": {
 		"title": "Side by side",
@@ -1471,7 +1474,6 @@
 		"rolesBody": "Only the roles you could hand out yourself in Discord are listed, so roles above yours stay as they are.",
 		"rolesLabel": "Roles you can give or take",
 		"rolesNone": "There are no roles here that you could give them.",
-		"rolesNeedPermission": "You need the Manage Roles permission to change roles.",
 		"rolesUnreadable": "Their roles could not be read.",
 		"saveRoles": "Save roles",
 		"levelOnXp": "Level {{level}} on {{xp}} XP.",

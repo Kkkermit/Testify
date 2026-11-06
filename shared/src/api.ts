@@ -124,6 +124,22 @@ export const WATCHED_PERMISSIONS = [
 
 export type WatchedPermission = (typeof WATCHED_PERMISSIONS)[number];
 
+/** What a screen can ask of its reader beyond Manage Server, as Discord names each permission. */
+export const READER_PERMISSIONS = [
+	"Administrator",
+	"BanMembers",
+	"KickMembers",
+	"ModerateMembers",
+	"ManageRoles",
+	"ManageNicknames",
+	"ManageChannels",
+	"ManageMessages",
+	"ViewAuditLog",
+	"MentionEveryone",
+] as const;
+
+export type ReaderPermission = (typeof READER_PERMISSIONS)[number];
+
 export interface AuditEntrySummary {
 	actorTag: string;
 	action: string;
@@ -140,6 +156,8 @@ export interface GuildOverview {
 	roleCount: number;
 	features: FeatureStatus[];
 	missingPermissions: WatchedPermission[];
+	/** Which of `READER_PERMISSIONS` the person reading holds here; every one, for a bot owner. */
+	yourPermissions: ReaderPermission[];
 	recentChanges: AuditEntrySummary[];
 }
 

@@ -14,7 +14,9 @@ import {
 	Warning,
 } from "@/components/form";
 import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { nameTemplateFrom, tempVoiceSummary, userLimitFrom } from "@/features/temp-voice/tempVoice.utils";
 import { useMakeLobby, useSaveTempVoice, useTempVoice } from "@/features/temp-voice/useTempVoice";
@@ -35,6 +37,7 @@ export function TempVoicePage(): React.JSX.Element {
 	const overview = useGuildOverview(guildId);
 	const save = useSaveTempVoice(guildId);
 	const lobby = useMakeLobby(guildId);
+	const mayMake = !useLacks(guildId)("ManageChannels");
 
 	usePageTitle(t("tempVoice.title"), overview.data?.name);
 
@@ -93,18 +96,21 @@ export function TempVoicePage(): React.JSX.Element {
 						write("lobby", { lobbyChannelId });
 					}}
 				>
-					{settings.lobbyChannelId === null && (
-						<div>
-							<Button
-								disabled={lobby.isPending}
-								onClick={() => {
-									lobby.mutate(undefined);
-								}}
-							>
-								{lobby.isPending ? t("tempVoice.making") : t("tempVoice.makeLobby")}
-							</Button>
-						</div>
-					)}
+					{settings.lobbyChannelId === null &&
+						(mayMake ? (
+							<div>
+								<Button
+									disabled={lobby.isPending}
+									onClick={() => {
+										lobby.mutate(undefined);
+									}}
+								>
+									{lobby.isPending ? t("tempVoice.making") : t("tempVoice.makeLobby")}
+								</Button>
+							</div>
+						) : (
+							<NeedsPermission permission="ManageChannels" action={t("tempVoice.makeLobby")} />
+						))}
 				</ChannelKindPicker>
 			</SettingRows>
 			{message(lobby.error) !== null && <Warning>{message(lobby.error)}</Warning>}

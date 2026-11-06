@@ -60,6 +60,7 @@ import {
 	changesQuery,
 	insightsQuery,
 	type InsightWindow,
+	READER_PERMISSIONS,
 	type ChannelSummary,
 	type GuildOverview,
 	type GuildInbox,
@@ -131,6 +132,7 @@ guilds.get("/:guildId/overview", async (context) => {
 		roleCount: guild.roles.cache.size,
 		features,
 		missingPermissions: missingPermissions(guild),
+		yourPermissions: READER_PERMISSIONS.filter((name) => holdsPermission(context, PermissionFlagsBits[name])),
 		recentChanges: recent.map(toAuditSummary),
 	};
 

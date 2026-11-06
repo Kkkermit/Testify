@@ -1,5 +1,7 @@
 {
 	"common": {
+		"actionNeedsPermission": "{{action}}: necesitas el permiso {{permission}} en este servidor.",
+		"youNeedPermission": "Necesitas el permiso {{permission}} en este servidor para usar esto.",
 		"preview": "Vista previa",
 		"previewEmpty": "Tu mensaje aparece aquí.",
 		"saved": "Guardado",
@@ -453,7 +455,7 @@
 		"title": "Servidores",
 		"subtitle": "Todo lugar donde puedes cambiar los ajustes de {{bot}}, o añadirlo.",
 		"ownerOnly": "No tienes permiso para ver esa página, así que te hemos traído de vuelta aquí.",
-		"guildRefused": "No tienes permiso para gestionar ese servidor, así que te hemos traído de vuelta aquí.",
+		"guildRefused": "Necesitas el permiso {{permission}} para abrir ese servidor, así que te hemos traído de vuelta aquí.",
 		"search": "Buscar servidores",
 		"emptyTitle": "Todavía no hay nada que configurar",
 		"noMatchTitle": "Ningún servidor coincide",
@@ -471,7 +473,8 @@
 		"lockedBody": "Añadir un bot requiere Gestionar servidor, y en estos no lo tienes.",
 		"pagesOf": "Páginas de {{group}}",
 		"compare": "Comparar tus servidores lado a lado",
-		"appealLink": "¿Te banearon de un servidor? Apela el baneo"
+		"appealLink": "¿Te banearon de un servidor? Apela el baneo",
+		"manageServerOnly": "Solo aparecen los servidores en los que tienes el permiso {{manage}}. Otros permisos, como {{channels}} o {{ban}}, no bastan para abrir uno aquí."
 	},
 	"compare": {
 		"title": "Lado a lado",
@@ -1525,7 +1528,6 @@
 		"rolesBody": "Solo aparecen los roles que podrías dar tú mismo en Discord, así que los que están por encima del tuyo no cambian.",
 		"rolesLabel": "Roles que puedes dar o quitar",
 		"rolesNone": "Aquí no hay roles que puedas darle.",
-		"rolesNeedPermission": "Necesitas el permiso Gestionar roles para cambiar roles.",
 		"rolesUnreadable": "No se pudieron leer sus roles.",
 		"saveRoles": "Guardar roles",
 		"levelOnXp": "Nivel {{level}} con {{xp}} XP.",

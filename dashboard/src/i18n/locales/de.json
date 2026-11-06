@@ -1,5 +1,7 @@
 {
 	"common": {
+		"actionNeedsPermission": "{{action}}: Dafür brauchst du in diesem Server die Berechtigung „{{permission}}“.",
+		"youNeedPermission": "Dafür brauchst du in diesem Server die Berechtigung „{{permission}}“.",
 		"preview": "Vorschau",
 		"previewEmpty": "Hier erscheint deine Nachricht.",
 		"saved": "Gespeichert",
@@ -446,7 +448,7 @@
 		"title": "Server",
 		"subtitle": "Überall, wo du {{bot}}s Einstellungen ändern oder ihn hinzufügen kannst.",
 		"ownerOnly": "Du hast keine Berechtigung für diese Seite, deshalb bist du wieder hier gelandet.",
-		"guildRefused": "Du hast keine Berechtigung, diesen Server zu verwalten, deshalb bist du wieder hier gelandet.",
+		"guildRefused": "Du brauchst die Berechtigung „{{permission}}“, um diesen Server zu öffnen, deshalb bist du wieder hier gelandet.",
 		"search": "Server suchen",
 		"emptyTitle": "Noch nichts einzurichten",
 		"noMatchTitle": "Kein Server passt dazu",
@@ -464,7 +466,8 @@
 		"lockedBody": "Einen Bot hinzuzufügen braucht Server verwalten — das hast du auf diesen nicht.",
 		"pagesOf": "Seiten von {{group}}",
 		"compare": "Deine Server nebeneinander vergleichen",
-		"appealLink": "Von einem Server gebannt? Lege Einspruch ein"
+		"appealLink": "Von einem Server gebannt? Lege Einspruch ein",
+		"manageServerOnly": "Hier stehen nur Server, auf denen du die Berechtigung „{{manage}}“ hast. Andere Berechtigungen wie „{{channels}}“ oder „{{ban}}“ reichen nicht, um einen hier zu öffnen."
 	},
 	"compare": {
 		"title": "Nebeneinander",
@@ -1471,7 +1474,6 @@
 		"rolesBody": "Hier stehen nur Rollen, die du in Discord selbst vergeben könntest, Rollen über deiner bleiben also, wie sie sind.",
 		"rolesLabel": "Rollen, die du geben oder nehmen kannst",
 		"rolesNone": "Hier gibt es keine Rolle, die du der Person geben könntest.",
-		"rolesNeedPermission": "Du brauchst die Berechtigung „Rollen verwalten“, um Rollen zu ändern.",
 		"rolesUnreadable": "Die Rollen konnten nicht gelesen werden.",
 		"saveRoles": "Rollen speichern",
 		"levelOnXp": "Level {{level}} mit {{xp}} XP.",

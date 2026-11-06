@@ -1,5 +1,7 @@
 {
 	"common": {
+		"actionNeedsPermission": "{{action}}：このサーバーで「{{permission}}」の権限が必要です。",
+		"youNeedPermission": "これを使うには、このサーバーで「{{permission}}」の権限が必要です。",
 		"preview": "プレビュー",
 		"previewEmpty": "ここにメッセージが表示されます。",
 		"saved": "保存しました",
@@ -439,7 +441,7 @@
 		"title": "サーバー",
 		"subtitle": "{{bot}} の設定を変更できる、または追加できるすべての場所。",
 		"ownerOnly": "そのページを見る権限がないため、ここに戻りました。",
-		"guildRefused": "そのサーバーを管理する権限がないため、ここに戻りました。",
+		"guildRefused": "そのサーバーを開くには「{{permission}}」の権限が必要なため、ここに戻りました。",
 		"search": "サーバーを検索",
 		"emptyTitle": "まだ設定できるものはありません",
 		"noMatchTitle": "一致するサーバーはありません",
@@ -457,7 +459,8 @@
 		"lockedBody": "ボットの追加には「サーバー管理」が必要ですが、これらのサーバーではその権限がありません。",
 		"pagesOf": "{{group}} のページ",
 		"compare": "サーバーを並べて比較",
-		"appealLink": "サーバーで BAN されましたか？異議を申し立てる"
+		"appealLink": "サーバーで BAN されましたか？異議を申し立てる",
+		"manageServerOnly": "ここに表示されるのは「{{manage}}」の権限があるサーバーだけです。「{{channels}}」や「{{ban}}」など他の権限では開けません。"
 	},
 	"compare": {
 		"title": "並べて比較",
@@ -1417,7 +1420,6 @@
 		"rolesBody": "Discord であなた自身が付与できるロールだけが表示されるため、あなたより上のロールはそのまま変わりません。",
 		"rolesLabel": "付与・削除できるロール",
 		"rolesNone": "ここには付与できるロールがありません。",
-		"rolesNeedPermission": "ロールを変更するには「ロールの管理」の権限が必要です。",
 		"rolesUnreadable": "ロールを読み込めませんでした。",
 		"saveRoles": "ロールを保存",
 		"levelOnXp": "レベル {{level}}（{{xp}} XP）。",

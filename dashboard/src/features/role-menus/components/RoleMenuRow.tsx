@@ -11,6 +11,7 @@ export function RoleMenuRow({
 	channels,
 	roles,
 	busy,
+	readOnly,
 	onEdit,
 	onPublish,
 	onRemove,
@@ -19,6 +20,8 @@ export function RoleMenuRow({
 	channels: ChannelSummary[];
 	roles: RoleSummary[];
 	busy: boolean;
+	/** The reader lacks Manage Roles, so the menu is shown without anything that would change it. */
+	readOnly: boolean;
 	onEdit: () => void;
 	onPublish: () => void;
 	onRemove: () => void;
@@ -59,20 +62,22 @@ export function RoleMenuRow({
 				<Warning>{t("common.cannotPostIn", { channel: channelLabel(channels, menu.channelId, t) })}</Warning>
 			)}
 
-			<div className="flex flex-wrap gap-2">
-				<Button variant="secondary" disabled={busy} onClick={onEdit}>
-					<Pencil size={15} aria-hidden="true" />
-					{t("roleMenus.edit")}
-				</Button>
-				<Button variant="secondary" disabled={busy || !menu.canSend} onClick={onPublish}>
-					<Send size={15} aria-hidden="true" />
-					{t(menu.posted ? "roleMenus.updatePost" : "roleMenus.post")}
-				</Button>
-				<Button variant="ghost" disabled={busy} onClick={onRemove}>
-					<Trash2 size={16} aria-hidden="true" />
-					<span className="sr-only">{t("roleMenus.deleteMenu", { title: menu.title })}</span>
-				</Button>
-			</div>
+			{!readOnly && (
+				<div className="flex flex-wrap gap-2">
+					<Button variant="secondary" disabled={busy} onClick={onEdit}>
+						<Pencil size={15} aria-hidden="true" />
+						{t("roleMenus.edit")}
+					</Button>
+					<Button variant="secondary" disabled={busy || !menu.canSend} onClick={onPublish}>
+						<Send size={15} aria-hidden="true" />
+						{t(menu.posted ? "roleMenus.updatePost" : "roleMenus.post")}
+					</Button>
+					<Button variant="ghost" disabled={busy} onClick={onRemove}>
+						<Trash2 size={16} aria-hidden="true" />
+						<span className="sr-only">{t("roleMenus.deleteMenu", { title: menu.title })}</span>
+					</Button>
+				</div>
+			)}
 		</li>
 	);
 }

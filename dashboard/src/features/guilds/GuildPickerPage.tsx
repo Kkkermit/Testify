@@ -9,6 +9,7 @@ import { EmptyState, SectionHeading, PageHeader, Pager, Skeleton } from "@/compo
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { comparable } from "@/features/compare/compare.utils";
 import { GuildCard } from "@/features/guilds/GuildCard";
 import {
@@ -69,7 +70,9 @@ export function GuildPickerPage(): React.JSX.Element {
 		<>
 			<PageHeader title={t("guilds.title")} subtitle={t("guilds.subtitle")} />
 			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
-			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused")}</Warning>}
+			{notice === GUILD_REFUSED_NOTICE && (
+				<Warning>{t("guilds.guildRefused", { permission: permissionLabel("ManageGuild", t) })}</Warning>
+			)}
 
 			<label className="relative block">
 				<span className="sr-only">{t("guilds.search")}</span>
@@ -147,6 +150,16 @@ export function GuildPickerPage(): React.JSX.Element {
 						</section>
 					);
 				})
+			)}
+
+			{found > 0 && (
+				<p className="text-muted-foreground text-sm">
+					{t("guilds.manageServerOnly", {
+						manage: permissionLabel("ManageGuild", t),
+						channels: permissionLabel("ManageChannels", t),
+						ban: permissionLabel("BanMembers", t),
+					})}
+				</p>
 			)}
 
 			<Link

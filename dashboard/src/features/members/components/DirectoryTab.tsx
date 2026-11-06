@@ -24,6 +24,7 @@ import {
 	Skeleton,
 	Summary,
 } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { ActionForm } from "@/features/members/components/ActionForm";
 import {
 	ACTION_LABELS,
@@ -34,6 +35,7 @@ import {
 	JOINED_LABELS,
 	KIND_LABELS,
 	type MemberAction,
+	withheldActions,
 	rowActions,
 	selectable,
 	SKIP_LABELS,
@@ -173,6 +175,18 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 					)}
 				</div>
 			</Card>
+
+			{page !== undefined && withheldActions(page).length > 0 && (
+				<div className="flex flex-col gap-1">
+					{withheldActions(page).map(({ permission, actions }) => (
+						<NeedsPermission
+							key={permission}
+							permission={permission}
+							action={actions.map((action) => t(ACTION_LABELS[action])).join(t("common.listSeparator"))}
+						/>
+					))}
+				</div>
+			)}
 
 			{results !== undefined && (
 				<div aria-live="polite" className="flex flex-col gap-1">

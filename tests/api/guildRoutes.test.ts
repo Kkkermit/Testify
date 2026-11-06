@@ -10,6 +10,7 @@ import {
 	type ChannelSummary,
 	type GuildOverview,
 	type GuildPlaces,
+	READER_PERMISSIONS,
 	type RoleSummary,
 	type ServerChangesPage,
 } from "@testify/shared";
@@ -270,6 +271,16 @@ describe("the guild overview", () => {
 		const body = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 
 		expect(body.missingPermissions).toEqual([]);
+	});
+
+	/** A manager without Ban Members was offered Ban and Unban, and only learnt otherwise from the refusal. */
+	it("tells the page which permissions its reader holds, by the same rule the routes ask", async () => {
+		const manager = appFor({ readerHolds: [PermissionFlagsBits.ManageGuild, PermissionFlagsBits.BanMembers] });
+		const managed = (await (await manager.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+		const owned = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+
+		expect(managed.yourPermissions).toEqual(["BanMembers"]);
+		expect(owned.yourPermissions).toEqual([...READER_PERMISSIONS]);
 	});
 
 	/** The bot's own member is missing while the cache is still filling; that is not a permission problem. */

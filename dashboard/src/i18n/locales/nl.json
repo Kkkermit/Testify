@@ -1,5 +1,7 @@
 {
 	"common": {
+		"actionNeedsPermission": "{{action}}: je hebt de machtiging {{permission}} in deze server nodig.",
+		"youNeedPermission": "Je hebt de machtiging {{permission}} in deze server nodig om dit te gebruiken.",
 		"preview": "Voorbeeld",
 		"previewEmpty": "Je bericht verschijnt hier.",
 		"saved": "Opgeslagen",
@@ -446,7 +448,7 @@
 		"title": "Servers",
 		"subtitle": "Overal waar je de instellingen van {{bot}} kunt wijzigen, of het kunt toevoegen.",
 		"ownerOnly": "Je hebt geen toestemming om die pagina te bekijken, dus je bent hierheen teruggebracht.",
-		"guildRefused": "Je hebt geen toestemming om die server te beheren, dus je bent hierheen teruggebracht.",
+		"guildRefused": "Je hebt de machtiging {{permission}} nodig om die server te openen, dus je bent hierheen teruggebracht.",
 		"search": "Servers zoeken",
 		"emptyTitle": "Nog niets in te stellen",
 		"noMatchTitle": "Geen server komt daarmee overeen",
@@ -464,7 +466,8 @@
 		"lockedBody": "Een bot toevoegen vraagt Server beheren, en dat heb je hier niet.",
 		"pagesOf": "Pagina’s van {{group}}",
 		"compare": "Vergelijk je servers naast elkaar",
-		"appealLink": "Verbannen van een server? Maak bezwaar"
+		"appealLink": "Verbannen van een server? Maak bezwaar",
+		"manageServerOnly": "Alleen servers waarin je de machtiging {{manage}} hebt, staan hier. Andere machtigingen, zoals {{channels}} of {{ban}}, zijn niet genoeg om er hier een te openen."
 	},
 	"compare": {
 		"title": "Naast elkaar",
@@ -1471,7 +1474,6 @@
 		"rolesBody": "Alleen de rollen die je zelf in Discord zou kunnen uitdelen, staan erbij, dus rollen boven die van jou blijven zoals ze zijn.",
 		"rolesLabel": "Rollen die je kunt geven of afnemen",
 		"rolesNone": "Er zijn hier geen rollen die je ze zou kunnen geven.",
-		"rolesNeedPermission": "Je hebt de machtiging Rollen beheren nodig om rollen te wijzigen.",
 		"rolesUnreadable": "Hun rollen konden niet worden gelezen.",
 		"saveRoles": "Rollen opslaan",
 		"levelOnXp": "Level {{level}} met {{xp}} XP.",
