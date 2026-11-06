@@ -175,7 +175,9 @@
 		"invites": "Uitnodigingen",
 		"invitesHint": "Wiens uitnodigingen leden binnenbrachten",
 		"economyRates": "Economie-instellingen",
-		"economyRatesHint": "Loon, beroven en rollen te koop"
+		"economyRatesHint": "Loon, beroven en rollen te koop",
+		"backup": "Back-up en kopiëren",
+		"backupHint": "Sla de instellingen van deze server op, of kopieer die van een andere"
 	},
 	"account": {
 		"title": "Je account",
@@ -2947,5 +2949,40 @@
 		"takeOffSale": "{{name}} uit de verkoop halen",
 		"deletedRole": "Een verwijderde rol",
 		"shopRolesNeedManageRoles": "Rollen te koop zetten, hun prijs wijzigen en ze weer weghalen vraagt de toestemming Rollen beheren in deze server."
+	},
+	"backup": {
+		"title": "Back-up en kopiëren",
+		"subtitle": "Bewaar de instellingen van deze server in een bestand, zet ze later terug of neem die van een andere server over.",
+		"readFailed": "De instellingen konden niet worden gelezen. Probeer het zo opnieuw.",
+		"saveTitle": "Back-up",
+		"saveBody": "Download elke instelling die je hier ziet als bestand. Er staan geen berichten of gegevens van mensen in, alleen hoe de bot is ingesteld.",
+		"download": "Back-up downloaden",
+		"leftOut": "Weggelaten, omdat je ze hier niet kunt lezen: {{sections}}.",
+		"bringTitle": "Instellingen overnemen",
+		"bringBody": "Er verandert niets tot je hebt gezien wat er zou veranderen en op Toepassen hebt gedrukt.",
+		"fromFile": "Uit een back-upbestand",
+		"fromFileHint": "Een bestand gedownload van deze pagina, hier of op een andere server.",
+		"tooLarge": "Dat bestand is te groot voor een back-up.",
+		"notBackup": "Dat bestand is geen back-up van deze pagina.",
+		"fromServer": "Van een andere server",
+		"fromServerHint": "Kopieert de instellingen hierheen. Kanalen en rollen worden op naam gekoppeld.",
+		"chooseServer": "Kies een server",
+		"readServer": "Instellingen lezen",
+		"previewTitle": "Van {{name}}",
+		"previewBody": "Opgeslagen op {{time}}. Vink uit wat je wilt laten zoals het is.",
+		"nothing": "Er staat niets in dat deze server kan gebruiken.",
+		"same": "Hier al hetzelfde",
+		"changes_one": "{{count, number}} instelling over te nemen",
+		"changes_other": "{{count, number}} instellingen over te nemen",
+		"missingChannel": "Geen kanaal hier heet #{{name}}, dus dat deel blijft zoals het is.",
+		"missingRole": "Geen rol hier heet @{{name}}, dus dat deel blijft zoals het is.",
+		"missingChannelUnnamed": "Een kanaal dat erin staat heeft hier geen tegenhanger, dus dat deel blijft zoals het is.",
+		"missingRoleUnnamed": "Een rol die erin staat heeft hier geen tegenhanger, dus dat deel blijft zoals het is.",
+		"saved": "Opgeslagen",
+		"unusable": "Deze konden niet worden gelezen en worden weggelaten: {{sections}}.",
+		"apply_one": "{{count, number}} onderdeel toepassen",
+		"apply_other": "{{count, number}} onderdelen toepassen",
+		"leftAsIs": "{{section}} blijft hier zoals het is.",
+		"chooseFile": "Back-upbestand kiezen"
 	}
 }

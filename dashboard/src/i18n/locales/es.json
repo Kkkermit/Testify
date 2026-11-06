@@ -176,7 +176,9 @@
 		"invites": "Invitaciones",
 		"invitesHint": "Qué invitaciones trajeron miembros",
 		"economyRates": "Ajustes de economía",
-		"economyRatesHint": "Pagos, robos y roles a la venta"
+		"economyRatesHint": "Pagos, robos y roles a la venta",
+		"backup": "Copia y traspaso",
+		"backupHint": "Guarda los ajustes de este servidor o copia los de otro"
 	},
 	"account": {
 		"title": "Tu cuenta",
@@ -3030,5 +3032,42 @@
 		"takeOffSale": "Retirar {{name}} de la venta",
 		"deletedRole": "Un rol eliminado",
 		"shopRolesNeedManageRoles": "Poner roles a la venta, cambiar sus precios y retirarlos requiere el permiso Gestionar roles en este servidor."
+	},
+	"backup": {
+		"title": "Copia y traspaso",
+		"subtitle": "Guarda los ajustes de este servidor en un archivo, recupéralos más tarde o trae los de otro servidor.",
+		"readFailed": "No se pudieron leer los ajustes. Vuelve a intentarlo en un momento.",
+		"saveTitle": "Copia de seguridad",
+		"saveBody": "Descarga en un archivo todos los ajustes que puedes ver aquí. No contiene mensajes ni datos de nadie, solo cómo está configurado el bot.",
+		"download": "Descargar una copia",
+		"leftOut": "Quedan fuera porque aquí no puedes leerlos: {{sections}}.",
+		"bringTitle": "Traer ajustes",
+		"bringBody": "Nada cambia hasta que veas qué cambiaría y pulses Aplicar.",
+		"fromFile": "Desde un archivo de copia",
+		"fromFileHint": "Un archivo descargado desde esta página, aquí o en otro servidor.",
+		"tooLarge": "Ese archivo es demasiado grande para ser una copia.",
+		"notBackup": "Ese archivo no es una copia de esta página.",
+		"fromServer": "Desde otro servidor",
+		"fromServerHint": "Copia aquí su configuración. Los canales y roles se emparejan por nombre.",
+		"chooseServer": "Elige un servidor",
+		"readServer": "Leer sus ajustes",
+		"previewTitle": "De {{name}}",
+		"previewBody": "Guardado el {{time}}. Desmarca lo que quieras dejar como está.",
+		"nothing": "No contiene nada que este servidor pueda usar.",
+		"same": "Aquí ya es igual",
+		"changes_one": "{{count, number}} ajuste para traer",
+		"changes_many": "{{count, number}} de ajustes para traer",
+		"changes_other": "{{count, number}} ajustes para traer",
+		"missingChannel": "Aquí ningún canal se llama #{{name}}, así que esa parte se queda como está.",
+		"missingRole": "Aquí ningún rol se llama @{{name}}, así que esa parte se queda como está.",
+		"missingChannelUnnamed": "Un canal que nombra no tiene equivalente aquí, así que esa parte se queda como está.",
+		"missingRoleUnnamed": "Un rol que nombra no tiene equivalente aquí, así que esa parte se queda como está.",
+		"saved": "Guardado",
+		"unusable": "No se pudieron leer, así que quedan fuera: {{sections}}.",
+		"apply_one": "Aplicar {{count, number}} sección",
+		"apply_many": "Aplicar {{count, number}} de secciones",
+		"apply_other": "Aplicar {{count, number}} secciones",
+		"leftAsIs": "{{section}} se queda aquí como está.",
+		"chooseFile": "Elegir un archivo de copia"
 	}
 }

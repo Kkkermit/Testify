@@ -1,5 +1,6 @@
 import {
 	Activity,
+	ArchiveRestore,
 	Ban,
 	Bell,
 	BookOpen,
@@ -120,6 +121,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
 				{ to: at("/roles"), labelKey: "nav.roles", icon: Shield, hintKey: "nav.rolesHint", exact: false },
 				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
+				{ to: at("/backup"), labelKey: "nav.backup", icon: ArchiveRestore, hintKey: "nav.backupHint" },
 			],
 			sections: [
 				{

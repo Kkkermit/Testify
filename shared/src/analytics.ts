@@ -231,6 +231,7 @@ export const SCREEN_ROUTES = [
 	"/guilds/:guildId/welcome",
 	"/guilds/:guildId/audit-log",
 	"/guilds/:guildId/settings",
+	"/guilds/:guildId/backup",
 	"/guilds/:guildId/automod",
 	"/guilds/:guildId/sticky",
 	"/guilds/:guildId/auto-responders",

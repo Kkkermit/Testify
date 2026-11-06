@@ -30,9 +30,12 @@ beforeEach(() => {
 });
 
 describe("GET /status", () => {
-	it("refuses an anonymous caller", async () => {
-		expect((await appFor(false).request("/status")).status).toBe(401);
-		expect(statusReport).not.toHaveBeenCalled();
+	/** The status page is the website's, so somebody signed out, or on a host with no dashboard, can read it. */
+	it("answers somebody signed out", async () => {
+		const answer = await appFor(false).request("/status");
+
+		expect(answer.status).toBe(200);
+		expect(await answer.json()).toEqual(REPORT);
 	});
 
 	/** Every open tab polls, and each report pings the database. */

@@ -175,7 +175,9 @@
 		"invites": "Einladungen",
 		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben",
 		"economyRates": "Wirtschaftseinstellungen",
-		"economyRatesHint": "Bezahlung, Rauben und Rollen zum Kauf"
+		"economyRatesHint": "Bezahlung, Rauben und Rollen zum Kauf",
+		"backup": "Sichern und kopieren",
+		"backupHint": "Die Einstellungen dieses Servers sichern oder die eines anderen übernehmen"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -2947,5 +2949,40 @@
 		"takeOffSale": "{{name}} aus dem Verkauf nehmen",
 		"deletedRole": "Eine gelöschte Rolle",
 		"shopRolesNeedManageRoles": "Rollen zum Verkauf anbieten, ihre Preise ändern und sie wieder herausnehmen erfordert die Berechtigung „Rollen verwalten“ auf diesem Server."
+	},
+	"backup": {
+		"title": "Sichern und kopieren",
+		"subtitle": "Die Einstellungen dieses Servers in einer Datei aufbewahren, später zurückholen oder die eines anderen Servers übernehmen.",
+		"readFailed": "Die Einstellungen konnten nicht gelesen werden. Versuch es gleich noch einmal.",
+		"saveTitle": "Sichern",
+		"saveBody": "Lade jede Einstellung, die du hier sehen kannst, als Datei herunter. Sie enthält keine Nachrichten und keine Daten über Personen, nur wie der Bot eingerichtet ist.",
+		"download": "Sicherung herunterladen",
+		"leftOut": "Weggelassen, weil du sie hier nicht lesen kannst: {{sections}}.",
+		"bringTitle": "Einstellungen übernehmen",
+		"bringBody": "Nichts ändert sich, bevor du gesehen hast, was sich ändern würde, und auf Übernehmen gedrückt hast.",
+		"fromFile": "Aus einer Sicherungsdatei",
+		"fromFileHint": "Eine von dieser Seite heruntergeladene Datei, von hier oder von einem anderen Server.",
+		"tooLarge": "Diese Datei ist zu groß für eine Sicherung.",
+		"notBackup": "Diese Datei ist keine Sicherung von dieser Seite.",
+		"fromServer": "Von einem anderen Server",
+		"fromServerHint": "Übernimmt dessen Einrichtung hierher. Kanäle und Rollen werden über den Namen zugeordnet.",
+		"chooseServer": "Server auswählen",
+		"readServer": "Einstellungen lesen",
+		"previewTitle": "Von {{name}}",
+		"previewBody": "Gespeichert am {{time}}. Entferne den Haken bei allem, was so bleiben soll.",
+		"nothing": "Darin ist nichts, was dieser Server verwenden kann.",
+		"same": "Hier bereits gleich",
+		"changes_one": "{{count, number}} Einstellung zu übernehmen",
+		"changes_other": "{{count, number}} Einstellungen zu übernehmen",
+		"missingChannel": "Hier heißt kein Kanal #{{name}}, darum bleibt dieser Teil, wie er ist.",
+		"missingRole": "Hier heißt keine Rolle @{{name}}, darum bleibt dieser Teil, wie er ist.",
+		"missingChannelUnnamed": "Ein darin genannter Kanal hat hier keine Entsprechung, darum bleibt dieser Teil, wie er ist.",
+		"missingRoleUnnamed": "Eine darin genannte Rolle hat hier keine Entsprechung, darum bleibt dieser Teil, wie er ist.",
+		"saved": "Gespeichert",
+		"unusable": "Diese konnten nicht gelesen werden und werden weggelassen: {{sections}}.",
+		"apply_one": "{{count, number}} Bereich übernehmen",
+		"apply_other": "{{count, number}} Bereiche übernehmen",
+		"leftAsIs": "{{section}} bleibt hier, wie es ist.",
+		"chooseFile": "Sicherungsdatei auswählen"
 	}
 }
