@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useTranslation } from "react-i18next";
 import { type Undo, type UndoableDelete, UndoContext, UNDO_WINDOW_MS } from "@/app/undo";
 import { Button } from "@/components/primitives";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 
 export function UndoProvider({ children }: { children: ReactNode }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -33,7 +33,7 @@ export function UndoProvider({ children }: { children: ReactNode }): React.JSX.E
 			setWaiting(null);
 			entry.commit().catch((error: unknown) => {
 				setHidden((was) => without(was, entry.key));
-				setFailure({ label: entry.label, message: error instanceof ApiError ? error.message : "" });
+				setFailure({ label: entry.label, message: refusalText(error, "") });
 			});
 		},
 		[stopClock],

@@ -7,6 +7,7 @@ import { LeaveGuard } from "@/app/LeaveGuard";
 import {
 	ChannelPicker,
 	postableChannels,
+	Refusal,
 	SavingIndicator,
 	savingStateOf,
 	SettingRows,
@@ -27,7 +28,6 @@ import { useAuditLog, useSaveAuditLog } from "@/features/audit-log/useAuditLog";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 
 export function AuditLogPage(): React.JSX.Element {
@@ -163,9 +163,7 @@ export function AuditLogPage(): React.JSX.Element {
 			{(blocked !== null || save.error !== null) && (
 				<div className="flex flex-col gap-2">
 					{blocked !== null && <Warning>{blocked}</Warning>}
-					{save.error !== null && (
-						<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-					)}
+					<Refusal error={save.error} />
 				</div>
 			)}
 		</>

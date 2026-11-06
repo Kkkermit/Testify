@@ -18,7 +18,7 @@ export interface SiteInfo {
 	version: string;
 }
 
-export interface LatestRelease {
+interface LatestRelease {
 	tag: string;
 	name: string;
 	url: string;
@@ -51,13 +51,13 @@ export interface TrafficDay {
 	uniqueClones: number;
 }
 
-export interface TrafficSource {
+interface TrafficSource {
 	name: string;
 	count: number;
 	uniques: number;
 }
 
-export type TrafficUnavailable = "no_token" | "refused";
+type TrafficUnavailable = "no_token" | "refused";
 
 export type RepositoryTraffic =
 	| { available: false; reason: TrafficUnavailable }
@@ -83,7 +83,7 @@ export interface SourceTree {
 	truncated: boolean;
 }
 
-export type SourceFileWithheld = "binary" | "too_large";
+type SourceFileWithheld = "binary" | "too_large";
 
 export interface SourceFile {
 	path: string;
@@ -96,7 +96,7 @@ export interface SourceFile {
 }
 
 /** A path inside the repository, never one that climbs out of it or names the root. */
-export const sourcePath = z
+const sourcePath = z
 	.string()
 	.min(1)
 	.max(SITE_LIMITS.pathMax)

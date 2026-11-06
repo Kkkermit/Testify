@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type TempVoicePatch, type TempVoiceSettings } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -20,22 +15,10 @@ function useTempVoiceWrite<Body>(
 	guildId: string,
 	send: (body: Body) => Promise<TempVoiceSettings>,
 ): UseMutationResult<TempVoiceSettings, Error, Body> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).tempVoice();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: send,
-		onSuccess: (settings) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).channels() });
-		},
-	});
+	return useDocumentMutation(keys.guild(guildId).tempVoice(), send, [
+		keys.guild(guildId).overview(),
+		keys.guild(guildId).channels(),
+	]);
 }
 
 export function useSaveTempVoice(guildId: string): UseMutationResult<TempVoiceSettings, Error, TempVoicePatch> {

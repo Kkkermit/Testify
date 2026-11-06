@@ -8,7 +8,7 @@ function issuesOf(error: { issues: { path: PropertyKey[]; message: string }[] })
 	return error.issues.map((issue) => ({ path: issue.path.map(String).join("."), message: issue.message }));
 }
 
-function parse<T>(schema: ZodType<T>, value: unknown, what: string): T {
+function validated<T>(schema: ZodType<T>, value: unknown, what: string): T {
 	const result = schema.safeParse(value);
 	if (result.success) return result.data;
 
@@ -16,11 +16,11 @@ function parse<T>(schema: ZodType<T>, value: unknown, what: string): T {
 }
 
 export function parseParams<T>(context: Context, schema: ZodType<T>): T {
-	return parse(schema, context.req.param(), "parameters");
+	return validated(schema, context.req.param(), "parameters");
 }
 
 export function parseQuery<T>(context: Context, schema: ZodType<T>): T {
-	return parse(schema, context.req.query(), "query parameters");
+	return validated(schema, context.req.query(), "query parameters");
 }
 
 /** A body that is not JSON becomes the 400 it is, not a 500. */
@@ -33,5 +33,5 @@ export async function parseBody<T>(context: Context, schema: ZodType<T>): Promis
 		throw badRequest("The request body is not valid JSON.");
 	}
 
-	return parse(schema, body, "fields");
+	return validated(schema, body, "fields");
 }

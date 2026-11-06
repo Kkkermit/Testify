@@ -2,12 +2,11 @@ import { stepFromValue, stepValue, WARN_LIMITS, type WarnStep } from "@testify/s
 import { Minus, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, RowActions, SettingRows, Warning } from "@/components/form";
+import { Field, Refusal, RowActions, SettingRows } from "@/components/form";
 import { SELECT } from "@/components/form/fieldStyles";
 import { Button, Skeleton } from "@/components/primitives";
 import { usePunishments, useSavePunishments } from "@/features/warnings/useWarnings";
 import { addStep, replaceStep, STEP_OPTIONS, stepText } from "@/features/warnings/warnings.utils";
-import { ApiError } from "@/lib/api";
 
 export function PunishmentsCard({ guildId }: { guildId: string }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -30,9 +29,7 @@ export function PunishmentsCard({ guildId }: { guildId: string }): React.JSX.Ele
 				/>
 			)}
 
-			{save.error !== null && (
-				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={save.error} />
 		</SettingRows>
 	);
 }

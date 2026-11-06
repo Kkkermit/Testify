@@ -75,14 +75,14 @@ owner.get("/guilds", async (context) => {
 	return context.json(body);
 });
 
-export interface GuildCounts {
+interface GuildCounts {
 	commands: Map<string, number>;
 	dashboard: Map<string, number>;
 }
 
 type Listed = Pick<Guild, "id" | "name" | "memberCount" | "joinedTimestamp">;
 
-export function guildMatches(guild: Pick<Guild, "id" | "name">, query: string): boolean {
+function guildMatches(guild: Pick<Guild, "id" | "name">, query: string): boolean {
 	const wanted = query.trim().toLowerCase();
 	if (wanted === "") return true;
 
@@ -90,7 +90,7 @@ export function guildMatches(guild: Pick<Guild, "id" | "name">, query: string): 
 }
 
 /** Ties fall back to the name, so a page never reshuffles between two requests for it. */
-export function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts: GuildCounts): T[] {
+function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts: GuildCounts): T[] {
 	const count = (map: Map<string, number>, guild: T): number => map.get(guild.id) ?? 0;
 	const order: Record<OwnerGuildSort, (a: T, b: T) => number> = {
 		members: (a, b) => b.memberCount - a.memberCount,

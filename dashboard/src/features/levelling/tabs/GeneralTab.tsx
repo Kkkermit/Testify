@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { ChannelPicker, savingStateOf, Toggle } from "@/components/form";
-import { Refusal } from "@/features/levelling/components/Refusal";
+import { ChannelPicker, savingStateOf, Toggle, Refusal } from "@/components/form";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type GeneralSettings, type TabProps } from "@/features/levelling/levelling.types";
 import { useUpdateLevelling } from "@/features/levelling/useLevelling";

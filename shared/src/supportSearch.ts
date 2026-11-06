@@ -91,7 +91,7 @@ export function stem(word: string): string {
 }
 
 /** The words that carry meaning, before stemming: phrases joined, stop words, numbers and `ignore` dropped. */
-export function wordsOf(text: string, ignore: readonly string[] = []): string[] {
+function wordsOf(text: string, ignore: readonly string[] = []): string[] {
 	const phrased = PHRASES.reduce(
 		(current, [pattern, replacement]) => current.replace(pattern, replacement),
 		text.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/['’]/g, ""),
@@ -339,10 +339,10 @@ export class SupportSearch<T extends SearchableEntry> {
 }
 
 /** Coverage is what turns away an off-topic question: most of its words appear in no article at all. */
-export const CONFIDENT = { score: 1, coverage: 0.42 } as const;
-export const RELATED = { score: 2, coverage: 0.25 } as const;
+const CONFIDENT = { score: 1, coverage: 0.42 } as const;
+const RELATED = { score: 2, coverage: 0.25 } as const;
 /** Looser than an answer, because a list of suggestions is for the reader to choose from. */
-export const SUGGESTED = { score: 0.5, coverage: 0.3 } as const;
+const SUGGESTED = { score: 0.5, coverage: 0.3 } as const;
 
 export function isConfident<T>(hit: SearchHit<T> | undefined): hit is SearchHit<T> {
 	return hit !== undefined && hit.score >= CONFIDENT.score && hit.coverage >= CONFIDENT.coverage;

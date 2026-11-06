@@ -23,13 +23,11 @@ import {
 	getUserLevel,
 	setLevel,
 } from "@database/repositories/levelRepository";
-import { deactivateSoftban, getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
 import { type RewardOutcome } from "@lib/levelling/levelling.types";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
-import { recordCase } from "@lib/moderation/caseActions.util";
 import { blockText, moderationProblem } from "@lib/moderation/moderationActions.util";
-import { type Moderator } from "@lib/moderation/sanctions.util";
 import {
 	BOARD_PAGE_SIZE,
 	type BoardPage,
@@ -99,7 +97,7 @@ export async function boardEntries(
 	return { total, entries: rows.map((row) => ({ userId: row.userId, primary: row.level, secondary: row.xp })) };
 }
 
-export async function rankOnBoard(
+async function rankOnBoard(
 	guildId: string,
 	board: MemberBoard,
 	userId: string,
@@ -271,20 +269,7 @@ export async function readMemberDetail(options: {
 	};
 }
 
-/** Lifts a softban early: the Discord ban first, because the record is what the sweep job reads. */
-export async function revokeSoftban(guild: Guild, userId: string, by: Moderator): Promise<boolean> {
-	if ((await getActiveSoftban(guild.id, userId)) === null) return false;
-
-	const ban = await guild.bans.fetch(userId).catch(() => null);
-	await guild.bans.remove(userId, `Softban lifted early by ${by.name}`).catch(() => null);
-	const lifted = await deactivateSoftban(guild.id, userId);
-
-	if (ban !== null)
-		await recordCase(guild, { action: "unban", user: ban.user, moderator: by, reason: "Softban lifted early" });
-	return lifted;
-}
-
-export interface LevelChange {
+interface LevelChange {
 	level: number;
 	xp: number;
 	rewards: RewardOutcome;

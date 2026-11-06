@@ -17,7 +17,7 @@ const LABELS: Record<MoneyAction, { title: string; done: string; source: string;
 
 const FROM_BALANCE = "bal";
 
-export interface MoneyStep {
+interface MoneyStep {
 	action: MoneyAction;
 	origin: MoneyOrigin;
 	/** An amount button, the button that opens the form, or the form being sent. */

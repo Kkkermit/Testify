@@ -41,7 +41,7 @@ function bestFirst(formats: RemoteFormat[]): RemoteFormat[] {
 		.map(({ format }) => format);
 }
 
-export interface PlanOptions {
+interface PlanOptions {
 	ffmpeg: boolean;
 	/** Set when the audio has to be filtered — a volume other than the track's own, or a seek — which only FFmpeg can do. */
 	filtered?: boolean;

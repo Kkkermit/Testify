@@ -23,9 +23,9 @@ export default defineEvent({
 				// Discord drops a keystroke's interaction when the next one arrives, so an answer crossing it is routine.
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownInteraction) {
 					const ageMs = Date.now() - interaction.createdTimestamp;
-					client.logger.trace({ command, ageMs }, "Autocomplete answered an interaction that had already expired");
+					client.logger.trace({ command, ageMs }, "[AUTOCOMPLETE] Answered an interaction that had already expired.");
 				} else {
-					client.logger.error({ err: toError(error), command }, "Autocomplete failed");
+					client.logger.error({ err: toError(error), command }, "[AUTOCOMPLETE_ERROR] An autocomplete failed.");
 				}
 			}
 			return;
@@ -34,7 +34,10 @@ export default defineEvent({
 		if (interaction.isChatInputCommand()) {
 			const command = client.commands.get(interaction.commandName);
 			if (!command) {
-				client.logger.warn({ command: interaction.commandName }, "Unknown slash command");
+				client.logger.warn(
+					{ command: interaction.commandName },
+					"[COMMAND] Received a slash command the bot does not have. Reload Discord if it was removed.",
+				);
 				return;
 			}
 

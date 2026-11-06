@@ -6,6 +6,7 @@ import { ErrorState } from "@/app/ErrorState";
 import {
 	Field,
 	FIELD,
+	Refusal,
 	RowActions,
 	SavingIndicator,
 	savingStateOf,
@@ -27,7 +28,6 @@ import {
 import { useCasino, useSaveCasino } from "@/features/casino/useCasino";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function CasinoPage(): React.JSX.Element {
@@ -55,9 +55,7 @@ export function CasinoPage(): React.JSX.Element {
 	const problem = limitsProblem(draft, t);
 	const limits = limitsOf(draft);
 	const refusal = (from: typeof source): React.JSX.Element | null =>
-		save.error !== null && source === from ? (
-			<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-		) : null;
+		source === from ? <Refusal error={save.error} /> : null;
 
 	return (
 		<>

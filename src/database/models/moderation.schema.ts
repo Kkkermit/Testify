@@ -17,7 +17,7 @@ const blacklistSchema = new Schema<BlacklistEntry>(
 
 export const Blacklist = model<BlacklistEntry>("blacklist", blacklistSchema);
 
-export interface WarnEdit {
+interface WarnEdit {
 	editedById: string;
 	editedByTag: string;
 	oldReason: string;
@@ -143,7 +143,7 @@ softbanSchema.index({ isActive: 1, expiresAt: 1 });
 
 export const Softban = model<SoftbanEntry>("SoftbanEntry", softbanSchema);
 
-export interface DmLogEntry {
+interface DmLogEntry {
 	messageId: string;
 	authorId: string;
 	content: string;

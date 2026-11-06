@@ -10,6 +10,7 @@ import {
 	Field,
 	FIELD,
 	FieldGroup,
+	Refusal,
 	RowActions,
 	SavingIndicator,
 	savingStateOf,
@@ -40,7 +41,6 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 import { oneOf } from "@/lib/oneOf";
@@ -185,9 +185,7 @@ export function GiveawaysPage(): React.JSX.Element {
 				</FieldGroup>
 
 				{blocked !== null && prize !== "" && <Warning>{blocked}</Warning>}
-				{failure !== null && (
-					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={failure} />
 
 				<RowActions>
 					<Button disabled={blocked !== null || busy} onClick={create}>

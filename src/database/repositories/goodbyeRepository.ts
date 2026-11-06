@@ -1,6 +1,6 @@
 import { GoodbyeSettingsConfig, type GoodbyeSettingsRecord } from "@database/models/goodbye.schema";
 
-export type StoredGoodbyeSettings = Pick<GoodbyeSettingsRecord, "enabled" | "channelId" | "message" | "style">;
+type StoredGoodbyeSettings = Pick<GoodbyeSettingsRecord, "enabled" | "channelId" | "message" | "style">;
 
 const FIELDS = "enabled channelId message style";
 

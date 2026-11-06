@@ -4,11 +4,7 @@ import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
 /** Timeout lengths a step may use, in minutes; Discord's own ceiling is 28 days. */
-export const WARN_TIMEOUT_MINUTES = [5, 10, 30, 60, 360, 1_440, 10_080] as const;
-
-export const WARN_ACTIONS = ["warn", "timeout", "kick", "ban"] as const;
-
-export type WarnAction = (typeof WARN_ACTIONS)[number];
+const WARN_TIMEOUT_MINUTES = [5, 10, 30, 60, 360, 1_440, 10_080] as const;
 
 export const WARN_LIMITS = {
 	/** Discord allows 40 components a message, and each step on the panel costs two. */
@@ -35,8 +31,6 @@ export const warnStep = z.discriminatedUnion("action", [
 ]);
 
 export const warnLadderPut = z.object({ steps: z.array(warnStep).max(WARN_LIMITS.maxSteps) });
-
-export type WarnLadderPut = z.infer<typeof warnLadderPut>;
 
 export interface WarnLadder {
 	/** The first entry is what a first warning does, the second a second, and so on. */
@@ -116,7 +110,7 @@ export const warningAdd = z.object({
 export type WarningAdd = z.infer<typeof warningAdd>;
 
 /** Why a step could not be carried out: they had left, the bot sits too low or lacks the permission, or Discord said no. */
-export const WARN_PROBLEMS = ["left", "outranked", "refused"] as const;
+const WARN_PROBLEMS = ["left", "outranked", "refused"] as const;
 
 export type WarnProblem = (typeof WARN_PROBLEMS)[number];
 

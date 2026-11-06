@@ -14,7 +14,7 @@ describe("the owner console's chunk", () => {
 
 	it("is reached from outside the owner feature by nothing but the router's lazy import", () => {
 		const outside = everyModule()
-			.filter((path) => !path.includes(`${resolve(SRC, "features", "owner")}`))
+			.filter((path) => !path.includes(resolve(SRC, "features", "owner")))
 			.filter((path) => OWNER_IMPORT.test(readFileSync(path, "utf8")))
 			.map((path) => path.slice(SRC.length + 1));
 

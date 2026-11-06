@@ -13,8 +13,6 @@ export type WeekEvent =
 	/** At midnight UTC on the day, which is when the birthday job first looks. */
 	| { kind: "birthday"; at: string; userId: string; name: string };
 
-export type WeekEventKind = WeekEvent["kind"];
-
 export interface GuildWeek {
 	from: string;
 	to: string;

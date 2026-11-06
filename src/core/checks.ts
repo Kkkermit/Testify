@@ -15,7 +15,7 @@ import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
 
-export interface TitledRefusal {
+interface TitledRefusal {
 	title: string;
 	message: string;
 	fields?: { name: string; value: string }[];
@@ -23,7 +23,7 @@ export interface TitledRefusal {
 	tone?: "notice" | "error";
 }
 
-export type CheckFailure = string | TitledRefusal | null;
+type CheckFailure = string | TitledRefusal | null;
 
 export function refusalText(refusal: string | TitledRefusal): string {
 	if (typeof refusal === "string") return refusal;
@@ -104,10 +104,7 @@ function listed(names: readonly string[]): string {
 	return names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} or ${names.at(-1) ?? ""}`;
 }
 
-export function blacklistRefusal(
-	entry: { reason: string; createdAt: Date },
-	owners: readonly string[] = [],
-): TitledRefusal {
+function blacklistRefusal(entry: { reason: string; createdAt: Date }, owners: readonly string[] = []): TitledRefusal {
 	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
 	const named = listed(owners.map((name) => `**${name}**`));
 	const ask =

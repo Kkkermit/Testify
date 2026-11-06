@@ -19,7 +19,7 @@ import {
 	useScheduledMessages,
 } from "@/features/scheduled-messages/useScheduledMessages";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
@@ -54,7 +54,7 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 	const touched = draft.channelId !== null || draft.message !== "" || draft.localTime !== "";
 	const saving = add.isPending || edit.isPending || remove.isPending;
 	const said = (error: Error | null): string | null =>
-		error === null ? null : error instanceof ApiError ? error.message : t("common.couldNotSave");
+		error === null ? null : refusalText(error, t("common.couldNotSave"));
 	const channelName = (id: string): string => channelLabel(channels.data ?? [], id, t);
 
 	function submit(): void {
@@ -147,7 +147,7 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 			{remove.error !== null && (
 				<Warning>
 					<Trash2 size={14} aria-hidden="true" className="mr-1 inline" />
-					{remove.error instanceof ApiError ? remove.error.message : t("common.couldNotRemove")}
+					{refusalText(remove.error, t("common.couldNotRemove"))}
 				</Warning>
 			)}
 		</>

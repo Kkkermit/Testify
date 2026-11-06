@@ -13,12 +13,12 @@ import { discordTime, escapeMarkdown, formatNumber } from "@lib/format/format.ut
 
 /** A shared round of roulette as pure state: who sits where, what they bet, and every message the round shows. */
 
-export interface RoundBet {
+interface RoundBet {
 	bet: RouletteBet;
 	amount: number;
 }
 
-export interface RoundPlayer {
+interface RoundPlayer {
 	userId: string;
 	name: string;
 	/** Their place in the order they sat down, which picks their chip colour. */
@@ -43,7 +43,7 @@ export interface RoundView {
 	history: readonly number[];
 }
 
-export interface PlayerResult {
+interface PlayerResult {
 	player: RoundPlayer;
 	staked: number;
 	returned: number;
@@ -76,7 +76,7 @@ export function roundView(record: RoundRecord, history: readonly number[] = []):
 	};
 }
 
-export function roundChips(view: RoundView): BoardChip[] {
+function roundChips(view: RoundView): BoardChip[] {
 	return view.players.flatMap((player) => player.bets.map((placed) => ({ ...placed, seat: player.seat })));
 }
 
@@ -161,7 +161,7 @@ function playersText(view: RoundView): string {
 }
 
 /** Says who may bet, so a reader knows whether the buttons are for them. */
-export function accessLine(view: RoundView): string {
+function accessLine(view: RoundView): string {
 	if (!view.private) return "🌐 **Public table** · anybody in the channel can join";
 	const host = view.hostName === "" ? "the host" : `**${escapeMarkdown(view.hostName)}**`;
 	return `🔒 **Private table** · only ${host} can bet`;
@@ -209,7 +209,7 @@ function betButton(roundId: string, bet: RouletteBet, style: ButtonStyle) {
 const POCKET_EMOJI = { red: "🔴", black: "⚫", green: "🟢" } as const;
 
 /** The last spins in words, for the reader who cannot see the strip drawn on the table. */
-export function historyLine(history: readonly number[]): string | null {
+function historyLine(history: readonly number[]): string | null {
 	if (history.length === 0) return null;
 	const spins = history.map((pocket) => `${POCKET_EMOJI[pocketColour(pocket)]} **${String(pocket)}**`);
 	return `-# Last spins, newest first: ${spins.join(" · ")}`;
@@ -313,7 +313,7 @@ export function roundSpinningMessage(view: RoundView, gif: Buffer): ContainerMes
 }
 
 /** Every outside bet a pocket pays, so the headline says what won as well as the number. */
-export function winningSpots(pocket: number): string[] {
+function winningSpots(pocket: number): string[] {
 	return ROULETTE_SPOTS.filter((spot) => spot.kind !== "number" && betWins(spot, pocket)).map(betName);
 }
 
@@ -373,7 +373,7 @@ function fitted(heading: string, lines: string[], limit = 3_900): string {
 }
 
 /** Grouped by where each player finished overall, biggest win and biggest loss first. */
-export function resultsText(view: RoundView, pocket: number): string[] {
+function resultsText(view: RoundView, pocket: number): string[] {
 	const results = roundResults(view, pocket);
 	const winners = results.filter((result) => profitOf(result) > 0).sort((a, b) => profitOf(b) - profitOf(a));
 	const even = results.filter((result) => profitOf(result) === 0);
@@ -398,7 +398,7 @@ export function resultsText(view: RoundView, pocket: number): string[] {
 }
 
 /** A private table's New round stays private and stays with its host; a public one is open to whoever presses. */
-export function playAgainRow(view: Pick<RoundView, "chip" | "private" | "hostId">): ContainerPart {
+function playAgainRow(view: Pick<RoundView, "chip" | "private" | "hostId">): ContainerPart {
 	return row(
 		button({
 			id: view.private

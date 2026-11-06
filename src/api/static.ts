@@ -29,7 +29,7 @@ export function dashboardBuilt(root = dashboardRoot()): boolean {
 }
 
 /** Every file in the build by its exact path, with `/` between folders whatever the platform. */
-export function builtFiles(root: string): Set<string> {
+function builtFiles(root: string): Set<string> {
 	return new Set(
 		readdirSync(root, { recursive: true, withFileTypes: true })
 			.filter((entry) => entry.isFile())
@@ -61,7 +61,7 @@ function safeDecode(pathname: string): string | null {
  * The owner console's chunk, which Vite names after the lazily imported `OwnerPage`; checked on the resolved file, so
  * no spelling of the address reaches it.
  */
-export function isOwnerChunk(root: string, asset: string): boolean {
+function isOwnerChunk(root: string, asset: string): boolean {
 	return relative(root, dirname(asset)) === "assets" && /^OwnerPage-[\w-]+\.(?:js|css)$/.test(basename(asset));
 }
 

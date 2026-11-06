@@ -5,6 +5,7 @@ import { ErrorState } from "@/app/ErrorState";
 import {
 	ChannelPicker,
 	FieldGroup,
+	Refusal,
 	SavingIndicator,
 	savingStateOf,
 	SettingRows,
@@ -17,7 +18,6 @@ import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { StyleChoice } from "@/features/welcome/components/StyleChoice";
 import { useGoodbye, useUpdateGoodbye } from "@/features/welcome/useGoodbye";
-import { ApiError } from "@/lib/api";
 
 export function GoodbyeSettings({
 	guildId,
@@ -110,9 +110,7 @@ export function GoodbyeSettings({
 			</MessageEditor>
 
 			{!needsChannel && !goodbye.canSend && <Warning>{t("goodbye.cannotSend")}</Warning>}
-			{update.error !== null && (
-				<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={update.error} />
 		</SettingRows>
 	);
 }

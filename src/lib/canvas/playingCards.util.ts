@@ -12,7 +12,7 @@ export const CARD_HEIGHT = 128;
 const RED = "#c8202c";
 const BLACK = "#16161c";
 
-export function drawSuit(ctx: SKRSContext2D, suit: Suit, x: number, y: number, size: number): void {
+function drawSuit(ctx: SKRSContext2D, suit: Suit, x: number, y: number, size: number): void {
 	const s = size / 2;
 	ctx.save();
 	ctx.translate(x, y);
@@ -170,7 +170,7 @@ export function drawFelt(ctx: SKRSContext2D, width: number, height: number): voi
 	ctx.stroke();
 }
 
-export interface PillOptions {
+interface PillOptions {
 	/** Whether `x` is the pill's left edge or its centre. */
 	align?: "left" | "center";
 	/** The figure's colour; the label is always a quieter white. */

@@ -2,16 +2,7 @@ import { strings } from "@config/strings";
 import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { SetupError, UserFacingError } from "@core/errors";
-import {
-	logAuthor,
-	loggedChannel,
-	loggedChannelText,
-	loggedGuild,
-	loggedGuildText,
-	loggedUser,
-	loggedUserText,
-	postToLogChannel,
-} from "@lib/bot";
+import { logAuthor, loggedUser, loggedUserText, postToLogChannel, placeFields } from "@lib/bot";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { containsProfanity } from "@lib/moderation";
 
@@ -38,15 +29,7 @@ export default defineCommand({
 					author: logAuthor(user),
 					title: "💡 Suggestion",
 					description: suggestion,
-					fields: [
-						{ name: "Suggested by", value: loggedUserText(user), inline: true },
-						{ name: "Server", value: loggedGuildText(loggedGuild(interaction.guild)), inline: true },
-						{
-							name: "Channel",
-							value: loggedChannelText(interaction.guild === null ? null : loggedChannel(interaction.channel, null)),
-							inline: true,
-						},
-					],
+					fields: [{ name: "Suggested by", value: loggedUserText(user), inline: true }, ...placeFields(interaction)],
 					thumbnail: user.avatarUrl,
 				}),
 			],

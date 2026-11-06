@@ -8,7 +8,7 @@ export const REMINDER_RULES = {
 	maxText: 500,
 } as const;
 
-export type ReminderTimeProblem = "tooSoon" | "tooLate";
+type ReminderTimeProblem = "tooSoon" | "tooLate";
 
 export function reminderTimeProblem(dueAt: Date, now: Date = new Date()): ReminderTimeProblem | null {
 	const delay = dueAt.getTime() - now.getTime();

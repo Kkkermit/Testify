@@ -2,7 +2,7 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import {
 	DEFAULT_WELCOME_MESSAGE,
@@ -37,14 +37,10 @@ export default recordsSettings(
 			const config = await currentConfig(guild.id);
 
 			const show = async (next: WelcomeConfig | null, note?: string): Promise<void> => {
-				const payload = welcomePanel({ config: next, ...(note !== undefined ? { note } : {}) }, ownerId);
-
-				if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-					await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
-					return;
-				}
-
-				await interaction.update(payload);
+				await redrawPanel(
+					interaction,
+					welcomePanel({ config: next, ...(note !== undefined ? { note } : {}) }, ownerId),
+				);
 			};
 
 			switch (context.action) {

@@ -43,7 +43,7 @@ export function describeValue(field: string, value: unknown, { channels, roles, 
 	return t("restore.notSet");
 }
 
-export interface RestoreLine {
+interface RestoreLine {
 	field: string;
 	label: string;
 	now: string;

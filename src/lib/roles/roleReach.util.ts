@@ -4,7 +4,7 @@ import { POWERFUL_PERMISSIONS } from "@lib/roles/roles.constants";
 /** Who may have the bot hand out which role: the rule the dashboard, `/role-menu` and a member's own pick all share. */
 
 /** Why the bot itself cannot give this role, whoever asks, or null when it can. */
-export function botGrantProblem(role: Role | undefined, guild: Guild): string | null {
+function botGrantProblem(role: Role | undefined, guild: Guild): string | null {
 	if (role === undefined) return "That role is not in this server.";
 	if (role.id === guild.id || role.managed) {
 		return `${role.name} is managed by Discord or an integration, so nobody can hand it out.`;

@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 
 export type LotteryFrequency = "hourly" | "daily" | "weekly";
 
-export interface LotteryEntry {
+interface LotteryEntry {
 	userId: string;
 	userTag: string;
 	tickets: number;

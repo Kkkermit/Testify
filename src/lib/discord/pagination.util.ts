@@ -4,7 +4,7 @@ import { type TestifyClient } from "@core/client";
 import { navRow } from "@lib/discord/components.util";
 import { withPageFooter } from "@lib/discord/embeds.util";
 
-export interface PageOptions<T> {
+interface PageOptions<T> {
 	items: T[];
 	pageSize: number;
 	/** The button id that owns the navigation controls. */
@@ -15,7 +15,7 @@ export interface PageOptions<T> {
 	render(pageItems: T[], page: number, totalPages: number): EmbedBuilder;
 }
 
-export interface RenderedPage {
+interface RenderedPage {
 	embeds: EmbedBuilder[];
 	components: ActionRowBuilder<MessageActionRowComponentBuilder>[];
 }

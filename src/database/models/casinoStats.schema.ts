@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 import { CASINO_GAMES, type CasinoGame } from "@testify/shared";
 
 /** One player's running totals at one game in one server, added to as each game settles. */
-export interface CasinoStatsRecord {
+interface CasinoStatsRecord {
 	guildId: string;
 	userId: string;
 	game: CasinoGame;

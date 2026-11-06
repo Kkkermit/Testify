@@ -33,4 +33,3 @@ export const testPostBody = z.discriminatedUnion("kind", [
 ]);
 
 export type TestPost = z.infer<typeof testPostBody>;
-export type TestPostKind = TestPost["kind"];

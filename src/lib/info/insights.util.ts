@@ -52,7 +52,7 @@ const VERIFICATION: Record<GuildVerificationLevel, VerificationLevel> = {
 	[GuildVerificationLevel.VeryHigh]: "highest",
 };
 
-export async function serverFacts(guild: Guild): Promise<ServerFacts> {
+async function serverFacts(guild: Guild): Promise<ServerFacts> {
 	const counts = await readMemberCounts(guild);
 	const channels = [...guild.channels.cache.values()];
 	const count = (...types: ChannelType[]) => channels.filter((channel) => types.includes(channel.type)).length;
@@ -88,7 +88,7 @@ export function fillDays(rows: readonly ServerDay[], days: number, now: Date): I
 	});
 }
 
-export function hoursOf(rows: readonly ServerDay[]): number[] {
+function hoursOf(rows: readonly ServerDay[]): number[] {
 	const hours = Array.from({ length: 24 }, () => 0);
 	for (const row of rows) {
 		for (const [hour, count] of Object.entries(row.hours ?? {})) {

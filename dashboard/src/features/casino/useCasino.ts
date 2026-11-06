@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type CasinoPatch, type CasinoSettings } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -17,19 +12,9 @@ export function useCasino(guildId: string): UseQueryResult<CasinoSettings> {
 }
 
 export function useSaveCasino(guildId: string): UseMutationResult<CasinoSettings, Error, CasinoPatch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).casino();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: (body: CasinoPatch) => api.patch<CasinoSettings>(`/guilds/${guildId}/casino`, body),
-		onSuccess: (settings) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useDocumentMutation(
+		keys.guild(guildId).casino(),
+		(body: CasinoPatch) => api.patch<CasinoSettings>(`/guilds/${guildId}/casino`, body),
+		[keys.guild(guildId).overview()],
+	);
 }

@@ -1,7 +1,7 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { analytics, zeroFill } from "@api/routes/analytics";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -99,10 +99,7 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 		await next();
 	});
 	app.route("/analytics", analytics);
-	app.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(app);
 
 	return app;
 }

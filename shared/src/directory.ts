@@ -48,11 +48,9 @@ export const directoryQuery = z.object({
 export type DirectoryQuery = z.infer<typeof directoryQuery>;
 
 /** Why the person reading cannot moderate somebody, as a code each surface words for itself. */
-export const MEMBER_BLOCKS = ["you", "owner", "bot", "outranked", "botOutranked", "notMember"] as const;
+export type MemberBlock = "you" | "owner" | "bot" | "outranked" | "botOutranked" | "notMember";
 
-export type MemberBlock = (typeof MEMBER_BLOCKS)[number];
-
-export interface DirectoryRole {
+interface DirectoryRole {
 	id: string;
 	name: string;
 	colour: string | null;

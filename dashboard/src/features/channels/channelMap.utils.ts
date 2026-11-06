@@ -1,8 +1,8 @@
 import { type ChannelSummary, type FeaturePlaces } from "@testify/shared";
 
-export type VisibleChannel = ChannelSummary & { name: string };
+type VisibleChannel = ChannelSummary & { name: string };
 
-export interface ChannelGroup {
+interface ChannelGroup {
 	category: { id: string; name: string | null } | null;
 	channels: VisibleChannel[];
 }

@@ -6,7 +6,7 @@ import { requireSendable } from "@lib/discord/channelPick.util";
 import { giveaways } from "@lib/giveaways/giveaways.util";
 import { GIVEAWAY_POST, type GiveawayRow } from "@testify/shared";
 
-export interface StartGiveaway {
+interface StartGiveaway {
 	channelId: string;
 	prize: string;
 	winnerCount: number;

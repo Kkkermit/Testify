@@ -1,5 +1,6 @@
 import { getHeapStatistics } from "node:v8";
 import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
 import { pingDatabase } from "@database/connection";
 import { firstStatusSampleAt, type SampleInput, statusSamplesSince } from "@database/repositories/statusRepository";
 import { commandTimes, type CommandTimes, eventLoopDelay, type LoopDelay } from "@lib/bot/performance.util";
@@ -52,7 +53,7 @@ export function gatewayCheck(ready: boolean, pingMs: number, shards: number): Ga
 	return { level: ready ? byLatency(ping, STATUS_LIMITS.gatewaySlowMs) : "down", pingMs: ping, shards };
 }
 
-export function databaseCheck(pingMs: number | null): DatabaseCheck {
+function databaseCheck(pingMs: number | null): DatabaseCheck {
 	return { level: pingMs === null ? "down" : byLatency(pingMs, STATUS_LIMITS.databaseSlowMs), pingMs };
 }
 
@@ -97,7 +98,7 @@ export function commandCheck(times: CommandTimes): CommandCheck {
 	return { level: failing || slow ? "degraded" : "operational", ...times };
 }
 
-export interface OverallInputs {
+interface OverallInputs {
 	core: StatusLevel[];
 	/** Commands and third-party services: their outage costs features, not the bot. */
 	peripheral: StatusLevel[];
@@ -204,9 +205,9 @@ export function recentBuckets(samples: SampleInput[], firstAt: number | null, no
 	});
 }
 
-export type LiveStatus = Omit<StatusResponse, "days" | "recent">;
+type LiveStatus = Omit<StatusResponse, "days" | "recent">;
 
-export interface StatusSources {
+interface StatusSources {
 	now?: number;
 	pingDatabase?: () => Promise<number | null>;
 }
@@ -260,7 +261,7 @@ export async function statusReport(client: TestifyClient, sources: StatusSources
 				firstStatusSampleAt().then((first) => first?.getTime() ?? null),
 			]);
 		} catch (error) {
-			client.logger.debug({ err: error }, "[STATUS] Could not read the heartbeat history.");
+			client.logger.debug({ err: toError(error) }, "[STATUS] Could not read the heartbeat history.");
 		}
 	}
 

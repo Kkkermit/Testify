@@ -1,7 +1,6 @@
 import { LEVEL_LIMITS } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { CheckList, postableChannels, RoleChecklist, savingStateOf } from "@/components/form";
-import { Refusal } from "@/features/levelling/components/Refusal";
+import { CheckList, postableChannels, RoleChecklist, savingStateOf, Refusal } from "@/components/form";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
 import { useUpdateIgnores } from "@/features/levelling/useLevelling";

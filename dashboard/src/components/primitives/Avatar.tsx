@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { initialOf } from "@/lib/people";
 import { tintFor } from "@/lib/tint";
 
 export function Avatar({
@@ -27,7 +28,7 @@ export function Avatar({
 				style={style}
 				aria-hidden="true"
 			>
-				{[...name][0]?.toUpperCase() ?? "?"}
+				{initialOf(name) ?? "?"}
 			</div>
 		);
 	}

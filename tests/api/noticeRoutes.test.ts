@@ -1,11 +1,10 @@
 import { Hono } from "hono";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, problemBody } from "@api/errors";
 import { notices } from "@api/routes/notices";
 import { ownerNotices } from "@api/routes/ownerNotices";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import {
 	createNotice,
@@ -54,15 +53,7 @@ function app(userId: string | null): Hono<ApiBindings> {
 	instance.route("/notices", notices);
 	instance.route("/owner/notices", ownerNotices);
 	// The same mapping the real app's boundary makes in `server.ts`.
-	instance.onError((error) => {
-		const problem =
-			error instanceof ApiProblem
-				? error
-				: error instanceof UserFacingError
-					? badRequest(error.message)
-					: new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 	return instance;
 }
 

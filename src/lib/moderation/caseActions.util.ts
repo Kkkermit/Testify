@@ -36,7 +36,7 @@ export const CASE_ACTION_LABELS: Record<CaseAction, string> = {
 	unban: "Unban",
 };
 
-export interface CaseInput {
+interface CaseInput {
 	action: CaseAction;
 	user: { id: string; username: string };
 	moderator: { id: string; name: string };

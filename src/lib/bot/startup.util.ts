@@ -5,7 +5,7 @@ import { badge, box, colourEnabled, type Paint, painter, stepLine, type StepStat
 
 /** What a person watching the terminal sees while the bot starts, and what they see when it cannot. */
 
-export interface BootFacts {
+interface BootFacts {
 	name: string;
 	version: string;
 	mode: string;
@@ -60,7 +60,7 @@ function modeLabel(mode: string, paint: Paint): string {
 	return mode === "production" ? paint.green(paint.bold(mode)) : paint.yellow(paint.bold(mode));
 }
 
-export interface StartupFailure {
+interface StartupFailure {
 	title: string;
 	tone: Tone;
 	lines: string[];

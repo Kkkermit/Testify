@@ -11,7 +11,7 @@ import { BellRing, Pencil, Send, Trash2 } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, FIELD, LABEL, SELECT, Warning } from "@/components/form";
+import { Field, FIELD, LABEL, Refusal, SELECT, Warning } from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, DividedList, SegmentedControl, Skeleton } from "@/components/primitives";
 import { NOTICE_TONE_BADGES, NOTICE_TONE_LABELS } from "@/features/notices/notices.utils";
 import {
@@ -24,7 +24,6 @@ import {
 } from "@/features/owner/noticeTiming.utils";
 import { useChangeNotice, useOwnerNotices, usePostNotice, useRemoveNotice } from "@/features/owner/useControl";
 import { toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 import { problemText } from "@/lib/problemText";
@@ -283,7 +282,7 @@ function NoticeRow({ notice }: { notice: Notice }): React.JSX.Element {
 				</>
 			)}
 
-			{failure !== null && <Warning>{failure instanceof ApiError ? failure.message : t("common.didNotWork")}</Warning>}
+			<Refusal error={failure} fallback="common.didNotWork" />
 		</li>
 	);
 }
@@ -328,9 +327,7 @@ export function NoticesCard(): React.JSX.Element {
 							post.mutate(input, { onSuccess: done });
 						}}
 					/>
-					{post.error !== null && (
-						<Warning>{post.error instanceof ApiError ? post.error.message : t("common.didNotWork")}</Warning>
-					)}
+					<Refusal error={post.error} fallback="common.didNotWork" />
 				</>
 			)}
 		</Card>

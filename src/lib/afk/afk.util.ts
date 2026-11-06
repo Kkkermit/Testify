@@ -8,7 +8,7 @@ import { sanitiseLine } from "@testify/shared";
 
 /** Away notes: set with `/afk`, shown to whoever mentions their member, and cleared when that member next speaks. */
 
-export interface AwayMember {
+interface AwayMember {
 	name: string;
 	note: string;
 	since: Date;

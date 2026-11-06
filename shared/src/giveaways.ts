@@ -32,7 +32,7 @@ export const GIVEAWAY_POST = {
 } as const;
 
 /** The tag is null when Discord no longer knows the account; the id still identifies the entry. */
-export interface GiveawayWinner {
+interface GiveawayWinner {
 	id: string;
 	tag: string | null;
 }

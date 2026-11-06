@@ -2,7 +2,7 @@ import { isValidObjectId, type Types } from "mongoose";
 import { Idea, type IdeaRecord, IdeaSettingsConfig, type IdeaSettingsRecord } from "@database/models/idea.schema";
 import { type IdeaFilter, type IdeaStatus } from "@testify/shared";
 
-export type StoredIdeaSettings = Pick<IdeaSettingsRecord, "enabled" | "channelId">;
+type StoredIdeaSettings = Pick<IdeaSettingsRecord, "enabled" | "channelId">;
 
 export type StoredIdea = Omit<IdeaRecord, "updatedAt"> & { id: string };
 

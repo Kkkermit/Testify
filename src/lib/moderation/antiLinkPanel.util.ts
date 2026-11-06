@@ -1,11 +1,10 @@
-import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { option, select, selectRow } from "@lib/discord/components.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { humanisePermission } from "@lib/format/format.util";
 import { ANTILINK_PANEL_ID } from "@lib/moderation/moderation.constants";
 import { type AntiLinkPanelState } from "@lib/moderation/moderation.types";
-import { settingsScreen } from "@lib/settings/settingsScreen.util";
+import { settingsScreen, switchAction } from "@lib/settings/settingsScreen.util";
 import { BYPASS_PERMISSIONS, type BypassPermission, DEFAULT_BYPASS, isBypassPermission } from "@testify/shared";
 
 /** Link removal, configured from one screen rather than `enable`/`disable`/`status`. */
@@ -44,13 +43,7 @@ export function antiLinkPanel(state: AntiLinkPanelState, ownerId: string): Conta
 				),
 			},
 		],
-		actions: [
-			{
-				action: "toggle",
-				label: state.enabled ? "Turn off" : "Turn on",
-				style: state.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
-			},
-		],
+		actions: [switchAction(state.enabled)],
 		footer: "Every removal is recorded as a warning, so repeat offenders are visible in `/warn list`.",
 	});
 }

@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type GiveawayList, type GiveawayStart } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -40,18 +35,5 @@ function useListMutation<Body>(
 	guildId: string,
 	send: (body: Body) => Promise<GiveawayList>,
 ): UseMutationResult<GiveawayList, Error, Body> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).giveaways();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: send,
-		onSuccess: (list) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, list);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-		},
-	});
+	return useDocumentMutation(keys.guild(guildId).giveaways(), send);
 }

@@ -4,7 +4,6 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { createSoftban, listActiveSoftbans } from "@database/repositories/moderationRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
-import { revokeSoftban } from "@lib/economy";
 import { discordTime, formatDurationLong, parseDuration } from "@lib/format";
 import {
 	actionEmbed,
@@ -14,6 +13,7 @@ import {
 	moderatorOf,
 	notifyTarget,
 	recordCase,
+	revokeSoftban,
 } from "@lib/moderation";
 
 export default defineCommand({

@@ -34,7 +34,7 @@ export default defineEvent({
 					member.roles.add(roleId, "Auto-role").catch((error: unknown) => {
 						client.logger.warn(
 							{ err: toError(error), roleId, guildId: member.guild.id },
-							"Could not apply an auto-role",
+							"[AUTO_ROLE] Could not give a role on join. Check the role sits below the bot's highest role.",
 						);
 					}),
 				),

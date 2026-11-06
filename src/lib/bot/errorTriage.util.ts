@@ -6,7 +6,7 @@ import { button, row } from "@lib/discord/components.util";
 
 export const ERROR_TRIAGE_ID = "error";
 
-export type TriageState = "pending" | "solved" | "unsolved";
+type TriageState = "pending" | "solved" | "unsolved";
 
 export function isTriageState(value: string): value is TriageState {
 	return value === "pending" || value === "solved" || value === "unsolved";

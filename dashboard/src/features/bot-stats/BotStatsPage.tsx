@@ -3,14 +3,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, RowActions, SavingIndicator, savingStateOf, SettingRows, Warning } from "@/components/form";
+import { ChannelPicker, Refusal, RowActions, SavingIndicator, savingStateOf, SettingRows } from "@/components/form";
 import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { placementOf, postActionOf } from "@/features/bot-stats/botStats.utils";
 import { usePostBotStats, useBotStats, useRemoveBotStats } from "@/features/bot-stats/useBotStats";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 
 export function BotStatsPage(): React.JSX.Element {
@@ -67,9 +66,7 @@ export function BotStatsPage(): React.JSX.Element {
 					/>
 				)}
 
-				{failure !== null && (
-					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={failure} />
 
 				<RowActions>
 					<Button

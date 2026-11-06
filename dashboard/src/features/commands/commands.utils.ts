@@ -56,7 +56,7 @@ export function configurableAt(command: CommandSummary, guildId: string | null):
 	return { path: entry.path(guildId), screen: entry.screen };
 }
 
-export function isConfigurable(command: CommandSummary): boolean {
+function isConfigurable(command: CommandSummary): boolean {
 	return CONFIGURABLE[command.name] !== undefined;
 }
 

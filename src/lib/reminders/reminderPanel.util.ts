@@ -27,7 +27,7 @@ export function canPingHere(reminder: Pick<StoredReminder, "guildId" | "channelI
 	return reminder.guildId !== null && reminder.channelId !== null;
 }
 
-export function whereLine(reminder: Pick<StoredReminder, "guildId" | "channelId" | "deliver">): string {
+function whereLine(reminder: Pick<StoredReminder, "guildId" | "channelId" | "deliver">): string {
 	return reminder.deliver === "dm" || !canPingHere(reminder)
 		? "by direct message"
 		: `with a ping in <#${reminder.channelId ?? ""}>`;

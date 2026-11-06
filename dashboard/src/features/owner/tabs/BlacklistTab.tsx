@@ -2,11 +2,10 @@ import { Ban, ShieldOff, UserX } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
-import { FIELD, Field, Warning } from "@/components/form";
+import { FIELD, Field, Refusal, Warning } from "@/components/form";
 import { Avatar, Button, Card, CARD_HEADING, EmptyState, Skeleton } from "@/components/primitives";
 import { isSnowflake, snowflakeFrom } from "@/features/owner/owner.utils";
 import { useBlacklist, useBlockUser, useUnblockUser } from "@/features/owner/useBlacklist";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function BlacklistTab(): React.JSX.Element {
@@ -92,9 +91,7 @@ export function BlacklistTab(): React.JSX.Element {
 					)}
 				</div>
 
-				{failure !== null && (
-					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={failure} />
 			</Card>
 
 			<Card className="flex flex-col gap-4">

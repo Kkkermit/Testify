@@ -1,10 +1,10 @@
-import { balancesOf } from "@buttons/shop";
 import { defineButton } from "@core/button";
 import { requireAccount } from "@database/repositories/economyRepository";
 import {
 	amountPanel,
 	BALANCE_PANEL_ID,
 	balancePanel,
+	balancesOf,
 	claimDaily,
 	dailyReady,
 	inventoryScreen,

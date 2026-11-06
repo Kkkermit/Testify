@@ -6,8 +6,7 @@ import { forbidden } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
-import { revokeSoftban } from "@lib/economy";
-import { DEFAULT_REASON, readBans, unbanUser } from "@lib/moderation";
+import { DEFAULT_REASON, readBans, revokeSoftban, unbanUser } from "@lib/moderation";
 import { banQuery, memberParams, unbanBody } from "@testify/shared";
 
 export const bans = new Hono<ApiBindings>();

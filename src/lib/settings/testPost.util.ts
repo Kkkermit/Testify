@@ -11,11 +11,11 @@ import { type TestPost } from "@testify/shared";
 
 /** The real post for `member`, as members would get it; a direct message pings nobody, whatever the draft says. */
 export async function testPostMessage(test: TestPost, member: GuildMember): Promise<MessageCreateOptions> {
-	const built = await build(test, member);
+	const built = await realPost(test, member);
 	return { ...built, allowedMentions: { parse: [] } };
 }
 
-async function build(test: TestPost, member: GuildMember): Promise<MessageCreateOptions> {
+async function realPost(test: TestPost, member: GuildMember): Promise<MessageCreateOptions> {
 	switch (test.kind) {
 		case "greeting":
 			// The saved background is what a card would be drawn on, whatever the draft's words.

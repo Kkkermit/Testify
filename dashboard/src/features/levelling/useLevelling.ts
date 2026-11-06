@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import {
 	type ChannelSummary,
 	type Ignores,
@@ -8,6 +8,7 @@ import {
 	type RoleSummary,
 	type XpBoostInput,
 } from "@testify/shared";
+import { useOptimisticMutation } from "@/hooks/useOptimisticMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -41,30 +42,7 @@ function useLevellingMutation<TInput>(
 	send: (input: TInput) => Promise<LevelConfigResponse>,
 	optimistic: (current: LevelConfigResponse, input: TInput) => LevelConfigResponse,
 ) {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).levelling();
-
-	return useMutation({
-		mutationFn: send,
-		onMutate: async (input: TInput) => {
-			// Or an in-flight read lands after the optimistic write and undoes it.
-			await client.cancelQueries({ queryKey: key });
-			const previous = client.getQueryData<LevelConfigResponse>(key);
-
-			if (previous !== undefined) client.setQueryData(key, optimistic(previous, input));
-
-			return { previous };
-		},
-		onError: (_error, _input, context) => {
-			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
-		},
-		onSuccess: (config) => {
-			client.setQueryData(key, config);
-		},
-		onSettled: () => {
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useOptimisticMutation(keys.guild(guildId).levelling(), send, optimistic, [keys.guild(guildId).overview()]);
 }
 
 export function useUpdateLevelling(guildId: string) {

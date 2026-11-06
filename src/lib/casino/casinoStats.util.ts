@@ -26,7 +26,7 @@ function signed(amount: number): string {
 }
 
 /** What the house kept, or how far ahead the players are when it kept nothing. */
-export function houseLine(sums: Pick<Sums, "wagered" | "returned">): string {
+function houseLine(sums: Pick<Sums, "wagered" | "returned">): string {
 	const take = sums.wagered - sums.returned;
 	if (take >= 0) return `**${formatNumber(take)}** · ${percent(take, sums.wagered)} of every bet`;
 	return `**${signed(take)}** · the players are ahead`;

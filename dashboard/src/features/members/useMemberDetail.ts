@@ -15,6 +15,7 @@ import {
 	type NicknameBody,
 	type TimeoutBody,
 } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -100,18 +101,5 @@ function useMemberMutation<Body>(
 	userId: string,
 	send: (body: Body) => Promise<MemberDetail>,
 ): UseMutationResult<MemberDetail, Error, Body> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).member(userId);
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: send,
-		onSuccess: (detail) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, detail);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-		},
-	});
+	return useDocumentMutation(keys.guild(guildId).member(userId), send);
 }

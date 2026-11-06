@@ -14,6 +14,7 @@ import {
 	type IdeaSettingsPatch,
 	type Paged,
 } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -33,20 +34,11 @@ export function useIdeaList(guildId: string, status: IdeaFilter, page: number): 
 }
 
 export function useSaveIdeaSettings(guildId: string): UseMutationResult<IdeaSettings, Error, IdeaSettingsPatch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).ideaSettings();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: (patch) => api.patch<IdeaSettings>(`/guilds/${guildId}/ideas`, patch),
-		onSuccess: (settings) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useDocumentMutation(
+		keys.guild(guildId).ideaSettings(),
+		(patch) => api.patch<IdeaSettings>(`/guilds/${guildId}/ideas`, patch),
+		[keys.guild(guildId).overview()],
+	);
 }
 
 export function useDecideIdea(

@@ -1,8 +1,8 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import {
 	isLevelTab,
 	LEVEL_LIMITS,
@@ -57,14 +57,7 @@ export default recordsSettings(
 
 			const show = async (next: LevelConfig, note?: string): Promise<void> => {
 				const state: LevelPanelState = { tab, config: next, ...(note !== undefined ? { note } : {}) };
-				const payload = levelPanel(state, ownerId);
-
-				if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-					await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
-					return;
-				}
-
-				await interaction.update(payload);
+				await redrawPanel(interaction, levelPanel(state, ownerId));
 			};
 
 			const save = async (next: LevelConfig, note?: string): Promise<void> => {

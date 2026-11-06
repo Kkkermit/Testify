@@ -1,6 +1,5 @@
 import {
 	type APIInteractionGuildMember,
-	type ChatInputCommandInteraction,
 	type AutocompleteInteraction,
 	type Client,
 	type EmbedBuilder,
@@ -60,6 +59,26 @@ export interface CommandInput {
 	/** A message cannot be private, so a prefix command's version of one deletes itself instead. */
 	replyBriefly?(embed: EmbedBuilder): Promise<unknown>;
 	tidyAway?(): void;
+}
+
+/** Number parsing and the required check, worded the same for every surface that reads options from text. */
+export abstract class OptionReader {
+	protected abstract raw(name: string): string | number | boolean | undefined;
+
+	protected number(name: string, valid: (value: number) => boolean): number | null {
+		const raw = this.raw(name);
+		if (raw === undefined) return null;
+
+		const parsed = Number(raw);
+		if (!valid(parsed)) throw new UserFacingError(`\`${name}\` has to be a number.`);
+
+		return parsed;
+	}
+
+	protected require<T>(name: string, value: T | null, required: boolean | undefined): T {
+		if (value === null && required === true) throw new UserFacingError(`You need to give me \`${name}\`.`);
+		return value as T;
+	}
 }
 
 export interface CommandInputOptions {
@@ -142,11 +161,6 @@ export interface Command {
 	run?(interaction: CommandInput, client: TestifyClient): Promise<void>;
 	autocomplete?(interaction: AutocompleteInteraction, client: TestifyClient): Promise<void>;
 }
-
-/** Proof that a real slash interaction satisfies the contract. */
-const _slashSatisfiesCommandInput: (interaction: ChatInputCommandInteraction) => CommandInput = (interaction) =>
-	interaction;
-void _slashSatisfiesCommandInput;
 
 export function defineCommand(command: Command): Command {
 	return command;

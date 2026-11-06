@@ -32,9 +32,7 @@ export const memberRolesBody = z.object({
 	roleIds: z.array(snowflake).max(MEMBER_ACTION_LIMITS.maxRoles),
 });
 
-export type MemberRolesBody = z.infer<typeof memberRolesBody>;
-
-export interface MemberRoleChoice {
+interface MemberRoleChoice {
 	id: string;
 	name: string;
 	colour: string | null;

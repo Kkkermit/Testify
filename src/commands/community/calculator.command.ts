@@ -1,4 +1,4 @@
-import { evaluate, format, type MathNode, parse } from "mathjs";
+import { evaluate, format, isFunctionNode, isSymbolNode, type MathNode, parse } from "mathjs";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
@@ -62,8 +62,9 @@ export function unsupportedPart(node: MathNode): string | null {
 			return;
 		}
 
-		if (child.type === "FunctionNode") {
-			const name = (child as unknown as { fn: { name?: string } }).fn.name ?? "";
+		if (isFunctionNode(child)) {
+			// A call through an accessor, `a.b(1)`, has no plain name to check.
+			const name = isSymbolNode(child.fn) ? child.fn.name : "";
 			if (!CALCULATOR_FUNCTIONS.has(name)) found = name === "" ? "that function" : name;
 		}
 	});

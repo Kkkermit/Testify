@@ -1,4 +1,4 @@
-import { type ButtonStyle } from "discord.js";
+import { ButtonStyle } from "discord.js";
 import { type Category } from "@config/categories";
 import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
@@ -18,8 +18,18 @@ export interface ScreenAction {
 	args?: (string | number)[];
 }
 
+/** The on and off switch; `ready` false keeps it from turning on before the feature has anywhere to work. */
+export function switchAction(enabled: boolean, ready?: boolean): ScreenAction {
+	return {
+		action: "toggle",
+		label: enabled ? "Turn off" : "Turn on",
+		style: enabled ? ButtonStyle.Danger : ButtonStyle.Success,
+		...(ready === undefined ? {} : { disabled: !enabled && !ready }),
+	};
+}
+
 /** A select menu with a caption above it. */
-export interface ScreenPicker {
+interface ScreenPicker {
 	label: string;
 	/** A line of smaller text under the label, for anything worth explaining. */
 	hint?: string;
@@ -33,7 +43,7 @@ export interface ScreenRow {
 	action?: ScreenAction;
 }
 
-export interface SettingsScreenOptions {
+interface SettingsScreenOptions {
 	id: string;
 	ownerId: string;
 	category: Category;

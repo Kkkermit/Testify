@@ -5,7 +5,8 @@ import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { defineCommand, type CommandInput } from "@core/command";
 import { embed, linkButton, reply, row } from "@lib/discord";
-import { discordTime, formatBytes, formatNumber, formatUptime } from "@lib/format";
+import { discordTime, formatBytes, formatUptime } from "@lib/format";
+import { reachFields } from "@lib/info";
 
 async function showUptime(interaction: CommandInput, client: TestifyClient): Promise<void> {
 	await reply(interaction, {
@@ -53,25 +54,13 @@ async function showSpecs(interaction: CommandInput, client: TestifyClient): Prom
 }
 
 async function showInfo(interaction: CommandInput, client: TestifyClient): Promise<void> {
-	const members = client.guilds.cache.reduce(
-		(total: number, guild: { memberCount: number }) => total + guild.memberCount,
-		0,
-	);
-
 	await reply(interaction, {
 		embeds: [
 			embed({
 				category: "info",
 				title: `About ${botName()}`,
 				description: "An open source, multipurpose Discord bot written in TypeScript.",
-				fields: [
-					{ name: "Servers", value: formatNumber(client.guilds.cache.size), inline: true },
-					{ name: "Members", value: formatNumber(members), inline: true },
-					{ name: "Commands", value: formatNumber(client.commands.size), inline: true },
-					{ name: "Uptime", value: formatUptime(client.startedAt), inline: true },
-					{ name: "Latency", value: `${Math.max(0, Math.round(client.ws.ping))}ms`, inline: true },
-					{ name: "Developer", value: theme.author, inline: true },
-				],
+				fields: [...reachFields(client), { name: "Developer", value: theme.author, inline: true }],
 				thumbnail: client.user?.displayAvatarURL(),
 			}),
 		],

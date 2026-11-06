@@ -2,7 +2,7 @@ import { WARNING_LIMITS, type MemberDetail, warningProblem } from "@testify/shar
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, RowActions, SettingRows, Warning } from "@/components/form";
+import { ConfirmField, Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, DividedList } from "@/components/primitives";
 import { permissionLabel } from "@/features/commands/permissions.labels";
@@ -129,21 +129,13 @@ export function WarningsCard({
 
 			{confirming && (
 				<>
-					<Field
+					<ConfirmField
+						id="clear-confirm"
 						label={t("members.typeToClear", { name: detail.username })}
 						hint={t("members.confirmHint")}
-						htmlFor="clear-confirm"
-					>
-						<input
-							id="clear-confirm"
-							className={FIELD}
-							value={typed}
-							autoComplete="off"
-							onChange={(event) => {
-								setTyped(event.target.value);
-							}}
-						/>
-					</Field>
+						value={typed}
+						onChange={setTyped}
+					/>
 					<Warning>{t("members.deleteWarning")}</Warning>
 
 					<RowActions>

@@ -3,7 +3,6 @@ import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import {
 	countBirthdays,
-	findBirthday,
 	forgetBirthday,
 	getBirthdaySettings,
 	listBirthdays,
@@ -84,12 +83,8 @@ export async function forgetLeaver(guildId: string, userId: string): Promise<voi
 	await forgetBirthday(guildId, userId);
 }
 
-export async function ownBirthday(guildId: string, userId: string): Promise<StoredBirthday | null> {
-	return findBirthday(guildId, userId);
-}
-
 /** Soonest first, named as the server knows them now, or as they were when they shared it. */
-export async function upcomingBirthdays(
+async function upcomingBirthdays(
 	guild: Guild,
 	now: Date = new Date(),
 	limit: number = BIRTHDAY_LIMITS.upcoming,

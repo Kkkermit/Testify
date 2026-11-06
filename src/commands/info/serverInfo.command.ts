@@ -33,7 +33,7 @@ export default defineCommand({
 
 		const builder = embed({
 			category: "info",
-			title: `${guild.name}`,
+			title: guild.name,
 			description: guild.description ?? "No description set.",
 			fields: [
 				{
@@ -80,8 +80,8 @@ export default defineCommand({
 				{
 					name: `Emojis & stickers (${guild.emojis.cache.size + guild.stickers.cache.size})`,
 					value: [
-						`📺 **Animated** ${guild.emojis.cache.filter((emoji) => emoji.animated === true).size}`,
-						`🗿 **Static** ${guild.emojis.cache.filter((emoji) => emoji.animated !== true).size}`,
+						`📺 **Animated** ${guild.emojis.cache.filter((emoji) => emoji.animated).size}`,
+						`🗿 **Static** ${guild.emojis.cache.filter((emoji) => !emoji.animated).size}`,
 						`🏷 **Stickers** ${guild.stickers.cache.size}`,
 					].join("\n"),
 					inline: true,

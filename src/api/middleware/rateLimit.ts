@@ -5,7 +5,7 @@ import { type ApiBindings } from "@api/context";
 import { SESSION_COOKIE, readCookie } from "@api/cookies";
 import { tooManyRequests } from "@api/errors";
 
-export interface RateLimitOptions {
+interface RateLimitOptions {
 	limit: number;
 	windowMs: number;
 	/** Distinguishes buckets, so a spent sign-in allowance does not also block reading a page. */

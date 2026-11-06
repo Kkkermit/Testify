@@ -9,7 +9,7 @@ import { PLACEHOLDER_HELP, WELCOME_PLACEHOLDERS } from "@lib/welcome/welcome.uti
 
 /** Setting up the welcome system, as one screen you read and press. */
 
-export interface WelcomePanelState {
+interface WelcomePanelState {
 	/** `null` before anything is configured. */
 	config: WelcomeConfig | null;
 	note?: string;

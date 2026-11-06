@@ -6,11 +6,11 @@ import {
 	ChannelPicker,
 	FieldGroup,
 	postableChannels,
+	Refusal,
 	SavingIndicator,
 	savingStateOf,
 	SettingRows,
 	Toggle,
-	Warning,
 } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -24,7 +24,6 @@ import { useGoodbye } from "@/features/welcome/useGoodbye";
 import { useUpdateWelcome, useWelcome } from "@/features/welcome/useWelcome";
 import { STYLE_ORDER, welcomeSummary } from "@/features/welcome/welcome.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 
 export function WelcomePage(): React.JSX.Element {
@@ -125,9 +124,7 @@ export function WelcomePage(): React.JSX.Element {
 					<SendTest test={{ kind: "greeting", message: draft, style: welcome.style }} />
 				</MessageEditor>
 
-				{update.error !== null && (
-					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={update.error} />
 			</SettingRows>
 
 			<GoodbyeSettings

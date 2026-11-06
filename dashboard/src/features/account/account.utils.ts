@@ -10,7 +10,7 @@ import { type TranslationKey } from "@/i18n";
 import { ApiError } from "@/lib/api";
 import { oneOf } from "@/lib/oneOf";
 
-export const ACCOUNT_TABS = ["profile", "history", "reminders", "sessions", "data"] as const;
+const ACCOUNT_TABS = ["profile", "history", "reminders", "sessions", "data"] as const;
 
 export type AccountTab = (typeof ACCOUNT_TABS)[number];
 

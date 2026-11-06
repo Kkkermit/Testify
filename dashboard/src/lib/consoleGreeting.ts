@@ -41,7 +41,7 @@ export function greetingLines(t: Translate, palette: ConsolePalette): ConsoleLin
 	];
 }
 
-export function printGreeting(lines: ConsoleLine[]): void {
+function printGreeting(lines: ConsoleLine[]): void {
 	for (const line of lines) console.log(line.text, ...line.styles);
 }
 

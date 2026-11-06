@@ -9,7 +9,7 @@ import {
 	parseLimits,
 	readCasinoSettings,
 } from "@lib/casino";
-import { errorEmbed, modalForm } from "@lib/discord";
+import { errorEmbed, modalForm, redrawPanel } from "@lib/discord";
 import { type CasinoPatch, isCasinoGame } from "@testify/shared";
 
 export default defineButton({
@@ -86,12 +86,6 @@ export default defineButton({
 			return;
 		}
 
-		const panel = casinoSettingsPanel(result.settings, interaction.user.id, note);
-		// A modal opened elsewhere cannot edit this message, so it answers privately.
-		if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-			await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
-		} else if (interaction.isButton() || interaction.isModalSubmit()) {
-			await interaction.update(panel);
-		}
+		await redrawPanel(interaction, casinoSettingsPanel(result.settings, interaction.user.id, note));
 	},
 });

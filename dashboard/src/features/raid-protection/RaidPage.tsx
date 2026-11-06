@@ -8,6 +8,7 @@ import {
 	FIELD,
 	Field,
 	postableChannels,
+	Refusal,
 	SavingIndicator,
 	savingStateOf,
 	SELECT,
@@ -21,7 +22,6 @@ import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { hasWork, numberIn, raidSummary } from "@/features/raid-protection/raid.utils";
 import { useRaid, useUpdateRaid } from "@/features/raid-protection/useRaid";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
@@ -147,9 +147,7 @@ export function RaidPage(): React.JSX.Element {
 				/>
 			</SettingRows>
 
-			{save.error !== null && (
-				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={save.error} />
 			<p className="text-muted-foreground text-sm">{t("raid.memory", { minutes: RAID_LIMITS.alertEveryMinutes })}</p>
 		</>
 	);

@@ -34,7 +34,7 @@ body:
     id: surface
     attributes:
       label: Surface
-      options: [Slash command, Prefix command, Component (button or menu), Not command-related]
+      options: [Slash command, Prefix command, Component (button or menu), Web dashboard, Not command-related]
     validations:
       required: true
 

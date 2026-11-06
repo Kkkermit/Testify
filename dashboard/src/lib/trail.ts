@@ -1,6 +1,6 @@
 import { type DataRouter, type Location, NavigationType } from "react-router";
 
-export interface Trail {
+interface Trail {
 	pathname: string;
 	search: string;
 	hash: string;
@@ -10,7 +10,7 @@ const STORAGE_KEY = "testify:trail";
 const KEPT = 50;
 const remembered = new Map<string, Trail>();
 
-export function leadsOn(pathname: string): boolean {
+function leadsOn(pathname: string): boolean {
 	return /^\/(?:docs|source-code)(?:\/|$)/.test(pathname);
 }
 

@@ -6,7 +6,6 @@ import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/birthdayRepository", () => ({
 	countBirthdays: jest.fn(() => Promise.resolve(0)),
-	findBirthday: jest.fn(),
 	forgetBirthday: jest.fn(),
 	getBirthdaySettings: jest.fn(() => Promise.resolve(null)),
 	listBirthdays: jest.fn(() => Promise.resolve([])),

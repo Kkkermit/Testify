@@ -10,7 +10,7 @@ import { formatDuration, formatNumber } from "@lib/format/format.util";
 
 /** Economy actions that more than one surface performs. */
 
-export interface DailyResult {
+interface DailyResult {
 	claimed: boolean;
 	/** Ready-to-show sentence, whether it succeeded or not. */
 	message: string;
@@ -60,7 +60,7 @@ export const USE_OUTCOMES: Record<string, { verb: string; min: number; max: numb
 	bank_upgrade: { verb: "You upgraded your bank and found some forgotten change inside", min: 0, max: 0 },
 };
 
-export interface UseResult {
+interface UseResult {
 	used: boolean;
 	message: string;
 	reward?: number;

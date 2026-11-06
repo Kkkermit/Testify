@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { SearchField, Warning } from "@/components/form";
+import { Refusal, SearchField } from "@/components/form";
 import {
 	Card,
 	EmptyState,
@@ -24,7 +24,6 @@ import { useCommands } from "@/features/commands/useCommands";
 import { useCommandToggles, useSaveCommandToggles } from "@/features/commands/useCommandToggles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 /** Not a permission: the API answers 404 or 403 regardless. */
@@ -119,11 +118,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 			</div>
 
 			{/* The API refuses a command `ALWAYS_ENABLED` covers, so a switch can bounce back with a reason. */}
-			{saveToggles.error !== null && (
-				<Warning>
-					{saveToggles.error instanceof ApiError ? saveToggles.error.message : t("commands.switchRefused")}
-				</Warning>
-			)}
+			<Refusal error={saveToggles.error} fallback="commands.switchRefused" />
 
 			{shown.length === 0 ? (
 				<Card>

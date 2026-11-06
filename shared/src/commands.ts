@@ -1,15 +1,4 @@
-export const OPTION_TYPES = [
-	"string",
-	"integer",
-	"number",
-	"boolean",
-	"user",
-	"channel",
-	"role",
-	"attachment",
-] as const;
-
-export type CommandOptionType = (typeof OPTION_TYPES)[number];
+type CommandOptionType = "string" | "integer" | "number" | "boolean" | "user" | "channel" | "role" | "attachment";
 
 export interface CommandOptionSummary {
 	name: string;

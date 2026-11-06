@@ -12,7 +12,7 @@ export interface CasinoPlay {
 	returned: number;
 }
 
-export interface CasinoTotals {
+interface CasinoTotals {
 	plays: number;
 	wagered: number;
 	returned: number;

@@ -7,6 +7,7 @@ import { ErrorState } from "@/app/ErrorState";
 import {
 	ChannelPicker,
 	postableChannels,
+	Refusal,
 	SavingIndicator,
 	savingStateOf,
 	SettingRows,
@@ -22,7 +23,6 @@ import { SendTest } from "@/features/test-post/SendTest";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { monthName } from "@/lib/datetime";
 
@@ -108,9 +108,7 @@ export function BirthdaysPage(): React.JSX.Element {
 				</MessageEditor>
 			</SettingRows>
 
-			{update.error !== null && (
-				<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={update.error} />
 
 			<section aria-labelledby="upcoming-heading" className="flex flex-col gap-3">
 				<SectionHeading as="h2" id="upcoming-heading" count={t("birthdays.sharedCount", { count: birthdays.shared })}>

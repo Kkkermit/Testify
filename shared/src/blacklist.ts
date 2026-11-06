@@ -2,7 +2,7 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-export const BLACKLIST_LIMITS = { maxReason: 200 } as const;
+const BLACKLIST_LIMITS = { maxReason: 200 } as const;
 
 export interface BlacklistRow {
 	userId: string;

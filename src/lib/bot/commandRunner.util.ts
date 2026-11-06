@@ -17,6 +17,7 @@ import {
 	type CommandInput,
 	type CommandInputOptions,
 	type CommandOption,
+	OptionReader,
 	subcommandsOf,
 } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -54,7 +55,7 @@ export function optionsFor(command: Command, subcommand: string | null): Command
 }
 
 /** Arguments from a JSON body, coerced to the declared types; anything the command did not declare is dropped. */
-export class DashboardOptions implements CommandInputOptions {
+export class DashboardOptions extends OptionReader implements CommandInputOptions {
 	private readonly values = new Map<string, string | number | boolean>();
 
 	constructor(
@@ -64,6 +65,7 @@ export class DashboardOptions implements CommandInputOptions {
 		private readonly subcommand: string | null,
 		args: CommandRunRequest["args"],
 	) {
+		super();
 		for (const option of declared) {
 			// `hasOwn`, so an option named `toString` does not find `Object.prototype`'s method.
 			if (!Object.hasOwn(args, option.name)) continue;
@@ -71,6 +73,10 @@ export class DashboardOptions implements CommandInputOptions {
 			const given = args[option.name];
 			if (given !== undefined) this.values.set(option.name, given);
 		}
+	}
+
+	protected raw(name: string): string | number | boolean | undefined {
+		return this.values.get(name);
 	}
 
 	getSubcommand(required = true): string {
@@ -161,21 +167,6 @@ export class DashboardOptions implements CommandInputOptions {
 		if (!/^\d{17,20}$/.test(text)) throw new UserFacingError(`\`${name}\` has to be a Discord ID.`);
 
 		return text;
-	}
-
-	private number(name: string, valid: (value: number) => boolean): number | null {
-		const raw = this.values.get(name);
-		if (raw === undefined) return null;
-
-		const parsed = Number(raw);
-		if (!valid(parsed)) throw new UserFacingError(`\`${name}\` has to be a number.`);
-
-		return parsed;
-	}
-
-	private require<T>(name: string, value: T | null, required: boolean | undefined): T {
-		if (value === null && required === true) throw new UserFacingError(`You need to give me \`${name}\`.`);
-		return value as T;
 	}
 }
 

@@ -20,7 +20,6 @@ export type Category = keyof typeof CATEGORIES;
 
 export const ALL_CATEGORIES = Object.keys(CATEGORIES) as Category[];
 
-/** Hidden from `/help`. */
 export const HIDDEN_CATEGORIES: Category[] = ["owner"];
 
 export function isCategory(value: string): value is Category {

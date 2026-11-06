@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, notFound, problemBody, UpstreamProblem } from "@api/errors";
+import { type ApiProblem, asProblem, badRequest, notFound, problemBody, UpstreamProblem } from "@api/errors";
 import { refuseBlacklisted } from "@api/middleware/blacklist";
 import { verifyCsrf } from "@api/middleware/csrf";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
@@ -28,7 +28,7 @@ import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
-import { toError, UserFacingError } from "@core/errors";
+import { toError } from "@core/errors";
 import { botVersion, siteUrl } from "@lib/bot";
 import { GitHubReader } from "@lib/site";
 
@@ -153,17 +153,6 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	return app;
 }
 
-/**
- * A refusal keeps its status and wording, a `UserFacingError` is a 400, and anything else is a bug the caller learns
- * nothing about.
- */
-function asProblem(error: unknown): ApiProblem {
-	if (error instanceof ApiProblem) return error;
-	if (error instanceof UserFacingError) return badRequest(error.message);
-
-	return new ApiProblem(500, "internal", "Something went wrong on our side.");
-}
-
 /** `bodyLimit` wants a response from `onError`, and throwing from inside it is what reaches the boundary. */
 function raise(problem: ApiProblem): never {
 	throw problem;
@@ -188,13 +177,13 @@ export function worthRetrying(error: NodeJS.ErrnoException): boolean {
 	return error.code === "EADDRINUSE" || error.code === "EAGAIN";
 }
 
-export interface RunningApi {
+interface RunningApi {
 	/** Resolves with the port actually bound, which is only the configured one when it was not 0. */
 	ready: Promise<number>;
 	close(): Promise<void>;
 }
 
-export interface ListenOptions {
+interface ListenOptions {
 	retries?: number;
 	retryDelayMs?: number;
 }

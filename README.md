@@ -33,7 +33,7 @@
 <h3 align="center">An all-in-one Discord bot, written once for both slash <em>and</em> prefix commands.</h3>
 
 <p align="center">
-<strong>84 commands and 135 subcommands</strong> — moderation, economy, a casino, levelling, music, tickets, giveaways
+<strong>93 commands and 145 subcommands</strong> — moderation, economy, a casino, levelling, music, tickets, giveaways
 and games — plus an optional web dashboard. Every command works as <code>/ban</code> <strong>and</strong> as
 <code>t?ban</code>, because underneath it is one command, not two copies.
 </p>
@@ -84,8 +84,8 @@ and games — plus an optional web dashboard. Every command works as <code>/ban<
 </details>
 
 > [!TIP]
-> ⭐ **If Testify is useful to you, or you have borrowed any of its code, please leave a star.** It genuinely helps,
-> and it tells us the project is worth continuing.
+> ⭐ **If Testify is useful to you, or you have borrowed any of its code, please leave a star.** It tells us the
+> project is worth continuing.
 
 ---
 
@@ -102,7 +102,7 @@ The whole thing was rebuilt around the problems the old codebase actually had.
 | **Start-up**       | Command registration raced the login                                                   | Each step awaited in order; a malformed file names itself and stops the boot |
 | **Errors**         | Stack traces could reach chat                                                          | One error boundary — users get a plain apology, you get the full context     |
 | **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
-| **Tests**          | A handful                                                                              | **About 3,500 tests** on Windows, Linux and macOS, with a 75% coverage floor |
+| **Tests**          | A handful                                                                              | **About 3,900 tests** on Windows, Linux and macOS, with a 75% coverage floor |
 | **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
 | **Web**            | None                                                                                   | Its own website with the docs and the source, and an optional dashboard      |
 
@@ -303,8 +303,8 @@ and `npm start`. No token or database yet? The next section walks through both f
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and sign in.
 2. Click **New Application**, name it, and confirm.
 3. Open the **Bot** tab on the left.
-4. Under **Privileged Gateway Intents**, turn on **all three**, then **Save Changes**. Message Content is not
-   optional — without it the bot cannot read any prefix command.
+4. Under **Privileged Gateway Intents**, turn on **Server Members** and **Message Content**, then **Save Changes**.
+   Neither is optional: without them Discord refuses the bot's connection. Presence can stay off.
 5. Click **Reset Token** and copy it. **This is the one value you must never share.**
 
 </details>
@@ -467,7 +467,7 @@ default**. Server admins can change either:
 | `/prefix enable`       | Turn prefix commands on                    |
 | `/prefix disable`      | Turn them off, leaving slash commands only |
 
-There are **90 prefix aliases** — `t?bal`, `t?lb`, `t?np`, `t?gamble` and the rest — listed beside each command
+There are **107 prefix aliases** — `t?bal`, `t?lb`, `t?np`, `t?gamble` and the rest — listed beside each command
 in [`docs/commands.md`](docs/commands.md).
 
 A command that answers privately on a slash command cannot do that in a channel, since an ordinary message
@@ -483,10 +483,10 @@ generated list.
 | ------------- | :-------: | ---------------------------------------------------------------------------- |
 | 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards          |
 | 🛡️ Moderation |    18     | Ban, kick, mute, warn, cases, softban, lock, clear, roles, slowmode          |
-| 📚 Info       |    13     | User, server and role info, avatars, profiles, ping, help, `/ask`, notices   |
+| 📚 Info       |    14     | User, server and role info, profiles, help, `/ask`, notices, delete my data  |
 | ⚙️ Settings   |    14     | Automod, raid protection, audit logging, auto-responders, schedules, welcome |
 | 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                  |
-| 👥 Community  |    10     | Birthdays, polls, away notes, reminders, ideas, starboard, join to create    |
+| 👥 Community  |    10     | Birthdays, polls, reminders, ideas, starboard, join to create, a calculator  |
 | 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                       |
 | 📈 Levelling  |     2     | Rank cards and the levelling settings                                        |
 | 💬 Feedback   |     2     | Suggestions and bug reports                                                  |
@@ -570,6 +570,10 @@ Discord and served **from inside the bot process** — no second service to depl
 It follows your device's light or dark setting out of the box, comes in twelve accent colours or one you pick yourself, and speaks
 **English, Spanish, German, French, Italian, Russian, Dutch and Japanese** — picked from the browser's own language and changeable
 from the Appearance screen. All of it is per browser: nothing you choose there affects anybody else.
+
+Your picture opens your own account: your profile, your reminders, the browsers you are signed in on, what you have
+changed in each server, and Delete my data. An account the bot's owners have blocked sees only why, whom to ask,
+Sign out and Delete my data.
 
 <p align="center">
   <img alt="The server overview: member counts, a permission warning, which features are on, and recent changes" src="docs/dashboard/screenshots/overview.png">
@@ -728,11 +732,11 @@ Yes — run `/prefix disable` in each server. Nothing else changes.
 </details>
 
 <details>
-<summary><strong>Do I really need all three privileged intents?</strong></summary>
+<summary><strong>Which privileged intents does it need?</strong></summary>
 
-**Message Content** is required — prefix commands, automod, levelling and counting all read messages.
-**Server Members** is needed for welcome messages, auto roles and member counters. **Presence** is the one you
-can most comfortably leave off.
+Two. **Message Content**, because prefix commands, the link filter, levelling and counting all read messages, and
+**Server Members**, for welcome messages, roles on join and member counters. The bot asks Discord for both when it
+connects, so leaving either off stops it starting, with a message saying which. **Presence** is never asked for.
 
 </details>
 

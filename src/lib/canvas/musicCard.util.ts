@@ -39,7 +39,7 @@ const ARTWORK_TIMEOUT_MS = 4_000;
 
 export const MUSIC_CARD_NAME = "now-playing.jpg";
 
-export interface MusicCardText {
+interface MusicCardText {
 	eyebrow: string;
 	title: string;
 	author: string;

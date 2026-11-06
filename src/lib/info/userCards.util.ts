@@ -63,7 +63,7 @@ export function userInfoEmbed(user: User, member: GuildMember | null): EmbedBuil
 
 	return embed({
 		category: "info",
-		title: `${user.displayName}`,
+		title: user.displayName,
 		fields,
 		thumbnail: user.displayAvatarURL({ size: 512 }),
 		footer: `User ID: ${user.id}`,

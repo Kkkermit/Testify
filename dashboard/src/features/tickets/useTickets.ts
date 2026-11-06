@@ -6,6 +6,7 @@ import {
 	type UseQueryResult,
 } from "@tanstack/react-query";
 import { type OpenTicketList, type TicketPatch, type TicketSettings } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -28,21 +29,7 @@ function useTicketMutation<Body>(
 	guildId: string,
 	send: (body: Body) => Promise<TicketSettings>,
 ): UseMutationResult<TicketSettings, Error, Body> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).tickets();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: send,
-		onSuccess: (settings) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useDocumentMutation(keys.guild(guildId).tickets(), send, [keys.guild(guildId).overview()]);
 }
 
 export function useOpenTickets(guildId: string, enabled: boolean): UseQueryResult<OpenTicketList> {

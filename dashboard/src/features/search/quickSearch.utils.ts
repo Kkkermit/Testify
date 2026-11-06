@@ -107,7 +107,7 @@ function words(text: string): string[] {
 		.filter((word) => word !== "");
 }
 
-export function scoreOf(entry: SearchEntry, query: string): number | null {
+function scoreOf(entry: SearchEntry, query: string): number | null {
 	const wanted = words(query);
 	if (wanted.length === 0) return null;
 

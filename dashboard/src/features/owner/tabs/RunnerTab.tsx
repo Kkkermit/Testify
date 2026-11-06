@@ -3,12 +3,11 @@ import { Play, Terminal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { FIELD, Field, SELECT, Warning } from "@/components/form";
+import { FIELD, Field, Refusal, SELECT } from "@/components/form";
 import { Button, Card, CARD_HEADING, EmptyState, Skeleton } from "@/components/primitives";
 import { RunOutputs } from "@/features/owner/components/RunOutputs";
 import { buildArgs, canRun, controlFor, needsSubcommand, optionsShown } from "@/features/owner/runner.utils";
 import { useRunCommand, useRunnable } from "@/features/owner/useRunner";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function RunnerTab(): React.JSX.Element {
@@ -134,9 +133,7 @@ export function RunnerTab(): React.JSX.Element {
 					</Button>
 				</div>
 
-				{run.error !== null && (
-					<Warning>{run.error instanceof ApiError ? run.error.message : t("common.couldNotRun")}</Warning>
-				)}
+				<Refusal error={run.error} fallback="common.couldNotRun" />
 			</Card>
 
 			{run.data === undefined ? (

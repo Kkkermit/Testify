@@ -25,7 +25,7 @@ export function retryBot(failures: number, error: Error): boolean {
 	return failures < (stillConnecting(error) ? CONNECTING_RETRIES : 2);
 }
 
-export function botRetryDelay(failures: number, error: Error): number {
+function botRetryDelay(failures: number, error: Error): number {
 	return stillConnecting(error) ? CONNECTING_RETRY_MS : Math.min(1_000 * 2 ** failures, 30_000);
 }
 

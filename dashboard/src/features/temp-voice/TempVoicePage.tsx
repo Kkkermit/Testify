@@ -19,7 +19,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { nameTemplateFrom, tempVoiceSummary, userLimitFrom } from "@/features/temp-voice/tempVoice.utils";
 import { useMakeLobby, useSaveTempVoice, useTempVoice } from "@/features/temp-voice/useTempVoice";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
@@ -44,7 +44,7 @@ export function TempVoicePage(): React.JSX.Element {
 	const settings = tempVoice.data;
 	const all = channels.data ?? [];
 	const message = (error: Error | null): string | null =>
-		error === null ? null : error instanceof ApiError ? error.message : t("common.couldNotSave");
+		error === null ? null : refusalText(error, t("common.couldNotSave"));
 	const write = (group: GroupName, patch: TempVoicePatch): void => {
 		setOrigin(group);
 		save.mutate(patch);

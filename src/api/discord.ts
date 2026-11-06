@@ -7,7 +7,7 @@ import { type DashboardUser } from "@testify/shared";
 const API = "https://discord.com/api/v10";
 const SCOPES = "identify guilds";
 
-export interface OauthTokens {
+interface OauthTokens {
 	accessToken: string;
 	refreshToken: string;
 	expiresAt: Date;
@@ -21,7 +21,7 @@ export interface OauthGuild {
 	permissions: string;
 }
 
-export interface PendingLogin {
+interface PendingLogin {
 	state: string;
 	verifier: string;
 	returnTo: string;

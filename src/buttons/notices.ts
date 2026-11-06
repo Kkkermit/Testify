@@ -1,7 +1,6 @@
-import { MessageFlags } from "discord.js";
 import { type ComponentInteraction, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { type ContainerMessage, modalForm } from "@lib/discord";
+import { modalForm, redrawPanel } from "@lib/discord";
 import { parseDuration } from "@lib/format";
 import {
 	allNotices,
@@ -15,15 +14,6 @@ import {
 	removeNotice,
 } from "@lib/notices";
 import { isScheduled, type Notice, NOTICE_LIMITS, NOTICE_TONES, type NoticeTone } from "@testify/shared";
-
-async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately.
-	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
-	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
-		await interaction.update(panel);
-	}
-}
 
 const KEEP_PLACEHOLDER = "Blank keeps it up until you remove it. Or 6h, 3d";
 const START_PLACEHOLDER = "Blank posts it now. Or 30m, 2h, 1d";
@@ -120,9 +110,9 @@ export default defineButton({
 		const ownerId = interaction.user.id;
 		const [first = ""] = context.args;
 		const board = async (note?: string): Promise<void> =>
-			show(interaction, noticeBoard(await allNotices(), ownerId, note));
+			redrawPanel(interaction, noticeBoard(await allNotices(), ownerId, note));
 		const editor = async (notice: Notice, note?: string): Promise<void> =>
-			show(interaction, noticeEditor({ notice, ...(note === undefined ? {} : { note }) }, ownerId));
+			redrawPanel(interaction, noticeEditor({ notice, ...(note === undefined ? {} : { note }) }, ownerId));
 
 		switch (context.action) {
 			case "new":
@@ -225,7 +215,7 @@ export default defineButton({
 
 			case "remove":
 			case "remove-no":
-				await show(
+				await redrawPanel(
 					interaction,
 					noticeEditor({ notice: await readNotice(first), confirmingRemove: context.action === "remove" }, ownerId),
 				);

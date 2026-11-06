@@ -23,7 +23,7 @@ import { type MusicSourceChoice } from "@testify/shared";
 /** `/play`'s autocomplete: what it would play for the text so far, from whichever services the owner allows. */
 
 /** Which services a search is put to: both at once for a plain search while the owner allows both. */
-export function searchTargets(query: Query, sources: MusicSourceChoice): MusicSource[] {
+function searchTargets(query: Query, sources: MusicSourceChoice): MusicSource[] {
 	return fallsBackToSoundCloud(query, sources) ? ["youtube", "soundcloud"] : [query.source];
 }
 

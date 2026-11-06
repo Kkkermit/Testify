@@ -95,7 +95,7 @@ export async function recordMove(
 	]);
 }
 
-export interface InsightRows {
+interface InsightRows {
 	days: ServerDay[];
 	channels: { channelId: string; messages: number }[];
 	members: { userId: string; messages: number }[];

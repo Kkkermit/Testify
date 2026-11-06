@@ -4,18 +4,18 @@ import { type QueueState, type Track } from "@lib/music/music.types";
 /** The queue and the rules for moving through it, with no voice connection and no network in sight. */
 
 /** A track shorter than this much of its stated length came apart rather than finished. */
-export const EARLY_TOLERANCE_MS = 2_000;
+const EARLY_TOLERANCE_MS = 2_000;
 
 export function currentTrack(state: QueueState): Track | null {
 	return state.tracks[state.index] ?? null;
 }
 
-export function enqueue(state: QueueState, tracks: Track[]): QueueState {
+function enqueue(state: QueueState, tracks: Track[]): QueueState {
 	return { ...state, tracks: [...state.tracks, ...tracks] };
 }
 
 /** Puts tracks directly after the one playing, for a "play next" that does not disturb the rest. */
-export function enqueueNext(state: QueueState, tracks: Track[]): QueueState {
+function enqueueNext(state: QueueState, tracks: Track[]): QueueState {
 	const at = state.index + 1;
 	return { ...state, tracks: [...state.tracks.slice(0, at), ...tracks, ...state.tracks.slice(at)] };
 }
@@ -64,7 +64,7 @@ export function shuffleUpcoming(state: QueueState, random: () => number = Math.r
 }
 
 /** Where the queue goes when the current track is genuinely over, or `null` when there is nowhere left. */
-export function nextIndex(state: QueueState): number | null {
+function nextIndex(state: QueueState): number | null {
 	if (state.tracks.length === 0) return null;
 	if (state.loop === "track" && state.index >= 0) return state.index;
 
@@ -81,7 +81,7 @@ export function endedEarly(playedMs: number, expectedMs: number | null, toleranc
 	return playedMs + tolerance < expectedMs;
 }
 
-export type IdleAction =
+type IdleAction =
 	| { action: "retry"; attempt: number }
 	| { action: "play"; index: number }
 	| { action: "stop"; reason: "empty" | "requested" };
@@ -120,7 +120,7 @@ export function decideOnIdle(input: {
 	return following === null ? { action: "stop", reason: "empty" } : { action: "play", index: following };
 }
 
-export interface QueuePage {
+interface QueuePage {
 	entries: { position: number; track: Track }[];
 	page: number;
 	pageCount: number;

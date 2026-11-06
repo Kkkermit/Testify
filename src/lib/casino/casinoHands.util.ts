@@ -195,7 +195,7 @@ export async function cashOutHiLo(player: Player): Promise<HiLoView> {
 	return cashOutHand(player, hand, hand.state as HiLoState);
 }
 
-export type SettledHand = { game: "blackjack"; view: BlackjackView } | { game: "hilo"; view: HiLoView };
+type SettledHand = { game: "blackjack"; view: BlackjackView } | { game: "hilo"; view: HiLoView };
 
 /** Plays out a hand its player walked away from: blackjack stands, hi-lo banks the pot. */
 export async function settleAbandoned(hand: HandRecord): Promise<SettledHand> {

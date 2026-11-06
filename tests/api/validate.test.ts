@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { ApiProblem, problemBody } from "@api/errors";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { guildIdParam, pagination, snowflake } from "@testify/shared";
 
@@ -8,10 +8,7 @@ import { guildIdParam, pagination, snowflake } from "@testify/shared";
 function appWith(register: (app: Hono) => void): Hono {
 	const app = new Hono();
 	register(app);
-	app.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(app);
 	return app;
 }
 
