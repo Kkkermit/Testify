@@ -66,7 +66,7 @@ export function QuickSearch({
 		};
 	}, []);
 
-	function go(entry: SearchEntry): void {
+	function openEntry(entry: SearchEntry): void {
 		onClose();
 		void navigate(entry.to);
 	}
@@ -79,7 +79,7 @@ export function QuickSearch({
 			setActive((was) => (Math.min(was, results.length - 1) + step + results.length) % results.length);
 		} else if (event.key === "Enter") {
 			event.preventDefault();
-			if (current !== undefined) go(current);
+			if (current !== undefined) openEntry(current);
 		} else if (event.key === "Escape") {
 			event.preventDefault();
 			event.stopPropagation();
@@ -138,7 +138,7 @@ export function QuickSearch({
 								setActive(index);
 							}}
 							onClick={() => {
-								go(entry);
+								openEntry(entry);
 							}}
 							className={cn(
 								"rounded-field flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm",

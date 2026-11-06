@@ -70,7 +70,7 @@ export function IdeasPage(): React.JSX.Element {
 	const countOf = (value: IdeaFilter): number =>
 		value === "all" ? counts.open + counts.accepted + counts.declined : counts[value];
 
-	function go(next: { status?: IdeaFilter; page?: number }): void {
+	function showIdeas(next: { status?: IdeaFilter; page?: number }): void {
 		const query = new URLSearchParams(params);
 		if (next.status !== undefined) {
 			query.set("status", next.status);
@@ -117,7 +117,7 @@ export function IdeasPage(): React.JSX.Element {
 							label: t(FILTER_LABEL[value], { count: countOf(value) }),
 						}))}
 						onChange={(status) => {
-							go({ status });
+							showIdeas({ status });
 						}}
 					/>
 				</div>
@@ -163,7 +163,7 @@ export function IdeasPage(): React.JSX.Element {
 						page={list.data.page}
 						pages={pageCount(list.data.total, list.data.perPage)}
 						onChange={(next) => {
-							go({ page: next });
+							showIdeas({ page: next });
 						}}
 					/>
 				)}

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Avatar, Card, Figure, UsageBars } from "@/components/primitives";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel } from "@/features/owner/components/UsagePanel";
-import { commandBar, surfaceBars } from "@/features/owner/usageRows";
+import { commandBar, surfaceBars } from "@/features/owner/owner.utils";
 import { formatNumber } from "@/lib/intl";
 
 export function GuildUsageSummary({ report }: { report: GuildUsageReport }): React.JSX.Element {

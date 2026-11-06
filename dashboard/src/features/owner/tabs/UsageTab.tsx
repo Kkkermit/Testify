@@ -7,8 +7,16 @@ import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/c
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { formatMs, percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
-import { commandBar, surfaceBars } from "@/features/owner/usageRows";
+import {
+	formatMs,
+	percent,
+	screenLabel,
+	searchWith,
+	snowflakeFrom,
+	WINDOWS,
+	commandBar,
+	surfaceBars,
+} from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 

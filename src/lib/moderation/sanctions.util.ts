@@ -3,6 +3,7 @@ import { DAY_MS } from "@config/constants";
 import { strings } from "@config/strings";
 import { theme } from "@config/theme";
 import { UserFacingError } from "@core/errors";
+import { deactivateSoftban, getActiveSoftban } from "@database/repositories/moderationRepository";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
@@ -153,4 +154,17 @@ export async function removeTimeout(
 	await recordCase(guild, { action: "untimeout", user: member.user, moderator, reason });
 
 	return { notified };
+}
+
+/** Lifts a softban early: the Discord ban first, because the record is what the sweep job reads. */
+export async function revokeSoftban(guild: Guild, userId: string, by: Moderator): Promise<boolean> {
+	if ((await getActiveSoftban(guild.id, userId)) === null) return false;
+
+	const ban = await guild.bans.fetch(userId).catch(() => null);
+	await guild.bans.remove(userId, `Softban lifted early by ${by.name}`).catch(() => null);
+	const lifted = await deactivateSoftban(guild.id, userId);
+
+	if (ban !== null)
+		await recordCase(guild, { action: "unban", user: ban.user, moderator: by, reason: "Softban lifted early" });
+	return lifted;
 }
