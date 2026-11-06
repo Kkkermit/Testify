@@ -5,6 +5,7 @@ import { isCategory } from "@config/categories";
 import { type Button } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, type Command, subcommandsOf } from "@core/command";
+import { localiserFor, readCommandTranslations } from "@core/commandLocales";
 import { buildContextMenu, type ContextMenu } from "@core/contextMenu";
 import { SetupError, toError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
@@ -197,9 +198,10 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 	}
 
 	// Right-click actions have their own limit of five of each kind, apart from the hundred slash commands.
+	const localise = localiserFor(readCommandTranslations());
 	const body = [
-		...[...client.commands.values()].map((command) => buildSlashCommand(command).toJSON()),
-		...[...client.contextMenus.values()].map((menu) => buildContextMenu(menu).toJSON()),
+		...[...client.commands.values()].map((command) => buildSlashCommand(command, localise).toJSON()),
+		...[...client.contextMenus.values()].map((menu) => buildContextMenu(menu, localise).toJSON()),
 	];
 	const rest = new REST({ version: "10" }).setToken(client.env.DISCORD_TOKEN);
 
