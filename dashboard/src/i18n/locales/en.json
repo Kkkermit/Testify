@@ -2786,13 +2786,13 @@
 	"blocked": {
 		"title": "You’re blocked from {{bot}}",
 		"signedInAs": "Signed in as {{name}}.",
-		"body": "The bot’s owners have blocked your account, so the dashboard and every command are closed to you, in every server. You can still delete everything {{bot}} keeps about you, here or with /delete-my-data in Discord.",
+		"body": "The bot’s owners have blocked your account, so the dashboard and every command are closed to you, in every server. You can still delete everything {{bot}} keeps about you, here or with /delete-my-data in Discord, but deleting it doesn’t lift the block.",
 		"reason": "Reason",
 		"noReason": "No reason was given.",
 		"since": "Blocked since",
 		"mistakeTitle": "Think this is a mistake?",
-		"ask_one": "Only the bot’s owner can lift a block; server moderators and admins can’t. Contact them on Discord:",
-		"ask_other": "Only the bot’s owners can lift a block; server moderators and admins can’t. Contact one of them on Discord:",
-		"askNobody": "Only the bot’s owner can lift a block; server moderators and admins can’t, so contact the owner."
+		"ask_one": "The only way to have the block lifted is to ask the bot’s owner; server moderators and admins can’t lift it. Contact them on Discord:",
+		"ask_other": "The only way to have the block lifted is to ask the bot’s owners; server moderators and admins can’t lift it. Contact one of them on Discord:",
+		"askNobody": "The only way to have the block lifted is to ask the bot’s owner; server moderators and admins can’t lift it."
 	}
 }

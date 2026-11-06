@@ -2865,14 +2865,14 @@
 	"blocked": {
 		"title": "{{bot}} ti ha bloccato",
 		"signedInAs": "Accesso effettuato come {{name}}.",
-		"body": "I proprietari del bot hanno bloccato il tuo account, quindi la dashboard e tutti i comandi ti sono chiusi, in ogni server. Puoi comunque eliminare tutto ciò che {{bot}} conserva su di te, qui o con /delete-my-data su Discord.",
+		"body": "I proprietari del bot hanno bloccato il tuo account, quindi la dashboard e tutti i comandi ti sono chiusi, in ogni server. Puoi comunque eliminare tutto ciò che {{bot}} conserva su di te, qui o con /delete-my-data su Discord, ma questo non rimuove il blocco.",
 		"reason": "Motivo",
 		"noReason": "Nessun motivo indicato.",
 		"since": "Bloccato dal",
 		"mistakeTitle": "Pensi che sia un errore?",
-		"ask_one": "Solo il proprietario del bot può rimuovere un blocco; i moderatori e gli amministratori di un server no. Contattalo su Discord:",
-		"ask_many": "Solo i proprietari del bot possono rimuovere un blocco; i moderatori e gli amministratori di un server no. Contatta uno di loro su Discord:",
-		"ask_other": "Solo i proprietari del bot possono rimuovere un blocco; i moderatori e gli amministratori di un server no. Contatta uno di loro su Discord:",
-		"askNobody": "Solo il proprietario del bot può rimuovere un blocco; i moderatori e gli amministratori di un server no, quindi contatta il proprietario."
+		"ask_one": "L’unico modo per far rimuovere il blocco è chiederlo al proprietario del bot; i moderatori e gli amministratori di un server non possono rimuoverlo. Contattalo su Discord:",
+		"ask_many": "L’unico modo per far rimuovere il blocco è chiederlo ai proprietari del bot; i moderatori e gli amministratori di un server non possono rimuoverlo. Contatta uno di loro su Discord:",
+		"ask_other": "L’unico modo per far rimuovere il blocco è chiederlo ai proprietari del bot; i moderatori e gli amministratori di un server non possono rimuoverlo. Contatta uno di loro su Discord:",
+		"askNobody": "L’unico modo per far rimuovere il blocco è chiederlo al proprietario del bot; i moderatori e gli amministratori di un server non possono rimuoverlo."
 	}
 }

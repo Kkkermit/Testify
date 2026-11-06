@@ -120,7 +120,7 @@ export function blacklistRefusal(
 		message:
 			`The bot's owner has blocked your account, so ${botName()} no longer works for you, in this server or any ` +
 			`other. Only \`/delete-my-data\` still does, to delete everything ${botName()} keeps about you, here or on ` +
-			"the dashboard.",
+			"the dashboard, and deleting it does not lift the block.",
 		fields: [
 			{ name: "Reason", value: entry.reason.trim() === "" ? "No reason was given." : entry.reason.slice(0, 1_000) },
 			{
@@ -129,7 +129,7 @@ export function blacklistRefusal(
 			},
 			{
 				name: "Think this is a mistake?",
-				value: `${ask} Only they can lift a block; server moderators and admins cannot.`,
+				value: `${ask} Asking them is the only way to have the block lifted; server moderators and admins cannot lift it.`,
 			},
 		],
 		tone: "error",

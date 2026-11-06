@@ -2786,13 +2786,13 @@
 	"blocked": {
 		"title": "Je bent geblokkeerd door {{bot}}",
 		"signedInAs": "Ingelogd als {{name}}.",
-		"body": "De eigenaren van de bot hebben je account geblokkeerd, dus het dashboard en alle opdrachten zijn voor jou dicht, in elke server. Je kunt nog steeds alles verwijderen wat {{bot}} over je bewaart, hier of met /delete-my-data in Discord.",
+		"body": "De eigenaren van de bot hebben je account geblokkeerd, dus het dashboard en alle opdrachten zijn voor jou dicht, in elke server. Je kunt nog steeds alles verwijderen wat {{bot}} over je bewaart, hier of met /delete-my-data in Discord, maar daarmee wordt de blokkade niet opgeheven.",
 		"reason": "Reden",
 		"noReason": "Er is geen reden opgegeven.",
 		"since": "Geblokkeerd sinds",
 		"mistakeTitle": "Denk je dat dit een vergissing is?",
-		"ask_one": "Alleen de eigenaar van de bot kan een blokkade opheffen; moderators en beheerders van een server niet. Neem contact met hem op via Discord:",
-		"ask_other": "Alleen de eigenaren van de bot kunnen een blokkade opheffen; moderators en beheerders van een server niet. Neem contact op met een van hen via Discord:",
-		"askNobody": "Alleen de eigenaar van de bot kan een blokkade opheffen; moderators en beheerders van een server niet, dus neem contact op met de eigenaar."
+		"ask_one": "De enige manier om de blokkade te laten opheffen is het aan de eigenaar van de bot te vragen; moderators en beheerders van een server kunnen dat niet. Neem contact met hem op via Discord:",
+		"ask_other": "De enige manier om de blokkade te laten opheffen is het aan de eigenaren van de bot te vragen; moderators en beheerders van een server kunnen dat niet. Neem contact op met een van hen via Discord:",
+		"askNobody": "De enige manier om de blokkade te laten opheffen is het aan de eigenaar van de bot te vragen; moderators en beheerders van een server kunnen dat niet."
 	}
 }

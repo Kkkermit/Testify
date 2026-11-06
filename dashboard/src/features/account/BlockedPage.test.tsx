@@ -45,6 +45,8 @@ describe("a blacklisted account's dashboard", () => {
 
 		renderAt("/guilds");
 		expect(await screen.findByText("Spamming commands")).toBeInTheDocument();
+		expect(screen.getByText(/deleting it doesn’t lift the block/)).toBeInTheDocument();
+		expect(screen.getByText(/The only way to have the block lifted is to ask the bot’s owners/)).toBeInTheDocument();
 		expect(screen.getByRole("link", { name: "kermit" })).toHaveAttribute(
 			"href",
 			"https://discord.com/users/100000000000000009",

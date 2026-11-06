@@ -101,8 +101,9 @@ describe("runChecks", () => {
 		expect(built.description).toContain("any other");
 		expect(byName.Reason).toBe("Spamming");
 		expect(byName["Blocked since"]).toBe("<t:1700000000:D> (<t:1700000000:R>)");
-		expect(byName["Think this is a mistake?"]).toContain("owner");
+		expect(byName["Think this is a mistake?"]).toContain("only way to have the block lifted");
 		expect(built.description).toContain("/delete-my-data");
+		expect(built.description).toContain("does not lift the block");
 		expect(built.color).toBe(refusalEmbed("x").toJSON().color);
 		expect(refusalText(refusal!)).toContain("**Reason:** Spamming");
 	});

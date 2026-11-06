@@ -1961,7 +1961,9 @@ Three things about it are load-bearing:
 - **`/auth/me` says why.** It carries `blacklist` — the reason, since when and the owners to ask — and an empty
   server list, so Discord is not asked for servers the account could not open. `RequireAuth` then draws
   `BlockedPage` in place of every signed-in screen: the reason, the owners with a link to each one's Discord
-  profile, Sign out and Delete my data. The page is a courtesy; the guard is the boundary.
+  profile, Sign out and Delete my data. It says, as the Discord refusal does, that deleting the data leaves the
+  block in place and that asking an owner is the only way to have it lifted. The page is a courtesy; the guard is
+  the boundary.
 - **A block made mid-session shows on the next click.** `createQueryClient` asks `/auth/me` again whenever any
   query or write is refused as `blacklisted`, so the page turns into `BlockedPage` rather than a screen of errors.
 

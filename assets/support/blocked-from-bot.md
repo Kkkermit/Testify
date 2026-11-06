@@ -13,6 +13,6 @@ The usual reasons are in the [terms of use](/terms):
 - Using scripts or several accounts to farm rewards or get round a cooldown.
 - Exploiting a bug instead of reporting it.
 
-Server staff cannot lift it. If you think it is a mistake, contact the bot's owners: the message names them, and so does the dashboard when you sign in.
+Server staff cannot lift it, and nor does deleting your data. If you think it is a mistake, contact the bot's owners, which is the only way to have it lifted: the message names them, and so does the dashboard when you sign in.
 
-> **Tip:** A block never stops you deleting your data. `/delete-my-data` still works, and so does signing in to the dashboard, which then shows only why you are blocked and Delete my data.
+> **Tip:** A block never stops you deleting your data. `/delete-my-data` still works, and so does signing in to the dashboard, which then shows only why you are blocked and Delete my data. Deleting your data leaves the block in place.

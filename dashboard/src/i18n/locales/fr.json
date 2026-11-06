@@ -2865,14 +2865,14 @@
 	"blocked": {
 		"title": "{{bot}} t’a bloqué",
 		"signedInAs": "Connecté en tant que {{name}}.",
-		"body": "Les propriétaires du bot ont bloqué ton compte : le tableau de bord et toutes les commandes te sont fermés, sur tous les serveurs. Tu peux quand même supprimer tout ce que {{bot}} garde sur toi, ici ou avec /delete-my-data dans Discord.",
+		"body": "Les propriétaires du bot ont bloqué ton compte : le tableau de bord et toutes les commandes te sont fermés, sur tous les serveurs. Tu peux quand même supprimer tout ce que {{bot}} garde sur toi, ici ou avec /delete-my-data dans Discord, mais cela ne lève pas le blocage.",
 		"reason": "Motif",
 		"noReason": "Aucun motif n’a été donné.",
 		"since": "Bloqué depuis",
 		"mistakeTitle": "Tu penses que c’est une erreur ?",
-		"ask_one": "Seul le propriétaire du bot peut lever un blocage ; les modérateurs et administrateurs d’un serveur ne le peuvent pas. Contacte-le sur Discord :",
-		"ask_many": "Seuls les propriétaires du bot peuvent lever un blocage ; les modérateurs et administrateurs d’un serveur ne le peuvent pas. Contacte l’un d’eux sur Discord :",
-		"ask_other": "Seuls les propriétaires du bot peuvent lever un blocage ; les modérateurs et administrateurs d’un serveur ne le peuvent pas. Contacte l’un d’eux sur Discord :",
-		"askNobody": "Seul le propriétaire du bot peut lever un blocage ; les modérateurs et administrateurs d’un serveur ne le peuvent pas, alors contacte-le."
+		"ask_one": "Le seul moyen de faire lever le blocage est de le demander au propriétaire du bot ; les modérateurs et administrateurs d’un serveur ne peuvent pas le lever. Contacte-le sur Discord :",
+		"ask_many": "Le seul moyen de faire lever le blocage est de le demander aux propriétaires du bot ; les modérateurs et administrateurs d’un serveur ne peuvent pas le lever. Contacte l’un d’eux sur Discord :",
+		"ask_other": "Le seul moyen de faire lever le blocage est de le demander aux propriétaires du bot ; les modérateurs et administrateurs d’un serveur ne peuvent pas le lever. Contacte l’un d’eux sur Discord :",
+		"askNobody": "Le seul moyen de faire lever le blocage est de le demander au propriétaire du bot ; les modérateurs et administrateurs d’un serveur ne peuvent pas le lever."
 	}
 }
