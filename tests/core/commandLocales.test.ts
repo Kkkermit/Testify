@@ -2,20 +2,17 @@ import { readFileSync } from "node:fs";
 import { PermissionsBitField, type PermissionsString } from "discord.js";
 import { DISCORD_LOCALES, type TranslatedLanguage } from "@config/languages";
 import { buildSlashCommand, subcommandsOf } from "@core/command";
-import {
-	commandStrings,
-	DESCRIPTION_LIMIT,
-	localiserFor,
-	MENU_NAME_LIMIT,
-	menuStrings,
-	readCommandTranslations,
-} from "@core/commandLocales";
+import { commandStrings, localiserFor, menuStrings, readCommandTranslations } from "@core/commandLocales";
 import { buildContextMenu } from "@core/contextMenu";
 import { permissionName } from "@core/language";
 import { loadEverything } from "@core/loader";
 import { assetPath } from "@core/paths";
 import { humanisePermission } from "@lib/format/format.util";
 import { createMockClient } from "@tests/helpers/mocks";
+
+/** Discord's own limits: a description is at most 100 characters, a right-click action's name at most 32. */
+const DESCRIPTION_LIMIT = 100;
+const MENU_NAME_LIMIT = 32;
 
 const client = createMockClient();
 loadEverything(client);

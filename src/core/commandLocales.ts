@@ -11,10 +11,6 @@ export interface CommandString {
 	text: string;
 }
 
-/** Discord's own limits: a description is at most 100 characters, a right-click action's name at most 32. */
-export const DESCRIPTION_LIMIT = 100;
-export const MENU_NAME_LIMIT = 32;
-
 /** Every description a command shows, under the key its translations are filed by; owner commands only owners see. */
 export function commandStrings(command: Command): CommandString[] {
 	if (command.ownerOnly === true) return [];
