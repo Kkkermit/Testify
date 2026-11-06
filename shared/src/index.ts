@@ -25,6 +25,7 @@ export * from "./goodbye";
 export * from "./ideas";
 export * from "./inbox";
 export * from "./insights";
+export * from "./invites";
 export * from "./levelling";
 export * from "./lottery";
 export * from "./markup";

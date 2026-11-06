@@ -172,7 +172,9 @@
 		"appeals": "Apelaciones",
 		"appealsHint": "Baneados que piden volver",
 		"modmail": "Correo al equipo",
-		"modmailHint": "Miembros que escriben en privado al equipo"
+		"modmailHint": "Miembros que escriben en privado al equipo",
+		"invites": "Invitaciones",
+		"invitesHint": "Qué invitaciones trajeron miembros"
 	},
 	"account": {
 		"title": "Tu cuenta",
@@ -1523,7 +1525,10 @@
 		"saveRoles": "Guardar roles",
 		"levelOnXp": "Nivel {{level}} con {{xp}} XP.",
 		"levelRange": "De 0 a {{max, number}}",
-		"warningsHidden": "Necesitas el permiso {{permission}} en este servidor para ver o dar avisos."
+		"warningsHidden": "Necesitas el permiso {{permission}} en este servidor para ver o dar avisos.",
+		"joinedWith": "Entró con la invitación {{code}} de {{name}}.",
+		"joinedVanity": "Entró con el enlace propio del servidor.",
+		"joinedUnknownInvite": "No se pudo saber qué invitación usó."
 	},
 	"tickets": {
 		"summaryOn_other": "Los miembros abren un ticket desde el panel en {{channel}}, y ahora mismo hay {{count, number}} abiertos.",
@@ -2209,7 +2214,9 @@
 		"storedL17": "Apelaciones de baneo: lo que escribiste al apelar un baneo, tu ID de usuario y tu nombre de usuario, y lo que decidió el equipo, con su motivo y quién lo decidió.",
 		"retentionL18": "Apelaciones de baneo: 180 días después de que el equipo decida, para que un rechazo pueda frenar la siguiente apelación. Una que sigue en espera se guarda hasta que se decida, y todas se borran cuando el bot se quita del servidor.",
 		"messagesP4": "El correo al equipo es la otra. Mientras tengas una conversación abierta, lo que envíes al bot por DM va al equipo de ese servidor, a un hilo en su canal de correo, y no se reenvía al operador. Lo que el equipo escribe en el hilo te llega del mismo modo. Ambas copias están en Discord: el bot solo guarda a qué servidor escribiste, el hilo, si se debe una respuesta y cuándo se abrió y cerró.",
-		"retentionL19": "Conversaciones de correo al equipo: 90 días después de cerrarse, y luego se borran automáticamente. Los hilos siguen en el Discord del servidor."
+		"retentionL19": "Conversaciones de correo al equipo: 90 días después de cerrarse, y luego se borran automáticamente. Los hilos siguen en el Discord del servidor.",
+		"storedL18": "Seguimiento de invitaciones: si un servidor lo activa, con qué invitación entró cada miembro nuevo, de quién era, ambos nombres de usuario y si se ha ido desde entonces.",
+		"retentionL20": "Seguimiento de invitaciones: 365 días después de cada entrada, y luego se borra automáticamente; todo se borra cuando el bot se quita del servidor."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",
@@ -2967,5 +2974,28 @@
 		"openThread": "Abrir el hilo",
 		"close": "Cerrar",
 		"closeWith": "Cerrar la conversación con {{name}}"
+	},
+	"invites": {
+		"title": "Invitaciones",
+		"subtitle": "Con qué invitación entró cada miembro nuevo, y qué invitaciones trajeron a quienes se quedaron.",
+		"summaryCannotRead": "{{bot}} necesita el permiso Gestionar servidor para ver qué invitación usó cada miembro.",
+		"summaryOff": "El seguimiento de invitaciones está desactivado, así que no se registran las entradas.",
+		"summaryOn": "Se registra la invitación de cada miembro nuevo.",
+		"summaryOnPosting": "Se registra la invitación de cada miembro nuevo y se anuncia en {{channel}}.",
+		"enabled": "Registrar qué invitación usó cada miembro",
+		"enabledHint": "El recuento empieza al activarlo. Si dos personas entran a la vez, puede que no se distinga la invitación.",
+		"enabledHintCannotRead": "Dale primero a {{bot}} el permiso Gestionar servidor.",
+		"channel": "Anunciar entradas en",
+		"channelHint": "Opcional. Cada entrada dice de quién era la invitación y no menciona a nadie.",
+		"noAnnouncements": "Sin anuncios",
+		"topTitle": "Quienes más invitan",
+		"emptyTitle": "Aún no hay nadie",
+		"emptyBody": "Con el seguimiento activado, aquí se cuenta la invitación de cada miembro nuevo.",
+		"standing": "{{stayed, number}} siguen · {{left, number}} se fueron",
+		"recentTitle": "Entradas recientes",
+		"left": "Se fue",
+		"viaInvite": "Con la invitación {{code}} de {{name}}.",
+		"viaVanity": "Con el enlace propio del servidor.",
+		"viaUnknown": "No se pudo saber la invitación."
 	}
 }

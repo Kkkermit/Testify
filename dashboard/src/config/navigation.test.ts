@@ -69,6 +69,7 @@ describe("navigationFor", () => {
 				"/ideas",
 				"/inbox",
 				"/insights",
+				"/invites",
 				"/levelling",
 				"/lottery",
 				"/member-count",
@@ -119,7 +120,7 @@ describe("navigationFor", () => {
 				"/tickets",
 				"/warnings",
 			],
-			"nav.stats": ["/bot-stats", "/insights", "/member-count"],
+			"nav.stats": ["/bot-stats", "/insights", "/invites", "/member-count"],
 			"nav.economy": ["/casino", "/lottery", "/treasure"],
 			"nav.entertainment": ["/giveaways", "/music"],
 		});

@@ -9,6 +9,7 @@ import {
 	type ChannelToolList,
 	type DirectoryPage,
 	type GuildWarningsPage,
+	type InviteOverview,
 	type MemberDetail,
 	type MemberMatch,
 	type MemberRoles,
@@ -80,6 +81,16 @@ export const memberDetail: MemberDetail = {
 		},
 	],
 	softban: null,
+	invite: {
+		memberId: "100000000000000002",
+		memberName: "kate",
+		inviterId: "100000000000000001",
+		inviterName: "kermit",
+		code: "abc123",
+		vanity: false,
+		joinedAt: "2026-01-04T00:00:00.000Z",
+		leftAt: null,
+	},
 	moderationProblem: null,
 };
 
@@ -361,6 +372,23 @@ export const modmailConversations: ModmailConversations = {
 			openedAt: "2026-11-05T00:00:00.000Z",
 			lastMessageAt: "2026-11-05T01:00:00.000Z",
 			waiting: true,
+		},
+	],
+};
+
+export const inviteOverview: InviteOverview = {
+	settings: { enabled: true, logChannelId: null, canRead: true, canSend: false },
+	top: [{ userId: "100000000000000001", name: "kermit", joins: 5, left: 2 }],
+	recent: [
+		{
+			memberId: "100000000000000002",
+			memberName: "kate",
+			inviterId: "100000000000000001",
+			inviterName: "kermit",
+			code: "abc123",
+			vanity: false,
+			joinedAt: "2026-11-05T00:00:00.000Z",
+			leftAt: null,
 		},
 	],
 };

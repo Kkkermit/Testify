@@ -35,6 +35,7 @@ import {
 	Lightbulb,
 	ListChecks,
 	Lock,
+	Mailbox,
 	Mails,
 	Ticket,
 	type LucideIcon,
@@ -180,6 +181,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					icon: ChartPie,
 					items: [
 						{ to: at("/insights"), labelKey: "nav.insights", icon: ChartLine, hintKey: "nav.insightsHint" },
+						{ to: at("/invites"), labelKey: "nav.invites", icon: Mailbox, hintKey: "nav.invitesHint" },
 						{
 							to: at("/member-count"),
 							labelKey: "nav.memberCount",

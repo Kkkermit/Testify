@@ -159,6 +159,9 @@ describe("the legal pages", () => {
 		const modmail = /keepDays: (\d+)/.exec(botSource("shared/src/modmail.ts"))?.[1];
 		expect(text).toContain(`Mod mail conversations: ${String(modmail)} days after they close`);
 
+		const invites = /keepDays: (\d+)/.exec(botSource("shared/src/invites.ts"))?.[1];
+		expect(text).toContain(`Invite tracking: ${String(invites)} days after each join`);
+
 		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
 		expect(text).toContain(`Who ran a command: ${String(runs)} days`);
 		expect(text).toContain(`logs and counts for ${String(retention)} days`);

@@ -226,6 +226,7 @@ export const SCREEN_ROUTES = [
 	"/guilds/compare",
 	"/guilds/:guildId",
 	"/guilds/:guildId/insights",
+	"/guilds/:guildId/invites",
 	"/guilds/:guildId/levelling",
 	"/guilds/:guildId/welcome",
 	"/guilds/:guildId/audit-log",

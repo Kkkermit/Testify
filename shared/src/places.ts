@@ -24,6 +24,7 @@ export const FEATURE_PLACES = {
 	cases: { reach: "everywhere" },
 	appeals: { reach: "channel" },
 	modmail: { reach: "channel" },
+	invites: { reach: "channel" },
 	"raid-protection": { reach: "everywhere" },
 	"anti-link": { reach: "everywhere" },
 	counting: { reach: "channel" },

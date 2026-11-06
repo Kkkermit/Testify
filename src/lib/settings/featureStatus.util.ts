@@ -10,6 +10,7 @@ import { getCaseSettings } from "@database/repositories/caseRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
+import { getInviteSettings } from "@database/repositories/inviteRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getModmailSettings } from "@database/repositories/modmailRepository";
 import { getRaidSettings } from "@database/repositories/raidRepository";
@@ -217,6 +218,19 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 				enabled: on,
 				detail: on && appeals.channelId !== null ? posting(appeals.channelId) : null,
 				places: at("posts", appeals?.channelId),
+			};
+		},
+	},
+	{
+		key: "invites",
+		label: "Invite tracking",
+		async read(guild) {
+			const invites = await getInviteSettings(guild.id);
+			const on = invites?.enabled === true;
+			return {
+				enabled: on,
+				detail: on && invites.logChannelId !== null ? posting(invites.logChannelId) : null,
+				places: at("logs", invites?.logChannelId),
 			};
 		},
 	},

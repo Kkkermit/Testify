@@ -171,7 +171,9 @@
 		"appeals": "Appeals",
 		"appealsHint": "Banned members asking to come back",
 		"modmail": "Mod mail",
-		"modmailHint": "Members writing privately to staff"
+		"modmailHint": "Members writing privately to staff",
+		"invites": "Invites",
+		"invitesHint": "Whose invites brought members in"
 	},
 	"account": {
 		"title": "Your account",
@@ -1469,7 +1471,10 @@
 		"saveRoles": "Save roles",
 		"levelOnXp": "Level {{level}} on {{xp}} XP.",
 		"levelRange": "0 to {{max, number}}",
-		"warningsHidden": "You need the {{permission}} permission in this server to see or give warnings."
+		"warningsHidden": "You need the {{permission}} permission in this server to see or give warnings.",
+		"joinedWith": "They joined with {{name}}’s invite {{code}}.",
+		"joinedVanity": "They joined with the server’s own link.",
+		"joinedUnknownInvite": "Which invite they used could not be told."
 	},
 	"tickets": {
 		"summaryOn_other": "Members open a ticket from the panel in {{channel}}, and {{count, number}} are open right now.",
@@ -2144,7 +2149,9 @@
 		"storedL17": "Ban appeals: what you wrote when you appealed a ban, your user id and username, and what staff decided, with its reason and who decided it.",
 		"retentionL18": "Ban appeals: 180 days after staff decide, so a refusal can hold back the next appeal. One still waiting is kept until it is decided, and every appeal goes when the bot is removed from the server.",
 		"messagesP4": "Mod mail is the other one. While you have a mod mail conversation open, what you send the bot in a direct message goes to that server’s staff, in a thread in their mod mail channel, and is not forwarded to the operator. What staff write in the thread comes back to you the same way. Both copies live in Discord: the bot keeps only which server you wrote to, the thread, whether a reply is owed and when it opened and closed.",
-		"retentionL19": "Mod mail conversations: 90 days after they close, then deleted automatically. The threads themselves stay in the server’s Discord."
+		"retentionL19": "Mod mail conversations: 90 days after they close, then deleted automatically. The threads themselves stay in the server’s Discord.",
+		"storedL18": "Invite tracking: when a server turns it on, which invite each new member joined with, whose invite it was, both usernames, and whether they have since left.",
+		"retentionL20": "Invite tracking: 365 days after each join, then deleted automatically, and all of it when the bot is removed from the server."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -2884,5 +2891,28 @@
 		"openThread": "Open the thread",
 		"close": "Close",
 		"closeWith": "Close the conversation with {{name}}"
+	},
+	"invites": {
+		"title": "Invites",
+		"subtitle": "Which invite each new member joined with, and whose invites brought in the people who stayed.",
+		"summaryCannotRead": "{{bot}} needs the Manage Server permission to see which invite each member used.",
+		"summaryOff": "Invite tracking is off, so joins are not recorded.",
+		"summaryOn": "Each new member’s invite is recorded.",
+		"summaryOnPosting": "Each new member’s invite is recorded and announced in {{channel}}.",
+		"enabled": "Record which invite each member used",
+		"enabledHint": "Counting starts when it is turned on. When two people join at the same moment, the invite may not be told apart.",
+		"enabledHintCannotRead": "Give {{bot}} the Manage Server permission first.",
+		"channel": "Announce joins in",
+		"channelHint": "Optional. Each join says whose invite it was, and pings nobody.",
+		"noAnnouncements": "No announcements",
+		"topTitle": "Top inviters",
+		"emptyTitle": "Nobody counted yet",
+		"emptyBody": "Once invite tracking is on, each new member’s invite is counted here.",
+		"standing": "{{stayed, number}} still here · {{left, number}} left",
+		"recentTitle": "Recent joins",
+		"left": "Left",
+		"viaInvite": "With {{name}}’s invite {{code}}.",
+		"viaVanity": "With the server’s own link.",
+		"viaUnknown": "The invite could not be told."
 	}
 }

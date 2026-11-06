@@ -21,6 +21,7 @@ import { Giveaway } from "@database/models/giveaway.schema";
 import { GoodbyeSettingsConfig } from "@database/models/goodbye.schema";
 import { Idea, IdeaSettingsConfig } from "@database/models/idea.schema";
 import { MemberDays, MemberMoves } from "@database/models/insights.schema";
+import { InviteJoin, InviteSettingsConfig } from "@database/models/invite.schema";
 import { UserLevel } from "@database/models/levelling.schema";
 import { Lottery } from "@database/models/lottery.schema";
 import { ModCaseEntry, ModCaseSettings } from "@database/models/modCase.schema";
@@ -133,6 +134,7 @@ const SETTINGS = [
 	CommandToggleConfig,
 	GoodbyeSettingsConfig,
 	IdeaSettingsConfig,
+	InviteSettingsConfig,
 	ModCaseSettings,
 	ModmailSettingsConfig,
 	MusicSettingsConfig,
@@ -176,6 +178,10 @@ describeWithMongo("eraseUserData", () => {
 			]),
 			DmLog.collection.insertOne({ messageId: "1", authorId: PERSON, content: "hello" }),
 			ModmailThread.collection.insertOne({ guildId: GUILD, userId: OTHER, closedBy: PERSON }),
+			InviteJoin.collection.insertMany([
+				{ guildId: GUILD, memberId: PERSON, inviterId: OTHER },
+				{ guildId: GUILD, memberId: OTHER, inviterId: PERSON, inviterName: "person" },
+			]),
 			Idea.collection.insertMany([
 				{
 					guildId: GUILD,
@@ -280,6 +286,11 @@ describeWithMongo("eraseUserData", () => {
 		]);
 		expect(await Appeal.collection.findOne({ userId: OTHER })).toMatchObject({ decidedBy: null, decidedByName: null });
 		expect(await ModmailThread.collection.findOne({ userId: OTHER })).toMatchObject({ closedBy: null });
+		expect(await InviteJoin.collection.countDocuments({ memberId: PERSON })).toBe(0);
+		expect(await InviteJoin.collection.findOne({ memberId: OTHER })).toMatchObject({
+			inviterId: DELETED_USER_ID,
+			inviterName: DELETED_USER_NAME,
+		});
 
 		const left = await Promise.all(THEIRS.map(async (model) => model.collection.countDocuments({ userId: PERSON })));
 		expect(left.every((count) => count === 0)).toBe(true);

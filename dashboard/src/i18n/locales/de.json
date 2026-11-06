@@ -171,7 +171,9 @@
 		"appeals": "Einsprüche",
 		"appealsHint": "Gebannte, die zurück wollen",
 		"modmail": "Modmail",
-		"modmailHint": "Mitglieder schreiben privat ans Team"
+		"modmailHint": "Mitglieder schreiben privat ans Team",
+		"invites": "Einladungen",
+		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -1469,7 +1471,10 @@
 		"saveRoles": "Rollen speichern",
 		"levelOnXp": "Level {{level}} mit {{xp}} XP.",
 		"levelRange": "0 bis {{max, number}}",
-		"warningsHidden": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um Verwarnungen zu sehen oder zu vergeben."
+		"warningsHidden": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um Verwarnungen zu sehen oder zu vergeben.",
+		"joinedWith": "Beigetreten mit der Einladung {{code}} von {{name}}.",
+		"joinedVanity": "Beigetreten über den eigenen Link des Servers.",
+		"joinedUnknownInvite": "Welche Einladung benutzt wurde, ließ sich nicht bestimmen."
 	},
 	"tickets": {
 		"summaryOn_other": "Mitglieder öffnen ein Ticket über das Panel in {{channel}}, und gerade sind {{count, number}} offen.",
@@ -2144,7 +2149,9 @@
 		"storedL17": "Einsprüche gegen Banns: was du beim Einspruch geschrieben hast, deine Nutzer-ID und dein Nutzername, und was das Team entschieden hat, mit Grund und wer entschieden hat.",
 		"retentionL18": "Einsprüche gegen Banns: 180 Tage nach der Entscheidung, damit eine Ablehnung den nächsten Einspruch zurückhalten kann. Ein offener bleibt bis zur Entscheidung, und alle gehen, wenn der Bot vom Server entfernt wird.",
 		"messagesP4": "Modmail ist die andere. Solange du ein Modmail-Gespräch offen hast, geht, was du dem Bot per DM schickst, an das Team dieses Servers, in einen Thread in dessen Modmail-Kanal, und wird nicht an den Betreiber weitergeleitet. Was das Team im Thread schreibt, kommt auf demselben Weg zu dir zurück. Beide Kopien liegen in Discord: Der Bot speichert nur, welchem Server du geschrieben hast, den Thread, ob eine Antwort aussteht und wann es begann und endete.",
-		"retentionL19": "Modmail-Gespräche: 90 Tage nach dem Schließen, dann automatisch gelöscht. Die Threads selbst bleiben im Discord des Servers."
+		"retentionL19": "Modmail-Gespräche: 90 Tage nach dem Schließen, dann automatisch gelöscht. Die Threads selbst bleiben im Discord des Servers.",
+		"storedL18": "Einladungs-Tracking: wenn ein Server es einschaltet, mit welcher Einladung jedes neue Mitglied kam, wessen Einladung es war, beide Nutzernamen und ob es seitdem gegangen ist.",
+		"retentionL20": "Einladungs-Tracking: 365 Tage nach jedem Beitritt, dann automatisch gelöscht, und alles, wenn der Bot vom Server entfernt wird."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
@@ -2884,5 +2891,28 @@
 		"openThread": "Thread öffnen",
 		"close": "Schließen",
 		"closeWith": "Gespräch mit {{name}} schließen"
+	},
+	"invites": {
+		"title": "Einladungen",
+		"subtitle": "Mit welcher Einladung jedes neue Mitglied kam, und wessen Einladungen die Leute brachten, die geblieben sind.",
+		"summaryCannotRead": "{{bot}} braucht die Berechtigung „Server verwalten“, um zu sehen, welche Einladung jedes Mitglied benutzt hat.",
+		"summaryOff": "Einladungs-Tracking ist aus, also werden Beitritte nicht erfasst.",
+		"summaryOn": "Die Einladung jedes neuen Mitglieds wird erfasst.",
+		"summaryOnPosting": "Die Einladung jedes neuen Mitglieds wird erfasst und in {{channel}} angekündigt.",
+		"enabled": "Erfassen, welche Einladung jedes Mitglied benutzt hat",
+		"enabledHint": "Die Zählung beginnt beim Einschalten. Wenn zwei Personen im selben Moment beitreten, lässt sich die Einladung vielleicht nicht zuordnen.",
+		"enabledHintCannotRead": "Gib {{bot}} zuerst die Berechtigung „Server verwalten“.",
+		"channel": "Beitritte ankündigen in",
+		"channelHint": "Optional. Jeder Beitritt nennt die Einladung und pingt niemanden an.",
+		"noAnnouncements": "Keine Ankündigungen",
+		"topTitle": "Top-Einlader",
+		"emptyTitle": "Noch niemand gezählt",
+		"emptyBody": "Sobald das Tracking an ist, wird hier die Einladung jedes neuen Mitglieds gezählt.",
+		"standing": "{{stayed, number}} noch hier · {{left, number}} gegangen",
+		"recentTitle": "Neueste Beitritte",
+		"left": "Gegangen",
+		"viaInvite": "Mit der Einladung {{code}} von {{name}}.",
+		"viaVanity": "Über den eigenen Link des Servers.",
+		"viaUnknown": "Die Einladung ließ sich nicht bestimmen."
 	}
 }

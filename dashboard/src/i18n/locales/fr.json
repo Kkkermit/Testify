@@ -172,7 +172,9 @@
 		"appeals": "Appels",
 		"appealsHint": "Les personnes bannies qui demandent à revenir",
 		"modmail": "Messagerie modération",
-		"modmailHint": "Les membres écrivent en privé à l’équipe"
+		"modmailHint": "Les membres écrivent en privé à l’équipe",
+		"invites": "Invitations",
+		"invitesHint": "Les invitations qui ont amené des membres"
 	},
 	"account": {
 		"title": "Ton compte",
@@ -1523,7 +1525,10 @@
 		"saveRoles": "Enregistrer les rôles",
 		"levelOnXp": "Niveau {{level}} avec {{xp}} XP.",
 		"levelRange": "De 0 à {{max, number}}",
-		"warningsHidden": "Il te faut la permission {{permission}} sur ce serveur pour voir ou donner des avertissements."
+		"warningsHidden": "Il te faut la permission {{permission}} sur ce serveur pour voir ou donner des avertissements.",
+		"joinedWith": "Arrivé avec l’invitation {{code}} de {{name}}.",
+		"joinedVanity": "Arrivé avec le lien propre au serveur.",
+		"joinedUnknownInvite": "L’invitation utilisée n’a pas pu être identifiée."
 	},
 	"tickets": {
 		"summaryOn_other": "Les membres ouvrent un ticket depuis le panneau dans {{channel}}, et {{count, number}} sont ouverts en ce moment.",
@@ -2209,7 +2214,9 @@
 		"storedL17": "Appels de bannissement : ce que vous avez écrit en faisant appel, votre identifiant et votre nom d’utilisateur, et ce que l’équipe a décidé, avec sa raison et qui l’a décidé.",
 		"retentionL18": "Appels de bannissement : 180 jours après la décision de l’équipe, pour qu’un refus puisse retenir l’appel suivant. Un appel en attente est gardé jusqu’à la décision, et tous partent quand le bot est retiré du serveur.",
 		"messagesP4": "La messagerie modération est l’autre. Tant que vous avez une conversation ouverte, ce que vous envoyez au bot en DM va à l’équipe de ce serveur, dans un fil de son salon de messagerie, et n’est pas transmis à l’opérateur. Ce que l’équipe écrit dans le fil vous revient de la même façon. Les deux copies sont dans Discord : le bot ne garde que le serveur auquel vous avez écrit, le fil, si une réponse est attendue, et quand la conversation a commencé et pris fin.",
-		"retentionL19": "Conversations de messagerie : 90 jours après leur fermeture, puis supprimées automatiquement. Les fils restent dans le Discord du serveur."
+		"retentionL19": "Conversations de messagerie : 90 jours après leur fermeture, puis supprimées automatiquement. Les fils restent dans le Discord du serveur.",
+		"storedL18": "Suivi des invitations : quand un serveur l’active, l’invitation avec laquelle chaque nouveau membre est arrivé, à qui elle appartenait, les deux noms d’utilisateur et s’il est parti depuis.",
+		"retentionL20": "Suivi des invitations : 365 jours après chaque arrivée, puis supprimé automatiquement, et entièrement quand le bot est retiré du serveur."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
@@ -2967,5 +2974,28 @@
 		"openThread": "Ouvrir le fil",
 		"close": "Fermer",
 		"closeWith": "Fermer la conversation avec {{name}}"
+	},
+	"invites": {
+		"title": "Invitations",
+		"subtitle": "L’invitation avec laquelle chaque nouveau membre est arrivé, et celles qui ont amené les personnes restées.",
+		"summaryCannotRead": "{{bot}} a besoin de la permission Gérer le serveur pour voir quelle invitation chaque membre a utilisée.",
+		"summaryOff": "Le suivi des invitations est désactivé, donc les arrivées ne sont pas enregistrées.",
+		"summaryOn": "L’invitation de chaque nouveau membre est enregistrée.",
+		"summaryOnPosting": "L’invitation de chaque nouveau membre est enregistrée et annoncée dans {{channel}}.",
+		"enabled": "Enregistrer l’invitation utilisée par chaque membre",
+		"enabledHint": "Le décompte commence à l’activation. Si deux personnes arrivent au même moment, l’invitation peut ne pas être identifiée.",
+		"enabledHintCannotRead": "Donnez d’abord à {{bot}} la permission Gérer le serveur.",
+		"channel": "Annoncer les arrivées dans",
+		"channelHint": "Facultatif. Chaque arrivée indique l’invitation utilisée et ne mentionne personne.",
+		"noAnnouncements": "Aucune annonce",
+		"topTitle": "Meilleurs parrains",
+		"emptyTitle": "Personne n’est encore compté",
+		"emptyBody": "Une fois le suivi activé, l’invitation de chaque nouveau membre est comptée ici.",
+		"standing": "{{stayed, number}} toujours là · {{left, number}} partis",
+		"recentTitle": "Arrivées récentes",
+		"left": "Parti",
+		"viaInvite": "Avec l’invitation {{code}} de {{name}}.",
+		"viaVanity": "Avec le lien propre au serveur.",
+		"viaUnknown": "L’invitation n’a pas pu être identifiée."
 	}
 }

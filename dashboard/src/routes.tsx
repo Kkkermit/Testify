@@ -45,6 +45,7 @@ const IdeasPage = page(async () => import("@/features/ideas/IdeasPage"), "IdeasP
 const BanAppealsPage = page(async () => import("@/features/appeals/BanAppealsPage"), "BanAppealsPage");
 const AppealBanPage = page(async () => import("@/features/appeals/AppealBanPage"), "AppealBanPage");
 const ModmailPage = page(async () => import("@/features/modmail/ModmailPage"), "ModmailPage");
+const InvitesPage = page(async () => import("@/features/invites/InvitesPage"), "InvitesPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
 const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
 const InboxPage = page(async () => import("@/features/inbox/InboxPage"), "InboxPage");
@@ -128,6 +129,7 @@ export const routes = [
 								children: [
 									{ path: "/guilds/:guildId", element: lazily(<GuildOverviewPage />) },
 									{ path: "/guilds/:guildId/insights", element: lazily(<InsightsPage />) },
+									{ path: "/guilds/:guildId/invites", element: lazily(<InvitesPage />) },
 									{ path: "/guilds/:guildId/levelling", element: lazily(<LevellingPage />) },
 									{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
 									{ path: "/guilds/:guildId/audit-log", element: lazily(<AuditLogPage />) },

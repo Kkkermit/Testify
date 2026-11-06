@@ -18,6 +18,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	schedule: { path: (guildId) => `/guilds/${guildId}/scheduled-messages`, screen: "Scheduled messages" },
 	appeals: { path: (guildId) => `/guilds/${guildId}/appeals`, screen: "Ban appeals" },
 	modmail: { path: (guildId) => `/guilds/${guildId}/modmail`, screen: "Mod mail" },
+	invites: { path: (guildId) => `/guilds/${guildId}/invites`, screen: "Invites" },
 	idea: { path: (guildId) => `/guilds/${guildId}/ideas`, screen: "Idea board" },
 	starboard: { path: (guildId) => `/guilds/${guildId}/starboard`, screen: "Starboard" },
 	"temp-voice": { path: (guildId) => `/guilds/${guildId}/temp-voice`, screen: "Join to create" },

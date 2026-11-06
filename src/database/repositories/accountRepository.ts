@@ -17,6 +17,7 @@ import { Giveaway } from "@database/models/giveaway.schema";
 import { GoodbyeSettingsConfig } from "@database/models/goodbye.schema";
 import { Idea, IdeaSettingsConfig } from "@database/models/idea.schema";
 import { MemberDays, MemberMoves } from "@database/models/insights.schema";
+import { InviteJoin, InviteSettingsConfig } from "@database/models/invite.schema";
 import { UserLevel } from "@database/models/levelling.schema";
 import { Lottery } from "@database/models/lottery.schema";
 import { ModCaseEntry, ModCaseSettings } from "@database/models/modCase.schema";
@@ -69,6 +70,8 @@ export const ERASURE = {
 	guildChannelSchema: { userId: "anonymise" },
 	ideas: { authorId: "delete", decidedBy: "anonymise", upVoters: "remove", downVoters: "remove" },
 	ideasettings: { updatedBy: "anonymise" },
+	invitejoins: { memberId: "delete", inviterId: "anonymise" },
+	invitesettings: { updatedBy: "anonymise" },
 	Lottery: {
 		createdBy: "anonymise",
 		lastModifiedBy: "anonymise",
@@ -131,6 +134,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		DmLog.deleteMany({ authorId: userId }).exec(),
 		Economy.deleteMany({ userId }).exec(),
 		Idea.deleteMany({ authorId: userId }).exec(),
+		InviteJoin.deleteMany({ memberId: userId }).exec(),
 		MemberDays.deleteMany({ userId }).exec(),
 		MemberMoves.deleteMany({ userId }).exec(),
 		ModmailThread.deleteMany({ userId }).exec(),
@@ -149,6 +153,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		Idea.updateMany({ decidedBy: userId }, { $set: { decidedBy: null, decidedByName: null } }).exec(),
 		Appeal.updateMany({ decidedBy: userId }, { $set: { decidedBy: null, decidedByName: null } }).exec(),
 		ModmailThread.updateMany({ closedBy: userId }, { $set: { closedBy: null } }).exec(),
+		InviteJoin.updateMany({ inviterId: userId }, { $set: { inviterId: gone, inviterName: name } }).exec(),
 		Lottery.updateMany({ "entries.userId": userId }, { $pull: { entries: { userId } } }).exec(),
 		Lottery.updateMany(
 			{ "history.winners.userId": userId },
@@ -197,6 +202,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		CommandToggleConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		GoodbyeSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		IdeaSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
+		InviteSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		ModCaseSettings.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		ModmailSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		MusicSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),

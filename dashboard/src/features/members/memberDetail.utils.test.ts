@@ -18,6 +18,7 @@ function detail(overrides: Partial<MemberDetail> = {}): MemberDetail {
 		levels: null,
 		warnings: [],
 		softban: null,
+		invite: null,
 		moderationProblem: null,
 		...overrides,
 	};

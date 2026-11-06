@@ -16,6 +16,7 @@ export * from "./giveaways";
 export * from "./ideas";
 export * from "./info";
 export * from "./infra";
+export * from "./invites";
 export * from "./levelling";
 export * from "./moderation";
 export * from "./modmail";

@@ -13,6 +13,7 @@ import {
 	getGlobalStanding,
 	getLeaderboard,
 } from "@database/repositories/economyRepository";
+import { latestJoinOf } from "@database/repositories/inviteRepository";
 import {
 	addXp,
 	countRanked,
@@ -24,6 +25,7 @@ import {
 	setLevel,
 } from "@database/repositories/levelRepository";
 import { getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { toInviteJoin } from "@lib/invites/inviteActions.util";
 import { type RewardOutcome } from "@lib/levelling/levelling.types";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
@@ -188,7 +190,7 @@ export async function readMemberDetail(options: {
 }): Promise<MemberDetail> {
 	const { guild, userId, member, moderator, botId } = options;
 
-	const [account, economyRank, level, levelRank, warnings, softban, ladder] = await Promise.all([
+	const [account, economyRank, level, levelRank, warnings, softban, ladder, joined] = await Promise.all([
 		findAccount(guild.id, userId),
 		getEconomyRank(guild.id, userId),
 		getUserLevel(guild.id, userId),
@@ -196,6 +198,7 @@ export async function readMemberDetail(options: {
 		getWarnings(guild.id, userId),
 		getActiveSoftban(guild.id, userId),
 		readWarnLadder(guild.id),
+		latestJoinOf(guild.id, userId),
 	]);
 
 	return {
@@ -238,6 +241,7 @@ export async function readMemberDetail(options: {
 						moderatorId: softban.moderatorId,
 						expiresAt: softban.expiresAt.toISOString(),
 					},
+		invite: joined === null ? null : toInviteJoin(joined),
 		// A member who has left cannot be acted on through Discord, and neither can one the caller sits below.
 		moderationProblem:
 			member === null

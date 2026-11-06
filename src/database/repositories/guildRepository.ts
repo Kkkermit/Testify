@@ -13,6 +13,7 @@ import { purgeCommandToggles } from "@database/repositories/commandToggleReposit
 import { purgeCounting } from "@database/repositories/countingRepository";
 import { purgeGoodbye } from "@database/repositories/goodbyeRepository";
 import { purgeIdeas } from "@database/repositories/ideaRepository";
+import { purgeInvites } from "@database/repositories/inviteRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeModmail } from "@database/repositories/modmailRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
@@ -34,6 +35,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeAfk(guildId),
 		purgeAppeals(guildId),
 		purgeModmail(guildId),
+		purgeInvites(guildId),
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
 		purgeBirthdays(guildId),

@@ -28,6 +28,9 @@ jest.mock("@database/repositories/levelRepository", () => ({
 	setLevel: jest.fn(() => Promise.resolve({ level: 10, xp: 5_000 })),
 	addXp: jest.fn(() => Promise.resolve({ level: 3, xp: 400 })),
 }));
+jest.mock("@database/repositories/inviteRepository", () => ({
+	latestJoinOf: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnings: jest.fn(() => Promise.resolve(null)),
 	getWarnLadder: jest.fn(() => Promise.resolve(null)),

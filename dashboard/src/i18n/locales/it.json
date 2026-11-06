@@ -172,7 +172,9 @@
 		"appeals": "Ricorsi",
 		"appealsHint": "Bannati che chiedono di tornare",
 		"modmail": "Posta allo staff",
-		"modmailHint": "Membri che scrivono in privato allo staff"
+		"modmailHint": "Membri che scrivono in privato allo staff",
+		"invites": "Inviti",
+		"invitesHint": "Gli inviti che hanno portato membri"
 	},
 	"account": {
 		"title": "Il tuo account",
@@ -1523,7 +1525,10 @@
 		"saveRoles": "Salva ruoli",
 		"levelOnXp": "Livello {{level}} con {{xp}} XP.",
 		"levelRange": "Da 0 a {{max, number}}",
-		"warningsHidden": "Ti serve il permesso {{permission}} in questo server per vedere o dare avvertimenti."
+		"warningsHidden": "Ti serve il permesso {{permission}} in questo server per vedere o dare avvertimenti.",
+		"joinedWith": "È entrato con l’invito {{code}} di {{name}}.",
+		"joinedVanity": "È entrato con il link del server.",
+		"joinedUnknownInvite": "Non è stato possibile capire quale invito ha usato."
 	},
 	"tickets": {
 		"summaryOn_other": "I membri aprono un ticket dal pannello in {{channel}}, e al momento ne sono aperti {{count, number}}.",
@@ -2209,7 +2214,9 @@
 		"storedL17": "Ricorsi contro i ban: ciò che hai scritto nel ricorso, il tuo ID utente e il nome utente, e ciò che ha deciso lo staff, con il motivo e chi l’ha deciso.",
 		"retentionL18": "Ricorsi contro i ban: 180 giorni dopo la decisione dello staff, così un rifiuto può trattenere il ricorso successivo. Uno ancora in attesa resta finché non viene deciso, e tutti vengono eliminati quando il bot viene rimosso dal server.",
 		"messagesP4": "La posta allo staff è l’altra. Finché hai una conversazione aperta, ciò che invii al bot in DM va allo staff di quel server, in un thread del suo canale della posta, e non viene inoltrato all’operatore. Ciò che lo staff scrive nel thread ti torna allo stesso modo. Entrambe le copie restano su Discord: il bot conserva solo a quale server hai scritto, il thread, se è attesa una risposta e quando si è aperta e chiusa.",
-		"retentionL19": "Conversazioni della posta allo staff: 90 giorni dopo la chiusura, poi eliminate automaticamente. I thread restano nel Discord del server."
+		"retentionL19": "Conversazioni della posta allo staff: 90 giorni dopo la chiusura, poi eliminate automaticamente. I thread restano nel Discord del server.",
+		"storedL18": "Tracciamento degli inviti: se un server lo attiva, con quale invito è entrato ogni nuovo membro, di chi era, entrambi i nomi utente e se nel frattempo è uscito.",
+		"retentionL20": "Tracciamento degli inviti: 365 giorni dopo ogni ingresso, poi eliminato automaticamente, e tutto quando il bot viene rimosso dal server."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",
@@ -2967,5 +2974,28 @@
 		"openThread": "Apri il thread",
 		"close": "Chiudi",
 		"closeWith": "Chiudi la conversazione con {{name}}"
+	},
+	"invites": {
+		"title": "Inviti",
+		"subtitle": "Con quale invito è entrato ogni nuovo membro, e di chi sono gli inviti che hanno portato chi è rimasto.",
+		"summaryCannotRead": "{{bot}} ha bisogno del permesso Gestisci server per vedere quale invito ha usato ogni membro.",
+		"summaryOff": "Il tracciamento degli inviti è disattivato, quindi gli ingressi non vengono registrati.",
+		"summaryOn": "Viene registrato l’invito di ogni nuovo membro.",
+		"summaryOnPosting": "L’invito di ogni nuovo membro viene registrato e annunciato in {{channel}}.",
+		"enabled": "Registra quale invito ha usato ogni membro",
+		"enabledHint": "Il conteggio parte quando lo attivi. Se due persone entrano nello stesso momento, l’invito potrebbe non essere distinto.",
+		"enabledHintCannotRead": "Dai prima a {{bot}} il permesso Gestisci server.",
+		"channel": "Annuncia gli ingressi in",
+		"channelHint": "Facoltativo. Ogni ingresso dice di chi era l’invito e non menziona nessuno.",
+		"noAnnouncements": "Nessun annuncio",
+		"topTitle": "Chi invita di più",
+		"emptyTitle": "Ancora nessuno",
+		"emptyBody": "Con il tracciamento attivo, qui viene contato l’invito di ogni nuovo membro.",
+		"standing": "{{stayed, number}} ancora qui · {{left, number}} usciti",
+		"recentTitle": "Ingressi recenti",
+		"left": "Uscito",
+		"viaInvite": "Con l’invito {{code}} di {{name}}.",
+		"viaVanity": "Con il link del server.",
+		"viaUnknown": "Non è stato possibile capire l’invito."
 	}
 }

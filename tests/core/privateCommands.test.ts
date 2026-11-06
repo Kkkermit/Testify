@@ -77,6 +77,7 @@ describe("which commands answer privately", () => {
 				"idea submit",
 				"impersonate",
 				"inventory",
+				"invites settings",
 				"levelling",
 				"lottery delete",
 				"lottery enter",

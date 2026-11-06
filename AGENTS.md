@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 95, across 14 categories          |
-| Command files        | 116 (incl. folded-in subcommands) |
+| Commands             | 96, across 14 categories          |
+| Command files        | 117 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
-| Button handlers      | 49                                |
-| Events               | 33, in 6 groups                   |
-| `src/lib` helpers    | 228, in 33 domain folders         |
-| Schemas/repositories | 49 / 48                           |
+| Button handlers      | 50                                |
+| Events               | 36, in 6 groups                   |
+| `src/lib` helpers    | 232, in 34 domain folders         |
+| Schemas/repositories | 50 / 49                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,011 across 534 suites           |
+| Tests                | 4,023 across 538 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -218,10 +218,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  116 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               33 handlers in command, community, create, logging, ready and message
-├── buttons/              49 component handlers, keyed by custom-ID prefix
-├── lib/                  228 helpers in 33 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               36 handlers in command, community, create, logging, ready and message
+├── buttons/              50 component handlers, keyed by custom-ID prefix
+├── lib/                  232 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,11 +232,11 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/ notices/ account/ appeals/ modmail/
+│       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           49 Mongoose schemas, one file per feature
-│   └── repositories/     48 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           50 Mongoose schemas, one file per feature
+│   └── repositories/     49 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -1940,6 +1940,27 @@ server from `offerPanel`; each gets a public thread in that channel. Five things
   direct message reads the member cache first and fetches at most `maxServersOffered` more, once per
   `offerEveryMinutes`, because each fetch is a request to Discord.
 
+### Invite tracking credits an invite only when it can tell, and never guesses
+
+`/invites` and the **Invites** screen record which invite each member joined with, and rank inviters by the members
+who stayed. Four things about it are load-bearing:
+
+- **A join is told apart by comparing every invite's use count before and after it** (`usedInvite` in
+  `@testify/shared`). Exactly one invite that went up is the one; an invite that vanished is one Discord deleted on
+  its last use; anything else — two that went up, or nothing seen since a restart — is recorded as unknown, because a
+  wrong guess credits somebody with a member they never brought. Joins in one server are compared one at a time
+  (`inOrder`), so two at once cannot read the same "before".
+- **The counts live in memory and are read once at start-up** (`primeInvites` in `ready/primeInvites.event.ts`, in
+  turn, because each read is a request to Discord), and kept current by `inviteCreate` and `inviteDelete`. Discord lists
+  a server's invites only to Manage Server, so the switch refuses to turn on without it. The intent is `GuildInvites`,
+  which is not privileged.
+- **A join is a member record, and it expires.** `invitejoins` keeps the member, the inviter, both usernames, the code
+  and when they left, for `INVITE_LIMITS.keepDays` (365) under a TTL, and `purgeGuild` takes it all. The privacy
+  notice says so (`legal.storedL18`, `legal.retentionL20`). Delete my data removes the person's joins and takes their
+  name off the joins their invites brought.
+- **The announcement pings nobody** (`allowedMentions: { parse: [] }`), and the board ranks by members who stayed, so
+  a burst of joins that left again cannot top it.
+
 ### The owners' notifications are mentioned once, and only the owners change them
 
 `/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
@@ -2173,6 +2194,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/roles`               | Every role and how many features give or read it, deleted roles a setting names first       |
 | `…/roles/:roleId`                 | One role and everything that gives or reads it: what deleting it would stop                 |
 | `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn as Discord draws them and edited there    |
+| `/guilds/:id/invites`             | Whose invites brought members in, the switch, and how each recent member joined             |
 | `/guilds/:id/insights`            | Server facts, messages a day, busiest hours, top channels and members                       |
 | `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                            |
 | `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                |
@@ -2915,7 +2937,7 @@ Settings come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
 messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
-tools, tickets, the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
+tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (treasure, the lottery, the
 casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,

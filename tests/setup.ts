@@ -5,10 +5,12 @@ const RESETS: readonly (readonly [module: string, name: string])[] = [
 	["@database/repositories/afkRepository", "clearAfkCache"],
 	["@database/repositories/autoResponderRepository", "clearAutoResponderCache"],
 	["@database/repositories/blacklistRepository", "clearBlacklistCache"],
+	["@database/repositories/inviteRepository", "clearInviteCache"],
 	["@database/repositories/modmailRepository", "clearModmailCache"],
 	["@database/repositories/noticeRepository", "clearNoticeCache"],
 	["@database/repositories/prefixRepository", "clearPrefixCache"],
 	["@database/repositories/raidRepository", "clearRaidCache"],
+	["@lib/invites/inviteTracker.util", "clearInviteSnapshots"],
 	["@lib/modmail/modmailActions.util", "clearModmailOffers"],
 	["@lib/notices/noticeActions.util", "clearNoticeHints"],
 ];

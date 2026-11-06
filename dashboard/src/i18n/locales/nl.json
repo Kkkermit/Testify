@@ -171,7 +171,9 @@
 		"appeals": "Bezwaren",
 		"appealsHint": "Verbannen leden die terug willen",
 		"modmail": "Modmail",
-		"modmailHint": "Leden die privé het team schrijven"
+		"modmailHint": "Leden die privé het team schrijven",
+		"invites": "Uitnodigingen",
+		"invitesHint": "Wiens uitnodigingen leden binnenbrachten"
 	},
 	"account": {
 		"title": "Je account",
@@ -1469,7 +1471,10 @@
 		"saveRoles": "Rollen opslaan",
 		"levelOnXp": "Level {{level}} met {{xp}} XP.",
 		"levelRange": "0 tot {{max, number}}",
-		"warningsHidden": "Je hebt in deze server de machtiging {{permission}} nodig om waarschuwingen te zien of te geven."
+		"warningsHidden": "Je hebt in deze server de machtiging {{permission}} nodig om waarschuwingen te zien of te geven.",
+		"joinedWith": "Binnengekomen met de uitnodiging {{code}} van {{name}}.",
+		"joinedVanity": "Binnengekomen via de eigen link van de server.",
+		"joinedUnknownInvite": "Welke uitnodiging gebruikt werd, was niet te bepalen."
 	},
 	"tickets": {
 		"summaryOn_other": "Leden openen een ticket via het paneel in {{channel}}, en er zijn er nu {{count, number}} open.",
@@ -2144,7 +2149,9 @@
 		"storedL17": "Bezwaren tegen bans: wat je schreef toen je bezwaar maakte, je gebruikers-ID en gebruikersnaam, en wat het team besloot, met de reden en wie besloot.",
 		"retentionL18": "Bezwaren tegen bans: 180 dagen nadat het team besliste, zodat een weigering het volgende bezwaar kan tegenhouden. Een bezwaar dat nog wacht blijft tot er besloten is, en alle bezwaren gaan wanneer de bot van de server wordt verwijderd.",
 		"messagesP4": "Modmail is de andere. Zolang je een modmailgesprek open hebt, gaat wat je de bot in een DM stuurt naar het team van die server, in een thread in hun modmailkanaal, en wordt het niet doorgestuurd naar de beheerder. Wat het team in de thread schrijft komt op dezelfde manier bij jou terug. Beide kopieën staan in Discord: de bot bewaart alleen aan welke server je schreef, de thread, of er een antwoord verwacht wordt en wanneer het begon en eindigde.",
-		"retentionL19": "Modmailgesprekken: 90 dagen nadat ze gesloten zijn, daarna automatisch verwijderd. De threads zelf blijven in de Discord van de server."
+		"retentionL19": "Modmailgesprekken: 90 dagen nadat ze gesloten zijn, daarna automatisch verwijderd. De threads zelf blijven in de Discord van de server.",
+		"storedL18": "Uitnodigingen volgen: als een server het aanzet, met welke uitnodiging elk nieuw lid binnenkwam, van wie die was, beide gebruikersnamen en of het lid sindsdien vertrokken is.",
+		"retentionL20": "Uitnodigingen volgen: 365 dagen na elke binnenkomst, daarna automatisch verwijderd, en alles wanneer de bot van de server wordt verwijderd."
 	},
 	"problem": {
 		"automodMentionLimit": "Kies hoeveel mentions je toestaat.",
@@ -2884,5 +2891,28 @@
 		"openThread": "Thread openen",
 		"close": "Sluiten",
 		"closeWith": "Gesprek met {{name}} sluiten"
+	},
+	"invites": {
+		"title": "Uitnodigingen",
+		"subtitle": "Met welke uitnodiging elk nieuw lid binnenkwam, en wiens uitnodigingen de mensen brachten die bleven.",
+		"summaryCannotRead": "{{bot}} heeft de machtiging Server beheren nodig om te zien welke uitnodiging elk lid gebruikte.",
+		"summaryOff": "Uitnodigingen volgen staat uit, dus nieuwe leden worden niet bijgehouden.",
+		"summaryOn": "De uitnodiging van elk nieuw lid wordt bijgehouden.",
+		"summaryOnPosting": "De uitnodiging van elk nieuw lid wordt bijgehouden en aangekondigd in {{channel}}.",
+		"enabled": "Bijhouden welke uitnodiging elk lid gebruikte",
+		"enabledHint": "Het tellen begint wanneer je het aanzet. Als twee mensen tegelijk binnenkomen, is de uitnodiging soms niet te onderscheiden.",
+		"enabledHintCannotRead": "Geef {{bot}} eerst de machtiging Server beheren.",
+		"channel": "Nieuwe leden aankondigen in",
+		"channelHint": "Optioneel. Elke aankondiging zegt wiens uitnodiging het was, en pingt niemand.",
+		"noAnnouncements": "Geen aankondigingen",
+		"topTitle": "Beste uitnodigers",
+		"emptyTitle": "Nog niemand geteld",
+		"emptyBody": "Zodra het volgen aanstaat, wordt hier de uitnodiging van elk nieuw lid geteld.",
+		"standing": "{{stayed, number}} nog hier · {{left, number}} vertrokken",
+		"recentTitle": "Recente nieuwe leden",
+		"left": "Vertrokken",
+		"viaInvite": "Met de uitnodiging {{code}} van {{name}}.",
+		"viaVanity": "Via de eigen link van de server.",
+		"viaUnknown": "De uitnodiging was niet te bepalen."
 	}
 }
