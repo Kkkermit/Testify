@@ -6,7 +6,9 @@ import { type WarnStep } from "@testify/shared";
 jest.mock("@lib/moderation", () => ({
 	...jest.requireActual<typeof Moderation>("@lib/moderation"),
 	readWarnLadder: jest.fn(),
-	writeWarnLadder: jest.fn((_guildId: string, steps: WarnStep[]) => Promise.resolve({ steps })),
+	writeWarnLadder: jest.fn((_guildId: string, steps: WarnStep[], _userId: string, expireAfterDays?: number | null) =>
+		Promise.resolve({ steps, expireAfterDays: expireAfterDays ?? null }),
+	),
 }));
 
 const { readWarnLadder, writeWarnLadder } = jest.requireMock("@lib/moderation");
@@ -42,6 +44,20 @@ describe("the warning punishments panel", () => {
 
 	it("refuses a value no menu offers", async () => {
 		await expect(run(pressed({ values: ["timeout-7"] }), "set", ["0"])).rejects.toBeInstanceOf(UserFacingError);
+	});
+
+	/** The window is its own menu, so choosing one must leave every step exactly as it was. */
+	it("sets the window without touching the steps, and refuses a length the menu never offered", async () => {
+		await run(pressed({ values: ["90"] }), "expiry", []);
+		expect(writeWarnLadder).toHaveBeenCalledWith(
+			"900000000000000001",
+			[{ action: "warn" }, { action: "warn" }],
+			OWNER,
+			90,
+		);
+
+		await expect(run(pressed({ values: ["45"] }), "expiry", [])).rejects.toBeInstanceOf(UserFacingError);
+		expect(writeWarnLadder).toHaveBeenCalledTimes(1);
 	});
 
 	/** The panel outlives the permission it was opened with. */

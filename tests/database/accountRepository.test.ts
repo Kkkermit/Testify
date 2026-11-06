@@ -3,6 +3,7 @@ import { join } from "node:path";
 import mongoose, { type Schema } from "mongoose";
 import { describeWithMongo } from "../helpers/mongo";
 import { AfkStatus } from "@database/models/afk.schema";
+import { Appeal, AppealSettingsConfig } from "@database/models/appeal.schema";
 import { AutoResponderEntry } from "@database/models/autoResponder.schema";
 import { BirthdaySettingsConfig, SharedBirthday } from "@database/models/birthday.schema";
 import { BotSettingsConfig } from "@database/models/botSettings.schema";
@@ -20,10 +21,12 @@ import { Giveaway } from "@database/models/giveaway.schema";
 import { GoodbyeSettingsConfig } from "@database/models/goodbye.schema";
 import { Idea, IdeaSettingsConfig } from "@database/models/idea.schema";
 import { MemberDays, MemberMoves } from "@database/models/insights.schema";
+import { InviteJoin, InviteSettingsConfig } from "@database/models/invite.schema";
 import { UserLevel } from "@database/models/levelling.schema";
 import { Lottery } from "@database/models/lottery.schema";
 import { ModCaseEntry, ModCaseSettings } from "@database/models/modCase.schema";
 import { Blacklist, DmLog, Softban, WarnLadderConfig, Warnings } from "@database/models/moderation.schema";
+import { ModmailSettingsConfig, ModmailThread } from "@database/models/modmail.schema";
 import { MusicSettingsConfig } from "@database/models/musicSettings.schema";
 import { BotNotice, NoticeReader } from "@database/models/notice.schema";
 import { Profile } from "@database/models/profile.schema";
@@ -43,6 +46,7 @@ import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
 const PERSON = "100000000000000001";
 const OTHER = "100000000000000002";
 const GUILD = "900000000000000001";
+const OTHER_GUILD = "900000000000000002";
 
 /** Field names that end like a person's but never hold one. */
 const NOT_A_PERSON = new Set([
@@ -72,6 +76,7 @@ const NOT_A_PERSON = new Set([
 	"pingRoleId",
 	"roleId",
 	"roleIds",
+	"threadId",
 	"ticketId",
 	"transcriptChannelId",
 	"warnId",
@@ -121,6 +126,7 @@ describe("what deleting somebody's data covers", () => {
 });
 
 const SETTINGS = [
+	AppealSettingsConfig,
 	AutoResponderEntry,
 	BirthdaySettingsConfig,
 	BotSettingsConfig,
@@ -128,7 +134,9 @@ const SETTINGS = [
 	CommandToggleConfig,
 	GoodbyeSettingsConfig,
 	IdeaSettingsConfig,
+	InviteSettingsConfig,
 	ModCaseSettings,
+	ModmailSettingsConfig,
 	MusicSettingsConfig,
 	RaidSettingsConfig,
 	RoleMenu,
@@ -139,6 +147,7 @@ const SETTINGS = [
 
 const THEIRS = [
 	AfkStatus,
+	Appeal,
 	SharedBirthday,
 	CasinoHand,
 	CasinoStats,
@@ -147,6 +156,7 @@ const THEIRS = [
 	Economy,
 	MemberDays,
 	MemberMoves,
+	ModmailThread,
 	NoticeReader,
 	PendingVerify,
 	Profile,
@@ -162,7 +172,16 @@ describeWithMongo("eraseUserData", () => {
 		await Promise.all([
 			Economy.collection.insertOne({ guildId: GUILD, userId: OTHER, lastRobbedBy: PERSON }),
 			Counting.collection.insertOne({ guildId: GUILD, lastUserId: PERSON }),
+			Appeal.collection.insertMany([
+				{ guildId: OTHER_GUILD, userId: PERSON, channelId: "400000000000000002", messageId: "500000000000000002" },
+				{ guildId: GUILD, userId: OTHER, decidedBy: PERSON, decidedByName: "person" },
+			]),
 			DmLog.collection.insertOne({ messageId: "1", authorId: PERSON, content: "hello" }),
+			ModmailThread.collection.insertOne({ guildId: GUILD, userId: OTHER, closedBy: PERSON }),
+			InviteJoin.collection.insertMany([
+				{ guildId: GUILD, memberId: PERSON, inviterId: OTHER },
+				{ guildId: GUILD, memberId: OTHER, inviterId: PERSON, inviterName: "person" },
+			]),
 			Idea.collection.insertMany([
 				{
 					guildId: GUILD,
@@ -261,7 +280,17 @@ describeWithMongo("eraseUserData", () => {
 
 		const posts = await eraseUserData(PERSON);
 
-		expect(posts).toEqual([{ channelId: "400000000000000001", messageId: "500000000000000001" }]);
+		expect(posts).toEqual([
+			{ channelId: "400000000000000001", messageId: "500000000000000001" },
+			{ channelId: "400000000000000002", messageId: "500000000000000002" },
+		]);
+		expect(await Appeal.collection.findOne({ userId: OTHER })).toMatchObject({ decidedBy: null, decidedByName: null });
+		expect(await ModmailThread.collection.findOne({ userId: OTHER })).toMatchObject({ closedBy: null });
+		expect(await InviteJoin.collection.countDocuments({ memberId: PERSON })).toBe(0);
+		expect(await InviteJoin.collection.findOne({ memberId: OTHER })).toMatchObject({
+			inviterId: DELETED_USER_ID,
+			inviterName: DELETED_USER_NAME,
+		});
 
 		const left = await Promise.all(THEIRS.map(async (model) => model.collection.countDocuments({ userId: PERSON })));
 		expect(left.every((count) => count === 0)).toBe(true);

@@ -48,6 +48,8 @@ const GUILD_SCOPED = "/api/guilds/:guildId/";
 
 /** Each asks what its Discord command asks on top of Manage Server, so gaining or losing a gate is decided here. */
 const ASKS_MORE = new Set([
+	"GET /appeals",
+	"POST /appeals/:appealId/decision",
 	"GET /bans",
 	"POST /bans/:userId/unban",
 	"GET /cases",
@@ -68,6 +70,7 @@ const ASKS_MORE = new Set([
 	"PATCH /members/:userId/nickname",
 	"GET /members/:userId/roles",
 	"PUT /members/:userId/roles",
+	"POST /modmail/conversations/:conversationId/close",
 	"PATCH /raid-protection",
 	"POST /role-menus",
 	"PUT /role-menus/:menuId",

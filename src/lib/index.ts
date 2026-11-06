@@ -2,6 +2,7 @@
 
 export * from "./account";
 export * from "./afk";
+export * from "./appeals";
 export * from "./autoResponders";
 export * from "./birthdays";
 export * from "./bot";
@@ -15,8 +16,10 @@ export * from "./giveaways";
 export * from "./ideas";
 export * from "./info";
 export * from "./infra";
+export * from "./invites";
 export * from "./levelling";
 export * from "./moderation";
+export * from "./modmail";
 export * from "./music";
 export * from "./notices";
 export * from "./polls";

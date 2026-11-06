@@ -12,6 +12,7 @@ const intents = [
 	GatewayIntentBits.GuildMembers,
 	GatewayIntentBits.GuildModeration,
 	GatewayIntentBits.GuildExpressions,
+	GatewayIntentBits.GuildInvites,
 	GatewayIntentBits.GuildVoiceStates,
 	GatewayIntentBits.GuildMessages,
 	GatewayIntentBits.GuildMessageReactions,

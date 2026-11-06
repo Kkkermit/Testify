@@ -14,7 +14,7 @@ import { SanctionCard } from "@/features/members/components/SanctionCard";
 import { SoftbanCard } from "@/features/members/components/SoftbanCard";
 import { TimeoutCard } from "@/features/members/components/TimeoutCard";
 import { WarningsCard } from "@/features/members/components/WarningsCard";
-import { memberSummary, softbanActive } from "@/features/members/memberDetail.utils";
+import { inviteLine, memberSummary, softbanActive } from "@/features/members/memberDetail.utils";
 import { useMemberActions } from "@/features/members/useMemberActions";
 import { outcomeText } from "@/features/warnings/warnings.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -46,7 +46,11 @@ export function MemberDetailPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess || edit.isSuccess)} />}
 			/>
 
-			<Summary>{memberSummary(detail, t)}</Summary>
+			<Summary>
+				{[memberSummary(detail, t), inviteLine(detail, t)]
+					.filter((sentence) => sentence !== null)
+					.join(t("common.sentenceSeparator"))}
+			</Summary>
 
 			<MemberIdentity detail={detail} />
 			<MemberStanding detail={detail} />

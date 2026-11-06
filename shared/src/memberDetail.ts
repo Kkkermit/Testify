@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type InviteJoin } from "./invites";
 import { type Problem, problem } from "./problems";
 import { plainLine } from "./text";
 import { type WarnProblem, type WarnStep } from "./warnings";
@@ -17,6 +18,8 @@ export interface MemberWarning {
 	step: WarnStep | null;
 	/** Set when the step was due but could not be carried out. */
 	stepProblem: WarnProblem | null;
+	/** True once it is older than the server's window, so it no longer counts towards the punishments. */
+	expired: boolean;
 }
 
 export interface MemberSoftban {
@@ -43,6 +46,8 @@ export interface MemberDetail {
 	warnings: MemberWarning[] | null;
 	/** Null when there is none, or when the reader lacks Ban Members. */
 	softban: MemberSoftban | null;
+	/** How they last joined, when invite tracking was on then. */
+	invite: InviteJoin | null;
 	/** Why the person reading may not act on this member, in the words the page shows. Null means they may. */
 	moderationProblem: string | null;
 }

@@ -75,6 +75,16 @@ jest.mock("@database/repositories/insightsRepository", () => ({
 jest.mock("@database/repositories/ideaRepository", () => ({
 	getIdeaSettings: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/appealRepository", () => ({
+	getAppealSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/inviteRepository", () => ({
+	getInviteSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/modmailRepository", () => ({
+	getModmailSettings: jest.fn(() => Promise.resolve(null)),
+	countOpenConversations: jest.fn(() => Promise.resolve(0)),
+}));
 jest.mock("@database/repositories/roleMenuRepository", () => ({
 	listRoleMenus: jest.fn(() => Promise.resolve([])),
 }));

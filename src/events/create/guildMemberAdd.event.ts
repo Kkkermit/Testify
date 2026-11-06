@@ -5,6 +5,7 @@ import { defineEvent } from "@core/event";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { countMove } from "@lib/info";
+import { trackJoin } from "@lib/invites";
 import { writeAuditLog } from "@lib/moderation";
 import { guardJoin } from "@lib/raid";
 import { syncVoiceCounters } from "@lib/settings";
@@ -14,6 +15,8 @@ export default defineEvent({
 	name: Events.GuildMemberAdd,
 	async run(client: TestifyClient, member: GuildMember) {
 		countMove(client, member, "join");
+		// First, so the invites are read before another join can move their counts on.
+		await trackJoin(client, member);
 		await guardJoin(client, member);
 
 		await writeAuditLog(client, member.guild, {

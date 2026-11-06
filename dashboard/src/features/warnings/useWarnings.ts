@@ -13,7 +13,6 @@ import {
 	type WarningAdd,
 	type WarningAdded,
 	type WarnLadder,
-	type WarnStep,
 } from "@testify/shared";
 import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
@@ -42,9 +41,9 @@ export function usePunishments(guildId: string): UseQueryResult<WarnLadder> {
 	});
 }
 
-export function useSavePunishments(guildId: string): UseMutationResult<WarnLadder, Error, WarnStep[]> {
-	return useDocumentMutation(keys.guild(guildId).punishments(), (steps: WarnStep[]) =>
-		api.put<WarnLadder>(`/guilds/${guildId}/warnings/punishments`, { steps }),
+export function useSavePunishments(guildId: string): UseMutationResult<WarnLadder, Error, WarnLadder> {
+	return useDocumentMutation(keys.guild(guildId).punishments(), (ladder: WarnLadder) =>
+		api.put<WarnLadder>(`/guilds/${guildId}/warnings/punishments`, ladder),
 	);
 }
 

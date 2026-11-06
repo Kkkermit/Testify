@@ -12,6 +12,7 @@ import {
 	ScrollText,
 	Shield,
 	ShieldAlert,
+	Scale,
 	Siren,
 	Server,
 	ShieldCheck,
@@ -34,6 +35,8 @@ import {
 	Lightbulb,
 	ListChecks,
 	Lock,
+	Mailbox,
+	Mails,
 	Ticket,
 	type LucideIcon,
 	Gauge,
@@ -165,6 +168,8 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 						{ to: at("/warnings"), labelKey: "nav.warnings", icon: TriangleAlert, hintKey: "nav.warningsHint" },
 						{ to: at("/cases"), labelKey: "nav.cases", icon: Gavel, hintKey: "nav.casesHint" },
 						{ to: at("/bans"), labelKey: "nav.bans", icon: Ban, hintKey: "nav.bansHint" },
+						{ to: at("/appeals"), labelKey: "nav.appeals", icon: Scale, hintKey: "nav.appealsHint" },
+						{ to: at("/modmail"), labelKey: "nav.modmail", icon: Mails, hintKey: "nav.modmailHint" },
 						{ to: at("/channel-tools"), labelKey: "nav.channelTools", icon: Lock, hintKey: "nav.channelToolsHint" },
 						{ to: at("/tickets"), labelKey: "nav.tickets", icon: LifeBuoy, hintKey: "nav.ticketsHint" },
 						{ to: at("/audit-log"), labelKey: "nav.auditLog", icon: ScrollText, hintKey: "nav.auditLogHint" },
@@ -176,6 +181,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					icon: ChartPie,
 					items: [
 						{ to: at("/insights"), labelKey: "nav.insights", icon: ChartLine, hintKey: "nav.insightsHint" },
+						{ to: at("/invites"), labelKey: "nav.invites", icon: Mailbox, hintKey: "nav.invitesHint" },
 						{
 							to: at("/member-count"),
 							labelKey: "nav.memberCount",

@@ -16,6 +16,16 @@ import { readTickets } from "@lib/tickets/ticketActions.util";
 import { FEATURE_PLACES, type FeatureStatus } from "@testify/shared";
 
 jest.mock("@database/repositories/ideaRepository", () => ({ getIdeaSettings: jest.fn() }));
+jest.mock("@database/repositories/appealRepository", () => ({
+	getAppealSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/inviteRepository", () => ({
+	getInviteSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/modmailRepository", () => ({
+	getModmailSettings: jest.fn(() => Promise.resolve(null)),
+	countOpenConversations: jest.fn(() => Promise.resolve(0)),
+}));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/roleMenuRepository", () => ({ listRoleMenus: jest.fn() }));
 jest.mock("@database/repositories/antiLinkRepository", () => ({

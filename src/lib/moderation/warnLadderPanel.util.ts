@@ -4,8 +4,8 @@ import { button, option, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { WARN_LADDER_ID } from "@lib/moderation/moderation.constants";
-import { stepLabel } from "@lib/moderation/warnActions.util";
-import { WARN_LIMITS, WARN_STEP_CHOICES, type WarnLadder, stepValue } from "@testify/shared";
+import { expiryLabel, stepLabel } from "@lib/moderation/warnActions.util";
+import { WARN_EXPIRY_DAYS, WARN_LIMITS, WARN_STEP_CHOICES, type WarnLadder, stepValue } from "@testify/shared";
 
 /** What each warning does, one menu per warning number, applied the moment a choice is made. */
 
@@ -44,6 +44,21 @@ export function warnLadderPanel(ladder: WarnLadder, userId: string, note?: strin
 	});
 
 	if (steps.length > 0) parts.push(divider());
+
+	parts.push(
+		row(
+			select({
+				id: customId(WARN_LADDER_ID, "expiry", userId),
+				options: [null, ...WARN_EXPIRY_DAYS].map((days) =>
+					option({
+						label: expiryLabel(days),
+						value: days === null ? "never" : String(days),
+						selected: days === ladder.expireAfterDays,
+					}),
+				),
+			}),
+		),
+	);
 
 	parts.push(
 		row(

@@ -220,11 +220,13 @@ export interface ScreenTally {
 /** Every dashboard screen a view is counted against, so a request cannot fill the tally with routes of its own. */
 export const SCREEN_ROUTES = [
 	"/account",
+	"/appeals",
 	"/appearance",
 	"/guilds",
 	"/guilds/compare",
 	"/guilds/:guildId",
 	"/guilds/:guildId/insights",
+	"/guilds/:guildId/invites",
 	"/guilds/:guildId/levelling",
 	"/guilds/:guildId/welcome",
 	"/guilds/:guildId/audit-log",
@@ -236,6 +238,8 @@ export const SCREEN_ROUTES = [
 	"/guilds/:guildId/cases",
 	"/guilds/:guildId/raid-protection",
 	"/guilds/:guildId/bans",
+	"/guilds/:guildId/appeals",
+	"/guilds/:guildId/modmail",
 	"/guilds/:guildId/channel-tools",
 	"/guilds/:guildId/channels/:channelId",
 	"/guilds/:guildId/channels",

@@ -12,6 +12,7 @@ import { loadSession } from "@api/middleware/session";
 import { oauthConfigFrom } from "@api/oauth";
 import { account } from "@api/routes/account";
 import { analytics } from "@api/routes/analytics";
+import { appeals } from "@api/routes/appeals";
 import { auth } from "@api/routes/auth";
 import { bot } from "@api/routes/bot";
 import { commands } from "@api/routes/commands";
@@ -31,6 +32,7 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { botVersion, siteUrl } from "@lib/bot";
 import { GitHubReader } from "@lib/site";
+import { APPEAL_LIMITS } from "@testify/shared";
 
 /** Config patches, not uploads. Anything larger than this is a mistake or an attempt. */
 const MAX_BODY_BYTES = 128 * 1024;
@@ -46,6 +48,9 @@ const SUPPORT_LIMIT = { limit: 10, windowMs: 60_000 };
 
 /** Deleting somebody's data touches every collection, so it is counted apart from everything else. */
 const ERASE_LIMIT = { limit: 3, windowMs: 60_000 };
+
+/** Each appeal is a post in a staff channel, so one person cannot send a stream of them. */
+const APPEAL_LIMIT = { limit: APPEAL_LIMITS.perMinute, windowMs: 60_000 };
 
 /** One address can be a household, an office or a school, so its ceiling is a multiple of one person's. */
 const ADDRESS_MULTIPLIER = 6;
@@ -70,6 +75,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const signIn = limiterPair(SIGN_IN_LIMIT);
 	const asking = limiterPair(SUPPORT_LIMIT);
 	const erasing = limiterPair(ERASE_LIMIT);
+	const appealing = limiterPair(APPEAL_LIMIT);
 	const oauth = oauthConfigFrom(env);
 	const github = new GitHubReader({
 		repository: theme.repository,
@@ -93,6 +99,10 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/support/ask", rateLimit(asking, { name: "support", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/erase", rateLimit(erasing, { name: "erase", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	// Sending an appeal posts to a staff channel; reading the list does not, so only the send takes this limit.
+	if (env.DASHBOARD_ENABLED) {
+		app.on("POST", "/api/appeals/*", rateLimit(appealing, { name: "appeal", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	}
 	// Before `verifyCsrf`, which compares against the session's stored secret when there is one.
 	app.use("/api/*", loadSession);
 	app.use("*", verifyCsrf);
@@ -139,6 +149,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	if (env.DASHBOARD_ENABLED) {
 		app.route("/api/auth", auth);
 		app.route("/api/account", account);
+		app.route("/api/appeals", appeals);
 		app.route("/api/commands", commands);
 		app.route("/api/guilds", guilds);
 		app.route("/api/owner", owner);

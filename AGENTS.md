@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 93, across 14 categories          |
-| Command files        | 114 (incl. folded-in subcommands) |
+| Commands             | 96, across 14 categories          |
+| Command files        | 117 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
-| Button handlers      | 45                                |
-| Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 221, in 31 domain folders         |
-| Schemas/repositories | 47 / 46                           |
+| Button handlers      | 50                                |
+| Events               | 36, in 6 groups                   |
+| `src/lib` helpers    | 232, in 34 domain folders         |
+| Schemas/repositories | 50 / 49                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,950 across 521 suites           |
+| Tests                | 4,023 across 538 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -218,10 +218,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  114 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               31 handlers in command, community, create, logging, ready and message
-├── buttons/              45 component handlers, keyed by custom-ID prefix
-├── lib/                  221 helpers in 31 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               36 handlers in command, community, create, logging, ready and message
+├── buttons/              50 component handlers, keyed by custom-ID prefix
+├── lib/                  232 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,11 +232,11 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/ notices/ account/
+│       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           47 Mongoose schemas, one file per feature
-│   └── repositories/     46 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           50 Mongoose schemas, one file per feature
+│   └── repositories/     49 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -843,7 +843,7 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
 
 **Log channels are the third job: posts the operator reads in Discord.** Each `CHANNEL_*_LOG` is optional and off
 while blank. `CHANNEL_ERROR_LOG` gets command failures with their reference, `CHANNEL_GUILD_LOG` servers the bot
-joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_REPORT_LOG` and
+joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot (never one in an open mod mail conversation), and `CHANNEL_BUG_REPORT_LOG` and
 `CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
@@ -1460,7 +1460,7 @@ yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports whic
 A server can say what each warning does: `WarnStep` in `shared/src/warnings.ts` is a plain warning, a timeout
 from a fixed list of lengths, a kick or a ban, and the list is stored per server in `warnpunishments`.
 `issueWarning` in `src/lib/moderation/warnActions.util.ts` is the **one path** a warning takes — `/warn create`,
-the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Four things
+the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Five things
 about it are load-bearing:
 
 - **The Nth warning takes the Nth step, and past the end the last step repeats** (`stepFor`). A fifth warning on
@@ -1471,6 +1471,11 @@ about it are load-bearing:
   `warnProblemText` in English for Discord, a translation key on the dashboard.
 - **The panel puts the warning number in every option's label**, so a step costs two components rather than
   three and ten of them fit Discord's 40 with room to spare. The test counts them.
+- **A warning can stop counting, and nothing is deleted when it does.** A server may pick `expireAfterDays` from
+  `WARN_EXPIRY_DAYS`, and `countsSince` is the one boundary: `issueWarning` counts only the warnings on or after it,
+  and `warningExpired` marks the older ones in `/warn list`, `/warn info` and on the dashboard, so a list can never
+  disagree with the step a warning took. A record from before the window existed, or one with a length the panel does
+  not offer, counts every warning (`expiryOf`). The put body may leave the window out, which keeps what is stored.
 
 **Each warning stores the step it took**, as `step` and `stepProblem` on the entry, written after the step runs, so
 `/warn list`, `/warn info` and the dashboard say what a warning did rather than guessing from today's list, which
@@ -1888,6 +1893,80 @@ things about them are load-bearing:
   dashboard's `PATCH`, because a hold is a timeout and somebody who could not `/mute` must not be able to arrange one.
   It cannot be on with nothing to do, and taking away the last thing it did turns it off.
 
+### A ban appeal is written on the web, decided in either place, and never pings
+
+`/appeals` and the **Appeals** screen choose a channel only staff can see and how long a refusal holds back the next
+appeal; banned members write theirs on the dashboard's `/appeals` page, which the ban's direct message links to
+(`appealLink`). Five things about it are load-bearing:
+
+- **Only somebody the server has banned can appeal it, asked live.** `submitAppeal` looks up the ban with
+  `guild.bans.fetch` on every send, over only the servers that take appeals (`appealGuildIds`), so a session cannot
+  name a server it was never banned from and post into its staff channel. The list, `readOwnAppeals`, keeps each
+  answer a minute (`listedBans`), because it asks once per server and a reload would otherwise be that many requests
+  to Discord; only the send takes the strict `APPEAL_LIMITS.perMinute`. The route takes the person from the session
+  alone. Appeals cannot be turned on without the dashboard (`takesAppeals`), because there would be nowhere to write
+  one.
+- **One waiting per person per server, and a refusal holds back the next.** A partial unique index on
+  `{ guildId, userId }` for open appeals decides, not a read, and `appealAgainAt` is the wait a refusal sets, from
+  `APPEAL_LIMITS.cooldownChoices`. A decided appeal is kept `keepDays` (180) under a TTL so the wait can still be
+  read, and the privacy notice says so (`legal.storedL17`, `legal.retentionL18`).
+- **The decision is claimed before the unban.** `decideAppeal` moves only an open appeal, so two staff pressing
+  together cannot both act; an unban Discord refuses hands it back (`reopenAppeal`), and a ban lifted some other way
+  meanwhile still records the appeal as accepted. A refusal needs a reason, on the form and in `appealDecision`.
+- **Deciding asks Ban Members, everywhere.** The post's buttons ask it on the press and again on the form, and the
+  dashboard's list and decision routes sit in `ASKS_MORE`; the settings ask Manage Server.
+- **Every post goes out with `allowedMentions: { parse: [] }`**, because it quotes what a banned person typed. A post
+  that cannot be sent deletes its appeal, which staff would otherwise never see and which would block the next one.
+  Delete my data removes the person's appeals and takes their posts down, and keeps a decision with the decider's
+  name taken off.
+
+### Mod mail relays both ways through direct messages, and keeps none of the words
+
+`/modmail` and the **Mod mail** screen pick a staff-only channel, a role to ping when a conversation opens, and
+whether replies are signed by name. A member starts one with `/modmail open`, or by messaging the bot and picking the
+server from `offerPanel`; each gets a public thread in that channel. Five things about it are load-bearing:
+
+- **One open conversation per person, across every server.** A direct message has to go somewhere, and a partial
+  unique index on `{ userId }` for open conversations is what makes "the one that is open" a single answer. The claim
+  goes before the thread is made, and a thread that cannot be made gives the claim back (`dropConversation`).
+- **Nothing anybody wrote is stored.** `modmailthreads` holds the server, the member, the thread, whether a reply is
+  owed and when it opened and closed; the words live in the thread and the direct messages. A closed conversation
+  expires after `MODMAIL_LIMITS.keepDays` (90). The privacy notice says so (`legal.messagesP4`, `legal.retentionL19`),
+  and a direct message in an open conversation is not posted to the operator's DM log — `directMessageLog` asks
+  `openConversationOf` first.
+- **Both handlers run after the prefix commands** (`modmailDirect` at 11, `modmailReplies` at 15), so a command typed
+  in a direct message or in the thread runs rather than being sent on. A staff message starting with
+  `MODMAIL_NOTE_PREFIX` (`//`) stays in the thread. A thread that is gone or locked ends its conversation on the next
+  message from the member, so staff closing it by hand cannot leave somebody writing into nothing.
+- **Every relay goes out with `allowedMentions: { parse: [] }`**, and the opening post pings only the chosen role,
+  never `@everyone`, which `applyModmailSettings` refuses as a ping role. Closing asks Manage Messages on the button,
+  the command and the dashboard's route (`ASKS_MORE`).
+- **The dashboard lists and closes conversations only for a reader who can see the channel** (`readerSees`), as
+  Discord would hide its threads; otherwise the list answers `visible: false` and the page says why. Offering the servers in a
+  direct message reads the member cache first and fetches at most `maxServersOffered` more, once per
+  `offerEveryMinutes`, because each fetch is a request to Discord.
+
+### Invite tracking credits an invite only when it can tell, and never guesses
+
+`/invites` and the **Invites** screen record which invite each member joined with, and rank inviters by the members
+who stayed. Four things about it are load-bearing:
+
+- **A join is told apart by comparing every invite's use count before and after it** (`usedInvite` in
+  `@testify/shared`). Exactly one invite that went up is the one; an invite that vanished is one Discord deleted on
+  its last use; anything else — two that went up, or nothing seen since a restart — is recorded as unknown, because a
+  wrong guess credits somebody with a member they never brought. Joins in one server are compared one at a time
+  (`inOrder`), so two at once cannot read the same "before".
+- **The counts live in memory and are read once at start-up** (`primeInvites` in `ready/primeInvites.event.ts`, in
+  turn, because each read is a request to Discord), and kept current by `inviteCreate` and `inviteDelete`. Discord lists
+  a server's invites only to Manage Server, so the switch refuses to turn on without it. The intent is `GuildInvites`,
+  which is not privileged.
+- **A join is a member record, and it expires.** `invitejoins` keeps the member, the inviter, both usernames, the code
+  and when they left, for `INVITE_LIMITS.keepDays` (365) under a TTL, and `purgeGuild` takes it all. The privacy
+  notice says so (`legal.storedL18`, `legal.retentionL20`). Delete my data removes the person's joins and takes their
+  name off the joins their invites brought.
+- **The announcement pings nobody** (`allowedMentions: { parse: [] }`), and the board ranks by members who stayed, so
+  a burst of joins that left again cannot top it.
+
 ### The owners' notifications are mentioned once, and only the owners change them
 
 `/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
@@ -2121,6 +2200,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/roles`               | Every role and how many features give or read it, deleted roles a setting names first       |
 | `…/roles/:roleId`                 | One role and everything that gives or reads it: what deleting it would stop                 |
 | `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn as Discord draws them and edited there    |
+| `/guilds/:id/invites`             | Whose invites brought members in, the switch, and how each recent member joined             |
 | `/guilds/:id/insights`            | Server facts, messages a day, busiest hours, top channels and members                       |
 | `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                            |
 | `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                |
@@ -2129,6 +2209,8 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/warnings`            | The five latest warnings and a search, the steps, warning a member by name                  |
 | `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                   |
 | `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                          |
+| `/guilds/:id/appeals`             | Where appeals are posted, the wait after a refusal, and every appeal with Accept and Refuse |
+| `/guilds/:id/modmail`             | Where conversations become threads, who is pinged, and every one open now with Close        |
 | `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                        |
 | `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                   |
 | `/guilds/:id/changes`             | Two weeks of changes, from the dashboard and Discord's audit log, searched                  |
@@ -2157,6 +2239,7 @@ four tabs, three shared components and two testable modules.
 | `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
 | `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
+| `/appeals`                        | Appeal a ban: every server that banned the reader and takes appeals, and past appeals       |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
@@ -2859,8 +2942,8 @@ existed. `useGuildOverview` takes `null` for the screens that serve both a serve
 Settings come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
-messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, channel tools, tickets,
-the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
+messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
+tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (treasure, the lottery, the
 casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,

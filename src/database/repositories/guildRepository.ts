@@ -1,5 +1,6 @@
 import { purgeAfk } from "@database/repositories/afkRepository";
 import { purgeAntiLink } from "@database/repositories/antiLinkRepository";
+import { purgeAppeals } from "@database/repositories/appealRepository";
 import { purgeAuditLog } from "@database/repositories/auditLogRepository";
 import { purgeAutoResponders } from "@database/repositories/autoResponderRepository";
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
@@ -12,7 +13,9 @@ import { purgeCommandToggles } from "@database/repositories/commandToggleReposit
 import { purgeCounting } from "@database/repositories/countingRepository";
 import { purgeGoodbye } from "@database/repositories/goodbyeRepository";
 import { purgeIdeas } from "@database/repositories/ideaRepository";
+import { purgeInvites } from "@database/repositories/inviteRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
+import { purgeModmail } from "@database/repositories/modmailRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { purgePrefix } from "@database/repositories/prefixRepository";
 import { purgeRaidSettings } from "@database/repositories/raidRepository";
@@ -30,6 +33,9 @@ import { purgeWelcome } from "@database/repositories/welcomeRepository";
 export async function purgeGuild(guildId: string): Promise<void> {
 	await Promise.all([
 		purgeAfk(guildId),
+		purgeAppeals(guildId),
+		purgeModmail(guildId),
+		purgeInvites(guildId),
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
 		purgeBirthdays(guildId),

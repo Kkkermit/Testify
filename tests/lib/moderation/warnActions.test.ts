@@ -70,10 +70,33 @@ describe("ladderOf", () => {
 			ladderOf({ steps: [{ action: "kick" }, { action: "timeout", minutes: 7 }, { action: "explode" }] }).steps,
 		).toEqual([{ action: "kick" }]);
 	});
+
+	/** A record from before warnings expired, or one edited by hand, counts every warning rather than an odd window. */
+	it("reads a window only when it is one the server could have chosen", () => {
+		expect([
+			ladderOf({ steps: [], expireAfterDays: 30 }).expireAfterDays,
+			ladderOf({ steps: [], expireAfterDays: 31 }).expireAfterDays,
+			ladderOf({ steps: [] }).expireAfterDays,
+		]).toEqual([30, null, null]);
+	});
 });
 
 describe("issueWarning", () => {
 	const moderator = { id: "100000000000000001", tag: "mod" };
+
+	/** With a window set, old warnings stop pushing a member up the steps, and the member is told what was counted. */
+	it("counts only the warnings inside the server's window", async () => {
+		ladder.mockResolvedValue({ steps: [{ action: "warn" }], expireAfterDays: 30 } as never);
+		const { user, member, guild } = world();
+		const before = Date.now();
+
+		await issueWarning({ guild: guild as never, user: user as never, member: member as never, moderator, reason: "x" });
+
+		const since = counted.mock.calls[0]?.[2];
+		expect(since?.getTime()).toBeGreaterThanOrEqual(before - 30 * 86_400_000);
+		expect(since?.getTime()).toBeLessThanOrEqual(Date.now() - 30 * 86_400_000);
+		expect(JSON.stringify(user.send.mock.calls[0])).toContain("Warnings in the last 30 days");
+	});
 
 	/** A second warning mutes for ten minutes. */
 	it("carries out the step the warning's number lands on", async () => {
