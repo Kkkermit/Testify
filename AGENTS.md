@@ -3183,7 +3183,8 @@ setup, all over the eighteen sections `RESTORABLE` already lists for Put back. F
   `blacklisted` it answers turns the page into `BlockedPage`. An archive, a document or a picture is refused without
   it, because those are chosen by mistake. Two limits, said plainly: a page that never runs this code reports
   nothing, which costs nothing because no file reaches the server either way; and a manager handed a program
-  disguised as a backup blacklists themselves, which is why the owners are told. `backupPentest.test.ts` attacks the
+  disguised as a backup blacklists themselves, which is why the page warns against exactly that under the picker
+  (`backup.toldToWarning`) and the owners are told. `backupPentest.test.ts` attacks the
   route through the real app, and each of its defences was proved to go red.
 - **Ids are moved by name** (`planBackup`): an id this server has is kept, otherwise the name the file stored is
   matched without regard to case against channels the reader can see and roles here, and anything with no match is

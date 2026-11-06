@@ -150,6 +150,8 @@ export function BackupPage(): React.JSX.Element {
 						<Upload size={16} aria-hidden="true" />
 						{t("backup.chooseFile")}
 					</label>
+					<Warning>{t("backup.programWarning")}</Warning>
+					<Warning>{t("backup.toldToWarning")}</Warning>
 				</Field>
 				{others.length > 0 && (
 					<Field label={t("backup.fromServer")} hint={t("backup.fromServerHint")} htmlFor="backup-source">
