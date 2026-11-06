@@ -36,7 +36,10 @@ export default async function setup(globalConfig: GlobalConfig): Promise<void> {
 
 	let uri: string;
 	try {
-		const server = await MongoMemoryServer.create();
+		// Fixtures carry fixed dates long past, so a TTL sweep would delete them in the middle of a test.
+		const server = await MongoMemoryServer.create({
+			instance: { args: ["--setParameter", "ttlMonitorEnabled=false"] },
+		});
 		(globalThis as Holder)[HANDLE] = server;
 		uri = server.getUri();
 		process.env["MONGO_TEST_URI"] = uri;
