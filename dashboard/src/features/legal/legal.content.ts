@@ -166,7 +166,7 @@ export const PRIVACY: LegalDocument = {
 		},
 		{
 			heading: "legal.messages",
-			paragraphs: ["legal.messagesP1", "legal.messagesP2", "legal.messagesP3", "legal.messagesP4"],
+			paragraphs: ["legal.messagesP1", "legal.messagesP2", "legal.messagesP3", "legal.messagesP4", "legal.messagesP5"],
 		},
 		{
 			heading: "legal.purposes",

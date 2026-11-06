@@ -35,10 +35,12 @@ import { Reminder } from "@database/models/reminder.schema";
 import { RoleMenu } from "@database/models/roleMenu.schema";
 import { RouletteRound } from "@database/models/rouletteRound.schema";
 import { ScheduledPost } from "@database/models/scheduledMessage.schema";
+import { ShopRoleEntry } from "@database/models/shopRole.schema";
 import { StarboardSettingsConfig, StarPost } from "@database/models/starboard.schema";
 import { TempChannel, TempVoiceSettingsConfig } from "@database/models/tempVoice.schema";
 import { Ticket } from "@database/models/tickets.schema";
 import { TreasureConfig } from "@database/models/treasure.schema";
+import { TuningConfig } from "@database/models/tuning.schema";
 import { PendingVerify, VerifyConfig } from "@database/models/verification.schema";
 import { ERASURE, eraseUserData } from "@database/repositories/accountRepository";
 import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
@@ -143,6 +145,8 @@ const SETTINGS = [
 	ScheduledPost,
 	StarboardSettingsConfig,
 	TempVoiceSettingsConfig,
+	TuningConfig,
+	ShopRoleEntry,
 ] as const;
 
 const THEIRS = [

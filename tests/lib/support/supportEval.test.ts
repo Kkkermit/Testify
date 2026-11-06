@@ -113,6 +113,8 @@ const PARAPHRASES: [string, string[]][] = [
 	["i got banned how can i get back in", ["ban-appeals"]],
 	["how can members message the mods privately", ["modmail"]],
 	["who invited this person to the server", ["invite-tracking"]],
+	["make the economy pay double", ["economy-admin"]],
+	["report a message to the mods", ["right-click-actions"]],
 	["delete 50 messages", ["clearing-messages", "command-clear"]],
 	["lock the channel", ["channel-controls"]],
 	["make the bot say something", ["announcements"]],

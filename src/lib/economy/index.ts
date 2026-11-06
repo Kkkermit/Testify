@@ -12,4 +12,6 @@ export * from "./pets.util";
 export * from "./robbery.util";
 export * from "./shop.util";
 export * from "./shopScreen.util";
+export * from "./shopRoles.util";
 export * from "./treasureActions.util";
+export * from "./tuningPanel.util";

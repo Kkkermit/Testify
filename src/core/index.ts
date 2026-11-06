@@ -4,6 +4,7 @@ export * from "./button";
 export * from "./checks";
 export * from "./client";
 export * from "./command";
+export * from "./contextMenu";
 export * from "./errors";
 export * from "./event";
 export * from "./loader";

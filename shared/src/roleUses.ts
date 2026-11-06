@@ -7,7 +7,8 @@ export type RoleUse =
 	| { kind: "dj" }
 	| { kind: "ticketStaff" }
 	| { kind: "raidPing" }
-	| { kind: "verified" };
+	| { kind: "verified" }
+	| { kind: "shop"; price: number };
 
 export type RoleUseKind = RoleUse["kind"];
 

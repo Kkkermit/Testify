@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import { PermissionFlagsBits, type PermissionResolvable, PermissionsBitField } from "discord.js";
 import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
@@ -82,18 +82,22 @@ export async function runChecks(
 	if (needed.length > 0 && member !== null) {
 		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
 		if (missing.length > 0) {
-			return `You need these permissions: ${missing.map((p) => `\`${humanisePermission(p)}\``).join(", ")}`;
+			return lacking("You need", missing);
 		}
 	}
 
 	if (command.botPermissions?.length && interaction.guild?.members.me) {
 		const missing = interaction.guild.members.me.permissions.missing(new PermissionsBitField(command.botPermissions));
 		if (missing.length > 0) {
-			return `I need these permissions: ${missing.map((p) => `\`${humanisePermission(p)}\``).join(", ")}`;
+			return lacking("I need", missing);
 		}
 	}
 
 	return checkCooldown(interaction, command, client);
+}
+
+function lacking(who: "You need" | "I need", missing: string[]): string {
+	return `${who} these permissions: ${missing.map((p) => `\`${humanisePermission(p)}\``).join(", ")}`;
 }
 
 async function ownerNames(client: TestifyClient): Promise<string[]> {
@@ -149,6 +153,28 @@ export async function checkOpenControl(
 	if (blacklisted) return blacklistRefusal(blacklisted, await ownerNames(client));
 
 	return checkSwitchedOff(command, who.guildId);
+}
+
+/** The gates a right-click action and its form pass: those of its command, then its own permissions and the bot's. */
+export async function checkContextMenu(
+	client: TestifyClient,
+	interaction: {
+		user: { id: string };
+		guildId: string;
+		memberPermissions: Readonly<PermissionsBitField>;
+		appPermissions: Readonly<PermissionsBitField>;
+	},
+	menu: { switchedBy: string; permissions?: PermissionResolvable[]; botPermissions?: PermissionResolvable[] },
+): Promise<CheckFailure> {
+	const who = { userId: interaction.user.id, guildId: interaction.guildId };
+	const refused = await checkOpenControl(client, who, menu.switchedBy);
+	if (refused !== null) return refused;
+
+	const missing = interaction.memberPermissions.missing(new PermissionsBitField(menu.permissions ?? []));
+	if (missing.length > 0) return lacking("You need", missing);
+
+	const botMissing = interaction.appPermissions.missing(new PermissionsBitField(menu.botPermissions ?? []));
+	return botMissing.length > 0 ? lacking("I need", botMissing) : null;
 }
 
 /** The gates `/play` passes, for a control anybody may press to queue music. */

@@ -173,7 +173,9 @@
 		"modmail": "Modmail",
 		"modmailHint": "Mitglieder schreiben privat ans Team",
 		"invites": "Einladungen",
-		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben"
+		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben",
+		"economyRates": "Wirtschaftseinstellungen",
+		"economyRatesHint": "Bezahlung, Rauben und Rollen zum Kauf"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -1337,7 +1339,8 @@
 		"raidPing": "Wird bei einem Raid angepingt",
 		"verified": "Wird Mitgliedern gegeben, die sich verifizieren",
 		"emptyTitle": "Noch keine Rollen",
-		"emptyBody": "In Discord erstellte Rollen erscheinen hier."
+		"emptyBody": "In Discord erstellte Rollen erscheinen hier.",
+		"shop": "Im Shop für {{price}} verkauft"
 	},
 	"testPost": {
 		"send": "Schick mir einen Test",
@@ -2151,7 +2154,8 @@
 		"messagesP4": "Modmail ist die andere. Solange du ein Modmail-Gespräch offen hast, geht, was du dem Bot per DM schickst, an das Team dieses Servers, in einen Thread in dessen Modmail-Kanal, und wird nicht an den Betreiber weitergeleitet. Was das Team im Thread schreibt, kommt auf demselben Weg zu dir zurück. Beide Kopien liegen in Discord: Der Bot speichert nur, welchem Server du geschrieben hast, den Thread, ob eine Antwort aussteht und wann es begann und endete.",
 		"retentionL19": "Modmail-Gespräche: 90 Tage nach dem Schließen, dann automatisch gelöscht. Die Threads selbst bleiben im Discord des Servers.",
 		"storedL18": "Einladungs-Tracking: wenn ein Server es einschaltet, mit welcher Einladung jedes neue Mitglied kam, wessen Einladung es war, beide Nutzernamen und ob es seitdem gegangen ist.",
-		"retentionL20": "Einladungs-Tracking: 365 Tage nach jedem Beitritt, dann automatisch gelöscht, und alles, wenn der Bot vom Server entfernt wird."
+		"retentionL20": "Einladungs-Tracking: 365 Tage nach jedem Beitritt, dann automatisch gelöscht, und alles, wenn der Bot vom Server entfernt wird.",
+		"messagesP5": "Das Melden einer Nachricht ist das Letzte. Wenn du mit Rechtsklick auf eine Nachricht „Report message“ wählst, postet {{bot}} sie im Modmail-Kanal dieses Servers für dessen Team: den Text der Nachricht, wer sie geschrieben hat, wer sie gemeldet hat und was du dazu gesagt hast. Dieser Beitrag liegt in Discord, nicht in der Datenbank des Bots. Der Bot merkt sich eine Stunde lang, nur im Arbeitsspeicher, welche Nachrichten du gemeldet hast, damit dieselbe nicht zweimal gemeldet wird; ein Neustart vergisst es."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
@@ -2914,5 +2918,34 @@
 		"viaInvite": "Mit der Einladung {{code}} von {{name}}.",
 		"viaVanity": "Über den eigenen Link des Servers.",
 		"viaUnknown": "Die Einladung ließ sich nicht bestimmen."
+	},
+	"economy": {
+		"title": "Wirtschaftseinstellungen",
+		"subtitle": "Wie die Wirtschaft dieses Servers von den Werten von {{bot}} abweicht. Die XP-Rate steht auf der Levelling-Seite.",
+		"summary": "Die Bezahlung liegt bei {{rate}} des Üblichen, und neue Konten starten mit {{wallet}}.",
+		"usualRate": "{{rate}} (üblich)",
+		"payRate": "Bezahlung",
+		"payRateHint": "Skaliert /daily, /work und /beg.",
+		"startingWallet": "Neue Konten starten mit",
+		"startingWalletHint": "Gilt für Konten, die ab jetzt eröffnet werden.",
+		"walletRange": "Gib eine ganze Zahl von 0 bis {{max}} an.",
+		"robbing": "Mitglieder können sich gegenseitig ausrauben",
+		"robbingHint": "Ausgeschaltet wird /rob auf diesem Server abgelehnt.",
+		"xpRate": "XP pro Nachricht",
+		"xpRateHint": "Skaliert die XP vor jeder Boost-Rolle.",
+		"xpCooldown": "Zeit zwischen Nachrichten, die XP bringen",
+		"xpCooldownHint": "Nachrichten, die früher gesendet werden, bringen nichts.",
+		"couldNotRead": "Die XP-Rate konnte nicht gelesen werden. Lade die Seite neu.",
+		"shopRoles": "Rollen zum Kauf",
+		"shopRolesBody": "Mitglieder kaufen sie im Reiter Rollen von /shop und behalten sie. Eine Rolle, die moderiert oder die {{bot}} nicht vergeben kann, lässt sich nicht verkaufen.",
+		"shopRolesFull": "Der Shop verkauft {{max}} Rollen, so viele wie möglich. Nimm eine heraus, um eine andere hinzuzufügen.",
+		"shopRole": "Rolle",
+		"chooseRole": "Rolle wählen",
+		"shopPrice": "Preis",
+		"putOnSale": "Zum Kauf anbieten",
+		"priceOf": "Preis von {{name}}",
+		"takeOffSale": "{{name}} aus dem Verkauf nehmen",
+		"deletedRole": "Eine gelöschte Rolle",
+		"shopRolesNeedManageRoles": "Rollen zum Verkauf anbieten, ihre Preise ändern und sie wieder herausnehmen erfordert die Berechtigung „Rollen verwalten“ auf diesem Server."
 	}
 }

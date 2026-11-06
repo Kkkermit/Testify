@@ -1,4 +1,4 @@
-import { type Guild, type GuildMember, type User } from "discord.js";
+import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
 import { theme } from "@config/theme";
 import { type WarnEntry, type WarnLadderRecord } from "@database/models/moderation.schema";
 import {
@@ -10,6 +10,7 @@ import {
 	setWarningCase,
 	setWarningStep,
 } from "@database/repositories/moderationRepository";
+import { embed } from "@lib/discord/embeds.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
@@ -140,6 +141,30 @@ export interface Issued {
 	entry: WarnEntry;
 	outcome: WarnOutcome;
 	notified: boolean;
+}
+
+function consequenceLine(outcome: WarnOutcome): string {
+	if (outcome.step === null) return "No punishment is set for warnings here. `/warn punishments` sets them up.";
+	if (outcome.problem !== null) {
+		return `${stepLabel(outcome.step)} was due, but ${warnProblemText(outcome.problem, outcome.step)}`;
+	}
+
+	return outcome.step.action === "warn" ? "Warning only." : `${stepLabel(outcome.step)}: done.`;
+}
+
+/** What `/warn create` and the Warn action answer with, so the two cannot describe one warning differently. */
+export function warnedEmbed(target: User, reason: string, { entry, outcome, notified }: Issued): EmbedBuilder {
+	return embed({
+		category: "moderation",
+		title: `${theme.emoji.warning} Member warned`,
+		fields: [
+			{ name: "User", value: `${target}`, inline: true },
+			{ name: "Warning ID", value: `\`${entry.warnId}\``, inline: true },
+			{ name: "Notified", value: notified ? "Yes" : "No", inline: true },
+			{ name: "Reason", value: reason },
+			{ name: `Warning ${String(outcome.count)}`, value: consequenceLine(outcome) },
+		],
+	});
 }
 
 export async function issueWarning(options: {

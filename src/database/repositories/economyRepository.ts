@@ -3,13 +3,16 @@ import { ECONOMY, type EconomyCooldownKey } from "@config/constants";
 import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
 import { Economy, type EconomyAccount, type InventoryItem } from "@database/models/economy.schema";
+import { getTuning } from "@database/repositories/tuningRepository";
 
 const LEAN = { lean: true as const, new: true as const };
 
 export async function getOrCreateAccount(guildId: string, userId: string): Promise<EconomyAccount> {
 	return Economy.findOneAndUpdate(
 		{ guildId, userId },
-		{ $setOnInsert: { guildId, userId, wallet: ECONOMY.startingWallet, bank: ECONOMY.startingBank } },
+		{
+			$setOnInsert: { guildId, userId, wallet: (await getTuning(guildId)).startingWallet, bank: ECONOMY.startingBank },
+		},
 		{ ...LEAN, upsert: true, setDefaultsOnInsert: true },
 	).exec() as Promise<EconomyAccount>;
 }

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { EmbedBuilder, MessageFlags } from "discord.js";
+import { type ContextMenuCommandInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { theme } from "@config/theme";
 import { type ComponentInteraction } from "@core/button";
@@ -8,6 +8,9 @@ import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptio
 import { triageRow } from "@lib/bot/errorTriage.util";
 import { logAuthor, loggedOptionsText, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
 import { embed } from "@lib/discord/embeds.util";
+
+/** Anything the bot can answer privately: a command on either surface, a button or form, a right-click action. */
+type Answerable = CommandInput | ComponentInteraction | ContextMenuCommandInteraction;
 
 /** Throw this when the user needs to read the message — a bad argument, not enough money, a missing role. */
 export class UserFacingError extends Error {
@@ -76,7 +79,7 @@ export async function runCommand(
 }
 
 export async function runButton(
-	interaction: ComponentInteraction,
+	interaction: ComponentInteraction | ContextMenuCommandInteraction,
 	handler: () => Promise<void>,
 	client: TestifyClient,
 	label: string,
@@ -89,7 +92,7 @@ export async function runButton(
 }
 
 async function reportFailure(
-	interaction: CommandInput | ComponentInteraction,
+	interaction: Answerable,
 	error: unknown,
 	client: TestifyClient,
 	label: string,
@@ -120,7 +123,7 @@ async function reportFailure(
 }
 
 /** Somewhere only the person who asked can see: never over a public reply, and never over a button's message. */
-export async function tell(interaction: CommandInput | ComponentInteraction, embed: EmbedBuilder): Promise<void> {
+export async function tell(interaction: Answerable, embed: EmbedBuilder): Promise<void> {
 	const privately = { embeds: [embed], flags: MessageFlags.Ephemeral } as const;
 
 	try {
@@ -143,7 +146,7 @@ export async function tell(interaction: CommandInput | ComponentInteraction, emb
 interface FailureReport {
 	label: string;
 	reference: string;
-	interaction: CommandInput | ComponentInteraction;
+	interaction: Answerable;
 	error: Error;
 	command: Command | undefined;
 }
@@ -168,6 +171,8 @@ function errorLogEmbed(report: FailureReport): EmbedBuilder {
 
 		const options = givenOptions(input, command);
 		if (options.length > 0) fields.push({ name: "Options", value: loggedOptionsText(options), inline: false });
+	} else if ("targetId" in interaction) {
+		title = `Right-click action failed · ${report.label}`;
 	} else if ("customId" in interaction) {
 		fields.push({ name: "Custom ID", value: `\`${interaction.customId}\``, inline: false });
 	}

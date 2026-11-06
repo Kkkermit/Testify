@@ -65,6 +65,7 @@ describe("navigationFor", () => {
 				"/channel-tools",
 				"/commands",
 				"/channels",
+				"/economy",
 				"/giveaways",
 				"/ideas",
 				"/inbox",
@@ -121,7 +122,7 @@ describe("navigationFor", () => {
 				"/warnings",
 			],
 			"nav.stats": ["/bot-stats", "/insights", "/invites", "/member-count"],
-			"nav.economy": ["/casino", "/lottery", "/treasure"],
+			"nav.economy": ["/casino", "/economy", "/lottery", "/treasure"],
 			"nav.entertainment": ["/giveaways", "/music"],
 		});
 	});

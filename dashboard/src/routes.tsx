@@ -46,6 +46,7 @@ const BanAppealsPage = page(async () => import("@/features/appeals/BanAppealsPag
 const AppealBanPage = page(async () => import("@/features/appeals/AppealBanPage"), "AppealBanPage");
 const ModmailPage = page(async () => import("@/features/modmail/ModmailPage"), "ModmailPage");
 const InvitesPage = page(async () => import("@/features/invites/InvitesPage"), "InvitesPage");
+const EconomyPage = page(async () => import("@/features/economy/EconomyPage"), "EconomyPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
 const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
 const InboxPage = page(async () => import("@/features/inbox/InboxPage"), "InboxPage");
@@ -156,6 +157,7 @@ export const routes = [
 									{ path: "/guilds/:guildId/roles/:roleId", element: lazily(<RolePage />) },
 									{ path: "/guilds/:guildId/channels", element: lazily(<ChannelsPage />) },
 									{ path: "/guilds/:guildId/temp-voice", element: lazily(<TempVoicePage />) },
+									{ path: "/guilds/:guildId/economy", element: lazily(<EconomyPage />) },
 									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 									{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
 									{ path: "/guilds/:guildId/casino", element: lazily(<CasinoPage />) },

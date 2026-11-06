@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 91](https://img.shields.io/badge/commands-91-8b5cf6?style=for-the-badge) ![subcommands: 148](https://img.shields.io/badge/subcommands-148-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
+![commands: 91](https://img.shields.io/badge/commands-91-8b5cf6?style=for-the-badge) ![subcommands: 150](https://img.shields.io/badge/subcommands-150-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
 
 </div>
 
@@ -15,7 +15,7 @@
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
 | [👥 Community](#-community)   |    11    |     17      |
-| [💰 Economy](#-economy)       |    20    |     25      |
+| [💰 Economy](#-economy)       |    20    |     27      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
 | [🎯 Games](#-games)           |    1     |      6      |
@@ -46,28 +46,28 @@
 
 ## 💰 Economy
 
-| Command         | Description                                       | Subcommands                                        | Prefix aliases              | Needs         |
-| --------------- | ------------------------------------------------- | -------------------------------------------------- | --------------------------- | ------------- |
-| `/balance`      | Shows a wallet and bank balance.                  | —                                                  | `t?bal`, `t?money`          | —             |
-| `/beg`          | Asks strangers for spare change.                  | —                                                  | —                           | —             |
-| `/cooldowns`    | Shows your active economy cooldowns.              | —                                                  | —                           | —             |
-| `/daily`        | Claims your daily reward.                         | —                                                  | —                           | —             |
-| `/deposit`      | Moves money from your wallet into the bank.       | —                                                  | `t?dep`                     | —             |
-| `/economy`      | Manages your economy account.                     | `create`, `delete`, `status`                       | —                           | —             |
-| `/economy-info` | Detailed economy information.                     | `account`, `server`                                | —                           | —             |
-| `/give`         | Grants currency or XP to a member.                | `currency`, `xp`                                   | —                           | Administrator |
-| `/heist`        | Starts a group heist that other members can join. | —                                                  | —                           | —             |
-| `/inventory`    | Shows what you own, and uses it.                  | —                                                  | `t?inv`, `t?use`, `t?items` | —             |
-| `/leaderboard`  | Shows the top ten, by money or by level.          | `economy`, `levels`                                | `t?lb`, `t?top`             | —             |
-| `/lottery`      | Runs and enters the server lottery.               | `info`, `enter`, `setup`, `freeze`, `delete`       | —                           | Manage guild  |
-| `/pet`          | Looks after your pet. Adopt one from the shop.    | `shop`, `rename`, `rehome`, `view`, `feed`, `walk` | `t?rehome`                  | —             |
-| `/reset`        | Resets economy or level data.                     | `user`, `server`, `levels`                         | —                           | Administrator |
-| `/rob`          | Tries to rob another member's wallet.             | —                                                  | —                           | —             |
-| `/shop`         | Browses and buys from the shop.                   | —                                                  | `t?store`, `t?buy`          | —             |
-| `/transfer`     | Sends money from your wallet to someone else.     | —                                                  | —                           | —             |
-| `/treasure`     | Configures random money drops in chat.            | `configure`, `status`                              | —                           | Manage guild  |
-| `/withdraw`     | Moves money from the bank into your wallet.       | —                                                  | `t?with`                    | —             |
-| `/work`         | Works a shift for money.                          | —                                                  | —                           | —             |
+| Command         | Description                                       | Subcommands                                           | Prefix aliases              | Needs                      |
+| --------------- | ------------------------------------------------- | ----------------------------------------------------- | --------------------------- | -------------------------- |
+| `/balance`      | Shows a wallet and bank balance.                  | —                                                     | `t?bal`, `t?money`          | —                          |
+| `/beg`          | Asks strangers for spare change.                  | —                                                     | —                           | —                          |
+| `/cooldowns`    | Shows your active economy cooldowns.              | —                                                     | —                           | —                          |
+| `/daily`        | Claims your daily reward.                         | —                                                     | —                           | —                          |
+| `/deposit`      | Moves money from your wallet into the bank.       | —                                                     | `t?dep`                     | —                          |
+| `/economy`      | Manages your economy account.                     | `create`, `delete`, `settings`, `shop-role`, `status` | —                           | Manage guild, Manage roles |
+| `/economy-info` | Detailed economy information.                     | `account`, `server`                                   | —                           | —                          |
+| `/give`         | Grants currency or XP to a member.                | `currency`, `xp`                                      | —                           | Administrator              |
+| `/heist`        | Starts a group heist that other members can join. | —                                                     | —                           | —                          |
+| `/inventory`    | Shows what you own, and uses it.                  | —                                                     | `t?inv`, `t?use`, `t?items` | —                          |
+| `/leaderboard`  | Shows the top ten, by money or by level.          | `economy`, `levels`                                   | `t?lb`, `t?top`             | —                          |
+| `/lottery`      | Runs and enters the server lottery.               | `info`, `enter`, `setup`, `freeze`, `delete`          | —                           | Manage guild               |
+| `/pet`          | Looks after your pet. Adopt one from the shop.    | `shop`, `rename`, `rehome`, `view`, `feed`, `walk`    | `t?rehome`                  | —                          |
+| `/reset`        | Resets economy or level data.                     | `user`, `server`, `levels`                            | —                           | Administrator              |
+| `/rob`          | Tries to rob another member's wallet.             | —                                                     | —                           | —                          |
+| `/shop`         | Browses and buys from the shop.                   | —                                                     | `t?store`, `t?buy`          | —                          |
+| `/transfer`     | Sends money from your wallet to someone else.     | —                                                     | —                           | —                          |
+| `/treasure`     | Configures random money drops in chat.            | `configure`, `status`                                 | —                           | Manage guild               |
+| `/withdraw`     | Moves money from the bank into your wallet.       | —                                                     | `t?with`                    | —                          |
+| `/work`         | Works a shift for money.                          | —                                                     | —                           | —                          |
 
 ## 🎰 Casino
 
@@ -183,3 +183,14 @@
 | ------------- | ------------------------------------- | ----------- | -------------- | ----- |
 | `/bug-report` | Reports a bug to the developers.      | —           | —              | —     |
 | `/suggest`    | Sends a suggestion to the developers. | —           | —              | —     |
+
+## 🖱️ Right-click actions
+
+In a server, right-click a member or a message (or long-press it on a phone) and open **Apps**.
+
+| Action               | On        | What it does                                                                     | Needs            |
+| -------------------- | --------- | -------------------------------------------------------------------------------- | ---------------- |
+| **Add to starboard** | A message | Puts a message on the starboard however many stars it has.                       | Manage messages  |
+| **Report message**   | A message | Sends a message, and what is wrong with it, to the server's mod mail channel.    | —                |
+| **Time out**         | A member  | Times a member out for as long as is typed in a form, exactly as `/mute` does.   | Moderate members |
+| **Warn**             | A member  | Warns a member, with the reason typed in a form, exactly as `/warn create` does. | Moderate members |

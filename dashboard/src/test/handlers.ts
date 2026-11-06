@@ -30,7 +30,7 @@ import {
 	starboardSettings,
 	welcomeConfig,
 } from "@/test/fixtures/community";
-import { casinoSettings, lotterySettings, treasureSettings } from "@/test/fixtures/economy";
+import { casinoSettings, lotterySettings, shopRoles, treasureSettings, tuning } from "@/test/fixtures/economy";
 import { giveawayList, musicSettings } from "@/test/fixtures/entertainment";
 import {
 	appealPage,
@@ -173,6 +173,11 @@ export const handlers = [
 	http.post("/api/guilds/:guildId/giveaways/:messageId/reroll", () => HttpResponse.json(giveawayList)),
 	http.delete("/api/guilds/:guildId/giveaways/:messageId", () => HttpResponse.json({ giveaways: [] })),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.get("/api/guilds/:guildId/tuning", () => HttpResponse.json(tuning)),
+	http.patch("/api/guilds/:guildId/tuning", () => HttpResponse.json(tuning)),
+	http.get("/api/guilds/:guildId/shop-roles", () => HttpResponse.json(shopRoles)),
+	http.put("/api/guilds/:guildId/shop-roles/:roleId", () => HttpResponse.json(shopRoles)),
+	http.delete("/api/guilds/:guildId/shop-roles/:roleId", () => HttpResponse.json({ ...shopRoles, roles: [] })),
 	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
 	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),

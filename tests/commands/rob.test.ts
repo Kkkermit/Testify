@@ -3,6 +3,9 @@ import rob from "@commands/economy/rob.command";
 import type * as Economy from "@lib/economy";
 import { createMockClient, createMockInteraction, createMockUser } from "@tests/helpers/mocks";
 
+jest.mock("@database/repositories/tuningRepository", () => ({
+	getTuning: jest.fn(() => Promise.resolve({ robbing: true })),
+}));
 jest.mock("@database/repositories/economyRepository", () => ({
 	getOrCreateAccount: jest.fn(() => Promise.resolve({ wallet: 1_000, lastRobbed: null })),
 	findAccount: jest.fn(() => Promise.resolve({ wallet: 10_000 })),
@@ -18,6 +21,7 @@ jest.mock("@lib/economy", () => ({
 }));
 
 const repository = jest.requireMock("@database/repositories/economyRepository");
+const tuning = jest.requireMock("@database/repositories/tuningRepository");
 const { planRobbery } = jest.requireMock("@lib/economy");
 const { ROBBERY_SCENES } = jest.requireActual<typeof Economy>("@lib/economy");
 
@@ -42,6 +46,15 @@ function fields(built: APIEmbed): Record<string, string> {
 beforeEach(() => jest.clearAllMocks());
 
 describe("/rob", () => {
+	/** A server that switched robbing off must not lose a coin to it, however the command was reached. */
+	it("refuses before anything is read when the server has switched robbing off", async () => {
+		tuning.getTuning.mockResolvedValueOnce({ robbing: false });
+
+		await expect(robbed()).rejects.toThrow(/switched off/);
+		expect(repository.getOrCreateAccount).not.toHaveBeenCalled();
+		expect(repository.debitWallet).not.toHaveBeenCalled();
+	});
+
 	/** The old embed said "Robbery successful" and nothing about whose money it was. */
 	it("names who was robbed in the title, the story, a field and the picture", async () => {
 		planRobbery.mockReturnValue({ rule: scene("clean"), amount: 1_000, line: "{target} lost **{amount}**." });

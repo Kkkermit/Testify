@@ -11,6 +11,7 @@ export * from "./channelTools.util";
 export * from "./contentFilter.util";
 export * from "./memberBulk.util";
 export * from "./memberDirectory.util";
+export * from "./memberMenus.util";
 export * from "./moderation.constants";
 export * from "./moderation.types";
 export * from "./moderationActions.util";

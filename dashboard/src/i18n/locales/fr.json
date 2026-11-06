@@ -174,7 +174,9 @@
 		"modmail": "Messagerie modération",
 		"modmailHint": "Les membres écrivent en privé à l’équipe",
 		"invites": "Invitations",
-		"invitesHint": "Les invitations qui ont amené des membres"
+		"invitesHint": "Les invitations qui ont amené des membres",
+		"economyRates": "Réglages de l’économie",
+		"economyRatesHint": "Paie, vols et rôles en vente"
 	},
 	"account": {
 		"title": "Ton compte",
@@ -1384,7 +1386,8 @@
 		"raidPing": "Mentionné quand un raid est repéré",
 		"verified": "Donné aux membres qui se vérifient",
 		"emptyTitle": "Pas encore de rôles",
-		"emptyBody": "Les rôles créés dans Discord apparaissent ici."
+		"emptyBody": "Les rôles créés dans Discord apparaissent ici.",
+		"shop": "Vendu dans la boutique pour {{price}}"
 	},
 	"testPost": {
 		"send": "M’envoyer un test",
@@ -2216,7 +2219,8 @@
 		"messagesP4": "La messagerie modération est l’autre. Tant que vous avez une conversation ouverte, ce que vous envoyez au bot en DM va à l’équipe de ce serveur, dans un fil de son salon de messagerie, et n’est pas transmis à l’opérateur. Ce que l’équipe écrit dans le fil vous revient de la même façon. Les deux copies sont dans Discord : le bot ne garde que le serveur auquel vous avez écrit, le fil, si une réponse est attendue, et quand la conversation a commencé et pris fin.",
 		"retentionL19": "Conversations de messagerie : 90 jours après leur fermeture, puis supprimées automatiquement. Les fils restent dans le Discord du serveur.",
 		"storedL18": "Suivi des invitations : quand un serveur l’active, l’invitation avec laquelle chaque nouveau membre est arrivé, à qui elle appartenait, les deux noms d’utilisateur et s’il est parti depuis.",
-		"retentionL20": "Suivi des invitations : 365 jours après chaque arrivée, puis supprimé automatiquement, et entièrement quand le bot est retiré du serveur."
+		"retentionL20": "Suivi des invitations : 365 jours après chaque arrivée, puis supprimé automatiquement, et entièrement quand le bot est retiré du serveur.",
+		"messagesP5": "Signaler un message est la dernière. Quand vous faites un clic droit sur un message et choisissez Report message, {{bot}} le publie dans le salon de messagerie modération de ce serveur pour son équipe : le texte du message, qui l’a écrit, qui l’a signalé et ce que vous en avez dit. Cette publication est dans Discord, pas dans la base de données du bot. Le bot retient pendant une heure, en mémoire seulement, les messages que vous avez signalés, pour qu’un même message ne soit pas signalé deux fois ; un redémarrage l’oublie."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
@@ -2997,5 +3001,34 @@
 		"viaInvite": "Avec l’invitation {{code}} de {{name}}.",
 		"viaVanity": "Avec le lien propre au serveur.",
 		"viaUnknown": "L’invitation n’a pas pu être identifiée."
+	},
+	"economy": {
+		"title": "Réglages de l’économie",
+		"subtitle": "En quoi l’économie de ce serveur diffère des valeurs de {{bot}}. Le taux d’XP est sur la page Niveaux.",
+		"summary": "La paie est à {{rate}} de l’habituel, et les nouveaux comptes commencent avec {{wallet}}.",
+		"usualRate": "{{rate}} (l’habituel)",
+		"payRate": "Paie",
+		"payRateHint": "Ajuste /daily, /work et /beg.",
+		"startingWallet": "Les nouveaux comptes commencent avec",
+		"startingWalletHint": "S’applique aux comptes ouverts à partir de maintenant.",
+		"walletRange": "Indiquez un nombre entier de 0 à {{max}}.",
+		"robbing": "Les membres peuvent se voler entre eux",
+		"robbingHint": "Désactivé, /rob est refusé sur ce serveur.",
+		"xpRate": "XP par message",
+		"xpRateHint": "Ajuste l’XP avant tout rôle de boost.",
+		"xpCooldown": "Délai entre deux messages qui rapportent de l’XP",
+		"xpCooldownHint": "Les messages envoyés plus tôt ne rapportent rien.",
+		"couldNotRead": "Le taux d’XP n’a pas pu être lu. Rechargez la page.",
+		"shopRoles": "Rôles en vente",
+		"shopRolesBody": "Les membres les achètent dans l’onglet Rôles de /shop et les gardent. Un rôle qui modère, ou que {{bot}} ne peut pas donner, ne peut pas être vendu.",
+		"shopRolesFull": "La boutique vend {{max}} rôles, le maximum. Retirez-en un pour en ajouter un autre.",
+		"shopRole": "Rôle",
+		"chooseRole": "Choisir un rôle",
+		"shopPrice": "Prix",
+		"putOnSale": "Mettre en vente",
+		"priceOf": "Prix de {{name}}",
+		"takeOffSale": "Retirer {{name}} de la vente",
+		"deletedRole": "Un rôle supprimé",
+		"shopRolesNeedManageRoles": "Mettre des rôles en vente, changer leur prix et les retirer demande l’autorisation Gérer les rôles sur ce serveur."
 	}
 }

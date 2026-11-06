@@ -53,7 +53,7 @@ async function main(): Promise<void> {
 		"Modules",
 		() => loadEverything(client),
 		(counts) =>
-			`${String(counts.commands)} commands · ${String(counts.buttons)} buttons · ${String(counts.events)} events`,
+			`${String(counts.commands)} commands · ${String(counts.menus)} right-click · ${String(counts.buttons)} buttons · ${String(counts.events)} events`,
 	);
 
 	await report.step(

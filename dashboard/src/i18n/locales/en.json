@@ -173,7 +173,9 @@
 		"modmail": "Mod mail",
 		"modmailHint": "Members writing privately to staff",
 		"invites": "Invites",
-		"invitesHint": "Whose invites brought members in"
+		"invitesHint": "Whose invites brought members in",
+		"economyRates": "Economy settings",
+		"economyRatesHint": "Pay, robbing and roles for sale"
 	},
 	"account": {
 		"title": "Your account",
@@ -1337,7 +1339,8 @@
 		"raidPing": "Pinged when a raid is spotted",
 		"verified": "Given to members who verify",
 		"emptyTitle": "No roles yet",
-		"emptyBody": "Roles made in Discord appear here."
+		"emptyBody": "Roles made in Discord appear here.",
+		"shop": "Sold in the shop for {{price}}"
 	},
 	"testPost": {
 		"send": "Send me a test",
@@ -2151,7 +2154,8 @@
 		"messagesP4": "Mod mail is the other one. While you have a mod mail conversation open, what you send the bot in a direct message goes to that server’s staff, in a thread in their mod mail channel, and is not forwarded to the operator. What staff write in the thread comes back to you the same way. Both copies live in Discord: the bot keeps only which server you wrote to, the thread, whether a reply is owed and when it opened and closed.",
 		"retentionL19": "Mod mail conversations: 90 days after they close, then deleted automatically. The threads themselves stay in the server’s Discord.",
 		"storedL18": "Invite tracking: when a server turns it on, which invite each new member joined with, whose invite it was, both usernames, and whether they have since left.",
-		"retentionL20": "Invite tracking: 365 days after each join, then deleted automatically, and all of it when the bot is removed from the server."
+		"retentionL20": "Invite tracking: 365 days after each join, then deleted automatically, and all of it when the bot is removed from the server.",
+		"messagesP5": "Reporting a message is the last. When you right-click a message and choose Report message, {{bot}} posts it in that server’s mod mail channel for its staff: the message’s text, who wrote it, who reported it and what you said about it. That post lives in Discord, not in the bot’s database. The bot remembers which messages you reported for an hour, in memory only, so the same one cannot be reported twice; a restart forgets it."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -2914,5 +2918,34 @@
 		"viaInvite": "With {{name}}’s invite {{code}}.",
 		"viaVanity": "With the server’s own link.",
 		"viaUnknown": "The invite could not be told."
+	},
+	"economy": {
+		"title": "Economy settings",
+		"subtitle": "How this server’s economy differs from {{bot}}’s own numbers. The XP rate is on the Levelling page.",
+		"summary": "Pay is {{rate}} of the usual, and new accounts start with {{wallet}}.",
+		"usualRate": "{{rate}} (the usual)",
+		"payRate": "Pay",
+		"payRateHint": "Scales /daily, /work and /beg.",
+		"startingWallet": "New accounts start with",
+		"startingWalletHint": "Applies to accounts opened from now on.",
+		"walletRange": "Give a whole number from 0 to {{max}}.",
+		"robbing": "Members can rob each other",
+		"robbingHint": "Turned off, /rob is refused in this server.",
+		"xpRate": "XP each message earns",
+		"xpRateHint": "Scales the XP before any boost role.",
+		"xpCooldown": "Time between messages that earn XP",
+		"xpCooldownHint": "Messages sent sooner after the last one earn nothing.",
+		"couldNotRead": "The XP rate could not be read. Reload the page to try again.",
+		"shopRoles": "Roles for sale",
+		"shopRolesBody": "Members buy these from the Roles tab of /shop and keep them. A role that moderates, or one {{bot}} cannot give, cannot be sold.",
+		"shopRolesFull": "The shop sells {{max}} roles, as many as it can. Take one off to add another.",
+		"shopRole": "Role",
+		"chooseRole": "Choose a role",
+		"shopPrice": "Price",
+		"putOnSale": "Put on sale",
+		"priceOf": "Price of {{name}}",
+		"takeOffSale": "Take {{name}} off sale",
+		"deletedRole": "A deleted role",
+		"shopRolesNeedManageRoles": "Putting roles on sale, changing their prices and taking them off need the Manage Roles permission in this server."
 	}
 }

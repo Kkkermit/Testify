@@ -121,6 +121,9 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **Warnings that escalate** — set what the 1st, 2nd and 3rd warning do: a timeout, a kick or a ban
 - **Moderation cases** — every warning, timeout, kick and ban numbered, whichever surface it came from
 - **Raid protection** — brand new accounts held back and staff told about a join spike, never a kick or a ban
+- **Ban appeals** written on the web and decided in Discord or on the dashboard
+- **Mod mail** — members write to staff by direct message, and each conversation is a thread
+- **Right-click actions** — warn or time out a member, report a message or put it on the starboard
 - **AutoMod** — Discord's own filters for words, spam, mentions and links
 - **Audit logging** — 18 event types, each switchable per server
 - **Tickets** — panels, claiming, locking and HTML transcripts
@@ -131,7 +134,8 @@ Everything the old bot did is still here, apart from the integrations that neede
 ### 💰 Economy and levelling
 
 - **Wallet and bank** — work, daily, beg, rob, heists and transfers
-- **Shop, inventory and pets** that need feeding and walking
+- **Shop, inventory and pets** that need feeding and walking, and server roles for sale
+- **Per-server rates** for pay, the starting wallet, robbing, XP and its cooldown
 - **Lottery and treasure drops** run by the server
 - **Leaderboards** by total, wallet or bank, for one server or every server
 - **Levelling** — XP, role rewards, boost roles and drawn rank cards
@@ -172,6 +176,7 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **An idea board** members post to and vote on, and staff accept or decline
 - **A starboard** that reposts the messages with enough ⭐, without pinging anybody again
 - **Join-to-create voice channels**, one per member and deleted once they empty
+- **Invite tracking** — whose invite brought each member in, ranked by who stayed
 - **Reminders** that ping you where you set them, or by DM
 - **Birthdays** — the day and month a member shares with one server, never the year
 - **Polls** — Discord's own, posted with `/poll`

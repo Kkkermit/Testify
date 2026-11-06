@@ -15,6 +15,7 @@ import {
 	type StoredStarPost,
 } from "@database/repositories/starboardRepository";
 import {
+	addToStarboard,
 	applyStarboardSettings,
 	handleStarChange,
 	handleStarredDelete,
@@ -331,5 +332,63 @@ describe("handleStarredDelete", () => {
 		await handleStarredDelete(guild as unknown as Guild, MESSAGE);
 
 		expect(board.messages.delete).toHaveBeenCalledWith(REPOST);
+	});
+});
+
+describe("addToStarboard", () => {
+	function starredMessage(guild: object, options: { stars?: number; channelId?: string } = {}) {
+		const { message } = reaction(guild, { channelId: options.channelId ?? SOURCE });
+		const stars = options.stars === undefined ? [] : [["⭐", { count: options.stars }] as const];
+		return { ...message, reactions: { cache: new Collection(stars) } };
+	}
+
+	/** A moderator's word puts it on the board however few stars it has, and the count it shows is the real one. */
+	it("posts a message below the line, with the stars it has", async () => {
+		const { guild, board } = world();
+
+		await expect(addToStarboard(starredMessage(guild, { stars: 1 }) as never)).resolves.toEqual({
+			channelId: BOARD,
+			messageId: REPOST,
+		});
+		expect(board.send).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining("**1**") }));
+		expect(setBoardMessage).toHaveBeenCalledWith(GUILD, MESSAGE, { channelId: BOARD, messageId: REPOST });
+	});
+
+	/** A second Add must not post a second copy, which only the claim can tell. */
+	it("refuses a message already on the board, and one the claim says another run took", async () => {
+		const { guild, board } = world();
+		jest.mocked(findStarPost).mockResolvedValueOnce(post());
+		await expect(addToStarboard(starredMessage(guild) as never)).rejects.toThrow(/on the board already/);
+
+		jest.mocked(claimStarPost).mockResolvedValueOnce({ post: post(), created: false });
+		await expect(addToStarboard(starredMessage(guild) as never)).rejects.toThrow(/on the board already/);
+		expect(board.send).not.toHaveBeenCalled();
+	});
+
+	/** A repost a moderator took down stays off by itself, but another moderator asking is a decision to put it back. */
+	it("puts back a repost that was taken down", async () => {
+		const { guild, board } = world();
+		jest.mocked(findStarPost).mockResolvedValueOnce(post({ removed: true }));
+
+		await addToStarboard(starredMessage(guild) as never);
+
+		expect(deleteStarPost).toHaveBeenCalledWith(GUILD, MESSAGE);
+		expect(board.send).toHaveBeenCalled();
+	});
+
+	it("lets go of the claim when the board refuses the post", async () => {
+		const { guild, board } = world();
+		board.send.mockRejectedValueOnce(discordError(RESTJSONErrorCodes.MissingPermissions, 403));
+
+		await expect(addToStarboard(starredMessage(guild) as never)).rejects.toThrow(UserFacingError);
+		expect(deleteStarPost).toHaveBeenCalledWith(GUILD, MESSAGE);
+	});
+
+	it("refuses while the starboard is off, and the board's own messages", async () => {
+		const { guild } = world();
+		jest.mocked(getStarboardSettings).mockResolvedValueOnce(settings({ enabled: false }));
+		await expect(addToStarboard(starredMessage(guild) as never)).rejects.toThrow(/off in this server/);
+
+		await expect(addToStarboard(starredMessage(guild, { channelId: BOARD }) as never)).rejects.toThrow(/already/);
 	});
 });

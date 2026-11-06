@@ -32,6 +32,7 @@ import {
 	ROLE_MENU_LIMITS,
 	SCHEDULE_LIMITS,
 	SETTINGS_LIMITS,
+	SHOP_ROLE_LIMITS,
 	STARBOARD_LIMITS,
 	STICKY_LIMITS,
 	TEMP_VOICE_LIMITS,
@@ -64,6 +65,7 @@ export const FACTS: Readonly<Record<string, string>> = {
 	"economy.heistMax": formatNumber(ECONOMY.heistMaxPlayers),
 	"economy.heistJoin": formatDurationLong(ECONOMY.heistJoinWindowMs),
 	"economy.inventoryMax": formatNumber(ECONOMY.maxInventorySize),
+	"economy.shopRolesMax": formatNumber(SHOP_ROLE_LIMITS.max),
 
 	"cooldown.daily": formatDurationLong(ECONOMY_COOLDOWNS.daily),
 	"cooldown.work": formatDurationLong(ECONOMY_COOLDOWNS.work),

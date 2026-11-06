@@ -8,6 +8,7 @@ const client = {
 	commands: new Collection(),
 	aliases: new Collection(),
 	buttons: new Collection(),
+	contextMenus: new Collection(),
 	messageHandlers: [],
 	logger: createLogger("fatal", false),
 	on: () => undefined,

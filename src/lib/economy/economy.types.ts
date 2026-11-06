@@ -40,6 +40,15 @@ export interface ShopState {
 	from?: "balance";
 }
 
+/** A role on the shop's Roles tab, as one member sees it. */
+export interface RoleForSale {
+	roleId: string;
+	name: string;
+	price: number;
+	held: boolean;
+	problem: string | null;
+}
+
 export interface Balances {
 	wallet: number;
 	ownsHouse: boolean;
@@ -49,6 +58,7 @@ export interface Balances {
 	ownedItemIds: string[];
 	job: string;
 	hasPet: boolean;
+	rolesForSale: RoleForSale[];
 }
 
 /** Moving money into the bank, or out of it. */

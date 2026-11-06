@@ -8,9 +8,11 @@ import {
 	incrementCounters,
 	setCooldown,
 } from "@database/repositories/economyRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
 import { findJob } from "@lib/economy";
 import { formatDuration, formatNumber } from "@lib/format";
+import { atRate } from "@testify/shared";
 
 const SCENARIOS = [
 	"You covered a shift and nobody noticed you were on your phone.",
@@ -42,7 +44,7 @@ export default defineCommand({
 		const job = findJob(account.job.toLowerCase().replace(/\s+/g, "_"));
 		const base = job?.basePay ?? randomInt(ECONOMY.workMinPay, ECONOMY.workMaxPay + 1);
 		const bonus = Math.floor(base * 0.1 * account.jobLevel);
-		const pay = base + bonus;
+		const pay = atRate(base + bonus, (await getTuning(guild.id)).payRate);
 
 		await adjustWallet(guild.id, interaction.user.id, pay);
 		await setCooldown(guild.id, interaction.user.id, "work", new Date(now));

@@ -31,10 +31,12 @@ import { Reminder } from "@database/models/reminder.schema";
 import { RoleMenu } from "@database/models/roleMenu.schema";
 import { RouletteRound } from "@database/models/rouletteRound.schema";
 import { ScheduledPost } from "@database/models/scheduledMessage.schema";
+import { ShopRoleEntry } from "@database/models/shopRole.schema";
 import { StarboardSettingsConfig, StarPost } from "@database/models/starboard.schema";
 import { TempChannel, TempVoiceSettingsConfig } from "@database/models/tempVoice.schema";
 import { Ticket } from "@database/models/tickets.schema";
 import { TreasureConfig } from "@database/models/treasure.schema";
+import { TuningConfig } from "@database/models/tuning.schema";
 import { PendingVerify, VerifyConfig } from "@database/models/verification.schema";
 import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
 
@@ -89,6 +91,8 @@ export const ERASURE = {
 	Profile: { userId: "delete" },
 	raidsettings: { updatedBy: "anonymise" },
 	reminders: { userId: "delete" },
+	servertuning: { updatedBy: "anonymise" },
+	shoproles: { updatedBy: "anonymise" },
 	rolemenus: { updatedBy: "anonymise" },
 	rouletterounds: { hostId: "anonymise", players: "remove" },
 	scheduledmessages: { updatedBy: "anonymise" },
@@ -211,6 +215,8 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		ScheduledPost.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		StarboardSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		TempVoiceSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
+		TuningConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
+		ShopRoleEntry.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 	]);
 
 	// A record written before its post went up has neither field, and nothing to take down.

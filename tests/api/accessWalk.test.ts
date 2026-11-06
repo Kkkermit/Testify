@@ -76,6 +76,8 @@ const ASKS_MORE = new Set([
 	"PUT /role-menus/:menuId",
 	"POST /role-menus/:menuId/publish",
 	"DELETE /role-menus/:menuId",
+	"PUT /shop-roles/:roleId",
+	"DELETE /shop-roles/:roleId",
 	"PATCH /settings/nickname",
 	"PUT /settings/auto-roles",
 	"POST /temp-voice/lobby",

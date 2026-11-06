@@ -118,7 +118,14 @@ export default ts.config(
 	},
 	{
 		// Everything else imports a domain's barrel, so a module can move inside its folder.
-		files: ["src/commands/**/*.ts", "src/buttons/**/*.ts", "src/events/**/*.ts", "src/api/**/*.ts", "src/jobs/**/*.ts"],
+		files: [
+			"src/commands/**/*.ts",
+			"src/buttons/**/*.ts",
+			"src/events/**/*.ts",
+			"src/menus/**/*.ts",
+			"src/api/**/*.ts",
+			"src/jobs/**/*.ts",
+		],
 		rules: {
 			"no-restricted-imports": [
 				"error",

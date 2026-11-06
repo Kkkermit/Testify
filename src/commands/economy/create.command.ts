@@ -1,9 +1,12 @@
-import { ECONOMY } from "@config/constants";
-import { defineCommand, inGuild } from "@core/command";
+import { PermissionFlagsBits } from "discord.js";
+import { asMember, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { createAccount, deleteAccount, findAccount } from "@database/repositories/economyRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
+import { sellShopRole, tuningPanel, withdrawShopRole } from "@lib/economy";
 import { formatNumber } from "@lib/format";
+import { SHOP_ROLE_LIMITS } from "@testify/shared";
 
 export default defineCommand({
 	name: "economy",
@@ -23,7 +26,7 @@ export default defineCommand({
 				await reply(interaction, {
 					embeds: [
 						successEmbed(
-							`Your account is open with **${formatNumber(ECONOMY.startingWallet)}** in your wallet. Try \`/daily\` next.`,
+							`Your account is open with **${formatNumber(account.wallet)}** in your wallet. Try \`/daily\` next.`,
 						),
 					],
 				});
@@ -38,6 +41,48 @@ export default defineCommand({
 				if (!deleted) throw new UserFacingError("You do not have an account here.");
 
 				await reply(interaction, { embeds: [successEmbed("Your economy account has been deleted.")] });
+			},
+		},
+		{
+			name: "settings",
+			description: "Sets this server's pay, starting money, robbing and XP rate.",
+			permissions: [PermissionFlagsBits.ManageGuild],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				await reply(interaction, tuningPanel(await getTuning(guild.id), interaction.user.id));
+			},
+		},
+		{
+			name: "shop-role",
+			description: "Puts a role on sale in the shop, changes its price, or takes it off with a price of 0.",
+			permissions: [PermissionFlagsBits.ManageRoles],
+			options: [
+				{ name: "role", description: "The role to sell.", type: "role", required: true },
+				{
+					name: "price",
+					description: "What it costs. 0 takes it off sale.",
+					type: "integer",
+					required: true,
+					min: 0,
+					max: SHOP_ROLE_LIMITS.maxPrice,
+				},
+			],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				const role = interaction.options.getRole("role", true);
+				const price = interaction.options.getInteger("price", true);
+				const actor = asMember(interaction);
+
+				if (price === 0) {
+					await withdrawShopRole(guild, actor, role.id);
+					await reply(interaction, { embeds: [successEmbed(`**${role.name}** is no longer for sale.`)] });
+					return;
+				}
+
+				await sellShopRole(guild, actor, role.id, price, interaction.user.id);
+				await reply(interaction, {
+					embeds: [successEmbed(`**${role.name}** is on sale in the shop for **${formatNumber(price)}**.`)],
+				});
 			},
 		},
 		{

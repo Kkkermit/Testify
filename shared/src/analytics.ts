@@ -253,6 +253,7 @@ export const SCREEN_ROUTES = [
 	"/guilds/:guildId/ideas",
 	"/guilds/:guildId/starboard",
 	"/guilds/:guildId/temp-voice",
+	"/guilds/:guildId/economy",
 	"/guilds/:guildId/treasure",
 	"/guilds/:guildId/music",
 	"/guilds/:guildId/casino",

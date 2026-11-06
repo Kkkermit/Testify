@@ -173,7 +173,9 @@
 		"modmail": "Modmail",
 		"modmailHint": "Leden die privé het team schrijven",
 		"invites": "Uitnodigingen",
-		"invitesHint": "Wiens uitnodigingen leden binnenbrachten"
+		"invitesHint": "Wiens uitnodigingen leden binnenbrachten",
+		"economyRates": "Economie-instellingen",
+		"economyRatesHint": "Loon, beroven en rollen te koop"
 	},
 	"account": {
 		"title": "Je account",
@@ -1337,7 +1339,8 @@
 		"raidPing": "Gepingd als er een raid wordt opgemerkt",
 		"verified": "Gegeven aan leden die zich verifiëren",
 		"emptyTitle": "Nog geen rollen",
-		"emptyBody": "Rollen die in Discord worden gemaakt, verschijnen hier."
+		"emptyBody": "Rollen die in Discord worden gemaakt, verschijnen hier.",
+		"shop": "Verkocht in de winkel voor {{price}}"
 	},
 	"testPost": {
 		"send": "Stuur mij een test",
@@ -2151,7 +2154,8 @@
 		"messagesP4": "Modmail is de andere. Zolang je een modmailgesprek open hebt, gaat wat je de bot in een DM stuurt naar het team van die server, in een thread in hun modmailkanaal, en wordt het niet doorgestuurd naar de beheerder. Wat het team in de thread schrijft komt op dezelfde manier bij jou terug. Beide kopieën staan in Discord: de bot bewaart alleen aan welke server je schreef, de thread, of er een antwoord verwacht wordt en wanneer het begon en eindigde.",
 		"retentionL19": "Modmailgesprekken: 90 dagen nadat ze gesloten zijn, daarna automatisch verwijderd. De threads zelf blijven in de Discord van de server.",
 		"storedL18": "Uitnodigingen volgen: als een server het aanzet, met welke uitnodiging elk nieuw lid binnenkwam, van wie die was, beide gebruikersnamen en of het lid sindsdien vertrokken is.",
-		"retentionL20": "Uitnodigingen volgen: 365 dagen na elke binnenkomst, daarna automatisch verwijderd, en alles wanneer de bot van de server wordt verwijderd."
+		"retentionL20": "Uitnodigingen volgen: 365 dagen na elke binnenkomst, daarna automatisch verwijderd, en alles wanneer de bot van de server wordt verwijderd.",
+		"messagesP5": "Een bericht melden is de laatste. Als je met de rechtermuisknop op een bericht Report message kiest, plaatst {{bot}} het in het modmailkanaal van die server voor het team: de tekst van het bericht, wie het schreef, wie het meldde en wat je erover zei. Dat bericht staat in Discord, niet in de database van de bot. De bot onthoudt een uur lang, alleen in het geheugen, welke berichten je meldde, zodat hetzelfde niet twee keer gemeld kan worden; een herstart vergeet het."
 	},
 	"problem": {
 		"automodMentionLimit": "Kies hoeveel mentions je toestaat.",
@@ -2914,5 +2918,34 @@
 		"viaInvite": "Met de uitnodiging {{code}} van {{name}}.",
 		"viaVanity": "Via de eigen link van de server.",
 		"viaUnknown": "De uitnodiging was niet te bepalen."
+	},
+	"economy": {
+		"title": "Economie-instellingen",
+		"subtitle": "Hoe de economie van deze server afwijkt van de waarden van {{bot}}. Het XP-tarief staat op de pagina Levels.",
+		"summary": "Het loon is {{rate}} van normaal, en nieuwe rekeningen beginnen met {{wallet}}.",
+		"usualRate": "{{rate}} (normaal)",
+		"payRate": "Loon",
+		"payRateHint": "Schaalt /daily, /work en /beg.",
+		"startingWallet": "Nieuwe rekeningen beginnen met",
+		"startingWalletHint": "Geldt voor rekeningen die vanaf nu worden geopend.",
+		"walletRange": "Geef een geheel getal van 0 tot {{max}}.",
+		"robbing": "Leden kunnen elkaar beroven",
+		"robbingHint": "Uitgezet wordt /rob op deze server geweigerd.",
+		"xpRate": "XP per bericht",
+		"xpRateHint": "Schaalt de XP vóór elke boostrol.",
+		"xpCooldown": "Tijd tussen berichten die XP opleveren",
+		"xpCooldownHint": "Berichten die eerder worden gestuurd leveren niets op.",
+		"couldNotRead": "Het XP-tarief kon niet worden gelezen. Laad de pagina opnieuw.",
+		"shopRoles": "Rollen te koop",
+		"shopRolesBody": "Leden kopen ze op het tabblad Rollen van /shop en houden ze. Een rol die modereert, of een die {{bot}} niet kan geven, kan niet verkocht worden.",
+		"shopRolesFull": "De winkel verkoopt {{max}} rollen, zoveel als kan. Haal er een weg om een andere toe te voegen.",
+		"shopRole": "Rol",
+		"chooseRole": "Kies een rol",
+		"shopPrice": "Prijs",
+		"putOnSale": "Te koop zetten",
+		"priceOf": "Prijs van {{name}}",
+		"takeOffSale": "{{name}} uit de verkoop halen",
+		"deletedRole": "Een verwijderde rol",
+		"shopRolesNeedManageRoles": "Rollen te koop zetten, hun prijs wijzigen en ze weer weghalen vraagt de toestemming Rollen beheren in deze server."
 	}
 }
