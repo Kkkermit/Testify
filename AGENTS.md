@@ -65,10 +65,10 @@ numbers, which drift):
 | Prefix aliases       | 107                               |
 | Button handlers      | 45                                |
 | Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 220, in 31 domain folders         |
+| `src/lib` helpers    | 221, in 31 domain folders         |
 | Schemas/repositories | 47 / 46                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,947 across 519 suites           |
+| Tests                | 3,950 across 521 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -221,7 +221,7 @@ src/
 ├── commands/<category>/  114 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               31 handlers in command, community, create, logging, ready and message
 ├── buttons/              45 component handlers, keyed by custom-ID prefix
-├── lib/                  220 helpers in 31 domain folders, each behind its own index.ts barrel
+├── lib/                  221 helpers in 31 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 337 suites; the dashboard's 182 sit beside its code.
+tests/                    Mirrors src/. 339 suites; the dashboard's 182 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -349,6 +349,15 @@ async function main(): Promise<void> {
 	await client.login(env.DISCORD_TOKEN);
 }
 ```
+
+**One process runs every shard.** `TestifyClient` passes `shards: "auto"`, so discord.js asks Discord how many shards
+the bot needs and runs them all here. Discord refuses an unsharded bot once it is in 2,500 servers, and keeping every
+shard in one process is what lets the dashboard go on reading one live cache; a `ShardingManager` that split them
+across processes would take that away.
+
+**The image asks the bot whether it is serving.** `src/healthcheck.ts` is the `Dockerfile`'s `HEALTHCHECK`: it asks
+`/api/health` and passes only on `ok`, which needs Discord ready and the database connected. With the website and the
+dashboard both off there is no listener to ask, so it passes rather than marking every such install unhealthy.
 
 **Command registration scope** — this is the single-guild vs multi-guild switch:
 
@@ -973,6 +982,10 @@ What good tests here look like:
   MongoDB reported **41 passing tests that asserted nothing**, and a mutation replacing an atomic `$inc` with
   `$set` survived all of them. `tests/core/conventions.test.ts` refuses the early-return pattern, and CI sets
   `REQUIRE_DB_TESTS=1` so a runner that cannot start a database fails rather than going quietly green.
+- **The test database never runs MongoDB's TTL sweep.** `mongoGlobal.ts` starts it with `ttlMonitorEnabled=false`,
+  because fixtures carry fixed dates: the command run log's are dated 1 August 2026, so they expired on 31 August
+  and the sweep, which runs once a minute, deleted them partway through a test on CI. A test checks that an expiry is
+  set, never that MongoDB acted on it, and `testDatabase.test.ts` pins the setting.
 - **A worker's database outlives each suite.** Every test starts on emptied collections, but the database is not
   dropped between suites, because dropping it made the next suite build every collection and index again: 464
   collection creations a run instead of 137, and on the Windows runner five suites once timed out together while

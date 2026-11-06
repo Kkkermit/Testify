@@ -54,7 +54,7 @@ export class TestifyClient extends Client {
 	pausedAt: number | null = null;
 
 	constructor(env: Env, logger: Logger) {
-		super({ intents, partials });
+		super({ intents, partials, shards: "auto" });
 		this.env = env;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);
