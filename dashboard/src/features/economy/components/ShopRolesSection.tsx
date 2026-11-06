@@ -10,6 +10,7 @@ import { useRemoveShopRole, useSellShopRole, useShopRoles } from "@/features/eco
 import { useRoles } from "@/features/levelling/useLevelling";
 import { numberIn } from "@/features/raid-protection/raid.utils";
 import { cn } from "@/lib/cn";
+import { formatNumber } from "@/lib/intl";
 
 /** Roles members can buy in the shop: nothing that moderates, nothing the bot cannot give, at most ten. */
 export function ShopRolesSection({ guildId }: { guildId: string }): React.JSX.Element {
@@ -21,16 +22,17 @@ export function ShopRolesSection({ guildId }: { guildId: string }): React.JSX.El
 	const [roleId, setRoleId] = useState("");
 	const [price, setPrice] = useState("");
 
-	const listed = new Set((shop.data ?? []).map((entry) => entry.roleId));
+	const listed = new Set((shop.data?.roles ?? []).map((entry) => entry.roleId));
+	const canManage = shop.data?.canManage === true;
 	const offerable = (roles.data ?? []).filter(
 		(role) => role.id !== guildId && !role.managed && !role.powerful && role.assignableByBot && !listed.has(role.id),
 	);
 	const amount = numberIn(price, SHOP_ROLE_LIMITS.minPrice, SHOP_ROLE_LIMITS.maxPrice);
-	const full = (shop.data?.length ?? 0) >= SHOP_ROLE_LIMITS.max;
+	const full = (shop.data?.roles.length ?? 0) >= SHOP_ROLE_LIMITS.max;
 
 	return (
 		<section aria-labelledby="shop-roles" className="flex flex-col gap-3">
-			<SectionHeading as="h2" id="shop-roles" count={shop.data?.length}>
+			<SectionHeading as="h2" id="shop-roles" count={shop.data?.roles.length}>
 				{t("economy.shopRoles")}
 			</SectionHeading>
 			<p className="text-muted-foreground text-sm">{t("economy.shopRolesBody")}</p>
@@ -40,13 +42,14 @@ export function ShopRolesSection({ guildId }: { guildId: string }): React.JSX.El
 			) : shop.isPending ? (
 				<Skeleton className="h-24 w-full" />
 			) : (
-				shop.data.length > 0 && (
+				shop.data.roles.length > 0 && (
 					<Card padding="none">
 						<DividedList className="rounded-card border-0">
-							{shop.data.map((entry) => (
+							{shop.data.roles.map((entry) => (
 								<ShopRoleRow
 									key={entry.roleId}
 									entry={entry}
+									canManage={canManage}
 									busy={sell.isPending || remove.isPending}
 									onPrice={(next) => {
 										sell.mutate({ roleId: entry.roleId, price: next });
@@ -61,7 +64,9 @@ export function ShopRolesSection({ guildId }: { guildId: string }): React.JSX.El
 				)
 			)}
 
-			{full ? (
+			{shop.data === undefined ? null : !canManage ? (
+				<p className="text-muted-foreground text-sm">{t("economy.shopRolesNeedManageRoles")}</p>
+			) : full ? (
 				<Warning>{t("economy.shopRolesFull", { max: SHOP_ROLE_LIMITS.max })}</Warning>
 			) : (
 				<form
@@ -122,11 +127,13 @@ export function ShopRolesSection({ guildId }: { guildId: string }): React.JSX.El
 
 function ShopRoleRow({
 	entry,
+	canManage,
 	busy,
 	onPrice,
 	onRemove,
 }: {
 	entry: ShopRole;
+	canManage: boolean;
 	busy: boolean;
 	onPrice: (price: number) => void;
 	onRemove: () => void;
@@ -143,25 +150,36 @@ function ShopRoleRow({
 				<RoleSwatch name={name} colour={entry.colour} />
 				{entry.problem !== null && <span className="text-warning text-xs">{entry.problem}</span>}
 			</div>
-			<label htmlFor={id} className="sr-only">
-				{t("economy.priceOf", { name })}
-			</label>
-			<input
-				id={id}
-				inputMode="numeric"
-				value={text}
-				aria-invalid={amount === null}
-				onChange={(event) => {
-					setText(event.target.value);
-				}}
-				onBlur={() => {
-					if (amount !== null && amount !== entry.price) onPrice(amount);
-				}}
-				className={cn(FIELD, "max-w-32 font-mono tabular-nums", amount === null && "border-destructive")}
-			/>
-			<Button variant="secondary" disabled={busy} onClick={onRemove} aria-label={t("economy.takeOffSale", { name })}>
-				<X size={15} aria-hidden="true" />
-			</Button>
+			{!canManage ? (
+				<span className="font-mono text-sm tabular-nums">{formatNumber(entry.price)}</span>
+			) : (
+				<>
+					<label htmlFor={id} className="sr-only">
+						{t("economy.priceOf", { name })}
+					</label>
+					<input
+						id={id}
+						inputMode="numeric"
+						value={text}
+						aria-invalid={amount === null}
+						onChange={(event) => {
+							setText(event.target.value);
+						}}
+						onBlur={() => {
+							if (amount !== null && amount !== entry.price) onPrice(amount);
+						}}
+						className={cn(FIELD, "max-w-32 font-mono tabular-nums", amount === null && "border-destructive")}
+					/>
+					<Button
+						variant="secondary"
+						disabled={busy}
+						onClick={onRemove}
+						aria-label={t("economy.takeOffSale", { name })}
+					>
+						<X size={15} aria-hidden="true" />
+					</Button>
+				</>
+			)}
 		</li>
 	);
 }

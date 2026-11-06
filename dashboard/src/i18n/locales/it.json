@@ -3028,6 +3028,7 @@
 		"putOnSale": "Metti in vendita",
 		"priceOf": "Prezzo di {{name}}",
 		"takeOffSale": "Togli {{name}} dalla vendita",
-		"deletedRole": "Un ruolo eliminato"
+		"deletedRole": "Un ruolo eliminato",
+		"shopRolesNeedManageRoles": "Mettere in vendita i ruoli, cambiarne il prezzo e ritirarli richiede il permesso Gestire i ruoli in questo server."
 	}
 }

@@ -2945,6 +2945,7 @@
 		"putOnSale": "Put on sale",
 		"priceOf": "Price of {{name}}",
 		"takeOffSale": "Take {{name}} off sale",
-		"deletedRole": "A deleted role"
+		"deletedRole": "A deleted role",
+		"shopRolesNeedManageRoles": "Putting roles on sale, changing their prices and taking them off need the Manage Roles permission in this server."
 	}
 }

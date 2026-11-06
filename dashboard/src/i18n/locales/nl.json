@@ -2945,6 +2945,7 @@
 		"putOnSale": "Te koop zetten",
 		"priceOf": "Prijs van {{name}}",
 		"takeOffSale": "{{name}} uit de verkoop halen",
-		"deletedRole": "Een verwijderde rol"
+		"deletedRole": "Een verwijderde rol",
+		"shopRolesNeedManageRoles": "Rollen te koop zetten, hun prijs wijzigen en ze weer weghalen vraagt de toestemming Rollen beheren in deze server."
 	}
 }

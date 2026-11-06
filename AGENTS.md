@@ -2010,8 +2010,12 @@ load-bearing:
 ### A role sold in the shop is paid for first, and never one that moderates
 
 `/economy shop-role`, the shop's **Roles** tab and **Roles for sale** on the Economy settings screen sell a server's
-roles for coins. Three things about it are load-bearing:
+roles for coins. Four things about it are load-bearing:
 
+- **Only Manage Roles changes what is on sale, on every surface.** `/economy shop-role` asks it, the dashboard's
+  `PUT` and `DELETE` ask it, and `sellShopRole` and `withdrawShopRole` ask it of the person again, so a button or
+  panel added later cannot skip it. The read answers `canManage`, and a Manage Server manager without Manage Roles
+  sees the list with no price fields, no Put on sale and no remove, and a line saying what they lack.
 - **Only what a role menu could offer can be sold.** `sellShopRole` asks `offerProblem` of the person putting it on
   sale, and the dashboard's write asks Manage Roles and `requireGrantable` with the same rule, because a role with
   Kick Members sold for coins lets anybody with enough money kick. At most `SHOP_ROLE_LIMITS.max` (10) are for sale.

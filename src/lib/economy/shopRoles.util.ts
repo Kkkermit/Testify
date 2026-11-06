@@ -1,4 +1,4 @@
-import { type Guild, type GuildMember } from "discord.js";
+import { type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { adjustWallet, debitWallet } from "@database/repositories/economyRepository";
 import {
@@ -46,6 +46,13 @@ export async function rolesForSale(guild: Guild, member: GuildMember | null): Pr
 		}));
 }
 
+/** Only Manage Roles may change what the shop sells, on every surface; no member means a bot owner on the dashboard. */
+function assertManagesRoles(actor: GuildMember | undefined): void {
+	if (actor !== undefined && !actor.permissions.has(PermissionFlagsBits.ManageRoles)) {
+		throw new UserFacingError("Changing which roles the shop sells needs the Manage Roles permission.");
+	}
+}
+
 /** Puts a role on sale or changes its price; the person doing it must be able to give it themselves. */
 export async function sellShopRole(
 	guild: Guild,
@@ -54,6 +61,7 @@ export async function sellShopRole(
 	price: number,
 	updatedBy: string | null,
 ): Promise<ShopRole[]> {
+	assertManagesRoles(actor);
 	const problem = offerProblem(actor, roleId, guild);
 	if (problem !== null) throw new UserFacingError(problem);
 	if (price < SHOP_ROLE_LIMITS.minPrice || price > SHOP_ROLE_LIMITS.maxPrice) {
@@ -67,7 +75,12 @@ export async function sellShopRole(
 	return readShopRoles(guild);
 }
 
-export async function withdrawShopRole(guild: Guild, roleId: string): Promise<ShopRole[]> {
+export async function withdrawShopRole(
+	guild: Guild,
+	actor: GuildMember | undefined,
+	roleId: string,
+): Promise<ShopRole[]> {
+	assertManagesRoles(actor);
 	if (!(await removeShopRole(guild.id, roleId))) throw new UserFacingError("That role is not on sale.");
 	return readShopRoles(guild);
 }
