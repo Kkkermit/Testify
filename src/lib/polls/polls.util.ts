@@ -4,7 +4,7 @@ import { ANSWER_SEPARATOR, POLL_LIMITS } from "@lib/polls/polls.constants";
 
 /** A poll Discord itself runs, so the bot counts nothing and stores nothing. */
 
-export interface PollRequest {
+interface PollRequest {
 	question: string;
 	answers: string;
 	hours: number | null;

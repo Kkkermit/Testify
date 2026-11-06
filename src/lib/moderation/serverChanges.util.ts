@@ -196,7 +196,7 @@ export function pageChanges(
 }
 
 /** What the person reading may see, as Discord would decide it for them. */
-export interface ChangesReader extends AuditAudience {
+interface ChangesReader extends AuditAudience {
 	/** Discord shows its audit log only to View Audit Log. */
 	auditLog: boolean;
 }

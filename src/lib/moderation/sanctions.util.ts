@@ -9,7 +9,7 @@ import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 
 /** Kicking, banning and timing out, shared by the commands and the dashboard so each checks, notifies and records the same way. */
 
-export interface Sanctioned {
+interface Sanctioned {
 	notified: boolean;
 }
 
@@ -23,7 +23,7 @@ export function moderatorOf(user: { id: string; username: string }): Moderator {
 }
 
 /** Discord's ceiling on a timeout. */
-export const MAX_TIMEOUT_MS = 28 * DAY_MS;
+const MAX_TIMEOUT_MS = 28 * DAY_MS;
 
 /** The DM goes first, because once they are out of the server the bot can no longer reach them. */
 export async function kickMember(

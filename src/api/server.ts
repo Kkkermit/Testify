@@ -184,13 +184,13 @@ export function worthRetrying(error: NodeJS.ErrnoException): boolean {
 	return error.code === "EADDRINUSE" || error.code === "EAGAIN";
 }
 
-export interface RunningApi {
+interface RunningApi {
 	/** Resolves with the port actually bound, which is only the configured one when it was not 0. */
 	ready: Promise<number>;
 	close(): Promise<void>;
 }
 
-export interface ListenOptions {
+interface ListenOptions {
 	retries?: number;
 	retryDelayMs?: number;
 }

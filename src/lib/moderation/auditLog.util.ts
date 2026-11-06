@@ -19,9 +19,9 @@ const TONES = {
 	moderated: theme.colours.severe,
 } satisfies Record<string, ColorResolvable>;
 
-export type AuditTone = keyof typeof TONES;
+type AuditTone = keyof typeof TONES;
 
-export interface AuditEntry {
+interface AuditEntry {
 	event: AuditEvent;
 	title: string;
 	description?: string;

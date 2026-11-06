@@ -29,7 +29,7 @@ export function normaliseVerify(settings: StoredVerifySettings | null): VerifyCo
 	};
 }
 
-export interface VerifyPanelState {
+interface VerifyPanelState {
 	config: VerifyConfig;
 	/** True when the bot cannot hand out the chosen role, so the panel can say so. */
 	roleTooHigh?: boolean;

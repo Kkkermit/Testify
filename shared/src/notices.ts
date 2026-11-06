@@ -71,7 +71,7 @@ const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
 
 /** Up now: gone up and not yet taken down. */
-export function isLive(notice: Pick<Notice, "publishedAt" | "endsAt">, now: Date): boolean {
+function isLive(notice: Pick<Notice, "publishedAt" | "endsAt">, now: Date): boolean {
 	const at = now.getTime();
 	return Date.parse(notice.publishedAt) <= at && (notice.endsAt === null || Date.parse(notice.endsAt) > at);
 }

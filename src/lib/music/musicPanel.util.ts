@@ -72,7 +72,7 @@ export function trackLine(track: Track): string {
 }
 
 /** The current track's own line, which links out because the panel is the only place the address is shown. */
-export function headlineFor(track: Track): string {
+function headlineFor(track: Track): string {
 	const author = track.author === null ? "" : `\n-# ${truncate(track.author, 60)}`;
 
 	return `${SOURCE_EMOJI[track.source]} ${link(`**${truncate(track.title, TITLE_MAX)}**`, track.url)}${author}`;
@@ -116,7 +116,7 @@ export function statusLine(state: PanelState, track: Track): string {
 	return `-# ${parts.join(" · ")}`;
 }
 
-export function queueSummary(state: QueueState): string {
+function queueSummary(state: QueueState): string {
 	const upcoming = state.tracks.slice(state.index + 1);
 	if (upcoming.length === 0) return "-# Nothing queued after this.";
 
@@ -129,7 +129,7 @@ export function queueSummary(state: QueueState): string {
 const LOOP_LABELS = { off: "Loop: off", track: "Loop: track", queue: "Loop: queue" } as const;
 
 /** Carries no owner, because anybody the music system lets in may add a song; its handler checks who pressed it. */
-export function addButton(): ReturnType<typeof button> {
+function addButton(): ReturnType<typeof button> {
 	return button({
 		id: customId(MUSIC_ADD_ID, "open"),
 		label: "Add to queue",

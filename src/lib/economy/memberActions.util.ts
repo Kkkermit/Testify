@@ -99,7 +99,7 @@ export async function boardEntries(
 	return { total, entries: rows.map((row) => ({ userId: row.userId, primary: row.level, secondary: row.xp })) };
 }
 
-export async function rankOnBoard(
+async function rankOnBoard(
 	guildId: string,
 	board: MemberBoard,
 	userId: string,
@@ -284,7 +284,7 @@ export async function revokeSoftban(guild: Guild, userId: string, by: Moderator)
 	return lifted;
 }
 
-export interface LevelChange {
+interface LevelChange {
 	level: number;
 	xp: number;
 	rewards: RewardOutcome;

@@ -36,7 +36,7 @@ import { PendingVerify, VerifyConfig } from "@database/models/verification.schem
 import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
 
 /** `delete` drops the record, `remove` takes the id off a list, `anonymise` swaps it for `DELETED_USER_ID`. */
-export type Erasure = "delete" | "remove" | "anonymise" | "keep";
+type Erasure = "delete" | "remove" | "anonymise" | "keep";
 
 /**
  * Every field that can hold a person's id, by collection, and what deleting their data does to it; moderation records
@@ -98,7 +98,7 @@ export const ERASURE = {
 } as const satisfies Record<string, Record<string, Erasure>>;
 
 /** An idea the person posted, whose post in Discord carries their words. */
-export interface ErasedIdeaPost {
+interface ErasedIdeaPost {
 	channelId: string;
 	messageId: string;
 }

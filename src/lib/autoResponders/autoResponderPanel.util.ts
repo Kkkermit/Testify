@@ -77,7 +77,7 @@ export function autoResponderHub(responders: readonly AutoResponder[], ownerId: 
 	return withoutPings(containerMessage(container({ category: "settings", parts })));
 }
 
-export interface AutoResponderEditorState {
+interface AutoResponderEditorState {
 	responder: AutoResponder;
 	note?: string;
 	confirmingDelete?: boolean;

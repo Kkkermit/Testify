@@ -76,7 +76,7 @@ export function earnsXp(config: LevelConfig, channelId: string, roleIds: readonl
 	return !roleIds.some((roleId) => config.ignoredRoleIds.includes(roleId));
 }
 
-export interface RewardChange {
+interface RewardChange {
 	add: string[];
 	remove: string[];
 }
@@ -105,7 +105,7 @@ function unique(values: string[]): string[] {
 	return [...new Set(values)];
 }
 
-export interface LevelProgress {
+interface LevelProgress {
 	level: number;
 	xp: number;
 	progress: number;

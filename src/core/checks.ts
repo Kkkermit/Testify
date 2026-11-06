@@ -14,7 +14,7 @@ import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
 
-export interface TitledRefusal {
+interface TitledRefusal {
 	title: string;
 	message: string;
 	fields?: { name: string; value: string }[];
@@ -22,7 +22,7 @@ export interface TitledRefusal {
 	tone?: "notice" | "error";
 }
 
-export type CheckFailure = string | TitledRefusal | null;
+type CheckFailure = string | TitledRefusal | null;
 
 export function refusalText(refusal: string | TitledRefusal): string {
 	if (typeof refusal === "string") return refusal;
@@ -93,7 +93,7 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
-export function blacklistRefusal(entry: { reason: string; createdAt: Date }): TitledRefusal {
+function blacklistRefusal(entry: { reason: string; createdAt: Date }): TitledRefusal {
 	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
 
 	return {

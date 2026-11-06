@@ -5,8 +5,7 @@ import { ECONOMY } from "@config/constants";
 
 type Roll = (max: number) => number;
 
-export type RobberyScene =
-	"pickpocket" | "clean" | "jackpot" | "scraps" | "caught" | "fought" | "dog" | "slipped" | "dropped";
+type RobberyScene = "pickpocket" | "clean" | "jackpot" | "scraps" | "caught" | "fought" | "dog" | "slipped" | "dropped";
 
 export interface SceneRule {
 	scene: RobberyScene;
@@ -119,7 +118,7 @@ export const ROBBERY_SCENES: readonly SceneRule[] = [
 	},
 ];
 
-export interface RobberyPlan {
+interface RobberyPlan {
 	rule: SceneRule;
 	/** What was taken on a success, or lost on a failure; zero when nothing moved. */
 	amount: number;
@@ -127,7 +126,7 @@ export interface RobberyPlan {
 	line: string;
 }
 
-export function pickScene(roll: Roll = randomInt): SceneRule {
+function pickScene(roll: Roll = randomInt): SceneRule {
 	const total = ROBBERY_SCENES.reduce((sum, rule) => sum + rule.weight, 0);
 	let point = roll(total);
 

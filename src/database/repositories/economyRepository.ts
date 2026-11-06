@@ -123,7 +123,7 @@ export async function incrementCounters(
 	await Economy.updateOne({ guildId, userId }, { $inc: counters }).exec();
 }
 
-export type LeaderboardField = "wallet" | "bank" | "total";
+type LeaderboardField = "wallet" | "bank" | "total";
 
 /** `_id` last so the order is total, since equal balances are the normal case. */
 export async function getLeaderboard(
@@ -186,7 +186,7 @@ export async function getEconomyStanding(
 }
 
 /** One person's money across several servers, added together. */
-export interface MoneyStanding {
+interface MoneyStanding {
 	userId: string;
 	wallet: number;
 	bank: number;

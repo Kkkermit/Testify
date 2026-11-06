@@ -3,7 +3,7 @@ export interface PaletteCommand {
 	description: string;
 }
 
-export interface ComposerOption {
+interface ComposerOption {
 	name: string;
 	value: string;
 }

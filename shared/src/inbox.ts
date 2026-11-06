@@ -6,14 +6,14 @@ export const INBOX_LIMITS = {
 	shown: 5,
 } as const;
 
-export interface InboxTicket {
+interface InboxTicket {
 	channelId: string;
 	ticketId: string;
 	ownerName: string;
 	openedAt: string;
 }
 
-export interface InboxIdea {
+interface InboxIdea {
 	id: string;
 	number: number;
 	text: string;

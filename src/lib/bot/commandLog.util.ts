@@ -20,7 +20,7 @@ import { embed } from "@lib/discord/embeds.util";
 
 /** Every command run, gathered in memory and posted a batch at a time: slash and prefix each to their own channel. */
 
-export type CommandSurface = "slash" | "prefix";
+type CommandSurface = "slash" | "prefix";
 
 export interface CommandLogEntry {
 	surface: CommandSurface;
@@ -164,9 +164,9 @@ export class CommandLog {
 
 export type CommandLogs = Record<CommandSurface, CommandLog>;
 
-export const commandLogs: CommandLogs = { slash: new CommandLog(), prefix: new CommandLog() };
+const commandLogs: CommandLogs = { slash: new CommandLog(), prefix: new CommandLog() };
 
-export function commandLogChannel(client: TestifyClient, surface: CommandSurface): string | undefined {
+function commandLogChannel(client: TestifyClient, surface: CommandSurface): string | undefined {
 	return surface === "slash" ? client.env.CHANNEL_SLASH_COMMAND_LOG : client.env.CHANNEL_PREFIX_COMMAND_LOG;
 }
 

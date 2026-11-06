@@ -26,13 +26,13 @@ export interface WelcomeCardData {
 	background?: Buffer | null;
 }
 
-export interface WelcomeCardText {
+interface WelcomeCardText {
 	heading: string;
 	name: string;
 	position: string;
 }
 
-export function welcomeCardText(data: WelcomeCardData): WelcomeCardText {
+function welcomeCardText(data: WelcomeCardData): WelcomeCardText {
 	return {
 		heading: `WELCOME TO ${data.serverName.toUpperCase()}`,
 		name: data.displayName,

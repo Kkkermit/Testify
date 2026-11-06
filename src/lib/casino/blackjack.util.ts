@@ -32,7 +32,7 @@ export function handValue(hand: readonly Card[]): number {
 	return total;
 }
 
-export function isBlackjack(hand: readonly Card[]): boolean {
+function isBlackjack(hand: readonly Card[]): boolean {
 	return hand.length === 2 && handValue(hand) === 21;
 }
 

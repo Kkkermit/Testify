@@ -2,7 +2,7 @@ import { randomInt } from "node:crypto";
 import { type Reels, type Roll, type SlotSymbol } from "@lib/casino/casino.types";
 
 /** How often each symbol lands on a reel; every reel is the same strip. */
-export const SLOT_WEIGHTS: Record<SlotSymbol, number> = {
+const SLOT_WEIGHTS: Record<SlotSymbol, number> = {
 	cherry: 7,
 	lemon: 6,
 	bell: 5,

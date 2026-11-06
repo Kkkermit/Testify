@@ -135,7 +135,7 @@ export const RESTORABLE = {
 
 export type RestorableAction = keyof typeof RESTORABLE;
 
-export function isRestorable(action: string): action is RestorableAction {
+function isRestorable(action: string): action is RestorableAction {
 	return Object.hasOwn(RESTORABLE, action);
 }
 

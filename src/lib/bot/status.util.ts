@@ -52,7 +52,7 @@ export function gatewayCheck(ready: boolean, pingMs: number, shards: number): Ga
 	return { level: ready ? byLatency(ping, STATUS_LIMITS.gatewaySlowMs) : "down", pingMs: ping, shards };
 }
 
-export function databaseCheck(pingMs: number | null): DatabaseCheck {
+function databaseCheck(pingMs: number | null): DatabaseCheck {
 	return { level: pingMs === null ? "down" : byLatency(pingMs, STATUS_LIMITS.databaseSlowMs), pingMs };
 }
 
@@ -97,7 +97,7 @@ export function commandCheck(times: CommandTimes): CommandCheck {
 	return { level: failing || slow ? "degraded" : "operational", ...times };
 }
 
-export interface OverallInputs {
+interface OverallInputs {
 	core: StatusLevel[];
 	/** Commands and third-party services: their outage costs features, not the bot. */
 	peripheral: StatusLevel[];
@@ -204,9 +204,9 @@ export function recentBuckets(samples: SampleInput[], firstAt: number | null, no
 	});
 }
 
-export type LiveStatus = Omit<StatusResponse, "days" | "recent">;
+type LiveStatus = Omit<StatusResponse, "days" | "recent">;
 
-export interface StatusSources {
+interface StatusSources {
 	now?: number;
 	pingDatabase?: () => Promise<number | null>;
 }

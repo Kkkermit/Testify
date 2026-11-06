@@ -5,7 +5,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useNoticeFeed } from "@/features/notices/useNotices";
 import { cn } from "@/lib/cn";
 
-export const NOTIFICATIONS_PATH = "/notifications";
+const NOTIFICATIONS_PATH = "/notifications";
 
 export function NoticeBanner(): React.JSX.Element | null {
 	const { t } = useTranslation();

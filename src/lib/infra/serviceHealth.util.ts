@@ -26,7 +26,7 @@ export function recordOutcome(service: string, outcome: Outcome): void {
 	if (kept.length > KEPT_PER_SERVICE) kept.shift();
 }
 
-export interface ObserveOptions {
+interface ObserveOptions {
 	/** False for a failure that is the request's fault rather than the service's, such as a deleted video. */
 	blame?: (error: unknown) => boolean;
 	now?: () => number;

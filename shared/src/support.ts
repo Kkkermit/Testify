@@ -67,11 +67,11 @@ export interface SupportIndex {
 }
 
 /** Outside hosts an article may link to; any other link is drawn as its text. */
-export const SUPPORT_LINK_HOSTS = ["discord.com", "support.discord.com", "discord.gg", "github.com"] as const;
+const SUPPORT_LINK_HOSTS = ["discord.com", "support.discord.com", "discord.gg", "github.com"] as const;
 
 const INTERNAL_PATH = /^\/(?:[a-z0-9-]+(?:\/[a-z0-9-]+)*)?(?:\?[a-z]+=[a-z0-9-]+)?$/;
 
-export interface LinkTarget {
+interface LinkTarget {
 	href: string;
 	external: boolean;
 }

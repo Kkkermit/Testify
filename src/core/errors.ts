@@ -59,11 +59,11 @@ function failureEmbed(message: string, title?: string): EmbedBuilder {
 }
 
 /** Six characters somebody can read out in a bug report, and that find the failure in the log. */
-export function errorReference(): string {
+function errorReference(): string {
 	return randomBytes(4).readUInt32BE(0).toString(36).toUpperCase().padStart(6, "0").slice(-6);
 }
 
-export interface RunOutcome {
+interface RunOutcome {
 	ok: boolean;
 	/** Set only for an unexpected failure, which is the one kind written to the log with a reference. */
 	reference: string | null;
@@ -157,7 +157,7 @@ interface FailureReport {
 }
 
 /** What the operator's error channel shows for one failure: what ran, for whom, where, and the stack. */
-export function errorLogEmbed(report: FailureReport): EmbedBuilder {
+function errorLogEmbed(report: FailureReport): EmbedBuilder {
 	const { interaction, error, command } = report;
 	const user = loggedUser(interaction.user);
 

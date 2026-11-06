@@ -8,7 +8,7 @@ export const SANS = "Card Sans";
 export const DISPLAY = "Card Display";
 
 type Family = typeof SANS | typeof DISPLAY;
-export type Weight = 500 | 600 | 700;
+type Weight = 500 | 600 | 700;
 
 export interface TextStyle {
 	size: number;
@@ -17,7 +17,7 @@ export interface TextStyle {
 	family?: Family;
 }
 
-export interface DrawOptions extends TextStyle {
+interface DrawOptions extends TextStyle {
 	align?: "left" | "center" | "right";
 	/** Past this width the text shrinks towards `minSize`, then ends in an ellipsis. */
 	maxWidth?: number;
@@ -68,7 +68,7 @@ let registered = false;
 let installed: { emoji: string[]; other: string[] } | null = null;
 
 /** Registers the bundled fonts once; a missing folder leaves the system fonts to do the work. */
-export function registerCardFonts(directory = assetPath("fonts")): void {
+function registerCardFonts(directory = assetPath("fonts")): void {
 	if (registered) return;
 	registered = true;
 

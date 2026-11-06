@@ -12,7 +12,7 @@ export const DOC_FILES = [
 	".env.example",
 ] as const;
 
-export type DocFile = (typeof DOC_FILES)[number];
+type DocFile = (typeof DOC_FILES)[number];
 
 export const LOADERS: Record<DocFile, () => Promise<string>> = {
 	"README.md": async () => (await import("@repo/README.md?raw")).default,
@@ -26,7 +26,7 @@ export const LOADERS: Record<DocFile, () => Promise<string>> = {
 };
 
 export const DOC_GROUPS = ["run", "use", "change"] as const;
-export type DocGroup = (typeof DOC_GROUPS)[number];
+type DocGroup = (typeof DOC_GROUPS)[number];
 
 export const GROUP_LABELS: Record<DocGroup, TranslationKey> = {
 	run: "docs.groups.run",
@@ -46,11 +46,11 @@ export interface MarkdownPage extends PageBase {
 	sources: readonly { file: DocFile; sections?: readonly string[] }[];
 }
 
-export interface ConfigurationPage extends PageBase {
+interface ConfigurationPage extends PageBase {
 	kind: "configuration";
 }
 
-export interface GuidesPage extends PageBase {
+interface GuidesPage extends PageBase {
 	kind: "guides";
 }
 

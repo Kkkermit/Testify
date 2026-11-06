@@ -27,7 +27,7 @@ export const OWNER_AUDIT_LIMITS = {
 	inlineCode: 3_800,
 } as const;
 
-export function ownerLogChannel(client: TestifyClient): string | undefined {
+function ownerLogChannel(client: TestifyClient): string | undefined {
 	return client.env.CHANNEL_EVAL_LOG ?? client.env.CHANNEL_ERROR_LOG;
 }
 
@@ -76,7 +76,7 @@ function whoAndWhere(input: CommandInput): { name: string; value: string; inline
 	];
 }
 
-export function ownerAttemptEmbed(input: CommandInput, command: Command, held: number): EmbedBuilder {
+function ownerAttemptEmbed(input: CommandInput, command: Command, held: number): EmbedBuilder {
 	const user = loggedUser(input.user);
 	const given = givenOptions(input, command);
 	const tried = given
@@ -128,7 +128,7 @@ export async function reportOwnerAttempt(
 	});
 }
 
-export interface EvalRecord {
+interface EvalRecord {
 	code: string;
 	/** Already redacted. */
 	output: string;

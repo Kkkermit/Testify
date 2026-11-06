@@ -92,7 +92,7 @@ export async function deleteNotice(id: string): Promise<boolean> {
 	}
 }
 
-export interface ReaderState {
+interface ReaderState {
 	seenAt: Date | null;
 	hintedAt: Date | null;
 }

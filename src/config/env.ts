@@ -96,7 +96,7 @@ export function envFile(
 	return { name, path, exists: existsSync(path) };
 }
 
-export interface EnvProblem {
+interface EnvProblem {
 	key: string;
 	/** True when the variable was blank or absent, rather than set to something it cannot be. */
 	missing: boolean;

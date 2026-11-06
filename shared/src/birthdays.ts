@@ -27,7 +27,7 @@ export const MONTHS = [
 ] as const;
 
 /** February counts 29, so a leap-day birthday can be shared and is posted on the 28th in other years. */
-export function daysInMonth(month: number): number {
+function daysInMonth(month: number): number {
 	return [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1] ?? 0;
 }
 

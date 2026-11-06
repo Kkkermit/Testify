@@ -39,7 +39,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
 }
 
-export interface LoadCounts {
+interface LoadCounts {
 	commands: number;
 	events: number;
 	buttons: number;

@@ -14,7 +14,7 @@ export interface NewSession {
 	tokenExpiresAt: Date;
 }
 
-export interface IssuedSession {
+interface IssuedSession {
 	id: string;
 	csrfSecret: string;
 	expiresAt: Date;
@@ -63,7 +63,7 @@ export async function touchSession(id: string, ttlDays: number): Promise<void> {
 	).exec();
 }
 
-export interface SessionTokens {
+interface SessionTokens {
 	accessToken: string;
 	refreshToken: string;
 }

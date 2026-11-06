@@ -5,7 +5,7 @@ import { type SupportEntry, type SupportPick, type SupportPicker } from "@lib/su
 
 /** Claude as a classifier: it reads the question and names one article id, and never writes a word the reader sees. */
 
-export const ANTHROPIC_API = "Anthropic API";
+const ANTHROPIC_API = "Anthropic API";
 const DEFAULT_SUPPORT_MODEL = "claude-opus-5";
 
 const NONE = "none";
@@ -22,7 +22,7 @@ export function pickSchema(ids: readonly string[]): Record<string, unknown> {
 	};
 }
 
-export function systemPrompt(
+function systemPrompt(
 	entries: readonly { id: string; title: string; keywords: readonly string[] }[],
 	bot: string,
 ): string {
@@ -69,7 +69,7 @@ export function blamesAnthropic(error: unknown): boolean {
 	return error.status >= 500;
 }
 
-export interface PickerOptions {
+interface PickerOptions {
 	apiKey: string;
 	model: string;
 	entries: readonly SupportEntry[];

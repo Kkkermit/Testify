@@ -25,7 +25,7 @@ const STATUS_WORD: Record<Exclude<IdeaStatus, "open">, string> = {
 
 const STATUS_ACCENT = { accepted: theme.colours.success, declined: theme.colours.error } as const;
 
-export function ideaStatusLine(idea: Pick<StoredIdea, "status" | "reason" | "decidedByName" | "decidedAt">): string {
+function ideaStatusLine(idea: Pick<StoredIdea, "status" | "reason" | "decidedByName" | "decidedAt">): string {
 	if (idea.status === "open") return "🟡 **Open** — vote with the buttons below.";
 
 	const by = idea.decidedByName === null ? "" : ` by ${idea.decidedByName}`;

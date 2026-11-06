@@ -34,7 +34,7 @@ const ROLE_MENTION = /^<@&(\d+)>$/;
 const SNOWFLAKE = /^\d{17,20}$/;
 
 /** Splits on spaces, but keeps "quoted phrases" in one piece. */
-export function splitArgs(input: string): string[] {
+function splitArgs(input: string): string[] {
 	const args: string[] = [];
 	const pattern = /"([^"]*)"|'([^']*)'|(\S+)/g;
 
@@ -45,7 +45,7 @@ export function splitArgs(input: string): string[] {
 	return args;
 }
 
-export interface ParsedMessage {
+interface ParsedMessage {
 	name: string;
 	args: string[];
 	/** The prefix as it was typed, or null when the bot was mentioned instead. */

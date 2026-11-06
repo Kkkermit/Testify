@@ -62,7 +62,7 @@ export async function applyIdeaSettings(
 	return readIdeaSettings(guild);
 }
 
-export function ideaText(input: string): string {
+function ideaText(input: string): string {
 	const value = sanitiseText(input);
 
 	if (value === "") throw new UserFacingError("Say what your idea is.");
@@ -118,7 +118,7 @@ export async function submitIdea(
 }
 
 /** Re-renders the post from what is stored; a post that has been deleted is left that way. */
-export async function refreshIdeaPost(guild: Guild, idea: StoredIdea): Promise<void> {
+async function refreshIdeaPost(guild: Guild, idea: StoredIdea): Promise<void> {
 	if (idea.messageId === null) return;
 
 	const channel = await guild.channels.fetch(idea.channelId).catch(() => null);

@@ -31,7 +31,7 @@ export interface GuildUsageRow {
 }
 
 /** `typicalMs` is the median run in a server. */
-export interface SlowCommandRow {
+interface SlowCommandRow {
 	command: string;
 	category: string;
 	runs: number;
@@ -113,7 +113,7 @@ export interface CommandRunRow {
 	channelName: string | null;
 }
 
-export const MAX_MEMBER_SEARCH = 100;
+const MAX_MEMBER_SEARCH = 100;
 
 export const guildMembersQuery = analyticsQuery.extend(pagination.shape).extend({
 	/** A name, an ID or a pasted `<@mention>`. */
@@ -146,7 +146,7 @@ export const OWNER_GUILD_FILTERS = ["all", "inactive"] as const;
 
 export type OwnerGuildFilter = (typeof OWNER_GUILD_FILTERS)[number];
 
-export const MAX_GUILD_SEARCH = 100;
+const MAX_GUILD_SEARCH = 100;
 
 export const ownerGuildQuery = pagination.extend({
 	sort: z.enum(OWNER_GUILD_SORTS).default("members"),
@@ -167,7 +167,7 @@ export const LOG_LEVEL_RANK: Record<ReportedLogLevel, number> = {
 	fatal: 60,
 };
 
-export const MAX_LOG_SEARCH = 100;
+const MAX_LOG_SEARCH = 100;
 
 export const logQuery = z.object({
 	limit: z.coerce.number().int().min(1).max(1_000).default(200),
@@ -269,7 +269,7 @@ export const SCREEN_ROUTES = [
 	"/owner",
 ] as const;
 
-export type ScreenRoute = (typeof SCREEN_ROUTES)[number];
+type ScreenRoute = (typeof SCREEN_ROUTES)[number];
 
 export function isScreenRoute(route: string): route is ScreenRoute {
 	return (SCREEN_ROUTES as readonly string[]).includes(route);

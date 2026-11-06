@@ -8,7 +8,7 @@ import { type CasinoGame } from "@testify/shared";
 
 /** The games settled in one go: the result is decided and paid first, and the picture shows what already happened. */
 
-export type InstantGame = Extract<CasinoGame, "slots" | "coinflip" | "dice">;
+type InstantGame = Extract<CasinoGame, "slots" | "coinflip" | "dice">;
 
 export interface InstantOutcome {
 	game: InstantGame;

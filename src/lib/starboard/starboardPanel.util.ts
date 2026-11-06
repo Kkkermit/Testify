@@ -32,7 +32,7 @@ export function starLine(stars: number, channelId: string): string {
 	return `${STARBOARD_EMOJI} **${String(stars)}** · <#${channelId}>`;
 }
 
-export function messageLink(message: Pick<StarredMessage, "guildId" | "channelId" | "messageId">): string {
+function messageLink(message: Pick<StarredMessage, "guildId" | "channelId" | "messageId">): string {
 	return `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.messageId}`;
 }
 

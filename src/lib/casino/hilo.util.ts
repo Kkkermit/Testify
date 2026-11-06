@@ -9,7 +9,7 @@ export const HILO_EDGE = 0.97;
 export const HILO_MAX_MULTIPLIER = 1_000;
 
 /** Aces are high: two is the lowest card and ace the highest. */
-export function cardValue(card: Card): number {
+function cardValue(card: Card): number {
 	if (card.rank === "A") return 14;
 	if (card.rank === "K") return 13;
 	if (card.rank === "Q") return 12;

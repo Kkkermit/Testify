@@ -69,7 +69,7 @@ export function scheduleHub(messages: readonly ScheduledMessage[], ownerId: stri
 	return withoutPings(containerMessage(container({ category: "settings", parts })));
 }
 
-export interface ScheduleEditorState {
+interface ScheduleEditorState {
 	schedule: ScheduledMessage;
 	note?: string;
 	confirmingDelete?: boolean;

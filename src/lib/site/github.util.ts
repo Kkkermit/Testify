@@ -141,11 +141,11 @@ export function trafficDays(
 }
 
 /** A day this many days before `now`, as GitHub dates its traffic. */
-export function daysBefore(now: number, days: number): string {
+function daysBefore(now: number, days: number): string {
 	return new Date(now - days * DAY_MS).toISOString().slice(0, 10);
 }
 
-export interface GitHubReaderOptions {
+interface GitHubReaderOptions {
 	repository: string;
 	version: string;
 	logger: Logger;

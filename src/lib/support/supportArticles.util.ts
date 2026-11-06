@@ -46,7 +46,7 @@ export interface Article {
 	related: string[];
 }
 
-export type ArticleResult = { ok: true; article: Article } | { ok: false; file: string; reason: string };
+type ArticleResult = { ok: true; article: Article } | { ok: false; file: string; reason: string };
 
 export function parseArticle(file: string, source: string): ArticleResult {
 	const match = FRONTMATTER.exec(source.replace(/\r\n/g, "\n"));
@@ -192,7 +192,7 @@ export function commandEntries(commands: Iterable<Command>): SupportEntry[] {
 		});
 }
 
-export interface LinkProblem {
+interface LinkProblem {
 	article: string;
 	missing: string;
 }

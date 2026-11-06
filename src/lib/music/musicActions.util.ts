@@ -55,7 +55,7 @@ export function requestedQuery(raw: string): Query {
 	return query;
 }
 
-export interface TrackRequest {
+interface TrackRequest {
 	guild: Guild;
 	client: TestifyClient;
 	channel: VoiceBasedChannel;
@@ -142,7 +142,7 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 	return { session, note: fellBack ? `${note} YouTube would not answer, so it came from SoundCloud.` : note };
 }
 
-export function openSession(guild: Guild, client: TestifyClient): MusicSession {
+function openSession(guild: Guild, client: TestifyClient): MusicSession {
 	return sessionFor(guild, musicBinaries(client), client.logger);
 }
 

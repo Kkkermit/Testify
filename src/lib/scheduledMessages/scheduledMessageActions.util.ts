@@ -28,7 +28,7 @@ import {
 
 const GONE = "That scheduled message has been deleted, or has already been posted.";
 
-export function publicSchedule(guild: Guild, stored: StoredSchedule): ScheduledMessage {
+function publicSchedule(guild: Guild, stored: StoredSchedule): ScheduledMessage {
 	return {
 		id: stored.id,
 		channelId: stored.channelId,

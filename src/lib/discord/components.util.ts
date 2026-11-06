@@ -15,7 +15,7 @@ import {
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
 
-export interface ButtonOptions {
+interface ButtonOptions {
 	id: string;
 	label?: string;
 	style?: ButtonStyle;
@@ -203,7 +203,7 @@ export function quickAmountRow(
 	);
 }
 
-export interface ModalField {
+interface ModalField {
 	id: string;
 	label: string;
 	paragraph?: boolean;

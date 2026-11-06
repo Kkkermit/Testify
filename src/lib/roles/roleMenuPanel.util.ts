@@ -132,7 +132,7 @@ export function roleMenuHub(menus: StoredRoleMenu[], ownerId: string, note?: str
 	return containerMessage(container({ category: "settings", parts }));
 }
 
-export interface RoleMenuEditorState {
+interface RoleMenuEditorState {
 	menu: StoredRoleMenu;
 	/** Lines naming each role a pick refused, and why. */
 	refused?: string[];

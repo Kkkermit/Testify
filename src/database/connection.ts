@@ -5,7 +5,7 @@ import { type Logger } from "@core/logger";
 
 /** The only place a Mongo connection is opened. */
 
-export interface ConnectOptions {
+interface ConnectOptions {
 	uri: string;
 	logger: Logger;
 	retries?: number;

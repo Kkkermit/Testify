@@ -49,10 +49,6 @@ export async function shareBirthday(
 		.exec();
 }
 
-export async function findBirthday(guildId: string, userId: string): Promise<StoredBirthday | null> {
-	return SharedBirthday.findOne({ guildId, userId }).select(BIRTHDAY).lean<StoredBirthday>().exec();
-}
-
 export async function forgetBirthday(guildId: string, userId: string): Promise<boolean> {
 	return (await SharedBirthday.deleteOne({ guildId, userId }).exec()).deletedCount > 0;
 }

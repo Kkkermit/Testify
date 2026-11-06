@@ -11,7 +11,7 @@ import {
 import { type TranslationKey } from "@/i18n";
 import { oneOf } from "@/lib/oneOf";
 
-export const MEMBER_TABS = ["directory", "boards"] as const;
+const MEMBER_TABS = ["directory", "boards"] as const;
 
 export type MemberTab = (typeof MEMBER_TABS)[number];
 

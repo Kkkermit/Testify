@@ -47,7 +47,7 @@ export function normaliseWelcome(settings: StoredWelcomeSettings | null): Welcom
 	};
 }
 
-export interface BackgroundCheck {
+interface BackgroundCheck {
 	ok: boolean;
 	reason?: string;
 }

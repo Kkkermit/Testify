@@ -10,7 +10,7 @@ export interface Button {
 	run(interaction: ComponentInteraction, context: ButtonContext): Promise<void>;
 }
 
-export interface ButtonContext {
+interface ButtonContext {
 	client: TestifyClient;
 	action: string;
 	args: string[];

@@ -19,7 +19,7 @@ export function normaliseMusicSettings(stored: StoredMusicSettings): MusicSettin
 }
 
 /** No roles chosen means the player is open; otherwise one of them is the ticket. */
-export function isDj(settings: Pick<MusicSettings, "djRoleIds">, roleIds: readonly string[]): boolean {
+function isDj(settings: Pick<MusicSettings, "djRoleIds">, roleIds: readonly string[]): boolean {
 	if (settings.djRoleIds.length === 0) return true;
 
 	return settings.djRoleIds.some((roleId) => roleIds.includes(roleId));

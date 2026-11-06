@@ -55,7 +55,7 @@ export function sourcesLine(sources: MusicSourceChoice): string {
 }
 
 /** Where a search that names no service goes. */
-export function searchSourceFor(sources: MusicSourceChoice): MusicSource {
+function searchSourceFor(sources: MusicSourceChoice): MusicSource {
 	return sources === "soundcloud" ? "soundcloud" : "youtube";
 }
 

@@ -5,7 +5,7 @@ import { categoryColour, theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { truncate } from "@lib/format/format.util";
 
-export interface EmbedOptions {
+interface EmbedOptions {
 	category?: Category | undefined;
 	colour?: ColorResolvable | undefined;
 	title?: string | undefined;

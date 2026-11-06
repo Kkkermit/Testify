@@ -1,4 +1,4 @@
-export interface ShopItem {
+interface ShopItem {
 	id: string;
 	name: string;
 	description: string;
@@ -9,7 +9,7 @@ export interface ShopItem {
 	useDescription?: string;
 }
 
-export interface HouseItem {
+interface HouseItem {
 	id: string;
 	name: string;
 	description: string;
@@ -18,7 +18,7 @@ export interface HouseItem {
 	emoji: string;
 }
 
-export interface BusinessItem {
+interface BusinessItem {
 	id: string;
 	name: string;
 	description: string;
@@ -27,7 +27,7 @@ export interface BusinessItem {
 	emoji: string;
 }
 
-export interface JobItem {
+interface JobItem {
 	id: string;
 	name: string;
 	description: string;

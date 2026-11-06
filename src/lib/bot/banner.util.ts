@@ -83,7 +83,7 @@ export function bigText(text: string): string[] {
 	return Array.from({ length: 6 }, (_unused, line) => glyphs.map((glyph) => glyph[line] ?? "").join(""));
 }
 
-export interface BannerFacts {
+interface BannerFacts {
 	name: string;
 	servers: number;
 	members: number;

@@ -88,7 +88,7 @@ export function formatBytes(bytes: number): string {
 	return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
 }
 
-export type TimestampStyle = "t" | "T" | "d" | "D" | "f" | "F" | "R";
+type TimestampStyle = "t" | "T" | "d" | "D" | "f" | "F" | "R";
 
 /** Discord renders these in each viewer's own locale and timezone, and keeps them live. */
 /** A mention, or the placeholder name for somebody who deleted their data, whose id would render as nobody. */

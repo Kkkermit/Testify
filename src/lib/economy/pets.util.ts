@@ -294,7 +294,7 @@ export function findPet(id: string): PetSpecies | undefined {
 	return ALL_PETS.find((pet) => pet.id === id);
 }
 
-export interface PetStatus {
+interface PetStatus {
 	mood: string;
 	emoji: string;
 	needsFood: boolean;

@@ -7,12 +7,12 @@ import { type CoinSide } from "@lib/casino/casino.types";
 
 /** The coin toss and the dice, each a short animation that plays once and lands on the result. */
 
-export const COIN_SIZE = 240;
-export const DICE_WIDTH = 320;
-export const DICE_HEIGHT = 180;
+const COIN_SIZE = 240;
+const DICE_WIDTH = 320;
+const DICE_HEIGHT = 180;
 
-export const TOSS = { frames: 26, frameMs: 45, halfTurns: 9 } as const;
-export const TUMBLE = { frames: 18, frameMs: 55 } as const;
+const TOSS = { frames: 26, frameMs: 45, halfTurns: 9 } as const;
+const TUMBLE = { frames: 18, frameMs: 55 } as const;
 
 /** How wide the coin looks at a point in the toss, and which face is up: it turns edge-on between faces. */
 export function coinAt(progress: number, landed: CoinSide): { width: number; side: CoinSide } {

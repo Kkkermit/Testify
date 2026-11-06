@@ -7,13 +7,13 @@ import { embed } from "@lib/discord/embeds.util";
 
 /** A config screen: current values on the left, one button per editable field. */
 
-export interface SettingsField {
+interface SettingsField {
 	label: string;
 	value: string;
 	inline?: boolean;
 }
 
-export interface SettingsAction {
+interface SettingsAction {
 	/** Becomes the action part of the custom ID. */
 	action: string;
 	label: string;
@@ -22,7 +22,7 @@ export interface SettingsAction {
 	disabled?: boolean;
 }
 
-export interface SettingsPanelOptions {
+interface SettingsPanelOptions {
 	id: string;
 	category: Category;
 	title: string;

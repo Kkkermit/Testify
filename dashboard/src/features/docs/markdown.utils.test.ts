@@ -4,7 +4,6 @@ import { REQUIRED_VARIABLES } from "@/features/docs/components/ConfigurationTabl
 import { PAGES_BY_FILE, PAGES_BY_SECTION } from "@/features/docs/docs.pages";
 import {
 	alertOf,
-	anchorsOf,
 	decodeEntities,
 	destinationOf,
 	headingSlug,
@@ -157,11 +156,5 @@ describe("the configuration page", () => {
 		const block = schema.slice(schema.indexOf("// Required."), schema.indexOf("// Optional."));
 
 		expect([...block.matchAll(/^\t([A-Z][A-Z0-9_]+):/gm)].map(([, name]) => name)).toEqual([...REQUIRED_VARIABLES]);
-	});
-});
-
-describe("anchorsOf", () => {
-	it("lists a file's anchors in order", () => {
-		expect(anchorsOf("# A\n## B\n## B")).toEqual(["a", "b", "b-1"]);
 	});
 });

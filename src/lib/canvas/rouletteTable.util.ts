@@ -22,12 +22,12 @@ const GRID_Y = LAYOUT.margin;
 const GRID_HEIGHT = LAYOUT.row * 3;
 
 export const BOARD_WIDTH = GRID_X + LAYOUT.cell * 12 + LAYOUT.columnWidth + LAYOUT.margin;
-export const BOARD_HEIGHT = GRID_Y + GRID_HEIGHT + LAYOUT.band * 2 + LAYOUT.margin;
+const BOARD_HEIGHT = GRID_Y + GRID_HEIGHT + LAYOUT.band * 2 + LAYOUT.margin;
 /** The strip above the table that shows the last spins, when there are any. */
 export const HISTORY_BAND = 64;
 
 /** The board is taller by the history strip only when it has spins to show. */
-export function boardHeight(history: readonly number[]): number {
+function boardHeight(history: readonly number[]): number {
 	return BOARD_HEIGHT + (history.length > 0 ? HISTORY_BAND : 0);
 }
 
@@ -35,7 +35,7 @@ const FILL = { red: "#c0262d", black: "#17181c", green: "#16813d" } as const;
 const LINE = "rgba(255, 255, 255, 0.55)";
 const GOLD = "#ffd76a";
 
-export interface Rect {
+interface Rect {
 	x: number;
 	y: number;
 	width: number;
@@ -107,7 +107,7 @@ export function spotRect(bet: RouletteBet): Rect {
 }
 
 /** A chip's figure in four characters or fewer: 950, 1.5K, 12K, 3M. */
-export function chipLabel(amount: number): string {
+function chipLabel(amount: number): string {
 	const units: [number, string][] = [
 		[1e12, "T"],
 		[1e9, "B"],
@@ -213,7 +213,7 @@ export interface BoardChip {
 	seat: number;
 }
 
-export interface RouletteBoardView {
+interface RouletteBoardView {
 	chips: readonly BoardChip[];
 	/** Where the ball landed; absent while bets are still going down. */
 	pocket?: number;
@@ -316,7 +316,7 @@ function drawChip(
 }
 
 /** The chips grouped by spot, in the order they went down. */
-export function chipStacks(chips: readonly BoardChip[]): { bet: RouletteBet; total: number; seats: number[] }[] {
+function chipStacks(chips: readonly BoardChip[]): { bet: RouletteBet; total: number; seats: number[] }[] {
 	const stacks = new Map<string, { bet: RouletteBet; total: number; seats: number[] }>();
 	for (const chip of chips) {
 		const key = spotKey(chip.bet);

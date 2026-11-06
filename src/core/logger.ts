@@ -9,7 +9,7 @@ export type Logger = pino.Logger;
 const LEVELS: Record<number, LogLevel> = { 10: "trace", 20: "debug", 30: "info", 40: "warn", 50: "error", 60: "fatal" };
 
 /** pino takes either `(message)` or `(context, message)`, and the ring wants them apart. */
-export function splitLogArgs(args: unknown[]): Pick<LogRecord, "message" | "context"> {
+function splitLogArgs(args: unknown[]): Pick<LogRecord, "message" | "context"> {
 	const [first, second] = args;
 
 	if (typeof first === "object" && first !== null) {

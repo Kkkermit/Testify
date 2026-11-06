@@ -56,7 +56,7 @@ async function editRoundMessage(client: TestifyClient, round: RoundRecord, messa
 }
 
 /** Who opened a table, and whether anybody else may bet at it. */
-export interface TableHost {
+interface TableHost {
 	userId: string;
 	name: string;
 	private: boolean;

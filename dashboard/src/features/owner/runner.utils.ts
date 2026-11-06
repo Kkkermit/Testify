@@ -49,7 +49,7 @@ function coerce(option: CommandOptionSummary, value: string): ArgValue {
 	return value;
 }
 
-export function missingRequired(options: CommandOptionSummary[], raw: Record<string, string>): string[] {
+function missingRequired(options: CommandOptionSummary[], raw: Record<string, string>): string[] {
 	return options.filter((option) => option.required && (raw[option.name] ?? "") === "").map((option) => option.name);
 }
 

@@ -67,7 +67,7 @@ export function languageOfFile(path: string): string | null {
 	return dot <= 0 ? null : (BY_EXTENSION[name.slice(dot + 1).toLowerCase()] ?? null);
 }
 
-export function knownLanguage(language: string | null | undefined): language is string {
+function knownLanguage(language: string | null | undefined): language is string {
 	return language !== null && language !== undefined && language !== "" && lowlight.registered(language);
 }
 

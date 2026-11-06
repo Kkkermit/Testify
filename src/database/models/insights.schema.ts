@@ -17,12 +17,12 @@ export interface ServerDay extends Expiring {
 	hours?: Record<string, number>;
 }
 
-export interface ChannelDay extends Expiring {
+interface ChannelDay extends Expiring {
 	channelId: string;
 	messages: number;
 }
 
-export interface MemberDay extends Expiring {
+interface MemberDay extends Expiring {
 	userId: string;
 	messages: number;
 }

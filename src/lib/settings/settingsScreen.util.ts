@@ -19,7 +19,7 @@ export interface ScreenAction {
 }
 
 /** A select menu with a caption above it. */
-export interface ScreenPicker {
+interface ScreenPicker {
 	label: string;
 	/** A line of smaller text under the label, for anything worth explaining. */
 	hint?: string;
@@ -33,7 +33,7 @@ export interface ScreenRow {
 	action?: ScreenAction;
 }
 
-export interface SettingsScreenOptions {
+interface SettingsScreenOptions {
 	id: string;
 	ownerId: string;
 	category: Category;

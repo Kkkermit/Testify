@@ -12,7 +12,7 @@ import { isScheduled, type Notice, NOTICE_LIMITS, NOTICE_TONES, type NoticeTone 
 
 type QuietPanel = ContainerMessage & { allowedMentions: { parse: [] } };
 
-export const NOTICE_TONE_LOOK: Record<NoticeTone, { emoji: string; label: string }> = {
+const NOTICE_TONE_LOOK: Record<NoticeTone, { emoji: string; label: string }> = {
 	info: { emoji: "📣", label: "Notice" },
 	problem: { emoji: "⚠️", label: "Problem" },
 	fixed: { emoji: "✅", label: "Fixed" },
@@ -114,7 +114,7 @@ export function noticeBoard(
 	return withoutPings(containerMessage(container({ category: "info", parts })));
 }
 
-export interface NoticeEditorState {
+interface NoticeEditorState {
 	notice: Notice;
 	note?: string;
 	confirmingRemove?: boolean;
