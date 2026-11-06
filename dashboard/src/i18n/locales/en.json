@@ -169,7 +169,9 @@
 		"compare": "Side by side",
 		"compareHint": "Compare how your servers are set up",
 		"appeals": "Appeals",
-		"appealsHint": "Banned members asking to come back"
+		"appealsHint": "Banned members asking to come back",
+		"modmail": "Mod mail",
+		"modmailHint": "Members writing privately to staff"
 	},
 	"account": {
 		"title": "Your account",
@@ -2140,7 +2142,9 @@
 		"storedP3": "Notifications are what the bot’s owners post for everybody. So that each new one is mentioned to you once, {{bot}} keeps when you last read them and when it last told you about one, against your user id and nothing else. That record is not tied to a server either, and it is deleted 90 days after you last read the notifications or were told about one.",
 		"retentionL17": "When you last read the notifications: 90 days after you last read them or were told about one, then deleted automatically.",
 		"storedL17": "Ban appeals: what you wrote when you appealed a ban, your user id and username, and what staff decided, with its reason and who decided it.",
-		"retentionL18": "Ban appeals: 180 days after staff decide, so a refusal can hold back the next appeal. One still waiting is kept until it is decided, and every appeal goes when the bot is removed from the server."
+		"retentionL18": "Ban appeals: 180 days after staff decide, so a refusal can hold back the next appeal. One still waiting is kept until it is decided, and every appeal goes when the bot is removed from the server.",
+		"messagesP4": "Mod mail is the other one. While you have a mod mail conversation open, what you send the bot in a direct message goes to that server’s staff, in a thread in their mod mail channel, and is not forwarded to the operator. What staff write in the thread comes back to you the same way. Both copies live in Discord: the bot keeps only which server you wrote to, the thread, whether a reply is owed and when it opened and closed.",
+		"retentionL19": "Mod mail conversations: 90 days after they close, then deleted automatically. The threads themselves stay in the server’s Discord."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -2851,5 +2855,34 @@
 		"ownHistory": "Your appeals",
 		"ownSentOn": "Sent on {{when}}",
 		"ownServerGone": "A server {{bot}} has left"
+	},
+	"modmail": {
+		"title": "Mod mail",
+		"subtitle": "Members write to staff in a direct message to {{bot}}. Each conversation gets a thread, and what staff write there goes back to the member.",
+		"summaryOn": "Members can write to staff, and each conversation is a thread in {{channel}}.",
+		"summaryOff": "Mod mail is off. Turned on, each conversation is a thread in {{channel}}.",
+		"summaryNoChannel": "Mod mail has no channel yet, so members cannot write to staff.",
+		"cannotUse": "{{bot}} cannot work in {{channel}}. Let it send messages, create public threads and manage threads there.",
+		"enabled": "Members can write to staff",
+		"enabledHint": "With /modmail open, or by sending {{bot}} a direct message.",
+		"enabledHintNoChannel": "Pick a channel first.",
+		"channel": "Threads go in",
+		"channelHint": "Each conversation gets a thread here. Only staff should be able to see this channel.",
+		"ping": "Ping when one opens",
+		"pingHint": "The role is pinged once, in the thread’s first post.",
+		"pingNobody": "Nobody",
+		"signed": "Replies are signed",
+		"signedHint": "How a reply looks in the member’s direct messages.",
+		"signedNamed": "With the staff member’s name",
+		"signedAnonymous": "As the server’s staff",
+		"openTitle": "Open conversations",
+		"hidden": "You cannot see the mod mail channel in Discord, so its conversations are hidden here too.",
+		"emptyTitle": "No open conversations",
+		"emptyBody": "When a member writes to staff, the conversation appears here until somebody closes it.",
+		"waiting": "Waiting for a reply",
+		"times": "Opened {{opened}} · last message {{last}}",
+		"openThread": "Open the thread",
+		"close": "Close",
+		"closeWith": "Close the conversation with {{name}}"
 	}
 }

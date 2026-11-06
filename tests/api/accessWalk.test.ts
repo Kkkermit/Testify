@@ -70,6 +70,7 @@ const ASKS_MORE = new Set([
 	"PATCH /members/:userId/nickname",
 	"GET /members/:userId/roles",
 	"PUT /members/:userId/roles",
+	"POST /modmail/conversations/:conversationId/close",
 	"PATCH /raid-protection",
 	"POST /role-menus",
 	"PUT /role-menus/:menuId",

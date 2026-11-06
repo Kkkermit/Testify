@@ -14,6 +14,7 @@ import {
 	Lightbulb,
 	Link as LinkIcon,
 	ListChecks,
+	Mails,
 	MessageSquareReply,
 	MessageSquareWarning,
 	MessagesSquare,
@@ -54,6 +55,11 @@ const LOOKS: Record<string, FeatureLook> = {
 		icon: Scale,
 		tint: "text-hue-red",
 		path: (guildId) => `/guilds/${guildId}/appeals`,
+	},
+	modmail: {
+		icon: Mails,
+		tint: "text-hue-red",
+		path: (guildId) => `/guilds/${guildId}/modmail`,
 	},
 	ideas: {
 		icon: Lightbulb,

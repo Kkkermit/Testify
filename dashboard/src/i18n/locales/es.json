@@ -170,7 +170,9 @@
 		"compare": "Lado a lado",
 		"compareHint": "Comparar cómo están configurados tus servidores",
 		"appeals": "Apelaciones",
-		"appealsHint": "Baneados que piden volver"
+		"appealsHint": "Baneados que piden volver",
+		"modmail": "Correo al equipo",
+		"modmailHint": "Miembros que escriben en privado al equipo"
 	},
 	"account": {
 		"title": "Tu cuenta",
@@ -2205,7 +2207,9 @@
 		"storedP3": "Las notificaciones son lo que publican los dueños del bot para todos. Para mencionarte cada nueva una sola vez, {{bot}} guarda cuándo las leíste por última vez y cuándo te avisó de una, ligado a tu ID de usuario y a nada más. Ese registro tampoco está ligado a un servidor y se elimina 90 días después de la última vez que leíste las notificaciones o te avisaron de una.",
 		"retentionL17": "Cuándo leíste las notificaciones por última vez: 90 días después de la última vez que las leíste o te avisaron de una, y luego se elimina automáticamente.",
 		"storedL17": "Apelaciones de baneo: lo que escribiste al apelar un baneo, tu ID de usuario y tu nombre de usuario, y lo que decidió el equipo, con su motivo y quién lo decidió.",
-		"retentionL18": "Apelaciones de baneo: 180 días después de que el equipo decida, para que un rechazo pueda frenar la siguiente apelación. Una que sigue en espera se guarda hasta que se decida, y todas se borran cuando el bot se quita del servidor."
+		"retentionL18": "Apelaciones de baneo: 180 días después de que el equipo decida, para que un rechazo pueda frenar la siguiente apelación. Una que sigue en espera se guarda hasta que se decida, y todas se borran cuando el bot se quita del servidor.",
+		"messagesP4": "El correo al equipo es la otra. Mientras tengas una conversación abierta, lo que envíes al bot por DM va al equipo de ese servidor, a un hilo en su canal de correo, y no se reenvía al operador. Lo que el equipo escribe en el hilo te llega del mismo modo. Ambas copias están en Discord: el bot solo guarda a qué servidor escribiste, el hilo, si se debe una respuesta y cuándo se abrió y cerró.",
+		"retentionL19": "Conversaciones de correo al equipo: 90 días después de cerrarse, y luego se borran automáticamente. Los hilos siguen en el Discord del servidor."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",
@@ -2934,5 +2938,34 @@
 		"ownHistory": "Tus apelaciones",
 		"ownSentOn": "Enviada el {{when}}",
 		"ownServerGone": "Un servidor del que {{bot}} se fue"
+	},
+	"modmail": {
+		"title": "Correo al equipo",
+		"subtitle": "Los miembros escriben al equipo por DM a {{bot}}. Cada conversación tiene un hilo, y lo que el equipo escribe allí le llega al miembro.",
+		"summaryOn": "Los miembros pueden escribir al equipo, y cada conversación es un hilo en {{channel}}.",
+		"summaryOff": "El correo al equipo está desactivado. Activado, cada conversación es un hilo en {{channel}}.",
+		"summaryNoChannel": "El correo al equipo aún no tiene canal, así que los miembros no pueden escribir.",
+		"cannotUse": "{{bot}} no puede trabajar en {{channel}}. Permítele enviar mensajes, crear hilos públicos y gestionar hilos allí.",
+		"enabled": "Los miembros pueden escribir al equipo",
+		"enabledHint": "Con /modmail open, o enviando un DM a {{bot}}.",
+		"enabledHintNoChannel": "Elige primero un canal.",
+		"channel": "Los hilos van en",
+		"channelHint": "Cada conversación tiene aquí un hilo. Solo el equipo debería poder ver este canal.",
+		"ping": "Mencionar cuando se abra una",
+		"pingHint": "Se menciona al rol una vez, en la primera publicación del hilo.",
+		"pingNobody": "Nadie",
+		"signed": "Las respuestas se firman",
+		"signedHint": "Cómo se ve una respuesta en los DM del miembro.",
+		"signedNamed": "Con el nombre de quien responde",
+		"signedAnonymous": "Como el equipo del servidor",
+		"openTitle": "Conversaciones abiertas",
+		"hidden": "No puedes ver el canal de correo en Discord, así que sus conversaciones también se ocultan aquí.",
+		"emptyTitle": "No hay conversaciones abiertas",
+		"emptyBody": "Cuando un miembro escribe al equipo, la conversación aparece aquí hasta que alguien la cierre.",
+		"waiting": "Espera respuesta",
+		"times": "Abierta {{opened}} · último mensaje {{last}}",
+		"openThread": "Abrir el hilo",
+		"close": "Cerrar",
+		"closeWith": "Cerrar la conversación con {{name}}"
 	}
 }

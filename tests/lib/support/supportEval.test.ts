@@ -111,6 +111,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["time someone out for an hour", ["timeouts"]],
 	["ban someone for a week", ["bans"]],
 	["i got banned how can i get back in", ["ban-appeals"]],
+	["how can members message the mods privately", ["modmail"]],
 	["delete 50 messages", ["clearing-messages", "command-clear"]],
 	["lock the channel", ["channel-controls"]],
 	["make the bot say something", ["announcements"]],

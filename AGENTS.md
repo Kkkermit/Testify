@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 94, across 14 categories          |
-| Command files        | 115 (incl. folded-in subcommands) |
+| Commands             | 95, across 14 categories          |
+| Command files        | 116 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
-| Button handlers      | 47                                |
-| Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 225, in 32 domain folders         |
-| Schemas/repositories | 48 / 47                           |
+| Button handlers      | 49                                |
+| Events               | 33, in 6 groups                   |
+| `src/lib` helpers    | 228, in 33 domain folders         |
+| Schemas/repositories | 49 / 48                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,987 across 528 suites           |
+| Tests                | 4,011 across 535 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -218,10 +218,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  115 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               31 handlers in command, community, create, logging, ready and message
-├── buttons/              47 component handlers, keyed by custom-ID prefix
-├── lib/                  225 helpers in 32 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  116 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               33 handlers in command, community, create, logging, ready and message
+├── buttons/              49 component handlers, keyed by custom-ID prefix
+├── lib/                  228 helpers in 33 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,11 +232,11 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/ notices/ account/ appeals/
+│       site/ notices/ account/ appeals/ modmail/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           48 Mongoose schemas, one file per feature
-│   └── repositories/     47 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           49 Mongoose schemas, one file per feature
+│   └── repositories/     48 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -843,7 +843,7 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
 
 **Log channels are the third job: posts the operator reads in Discord.** Each `CHANNEL_*_LOG` is optional and off
 while blank. `CHANNEL_ERROR_LOG` gets command failures with their reference, `CHANNEL_GUILD_LOG` servers the bot
-joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_REPORT_LOG` and
+joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot (never one in an open mod mail conversation), and `CHANNEL_BUG_REPORT_LOG` and
 `CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
@@ -1914,6 +1914,32 @@ appeal; banned members write theirs on the dashboard's `/appeals` page, which th
   Delete my data removes the person's appeals and takes their posts down, and keeps a decision with the decider's
   name taken off.
 
+### Mod mail relays both ways through direct messages, and keeps none of the words
+
+`/modmail` and the **Mod mail** screen pick a staff-only channel, a role to ping when a conversation opens, and
+whether replies are signed by name. A member starts one with `/modmail open`, or by messaging the bot and picking the
+server from `offerPanel`; each gets a public thread in that channel. Five things about it are load-bearing:
+
+- **One open conversation per person, across every server.** A direct message has to go somewhere, and a partial
+  unique index on `{ userId }` for open conversations is what makes "the one that is open" a single answer. The claim
+  goes before the thread is made, and a thread that cannot be made gives the claim back (`dropConversation`).
+- **Nothing anybody wrote is stored.** `modmailthreads` holds the server, the member, the thread, whether a reply is
+  owed and when it opened and closed; the words live in the thread and the direct messages. A closed conversation
+  expires after `MODMAIL_LIMITS.keepDays` (90). The privacy notice says so (`legal.messagesP4`, `legal.retentionL19`),
+  and a direct message in an open conversation is not posted to the operator's DM log — `directMessageLog` asks
+  `openConversationOf` first.
+- **Both handlers run after the prefix commands** (`modmailDirect` at 11, `modmailReplies` at 15), so a command typed
+  in a direct message or in the thread runs rather than being sent on. A staff message starting with
+  `MODMAIL_NOTE_PREFIX` (`//`) stays in the thread. A thread that is gone or locked ends its conversation on the next
+  message from the member, so staff closing it by hand cannot leave somebody writing into nothing.
+- **Every relay goes out with `allowedMentions: { parse: [] }`**, and the opening post pings only the chosen role,
+  never `@everyone`, which `applyModmailSettings` refuses as a ping role. Closing asks Manage Messages on the button,
+  the command and the dashboard's route (`ASKS_MORE`).
+- **The dashboard lists conversations only to a reader who can see the channel** (`readerSees`), as Discord would
+  hide its threads; otherwise the list answers `visible: false` and the page says why. Offering the servers in a
+  direct message reads the member cache first and fetches at most `maxServersOffered` more, once per
+  `offerEveryMinutes`, because each fetch is a request to Discord.
+
 ### The owners' notifications are mentioned once, and only the owners change them
 
 `/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
@@ -2156,6 +2182,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                   |
 | `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                          |
 | `/guilds/:id/appeals`             | Where appeals are posted, the wait after a refusal, and every appeal with Accept and Refuse |
+| `/guilds/:id/modmail`             | Where conversations become threads, who is pinged, and every one open now with Close        |
 | `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                        |
 | `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                   |
 | `/guilds/:id/changes`             | Two weeks of changes, from the dashboard and Discord's audit log, searched                  |
@@ -2887,8 +2914,8 @@ existed. `useGuildOverview` takes `null` for the screens that serve both a serve
 Settings come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
-messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, channel tools,
-tickets, the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
+messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
+tools, tickets, the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
 casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,

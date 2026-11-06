@@ -169,7 +169,9 @@
 		"compare": "Naast elkaar",
 		"compareHint": "Vergelijk hoe je servers zijn ingesteld",
 		"appeals": "Bezwaren",
-		"appealsHint": "Verbannen leden die terug willen"
+		"appealsHint": "Verbannen leden die terug willen",
+		"modmail": "Modmail",
+		"modmailHint": "Leden die privé het team schrijven"
 	},
 	"account": {
 		"title": "Je account",
@@ -2140,7 +2142,9 @@
 		"storedP3": "Meldingen zijn wat de eigenaren van de bot voor iedereen plaatsen. Zodat elke nieuwe je één keer wordt genoemd, bewaart {{bot}} wanneer je ze voor het laatst las en wanneer het je voor het laatst over een vertelde, bij je gebruikers-ID en verder niets. Dat gegeven is ook niet aan een server gekoppeld, en wordt 90 dagen nadat je de meldingen voor het laatst las of over een hoorde, verwijderd.",
 		"retentionL17": "Wanneer je de meldingen voor het laatst las: 90 dagen nadat je ze voor het laatst las of over een hoorde, daarna automatisch verwijderd.",
 		"storedL17": "Bezwaren tegen bans: wat je schreef toen je bezwaar maakte, je gebruikers-ID en gebruikersnaam, en wat het team besloot, met de reden en wie besloot.",
-		"retentionL18": "Bezwaren tegen bans: 180 dagen nadat het team besliste, zodat een weigering het volgende bezwaar kan tegenhouden. Een bezwaar dat nog wacht blijft tot er besloten is, en alle bezwaren gaan wanneer de bot van de server wordt verwijderd."
+		"retentionL18": "Bezwaren tegen bans: 180 dagen nadat het team besliste, zodat een weigering het volgende bezwaar kan tegenhouden. Een bezwaar dat nog wacht blijft tot er besloten is, en alle bezwaren gaan wanneer de bot van de server wordt verwijderd.",
+		"messagesP4": "Modmail is de andere. Zolang je een modmailgesprek open hebt, gaat wat je de bot in een DM stuurt naar het team van die server, in een thread in hun modmailkanaal, en wordt het niet doorgestuurd naar de beheerder. Wat het team in de thread schrijft komt op dezelfde manier bij jou terug. Beide kopieën staan in Discord: de bot bewaart alleen aan welke server je schreef, de thread, of er een antwoord verwacht wordt en wanneer het begon en eindigde.",
+		"retentionL19": "Modmailgesprekken: 90 dagen nadat ze gesloten zijn, daarna automatisch verwijderd. De threads zelf blijven in de Discord van de server."
 	},
 	"problem": {
 		"automodMentionLimit": "Kies hoeveel mentions je toestaat.",
@@ -2851,5 +2855,34 @@
 		"ownHistory": "Je bezwaren",
 		"ownSentOn": "Verstuurd op {{when}}",
 		"ownServerGone": "Een server die {{bot}} heeft verlaten"
+	},
+	"modmail": {
+		"title": "Modmail",
+		"subtitle": "Leden schrijven het team via een DM aan {{bot}}. Elk gesprek krijgt een thread, en wat het team daar schrijft gaat terug naar het lid.",
+		"summaryOn": "Leden kunnen het team schrijven, en elk gesprek is een thread in {{channel}}.",
+		"summaryOff": "Modmail staat uit. Aangezet is elk gesprek een thread in {{channel}}.",
+		"summaryNoChannel": "Modmail heeft nog geen kanaal, dus leden kunnen het team niet schrijven.",
+		"cannotUse": "{{bot}} kan niet werken in {{channel}}. Laat het daar berichten sturen, openbare threads maken en threads beheren.",
+		"enabled": "Leden kunnen het team schrijven",
+		"enabledHint": "Met /modmail open, of door {{bot}} een DM te sturen.",
+		"enabledHintNoChannel": "Kies eerst een kanaal.",
+		"channel": "Threads komen in",
+		"channelHint": "Elk gesprek krijgt hier een thread. Alleen het team zou dit kanaal moeten zien.",
+		"ping": "Pingen als er een opent",
+		"pingHint": "De rol wordt één keer gepingd, in het eerste bericht van de thread.",
+		"pingNobody": "Niemand",
+		"signed": "Antwoorden zijn ondertekend",
+		"signedHint": "Hoe een antwoord eruitziet in de DM’s van het lid.",
+		"signedNamed": "Met de naam van het teamlid",
+		"signedAnonymous": "Als het team van de server",
+		"openTitle": "Open gesprekken",
+		"hidden": "Je kunt het modmailkanaal in Discord niet zien, dus de gesprekken zijn hier ook verborgen.",
+		"emptyTitle": "Geen open gesprekken",
+		"emptyBody": "Als een lid het team schrijft, verschijnt het gesprek hier tot iemand het sluit.",
+		"waiting": "Wacht op antwoord",
+		"times": "Geopend {{opened}} · laatste bericht {{last}}",
+		"openThread": "Thread openen",
+		"close": "Sluiten",
+		"closeWith": "Gesprek met {{name}} sluiten"
 	}
 }

@@ -32,6 +32,7 @@ export * from "./memberCount";
 export * from "./memberActions";
 export * from "./memberDetail";
 export * from "./members";
+export * from "./modmail";
 export * from "./music";
 export * from "./notices";
 export * from "./places";

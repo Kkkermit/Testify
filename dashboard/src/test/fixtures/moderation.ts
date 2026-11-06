@@ -12,6 +12,8 @@ import {
 	type MemberDetail,
 	type MemberMatch,
 	type MemberRoles,
+	type ModmailConversations,
+	type ModmailSettings,
 	type OwnAppeals,
 	type Paged,
 	type RaidOverview,
@@ -335,6 +337,30 @@ export const ownAppeals: OwnAppeals = {
 			reason: "Not this time.",
 			createdAt: "2026-10-20T00:00:00.000Z",
 			decidedAt: "2026-11-01T00:00:00.000Z",
+		},
+	],
+};
+
+export const modmailSettings: ModmailSettings = {
+	enabled: true,
+	channelId: "400000000000000001",
+	canUse: true,
+	pingRoleId: null,
+	anonymous: false,
+	open: 1,
+};
+
+export const modmailConversations: ModmailConversations = {
+	visible: true,
+	items: [
+		{
+			id: "c".repeat(24),
+			userId: "100000000000000002",
+			username: "kate",
+			threadUrl: "https://discord.com/channels/900000000000000001/600000000000000001",
+			openedAt: "2026-11-05T00:00:00.000Z",
+			lastMessageAt: "2026-11-05T01:00:00.000Z",
+			waiting: true,
 		},
 	],
 };

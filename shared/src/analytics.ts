@@ -238,6 +238,7 @@ export const SCREEN_ROUTES = [
 	"/guilds/:guildId/raid-protection",
 	"/guilds/:guildId/bans",
 	"/guilds/:guildId/appeals",
+	"/guilds/:guildId/modmail",
 	"/guilds/:guildId/channel-tools",
 	"/guilds/:guildId/channels/:channelId",
 	"/guilds/:guildId/channels",

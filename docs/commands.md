@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 89](https://img.shields.io/badge/commands-89-8b5cf6?style=for-the-badge) ![subcommands: 142](https://img.shields.io/badge/subcommands-142-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
+![commands: 90](https://img.shields.io/badge/commands-90-8b5cf6?style=for-the-badge) ![subcommands: 145](https://img.shields.io/badge/subcommands-145-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
 
 </div>
 
@@ -21,7 +21,7 @@
 | [🎯 Games](#-games)           |    1     |      6      |
 | [📚 Info](#-info)             |    14    |      8      |
 | [📈 Levelling](#-levelling)   |    2     |      6      |
-| [🛡️ Moderation](#️-moderation) |    19    |     19      |
+| [🛡️ Moderation](#️-moderation) |    20    |     22      |
 | [🎵 Music](#-music)           |    2     |     14      |
 | [⚙️ Settings](#️-settings)     |    14    |     18      |
 | [🎫 Tickets](#-tickets)       |    1     |      3      |
@@ -126,6 +126,7 @@
 | `/create`   | Creates embeds and threads.                                                         | `embed`, `thread`                                                  | —                    | Manage messages                                      |
 | `/kick`     | Kicks a member from the server.                                                     | —                                                                  | —                    | Kick members                                         |
 | `/lock`     | Stops everyone from sending messages in a channel.                                  | —                                                                  | —                    | Manage channels                                      |
+| `/modmail`  | Lets members write privately to the server's staff, in threads only staff can see.  | `open`, `close`, `settings`                                        | —                    | Manage guild, Manage messages                        |
 | `/mute`     | Times a member out.                                                                 | —                                                                  | `t?timeout`          | Moderate members                                     |
 | `/nickname` | Changes or clears a member's nickname.                                              | —                                                                  | —                    | Manage nicknames                                     |
 | `/role`     | Adds or removes a role from a member.                                               | `add`, `remove`                                                    | —                    | Manage roles                                         |

@@ -18,6 +18,7 @@ const FEATURE_LABELS: Record<string, TranslationKey> = {
 	"auto-roles": "settings.autoRoleTitle",
 	"role-menus": "roleMenus.title",
 	appeals: "appeals.title",
+	modmail: "modmail.title",
 	ideas: "ideas.title",
 	starboard: "starboard.title",
 	"temp-voice": "tempVoice.title",

@@ -170,7 +170,9 @@
 		"compare": "Côte à côte",
 		"compareHint": "Comparer la configuration de vos serveurs",
 		"appeals": "Appels",
-		"appealsHint": "Les personnes bannies qui demandent à revenir"
+		"appealsHint": "Les personnes bannies qui demandent à revenir",
+		"modmail": "Messagerie modération",
+		"modmailHint": "Les membres écrivent en privé à l’équipe"
 	},
 	"account": {
 		"title": "Ton compte",
@@ -2205,7 +2207,9 @@
 		"storedP3": "Les notifications sont ce que les propriétaires du bot publient pour tous. Pour que chaque nouvelle vous soit signalée une seule fois, {{bot}} conserve le moment où vous les avez lues pour la dernière fois et celui où il vous en a signalé une, rattachés à votre identifiant d’utilisateur et à rien d’autre. Cette fiche n’est liée à aucun serveur non plus, et elle est supprimée 90 jours après la dernière fois que vous avez lu les notifications ou qu’on vous en a signalé une.",
 		"retentionL17": "Le moment où vous avez lu les notifications pour la dernière fois : 90 jours après la dernière lecture ou le dernier signalement, puis supprimé automatiquement.",
 		"storedL17": "Appels de bannissement : ce que vous avez écrit en faisant appel, votre identifiant et votre nom d’utilisateur, et ce que l’équipe a décidé, avec sa raison et qui l’a décidé.",
-		"retentionL18": "Appels de bannissement : 180 jours après la décision de l’équipe, pour qu’un refus puisse retenir l’appel suivant. Un appel en attente est gardé jusqu’à la décision, et tous partent quand le bot est retiré du serveur."
+		"retentionL18": "Appels de bannissement : 180 jours après la décision de l’équipe, pour qu’un refus puisse retenir l’appel suivant. Un appel en attente est gardé jusqu’à la décision, et tous partent quand le bot est retiré du serveur.",
+		"messagesP4": "La messagerie modération est l’autre. Tant que vous avez une conversation ouverte, ce que vous envoyez au bot en DM va à l’équipe de ce serveur, dans un fil de son salon de messagerie, et n’est pas transmis à l’opérateur. Ce que l’équipe écrit dans le fil vous revient de la même façon. Les deux copies sont dans Discord : le bot ne garde que le serveur auquel vous avez écrit, le fil, si une réponse est attendue, et quand la conversation a commencé et pris fin.",
+		"retentionL19": "Conversations de messagerie : 90 jours après leur fermeture, puis supprimées automatiquement. Les fils restent dans le Discord du serveur."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
@@ -2934,5 +2938,34 @@
 		"ownHistory": "Vos appels",
 		"ownSentOn": "Envoyé le {{when}}",
 		"ownServerGone": "Un serveur que {{bot}} a quitté"
+	},
+	"modmail": {
+		"title": "Messagerie modération",
+		"subtitle": "Les membres écrivent à l’équipe en DM à {{bot}}. Chaque conversation a son fil, et ce que l’équipe y écrit est renvoyé au membre.",
+		"summaryOn": "Les membres peuvent écrire à l’équipe, et chaque conversation est un fil dans {{channel}}.",
+		"summaryOff": "La messagerie est désactivée. Activée, chaque conversation est un fil dans {{channel}}.",
+		"summaryNoChannel": "La messagerie n’a pas encore de salon, donc les membres ne peuvent pas écrire à l’équipe.",
+		"cannotUse": "{{bot}} ne peut pas travailler dans {{channel}}. Autorisez-le à y envoyer des messages, créer des fils publics et gérer les fils.",
+		"enabled": "Les membres peuvent écrire à l’équipe",
+		"enabledHint": "Avec /modmail open, ou en envoyant un DM à {{bot}}.",
+		"enabledHintNoChannel": "Choisissez d’abord un salon.",
+		"channel": "Les fils sont créés dans",
+		"channelHint": "Chaque conversation a ici son fil. Seule l’équipe devrait voir ce salon.",
+		"ping": "Mentionner à l’ouverture",
+		"pingHint": "Le rôle est mentionné une fois, dans le premier message du fil.",
+		"pingNobody": "Personne",
+		"signed": "Les réponses sont signées",
+		"signedHint": "L’apparence d’une réponse dans les DM du membre.",
+		"signedNamed": "Avec le nom du membre de l’équipe",
+		"signedAnonymous": "Au nom de l’équipe du serveur",
+		"openTitle": "Conversations ouvertes",
+		"hidden": "Vous ne voyez pas le salon de messagerie dans Discord, donc ses conversations sont aussi masquées ici.",
+		"emptyTitle": "Aucune conversation ouverte",
+		"emptyBody": "Quand un membre écrit à l’équipe, la conversation apparaît ici jusqu’à ce que quelqu’un la ferme.",
+		"waiting": "En attente de réponse",
+		"times": "Ouverte {{opened}} · dernier message {{last}}",
+		"openThread": "Ouvrir le fil",
+		"close": "Fermer",
+		"closeWith": "Fermer la conversation avec {{name}}"
 	}
 }

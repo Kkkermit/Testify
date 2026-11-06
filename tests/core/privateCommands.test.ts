@@ -83,6 +83,8 @@ describe("which commands answer privately", () => {
 				"lottery freeze",
 				"lottery setup",
 				"member-count",
+				"modmail open",
+				"modmail settings",
 				"music status",
 				"music system",
 				"nickname",

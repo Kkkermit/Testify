@@ -18,6 +18,7 @@ export * from "./info";
 export * from "./infra";
 export * from "./levelling";
 export * from "./moderation";
+export * from "./modmail";
 export * from "./music";
 export * from "./notices";
 export * from "./polls";

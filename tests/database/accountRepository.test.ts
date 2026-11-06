@@ -25,6 +25,7 @@ import { UserLevel } from "@database/models/levelling.schema";
 import { Lottery } from "@database/models/lottery.schema";
 import { ModCaseEntry, ModCaseSettings } from "@database/models/modCase.schema";
 import { Blacklist, DmLog, Softban, WarnLadderConfig, Warnings } from "@database/models/moderation.schema";
+import { ModmailSettingsConfig, ModmailThread } from "@database/models/modmail.schema";
 import { MusicSettingsConfig } from "@database/models/musicSettings.schema";
 import { BotNotice, NoticeReader } from "@database/models/notice.schema";
 import { Profile } from "@database/models/profile.schema";
@@ -74,6 +75,7 @@ const NOT_A_PERSON = new Set([
 	"pingRoleId",
 	"roleId",
 	"roleIds",
+	"threadId",
 	"ticketId",
 	"transcriptChannelId",
 	"warnId",
@@ -132,6 +134,7 @@ const SETTINGS = [
 	GoodbyeSettingsConfig,
 	IdeaSettingsConfig,
 	ModCaseSettings,
+	ModmailSettingsConfig,
 	MusicSettingsConfig,
 	RaidSettingsConfig,
 	RoleMenu,
@@ -151,6 +154,7 @@ const THEIRS = [
 	Economy,
 	MemberDays,
 	MemberMoves,
+	ModmailThread,
 	NoticeReader,
 	PendingVerify,
 	Profile,
@@ -171,6 +175,7 @@ describeWithMongo("eraseUserData", () => {
 				{ guildId: GUILD, userId: OTHER, decidedBy: PERSON, decidedByName: "person" },
 			]),
 			DmLog.collection.insertOne({ messageId: "1", authorId: PERSON, content: "hello" }),
+			ModmailThread.collection.insertOne({ guildId: GUILD, userId: OTHER, closedBy: PERSON }),
 			Idea.collection.insertMany([
 				{
 					guildId: GUILD,
@@ -274,6 +279,7 @@ describeWithMongo("eraseUserData", () => {
 			{ channelId: "400000000000000002", messageId: "500000000000000002" },
 		]);
 		expect(await Appeal.collection.findOne({ userId: OTHER })).toMatchObject({ decidedBy: null, decidedByName: null });
+		expect(await ModmailThread.collection.findOne({ userId: OTHER })).toMatchObject({ closedBy: null });
 
 		const left = await Promise.all(THEIRS.map(async (model) => model.collection.countDocuments({ userId: PERSON })));
 		expect(left.every((count) => count === 0)).toBe(true);

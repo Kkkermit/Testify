@@ -129,6 +129,9 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/only the bot’s owners can add or lift a block/);
 		expect(text).toMatch(/Warnings, cases, softbans and blocks against you are kept/);
 		expect(text).toMatch(/stays with your name taken off/);
+		// `directMessageLog` skips a sender with a conversation open, which `modmail.test.ts` proves.
+		expect(botSource("src/events/message/directMessageLog.event.ts")).toContain("openConversationOf");
+		expect(text).toMatch(/is not forwarded to the operator/);
 		// `purgeGuild` keeps member records, so the notice must not promise they go with the bot.
 		expect(text).toMatch(/every member record .* kept after the bot is removed/);
 	});
@@ -152,6 +155,9 @@ describe("the legal pages", () => {
 
 		const appeals = /keepDays: (\d+)/.exec(botSource("shared/src/appeals.ts"))?.[1];
 		expect(text).toContain(`Ban appeals: ${String(appeals)} days after staff decide`);
+
+		const modmail = /keepDays: (\d+)/.exec(botSource("shared/src/modmail.ts"))?.[1];
+		expect(text).toContain(`Mod mail conversations: ${String(modmail)} days after they close`);
 
 		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
 		expect(text).toContain(`Who ran a command: ${String(runs)} days`);

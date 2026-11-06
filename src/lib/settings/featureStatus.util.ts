@@ -11,6 +11,7 @@ import { getCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { getModmailSettings } from "@database/repositories/modmailRepository";
 import { getRaidSettings } from "@database/repositories/raidRepository";
 import { listRoleMenus } from "@database/repositories/roleMenuRepository";
 import { listSchedules } from "@database/repositories/scheduledMessageRepository";
@@ -216,6 +217,19 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 				enabled: on,
 				detail: on && appeals.channelId !== null ? posting(appeals.channelId) : null,
 				places: at("posts", appeals?.channelId),
+			};
+		},
+	},
+	{
+		key: "modmail",
+		label: "Mod mail",
+		async read(guild) {
+			const modmail = await getModmailSettings(guild.id);
+			const on = modmail?.enabled === true;
+			return {
+				enabled: on,
+				detail: on && modmail.channelId !== null ? posting(modmail.channelId) : null,
+				places: at("posts", modmail?.channelId),
 			};
 		},
 	},

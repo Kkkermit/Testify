@@ -169,7 +169,9 @@
 		"compare": "Nebeneinander",
 		"compareHint": "Vergleichen, wie deine Server eingerichtet sind",
 		"appeals": "Einsprüche",
-		"appealsHint": "Gebannte, die zurück wollen"
+		"appealsHint": "Gebannte, die zurück wollen",
+		"modmail": "Modmail",
+		"modmailHint": "Mitglieder schreiben privat ans Team"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -2140,7 +2142,9 @@
 		"storedP3": "Benachrichtigungen veröffentlichen die Betreiber des Bots für alle. Damit dir jede neue nur einmal genannt wird, speichert {{bot}}, wann du sie zuletzt gelesen hast und wann er dich zuletzt auf eine hingewiesen hat, zu deiner Nutzer-ID und sonst nichts. Auch dieser Datensatz ist an keinen Server gebunden und wird 90 Tage, nachdem du die Benachrichtigungen zuletzt gelesen hast oder auf eine hingewiesen wurdest, gelöscht.",
 		"retentionL17": "Wann du die Benachrichtigungen zuletzt gelesen hast: 90 Tage, nachdem du sie zuletzt gelesen hast oder auf eine hingewiesen wurdest, dann automatisch gelöscht.",
 		"storedL17": "Einsprüche gegen Banns: was du beim Einspruch geschrieben hast, deine Nutzer-ID und dein Nutzername, und was das Team entschieden hat, mit Grund und wer entschieden hat.",
-		"retentionL18": "Einsprüche gegen Banns: 180 Tage nach der Entscheidung, damit eine Ablehnung den nächsten Einspruch zurückhalten kann. Ein offener bleibt bis zur Entscheidung, und alle gehen, wenn der Bot vom Server entfernt wird."
+		"retentionL18": "Einsprüche gegen Banns: 180 Tage nach der Entscheidung, damit eine Ablehnung den nächsten Einspruch zurückhalten kann. Ein offener bleibt bis zur Entscheidung, und alle gehen, wenn der Bot vom Server entfernt wird.",
+		"messagesP4": "Modmail ist die andere. Solange du ein Modmail-Gespräch offen hast, geht, was du dem Bot per DM schickst, an das Team dieses Servers, in einen Thread in dessen Modmail-Kanal, und wird nicht an den Betreiber weitergeleitet. Was das Team im Thread schreibt, kommt auf demselben Weg zu dir zurück. Beide Kopien liegen in Discord: Der Bot speichert nur, welchem Server du geschrieben hast, den Thread, ob eine Antwort aussteht und wann es begann und endete.",
+		"retentionL19": "Modmail-Gespräche: 90 Tage nach dem Schließen, dann automatisch gelöscht. Die Threads selbst bleiben im Discord des Servers."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
@@ -2851,5 +2855,34 @@
 		"ownHistory": "Deine Einsprüche",
 		"ownSentOn": "Gesendet am {{when}}",
 		"ownServerGone": "Ein Server, den {{bot}} verlassen hat"
+	},
+	"modmail": {
+		"title": "Modmail",
+		"subtitle": "Mitglieder schreiben dem Team per DM an {{bot}}. Jedes Gespräch bekommt einen Thread, und was das Team dort schreibt, geht an das Mitglied zurück.",
+		"summaryOn": "Mitglieder können dem Team schreiben, und jedes Gespräch ist ein Thread in {{channel}}.",
+		"summaryOff": "Modmail ist aus. Eingeschaltet ist jedes Gespräch ein Thread in {{channel}}.",
+		"summaryNoChannel": "Modmail hat noch keinen Kanal, also können Mitglieder dem Team nicht schreiben.",
+		"cannotUse": "{{bot}} kann in {{channel}} nicht arbeiten. Erlaube ihm dort Nachrichten zu senden, öffentliche Threads zu erstellen und Threads zu verwalten.",
+		"enabled": "Mitglieder können dem Team schreiben",
+		"enabledHint": "Mit /modmail open oder per DM an {{bot}}.",
+		"enabledHintNoChannel": "Wähle zuerst einen Kanal.",
+		"channel": "Threads entstehen in",
+		"channelHint": "Jedes Gespräch bekommt hier einen Thread. Nur das Team sollte diesen Kanal sehen können.",
+		"ping": "Anpingen, wenn eins beginnt",
+		"pingHint": "Die Rolle wird einmal angepingt, im ersten Post des Threads.",
+		"pingNobody": "Niemanden",
+		"signed": "Antworten sind unterschrieben",
+		"signedHint": "Wie eine Antwort in den DMs des Mitglieds aussieht.",
+		"signedNamed": "Mit dem Namen des Teammitglieds",
+		"signedAnonymous": "Als Team des Servers",
+		"openTitle": "Offene Gespräche",
+		"hidden": "Du kannst den Modmail-Kanal in Discord nicht sehen, also sind seine Gespräche auch hier verborgen.",
+		"emptyTitle": "Keine offenen Gespräche",
+		"emptyBody": "Wenn ein Mitglied dem Team schreibt, erscheint das Gespräch hier, bis es jemand schließt.",
+		"waiting": "Wartet auf Antwort",
+		"times": "Geöffnet {{opened}} · letzte Nachricht {{last}}",
+		"openThread": "Thread öffnen",
+		"close": "Schließen",
+		"closeWith": "Gespräch mit {{name}} schließen"
 	}
 }

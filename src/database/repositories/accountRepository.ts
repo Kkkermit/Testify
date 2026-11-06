@@ -21,6 +21,7 @@ import { UserLevel } from "@database/models/levelling.schema";
 import { Lottery } from "@database/models/lottery.schema";
 import { ModCaseEntry, ModCaseSettings } from "@database/models/modCase.schema";
 import { DmLog, Softban, WarnLadderConfig, Warnings } from "@database/models/moderation.schema";
+import { ModmailSettingsConfig, ModmailThread } from "@database/models/modmail.schema";
 import { MusicSettingsConfig } from "@database/models/musicSettings.schema";
 import { BotNotice, NoticeReader } from "@database/models/notice.schema";
 import { Profile } from "@database/models/profile.schema";
@@ -78,6 +79,8 @@ export const ERASURE = {
 	membermove: { userId: "delete" },
 	modcases: { userId: "keep", moderatorId: "anonymise" },
 	modcasesettings: { updatedBy: "anonymise" },
+	modmailsettings: { updatedBy: "anonymise" },
+	modmailthreads: { userId: "delete", closedBy: "anonymise" },
 	musicsettings: { updatedBy: "anonymise" },
 	noticereaders: { userId: "delete" },
 	Profile: { userId: "delete" },
@@ -130,6 +133,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		Idea.deleteMany({ authorId: userId }).exec(),
 		MemberDays.deleteMany({ userId }).exec(),
 		MemberMoves.deleteMany({ userId }).exec(),
+		ModmailThread.deleteMany({ userId }).exec(),
 		NoticeReader.deleteMany({ userId }).exec(),
 		PendingVerify.deleteMany({ userId }).exec(),
 		Profile.deleteMany({ userId }).exec(),
@@ -144,6 +148,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		).exec(),
 		Idea.updateMany({ decidedBy: userId }, { $set: { decidedBy: null, decidedByName: null } }).exec(),
 		Appeal.updateMany({ decidedBy: userId }, { $set: { decidedBy: null, decidedByName: null } }).exec(),
+		ModmailThread.updateMany({ closedBy: userId }, { $set: { closedBy: null } }).exec(),
 		Lottery.updateMany({ "entries.userId": userId }, { $pull: { entries: { userId } } }).exec(),
 		Lottery.updateMany(
 			{ "history.winners.userId": userId },
@@ -193,6 +198,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		GoodbyeSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		IdeaSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		ModCaseSettings.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
+		ModmailSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		MusicSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		RaidSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		RoleMenu.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),

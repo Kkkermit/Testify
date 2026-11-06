@@ -50,6 +50,8 @@ import {
 	warnLadder,
 	warningAdded,
 	memberDirectory,
+	modmailConversations,
+	modmailSettings,
 	ownAppeals,
 } from "@/test/fixtures/moderation";
 import {
@@ -135,6 +137,12 @@ export const handlers = [
 	http.patch("/api/guilds/:guildId/appeals/settings", () => HttpResponse.json(appealSettings)),
 	http.get("/api/guilds/:guildId/appeals", () => HttpResponse.json(appealPage)),
 	http.post("/api/guilds/:guildId/appeals/:appealId/decision", () => HttpResponse.json(appealPage.items[0])),
+	http.get("/api/guilds/:guildId/modmail/settings", () => HttpResponse.json(modmailSettings)),
+	http.patch("/api/guilds/:guildId/modmail/settings", () => HttpResponse.json(modmailSettings)),
+	http.get("/api/guilds/:guildId/modmail/conversations", () => HttpResponse.json(modmailConversations)),
+	http.post("/api/guilds/:guildId/modmail/conversations/:conversationId/close", () =>
+		HttpResponse.json(modmailConversations.items[0]),
+	),
 	http.get("/api/appeals", () => HttpResponse.json(ownAppeals)),
 	http.post("/api/appeals/:guildId", () => HttpResponse.json(ownAppeals.appeals[0], { status: 201 })),
 	http.get("/api/guilds/:guildId/channel-tools", () => HttpResponse.json(channelTools)),

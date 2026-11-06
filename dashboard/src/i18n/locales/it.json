@@ -170,7 +170,9 @@
 		"compare": "Fianco a fianco",
 		"compareHint": "Confronta come sono configurati i tuoi server",
 		"appeals": "Ricorsi",
-		"appealsHint": "Bannati che chiedono di tornare"
+		"appealsHint": "Bannati che chiedono di tornare",
+		"modmail": "Posta allo staff",
+		"modmailHint": "Membri che scrivono in privato allo staff"
 	},
 	"account": {
 		"title": "Il tuo account",
@@ -2205,7 +2207,9 @@
 		"storedP3": "Le notifiche sono ciò che i proprietari del bot pubblicano per tutti. Perché ogni nuova ti venga segnalata una sola volta, {{bot}} conserva quando le hai lette l’ultima volta e quando te ne ha segnalata una, legati al tuo ID utente e a nient’altro. Anche questo dato non è legato a un server e viene eliminato 90 giorni dopo l’ultima volta che hai letto le notifiche o te ne è stata segnalata una.",
 		"retentionL17": "Quando hai letto le notifiche l’ultima volta: 90 giorni dopo l’ultima lettura o l’ultima segnalazione, poi eliminato automaticamente.",
 		"storedL17": "Ricorsi contro i ban: ciò che hai scritto nel ricorso, il tuo ID utente e il nome utente, e ciò che ha deciso lo staff, con il motivo e chi l’ha deciso.",
-		"retentionL18": "Ricorsi contro i ban: 180 giorni dopo la decisione dello staff, così un rifiuto può trattenere il ricorso successivo. Uno ancora in attesa resta finché non viene deciso, e tutti vengono eliminati quando il bot viene rimosso dal server."
+		"retentionL18": "Ricorsi contro i ban: 180 giorni dopo la decisione dello staff, così un rifiuto può trattenere il ricorso successivo. Uno ancora in attesa resta finché non viene deciso, e tutti vengono eliminati quando il bot viene rimosso dal server.",
+		"messagesP4": "La posta allo staff è l’altra. Finché hai una conversazione aperta, ciò che invii al bot in DM va allo staff di quel server, in un thread del suo canale della posta, e non viene inoltrato all’operatore. Ciò che lo staff scrive nel thread ti torna allo stesso modo. Entrambe le copie restano su Discord: il bot conserva solo a quale server hai scritto, il thread, se è attesa una risposta e quando si è aperta e chiusa.",
+		"retentionL19": "Conversazioni della posta allo staff: 90 giorni dopo la chiusura, poi eliminate automaticamente. I thread restano nel Discord del server."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",
@@ -2934,5 +2938,34 @@
 		"ownHistory": "I tuoi ricorsi",
 		"ownSentOn": "Inviato il {{when}}",
 		"ownServerGone": "Un server che {{bot}} ha lasciato"
+	},
+	"modmail": {
+		"title": "Posta allo staff",
+		"subtitle": "I membri scrivono allo staff in DM a {{bot}}. Ogni conversazione ha un thread, e ciò che lo staff scrive lì torna al membro.",
+		"summaryOn": "I membri possono scrivere allo staff, e ogni conversazione è un thread in {{channel}}.",
+		"summaryOff": "La posta allo staff è disattivata. Attivata, ogni conversazione è un thread in {{channel}}.",
+		"summaryNoChannel": "La posta allo staff non ha ancora un canale, quindi i membri non possono scrivere.",
+		"cannotUse": "{{bot}} non può lavorare in {{channel}}. Consentigli di inviare messaggi, creare thread pubblici e gestire i thread lì.",
+		"enabled": "I membri possono scrivere allo staff",
+		"enabledHint": "Con /modmail open, o inviando un DM a {{bot}}.",
+		"enabledHintNoChannel": "Scegli prima un canale.",
+		"channel": "I thread vanno in",
+		"channelHint": "Ogni conversazione ha qui un thread. Solo lo staff dovrebbe vedere questo canale.",
+		"ping": "Menziona quando se ne apre una",
+		"pingHint": "Il ruolo viene menzionato una volta, nel primo post del thread.",
+		"pingNobody": "Nessuno",
+		"signed": "Le risposte sono firmate",
+		"signedHint": "Come appare una risposta nei DM del membro.",
+		"signedNamed": "Con il nome del membro dello staff",
+		"signedAnonymous": "Come staff del server",
+		"openTitle": "Conversazioni aperte",
+		"hidden": "Non puoi vedere il canale della posta su Discord, quindi anche qui le sue conversazioni sono nascoste.",
+		"emptyTitle": "Nessuna conversazione aperta",
+		"emptyBody": "Quando un membro scrive allo staff, la conversazione compare qui finché qualcuno non la chiude.",
+		"waiting": "In attesa di risposta",
+		"times": "Aperta {{opened}} · ultimo messaggio {{last}}",
+		"openThread": "Apri il thread",
+		"close": "Chiudi",
+		"closeWith": "Chiudi la conversazione con {{name}}"
 	}
 }
