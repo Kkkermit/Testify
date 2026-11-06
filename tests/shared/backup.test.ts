@@ -6,6 +6,7 @@ import {
 	placeKind,
 	planBackup,
 	readBackupFile,
+	runsAsProgram,
 } from "@testify/shared";
 
 const SOURCE_STARS = "100000000000000001";
@@ -179,6 +180,42 @@ describe("readBackupFile", () => {
 		expect(planBackup(read, here, {}).steps.find((step) => step.action === "goodbye.update")?.body).toEqual({
 			message: "Bye {user}",
 		});
+	});
+
+	/** Discord allows a role called `<Staff>`, which the read refuses as HTML, so its own download once never read back. */
+	it("reads back a backup from a server whose names look like tags, and still matches them by name", () => {
+		const tagged = { channels: [], roles: [{ id: SOURCE_DJ, name: "<Staff>" }] };
+		const written = buildBackup("<Mods> HQ", { "music.update": { djRoleIds: [SOURCE_DJ] } }, tagged);
+		const read = readBackupFile(file(json(written)));
+		if (typeof read === "string") throw new Error(`Refused as ${read}.`);
+
+		const elsewhere = { channels: [], roles: [{ id: HERE_DJ, name: "<staff>" }] };
+		expect(read.guildName).toBe("‹Mods> HQ");
+		expect(planBackup(read, elsewhere, {}).steps[0]?.body).toEqual({ djRoleIds: [HERE_DJ] });
+	});
+});
+
+describe("runsAsProgram", () => {
+	/** Only a program or a script blacklists its chooser; a picture, an archive or a document is somebody's mistake. */
+	it("tells a program or a script from every other file", () => {
+		const heads: Record<string, [number[], boolean]> = {
+			"a Windows program": [[0x4d, 0x5a, 0x90], true],
+			"a Linux program": [[0x7f, 0x45, 0x4c, 0x46], true],
+			"a macOS program": [[0xcf, 0xfa, 0xed, 0xfe], true],
+			"a 32-bit macOS program": [[0xce, 0xfa, 0xed, 0xfe], true],
+			"a universal program or Java class": [[0xca, 0xfe, 0xba, 0xbe], true],
+			"a script": [[0x23, 0x21, 0x2f], true],
+			"a zip": [[0x50, 0x4b, 0x03, 0x04], false],
+			"a PDF": [[0x25, 0x50, 0x44, 0x46], false],
+			"a picture": [[0x89, 0x50, 0x4e, 0x47], false],
+			"a backup": [[0x7b, 0x22, 0x6b], false],
+			"a script behind a byte-order mark": [[0xef, 0xbb, 0xbf, 0x23, 0x21], false],
+		};
+
+		const judged = Object.fromEntries(
+			Object.entries(heads).map(([label, [bytes]]) => [label, runsAsProgram(Uint8Array.from(bytes))]),
+		);
+		expect(judged).toEqual(Object.fromEntries(Object.entries(heads).map(([label, [, expected]]) => [label, expected])));
 	});
 });
 

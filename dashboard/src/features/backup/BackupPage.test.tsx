@@ -27,9 +27,10 @@ const elsewhere: BackupDocument = {
 	roles: { "222222222222222222": "DJs" },
 };
 
-// jsdom's File has no text() or arrayBuffer(), which every browser's has.
+// jsdom's File, and the Blob its slice() returns, have no text() or arrayBuffer(), which every browser's have.
 beforeAll(() => {
-	const read = <T,>(file: File, as: "readAsText" | "readAsArrayBuffer"): Promise<T> =>
+	const jsdomBlob = Object.getPrototypeOf(File.prototype) as Blob;
+	const read = <T,>(file: Blob, as: "readAsText" | "readAsArrayBuffer"): Promise<T> =>
 		new Promise<T>((resolve) => {
 			const reader = new FileReader();
 			reader.onload = () => {
@@ -37,15 +38,15 @@ beforeAll(() => {
 			};
 			reader[as](file);
 		});
-	Object.defineProperty(File.prototype, "text", {
+	Object.defineProperty(jsdomBlob, "text", {
 		configurable: true,
-		value(this: File) {
+		value(this: Blob) {
 			return read<string>(this, "readAsText");
 		},
 	});
-	Object.defineProperty(File.prototype, "arrayBuffer", {
+	Object.defineProperty(jsdomBlob, "arrayBuffer", {
 		configurable: true,
-		value(this: File) {
+		value(this: Blob) {
 			return read<ArrayBuffer>(this, "readAsArrayBuffer");
 		},
 	});
@@ -123,6 +124,37 @@ describe("the back up and copy page", () => {
 		// The picker hides it, so this is somebody switching the picker to show every file.
 		await userEvent.setup({ applyAccept: false }).upload(picker, backupFile(JSON.stringify(elsewhere), "backup.exe"));
 		expect(await screen.findByText(/one ending in \.json/)).toBeInTheDocument();
+	});
+
+	/** The server judges a program by its first bytes alone, so nothing else of the file ever leaves the browser. */
+	/** A program chosen under its own name, or one past the size limit, was once refused and never reported. */
+	it("reports a program by its first eight bytes whatever it is called, and a mistaken archive not at all", async () => {
+		const sent: unknown[] = [];
+		server.use(
+			http.post(`/api/guilds/${GUILD}/backup/program`, async ({ request }) => {
+				sent.push(await request.json());
+				return HttpResponse.json({ error: { code: "blacklisted", message: "Blocked." } }, { status: 403 });
+			}),
+		);
+		renderPage();
+		const user = userEvent.setup({ applyAccept: false });
+		const picker = await screen.findByLabelText(/From a backup file/);
+		const zip = new File([Uint8Array.from([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00])], "backup.json", {
+			type: "application/json",
+		});
+		const program = new File(
+			[Uint8Array.from([0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04]), new Uint8Array(300 * 1024)],
+			"setup.exe",
+			{ type: "application/x-msdownload" },
+		);
+
+		await user.upload(picker, zip);
+		expect(await screen.findByText(/That is a program, a script or another kind of file/)).toBeInTheDocument();
+		await user.upload(picker, program);
+
+		await waitFor(() => {
+			expect(sent).toEqual([{ head: [0x4d, 0x5a, 0x90, 0x00, 0x03, 0x00, 0x00, 0x00] }]);
+		});
 	});
 
 	/** Copying a server set up just like this one has nothing to do, so nothing is ticked to begin with. */

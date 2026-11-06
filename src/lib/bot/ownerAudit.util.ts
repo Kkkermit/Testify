@@ -19,7 +19,7 @@ export const OWNER_AUDIT_LIMITS = {
 	inlineCode: 3_800,
 } as const;
 
-function ownerLogChannel(client: TestifyClient): string | undefined {
+export function ownerLogChannel(client: TestifyClient): string | undefined {
 	return client.env.CHANNEL_EVAL_LOG ?? client.env.CHANNEL_ERROR_LOG;
 }
 

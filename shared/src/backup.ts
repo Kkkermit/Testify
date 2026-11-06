@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { containsMarkup } from "./markup";
 import { RESTORABLE, type Restorable, type RestorableAction, restorableFields, sameValue } from "./restore";
-import { plainLine } from "./text";
+import { plainLine, sanitiseLine } from "./text";
 
 /** A server’s settings as a file to keep, or to copy to another server, over the same writes Put back uses. */
 
@@ -10,6 +11,8 @@ export const BACKUP_LIMITS = {
 	maxName: 100,
 	maxText: 4_000,
 	maxList: 100,
+	/** Enough of a file's start for the server to tell a program by, and nothing of what follows. */
+	reportedBytes: 8,
 } as const;
 
 export const BACKUP_SECTIONS = Object.keys(RESTORABLE) as RestorableAction[];
@@ -64,14 +67,18 @@ export interface BackupFile {
 	bytes: Uint8Array;
 }
 
-/** The first bytes of programs, scripts, archives and documents; no backup starts with any of them. */
-const NOT_A_BACKUP: readonly (readonly number[])[] = [
+/** The first bytes of programs and scripts; nobody chooses one of these as a backup by mistake. */
+const PROGRAMS: readonly (readonly number[])[] = [
 	[0x4d, 0x5a], // MZ: a Windows .exe or .dll
 	[0x7f, 0x45, 0x4c, 0x46], // ELF: a Linux program
 	[0xcf, 0xfa, 0xed, 0xfe], // Mach-O: a macOS program, 64-bit
 	[0xce, 0xfa, 0xed, 0xfe], // Mach-O, 32-bit
 	[0xca, 0xfe, 0xba, 0xbe], // a macOS universal program, or a Java class
 	[0x23, 0x21], // #!: a shell, Bash, Python or other script
+];
+
+/** The first bytes of archives and documents, refused like a program but plausibly chosen by mistake. */
+const OTHER_FILES: readonly (readonly number[])[] = [
 	[0x50, 0x4b, 0x03, 0x04], // PK: a zip, .jar, .apk or Office file
 	[0x1f, 0x8b], // gzip
 	[0x52, 0x61, 0x72, 0x21], // Rar!
@@ -79,6 +86,19 @@ const NOT_A_BACKUP: readonly (readonly number[])[] = [
 	[0xd0, 0xcf, 0x11, 0xe0], // an .msi or old Office file
 	[0x25, 0x50, 0x44, 0x46], // %PDF
 ];
+
+const startsWith = (bytes: Uint8Array, signature: readonly number[]): boolean =>
+	signature.every((byte, index) => bytes[index] === byte);
+
+/** Whether a file starts like a program or a script, judged on its first bytes alone. */
+export function runsAsProgram(head: Uint8Array): boolean {
+	return PROGRAMS.some((signature) => startsWith(head, signature));
+}
+
+/** What the browser sends when somebody chooses a program as a backup: the file's first bytes, never the file. */
+export const programReport = z.strictObject({
+	head: z.array(z.int().min(0).max(255)).min(2).max(BACKUP_LIMITS.reportedBytes),
+});
 
 /** JSON.parse keeps these as ordinary keys, but no backup has a reason to carry one. */
 const PROTOTYPE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
@@ -93,7 +113,7 @@ export function readBackupFile(file: BackupFile): BackupDocument | BackupRefusal
 	const { bytes } = file;
 	if (bytes.length > BACKUP_LIMITS.maxBytes) return "tooLarge";
 	if (!/^[^\\/]+\.json$/i.test(file.name) || (file.type !== "" && file.type !== "application/json")) return "notJson";
-	if (NOT_A_BACKUP.some((signature) => signature.every((byte, index) => bytes[index] === byte))) return "program";
+	if ([...PROGRAMS, ...OTHER_FILES].some((signature) => startsWith(bytes, signature))) return "program";
 
 	let text: string;
 	try {
@@ -118,6 +138,12 @@ export function placeKind(field: string): "channel" | "role" | null {
 	if (/channel|category/i.test(field)) return "channel";
 	if (/role/i.test(field)) return "role";
 	return null;
+}
+
+/** Discord allows a name the read would refuse as HTML, so a backup writes its `<` as a look-alike and still reads back. */
+function backupName(value: string): string {
+	const line = sanitiseLine(value);
+	return containsMarkup(line) ? line.replaceAll("<", "\u2039") : line;
 }
 
 function isPlain(value: unknown): value is Plain {
@@ -154,13 +180,13 @@ export function buildBackup(
 
 	const nameOf = (list: readonly { id: string; name: string | null }[], ids: Set<string>): Record<string, string> =>
 		Object.fromEntries(
-			list.flatMap((entry) => (ids.has(entry.id) && entry.name !== null ? [[entry.id, entry.name]] : [])),
+			list.flatMap((entry) => (ids.has(entry.id) && entry.name !== null ? [[entry.id, backupName(entry.name)]] : [])),
 		);
 
 	return {
 		kind: "testify-backup",
 		version: 1,
-		guildName,
+		guildName: backupName(guildName),
 		exportedAt: now.toISOString(),
 		// Restorable fields are the routes' own settings, which are all scalars or lists of them.
 		sections: sections as BackupDocument["sections"],
@@ -213,8 +239,9 @@ export function planBackup(
 			if (typeof id !== "string") return undefined;
 			if (visible[kind].some((place) => place.id === id)) return id;
 			const name = (kind === "channel" ? document.channels : document.roles)[id] ?? null;
+			const wanted = name === null ? null : backupName(name).toLowerCase();
 			const match =
-				name === null ? undefined : visible[kind].find((place) => place.name.toLowerCase() === name.toLowerCase());
+				wanted === null ? undefined : visible[kind].find((place) => backupName(place.name).toLowerCase() === wanted);
 			if (match !== undefined) return match.id;
 			missing.push({ kind, name });
 			return undefined;
