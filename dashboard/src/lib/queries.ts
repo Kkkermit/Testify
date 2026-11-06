@@ -13,6 +13,7 @@ export const keys = {
 	commands: () => ["commands"] as const,
 	status: () => ["status"] as const,
 	notices: () => ["notices"] as const,
+	ownAppeals: () => ["own-appeals"] as const,
 	account: {
 		all: () => ["account"] as const,
 		history: (page: number, server: string) => ["account", "history", page, server] as const,
@@ -50,6 +51,9 @@ export const keys = {
 		autoResponders: () => ["guild", id, "auto-responders"] as const,
 		scheduledMessages: () => ["guild", id, "scheduled-messages"] as const,
 		roleMenus: () => ["guild", id, "role-menus"] as const,
+		appealSettings: () => ["guild", id, "appeals", "settings"] as const,
+		appealList: (status: string, page: number) => ["guild", id, "appeals", "list", status, page] as const,
+		allAppeals: () => ["guild", id, "appeals"] as const,
 		ideaSettings: () => ["guild", id, "ideas", "settings"] as const,
 		ideaList: (status: string, page: number) => ["guild", id, "ideas", "list", status, page] as const,
 		allIdeas: () => ["guild", id, "ideas"] as const,

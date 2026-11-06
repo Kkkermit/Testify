@@ -2,6 +2,7 @@ export * from "./account";
 export * from "./analytics";
 export * from "./announcements";
 export * from "./api";
+export * from "./appeals";
 export * from "./auditLog";
 export * from "./automod";
 export * from "./autoResponders";

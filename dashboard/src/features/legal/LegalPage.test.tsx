@@ -150,6 +150,9 @@ describe("the legal pages", () => {
 		expect(text).toContain(`When you last read the notifications: ${String(readers)} days`);
 		expect(text).toContain(`deleted ${String(readers)} days after you last read the notifications`);
 
+		const appeals = /keepDays: (\d+)/.exec(botSource("shared/src/appeals.ts"))?.[1];
+		expect(text).toContain(`Ban appeals: ${String(appeals)} days after staff decide`);
+
 		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
 		expect(text).toContain(`Who ran a command: ${String(runs)} days`);
 		expect(text).toContain(`logs and counts for ${String(retention)} days`);

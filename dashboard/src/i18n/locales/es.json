@@ -168,7 +168,9 @@
 		"notifications": "Notificaciones",
 		"notificationsHint": "Lo que los dueños del bot quieren que todos sepan",
 		"compare": "Lado a lado",
-		"compareHint": "Comparar cómo están configurados tus servidores"
+		"compareHint": "Comparar cómo están configurados tus servidores",
+		"appeals": "Apelaciones",
+		"appealsHint": "Baneados que piden volver"
 	},
 	"account": {
 		"title": "Tu cuenta",
@@ -460,7 +462,8 @@
 		"lockedTitle": "Hace falta otra persona",
 		"lockedBody": "Añadir un bot requiere Gestionar servidor, y en estos no lo tienes.",
 		"pagesOf": "Páginas de {{group}}",
-		"compare": "Comparar tus servidores lado a lado"
+		"compare": "Comparar tus servidores lado a lado",
+		"appealLink": "¿Te banearon de un servidor? Apela el baneo"
 	},
 	"compare": {
 		"title": "Lado a lado",
@@ -2200,7 +2203,9 @@
 		"retentionL15": "Cumpleaños: hasta que quites el tuyo con /birthday remove, salgas de ese servidor o el bot sea retirado de él.",
 		"retentionL16": "Casos de moderación: se conservan como las advertencias después de retirar el bot, hasta que el operador los borre. El canal donde se publican se olvida al retirar el bot.",
 		"storedP3": "Las notificaciones son lo que publican los dueños del bot para todos. Para mencionarte cada nueva una sola vez, {{bot}} guarda cuándo las leíste por última vez y cuándo te avisó de una, ligado a tu ID de usuario y a nada más. Ese registro tampoco está ligado a un servidor y se elimina 90 días después de la última vez que leíste las notificaciones o te avisaron de una.",
-		"retentionL17": "Cuándo leíste las notificaciones por última vez: 90 días después de la última vez que las leíste o te avisaron de una, y luego se elimina automáticamente."
+		"retentionL17": "Cuándo leíste las notificaciones por última vez: 90 días después de la última vez que las leíste o te avisaron de una, y luego se elimina automáticamente.",
+		"storedL17": "Apelaciones de baneo: lo que escribiste al apelar un baneo, tu ID de usuario y tu nombre de usuario, y lo que decidió el equipo, con su motivo y quién lo decidió.",
+		"retentionL18": "Apelaciones de baneo: 180 días después de que el equipo decida, para que un rechazo pueda frenar la siguiente apelación. Una que sigue en espera se guarda hasta que se decida, y todas se borran cuando el bot se quita del servidor."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",
@@ -2885,5 +2890,49 @@
 		"ask_many": "La única forma de que se levante el bloqueo es pedírselo a los propietarios del bot; los moderadores y administradores de un servidor no pueden levantarlo. Contacta con uno de ellos en Discord:",
 		"ask_other": "La única forma de que se levante el bloqueo es pedírselo a los propietarios del bot; los moderadores y administradores de un servidor no pueden levantarlo. Contacta con uno de ellos en Discord:",
 		"askNobody": "La única forma de que se levante el bloqueo es pedírselo al propietario del bot; los moderadores y administradores de un servidor no pueden levantarlo."
+	},
+	"appeals": {
+		"title": "Apelaciones de baneo",
+		"subtitle": "Los baneados escriben su apelación en este panel. El equipo la acepta o la rechaza aquí o desde su publicación en Discord, y aceptarla levanta el baneo.",
+		"summaryOn": "Los baneados pueden apelar, y cada apelación se publica en {{channel}} para que el equipo decida.",
+		"summaryOff": "Las apelaciones están desactivadas. Activadas, cada apelación se publica en {{channel}} para que el equipo decida.",
+		"summaryNoChannel": "Las apelaciones aún no tienen canal, así que los baneados no pueden apelar.",
+		"enabled": "Los baneados pueden apelar",
+		"enabledHint": "En la página Apelar un baneo de este panel, enlazada en el DM que envía un baneo.",
+		"enabledHintNoChannel": "Elige primero un canal.",
+		"channel": "Se publica en",
+		"channelHint": "{{bot}} publica aquí cada apelación, con botones para aceptarla o rechazarla. Solo el equipo debería poder ver este canal.",
+		"cooldown": "Espera tras un rechazo",
+		"cooldownHint": "Cuánto espera alguien cuya apelación fue rechazada antes de poder apelar de nuevo.",
+		"cooldownDays_one": "{{count, number}} día",
+		"cooldownDays_many": "{{count, number}} de días",
+		"cooldownDays_other": "{{count, number}} días",
+		"listTitle": "Apelaciones",
+		"filter": "Mostrar",
+		"filterAll": "Todas",
+		"statusOpen": "En espera",
+		"statusAccepted": "Aceptada",
+		"statusRefused": "Rechazada",
+		"emptyTitle": "No hay apelaciones aquí",
+		"emptyBody": "Cuando un baneado apela, aparece aquí y en el canal que elegiste.",
+		"from": "ID de Discord {{id}} · {{when}}",
+		"decidedBy": "Por {{name}} · {{when}}",
+		"reason": "Motivo",
+		"reasonHint": "Necesario para rechazar y opcional para aceptar. Se le comunica al miembro por DM.",
+		"accept": "Aceptar y desbanear",
+		"refuse": "Rechazar",
+		"openInDiscord": "Abrir en Discord",
+		"ownTitle": "Apelar un baneo",
+		"ownSubtitle": "Pide a un servidor que te baneó que te deje volver. Su equipo lee lo que escribes y decide.",
+		"ownNone": "No hay baneos que apelar",
+		"ownNoneBody": "Ninguno de los servidores que aceptan apelaciones a través de {{bot}} te ha baneado. A un servidor que no las acepta hay que preguntarle de otra forma.",
+		"ownWrite": "Tu apelación",
+		"ownWriteHint": "Cuenta qué pasó y por qué deberían dejarte volver. Entre {{min}} y {{max}} caracteres.",
+		"ownSend": "Enviar apelación",
+		"ownWaiting": "Apelaste el {{when}}. Está esperando la decisión del equipo del servidor, y se te avisará por DM cuando decidan.",
+		"ownAgain": "Tu última apelación fue rechazada. Puedes volver a apelar desde el {{when}}.",
+		"ownHistory": "Tus apelaciones",
+		"ownSentOn": "Enviada el {{when}}",
+		"ownServerGone": "Un servidor del que {{bot}} se fue"
 	}
 }

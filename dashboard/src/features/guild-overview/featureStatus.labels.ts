@@ -17,6 +17,7 @@ const FEATURE_LABELS: Record<string, TranslationKey> = {
 	counting: "settings.countingTitle",
 	"auto-roles": "settings.autoRoleTitle",
 	"role-menus": "roleMenus.title",
+	appeals: "appeals.title",
 	ideas: "ideas.title",
 	starboard: "starboard.title",
 	"temp-voice": "tempVoice.title",

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import mongoose, { type Schema } from "mongoose";
 import { describeWithMongo } from "../helpers/mongo";
 import { AfkStatus } from "@database/models/afk.schema";
+import { Appeal, AppealSettingsConfig } from "@database/models/appeal.schema";
 import { AutoResponderEntry } from "@database/models/autoResponder.schema";
 import { BirthdaySettingsConfig, SharedBirthday } from "@database/models/birthday.schema";
 import { BotSettingsConfig } from "@database/models/botSettings.schema";
@@ -43,6 +44,7 @@ import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
 const PERSON = "100000000000000001";
 const OTHER = "100000000000000002";
 const GUILD = "900000000000000001";
+const OTHER_GUILD = "900000000000000002";
 
 /** Field names that end like a person's but never hold one. */
 const NOT_A_PERSON = new Set([
@@ -121,6 +123,7 @@ describe("what deleting somebody's data covers", () => {
 });
 
 const SETTINGS = [
+	AppealSettingsConfig,
 	AutoResponderEntry,
 	BirthdaySettingsConfig,
 	BotSettingsConfig,
@@ -139,6 +142,7 @@ const SETTINGS = [
 
 const THEIRS = [
 	AfkStatus,
+	Appeal,
 	SharedBirthday,
 	CasinoHand,
 	CasinoStats,
@@ -162,6 +166,10 @@ describeWithMongo("eraseUserData", () => {
 		await Promise.all([
 			Economy.collection.insertOne({ guildId: GUILD, userId: OTHER, lastRobbedBy: PERSON }),
 			Counting.collection.insertOne({ guildId: GUILD, lastUserId: PERSON }),
+			Appeal.collection.insertMany([
+				{ guildId: OTHER_GUILD, userId: PERSON, channelId: "400000000000000002", messageId: "500000000000000002" },
+				{ guildId: GUILD, userId: OTHER, decidedBy: PERSON, decidedByName: "person" },
+			]),
 			DmLog.collection.insertOne({ messageId: "1", authorId: PERSON, content: "hello" }),
 			Idea.collection.insertMany([
 				{
@@ -261,7 +269,11 @@ describeWithMongo("eraseUserData", () => {
 
 		const posts = await eraseUserData(PERSON);
 
-		expect(posts).toEqual([{ channelId: "400000000000000001", messageId: "500000000000000001" }]);
+		expect(posts).toEqual([
+			{ channelId: "400000000000000001", messageId: "500000000000000001" },
+			{ channelId: "400000000000000002", messageId: "500000000000000002" },
+		]);
+		expect(await Appeal.collection.findOne({ userId: OTHER })).toMatchObject({ decidedBy: null, decidedByName: null });
 
 		const left = await Promise.all(THEIRS.map(async (model) => model.collection.countDocuments({ userId: PERSON })));
 		expect(left.every((count) => count === 0)).toBe(true);

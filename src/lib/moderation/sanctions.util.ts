@@ -2,8 +2,10 @@ import { type Guild, type GuildMember, type User } from "discord.js";
 import { DAY_MS } from "@config/constants";
 import { strings } from "@config/strings";
 import { theme } from "@config/theme";
+import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { deactivateSoftban, getActiveSoftban } from "@database/repositories/moderationRepository";
+import { appealLink } from "@lib/appeals/appealLink.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
@@ -66,6 +68,7 @@ export async function banUser(
 	const existing = await guild.bans.fetch(user.id).catch(() => null);
 	if (existing !== null) throw new UserFacingError(`${user.username} is already banned.`);
 
+	const appeal = member === null ? null : await appealLink(guild.client as TestifyClient, guild.id);
 	const notified =
 		member === null
 			? false
@@ -77,6 +80,9 @@ export async function banUser(
 						guild,
 						moderator: { username: moderator.name },
 						reason,
+						...(appeal === null
+							? {}
+							: { extra: [{ name: "Appeal", value: `Sign in at ${appeal} to ask for the ban to be lifted.` }] }),
 					}),
 				);
 

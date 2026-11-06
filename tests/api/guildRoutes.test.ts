@@ -75,6 +75,9 @@ jest.mock("@database/repositories/insightsRepository", () => ({
 jest.mock("@database/repositories/ideaRepository", () => ({
 	getIdeaSettings: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/appealRepository", () => ({
+	getAppealSettings: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/roleMenuRepository", () => ({
 	listRoleMenus: jest.fn(() => Promise.resolve([])),
 }));

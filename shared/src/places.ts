@@ -22,6 +22,7 @@ export const FEATURE_PLACES = {
 	birthdays: { reach: "channel" },
 	verification: { reach: "channel" },
 	cases: { reach: "everywhere" },
+	appeals: { reach: "channel" },
 	"raid-protection": { reach: "everywhere" },
 	"anti-link": { reach: "everywhere" },
 	counting: { reach: "channel" },

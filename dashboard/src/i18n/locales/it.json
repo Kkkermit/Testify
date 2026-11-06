@@ -168,7 +168,9 @@
 		"notifications": "Notifiche",
 		"notificationsHint": "Ciò che i proprietari del bot vogliono far sapere a tutti",
 		"compare": "Fianco a fianco",
-		"compareHint": "Confronta come sono configurati i tuoi server"
+		"compareHint": "Confronta come sono configurati i tuoi server",
+		"appeals": "Ricorsi",
+		"appealsHint": "Bannati che chiedono di tornare"
 	},
 	"account": {
 		"title": "Il tuo account",
@@ -460,7 +462,8 @@
 		"lockedTitle": "Serve qualcun altro",
 		"lockedBody": "Aggiungere un bot richiede Gestire il server, che qui non hai.",
 		"pagesOf": "Pagine di {{group}}",
-		"compare": "Confronta i tuoi server fianco a fianco"
+		"compare": "Confronta i tuoi server fianco a fianco",
+		"appealLink": "Bannato da un server? Fai ricorso"
 	},
 	"compare": {
 		"title": "Fianco a fianco",
@@ -2200,7 +2203,9 @@
 		"retentionL15": "Compleanni: finché non rimuovi il tuo con /birthday remove, non lasci quel server o il bot non viene rimosso.",
 		"retentionL16": "Casi di moderazione: conservati come gli avvertimenti dopo la rimozione del bot, finché l’operatore non li elimina. Il canale in cui vengono pubblicati viene dimenticato alla rimozione del bot.",
 		"storedP3": "Le notifiche sono ciò che i proprietari del bot pubblicano per tutti. Perché ogni nuova ti venga segnalata una sola volta, {{bot}} conserva quando le hai lette l’ultima volta e quando te ne ha segnalata una, legati al tuo ID utente e a nient’altro. Anche questo dato non è legato a un server e viene eliminato 90 giorni dopo l’ultima volta che hai letto le notifiche o te ne è stata segnalata una.",
-		"retentionL17": "Quando hai letto le notifiche l’ultima volta: 90 giorni dopo l’ultima lettura o l’ultima segnalazione, poi eliminato automaticamente."
+		"retentionL17": "Quando hai letto le notifiche l’ultima volta: 90 giorni dopo l’ultima lettura o l’ultima segnalazione, poi eliminato automaticamente.",
+		"storedL17": "Ricorsi contro i ban: ciò che hai scritto nel ricorso, il tuo ID utente e il nome utente, e ciò che ha deciso lo staff, con il motivo e chi l’ha deciso.",
+		"retentionL18": "Ricorsi contro i ban: 180 giorni dopo la decisione dello staff, così un rifiuto può trattenere il ricorso successivo. Uno ancora in attesa resta finché non viene deciso, e tutti vengono eliminati quando il bot viene rimosso dal server."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",
@@ -2885,5 +2890,49 @@
 		"ask_many": "L’unico modo per far rimuovere il blocco è chiederlo ai proprietari del bot; i moderatori e gli amministratori di un server non possono rimuoverlo. Contatta uno di loro su Discord:",
 		"ask_other": "L’unico modo per far rimuovere il blocco è chiederlo ai proprietari del bot; i moderatori e gli amministratori di un server non possono rimuoverlo. Contatta uno di loro su Discord:",
 		"askNobody": "L’unico modo per far rimuovere il blocco è chiederlo al proprietario del bot; i moderatori e gli amministratori di un server non possono rimuoverlo."
+	},
+	"appeals": {
+		"title": "Ricorsi contro i ban",
+		"subtitle": "I bannati scrivono il ricorso su questa dashboard. Lo staff lo accetta o lo rifiuta qui o dal suo post su Discord, e accettarlo revoca il ban.",
+		"summaryOn": "I bannati possono fare ricorso, e ogni ricorso viene pubblicato in {{channel}} perché lo staff decida.",
+		"summaryOff": "I ricorsi sono disattivati. Attivati, ogni ricorso viene pubblicato in {{channel}} perché lo staff decida.",
+		"summaryNoChannel": "I ricorsi non hanno ancora un canale, quindi i bannati non possono fare ricorso.",
+		"enabled": "I bannati possono fare ricorso",
+		"enabledHint": "Nella pagina Fai ricorso contro un ban di questa dashboard, a cui rimanda il DM inviato con il ban.",
+		"enabledHintNoChannel": "Scegli prima un canale.",
+		"channel": "Pubblicato in",
+		"channelHint": "{{bot}} pubblica qui ogni ricorso, con i pulsanti per accettarlo o rifiutarlo. Solo lo staff dovrebbe vedere questo canale.",
+		"cooldown": "Attesa dopo un rifiuto",
+		"cooldownHint": "Quanto deve aspettare chi si è visto rifiutare il ricorso prima di poterne fare un altro.",
+		"cooldownDays_one": "{{count, number}} giorno",
+		"cooldownDays_many": "{{count, number}} di giorni",
+		"cooldownDays_other": "{{count, number}} giorni",
+		"listTitle": "Ricorsi",
+		"filter": "Mostra",
+		"filterAll": "Tutti",
+		"statusOpen": "In attesa",
+		"statusAccepted": "Accettato",
+		"statusRefused": "Rifiutato",
+		"emptyTitle": "Nessun ricorso qui",
+		"emptyBody": "Quando un bannato fa ricorso, compare qui e nel canale che hai scelto.",
+		"from": "ID Discord {{id}} · {{when}}",
+		"decidedBy": "Da {{name}} · {{when}}",
+		"reason": "Motivo",
+		"reasonHint": "Necessario per rifiutare, facoltativo per accettare. Il membro lo riceve in DM.",
+		"accept": "Accetta e revoca il ban",
+		"refuse": "Rifiuta",
+		"openInDiscord": "Apri in Discord",
+		"ownTitle": "Fai ricorso contro un ban",
+		"ownSubtitle": "Chiedi a un server che ti ha bannato di farti tornare. Il suo staff legge ciò che scrivi e decide.",
+		"ownNone": "Nessun ban da contestare",
+		"ownNoneBody": "Nessuno dei server che accettano ricorsi tramite {{bot}} ti ha bannato. Un server che non li accetta va contattato in un altro modo.",
+		"ownWrite": "Il tuo ricorso",
+		"ownWriteHint": "Racconta cosa è successo e perché dovrebbero farti tornare. Tra {{min}} e {{max}} caratteri.",
+		"ownSend": "Invia ricorso",
+		"ownWaiting": "Hai fatto ricorso il {{when}}. Attende la decisione dello staff del server, e te lo diranno in DM.",
+		"ownAgain": "Il tuo ultimo ricorso è stato rifiutato. Potrai fare di nuovo ricorso dal {{when}}.",
+		"ownHistory": "I tuoi ricorsi",
+		"ownSentOn": "Inviato il {{when}}",
+		"ownServerGone": "Un server che {{bot}} ha lasciato"
 	}
 }

@@ -167,7 +167,9 @@
 		"notifications": "Notifications",
 		"notificationsHint": "What the bot’s owners want everybody to know",
 		"compare": "Side by side",
-		"compareHint": "Compare how your servers are set up"
+		"compareHint": "Compare how your servers are set up",
+		"appeals": "Appeals",
+		"appealsHint": "Banned members asking to come back"
 	},
 	"account": {
 		"title": "Your account",
@@ -453,7 +455,8 @@
 		"lockedTitle": "Needs somebody else",
 		"lockedBody": "Adding a bot takes Manage Server, which you do not have in these.",
 		"pagesOf": "Pages of {{group}}",
-		"compare": "Compare your servers side by side"
+		"compare": "Compare your servers side by side",
+		"appealLink": "Banned from a server? Appeal the ban"
 	},
 	"compare": {
 		"title": "Side by side",
@@ -2135,7 +2138,9 @@
 		"retentionL15": "Birthdays: until you remove yours with /birthday remove, you leave that server, or the bot is removed from it.",
 		"retentionL16": "Moderation cases: kept like warnings after the bot is removed, until the operator deletes them. Where they are posted is forgotten when the bot is removed.",
 		"storedP3": "Notifications are what the bot’s owners post for everybody. So that each new one is mentioned to you once, {{bot}} keeps when you last read them and when it last told you about one, against your user id and nothing else. That record is not tied to a server either, and it is deleted 90 days after you last read the notifications or were told about one.",
-		"retentionL17": "When you last read the notifications: 90 days after you last read them or were told about one, then deleted automatically."
+		"retentionL17": "When you last read the notifications: 90 days after you last read them or were told about one, then deleted automatically.",
+		"storedL17": "Ban appeals: what you wrote when you appealed a ban, your user id and username, and what staff decided, with its reason and who decided it.",
+		"retentionL18": "Ban appeals: 180 days after staff decide, so a refusal can hold back the next appeal. One still waiting is kept until it is decided, and every appeal goes when the bot is removed from the server."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -2803,5 +2808,48 @@
 		"ask_one": "The only way to have the block lifted is to ask the bot’s owner; server moderators and admins can’t lift it. Contact them on Discord:",
 		"ask_other": "The only way to have the block lifted is to ask the bot’s owners; server moderators and admins can’t lift it. Contact one of them on Discord:",
 		"askNobody": "The only way to have the block lifted is to ask the bot’s owner; server moderators and admins can’t lift it."
+	},
+	"appeals": {
+		"title": "Ban appeals",
+		"subtitle": "Banned members write an appeal on this dashboard. Staff accept or refuse it here or from its post in Discord, and accepting one lifts the ban.",
+		"summaryOn": "Banned members can appeal, and each appeal is posted to {{channel}} for staff to decide.",
+		"summaryOff": "Appeals are off. Turned on, each appeal is posted to {{channel}} for staff to decide.",
+		"summaryNoChannel": "Appeals have no channel yet, so banned members cannot appeal.",
+		"enabled": "Banned members can appeal",
+		"enabledHint": "On this dashboard’s Appeal a ban page, which the DM a ban sends links to.",
+		"enabledHintNoChannel": "Pick a channel first.",
+		"channel": "Posted in",
+		"channelHint": "{{bot}} posts each appeal here, with buttons to accept or refuse it. Only staff should be able to see this channel.",
+		"cooldown": "Wait after a refusal",
+		"cooldownHint": "How long somebody whose appeal was refused waits before they can appeal again.",
+		"cooldownDays_one": "{{count, number}} day",
+		"cooldownDays_other": "{{count, number}} days",
+		"listTitle": "Appeals",
+		"filter": "Show",
+		"filterAll": "All",
+		"statusOpen": "Waiting",
+		"statusAccepted": "Accepted",
+		"statusRefused": "Refused",
+		"emptyTitle": "No appeals here",
+		"emptyBody": "When a banned member appeals, it appears here and in the channel you picked.",
+		"from": "Discord ID {{id}} · {{when}}",
+		"decidedBy": "By {{name}} · {{when}}",
+		"reason": "Reason",
+		"reasonHint": "Needed to refuse, and optional to accept. The member is told it in a DM.",
+		"accept": "Accept and unban",
+		"refuse": "Refuse",
+		"openInDiscord": "Open in Discord",
+		"ownTitle": "Appeal a ban",
+		"ownSubtitle": "Ask a server that has banned you to let you back in. Its staff read what you write and decide.",
+		"ownNone": "No bans to appeal",
+		"ownNoneBody": "None of the servers that take appeals through {{bot}} have banned you. A server that does not take them has to be asked some other way.",
+		"ownWrite": "Your appeal",
+		"ownWriteHint": "Say what happened and why they should let you back in. Between {{min}} and {{max}} characters.",
+		"ownSend": "Send appeal",
+		"ownWaiting": "You appealed on {{when}}. It is waiting for the server’s staff to decide, and you will be told in a DM when they do.",
+		"ownAgain": "Your last appeal was refused. You can appeal again from {{when}}.",
+		"ownHistory": "Your appeals",
+		"ownSentOn": "Sent on {{when}}",
+		"ownServerGone": "A server {{bot}} has left"
 	}
 }

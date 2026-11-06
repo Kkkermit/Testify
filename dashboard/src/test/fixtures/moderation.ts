@@ -1,4 +1,6 @@
 import {
+	type AppealRow,
+	type AppealSettings,
 	type AuditLogConfigResponse,
 	type AutomodRules,
 	type BanPage,
@@ -10,6 +12,8 @@ import {
 	type MemberDetail,
 	type MemberMatch,
 	type MemberRoles,
+	type OwnAppeals,
+	type Paged,
 	type RaidOverview,
 	type ServerChangesPage,
 	type WarnLadder,
@@ -279,4 +283,58 @@ export const memberDirectory: DirectoryPage = {
 	],
 	grantable: ["300000000000000001"],
 	can: { roles: true, timeout: true, warn: true, kick: true, ban: true },
+};
+
+export const appealSettings: AppealSettings = {
+	enabled: true,
+	channelId: "400000000000000001",
+	canSend: true,
+	cooldownDays: 30,
+	dashboard: true,
+	open: 1,
+};
+
+export const appealPage: Paged<AppealRow> = {
+	page: 1,
+	perPage: 10,
+	total: 1,
+	items: [
+		{
+			id: "a".repeat(24),
+			userId: "100000000000000002",
+			username: "kate",
+			text: "I was spamming, and I will not do it again.",
+			status: "open",
+			reason: "",
+			decidedByName: null,
+			decidedAt: null,
+			createdAt: "2026-11-01T00:00:00.000Z",
+			messageUrl: "https://discord.com/channels/900000000000000001/400000000000000001/500000000000000001",
+		},
+	],
+};
+
+export const ownAppeals: OwnAppeals = {
+	servers: [
+		{ guildId: "900000000000000001", name: "Testify HQ", iconUrl: null, open: null, againAt: null },
+		{
+			guildId: "900000000000000002",
+			name: "Side Project",
+			iconUrl: null,
+			open: null,
+			againAt: "2026-12-01T00:00:00.000Z",
+		},
+	],
+	appeals: [
+		{
+			id: "b".repeat(24),
+			guildId: "900000000000000002",
+			guildName: "Side Project",
+			status: "refused",
+			text: "Please let me back, it was a mistake.",
+			reason: "Not this time.",
+			createdAt: "2026-10-20T00:00:00.000Z",
+			decidedAt: "2026-11-01T00:00:00.000Z",
+		},
+	],
 };

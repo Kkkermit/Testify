@@ -35,6 +35,7 @@ describe("which commands answer privately", () => {
 				"afk",
 				"announce",
 				"anti-link",
+				"appeals",
 				"ask",
 				"audit-logging",
 				"auto-responder",

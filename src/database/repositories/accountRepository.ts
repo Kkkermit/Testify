@@ -1,4 +1,5 @@
 import { AfkStatus } from "@database/models/afk.schema";
+import { Appeal, AppealSettingsConfig } from "@database/models/appeal.schema";
 import { AutoResponderEntry } from "@database/models/autoResponder.schema";
 import { BirthdaySettingsConfig, SharedBirthday } from "@database/models/birthday.schema";
 import { BotSettingsConfig } from "@database/models/botSettings.schema";
@@ -44,6 +45,8 @@ type Erasure = "delete" | "remove" | "anonymise" | "keep";
  */
 export const ERASURE = {
 	afk: { userId: "delete" },
+	appeals: { userId: "delete", decidedBy: "anonymise" },
+	appealsettings: { updatedBy: "anonymise" },
 	autoresponders: { updatedBy: "anonymise" },
 	birthdays: { userId: "delete" },
 	birthdaysettings: { updatedBy: "anonymise" },
@@ -97,22 +100,26 @@ export const ERASURE = {
 	warnTutorial: { userId: "keep", "warnings.executorId": "anonymise", "warnings.edits.editedById": "anonymise" },
 } as const satisfies Record<string, Record<string, Erasure>>;
 
-/** An idea the person posted, whose post in Discord carries their words. */
-interface ErasedIdeaPost {
+/** An idea or an appeal the person wrote, whose post in Discord carries their words. */
+interface ErasedPost {
 	channelId: string;
 	messageId: string;
 }
 
-/** Applies `ERASURE` to one person; it cannot be undone, and the idea posts it returns are the caller's to take down. */
-export async function eraseUserData(userId: string): Promise<ErasedIdeaPost[]> {
+type Place = { channelId: string | null; messageId: string | null }[];
+
+/** Applies `ERASURE` to one person; it cannot be undone, and the posts it returns are the caller's to take down. */
+export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 	const gone = DELETED_USER_ID;
 	const name = DELETED_USER_NAME;
-	const posts = await Idea.find({ authorId: userId }, { channelId: 1, messageId: 1 })
-		.lean<{ channelId: string; messageId: string | null }[]>()
-		.exec();
+	const [ideas, appeals] = await Promise.all([
+		Idea.find({ authorId: userId }, { channelId: 1, messageId: 1 }).lean<Place>().exec(),
+		Appeal.find({ userId }, { channelId: 1, messageId: 1 }).lean<Place>().exec(),
+	]);
 
 	await Promise.all([
 		AfkStatus.deleteMany({ userId }).exec(),
+		Appeal.deleteMany({ userId }).exec(),
 		SharedBirthday.deleteMany({ userId }).exec(),
 		CasinoHand.deleteMany({ userId }).exec(),
 		CasinoStats.deleteMany({ userId }).exec(),
@@ -136,6 +143,7 @@ export async function eraseUserData(userId: string): Promise<ErasedIdeaPost[]> {
 			{ $pull: { upVoters: userId, downVoters: userId } },
 		).exec(),
 		Idea.updateMany({ decidedBy: userId }, { $set: { decidedBy: null, decidedByName: null } }).exec(),
+		Appeal.updateMany({ decidedBy: userId }, { $set: { decidedBy: null, decidedByName: null } }).exec(),
 		Lottery.updateMany({ "entries.userId": userId }, { $pull: { entries: { userId } } }).exec(),
 		Lottery.updateMany(
 			{ "history.winners.userId": userId },
@@ -176,6 +184,7 @@ export async function eraseUserData(userId: string): Promise<ErasedIdeaPost[]> {
 			{ $unset: { [`players.${userId}`]: 1 } },
 		).exec(),
 
+		AppealSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		AutoResponderEntry.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		BirthdaySettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 		BotSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
@@ -192,7 +201,7 @@ export async function eraseUserData(userId: string): Promise<ErasedIdeaPost[]> {
 		TempVoiceSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 	]);
 
-	return posts.flatMap((post) =>
-		post.messageId === null ? [] : [{ channelId: post.channelId, messageId: post.messageId }],
+	return [...ideas, ...appeals].flatMap(({ channelId, messageId }) =>
+		channelId === null || messageId === null ? [] : [{ channelId, messageId }],
 	);
 }

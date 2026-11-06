@@ -1,5 +1,6 @@
 import { type Guild } from "discord.js";
 import { getAntiLink } from "@database/repositories/antiLinkRepository";
+import { getAppealSettings } from "@database/repositories/appealRepository";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
@@ -202,6 +203,19 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 				enabled: menus.length > 0,
 				detail: menus.length === 0 ? null : counted("menus", menus.length),
 				places: at("panel", ...menus.map((menu) => menu.channelId)),
+			};
+		},
+	},
+	{
+		key: "appeals",
+		label: "Ban appeals",
+		async read(guild) {
+			const appeals = await getAppealSettings(guild.id);
+			const on = appeals?.enabled === true;
+			return {
+				enabled: on,
+				detail: on && appeals.channelId !== null ? posting(appeals.channelId) : null,
+				places: at("posts", appeals?.channelId),
 			};
 		},
 	},

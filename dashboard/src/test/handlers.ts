@@ -33,6 +33,8 @@ import {
 import { casinoSettings, lotterySettings, treasureSettings } from "@/test/fixtures/economy";
 import { giveawayList, musicSettings } from "@/test/fixtures/entertainment";
 import {
+	appealPage,
+	appealSettings,
 	auditLogConfig,
 	automodRules,
 	banPage,
@@ -48,6 +50,7 @@ import {
 	warnLadder,
 	warningAdded,
 	memberDirectory,
+	ownAppeals,
 } from "@/test/fixtures/moderation";
 import {
 	blacklistRows,
@@ -128,6 +131,12 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/cases", () => HttpResponse.json(casePage)),
 	http.get("/api/guilds/:guildId/raid-protection", () => HttpResponse.json(raidOverview)),
 	http.get("/api/guilds/:guildId/bans", () => HttpResponse.json(banPage)),
+	http.get("/api/guilds/:guildId/appeals/settings", () => HttpResponse.json(appealSettings)),
+	http.patch("/api/guilds/:guildId/appeals/settings", () => HttpResponse.json(appealSettings)),
+	http.get("/api/guilds/:guildId/appeals", () => HttpResponse.json(appealPage)),
+	http.post("/api/guilds/:guildId/appeals/:appealId/decision", () => HttpResponse.json(appealPage.items[0])),
+	http.get("/api/appeals", () => HttpResponse.json(ownAppeals)),
+	http.post("/api/appeals/:guildId", () => HttpResponse.json(ownAppeals.appeals[0], { status: 201 })),
 	http.get("/api/guilds/:guildId/channel-tools", () => HttpResponse.json(channelTools)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),

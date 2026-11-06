@@ -167,7 +167,9 @@
 		"notifications": "Benachrichtigungen",
 		"notificationsHint": "Was die Betreiber des Bots allen mitteilen wollen",
 		"compare": "Nebeneinander",
-		"compareHint": "Vergleichen, wie deine Server eingerichtet sind"
+		"compareHint": "Vergleichen, wie deine Server eingerichtet sind",
+		"appeals": "Einsprüche",
+		"appealsHint": "Gebannte, die zurück wollen"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -453,7 +455,8 @@
 		"lockedTitle": "Braucht jemand anderen",
 		"lockedBody": "Einen Bot hinzuzufügen braucht Server verwalten — das hast du auf diesen nicht.",
 		"pagesOf": "Seiten von {{group}}",
-		"compare": "Deine Server nebeneinander vergleichen"
+		"compare": "Deine Server nebeneinander vergleichen",
+		"appealLink": "Von einem Server gebannt? Lege Einspruch ein"
 	},
 	"compare": {
 		"title": "Nebeneinander",
@@ -2135,7 +2138,9 @@
 		"retentionL15": "Geburtstage: bis du deinen mit /birthday remove entfernst, den Server verlässt oder der Bot daraus entfernt wird.",
 		"retentionL16": "Moderationsfälle: bleiben wie Verwarnungen erhalten, wenn der Bot entfernt wird, bis der Betreiber sie löscht. Wohin sie gepostet werden, wird beim Entfernen des Bots vergessen.",
 		"storedP3": "Benachrichtigungen veröffentlichen die Betreiber des Bots für alle. Damit dir jede neue nur einmal genannt wird, speichert {{bot}}, wann du sie zuletzt gelesen hast und wann er dich zuletzt auf eine hingewiesen hat, zu deiner Nutzer-ID und sonst nichts. Auch dieser Datensatz ist an keinen Server gebunden und wird 90 Tage, nachdem du die Benachrichtigungen zuletzt gelesen hast oder auf eine hingewiesen wurdest, gelöscht.",
-		"retentionL17": "Wann du die Benachrichtigungen zuletzt gelesen hast: 90 Tage, nachdem du sie zuletzt gelesen hast oder auf eine hingewiesen wurdest, dann automatisch gelöscht."
+		"retentionL17": "Wann du die Benachrichtigungen zuletzt gelesen hast: 90 Tage, nachdem du sie zuletzt gelesen hast oder auf eine hingewiesen wurdest, dann automatisch gelöscht.",
+		"storedL17": "Einsprüche gegen Banns: was du beim Einspruch geschrieben hast, deine Nutzer-ID und dein Nutzername, und was das Team entschieden hat, mit Grund und wer entschieden hat.",
+		"retentionL18": "Einsprüche gegen Banns: 180 Tage nach der Entscheidung, damit eine Ablehnung den nächsten Einspruch zurückhalten kann. Ein offener bleibt bis zur Entscheidung, und alle gehen, wenn der Bot vom Server entfernt wird."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
@@ -2803,5 +2808,48 @@
 		"ask_one": "Die Sperre aufheben lassen kannst du nur, indem du den Inhaber des Bots darum bittest; Moderatoren und Admins eines Servers können sie nicht aufheben. Kontaktiere ihn auf Discord:",
 		"ask_other": "Die Sperre aufheben lassen kannst du nur, indem du die Inhaber des Bots darum bittest; Moderatoren und Admins eines Servers können sie nicht aufheben. Kontaktiere einen von ihnen auf Discord:",
 		"askNobody": "Die Sperre aufheben lassen kannst du nur, indem du den Inhaber des Bots darum bittest; Moderatoren und Admins eines Servers können sie nicht aufheben."
+	},
+	"appeals": {
+		"title": "Einsprüche gegen Banns",
+		"subtitle": "Gebannte schreiben ihren Einspruch auf diesem Dashboard. Das Team nimmt ihn hier oder über seinen Post in Discord an oder lehnt ihn ab, und eine Annahme hebt den Bann auf.",
+		"summaryOn": "Gebannte können Einspruch einlegen, und jeder Einspruch wird in {{channel}} gepostet, damit das Team entscheidet.",
+		"summaryOff": "Einsprüche sind aus. Eingeschaltet wird jeder Einspruch in {{channel}} gepostet, damit das Team entscheidet.",
+		"summaryNoChannel": "Einsprüche haben noch keinen Kanal, also können Gebannte keinen einlegen.",
+		"enabled": "Gebannte können Einspruch einlegen",
+		"enabledHint": "Auf der Seite „Bann anfechten“ dieses Dashboards, auf die die DM bei einem Bann verlinkt.",
+		"enabledHintNoChannel": "Wähle zuerst einen Kanal.",
+		"channel": "Gepostet in",
+		"channelHint": "{{bot}} postet jeden Einspruch hier, mit Buttons zum Annehmen oder Ablehnen. Nur das Team sollte diesen Kanal sehen können.",
+		"cooldown": "Wartezeit nach einer Ablehnung",
+		"cooldownHint": "Wie lange jemand nach einem abgelehnten Einspruch warten muss, bevor ein neuer möglich ist.",
+		"cooldownDays_one": "{{count, number}} Tag",
+		"cooldownDays_other": "{{count, number}} Tage",
+		"listTitle": "Einsprüche",
+		"filter": "Zeigen",
+		"filterAll": "Alle",
+		"statusOpen": "Offen",
+		"statusAccepted": "Angenommen",
+		"statusRefused": "Abgelehnt",
+		"emptyTitle": "Keine Einsprüche hier",
+		"emptyBody": "Wenn ein Gebannter Einspruch einlegt, erscheint er hier und im gewählten Kanal.",
+		"from": "Discord-ID {{id}} · {{when}}",
+		"decidedBy": "Von {{name}} · {{when}}",
+		"reason": "Grund",
+		"reasonHint": "Nötig zum Ablehnen, optional zum Annehmen. Die Person erfährt ihn per DM.",
+		"accept": "Annehmen und entbannen",
+		"refuse": "Ablehnen",
+		"openInDiscord": "In Discord öffnen",
+		"ownTitle": "Bann anfechten",
+		"ownSubtitle": "Bitte einen Server, der dich gebannt hat, dich wieder hereinzulassen. Sein Team liest, was du schreibst, und entscheidet.",
+		"ownNone": "Keine Banns anzufechten",
+		"ownNoneBody": "Keiner der Server, die über {{bot}} Einsprüche annehmen, hat dich gebannt. Einen Server, der keine annimmt, musst du auf anderem Weg fragen.",
+		"ownWrite": "Dein Einspruch",
+		"ownWriteHint": "Schreib, was passiert ist und warum sie dich zurücklassen sollten. Zwischen {{min}} und {{max}} Zeichen.",
+		"ownSend": "Einspruch senden",
+		"ownWaiting": "Du hast am {{when}} Einspruch eingelegt. Er wartet auf die Entscheidung des Teams, und du erfährst sie per DM.",
+		"ownAgain": "Dein letzter Einspruch wurde abgelehnt. Ab {{when}} kannst du erneut Einspruch einlegen.",
+		"ownHistory": "Deine Einsprüche",
+		"ownSentOn": "Gesendet am {{when}}",
+		"ownServerGone": "Ein Server, den {{bot}} verlassen hat"
 	}
 }

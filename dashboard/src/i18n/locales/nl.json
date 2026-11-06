@@ -167,7 +167,9 @@
 		"notifications": "Meldingen",
 		"notificationsHint": "Wat de eigenaren van de bot iedereen willen laten weten",
 		"compare": "Naast elkaar",
-		"compareHint": "Vergelijk hoe je servers zijn ingesteld"
+		"compareHint": "Vergelijk hoe je servers zijn ingesteld",
+		"appeals": "Bezwaren",
+		"appealsHint": "Verbannen leden die terug willen"
 	},
 	"account": {
 		"title": "Je account",
@@ -453,7 +455,8 @@
 		"lockedTitle": "Iemand anders nodig",
 		"lockedBody": "Een bot toevoegen vraagt Server beheren, en dat heb je hier niet.",
 		"pagesOf": "Pagina’s van {{group}}",
-		"compare": "Vergelijk je servers naast elkaar"
+		"compare": "Vergelijk je servers naast elkaar",
+		"appealLink": "Verbannen van een server? Maak bezwaar"
 	},
 	"compare": {
 		"title": "Naast elkaar",
@@ -2135,7 +2138,9 @@
 		"retentionL15": "Verjaardagen: totdat je die van jou verwijdert met /birthday remove, je die server verlaat, of de bot eruit wordt verwijderd.",
 		"retentionL16": "Moderatiezaken: net als waarschuwingen bewaard nadat de bot is verwijderd, totdat de beheerder ze verwijdert. Waar ze worden geplaatst, wordt vergeten als de bot wordt verwijderd.",
 		"storedP3": "Meldingen zijn wat de eigenaren van de bot voor iedereen plaatsen. Zodat elke nieuwe je één keer wordt genoemd, bewaart {{bot}} wanneer je ze voor het laatst las en wanneer het je voor het laatst over een vertelde, bij je gebruikers-ID en verder niets. Dat gegeven is ook niet aan een server gekoppeld, en wordt 90 dagen nadat je de meldingen voor het laatst las of over een hoorde, verwijderd.",
-		"retentionL17": "Wanneer je de meldingen voor het laatst las: 90 dagen nadat je ze voor het laatst las of over een hoorde, daarna automatisch verwijderd."
+		"retentionL17": "Wanneer je de meldingen voor het laatst las: 90 dagen nadat je ze voor het laatst las of over een hoorde, daarna automatisch verwijderd.",
+		"storedL17": "Bezwaren tegen bans: wat je schreef toen je bezwaar maakte, je gebruikers-ID en gebruikersnaam, en wat het team besloot, met de reden en wie besloot.",
+		"retentionL18": "Bezwaren tegen bans: 180 dagen nadat het team besliste, zodat een weigering het volgende bezwaar kan tegenhouden. Een bezwaar dat nog wacht blijft tot er besloten is, en alle bezwaren gaan wanneer de bot van de server wordt verwijderd."
 	},
 	"problem": {
 		"automodMentionLimit": "Kies hoeveel mentions je toestaat.",
@@ -2803,5 +2808,48 @@
 		"ask_one": "De enige manier om de blokkade te laten opheffen is het aan de eigenaar van de bot te vragen; moderators en beheerders van een server kunnen dat niet. Neem contact met hem op via Discord:",
 		"ask_other": "De enige manier om de blokkade te laten opheffen is het aan de eigenaren van de bot te vragen; moderators en beheerders van een server kunnen dat niet. Neem contact op met een van hen via Discord:",
 		"askNobody": "De enige manier om de blokkade te laten opheffen is het aan de eigenaar van de bot te vragen; moderators en beheerders van een server kunnen dat niet."
+	},
+	"appeals": {
+		"title": "Bezwaren tegen bans",
+		"subtitle": "Verbannen leden schrijven hun bezwaar op dit dashboard. Het team accepteert of weigert het hier of vanuit het bericht in Discord, en accepteren heft de ban op.",
+		"summaryOn": "Verbannen leden kunnen bezwaar maken, en elk bezwaar wordt in {{channel}} geplaatst zodat het team beslist.",
+		"summaryOff": "Bezwaren staan uit. Aangezet wordt elk bezwaar in {{channel}} geplaatst zodat het team beslist.",
+		"summaryNoChannel": "Bezwaren hebben nog geen kanaal, dus verbannen leden kunnen geen bezwaar maken.",
+		"enabled": "Verbannen leden kunnen bezwaar maken",
+		"enabledHint": "Op de pagina Bezwaar tegen een ban van dit dashboard, waar de DM bij een ban naar linkt.",
+		"enabledHintNoChannel": "Kies eerst een kanaal.",
+		"channel": "Geplaatst in",
+		"channelHint": "{{bot}} plaatst hier elk bezwaar, met knoppen om het te accepteren of te weigeren. Alleen het team zou dit kanaal moeten zien.",
+		"cooldown": "Wachttijd na een weigering",
+		"cooldownHint": "Hoe lang iemand van wie het bezwaar is geweigerd moet wachten voordat een nieuw bezwaar kan.",
+		"cooldownDays_one": "{{count, number}} dag",
+		"cooldownDays_other": "{{count, number}} dagen",
+		"listTitle": "Bezwaren",
+		"filter": "Tonen",
+		"filterAll": "Alle",
+		"statusOpen": "Wacht",
+		"statusAccepted": "Geaccepteerd",
+		"statusRefused": "Geweigerd",
+		"emptyTitle": "Geen bezwaren hier",
+		"emptyBody": "Als een verbannen lid bezwaar maakt, verschijnt het hier en in het gekozen kanaal.",
+		"from": "Discord-ID {{id}} · {{when}}",
+		"decidedBy": "Door {{name}} · {{when}}",
+		"reason": "Reden",
+		"reasonHint": "Nodig om te weigeren, optioneel om te accepteren. Het lid krijgt het in een DM te horen.",
+		"accept": "Accepteren en ban opheffen",
+		"refuse": "Weigeren",
+		"openInDiscord": "Openen in Discord",
+		"ownTitle": "Bezwaar tegen een ban",
+		"ownSubtitle": "Vraag een server die je heeft verbannen om je terug te laten. Het team leest wat je schrijft en beslist.",
+		"ownNone": "Geen bans om bezwaar tegen te maken",
+		"ownNoneBody": "Geen van de servers die bezwaren via {{bot}} aannemen heeft je verbannen. Een server die ze niet aanneemt moet je op een andere manier vragen.",
+		"ownWrite": "Je bezwaar",
+		"ownWriteHint": "Vertel wat er gebeurde en waarom ze je terug zouden moeten laten. Tussen {{min}} en {{max}} tekens.",
+		"ownSend": "Bezwaar versturen",
+		"ownWaiting": "Je maakte bezwaar op {{when}}. Het wacht op het besluit van het team, en je hoort het in een DM.",
+		"ownAgain": "Je laatste bezwaar is geweigerd. Vanaf {{when}} kun je opnieuw bezwaar maken.",
+		"ownHistory": "Je bezwaren",
+		"ownSentOn": "Verstuurd op {{when}}",
+		"ownServerGone": "Een server die {{bot}} heeft verlaten"
 	}
 }

@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 93, across 14 categories          |
-| Command files        | 114 (incl. folded-in subcommands) |
+| Commands             | 94, across 14 categories          |
+| Command files        | 115 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
-| Button handlers      | 45                                |
+| Button handlers      | 47                                |
 | Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 221, in 31 domain folders         |
-| Schemas/repositories | 47 / 46                           |
+| `src/lib` helpers    | 225, in 32 domain folders         |
+| Schemas/repositories | 48 / 47                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,950 across 521 suites           |
+| Tests                | 3,987 across 528 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -218,10 +218,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  114 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  115 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               31 handlers in command, community, create, logging, ready and message
-├── buttons/              45 component handlers, keyed by custom-ID prefix
-├── lib/                  221 helpers in 31 domain folders, each behind its own index.ts barrel
+├── buttons/              47 component handlers, keyed by custom-ID prefix
+├── lib/                  225 helpers in 32 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,11 +232,11 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/ notices/ account/
+│       site/ notices/ account/ appeals/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           47 Mongoose schemas, one file per feature
-│   └── repositories/     46 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           48 Mongoose schemas, one file per feature
+│   └── repositories/     47 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -1889,6 +1889,31 @@ things about them are load-bearing:
   dashboard's `PATCH`, because a hold is a timeout and somebody who could not `/mute` must not be able to arrange one.
   It cannot be on with nothing to do, and taking away the last thing it did turns it off.
 
+### A ban appeal is written on the web, decided in either place, and never pings
+
+`/appeals` and the **Appeals** screen choose a channel only staff can see and how long a refusal holds back the next
+appeal; banned members write theirs on the dashboard's `/appeals` page, which the ban's direct message links to
+(`appealLink`). Five things about it are load-bearing:
+
+- **Only somebody the server has banned can appeal it, asked live.** `readOwnAppeals` and `submitAppeal` look up the
+  ban with `guild.bans.fetch` on every read and every send, over only the servers that take appeals
+  (`appealGuildIds`), so a session cannot name a server it was never banned from and post into its staff channel.
+  The route takes the person from the session alone. Appeals cannot be turned on without the dashboard
+  (`takesAppeals`), because there would be nowhere to write one.
+- **One waiting per person per server, and a refusal holds back the next.** A partial unique index on
+  `{ guildId, userId }` for open appeals decides, not a read, and `appealAgainAt` is the wait a refusal sets, from
+  `APPEAL_LIMITS.cooldownChoices`. A decided appeal is kept `keepDays` (180) under a TTL so the wait can still be
+  read, and the privacy notice says so (`legal.storedL17`, `legal.retentionL18`).
+- **The decision is claimed before the unban.** `decideAppeal` moves only an open appeal, so two staff pressing
+  together cannot both act; an unban Discord refuses hands it back (`reopenAppeal`), and a ban lifted some other way
+  meanwhile still records the appeal as accepted. A refusal needs a reason, on the form and in `appealDecision`.
+- **Deciding asks Ban Members, everywhere.** The post's buttons ask it on the press and again on the form, and the
+  dashboard's list and decision routes sit in `ASKS_MORE`; the settings ask Manage Server.
+- **Every post goes out with `allowedMentions: { parse: [] }`**, because it quotes what a banned person typed. A post
+  that cannot be sent deletes its appeal, which staff would otherwise never see and which would block the next one.
+  Delete my data removes the person's appeals and takes their posts down, and keeps a decision with the decider's
+  name taken off.
+
 ### The owners' notifications are mentioned once, and only the owners change them
 
 `/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
@@ -2130,6 +2155,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/warnings`            | The five latest warnings and a search, the steps, warning a member by name                  |
 | `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                   |
 | `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                          |
+| `/guilds/:id/appeals`             | Where appeals are posted, the wait after a refusal, and every appeal with Accept and Refuse |
 | `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                        |
 | `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                   |
 | `/guilds/:id/changes`             | Two weeks of changes, from the dashboard and Discord's audit log, searched                  |
@@ -2158,6 +2184,7 @@ four tabs, three shared components and two testable modules.
 | `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
 | `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
+| `/appeals`                        | Appeal a ban: every server that banned the reader and takes appeals, and past appeals       |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
@@ -2860,8 +2887,8 @@ existed. `useGuildOverview` takes `null` for the screens that serve both a serve
 Settings come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
-messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, channel tools, tickets,
-the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
+messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, channel tools,
+tickets, the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
 casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,

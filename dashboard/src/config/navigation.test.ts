@@ -52,6 +52,7 @@ describe("navigationFor", () => {
 			[
 				"/",
 				"/announcements",
+				"/appeals",
 				"/audit-log",
 				"/auto-responders",
 				"/automod",
@@ -105,6 +106,7 @@ describe("navigationFor", () => {
 			"nav.community": ["/birthdays", "/ideas", "/levelling", "/role-menus", "/starboard", "/temp-voice", "/welcome"],
 			"nav.messages": ["/announcements", "/auto-responders", "/scheduled-messages", "/sticky"],
 			"nav.moderation": [
+				"/appeals",
 				"/audit-log",
 				"/automod",
 				"/bans",

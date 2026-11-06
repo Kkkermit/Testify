@@ -42,6 +42,8 @@ const AutoRespondersPage = page(
 );
 const RoleMenusPage = page(async () => import("@/features/role-menus/RoleMenusPage"), "RoleMenusPage");
 const IdeasPage = page(async () => import("@/features/ideas/IdeasPage"), "IdeasPage");
+const BanAppealsPage = page(async () => import("@/features/appeals/BanAppealsPage"), "BanAppealsPage");
+const AppealBanPage = page(async () => import("@/features/appeals/AppealBanPage"), "AppealBanPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
 const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
 const InboxPage = page(async () => import("@/features/inbox/InboxPage"), "InboxPage");
@@ -136,6 +138,7 @@ export const routes = [
 									{ path: "/guilds/:guildId/cases", element: lazily(<CasesPage />) },
 									{ path: "/guilds/:guildId/raid-protection", element: lazily(<RaidPage />) },
 									{ path: "/guilds/:guildId/bans", element: lazily(<BansPage />) },
+									{ path: "/guilds/:guildId/appeals", element: lazily(<BanAppealsPage />) },
 									{ path: "/guilds/:guildId/channel-tools", element: lazily(<ChannelToolsPage />) },
 									{ path: "/guilds/:guildId/announcements", element: lazily(<AnnouncementsPage />) },
 									{ path: "/guilds/:guildId/scheduled-messages", element: lazily(<ScheduledMessagesPage />) },
@@ -169,6 +172,7 @@ export const routes = [
 							{ path: "/status", element: lazily(<StatusPage />) },
 							{ path: "/notifications", element: lazily(<NotificationsPage />) },
 							{ path: "/account", element: lazily(<AccountPage />) },
+							{ path: "/appeals", element: lazily(<AppealBanPage />) },
 							{
 								element: <RequireOwner />,
 								children: [{ path: "/owner", element: lazily(<OwnerPage />), errorElement: <OwnerRouteError /> }],
