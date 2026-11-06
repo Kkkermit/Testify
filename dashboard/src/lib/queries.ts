@@ -54,6 +54,7 @@ export const keys = {
 		appealSettings: () => ["guild", id, "appeals", "settings"] as const,
 		modmailSettings: () => ["guild", id, "modmail", "settings"] as const,
 		invites: () => ["guild", id, "invites"] as const,
+		tuning: () => ["guild", id, "tuning"] as const,
 		modmailConversations: () => ["guild", id, "modmail", "conversations"] as const,
 		appealList: (status: string, page: number) => ["guild", id, "appeals", "list", status, page] as const,
 		allAppeals: () => ["guild", id, "appeals"] as const,

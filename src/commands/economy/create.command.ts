@@ -1,8 +1,10 @@
-import { ECONOMY } from "@config/constants";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { createAccount, deleteAccount, findAccount } from "@database/repositories/economyRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
+import { tuningPanel } from "@lib/economy";
 import { formatNumber } from "@lib/format";
 
 export default defineCommand({
@@ -23,7 +25,7 @@ export default defineCommand({
 				await reply(interaction, {
 					embeds: [
 						successEmbed(
-							`Your account is open with **${formatNumber(ECONOMY.startingWallet)}** in your wallet. Try \`/daily\` next.`,
+							`Your account is open with **${formatNumber(account.wallet)}** in your wallet. Try \`/daily\` next.`,
 						),
 					],
 				});
@@ -38,6 +40,15 @@ export default defineCommand({
 				if (!deleted) throw new UserFacingError("You do not have an account here.");
 
 				await reply(interaction, { embeds: [successEmbed("Your economy account has been deleted.")] });
+			},
+		},
+		{
+			name: "settings",
+			description: "Sets this server's pay, starting money, robbing and XP rate.",
+			permissions: [PermissionFlagsBits.ManageGuild],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				await reply(interaction, tuningPanel(await getTuning(guild.id), interaction.user.id));
 			},
 		},
 		{

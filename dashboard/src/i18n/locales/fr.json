@@ -174,7 +174,9 @@
 		"modmail": "Messagerie modération",
 		"modmailHint": "Les membres écrivent en privé à l’équipe",
 		"invites": "Invitations",
-		"invitesHint": "Les invitations qui ont amené des membres"
+		"invitesHint": "Les invitations qui ont amené des membres",
+		"economyRates": "Paie et taux",
+		"economyRatesHint": "Ce que l’économie rapporte, et les vols"
 	},
 	"account": {
 		"title": "Ton compte",
@@ -2997,5 +2999,23 @@
 		"viaInvite": "Avec l’invitation {{code}} de {{name}}.",
 		"viaVanity": "Avec le lien propre au serveur.",
 		"viaUnknown": "L’invitation n’a pas pu être identifiée."
+	},
+	"economy": {
+		"title": "Paie et taux",
+		"subtitle": "En quoi l’économie de ce serveur diffère des valeurs de {{bot}}. Le taux d’XP est sur la page Niveaux.",
+		"summary": "La paie est à {{rate}} de l’habituel, et les nouveaux comptes commencent avec {{wallet}}.",
+		"usualRate": "{{rate}} (l’habituel)",
+		"payRate": "Paie",
+		"payRateHint": "Ajuste /daily, /work et /beg.",
+		"startingWallet": "Les nouveaux comptes commencent avec",
+		"startingWalletHint": "S’applique aux comptes ouverts à partir de maintenant.",
+		"walletRange": "Indiquez un nombre entier de 0 à {{max}}.",
+		"robbing": "Les membres peuvent se voler entre eux",
+		"robbingHint": "Désactivé, /rob est refusé sur ce serveur.",
+		"xpRate": "XP par message",
+		"xpRateHint": "Ajuste l’XP avant tout rôle de boost.",
+		"xpCooldown": "Délai entre deux messages qui rapportent de l’XP",
+		"xpCooldownHint": "Les messages envoyés plus tôt ne rapportent rien.",
+		"couldNotRead": "Le taux d’XP n’a pas pu être lu. Rechargez la page."
 	}
 }

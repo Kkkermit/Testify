@@ -13,6 +13,7 @@ import {
 	removeInventoryItem,
 	setCooldown,
 } from "@database/repositories/economyRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
 import { planRobbery } from "@lib/economy";
 import { discordTime, escapeMarkdown, formatDuration, formatNumber } from "@lib/format";
@@ -52,6 +53,9 @@ export default defineCommand({
 		const guild = inGuild(interaction);
 		const target = interaction.options.getUser("user", true);
 
+		if (!(await getTuning(guild.id)).robbing) {
+			throw new UserFacingError("Robbing is switched off in this server.");
+		}
 		if (target.id === interaction.user.id) throw new UserFacingError(strings.economy.selfTarget);
 		if (target.bot) throw new UserFacingError(strings.economy.botTarget);
 

@@ -39,6 +39,7 @@ import { StarboardSettingsConfig, StarPost } from "@database/models/starboard.sc
 import { TempChannel, TempVoiceSettingsConfig } from "@database/models/tempVoice.schema";
 import { Ticket } from "@database/models/tickets.schema";
 import { TreasureConfig } from "@database/models/treasure.schema";
+import { TuningConfig } from "@database/models/tuning.schema";
 import { PendingVerify, VerifyConfig } from "@database/models/verification.schema";
 import { ERASURE, eraseUserData } from "@database/repositories/accountRepository";
 import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
@@ -143,6 +144,7 @@ const SETTINGS = [
 	ScheduledPost,
 	StarboardSettingsConfig,
 	TempVoiceSettingsConfig,
+	TuningConfig,
 ] as const;
 
 const THEIRS = [

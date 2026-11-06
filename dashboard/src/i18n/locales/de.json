@@ -173,7 +173,9 @@
 		"modmail": "Modmail",
 		"modmailHint": "Mitglieder schreiben privat ans Team",
 		"invites": "Einladungen",
-		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben"
+		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben",
+		"economyRates": "Bezahlung und Raten",
+		"economyRatesHint": "Wie viel die Wirtschaft zahlt, und Rauben"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -2914,5 +2916,23 @@
 		"viaInvite": "Mit der Einladung {{code}} von {{name}}.",
 		"viaVanity": "Über den eigenen Link des Servers.",
 		"viaUnknown": "Die Einladung ließ sich nicht bestimmen."
+	},
+	"economy": {
+		"title": "Bezahlung und Raten",
+		"subtitle": "Wie die Wirtschaft dieses Servers von den Werten von {{bot}} abweicht. Die XP-Rate steht auf der Levelling-Seite.",
+		"summary": "Die Bezahlung liegt bei {{rate}} des Üblichen, und neue Konten starten mit {{wallet}}.",
+		"usualRate": "{{rate}} (üblich)",
+		"payRate": "Bezahlung",
+		"payRateHint": "Skaliert /daily, /work und /beg.",
+		"startingWallet": "Neue Konten starten mit",
+		"startingWalletHint": "Gilt für Konten, die ab jetzt eröffnet werden.",
+		"walletRange": "Gib eine ganze Zahl von 0 bis {{max}} an.",
+		"robbing": "Mitglieder können sich gegenseitig ausrauben",
+		"robbingHint": "Ausgeschaltet wird /rob auf diesem Server abgelehnt.",
+		"xpRate": "XP pro Nachricht",
+		"xpRateHint": "Skaliert die XP vor jeder Boost-Rolle.",
+		"xpCooldown": "Zeit zwischen Nachrichten, die XP bringen",
+		"xpCooldownHint": "Nachrichten, die früher gesendet werden, bringen nichts.",
+		"couldNotRead": "Die XP-Rate konnte nicht gelesen werden. Lade die Seite neu."
 	}
 }

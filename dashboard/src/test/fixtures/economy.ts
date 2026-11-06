@@ -1,4 +1,12 @@
-import { type CasinoSettings, type LotterySettings, type TreasureSettings } from "@testify/shared";
+import {
+	type CasinoSettings,
+	DEFAULT_TUNING,
+	type LotterySettings,
+	type ServerTuning,
+	type TreasureSettings,
+} from "@testify/shared";
+
+export const tuning: ServerTuning = { ...DEFAULT_TUNING, payRate: 150 };
 
 export const lotterySettings: LotterySettings = {
 	enabled: true,

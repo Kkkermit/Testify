@@ -49,6 +49,7 @@ import {
 	Sparkles,
 	Star,
 	Volume2,
+	Wallet,
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
@@ -195,6 +196,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					labelKey: "nav.economy",
 					icon: Coins,
 					items: [
+						{ to: at("/economy"), labelKey: "nav.economyRates", icon: Wallet, hintKey: "nav.economyRatesHint" },
 						{ to: at("/treasure"), labelKey: "nav.treasure", icon: Gem, hintKey: "nav.treasureHint" },
 						{ to: at("/lottery"), labelKey: "nav.lottery", icon: Ticket, hintKey: "nav.lotteryHint" },
 						{ to: at("/casino"), labelKey: "nav.casino", icon: Dices, hintKey: "nav.casinoHint" },

@@ -172,7 +172,9 @@
 		"modmail": "モッドメール",
 		"modmailHint": "メンバーからスタッフへの非公開メッセージ",
 		"invites": "招待",
-		"invitesHint": "誰の招待でメンバーが来たか"
+		"invitesHint": "誰の招待でメンバーが来たか",
+		"economyRates": "報酬とレート",
+		"economyRatesHint": "経済の報酬と強盗"
 	},
 	"account": {
 		"title": "アカウント",
@@ -2831,5 +2833,23 @@
 		"viaInvite": "{{name}} の招待 {{code}} で参加。",
 		"viaVanity": "サーバー独自のリンクで参加。",
 		"viaUnknown": "招待を特定できませんでした。"
+	},
+	"economy": {
+		"title": "報酬とレート",
+		"subtitle": "このサーバーの経済が {{bot}} 標準の数値とどう違うか。XP レートはレベルのページにあります。",
+		"summary": "報酬は通常の {{rate}}、新しい口座は {{wallet}} から始まります。",
+		"usualRate": "{{rate}}（標準）",
+		"payRate": "報酬",
+		"payRateHint": "/daily、/work、/beg に掛かります。",
+		"startingWallet": "新しい口座の初期額",
+		"startingWalletHint": "今後開設される口座に適用されます。",
+		"walletRange": "0〜{{max}} の整数を入力してください。",
+		"robbing": "メンバー同士で強盗できる",
+		"robbingHint": "オフにすると、このサーバーでは /rob が使えません。",
+		"xpRate": "メッセージごとの XP",
+		"xpRateHint": "ブーストロールの前に XP に掛かります。",
+		"xpCooldown": "XP を得られるメッセージの間隔",
+		"xpCooldownHint": "それより早く送ったメッセージは XP になりません。",
+		"couldNotRead": "XP レートを読み込めませんでした。ページを再読み込みしてください。"
 	}
 }

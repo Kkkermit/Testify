@@ -173,7 +173,9 @@
 		"modmail": "Mod mail",
 		"modmailHint": "Members writing privately to staff",
 		"invites": "Invites",
-		"invitesHint": "Whose invites brought members in"
+		"invitesHint": "Whose invites brought members in",
+		"economyRates": "Pay and rates",
+		"economyRatesHint": "How much the economy pays, and robbing"
 	},
 	"account": {
 		"title": "Your account",
@@ -2914,5 +2916,23 @@
 		"viaInvite": "With {{name}}’s invite {{code}}.",
 		"viaVanity": "With the server’s own link.",
 		"viaUnknown": "The invite could not be told."
+	},
+	"economy": {
+		"title": "Pay and rates",
+		"subtitle": "How this server’s economy differs from {{bot}}’s own numbers. The XP rate is on the Levelling page.",
+		"summary": "Pay is {{rate}} of the usual, and new accounts start with {{wallet}}.",
+		"usualRate": "{{rate}} (the usual)",
+		"payRate": "Pay",
+		"payRateHint": "Scales /daily, /work and /beg.",
+		"startingWallet": "New accounts start with",
+		"startingWalletHint": "Applies to accounts opened from now on.",
+		"walletRange": "Give a whole number from 0 to {{max}}.",
+		"robbing": "Members can rob each other",
+		"robbingHint": "Turned off, /rob is refused in this server.",
+		"xpRate": "XP each message earns",
+		"xpRateHint": "Scales the XP before any boost role.",
+		"xpCooldown": "Time between messages that earn XP",
+		"xpCooldownHint": "Messages sent sooner after the last one earn nothing.",
+		"couldNotRead": "The XP rate could not be read. Reload the page to try again."
 	}
 }

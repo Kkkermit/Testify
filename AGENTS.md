@@ -63,12 +63,12 @@ numbers, which drift):
 | Command files        | 117 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
-| Button handlers      | 50                                |
+| Button handlers      | 51                                |
 | Events               | 36, in 6 groups                   |
-| `src/lib` helpers    | 232, in 34 domain folders         |
-| Schemas/repositories | 50 / 49                           |
+| `src/lib` helpers    | 233, in 34 domain folders         |
+| Schemas/repositories | 51 / 50                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,023 across 538 suites           |
+| Tests                | 4,033 across 542 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -220,8 +220,8 @@ src/
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
-├── buttons/              50 component handlers, keyed by custom-ID prefix
-├── lib/                  232 helpers in 34 domain folders, each behind its own index.ts barrel
+├── buttons/              51 component handlers, keyed by custom-ID prefix
+├── lib/                  233 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -235,8 +235,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           50 Mongoose schemas, one file per feature
-│   └── repositories/     49 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           51 Mongoose schemas, one file per feature
+│   └── repositories/     50 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -1961,6 +1961,21 @@ who stayed. Four things about it are load-bearing:
 - **The announcement pings nobody** (`allowedMentions: { parse: [] }`), and the board ranks by members who stayed, so
   a burst of joins that left again cannot top it.
 
+### A server tunes its economy and XP by rates, never by rewriting the numbers
+
+`/economy settings`, the **Pay and rates** screen and two rows on the Levelling page change one record, `servertuning`:
+a pay rate, the starting wallet, whether `/rob` works, an XP rate and the XP cooldown. Three things about it are
+load-bearing:
+
+- **The bot's own numbers stay the source; a server only scales them.** A rate is a percentage from `TUNING_RATES`
+  and `atRate` applies it, never below one where there was anything to scale, so `/daily`'s streak, a job's pay and a
+  boost role's multiplier all keep working on top. `DEFAULT_TUNING` must equal `ECONOMY` and `LEVELLING`, which
+  `tuning.test.ts` pins, so a server that tuned nothing plays by the numbers the help articles quote.
+- **It is read on every message that earns XP, so it is cached** like the prefix and replaced on every write, and a
+  stored value no list offers reads as the default (`tuningOf`), so a hand-edited record cannot hand out 1,000% XP.
+- **It asks Manage Server, not Administrator.** It changes rates for everybody rather than one member's balance or
+  level, which is what `/give` and the member page's money and level controls ask Administrator for.
+
 ### The owners' notifications are mentioned once, and only the owners change them
 
 `/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
@@ -2217,6 +2232,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                 |
 | `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                         |
 | `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                        |
+| `/guilds/:id/economy`             | Pay, the starting wallet and robbing; the XP rate sits on the Levelling page                |
 | `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                               |
 | `/guilds/:id/music`               | The music kill switch and the DJ roles                                                      |
 | `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                        |
@@ -2937,8 +2953,8 @@ Settings come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
 messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
-tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (treasure, the lottery, the
-casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
+tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (pay and rates, treasure, the
+lottery, the casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,
 with a count beside each and features dragged onto them, and both were taken out after review: a real server's

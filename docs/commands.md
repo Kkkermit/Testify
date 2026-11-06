@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 91](https://img.shields.io/badge/commands-91-8b5cf6?style=for-the-badge) ![subcommands: 148](https://img.shields.io/badge/subcommands-148-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
+![commands: 91](https://img.shields.io/badge/commands-91-8b5cf6?style=for-the-badge) ![subcommands: 149](https://img.shields.io/badge/subcommands-149-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
 
 </div>
 
@@ -15,7 +15,7 @@
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
 | [👥 Community](#-community)   |    11    |     17      |
-| [💰 Economy](#-economy)       |    20    |     25      |
+| [💰 Economy](#-economy)       |    20    |     26      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
 | [🎯 Games](#-games)           |    1     |      6      |
@@ -53,7 +53,7 @@
 | `/cooldowns`    | Shows your active economy cooldowns.              | —                                                  | —                           | —             |
 | `/daily`        | Claims your daily reward.                         | —                                                  | —                           | —             |
 | `/deposit`      | Moves money from your wallet into the bank.       | —                                                  | `t?dep`                     | —             |
-| `/economy`      | Manages your economy account.                     | `create`, `delete`, `status`                       | —                           | —             |
+| `/economy`      | Manages your economy account.                     | `create`, `delete`, `settings`, `status`           | —                           | Manage guild  |
 | `/economy-info` | Detailed economy information.                     | `account`, `server`                                | —                           | —             |
 | `/give`         | Grants currency or XP to a member.                | `currency`, `xp`                                   | —                           | Administrator |
 | `/heist`        | Starts a group heist that other members can join. | —                                                  | —                           | —             |

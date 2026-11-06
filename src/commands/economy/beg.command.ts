@@ -8,8 +8,10 @@ import {
 	incrementCounters,
 	setCooldown,
 } from "@database/repositories/economyRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
 import { formatDuration, formatNumber } from "@lib/format";
+import { atRate } from "@testify/shared";
 
 export default defineCommand({
 	name: "beg",
@@ -30,7 +32,7 @@ export default defineCommand({
 			}
 		}
 
-		const amount = randomInt(ECONOMY.begMin, ECONOMY.begMax + 1);
+		const amount = atRate(randomInt(ECONOMY.begMin, ECONOMY.begMax + 1), (await getTuning(guild.id)).payRate);
 		if (amount > 0) await adjustWallet(guild.id, interaction.user.id, amount);
 		await setCooldown(guild.id, interaction.user.id, "beg", new Date(now));
 		await incrementCounters(guild.id, interaction.user.id, { begged: 1 });

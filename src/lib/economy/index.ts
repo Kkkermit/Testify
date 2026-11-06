@@ -13,3 +13,4 @@ export * from "./robbery.util";
 export * from "./shop.util";
 export * from "./shopScreen.util";
 export * from "./treasureActions.util";
+export * from "./tuningPanel.util";

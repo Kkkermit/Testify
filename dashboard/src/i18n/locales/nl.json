@@ -173,7 +173,9 @@
 		"modmail": "Modmail",
 		"modmailHint": "Leden die privé het team schrijven",
 		"invites": "Uitnodigingen",
-		"invitesHint": "Wiens uitnodigingen leden binnenbrachten"
+		"invitesHint": "Wiens uitnodigingen leden binnenbrachten",
+		"economyRates": "Loon en tarieven",
+		"economyRatesHint": "Hoeveel de economie betaalt, en beroven"
 	},
 	"account": {
 		"title": "Je account",
@@ -2914,5 +2916,23 @@
 		"viaInvite": "Met de uitnodiging {{code}} van {{name}}.",
 		"viaVanity": "Via de eigen link van de server.",
 		"viaUnknown": "De uitnodiging was niet te bepalen."
+	},
+	"economy": {
+		"title": "Loon en tarieven",
+		"subtitle": "Hoe de economie van deze server afwijkt van de waarden van {{bot}}. Het XP-tarief staat op de pagina Levels.",
+		"summary": "Het loon is {{rate}} van normaal, en nieuwe rekeningen beginnen met {{wallet}}.",
+		"usualRate": "{{rate}} (normaal)",
+		"payRate": "Loon",
+		"payRateHint": "Schaalt /daily, /work en /beg.",
+		"startingWallet": "Nieuwe rekeningen beginnen met",
+		"startingWalletHint": "Geldt voor rekeningen die vanaf nu worden geopend.",
+		"walletRange": "Geef een geheel getal van 0 tot {{max}}.",
+		"robbing": "Leden kunnen elkaar beroven",
+		"robbingHint": "Uitgezet wordt /rob op deze server geweigerd.",
+		"xpRate": "XP per bericht",
+		"xpRateHint": "Schaalt de XP vóór elke boostrol.",
+		"xpCooldown": "Tijd tussen berichten die XP opleveren",
+		"xpCooldownHint": "Berichten die eerder worden gestuurd leveren niets op.",
+		"couldNotRead": "Het XP-tarief kon niet worden gelezen. Laad de pagina opnieuw."
 	}
 }

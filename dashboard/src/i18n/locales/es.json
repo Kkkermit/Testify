@@ -174,7 +174,9 @@
 		"modmail": "Correo al equipo",
 		"modmailHint": "Miembros que escriben en privado al equipo",
 		"invites": "Invitaciones",
-		"invitesHint": "Qué invitaciones trajeron miembros"
+		"invitesHint": "Qué invitaciones trajeron miembros",
+		"economyRates": "Pagos y tasas",
+		"economyRatesHint": "Cuánto paga la economía, y los robos"
 	},
 	"account": {
 		"title": "Tu cuenta",
@@ -2997,5 +2999,23 @@
 		"viaInvite": "Con la invitación {{code}} de {{name}}.",
 		"viaVanity": "Con el enlace propio del servidor.",
 		"viaUnknown": "No se pudo saber la invitación."
+	},
+	"economy": {
+		"title": "Pagos y tasas",
+		"subtitle": "En qué se diferencia la economía de este servidor de los valores de {{bot}}. La tasa de XP está en la página de Niveles.",
+		"summary": "Los pagos son el {{rate}} de lo habitual, y las cuentas nuevas empiezan con {{wallet}}.",
+		"usualRate": "{{rate}} (lo habitual)",
+		"payRate": "Pagos",
+		"payRateHint": "Ajusta /daily, /work y /beg.",
+		"startingWallet": "Las cuentas nuevas empiezan con",
+		"startingWalletHint": "Se aplica a las cuentas que se abran a partir de ahora.",
+		"walletRange": "Escribe un número entero entre 0 y {{max}}.",
+		"robbing": "Los miembros pueden robarse entre sí",
+		"robbingHint": "Desactivado, /rob se rechaza en este servidor.",
+		"xpRate": "XP por mensaje",
+		"xpRateHint": "Ajusta la XP antes de cualquier rol de impulso.",
+		"xpCooldown": "Tiempo entre mensajes que dan XP",
+		"xpCooldownHint": "Los mensajes enviados antes no dan nada.",
+		"couldNotRead": "No se pudo leer la tasa de XP. Recarga la página."
 	}
 }
