@@ -2,7 +2,7 @@ import { type MemberDetail, MEMBER_TIMEOUT_MINUTES, WARNING_LIMITS, warningProbl
 import { Timer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, RowActions, SettingRows, Warning } from "@/components/form";
+import { ConfirmField, Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD, SELECT } from "@/components/form/fieldStyles";
 import { Button } from "@/components/primitives";
 import { durationText } from "@/features/cases/cases.utils";
@@ -105,21 +105,13 @@ export function TimeoutCard({
 						/>
 					</Field>
 
-					<Field
+					<ConfirmField
+						id="timeout-confirm"
 						label={t("members.typeToConfirm", { name: detail.username })}
 						hint={t("members.confirmHint")}
-						htmlFor="timeout-confirm"
-					>
-						<input
-							id="timeout-confirm"
-							className={FIELD}
-							value={typed}
-							autoComplete="off"
-							onChange={(event) => {
-								setTyped(event.target.value);
-							}}
-						/>
-					</Field>
+						value={typed}
+						onChange={setTyped}
+					/>
 
 					<Warning>{t("members.timeoutWarning")}</Warning>
 

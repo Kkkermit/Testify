@@ -1,12 +1,11 @@
 import { type TestPost, type WelcomePlaceholder, type WelcomeStyle } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Warning } from "@/components/form";
+import { Refusal } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { SendTest } from "@/features/test-post/SendTest";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
-import { ApiError } from "@/lib/api";
 
 export function EditablePost({
 	id,
@@ -98,7 +97,7 @@ export function EditablePost({
 			>
 				<SendTest test={testOf(draft)} />
 			</MessageEditor>
-			{error !== null && <Warning>{error instanceof ApiError ? error.message : t("common.couldNotSave")}</Warning>}
+			<Refusal error={error} />
 			<Button
 				variant="secondary"
 				className="self-start"

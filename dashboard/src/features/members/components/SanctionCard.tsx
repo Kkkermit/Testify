@@ -2,7 +2,7 @@ import { type MemberDetail, WARN_LIMITS, WARNING_LIMITS, warningProblem } from "
 import { Ban, DoorOpen } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, RowActions, SettingRows, Warning } from "@/components/form";
+import { ConfirmField, Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD, SELECT } from "@/components/form/fieldStyles";
 import { Button } from "@/components/primitives";
 import { clearConfirmed } from "@/features/members/memberDetail.utils";
@@ -103,21 +103,13 @@ export function SanctionCard({
 						</Field>
 					)}
 
-					<Field
+					<ConfirmField
+						id="sanction-confirm"
 						label={t("members.typeToConfirm", { name: detail.username })}
 						hint={t("members.confirmHint")}
-						htmlFor="sanction-confirm"
-					>
-						<input
-							id="sanction-confirm"
-							className={FIELD}
-							value={typed}
-							autoComplete="off"
-							onChange={(event) => {
-								setTyped(event.target.value);
-							}}
-						/>
-					</Field>
+						value={typed}
+						onChange={setTyped}
+					/>
 
 					<Warning>{chosen === "kick" ? t("members.kickWarning") : t("members.banWarning")}</Warning>
 

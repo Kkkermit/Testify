@@ -13,6 +13,7 @@ import { ErrorState } from "@/app/ErrorState";
 import {
 	Field,
 	FIELD,
+	Refusal,
 	RowActions,
 	SavingIndicator,
 	savingStateOf,
@@ -27,7 +28,6 @@ import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { oneOf } from "@/lib/oneOf";
 import { problemText } from "@/lib/problemText";
@@ -159,9 +159,7 @@ export function AutomodPage(): React.JSX.Element {
 
 					{preset === "keyword" && markupWarning(word) !== null && <Warning>{markupWarning(word)}</Warning>}
 					{blocked !== null && word !== "" && <Warning>{blocked}</Warning>}
-					{add.error !== null && (
-						<Warning>{add.error instanceof ApiError ? add.error.message : t("automod.refusedRule")}</Warning>
-					)}
+					<Refusal error={add.error} fallback="automod.refusedRule" />
 
 					<RowActions>
 						<Button
@@ -177,12 +175,8 @@ export function AutomodPage(): React.JSX.Element {
 				</SettingRows>
 			)}
 
-			{toggle.error !== null && (
-				<Warning>{toggle.error instanceof ApiError ? toggle.error.message : t("common.couldNotChange")}</Warning>
-			)}
-			{remove.error !== null && (
-				<Warning>{remove.error instanceof ApiError ? remove.error.message : t("common.couldNotRemove")}</Warning>
-			)}
+			<Refusal error={toggle.error} fallback="common.couldNotChange" />
+			<Refusal error={remove.error} fallback="common.couldNotRemove" />
 		</>
 	);
 }

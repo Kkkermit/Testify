@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
+import { Refusal, SavingIndicator, savingStateOf } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -20,7 +20,6 @@ import { memberSummary, softbanActive } from "@/features/members/memberDetail.ut
 import { useMemberActions } from "@/features/members/useMemberActions";
 import { outcomeText } from "@/features/warnings/warnings.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function MemberDetailPage(): React.JSX.Element {
@@ -160,9 +159,7 @@ export function MemberDetailPage(): React.JSX.Element {
 				/>
 			)}
 
-			{failure !== null && (
-				<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={failure} />
 		</>
 	);
 }

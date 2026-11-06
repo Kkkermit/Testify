@@ -1,7 +1,7 @@
 import { MEMBER_ACTION_LIMITS, type MemberRoles } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckList, RowActions, SettingRows, Warning } from "@/components/form";
+import { CheckList, Refusal, RowActions, SettingRows, Warning } from "@/components/form";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
 import { Button, Skeleton } from "@/components/primitives";
 import { useMemberRoles, useSetMemberRoles } from "@/features/members/useMemberDetail";
@@ -85,9 +85,7 @@ function RolesForm({
 					</Button>
 				)}
 			</RowActions>
-			{save.error !== null && (
-				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={save.error} />
 		</>
 	);
 }

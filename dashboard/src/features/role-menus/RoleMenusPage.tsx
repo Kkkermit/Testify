@@ -20,7 +20,7 @@ import {
 	useUpdateRoleMenu,
 } from "@/features/role-menus/useRoleMenus";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 
 export function RoleMenusPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -49,7 +49,7 @@ export function RoleMenusPage(): React.JSX.Element {
 	const full = list.data.menus.length >= list.data.limit;
 	const busy = create.isPending || update.isPending || publish.isPending || remove.isPending;
 	const message = (error: Error | null, fallback: string): string | null =>
-		error === null ? null : error instanceof ApiError ? error.message : fallback;
+		error === null ? null : refusalText(error, fallback);
 
 	function save(body: RoleMenuBody): void {
 		if (editingMenu === null) {

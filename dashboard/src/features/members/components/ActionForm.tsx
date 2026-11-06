@@ -10,14 +10,13 @@ import {
 } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, RowActions, Warning } from "@/components/form";
+import { ConfirmField, Field, Refusal, RowActions, Warning } from "@/components/form";
 import { FIELD, SELECT } from "@/components/form/fieldStyles";
 import { Button, Card, CARD_HEADING } from "@/components/primitives";
 import { durationText } from "@/features/cases/cases.utils";
 import { ACTION_LABELS, type MemberAction, SKIP_LABELS } from "@/features/members/directory.utils";
 import { type BulkRequest, useBulkAction } from "@/features/members/useDirectory";
 import { useAddWarning } from "@/features/warnings/useWarnings";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
@@ -242,21 +241,13 @@ export function ActionForm({
 						)}
 
 						{typing !== null && (
-							<Field
+							<ConfirmField
+								id={`${id}-confirm`}
 								label={t("members.typeToConfirm", { name: typing })}
 								hint={targets.length === 1 ? t("members.confirmHint") : t("directory.typeCountHint")}
-								htmlFor={`${id}-confirm`}
-							>
-								<input
-									id={`${id}-confirm`}
-									className={FIELD}
-									value={typed}
-									autoComplete="off"
-									onChange={(event) => {
-										setTyped(event.target.value);
-									}}
-								/>
-							</Field>
+								value={typed}
+								onChange={setTyped}
+							/>
 						)}
 
 						{(action === "timeout" || action === "kick" || action === "ban") && (
@@ -273,9 +264,7 @@ export function ActionForm({
 							</Warning>
 						)}
 
-						{failure !== null && (
-							<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-						)}
+						<Refusal error={failure} />
 
 						<RowActions>
 							<Button variant={roles ? "primary" : "destructive"} disabled={!ready} onClick={submit}>

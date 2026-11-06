@@ -1,10 +1,9 @@
-import { errorRate, type GuildUsageReport } from "@testify/shared";
+import { type GuildUsageReport } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Card, Figure, UsageBars } from "@/components/primitives";
-import { categoryLabel } from "@/features/commands/categories.labels";
-import { UsageChart } from "@/features/owner/components/UsageChart";
+import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel } from "@/features/owner/components/UsagePanel";
-import { percent } from "@/features/owner/owner.utils";
+import { commandBar, surfaceBars } from "@/features/owner/usageRows";
 import { formatNumber } from "@/lib/intl";
 
 export function GuildUsageSummary({ report }: { report: GuildUsageReport }): React.JSX.Element {
@@ -22,40 +21,21 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 					</div>
 				</div>
 
-				<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
-					<Figure className="px-6 py-4" label={t("owner.commandsRun")} value={formatNumber(report.runs)} />
-					<Figure
-						className="px-6 py-4"
-						label={t("owner.failed")}
-						value={percent(report.failures, report.runs)}
-						{...(errorRate(report) > 0.05 ? { tone: "text-destructive-text" } : {})}
-					/>
+				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
 					<Figure className="px-6 py-4" label={t("owner.activeMembers")} value={formatNumber(report.members)} />
 					<Figure
 						className="px-6 py-4"
 						label={t("owner.dashboardScreens")}
 						value={formatNumber(report.dashboardViews)}
 					/>
-				</dl>
-
-				<div className="px-6 py-5">
-					<UsageChart days={report.daily} />
-				</div>
+				</RunFigures>
 			</Card>
 
 			<div className="grid items-start gap-4 lg:grid-cols-2">
 				<UsagePanel title={t("owner.serverCommands")} hint={t("owner.serverCommandsHint")}>
 					<UsageBars
 						empty={t("owner.noCommandRun")}
-						rows={report.commands.slice(0, 10).map((row) => ({
-							id: row.command,
-							label: `/${row.command}`,
-							sub:
-								row.failures > 0
-									? t("owner.categoryFailed", { category: categoryLabel(row.category, t), failed: row.failures })
-									: categoryLabel(row.category, t),
-							count: row.count,
-						}))}
+						rows={report.commands.slice(0, 10).map((row) => commandBar(row, t))}
 					/>
 				</UsagePanel>
 
@@ -63,10 +43,7 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 					<UsageBars
 						tint="bg-hue-violet/20"
 						empty={t("owner.nothingRecorded")}
-						rows={[
-							{ id: "slash", label: t("owner.slashCommands"), count: report.surfaces.slash },
-							{ id: "prefix", label: t("owner.prefixCommands"), count: report.surfaces.prefix },
-						]}
+						rows={surfaceBars(report.surfaces, t)}
 					/>
 				</UsagePanel>
 			</div>

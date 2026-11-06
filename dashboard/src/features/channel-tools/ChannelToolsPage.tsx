@@ -4,7 +4,16 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, SavingIndicator, savingStateOf, SELECT, SettingRows, Toggle, Warning } from "@/components/form";
+import {
+	Field,
+	Refusal,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	SettingRows,
+	Toggle,
+	Warning,
+} from "@/components/form";
 import {
 	Badge,
 	Button,
@@ -20,7 +29,6 @@ import { restricted, slowmodeChoices, slowmodeText } from "@/features/channel-to
 import { useChannelTools, useUpdateChannel } from "@/features/channel-tools/useChannelTools";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 
 export function ChannelToolsPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -86,9 +94,7 @@ export function ChannelToolsPage(): React.JSX.Element {
 						}}
 					/>
 
-					{update.error !== null && (
-						<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-					)}
+					<Refusal error={update.error} />
 				</SettingRows>
 			)}
 

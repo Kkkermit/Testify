@@ -29,7 +29,7 @@ import {
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 
 const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
@@ -61,7 +61,7 @@ export function IdeasPage(): React.JSX.Element {
 	if (settings.isPending) return <Skeleton className="h-96 w-full" />;
 
 	const message = (error: Error | null, fallback: string): string | null =>
-		error === null ? null : error instanceof ApiError ? error.message : fallback;
+		error === null ? null : refusalText(error, fallback);
 	const busy = decide.isPending || remove.isPending;
 	const postable = postableChannels(channels.data ?? []);
 	const channel = channelLabel(postable, settings.data.channelId, t);

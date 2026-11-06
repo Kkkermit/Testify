@@ -1,13 +1,12 @@
 import { type ChangeRestore, stillAsLeft } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Warning } from "@/components/form";
+import { Refusal, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { RESTORE_SCREENS } from "@/features/changes/restore.labels";
 import { restoreLines } from "@/features/changes/restore.utils";
 import { useCurrentSetting, usePutBack } from "@/features/changes/useRestore";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
-import { ApiError } from "@/lib/api";
 
 export function RestorePanel({
 	id,
@@ -76,9 +75,7 @@ export function RestorePanel({
 					</div>
 				))}
 			</dl>
-			{putBack.error !== null && (
-				<Warning>{putBack.error instanceof ApiError ? putBack.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={putBack.error} />
 			<div className="flex flex-wrap gap-3">
 				<Button
 					disabled={putBack.isPending}

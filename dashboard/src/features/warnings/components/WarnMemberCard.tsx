@@ -2,13 +2,12 @@ import { type MemberMatch, WARNING_LIMITS, warningProblem } from "@testify/share
 import { X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, FieldGroup, RowActions, SettingRows, Warning } from "@/components/form";
+import { Field, FieldGroup, Refusal, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Avatar, Button, DividedList } from "@/components/primitives";
 import { useAddWarning, useMemberSearch } from "@/features/warnings/useWarnings";
 import { outcomeText } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
-import { ApiError } from "@/lib/api";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
@@ -102,9 +101,7 @@ export function WarnMemberCard({ guildId }: { guildId: string }): React.JSX.Elem
 				/>
 			</Field>
 
-			{add.error !== null && (
-				<Warning>{add.error instanceof ApiError ? add.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={add.error} />
 
 			<RowActions>
 				<Button

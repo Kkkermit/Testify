@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, FIELD, Warning } from "@/components/form";
+import { Field, FIELD, Refusal, Warning } from "@/components/form";
 import {
 	Avatar,
 	Badge,
@@ -22,7 +22,6 @@ import { useBans, useUnban } from "@/features/bans/useBans";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
 import { sanitiseInput } from "@/lib/sanitise";
@@ -182,9 +181,7 @@ function BanRow({ guildId, entry }: { guildId: string; entry: BanEntry }): React
 							{t("common.cancel")}
 						</Button>
 					</div>
-					{unban.error !== null && (
-						<Warning>{unban.error instanceof ApiError ? unban.error.message : t("common.couldNotSave")}</Warning>
-					)}
+					<Refusal error={unban.error} />
 				</form>
 			)}
 		</li>

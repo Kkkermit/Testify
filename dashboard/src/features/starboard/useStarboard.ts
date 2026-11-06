@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type StarboardPatch, type StarboardSettings } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -17,19 +12,9 @@ export function useStarboard(guildId: string): UseQueryResult<StarboardSettings>
 }
 
 export function useSaveStarboard(guildId: string): UseMutationResult<StarboardSettings, Error, StarboardPatch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).starboard();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: (patch) => api.patch<StarboardSettings>(`/guilds/${guildId}/starboard`, patch),
-		onSuccess: (settings) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useDocumentMutation(
+		keys.guild(guildId).starboard(),
+		(patch) => api.patch<StarboardSettings>(`/guilds/${guildId}/starboard`, patch),
+		[keys.guild(guildId).overview()],
+	);
 }

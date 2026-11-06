@@ -9,6 +9,7 @@ import {
 	ChannelPicker,
 	Field,
 	FIELD,
+	Refusal,
 	RowActions,
 	SavingIndicator,
 	savingStateOf,
@@ -24,7 +25,7 @@ import { useRemoveSticky, useSaveSticky, useSticky } from "@/features/sticky/use
 import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
@@ -161,9 +162,7 @@ export function StickyPage(): React.JSX.Element {
 				{markupWarning(message) !== null && <Warning>{markupWarning(message)}</Warning>}
 				{full && <Warning>{t("sticky.full")}</Warning>}
 				{blocked !== null && message !== "" && <Warning>{blocked}</Warning>}
-				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={save.error} />
 
 				<RowActions>
 					<Button disabled={blocked !== null || full || save.isPending} onClick={add}>
@@ -175,7 +174,7 @@ export function StickyPage(): React.JSX.Element {
 			{remove.error !== null && (
 				<Warning>
 					<Trash2 size={14} aria-hidden="true" className="mr-1 inline" />
-					{remove.error instanceof ApiError ? remove.error.message : t("common.couldNotRemove")}
+					{refusalText(remove.error, t("common.couldNotRemove"))}
 				</Warning>
 			)}
 		</>

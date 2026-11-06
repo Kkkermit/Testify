@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { RowActions, SavingIndicator, savingStateOf, SettingRows, Toggle, Warning } from "@/components/form";
+import { Refusal, RowActions, SavingIndicator, savingStateOf, SettingRows, Toggle, Warning } from "@/components/form";
 import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { NumberField } from "@/features/treasure/components/NumberField";
@@ -18,7 +18,6 @@ import {
 } from "@/features/treasure/treasure.utils";
 import { useResetTreasure, useSaveTreasure, useTreasure } from "@/features/treasure/useTreasure";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 
 export function TreasurePage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -132,9 +131,7 @@ export function TreasurePage(): React.JSX.Element {
 				/>
 
 				{problem !== null && <Warning>{problem}</Warning>}
-				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={save.error} />
 
 				<RowActions>
 					<Button
@@ -164,9 +161,7 @@ export function TreasurePage(): React.JSX.Element {
 				</RowActions>
 			</SettingRows>
 
-			{reset.error !== null && (
-				<Warning>{reset.error instanceof ApiError ? reset.error.message : t("common.couldNotReset")}</Warning>
-			)}
+			<Refusal error={reset.error} fallback="common.couldNotReset" />
 		</>
 	);
 }

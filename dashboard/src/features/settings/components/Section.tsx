@@ -1,7 +1,5 @@
 import { type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
-import { SavingIndicator, type SavingState, SettingRows, Warning } from "@/components/form";
-import { ApiError } from "@/lib/api";
+import { Refusal, SavingIndicator, type SavingState, SettingRows } from "@/components/form";
 
 export function Section({
 	title,
@@ -16,14 +14,10 @@ export function Section({
 	failure?: Error | null;
 	children: ReactNode;
 }): React.JSX.Element {
-	const { t } = useTranslation();
-
 	return (
 		<SettingRows title={title} description={describes} action={<SavingIndicator state={saving} />}>
 			{children}
-			{failure !== null && (
-				<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={failure} />
 		</SettingRows>
 	);
 }

@@ -1,14 +1,14 @@
-import { errorRate, type AnalyticsWindow, type GuildUsageRow } from "@testify/shared";
+import { type AnalyticsWindow, type GuildUsageRow } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
-import { categoryLabel } from "@/features/commands/categories.labels";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
-import { UsageChart } from "@/features/owner/components/UsageChart";
+import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { formatMs, percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
+import { commandBar, surfaceBars } from "@/features/owner/usageRows";
 import { useUsage } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
@@ -59,54 +59,27 @@ function FleetUsage({
 			</div>
 
 			<Card padding="none" className="divide-border divide-y">
-				<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
-					<Figure className="px-6 py-4" label={t("owner.commandsRun")} value={formatNumber(report.runs)} />
-					<Figure
-						className="px-6 py-4"
-						label={t("owner.failed")}
-						value={percent(report.failures, report.runs)}
-						{...(errorRate(report) > 0.05 ? { tone: "text-destructive-text" } : {})}
-					/>
+				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
 					<Figure className="px-6 py-4" label={t("owner.activeServers")} value={formatNumber(report.activeGuilds)} />
 					<Figure
 						className="px-6 py-4"
 						label={t("owner.commandsUsed")}
 						value={t("common.partOf", { part: report.commandsUsed, whole: report.commandsTotal })}
 					/>
-				</dl>
-
-				<div className="px-6 py-5">
-					<UsageChart days={report.daily} />
-				</div>
+				</RunFigures>
 			</Card>
 
 			{/* `items-start` so a short panel ends where its list does, rather than stretching to its neighbour. */}
 			<div className="grid items-start gap-4 lg:grid-cols-2">
 				<Panel title={t("owner.mostUsed")} hint={t("owner.mostUsedHint")}>
-					<UsageBars
-						empty={t("owner.noCommandRun")}
-						rows={report.mostUsed.map((row) => ({
-							id: row.command,
-							label: `/${row.command}`,
-							sub:
-								row.failures > 0
-									? t("owner.categoryFailed", { category: categoryLabel(row.category, t), failed: row.failures })
-									: categoryLabel(row.category, t),
-							count: row.count,
-						}))}
-					/>
+					<UsageBars empty={t("owner.noCommandRun")} rows={report.mostUsed.map((row) => commandBar(row, t))} />
 				</Panel>
 
 				<Panel title={t("owner.leastUsed")} hint={t("owner.leastUsedHint")}>
 					<UsageBars
 						tint="bg-muted"
 						empty={t("owner.noCommandsRegistered")}
-						rows={report.leastUsed.map((row) => ({
-							id: row.command,
-							label: `/${row.command}`,
-							sub: categoryLabel(row.category, t),
-							count: row.count,
-						}))}
+						rows={report.leastUsed.map((row) => commandBar(row, t))}
 					/>
 				</Panel>
 
@@ -144,10 +117,7 @@ function FleetUsage({
 					<UsageBars
 						tint="bg-hue-violet/20"
 						empty={t("owner.nothingRecorded")}
-						rows={[
-							{ id: "slash", label: t("owner.slashCommands"), count: report.surfaces.slash },
-							{ id: "prefix", label: t("owner.prefixCommands"), count: report.surfaces.prefix },
-						]}
+						rows={surfaceBars(report.surfaces, t)}
 					/>
 				</Panel>
 
