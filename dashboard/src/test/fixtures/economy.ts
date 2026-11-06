@@ -3,15 +3,16 @@ import {
 	DEFAULT_TUNING,
 	type LotterySettings,
 	type ServerTuning,
-	type ShopRole,
+	type ShopRoleList,
 	type TreasureSettings,
 } from "@testify/shared";
 
 export const tuning: ServerTuning = { ...DEFAULT_TUNING, payRate: 150 };
 
-export const shopRoles: ShopRole[] = [
-	{ roleId: "300000000000000001", name: "Regulars", colour: "#336699", price: 5000, problem: null },
-];
+export const shopRoles: ShopRoleList = {
+	roles: [{ roleId: "300000000000000001", name: "Regulars", colour: "#336699", price: 5000, problem: null }],
+	canManage: true,
+};
 
 export const lotterySettings: LotterySettings = {
 	enabled: true,

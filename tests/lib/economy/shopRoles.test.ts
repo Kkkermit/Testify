@@ -1,7 +1,7 @@
 import { PermissionsBitField } from "discord.js";
 import { adjustWallet, debitWallet } from "@database/repositories/economyRepository";
-import { countShopRoles, findShopRole, saveShopRole } from "@database/repositories/shopRoleRepository";
-import { buyShopRole, sellShopRole } from "@lib/economy/shopRoles.util";
+import { countShopRoles, findShopRole, removeShopRole, saveShopRole } from "@database/repositories/shopRoleRepository";
+import { buyShopRole, sellShopRole, withdrawShopRole } from "@lib/economy/shopRoles.util";
 
 jest.mock("@database/repositories/economyRepository", () => ({
 	adjustWallet: jest.fn(() => Promise.resolve({})),
@@ -29,7 +29,7 @@ function role(id: string, position: number, permissions: bigint[] = []) {
 	};
 }
 
-function world(options: { holds?: boolean; refuses?: boolean } = {}) {
+function world(options: { holds?: boolean; refuses?: boolean; permissions?: bigint[] } = {}) {
 	const roles = new Map([
 		[VIP, role(VIP, 2)],
 		[MODS, role(MODS, 3, [PermissionsBitField.Flags.KickMembers])],
@@ -44,6 +44,7 @@ function world(options: { holds?: boolean; refuses?: boolean } = {}) {
 	};
 	const member = {
 		id: "100000000000000002",
+		permissions: new PermissionsBitField(options.permissions ?? []),
 		roles: {
 			highest: { position: 5 },
 			cache: new Map(options.holds === true ? [[VIP, roles.get(VIP)]] : []),
@@ -99,5 +100,26 @@ describe("sellShopRole", () => {
 		jest.mocked(countShopRoles).mockResolvedValueOnce(10);
 		await expect(sellShopRole(guild, undefined, VIP, 100, "1")).rejects.toThrow(/already sells 10/);
 		expect(saveShopRole).not.toHaveBeenCalled();
+	});
+});
+
+/** The route and `/economy shop-role` both ask Manage Roles, and so does the action, so a new caller cannot skip it. */
+describe("who may change what the shop sells", () => {
+	it("refuses somebody who can manage the server but not its roles, and changes nothing", async () => {
+		const { guild, member } = world({ permissions: [PermissionsBitField.Flags.ManageGuild] });
+
+		await expect(sellShopRole(guild, member, VIP, 100, "1")).rejects.toThrow(/Manage Roles/);
+		await expect(withdrawShopRole(guild, member, VIP)).rejects.toThrow(/Manage Roles/);
+		expect(saveShopRole).not.toHaveBeenCalled();
+		expect(removeShopRole).not.toHaveBeenCalled();
+	});
+
+	it("lets somebody with Manage Roles sell a role below their own and take it off again", async () => {
+		const { guild, member } = world({ permissions: [PermissionsBitField.Flags.ManageRoles] });
+
+		await sellShopRole(guild, member, VIP, 100, "1");
+		await withdrawShopRole(guild, member, VIP);
+		expect(saveShopRole).toHaveBeenCalledWith(GUILD, VIP, 100, "1");
+		expect(removeShopRole).toHaveBeenCalledWith(GUILD, VIP);
 	});
 });

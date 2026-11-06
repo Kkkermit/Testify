@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { EconomyPage } from "@/features/economy/EconomyPage";
 import { expectNoViolations } from "@/test/axe";
-import { tuning } from "@/test/fixtures/economy";
+import { shopRoles, tuning } from "@/test/fixtures/economy";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -31,7 +31,7 @@ describe("the economy settings page", () => {
 		server.use(
 			http.put(`/api/guilds/${GUILD}/shop-roles/:roleId`, async ({ params, request }) => {
 				sent.push({ roleId: String(params.roleId), body: await request.json() });
-				return HttpResponse.json([]);
+				return HttpResponse.json({ roles: [], canManage: true });
 			}),
 		);
 		renderPage();
@@ -52,6 +52,21 @@ describe("the economy settings page", () => {
 			expect(sent).toHaveLength(1);
 		});
 		expect(sent[0]).toEqual({ roleId: "300000000000000002", body: { price: 2500 } });
+	});
+
+	/** Only Manage Roles may choose what the shop sells, so a manager without it is shown the list and no controls. */
+	it("shows the roles on sale without their controls to somebody who cannot manage roles", async () => {
+		server.use(
+			http.get(`/api/guilds/${GUILD}/shop-roles`, () => HttpResponse.json({ ...shopRoles, canManage: false })),
+		);
+		renderPage();
+
+		expect(await screen.findByText(/need the Manage Roles permission/)).toBeInTheDocument();
+		expect(screen.getByText("Regulars")).toBeInTheDocument();
+		expect(screen.getByText("5,000")).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Put on sale" })).not.toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /Take Regulars off sale/ })).not.toBeInTheDocument();
+		expect(screen.queryByLabelText(/Price of Regulars/)).not.toBeInTheDocument();
 	});
 
 	it("saves a new starting wallet when the field is left, and refuses one out of range", async () => {

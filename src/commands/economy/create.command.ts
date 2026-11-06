@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild } from "@core/command";
+import { asMember, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { createAccount, deleteAccount, findAccount } from "@database/repositories/economyRepository";
 import { getTuning } from "@database/repositories/tuningRepository";
@@ -71,10 +71,10 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const role = interaction.options.getRole("role", true);
 				const price = interaction.options.getInteger("price", true);
-				const actor = await guild.members.fetch(interaction.user.id).catch(() => undefined);
+				const actor = asMember(interaction);
 
 				if (price === 0) {
-					await withdrawShopRole(guild, role.id);
+					await withdrawShopRole(guild, actor, role.id);
 					await reply(interaction, { embeds: [successEmbed(`**${role.name}** is no longer for sale.`)] });
 					return;
 				}

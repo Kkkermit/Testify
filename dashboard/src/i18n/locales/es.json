@@ -3030,7 +3030,8 @@
 		"putOnSale": "Poner a la venta",
 		"priceOf": "Precio de {{name}}",
 		"takeOffSale": "Retirar {{name}} de la venta",
-		"deletedRole": "Un rol eliminado"
+		"deletedRole": "Un rol eliminado",
+		"shopRolesNeedManageRoles": "Poner roles a la venta, cambiar sus precios y retirarlos requiere el permiso Gestionar roles en este servidor."
 	},
 	"backup": {
 		"title": "Copia y traspaso",
