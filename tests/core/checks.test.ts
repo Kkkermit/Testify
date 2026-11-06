@@ -593,6 +593,23 @@ describe("refusals in the reader's language", () => {
 		);
 	});
 
+	/** The permission and the wait are filled into the sentence, so they have to be in its language too. */
+	it("names the missing permission and the wait in the reader's language", async () => {
+		const german = createMockInteraction({
+			subcommand: "shop-role",
+			overrides: { locale: "de", ...memberWith(PermissionFlagsBits.ManageGuild) } as never,
+		});
+		const command = { ...plain, cooldown: 90_000 };
+		const french = createMockInteraction({ overrides: { locale: "fr" } as never });
+		offInGuild.mockResolvedValue([]);
+		await runChecks(french, command, createMockClient());
+
+		expect(await runChecks(german, economy, createMockClient())).toBe(
+			"Dir fehlen diese Berechtigungen: `Rollen verwalten`",
+		);
+		expect(await runChecks(french, command, createMockClient())).toMatch(/^Doucement.*1\sminute et 30\ssecondes/);
+	});
+
 	it("falls back to the server's language, then to English", async () => {
 		const inGerman = createMockInteraction({ overrides: { guild: { preferredLocale: "de", id: "1" } } as never });
 		const unknown = createMockInteraction({ overrides: { locale: "pt-BR" } as never });

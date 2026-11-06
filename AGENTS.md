@@ -224,6 +224,7 @@ src/
 │   ├── theme.ts          Colours, emoji, repo URL
 │   ├── languages.ts      The bot's eight languages and the Discord locales each answers
 │   ├── replies.ts        The refusals and apology every command shares, in each language
+│   ├── permissionNames.ts What each language calls the permissions a refusal names
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
@@ -1848,7 +1849,10 @@ bot in two places. Four things about it are load-bearing:
   `src/config/replies.ts` holds the gates' refusals, the cooldown, the blacklist notice and the apology with its
   reference, typed `Record<BotLanguage, Record<ReplyKey, string>>` so a language missing a key is a compile error.
   `say(language, key, values)` fills `{name}`; `replies.test.ts` fails on a placeholder or code span a language
-  changed. Everything else a command says is still English.
+  changed. What is filled in is in the reader's language too: `permissionName` reads `PERMISSION_NAMES` in
+  `src/config/permissionNames.ts`, and `durationIn` writes a cooldown with `Intl`, so a German refusal never reads
+  "manage roles" or "12s". `commandLocales.test.ts` walks every permission a command, subcommand or action declares
+  and fails on one a language has no name for. Everything else a command says is still English.
 - **The reader's language comes from Discord.** `readerLanguage` takes an interaction's `locale` — the reader's own
   Discord language — and falls back to the server's `preferredLocale`, which is all a prefix command has, then to
   English for any language the bot does not speak. Nothing is stored and nothing is asked.

@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, type Subcommand } from "@core/command";
-import { eitherOf, readerLanguage, say } from "@core/language";
+import { allOf, durationIn, eitherOf, permissionName, readerLanguage, say } from "@core/language";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
@@ -12,7 +12,6 @@ import { reportOwnerAttempt } from "@lib/bot/ownerAudit.util";
 import { ownerContacts } from "@lib/bot/owners.util";
 import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND, CASINO_STATS_SUBCOMMAND } from "@lib/casino/casino.constants";
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
-import { formatDuration, humanisePermission } from "@lib/format/format.util";
 import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
@@ -101,7 +100,9 @@ export async function runChecks(
 }
 
 function lacking(language: BotLanguage, who: "youNeed" | "iNeed", missing: string[]): string {
-	return say(language, who, { permissions: missing.map((p) => `\`${humanisePermission(p)}\``).join(", ") });
+	return say(language, who, {
+		permissions: allOf(language, [...new Set(missing.map((flag) => `\`${permissionName(language, flag)}\``))]),
+	});
 }
 
 async function ownerNames(client: TestifyClient): Promise<string[]> {
@@ -303,7 +304,7 @@ function checkCooldown(
 	const now = Date.now();
 	const readyAt = cooldowns.get(key) ?? 0;
 
-	if (readyAt > now) return say(language, "cooldown", { time: formatDuration(readyAt - now) });
+	if (readyAt > now) return say(language, "cooldown", { time: durationIn(language, readyAt - now) });
 
 	cooldowns.set(key, now + command.cooldown);
 	if (cooldowns.size > 5_000) {

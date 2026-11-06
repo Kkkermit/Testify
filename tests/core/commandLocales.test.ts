@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
+import { PermissionsBitField, type PermissionsString } from "discord.js";
 import { DISCORD_LOCALES, type TranslatedLanguage } from "@config/languages";
-import { buildSlashCommand } from "@core/command";
+import { buildSlashCommand, subcommandsOf } from "@core/command";
 import {
 	commandStrings,
 	DESCRIPTION_LIMIT,
@@ -10,8 +11,10 @@ import {
 	readCommandTranslations,
 } from "@core/commandLocales";
 import { buildContextMenu } from "@core/contextMenu";
+import { permissionName } from "@core/language";
 import { loadEverything } from "@core/loader";
 import { assetPath } from "@core/paths";
+import { humanisePermission } from "@lib/format/format.util";
 import { createMockClient } from "@tests/helpers/mocks";
 
 const client = createMockClient();
@@ -34,6 +37,31 @@ describe("the command menus in other languages", () => {
 			hint: "Run npm run i18n:commands",
 			strings: registered,
 		});
+	});
+
+	/** A refusal names what is missing, and "Dir fehlen diese Berechtigungen: manage roles" is English in a German sentence. */
+	it("names every permission a command or an action can ask for in every language", () => {
+		const asked = new Set<PermissionsString>(
+			[
+				...[...client.commands.values()].flatMap((command) => [
+					...(command.permissions ?? []),
+					...(command.botPermissions ?? []),
+					...subcommandsOf(command).flatMap((sub) => sub.permissions ?? []),
+				]),
+				...[...client.contextMenus.values()].flatMap((menu) => [
+					...(menu.permissions ?? []),
+					...(menu.botPermissions ?? []),
+				]),
+			].flatMap((permission) => new PermissionsBitField(permission).toArray()),
+		);
+		const unnamed = languages.flatMap((language) =>
+			[...asked]
+				.filter((flag) => permissionName(language, flag) === humanisePermission(flag))
+				.map((flag) => `${language}: ${flag}`),
+		);
+
+		expect(asked.size).toBeGreaterThan(10);
+		expect(unnamed).toEqual([]);
 	});
 
 	/** A missing key falls back to English silently, and a stale one names a description that no longer exists. */
