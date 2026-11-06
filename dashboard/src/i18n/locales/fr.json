@@ -3068,6 +3068,8 @@
 		"apply_many": "Appliquer {{count, number}} de sections",
 		"apply_other": "Appliquer {{count, number}} sections",
 		"leftAsIs": "{{section}} reste tel quel ici.",
-		"chooseFile": "Choisir un fichier de sauvegarde"
+		"chooseFile": "Choisir un fichier de sauvegarde",
+		"notJson": "Choisissez un fichier de sauvegarde : un fichier en .json, téléchargé depuis cette page.",
+		"program": "C’est un programme, un script ou un autre type de fichier, pas une sauvegarde. Rien de son contenu n’a été ouvert ni exécuté."
 	}
 }

@@ -2983,6 +2983,8 @@
 		"apply_one": "Apply {{count, number}} section",
 		"apply_other": "Apply {{count, number}} sections",
 		"leftAsIs": "{{section}} stays as it is here.",
-		"chooseFile": "Choose a backup file"
+		"chooseFile": "Choose a backup file",
+		"notJson": "Choose a backup file: one ending in .json, downloaded from this page.",
+		"program": "That is a program, a script or another kind of file, not a backup. Nothing in it was opened or run."
 	}
 }

@@ -3068,6 +3068,8 @@
 		"apply_many": "Aplicar {{count, number}} de secciones",
 		"apply_other": "Aplicar {{count, number}} secciones",
 		"leftAsIs": "{{section}} se queda aquí como está.",
-		"chooseFile": "Elegir un archivo de copia"
+		"chooseFile": "Elegir un archivo de copia",
+		"notJson": "Elige un archivo de copia de seguridad: uno que termine en .json, descargado desde esta página.",
+		"program": "Eso es un programa, un script u otro tipo de archivo, no una copia de seguridad. No se ha abierto ni ejecutado nada de su contenido."
 	}
 }

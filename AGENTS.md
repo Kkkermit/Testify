@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 52 / 51                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,106 across 553 suites           |
+| Tests                | 4,107 across 553 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -3158,9 +3158,19 @@ setup, all over the eighteen sections `RESTORABLE` already lists for Put back. F
   not read is left out of a backup and the page names it; a write the route refuses is shown beside its section with
   the server's own words, and the rest still go.
 - **A backup holds only what Put back could send** (`restorableFields`), and the names of the channels and roles it
-  points at. Nothing that acts rather than stores, no messages and nobody's data. `backupDocument` is the only shape
-  read back: section and field keys are plain words and place keys are snowflakes, so no key in a file can reach an
-  object's prototype, and a file over `BACKUP_LIMITS.maxBytes` is refused before it is read.
+  points at. Nothing that acts rather than stores, no messages and nobody's data.
+- **A file is never uploaded, and nothing in it runs.** The browser reads it and `readBackupFile` in
+  `@testify/shared` is the only way in, each check before the next part is read: at most `BACKUP_LIMITS.maxBytes`, a
+  name ending `.json` with the type `application/json` or none, none of the first bytes of a program, script or archive
+  (`NOT_A_BACKUP`: `.exe`, ELF, Mach-O, `#!`, zip, gzip, rar, 7z, `.msi`, PDF), strict UTF-8, a JSON object, and no
+  `__proto__`, `constructor` or `prototype` key anywhere. Then `backupDocument` takes nothing but its own keys, a
+  section `RESTORABLE` lists with only that route's fields, and values that are text, a number, a switch or a short
+  list of those; names are cleaned like any typed line. What goes to the server is each section as its route's own
+  schema made it (`planBackup`), never the file's values, and the route checks it again. There is deliberately no
+  virus scanner: an allowlist refuses everything a scanner would and more, a scanner on the server would scan nothing
+  because no file reaches it, and sending files to a scanning service would hand somebody's settings to a third party.
+  `backup.test.ts` refuses a row of programs, scripts and crafted files, and each of the eleven checks was proved to
+  turn it red.
 - **Ids are moved by name** (`planBackup`): an id this server has is kept, otherwise the name the file stored is
   matched without regard to case against channels the reader can see and roles here, and anything with no match is
   left as it is and named. A list where nothing matched is left alone rather than emptied, and a section with nothing

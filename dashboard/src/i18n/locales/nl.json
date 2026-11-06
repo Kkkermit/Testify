@@ -2983,6 +2983,8 @@
 		"apply_one": "{{count, number}} onderdeel toepassen",
 		"apply_other": "{{count, number}} onderdelen toepassen",
 		"leftAsIs": "{{section}} blijft hier zoals het is.",
-		"chooseFile": "Back-upbestand kiezen"
+		"chooseFile": "Back-upbestand kiezen",
+		"notJson": "Kies een back-upbestand: een bestand dat eindigt op .json en van deze pagina is gedownload.",
+		"program": "Dat is een programma, een script of een ander soort bestand, geen back-up. Er is niets uit geopend of uitgevoerd."
 	}
 }

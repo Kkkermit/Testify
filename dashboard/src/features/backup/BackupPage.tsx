@@ -4,7 +4,9 @@ import {
 	type RestorableAction,
 	BACKUP_LIMITS,
 	type BackupDocument,
+	type BackupRefusal,
 	type BackupStep,
+	readBackupFile,
 } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { Check, Upload } from "lucide-react";
@@ -15,13 +17,21 @@ import { Field, Refusal, RowActions, SELECT, SettingRows, Warning } from "@/comp
 import { Button, DividedList, PageHeader, SectionHeading } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
 import { BACKUP_SECTION_LABELS } from "@/features/backup/backup.labels";
-import { backupFileName, readBackup, saveFile } from "@/features/backup/backup.utils";
+import { backupFileName, saveFile } from "@/features/backup/backup.utils";
 import { readServerSettings, type ServerSettings, type StepResult, useApplyBackup } from "@/features/backup/useBackup";
 import { comparable } from "@/features/compare/compare.utils";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
+
+const REFUSALS: Record<BackupRefusal, TranslationKey> = {
+	tooLarge: "backup.tooLarge",
+	notJson: "backup.notJson",
+	program: "backup.program",
+	notBackup: "backup.notBackup",
+};
 
 interface Incoming {
 	document: BackupDocument;
@@ -102,10 +112,9 @@ export function BackupPage(): React.JSX.Element {
 								setProblem(t("backup.tooLarge"));
 								return;
 							}
-							void file.text().then((text) => {
-								const read = readBackup(text);
-								if (typeof read === "string")
-									setProblem(t(read === "tooLarge" ? "backup.tooLarge" : "backup.notBackup"));
+							void file.arrayBuffer().then((buffer) => {
+								const read = readBackupFile({ name: file.name, type: file.type, bytes: new Uint8Array(buffer) });
+								if (typeof read === "string") setProblem(t(REFUSALS[read]));
 								else void bringIn(read);
 							});
 						}}

@@ -27,24 +27,32 @@ const elsewhere: BackupDocument = {
 	roles: { "222222222222222222": "DJs" },
 };
 
-// jsdom's File has no text(), which every browser's has.
+// jsdom's File has no text() or arrayBuffer(), which every browser's has.
 beforeAll(() => {
+	const read = <T,>(file: File, as: "readAsText" | "readAsArrayBuffer"): Promise<T> =>
+		new Promise<T>((resolve) => {
+			const reader = new FileReader();
+			reader.onload = () => {
+				resolve(reader.result as T);
+			};
+			reader[as](file);
+		});
 	Object.defineProperty(File.prototype, "text", {
 		configurable: true,
 		value(this: File) {
-			return new Promise<string>((resolve) => {
-				const reader = new FileReader();
-				reader.onload = () => {
-					resolve(typeof reader.result === "string" ? reader.result : "");
-				};
-				reader.readAsText(this);
-			});
+			return read<string>(this, "readAsText");
+		},
+	});
+	Object.defineProperty(File.prototype, "arrayBuffer", {
+		configurable: true,
+		value(this: File) {
+			return read<ArrayBuffer>(this, "readAsArrayBuffer");
 		},
 	});
 });
 
-function backupFile(content: string): File {
-	return new File([content], "backup.json", { type: "application/json" });
+function backupFile(content: string, name = "backup.json"): File {
+	return new File([content], name, { type: name.endsWith(".json") ? "application/json" : "" });
 }
 
 describe("the back up and copy page", () => {
@@ -102,12 +110,19 @@ describe("the back up and copy page", () => {
 		expect(await screen.findByText("Saved")).toBeInTheDocument();
 	});
 
-	it("refuses a file that is not a backup", async () => {
+	it("refuses a file that is not a backup, and says when it is a program or a script", async () => {
 		renderPage();
+		const picker = await screen.findByLabelText(/From a backup file/);
 
-		await userEvent.upload(await screen.findByLabelText(/From a backup file/), backupFile('{"kind":"other"}'));
-
+		await userEvent.upload(picker, backupFile('{"kind":"other"}'));
 		expect(await screen.findByText("That file is not a backup from this page.")).toBeInTheDocument();
+
+		await userEvent.upload(picker, backupFile("#!/bin/sh\necho hi\n"));
+		expect(await screen.findByText(/That is a program, a script or another kind of file/)).toBeInTheDocument();
+
+		// The picker hides it, so this is somebody switching the picker to show every file.
+		await userEvent.setup({ applyAccept: false }).upload(picker, backupFile(JSON.stringify(elsewhere), "backup.exe"));
+		expect(await screen.findByText(/one ending in \.json/)).toBeInTheDocument();
 	});
 
 	/** Copying a server set up just like this one has nothing to do, so nothing is ticked to begin with. */
