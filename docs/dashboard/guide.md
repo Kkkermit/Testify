@@ -391,23 +391,15 @@ export const keys = {
 
 ### The write-race guard — copy this exactly
 
-Every mutation writing a shared cache key declares the **same `mutationKey`** and guards `setQueryData`:
+Every mutation writing a shared cache key goes through **`useDocumentMutation`** in `src/hooks/`, which declares the
+key as its `mutationKey` and guards `setQueryData` with `client.isMutating({ mutationKey: key }) === 1`:
 
 ```ts
-return useMutation({
-	mutationKey: key,
-	mutationFn: send,
-	onSuccess: (settings) => {
-		// A whole-document answer is only trusted while it is the only write in flight.
-		if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-	},
-	onSettled: () => {
-		if (client.isMutating({ mutationKey: key }) !== 1) return;
-		void client.invalidateQueries({ queryKey: key });
-		void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-	},
-});
+return useDocumentMutation(keys.guild(guildId).treasure(), send, [keys.guild(guildId).overview()]);
 ```
+
+The third argument is every other key the write makes stale. A write that shows its change before the answer lands
+is `useOptimisticMutation(key, send, applyPatch, stale)` instead.
 
 **Why.** Every write answers with the whole document. The order those answers arrive says nothing about the
 order the server applied them — a slow one carries a snapshot taken _before_ a later click and would put that

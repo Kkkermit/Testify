@@ -572,6 +572,10 @@ Both call the same renderer, so the first render and every re-render cannot drif
 `shopScreen.util.ts` + `buttons/shop.ts`, `auditPanel.util.ts` + `buttons/auditLog.ts`,
 `balancePanel.util.ts` + `buttons/balance.ts`, `inventoryScreen.util.ts` + `buttons/inventory.ts`.
 
+A handler shows the next state with `redrawPanel` from `@lib/discord`, which edits the panel in place and answers
+privately instead when its form was opened from somewhere the panel cannot be edited. A settings panel's on and off
+button is `switchAction(enabled, ready)`, so every switch reads, colours and refuses the same way.
+
 ### Custom IDs
 
 `customId(id, action, ...args)` builds `id:action:arg1:arg2`. `parseCustomId` splits it back. `id` selects the
@@ -943,6 +947,8 @@ Shared harness in `tests/helpers/` (these are not tests):
 - **`mongo.ts`** — `mongodb-memory-server` setup.
 - **`containers.ts`** — `idsOf()`, `buttonsOf()`, `textOf()` for walking a Components V2 tree. A container nests
   sections inside containers and buttons inside sections, so asserting on one means walking it.
+- **`apiHarness.ts`** — `ask()` against the real app, and for a route mounted on its own, `withSession()` for the
+  context the middleware would set and `answerLikeTheApp()` for the boundary's own error mapping (`asProblem`).
 
 What good tests here look like:
 
@@ -2045,11 +2051,13 @@ components/
   brand/        BotMark and BotBanner — the bot's own picture and banner, FlagIcon
   primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
                 SegmentedControl, DataList/Figure, Tooltip
-  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
+  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, Refusal, ConfirmField,
+                FIELD/LABEL
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
-hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced
+hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced, useDocumentMutation,
+                useOptimisticMutation
 lib/            api, cn, datetime and intl, colour and customAccent, paging, queries, redirect, tint, and tokens
                 for reading a colour in JavaScript
 ```
@@ -2346,11 +2354,14 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
 - **A whole-document answer is only trusted while it is the only write in flight.** The settings sections and the
   command toggles each answer with the entire list, and the order those answers arrive in says nothing about the
   order the server applied them — a slow one carries a snapshot taken before a later click and would put that
-  click's control back where it was. Every mutation that writes a shared cache key therefore declares the same
-  `mutationKey` and guards `setQueryData` with `client.isMutating({ mutationKey }) === 1`, ending the burst in an
-  `invalidateQueries` so a read decides. A mutation is counted as pending across `onMutate`, `onSuccess` and
-  `onSettled` — verified in `@tanstack/query-core`'s `mutation.ts`, not assumed. Both are pinned by tests that
-  were proved to go red without the guard.
+  click's control back where it was. Every mutation that writes a shared cache key therefore goes through
+  `useDocumentMutation`, which declares the key as its `mutationKey` and guards `setQueryData` with
+  `client.isMutating({ mutationKey }) === 1`, ending the burst in an `invalidateQueries` so a read decides. A
+  mutation is counted as pending across `onMutate`, `onSuccess` and `onSettled` — verified in
+  `@tanstack/query-core`'s `mutation.ts`, not assumed. `useDocumentMutation.test.tsx` pins both guards, and each
+  was proved to go red without it. A write that shows its change before the answer lands is `useOptimisticMutation`.
+- **A refused write is drawn by `Refusal`**, which shows the server's own wording when it gave one and the fallback
+  otherwise; `refusalText` is the same rule for a place that needs the string.
 - **A control that is typed into does not write the URL per keystroke.** `?q=` is written with `replace: true`,
   or Back walks the user back through every character, and the request behind it is debounced (`useDebounced`) so
   a five-character search is one query rather than five. Confirmed in a real browser, not in jsdom.
