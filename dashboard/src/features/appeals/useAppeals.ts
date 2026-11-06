@@ -20,10 +20,11 @@ import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export function useAppealSettings(guildId: string): UseQueryResult<AppealSettings> {
+export function useAppealSettings(guildId: string, enabled = true): UseQueryResult<AppealSettings> {
 	return useQuery({
 		queryKey: keys.guild(guildId).appealSettings(),
 		queryFn: () => api.get<AppealSettings>(`/guilds/${guildId}/appeals/settings`),
+		enabled,
 	});
 }
 

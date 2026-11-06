@@ -4,6 +4,7 @@ import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
 import { readCookie, SESSION_COOKIE } from "@api/cookies";
 import { forbidden, notFound, notInGuild, unauthorised } from "@api/errors";
+import { moderates, openToModerators } from "@api/middleware/moderators";
 import { requireOauth } from "@api/oauth";
 import { findSession, touchSession } from "@database/repositories/dashboardSessionRepository";
 
@@ -49,7 +50,15 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 		if (member === null) throw forbidden("not_a_member", "You are not in that server.");
 
 		if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-			throw forbidden("missing_manage_guild", "You need Manage Server in that server.");
+			if (!moderates(member)) {
+				throw forbidden(
+					"missing_manage_guild",
+					"You need Manage Server, Timeout Members, Kick Members or Ban Members in that server.",
+				);
+			}
+			if (!openToModerators(context.req.method, context.req.path, guildId)) {
+				throw forbidden("missing_manage_guild", "You need Manage Server in that server to use this.");
+			}
 		}
 
 		context.set("member", member);

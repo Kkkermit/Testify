@@ -19,6 +19,17 @@ describe("the guild picker", () => {
 		expect(screen.getByRole("heading", { name: /needs somebody else/i })).toBeInTheDocument();
 	});
 
+	/** A moderator without Manage Server once saw none of their servers, so their tools were out of reach. */
+	it("lists a server the reader can only moderate apart from those they manage, and says what opens there", async () => {
+		const moderated = { ...aGuild, id: "900000000000000007", name: "Mod Squad", canInvite: false, access: "moderate" };
+		server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, guilds: [aGuild, moderated] })));
+		renderWithProviders(<GuildPickerPage />);
+
+		const group = (await screen.findByRole("heading", { name: /ready to moderate/i })).closest("section");
+		expect(within(group!).getByRole("link", { name: /mod squad/i })).toHaveAttribute("href", `/guilds/${moderated.id}`);
+		expect(within(group!).getByText(/only members, warnings, cases, bans and appeals open/i)).toBeVisible();
+	});
+
 	/** Discord would refuse the invite, so offering the button would be a lie rather than a shortcut. */
 	it("offers no invite where the viewer lacks Manage Server", async () => {
 		renderWithProviders(<GuildPickerPage />);

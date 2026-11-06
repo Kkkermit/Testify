@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { WarningsPage } from "@/features/warnings/WarningsPage";
 import { expectNoViolations } from "@/test/axe";
 import { guildWarnings } from "@/test/fixtures/moderation";
+import { overview } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -18,6 +19,25 @@ function renderPage(): ReturnType<typeof renderWithProviders> {
 }
 
 describe("the warnings page", () => {
+	/** `/warn punishments` asks Manage Server, so a moderator neither reads nor changes the steps. */
+	it("leaves the steps to a manager, and does not ask a moderator's browser for them", async () => {
+		const asked: string[] = [];
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({ ...overview, yourPermissions: ["ModerateMembers", "KickMembers", "BanMembers"] }),
+			),
+			http.get("/api/guilds/:guildId/warnings/punishments", () => {
+				asked.push("/api/guilds/:guildId/warnings/punishments");
+				return HttpResponse.json({});
+			}),
+		);
+		renderPage();
+
+		expect(await screen.findByRole("heading", { name: "Punishments" })).toBeInTheDocument();
+		expect(screen.getByText("You need the Manage Server permission in this server to use this.")).toBeInTheDocument();
+		expect(asked).toEqual([]);
+	});
+
 	/** The list is the control, so a change sends the whole of it in one request. */
 	it("saves the whole list when one step changes", async () => {
 		let body: unknown;

@@ -1,3 +1,4 @@
+import { type GuildAccess } from "@testify/shared";
 import {
 	Activity,
 	ArchiveRestore,
@@ -78,20 +79,34 @@ export interface NavGroup {
 }
 
 export interface NavAudience {
-	guild: { id: string; name: string } | undefined;
+	guild: { id: string; name: string; access?: GuildAccess } | undefined;
 	isOwner: boolean;
 }
 
+/** The API opens the same screens' routes to a moderator, in `src/api/middleware/moderators.ts`. */
+const MODERATION_SCREENS = ["/members", "/warnings", "/cases", "/bans", "/appeals"];
+
+/** Whether somebody who can moderate a server but not manage it may open this path in it. */
+export function moderatorMayOpen(pathname: string, guildId: string): boolean {
+	const base = `/guilds/${guildId}`;
+	if (pathname === base || pathname === `${base}/`) return true;
+	if (!pathname.startsWith(`${base}/`)) return false;
+
+	const rest = pathname.slice(base.length);
+	return MODERATION_SCREENS.some((screen) => rest === screen || rest.startsWith(`${screen}/`));
+}
+
 export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
+	const configures = guild !== undefined && guild.access !== "moderate";
 	const groups: NavGroup[] = [
 		{
 			items: [
 				{ to: "/guilds", labelKey: "nav.servers", icon: LayoutGrid, hintKey: "nav.serversHint" },
 				{
-					to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
+					to: configures ? `/guilds/${guild.id}/commands` : "/commands",
 					labelKey: "nav.commands",
 					icon: Terminal,
-					hintKey: guild === undefined ? "nav.commandsHintAll" : "nav.commandsHintGuild",
+					hintKey: configures ? "nav.commandsHintGuild" : "nav.commandsHintAll",
 				},
 				{ to: "/status", labelKey: "nav.status", icon: Activity, hintKey: "nav.statusHint" },
 				{ to: "/notifications", labelKey: "nav.notifications", icon: Bell, hintKey: "nav.notificationsHint" },
@@ -214,6 +229,16 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				},
 			],
 		});
+	}
+
+	if (guild?.access === "moderate") {
+		const open = (item: NavItem): boolean => moderatorMayOpen(item.to, guild.id);
+		for (const group of groups.filter((candidate) => candidate.guildId === guild.id)) {
+			group.items = group.items.filter(open);
+			group.sections = (group.sections ?? [])
+				.map((section) => ({ ...section, items: section.items.filter(open) }))
+				.filter((section) => section.items.length > 0);
+		}
 	}
 
 	if (isOwner) {

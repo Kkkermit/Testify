@@ -1,7 +1,7 @@
 import { type ChannelSummary, type CommandSummary, type ManageableGuild } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { Columns3, FileText, Hash, type LucideIcon, Palette, ShieldQuestion, Terminal, Volume2 } from "lucide-react";
-import { allNavItems, type NavAudience, navigationFor } from "@/config/navigation";
+import { allNavItems, moderatorMayOpen, type NavAudience, navigationFor } from "@/config/navigation";
 import { channelPath, channelTree } from "@/features/channels/channelMap.utils";
 import { configurableAt } from "@/features/commands/commands.utils";
 
@@ -48,8 +48,9 @@ export function searchEntries({
 		terms: [],
 	}));
 
+	const moderates = guild?.access === "moderate";
 	const channelEntries =
-		guild === undefined
+		guild === undefined || moderates
 			? []
 			: channelTree(channels)
 					.flatMap((group) => group.channels)
@@ -76,9 +77,11 @@ export function searchEntries({
 			terms: [],
 		}));
 
-	const commandList = guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`;
+	const commandList = guild === undefined || moderates ? "/commands" : `/guilds/${guild.id}/commands`;
 	const commandEntries = commands.map<SearchEntry>((command) => {
-		const place = configurableAt(command, guild?.id ?? null);
+		const found = configurableAt(command, guild?.id ?? null);
+		const closed = found !== null && guild !== undefined && moderates && !moderatorMayOpen(found.path, guild.id);
+		const place = closed ? null : found;
 		const screen = place === null ? null : (screens.find((entry) => entry.to === place.path)?.label ?? place.screen);
 		return {
 			id: `command:${command.name}`,

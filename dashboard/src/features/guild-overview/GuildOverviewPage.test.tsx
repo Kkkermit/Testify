@@ -14,6 +14,39 @@ function renderPage() {
 }
 
 describe("the guild overview", () => {
+	/** A moderator's overview asked for the inbox and the setup checklist, both closed to them, and showed two errors. */
+	it("gives a moderator their tools and asks for nothing closed to them", async () => {
+		const asked: string[] = [];
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({ ...overview, features: [], yourPermissions: ["KickMembers"] }),
+			),
+			http.get("/api/guilds/:guildId/:screen", ({ params }) => {
+				asked.push(String(params.screen));
+				return HttpResponse.json({});
+			}),
+		);
+
+		const { container } = renderPage();
+
+		const tools = await screen.findByRole("heading", { name: "Your moderation tools" });
+		const list = tools.parentElement?.querySelector("ul");
+		expect(
+			within(list as HTMLElement)
+				.getAllByRole("link")
+				.map((link) => link.textContent),
+		).toEqual([
+			expect.stringContaining("Members"),
+			expect.stringContaining("Warnings"),
+			expect.stringContaining("Cases"),
+			expect.stringContaining("Bans"),
+			expect.stringContaining("Appeals"),
+		]);
+		expect(screen.queryByRole("heading", { name: /features/i })).toBeNull();
+		expect(asked).toEqual([]);
+		await expectNoViolations(container);
+	});
+
 	/** Discord revokes permissions silently, and this is the only place anyone would find out. */
 	it("warns when the bot is missing a permission a feature needs", async () => {
 		server.use(

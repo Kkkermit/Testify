@@ -279,8 +279,18 @@ describe("the guild overview", () => {
 		const managed = (await (await manager.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 		const owned = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 
-		expect(managed.yourPermissions).toEqual(["BanMembers"]);
+		expect(managed.yourPermissions).toEqual(["ManageGuild", "BanMembers"]);
 		expect(owned.yourPermissions).toEqual([...READER_PERMISSIONS]);
+	});
+
+	/** A moderator reaches the overview to find their way round, and the server's settings are not theirs to read. */
+	it("leaves the features and the changes out for a reader who can moderate but not manage", async () => {
+		const moderator = appFor({ readerHolds: [PermissionFlagsBits.BanMembers] });
+		const body = (await (await moderator.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+		const managed = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+
+		expect([body.features, body.recentChanges, body.yourPermissions]).toEqual([[], [], ["BanMembers"]]);
+		expect(managed.features.length).toBeGreaterThan(0);
 	});
 
 	/** The bot's own member is missing while the cache is still filling; that is not a permission problem. */

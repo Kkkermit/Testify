@@ -16,6 +16,22 @@ describe("navigationFor", () => {
 		expect(pathsFor({ guild, isOwner: false })).toEqual(expect.arrayContaining(inSections));
 	});
 
+	/** Every other screen refuses a moderator without Manage Server, so the sidebar offers only what opens. */
+	it("shows a moderator the moderation screens alone, and the bot-wide command list", () => {
+		const paths = pathsFor({ guild: { ...guild, access: "moderate" }, isOwner: false });
+		const prefix = `/guilds/${guild.id}`;
+
+		expect(paths.filter((path) => path.startsWith(prefix)).map((path) => path.slice(prefix.length) || "/")).toEqual([
+			"/",
+			"/members",
+			"/warnings",
+			"/cases",
+			"/bans",
+			"/appeals",
+		]);
+		expect(paths).toContain("/commands");
+	});
+
 	/** The console 404s for anyone else, so offering the link would only be a dead end. */
 	it("shows the owner console to an owner and nobody else", () => {
 		expect(pathsFor({ guild: undefined, isOwner: true })).toContain("/owner");

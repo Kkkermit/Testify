@@ -15,9 +15,11 @@ export function WarningsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
-	const punishments = usePunishments(guildId);
-	const blocked = useLacks(guildId)("ModerateMembers");
-	const mayModerate = useHolds(guildId)("ModerateMembers");
+	const lacks = useLacks(guildId);
+	const holds = useHolds(guildId);
+	const punishments = usePunishments(guildId, holds("ManageGuild"));
+	const blocked = lacks("ModerateMembers");
+	const mayModerate = holds("ModerateMembers");
 
 	usePageTitle(t("warnings.title"), overview.data?.name);
 
@@ -25,7 +27,13 @@ export function WarningsPage(): React.JSX.Element {
 		<>
 			<PageHeader server={overview.data} title={t("warnings.title")} subtitle={t("warnings.subtitle")} />
 			{punishments.data !== undefined && <Summary>{warningsSummary(punishments.data, t)}</Summary>}
-			<PunishmentsCard guildId={guildId} />
+			{lacks("ManageGuild") ? (
+				<NeedsPermissionPanel title={t("warnings.punishmentsTitle")} permission="ManageGuild" />
+			) : holds("ManageGuild") ? (
+				<PunishmentsCard guildId={guildId} />
+			) : (
+				<Skeleton className="h-40 w-full" />
+			)}
 			{blocked ? (
 				<>
 					<NeedsPermissionPanel title={t("warnings.warnTitle")} permission="ModerateMembers" />

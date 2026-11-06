@@ -32,6 +32,11 @@ export interface DashboardUser {
 	avatarUrl: string | null;
 }
 
+/** Manage Server opens every screen; any of `MODERATOR_PERMISSIONS` without it opens only the moderation ones. */
+export type GuildAccess = "manage" | "moderate";
+
+export const MODERATOR_PERMISSIONS = ["ModerateMembers", "KickMembers", "BanMembers"] as const;
+
 export interface ManageableGuild {
 	id: string;
 	name: string;
@@ -39,6 +44,7 @@ export interface ManageableGuild {
 	memberCount: number | null;
 	botPresent: boolean;
 	canInvite: boolean;
+	access: GuildAccess;
 }
 
 /** Everything the bot asks for on the invite, as one bitfield, rather than Administrator. */
@@ -124,8 +130,9 @@ export const WATCHED_PERMISSIONS = [
 
 export type WatchedPermission = (typeof WATCHED_PERMISSIONS)[number];
 
-/** What a screen can ask of its reader beyond Manage Server, as Discord names each permission. */
+/** What a screen can ask of its reader, as Discord names each permission. */
 export const READER_PERMISSIONS = [
+	"ManageGuild",
 	"Administrator",
 	"BanMembers",
 	"KickMembers",
@@ -158,6 +165,7 @@ export interface GuildOverview {
 	missingPermissions: WatchedPermission[];
 	/** Which of `READER_PERMISSIONS` the person reading holds here; every one, for a bot owner. */
 	yourPermissions: ReaderPermission[];
+	/** Empty, like `features`, for a reader without Manage Server, since both describe the server's settings. */
 	recentChanges: AuditEntrySummary[];
 }
 

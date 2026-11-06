@@ -7,6 +7,7 @@ import { GUILD_REFUSED_NOTICE, RequireGuild } from "@/app/RequireGuild";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
+import { overview } from "@/test/fixtures/server";
 import { aGuild } from "@/test/fixtures/session";
 import { server } from "@/test/setup";
 
@@ -107,6 +108,26 @@ describe("reaching a server's screens", () => {
 		});
 	});
 
+	/** A moderator who follows a link to a setting is told what it needs, and the setting is never asked for. */
+	it("shows a moderator without Manage Server what a settings screen needs, and asks the API nothing for it", async () => {
+		const asked: string[] = [];
+		overviewAnswers(() => HttpResponse.json({ ...overview, yourPermissions: ["BanMembers", "ModerateMembers"] }));
+		server.use(
+			http.get(`/api/guilds/${GUILD}/settings`, () => {
+				asked.push("settings");
+				return HttpResponse.json({});
+			}),
+		);
+		visit();
+
+		expect(
+			await screen.findByText("You need the Manage Server permission in this server to use this."),
+		).toBeInTheDocument();
+		expect(screen.getByRole("heading", { level: 1, name: "Settings" })).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { name: "Server settings" })).toBeNull();
+		expect(asked).toEqual([]);
+	});
+
 	/** Lacking Kick Members is about one action, not about the server, so the manager stays where they are. */
 	it("keeps a manager in place when only one action is refused", async () => {
 		const user = userEvent.setup();
@@ -132,6 +153,10 @@ describe("the server list after being sent back from a server", () => {
 			</QueryClientProvider>,
 		);
 
-		expect(await screen.findByText(/you need the manage server permission to open that server/i)).toBeInTheDocument();
+		expect(
+			await screen.findByText(
+				/you need manage server, timeout members, kick members or ban members to open that server/i,
+			),
+		).toBeInTheDocument();
 	});
 });

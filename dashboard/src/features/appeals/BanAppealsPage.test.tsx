@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import { BanAppealsPage } from "@/features/appeals/BanAppealsPage";
 import { expectNoViolations } from "@/test/axe";
 import { appealPage } from "@/test/fixtures/moderation";
+import { overview } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -18,6 +19,25 @@ function renderPage(): ReturnType<typeof renderWithProviders> {
 }
 
 describe("the ban appeals page", () => {
+	/** A moderator decides appeals; where they are posted is the server's setting. */
+	it("lets a moderator decide appeals without asking for the settings", async () => {
+		const asked: string[] = [];
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({ ...overview, yourPermissions: ["ModerateMembers", "KickMembers", "BanMembers"] }),
+			),
+			http.get("/api/guilds/:guildId/appeals/settings", () => {
+				asked.push("/api/guilds/:guildId/appeals/settings");
+				return HttpResponse.json({});
+			}),
+		);
+		renderPage();
+
+		expect(await screen.findByRole("heading", { name: "Appeal settings" })).toBeInTheDocument();
+		expect(screen.getByText("You need the Manage Server permission in this server to use this.")).toBeInTheDocument();
+		expect(asked).toEqual([]);
+	});
+
 	/** A refusal is the one decision the member has to be told the reason for, so it cannot go without one. */
 	it("refuses an appeal only once a reason is typed, and sends that reason", async () => {
 		const sent: AppealDecision[] = [];

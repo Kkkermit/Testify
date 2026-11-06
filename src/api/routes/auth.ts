@@ -10,6 +10,7 @@ import {
 	setSessionCookie,
 } from "@api/cookies";
 import {
+	accessOf,
 	authoriseUrl,
 	avatarUrl,
 	callbackUrl,
@@ -42,6 +43,7 @@ import { ownerContacts } from "@lib/bot";
 import {
 	confirmsName,
 	eraseAccountSchema,
+	type GuildAccess,
 	type ManageableGuild,
 	type MeResponse,
 	returnTo as returnToSchema,
@@ -218,8 +220,13 @@ async function guildsFor(
 	const owner = client.isOwner(session.userId);
 
 	return (await rawGuilds(oauth, session))
-		.filter((guild) => owner || canManage(guild.permissions))
-		.map((guild) => toManageable(guild, client.guilds.cache.get(guild.id)?.memberCount, canManage(guild.permissions)))
+		.flatMap((guild) => {
+			const access: GuildAccess | null = owner ? "manage" : accessOf(guild.permissions);
+			const memberCount = client.guilds.cache.get(guild.id)?.memberCount;
+			// A moderator can neither invite the bot nor do anything where it is not, so only a manager sees one without it.
+			if (access === null || (access === "moderate" && memberCount === undefined)) return [];
+			return [toManageable(guild, memberCount, canManage(guild.permissions), access)];
+		})
 		.sort((a, b) => Number(b.botPresent) - Number(a.botPresent) || a.name.localeCompare(b.name));
 }
 
@@ -260,7 +267,12 @@ async function usableToken(oauth: OauthConfig, session: DashboardSession): Promi
 	return refreshed.accessToken;
 }
 
-function toManageable(guild: OauthGuild, memberCount: number | undefined, canInvite: boolean): ManageableGuild {
+function toManageable(
+	guild: OauthGuild,
+	memberCount: number | undefined,
+	canInvite: boolean,
+	access: GuildAccess,
+): ManageableGuild {
 	return {
 		id: guild.id,
 		name: guild.name,
@@ -268,5 +280,6 @@ function toManageable(guild: OauthGuild, memberCount: number | undefined, canInv
 		memberCount: memberCount ?? null,
 		botPresent: memberCount !== undefined,
 		canInvite,
+		access,
 	};
 }

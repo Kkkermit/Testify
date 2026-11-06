@@ -121,7 +121,10 @@ guilds.route("/:guildId/test-post", testPost);
 
 guilds.get("/:guildId/overview", async (context) => {
 	const guild = guildOf(context);
-	const [features, recent] = await Promise.all([featuresOf(guild), recentAudits(guild.id, 8, audienceOf(context))]);
+	const manages = holdsPermission(context, PermissionFlagsBits.ManageGuild);
+	const [features, recent] = manages
+		? await Promise.all([featuresOf(guild), recentAudits(guild.id, 8, audienceOf(context))])
+		: [[], []];
 
 	const body: GuildOverview = {
 		id: guild.id,

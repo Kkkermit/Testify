@@ -7,6 +7,8 @@ import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { UndoProvider } from "@/app/UndoProvider";
 import { useBotLook } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { accessFrom } from "@/features/guild-overview/useLacks";
 import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
 import { QuickSearch } from "@/features/search/QuickSearch";
 import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
@@ -36,7 +38,9 @@ export function AppShell(): React.JSX.Element {
 		}, []),
 	);
 
-	const guild = me.data?.guilds.find((candidate) => candidate.id === guildId);
+	const overview = useGuildOverview(guildId ?? null).data;
+	const listed = me.data?.guilds.find((candidate) => candidate.id === guildId);
+	const guild = listed === undefined || overview === undefined ? listed : { ...listed, access: accessFrom(overview) };
 	const audience = { guild, guilds: me.data?.guilds ?? [], isOwner: me.data?.isOwner === true };
 	const user = me.data?.user ?? null;
 

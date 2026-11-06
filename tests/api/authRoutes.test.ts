@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
@@ -62,11 +63,15 @@ function envFor(overrides: Partial<Env> = {}): Env {
 	} as Env;
 }
 
-function app(env: Env = envFor(), session: object | undefined = undefined): Hono<ApiBindings> {
+function app(
+	env: Env = envFor(),
+	session: object | undefined = undefined,
+	botIn = new Map<string, { memberCount: number }>(),
+): Hono<ApiBindings> {
 	const client = {
 		isOwner: (id: string) => id === OWNER,
 		logger: { error: jest.fn() },
-		guilds: { cache: new Map() },
+		guilds: { cache: botIn },
 		env: { DISCORD_OWNER_IDS: [OWNER] },
 		users: { fetch: jest.fn(() => Promise.resolve({ username: "the-owner" })) },
 	} as unknown as TestifyClient;
@@ -349,6 +354,36 @@ describe("GET /auth/me", () => {
 		});
 		expect(body.guilds).toEqual([]);
 		expect(guildsFetched).not.toHaveBeenCalled();
+	});
+
+	/** Manage Channels once listed nothing and Ban Members nothing either, so a moderator could not reach their own tools. */
+	it("lists the servers somebody can manage, and the ones with the bot they can moderate, and nothing else", async () => {
+		const at = (id: string, permissions: bigint) => ({ id, name: id, icon: null, permissions: String(permissions) });
+		guildsFetched.mockResolvedValueOnce([
+			at("900000000000000001", PermissionFlagsBits.ManageGuild),
+			at("900000000000000002", PermissionFlagsBits.Administrator),
+			at("900000000000000003", PermissionFlagsBits.BanMembers),
+			at("900000000000000004", PermissionFlagsBits.KickMembers),
+			at("900000000000000005", PermissionFlagsBits.ManageChannels | PermissionFlagsBits.ManageRoles),
+			at("900000000000000006", PermissionFlagsBits.ModerateMembers),
+		]);
+		const botIn = new Map(
+			["900000000000000001", "900000000000000003", "900000000000000005", "900000000000000006"].map((id) => [
+				id,
+				{ memberCount: 10 },
+			]),
+		);
+
+		const body = (await (await app(envFor(), signedIn("100000000000000014"), botIn).request("/auth/me")).json()) as {
+			guilds: { id: string; access: string; canInvite: boolean }[];
+		};
+
+		expect(body.guilds.map(({ id, access, canInvite }) => [id.slice(-1), access, canInvite])).toEqual([
+			["1", "manage", true],
+			["3", "moderate", false],
+			["6", "moderate", false],
+			["2", "manage", true],
+		]);
 	});
 
 	/** Discord limits the guild list tightly, and a page that asks twice in a breath was refused the second time. */

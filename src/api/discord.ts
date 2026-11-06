@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { PermissionFlagsBits } from "discord.js";
 import { ApiProblem, UpstreamProblem } from "@api/errors";
-import { type DashboardUser } from "@testify/shared";
+import { type DashboardUser, type GuildAccess, MODERATOR_PERMISSIONS } from "@testify/shared";
 
 /** Discord's OAuth2 endpoints; the browser never holds a token or the client secret. */
 
@@ -177,13 +178,24 @@ export function guildIconUrl(guildId: string, icon: string | null): string | nul
 	return icon === null ? null : `https://cdn.discordapp.com/icons/${guildId}/${icon}.png?size=128`;
 }
 
-const MANAGE_GUILD = 1n << 5n;
+const MANAGES = [PermissionFlagsBits.Administrator, PermissionFlagsBits.ManageGuild];
+const MODERATES = MODERATOR_PERMISSIONS.map((name) => PermissionFlagsBits[name]);
 
-/** A login-time snapshot, good enough for what to show; `requireGuild` checks live before any write. */
-export function canManage(permissions: string): boolean {
+function holdsAny(permissions: string, flags: readonly bigint[]): boolean {
 	try {
-		return (BigInt(permissions) & MANAGE_GUILD) === MANAGE_GUILD;
+		const held = BigInt(permissions);
+		return flags.some((flag) => (held & flag) === flag);
 	} catch {
 		return false;
 	}
+}
+
+/** A login-time snapshot, good enough for what to show; `requireGuild` checks live before any write. */
+export function canManage(permissions: string): boolean {
+	return holdsAny(permissions, MANAGES);
+}
+
+export function accessOf(permissions: string): GuildAccess | null {
+	if (canManage(permissions)) return "manage";
+	return holdsAny(permissions, MODERATES) ? "moderate" : null;
 }

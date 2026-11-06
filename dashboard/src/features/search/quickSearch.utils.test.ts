@@ -34,6 +34,19 @@ describe("searchEntries", () => {
 		expect(ban?.to).toBe("/commands?q=ban");
 	});
 
+	/** A moderator searching for `/levelling` was sent to a screen that only refused them. */
+	it("keeps a moderator's results to what opens for them", () => {
+		const entries = entriesIn({ ...aGuild, access: "moderate" });
+		const at = (label: string) => entries.find((entry) => entry.label === label)?.to;
+
+		expect([at("/ban"), at("/levelling"), at("Welcome")]).toEqual([
+			`/guilds/${aGuild.id}/members`,
+			"/commands?q=levelling",
+			undefined,
+		]);
+		expect(entries.filter((entry) => entry.kind === "channel")).toEqual([]);
+	});
+
 	/** A channel is found by its name and opens its page; outside a server there is no channel to find. */
 	it("finds a channel by name inside a server, and none outside one", () => {
 		const [general] = searchFor(entriesIn(aGuild), "general");

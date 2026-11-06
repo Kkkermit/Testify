@@ -326,7 +326,7 @@ writing it once. Every piece has a test proven able to fail.
 
 ### `requireGuild` is the security boundary
 
-Five things in it are load-bearing:
+Six things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, shape-checked before it is used to look anything up. A
    handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, **never** a guild id from a body. This is the most likely way one guild's
@@ -339,6 +339,9 @@ Five things in it are load-bearing:
    learns the owner console exists.
 5. **`.catch(() => null)` on the fetch.** An unknown member throws, and an unhandled throw would be a 500 that
    looks like a bug rather than a 403 that looks like a denial.
+6. **A moderator without Manage Server passes only `openToModerators`** in `src/api/middleware/moderators.ts`, an
+   allowlist of the moderation routes. A screen that a moderator should reach is a line there and one in
+   `moderatorMayOpen` in `config/navigation.ts`; nothing else opens it to them.
 
 `serveDashboard()` is registered in `startApi` **after** every route, because it is a catch-all — anything
 registered behind it silently never runs.

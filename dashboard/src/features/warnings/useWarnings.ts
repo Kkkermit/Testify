@@ -34,10 +34,11 @@ export function useGuildWarnings(
 	});
 }
 
-export function usePunishments(guildId: string): UseQueryResult<WarnLadder> {
+export function usePunishments(guildId: string, enabled = true): UseQueryResult<WarnLadder> {
 	return useQuery({
 		queryKey: keys.guild(guildId).punishments(),
 		queryFn: () => api.get<WarnLadder>(`/guilds/${guildId}/warnings/punishments`),
+		enabled,
 	});
 }
 
