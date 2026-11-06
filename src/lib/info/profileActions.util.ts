@@ -6,7 +6,7 @@ import { type AccountProfile, birthdayFrom, birthdayText, type ProfileBody } fro
 /** Why a profile was refused; each surface words it, `/profile set` in English and the dashboard by translation. */
 export type ProfileProblem = "profanity" | "birthday";
 
-export interface ProfileFields {
+interface ProfileFields {
 	about: string;
 	favouriteSong: string;
 	favouriteGame: string | null;

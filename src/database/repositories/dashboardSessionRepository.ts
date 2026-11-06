@@ -108,7 +108,7 @@ export function sessionHandleOf(id: string): string {
 	return createHash("sha256").update(id).digest("hex").slice(0, 24);
 }
 
-export interface SessionSummary {
+interface SessionSummary {
 	handle: string;
 	createdAt: Date;
 	lastSeenAt: Date;

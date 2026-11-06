@@ -104,10 +104,7 @@ function listed(names: readonly string[]): string {
 	return names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} or ${names.at(-1) ?? ""}`;
 }
 
-export function blacklistRefusal(
-	entry: { reason: string; createdAt: Date },
-	owners: readonly string[] = [],
-): TitledRefusal {
+function blacklistRefusal(entry: { reason: string; createdAt: Date }, owners: readonly string[] = []): TitledRefusal {
 	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
 	const named = listed(owners.map((name) => `**${name}**`));
 	const ask =

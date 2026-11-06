@@ -4,8 +4,7 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { Field, RowActions, SettingRows, Warning } from "@/components/form";
-import { FIELD } from "@/components/form/fieldStyles";
+import { ConfirmField, RowActions, SettingRows, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { useEraseAccount } from "@/features/account/useAccount";
 import { useMe } from "@/features/auth/useMe";
@@ -51,21 +50,13 @@ export function DataTab(): React.JSX.Element {
 				{asking ? (
 					<>
 						<Warning>{t("account.eraseWarning")}</Warning>
-						<Field
+						<ConfirmField
+							id="erase-confirm"
 							label={t("account.typeToConfirm", { name: username })}
 							hint={t("account.confirmHint")}
-							htmlFor="erase-confirm"
-						>
-							<input
-								id="erase-confirm"
-								className={FIELD}
-								value={typed}
-								autoComplete="off"
-								onChange={(event) => {
-									setTyped(event.target.value);
-								}}
-							/>
-						</Field>
+							value={typed}
+							onChange={setTyped}
+						/>
 						{erase.error !== null && <Warning>{t("account.eraseFailed")}</Warning>}
 						<RowActions>
 							<Button
