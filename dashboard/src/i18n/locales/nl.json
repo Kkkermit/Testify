@@ -2982,6 +2982,7 @@
 		"unusable": "Deze konden niet worden gelezen en worden weggelaten: {{sections}}.",
 		"apply_one": "{{count, number}} onderdeel toepassen",
 		"apply_other": "{{count, number}} onderdelen toepassen",
-		"leftAsIs": "{{section}} blijft hier zoals het is."
+		"leftAsIs": "{{section}} blijft hier zoals het is.",
+		"chooseFile": "Back-upbestand kiezen"
 	}
 }

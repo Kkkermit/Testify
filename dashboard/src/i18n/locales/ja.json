@@ -2897,6 +2897,7 @@
 		"saved": "保存しました",
 		"unusable": "次の項目は読み込めないため除外します：{{sections}}。",
 		"apply_other": "{{count, number}} 件を適用",
-		"leftAsIs": "{{section}} はここではそのままです。"
+		"leftAsIs": "{{section}} はここではそのままです。",
+		"chooseFile": "バックアップファイルを選ぶ"
 	}
 }

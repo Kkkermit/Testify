@@ -3067,6 +3067,7 @@
 		"apply_one": "Appliquer {{count, number}} section",
 		"apply_many": "Appliquer {{count, number}} de sections",
 		"apply_other": "Appliquer {{count, number}} sections",
-		"leftAsIs": "{{section}} reste tel quel ici."
+		"leftAsIs": "{{section}} reste tel quel ici.",
+		"chooseFile": "Choisir un fichier de sauvegarde"
 	}
 }

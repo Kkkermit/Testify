@@ -2982,6 +2982,7 @@
 		"unusable": "Diese konnten nicht gelesen werden und werden weggelassen: {{sections}}.",
 		"apply_one": "{{count, number}} Bereich übernehmen",
 		"apply_other": "{{count, number}} Bereiche übernehmen",
-		"leftAsIs": "{{section}} bleibt hier, wie es ist."
+		"leftAsIs": "{{section}} bleibt hier, wie es ist.",
+		"chooseFile": "Sicherungsdatei auswählen"
 	}
 }
