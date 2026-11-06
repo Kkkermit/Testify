@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings, actorOf, guildOf, readerOf } from "@api/context";
+import { forbidden } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
@@ -30,17 +31,18 @@ guildModmail.patch("/settings", async (context) => {
 	return context.json(settings);
 });
 
-guildModmail.get("/conversations", async (context) => {
+/** Discord hides a channel's threads from whoever cannot view it, and so does every conversation route. */
+async function seesConversations(context: Context<ApiBindings>): Promise<boolean> {
 	const guild = guildOf(context);
-	const settings = await readModmailSettings(guild);
-	const channel = settings.channelId === null ? undefined : guild.channels.cache.get(settings.channelId);
+	const { channelId } = await readModmailSettings(guild);
+	const channel = channelId === null ? undefined : guild.channels.cache.get(channelId);
+	return channel === undefined || readerSees(channel, readerOf(context));
+}
 
-	// Discord hides a channel's threads from whoever cannot view it, and so does this list.
-	if (channel !== undefined && !readerSees(channel, readerOf(context))) {
-		return context.json<ModmailConversations>({ visible: false, items: [] });
-	}
+guildModmail.get("/conversations", async (context) => {
+	if (!(await seesConversations(context))) return context.json<ModmailConversations>({ visible: false, items: [] });
 
-	const open = await listOpenConversations(guild.id, MODMAIL_LIMITS.shown);
+	const open = await listOpenConversations(guildOf(context).id, MODMAIL_LIMITS.shown);
 	return context.json<ModmailConversations>({ visible: true, items: open.map(toConversationRow) });
 });
 
@@ -51,6 +53,9 @@ guildModmail.post(
 		const guild = guildOf(context);
 		const { conversationId } = parseParams(context, modmailParams);
 		const actor = actorOf(context);
+		if (!(await seesConversations(context))) {
+			throw forbidden("missing_permission", "You need to be able to see the mod mail channel to close a conversation.");
+		}
 
 		const closed = await closeModmail(context.get("client"), guild.id, conversationId, actor, "staff");
 		await auditChange(context, {

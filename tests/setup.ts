@@ -10,6 +10,7 @@ const RESETS: readonly (readonly [module: string, name: string])[] = [
 	["@database/repositories/noticeRepository", "clearNoticeCache"],
 	["@database/repositories/prefixRepository", "clearPrefixCache"],
 	["@database/repositories/raidRepository", "clearRaidCache"],
+	["@lib/appeals/appealActions.util", "clearListedBans"],
 	["@lib/invites/inviteTracker.util", "clearInviteSnapshots"],
 	["@lib/modmail/modmailActions.util", "clearModmailOffers"],
 	["@lib/notices/noticeActions.util", "clearNoticeHints"],
