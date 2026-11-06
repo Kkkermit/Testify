@@ -60,10 +60,18 @@ export function inviteUrl(clientId: string, guildId?: string): string {
 	return `https://discord.com/oauth2/authorize?${query.toString()}`;
 }
 
+/** Why a signed-in account is blocked and whom to ask; such an account may only sign out and delete its data. */
+export interface BlacklistNotice {
+	reason: string;
+	since: string;
+	owners: { id: string; name: string }[];
+}
+
 export interface MeResponse {
 	user: DashboardUser;
 	isOwner: boolean;
 	guilds: ManageableGuild[];
+	blacklist: BlacklistNotice | null;
 }
 
 /** Told to an unauthenticated caller: which variables are missing, never their values. */

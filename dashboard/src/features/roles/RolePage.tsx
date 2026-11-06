@@ -1,16 +1,13 @@
-import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Warning } from "@/components/form";
 import { DividedList, HoverChevron, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
-import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useRoles } from "@/features/levelling/useLevelling";
 import { roleSummary, USE_SCREENS, useText } from "@/features/roles/roles.utils";
 import { useRoleUses } from "@/features/roles/useRoleUses";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { cn } from "@/lib/cn";
 
 export function RolePage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -31,14 +28,11 @@ export function RolePage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader server={overview.data} title={name} />
-
-			<Link
-				to={`/guilds/${guildId}/roles`}
-				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground -mt-3 w-fit gap-1 text-sm")}
-			>
-				<ArrowLeft size={16} aria-hidden="true" /> {t("roles.list")}
-			</Link>
+			<PageHeader
+				server={overview.data}
+				title={name}
+				back={{ to: `/guilds/${guildId}/roles`, label: t("roles.list") }}
+			/>
 
 			{/* A role already deleted cannot be stopped by deleting it, so it gets the warning instead of the sentence. */}
 			{role === undefined && list.length > 0 ? (

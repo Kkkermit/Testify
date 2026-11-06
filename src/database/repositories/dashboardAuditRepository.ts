@@ -1,4 +1,4 @@
-import { type FilterQuery } from "mongoose";
+import { type FilterQuery, type Types } from "mongoose";
 import { type DashboardAudit, DashboardAudits } from "@database/models/dashboardAudit.schema";
 
 export type NewAudit = Omit<DashboardAudit, "at">;
@@ -59,4 +59,34 @@ export async function auditsSince(
 		.limit(limit)
 		.lean<DashboardAudit[]>()
 		.exec();
+}
+
+function byActor(actorId: string, guildId?: string): FilterQuery<DashboardAudit> {
+	return guildId === undefined ? { actorId } : { actorId, guildId };
+}
+
+/** One person's own records, newest first, in every server or in one. */
+export async function auditsBy(
+	actorId: string,
+	page: number,
+	perPage: number,
+	guildId?: string,
+): Promise<{ items: (DashboardAudit & { _id: Types.ObjectId })[]; total: number }> {
+	const filter = byActor(actorId, guildId);
+	const [items, total] = await Promise.all([
+		DashboardAudits.find(filter)
+			.sort({ at: -1, _id: -1 })
+			.skip(Math.max(0, page - 1) * perPage)
+			.limit(perPage)
+			.lean<(DashboardAudit & { _id: Types.ObjectId })[]>()
+			.exec(),
+		DashboardAudits.countDocuments(filter).exec(),
+	]);
+
+	return { items, total };
+}
+
+/** Every server one person has a record in; null is the owner console. */
+export async function auditServersOf(actorId: string): Promise<(string | null)[]> {
+	return DashboardAudits.distinct("guildId", { actorId }).exec();
 }

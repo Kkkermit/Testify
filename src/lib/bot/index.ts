@@ -11,6 +11,7 @@ export * from "./guildLifecycle.util";
 export * from "./logChannel.util";
 export * from "./logFields.util";
 export * from "./ownerAudit.util";
+export * from "./owners.util";
 export * from "./performance.util";
 export * from "./runtime.util";
 export * from "./startup.util";

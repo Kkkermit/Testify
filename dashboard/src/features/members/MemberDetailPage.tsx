@@ -1,11 +1,9 @@
-import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Refusal, SavingIndicator, savingStateOf } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
-import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { LevelCard } from "@/features/members/components/LevelCard";
 import { MemberIdentity, MemberStanding } from "@/features/members/components/MemberIdentity";
@@ -20,7 +18,6 @@ import { memberSummary, softbanActive } from "@/features/members/memberDetail.ut
 import { useMemberActions } from "@/features/members/useMemberActions";
 import { outcomeText } from "@/features/warnings/warnings.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { cn } from "@/lib/cn";
 
 export function MemberDetailPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -45,16 +42,9 @@ export function MemberDetailPage(): React.JSX.Element {
 				server={overview.data}
 				title={detail.displayName}
 				subtitle={`@${detail.username}`}
+				back={{ to: `/guilds/${guildId}/members`, label: t("members.backToMembers") }}
 				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess || edit.isSuccess)} />}
 			/>
-
-			{/* `py-1` carries it past the 24px WCAG 2.2 target minimum; the margin absorbs the padding it adds. */}
-			<Link
-				to={`/guilds/${guildId}/members`}
-				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground -mt-3 w-fit gap-1 text-sm")}
-			>
-				<ArrowLeft size={16} aria-hidden="true" /> {t("members.backToMembers")}
-			</Link>
 
 			<Summary>{memberSummary(detail, t)}</Summary>
 

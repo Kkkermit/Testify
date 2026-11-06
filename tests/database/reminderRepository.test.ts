@@ -4,6 +4,7 @@ import {
 	claimDueReminder,
 	countReminders,
 	createReminder,
+	editReminder,
 	findReminder,
 	finishReminder,
 	listReminders,
@@ -87,5 +88,16 @@ describeWithMongo("reminderRepository", () => {
 		await finishReminder(id);
 
 		expect(await findReminder(ALICE, id)).toBeNull();
+	});
+
+	/** An id from somebody else's list, or a reminder already on its way out, is never changed. */
+	it("edits only the owner's reminder, and never one that is being delivered", async () => {
+		const id = await remind(ALICE, at(-1));
+		const change = { text: "moved", dueAt: at(90) };
+
+		expect(await editReminder(BOB, id, change, NOW)).toBeNull();
+		await claimDueReminder(NOW, LEASE);
+		expect(await editReminder(ALICE, id, change, NOW)).toBeNull();
+		expect(await editReminder(ALICE, id, change, new Date(NOW.getTime() + LEASE))).toMatchObject({ text: "moved" });
 	});
 });

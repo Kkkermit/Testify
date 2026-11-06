@@ -22,6 +22,8 @@ export function ChannelPage(): React.JSX.Element {
 
 	usePageTitle(channel?.name ?? t("channel.unknown"));
 
+	const back = { to: `/guilds/${guildId}/channels`, label: t("channel.allChannels") };
+
 	if (channels.isError) return <ErrorState error={channels.error} onRetry={() => void channels.refetch()} />;
 	if (places.isError) return <ErrorState error={places.error} onRetry={() => void places.refetch()} />;
 	if (channels.isPending || places.isPending) return <Skeleton className="h-64" />;
@@ -29,7 +31,7 @@ export function ChannelPage(): React.JSX.Element {
 	if (channel?.name === undefined || channel.name === null || channel.kind === "category") {
 		return (
 			<>
-				<PageHeader server={overview.data} title={t("channel.unknown")} />
+				<PageHeader server={overview.data} title={t("channel.unknown")} back={back} />
 				<EmptyState icon={<SearchX size={20} />} title={t("channel.notFound")} body={t("channel.notFoundHint")} />
 			</>
 		);
@@ -40,7 +42,7 @@ export function ChannelPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader server={overview.data} title={name} subtitle={t("channel.subtitle")} />
+			<PageHeader server={overview.data} title={name} subtitle={t("channel.subtitle")} back={back} />
 			{here.length > 0 ? (
 				<ChannelBlocks features={here} channelId={channel.id} channels={channels.data} guildId={guildId} />
 			) : (

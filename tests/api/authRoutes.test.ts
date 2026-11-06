@@ -9,6 +9,7 @@ import { oauthConfigFrom } from "@api/oauth";
 import { auth } from "@api/routes/auth";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { createSession, deleteSession, deleteSessionsFor } from "@database/repositories/dashboardSessionRepository";
 import { eraseAccount } from "@lib/account";
 import { type SetupStatus } from "@testify/shared";
@@ -24,6 +25,9 @@ jest.mock("@api/discord", () => {
 		fetchGuilds: jest.fn(() => Promise.resolve([])),
 	};
 });
+jest.mock("@database/repositories/blacklistRepository", () => ({
+	findBlacklistEntry: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	createSession: jest.fn(() =>
 		Promise.resolve({ id: "new-session-id", csrfSecret: "new-csrf", expiresAt: new Date() }),
@@ -63,6 +67,8 @@ function app(env: Env = envFor(), session: object | undefined = undefined): Hono
 		isOwner: (id: string) => id === OWNER,
 		logger: { error: jest.fn() },
 		guilds: { cache: new Map() },
+		env: { DISCORD_OWNER_IDS: [OWNER] },
+		users: { fetch: jest.fn(() => Promise.resolve({ username: "the-owner" })) },
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
@@ -321,6 +327,29 @@ describe("GET /auth/me", () => {
 		tokenExpiresAt: new Date(Date.now() + 604_800_000),
 	});
 	const guild = { id: "900000000000000001", name: "A server", icon: null, permissions: "32" };
+
+	/** A blocked account is told why and whom to ask, and Discord is not asked for servers it could not open. */
+	it("tells a blocked account why and whom to ask, and lists no servers", async () => {
+		jest.mocked(findBlacklistEntry).mockResolvedValueOnce({
+			userId: "100000000000000013",
+			reason: "Spamming",
+			createdAt: new Date("2026-11-01T00:00:00.000Z"),
+		} as never);
+		guildsFetched.mockClear();
+
+		const body = (await (await app(envFor(), signedIn("100000000000000013")).request("/auth/me")).json()) as {
+			blacklist: unknown;
+			guilds: unknown[];
+		};
+
+		expect(body.blacklist).toEqual({
+			reason: "Spamming",
+			since: "2026-11-01T00:00:00.000Z",
+			owners: [{ id: OWNER, name: "the-owner" }],
+		});
+		expect(body.guilds).toEqual([]);
+		expect(guildsFetched).not.toHaveBeenCalled();
+	});
 
 	/** Discord limits the guild list tightly, and a page that asks twice in a breath was refused the second time. */
 	it("asks Discord for the guild list once for a burst of requests", async () => {

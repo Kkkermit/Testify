@@ -1,6 +1,8 @@
 import { DashboardAudits } from "@database/models/dashboardAudit.schema";
 import {
 	auditPage,
+	auditServersOf,
+	auditsBy,
 	auditsSince,
 	countAudits,
 	type NewAudit,
@@ -103,5 +105,21 @@ describeWithMongo("the dashboard audit repository", () => {
 		await recordAudit(entry());
 
 		expect(await auditPage(GUILD, 9, 25)).toEqual([]);
+	});
+
+	/** A person's history is theirs alone, across every server, and the filter narrows it to one. */
+	it("reads one person's own records in every server, or in one", async () => {
+		const other = "900000000000000002";
+		await recordAudit(entry({ summary: "here" }));
+		await recordAudit(entry({ guildId: other, summary: "there" }));
+		await recordAudit(entry({ actorId: "100000000000000002", summary: "somebody else" }));
+
+		const everywhere = await auditsBy("100000000000000001", 1, 25);
+		expect(everywhere.items.map((row) => row.summary).sort()).toEqual(["here", "there"]);
+		expect(everywhere.total).toBe(2);
+
+		const one = await auditsBy("100000000000000001", 1, 25, other);
+		expect(one.items.map((row) => row.summary)).toEqual(["there"]);
+		expect((await auditServersOf("100000000000000001")).sort()).toEqual([GUILD, other]);
 	});
 });
