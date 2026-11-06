@@ -1,5 +1,6 @@
-import { isValidObjectId, type Types } from "mongoose";
+import { type Types } from "mongoose";
 import { RoleMenu, type RoleMenuRecord } from "@database/models/roleMenu.schema";
+import { recordIn } from "@database/recordFilter.util";
 
 /** A role menu as the rest of the bot sees it, with its id as a string. */
 export type StoredRoleMenu = Omit<RoleMenuRecord, "createdAt" | "updatedAt"> & { id: string };
@@ -23,10 +24,6 @@ function toMenu(row: Lean): StoredRoleMenu {
 }
 
 /** Every lookup is scoped to the server as well as the id, so one server can never reach another's menu. */
-function scope(guildId: string, menuId: string): { guildId: string; _id: string } | null {
-	return isValidObjectId(menuId) ? { guildId, _id: menuId } : null;
-}
-
 export async function listRoleMenus(guildId: string): Promise<StoredRoleMenu[]> {
 	const rows = await RoleMenu.find({ guildId }).sort({ createdAt: 1 }).lean<Lean[]>().exec();
 	return rows.map(toMenu);
@@ -37,7 +34,7 @@ export async function countRoleMenus(guildId: string): Promise<number> {
 }
 
 export async function findRoleMenu(guildId: string, menuId: string): Promise<StoredRoleMenu | null> {
-	const filter = scope(guildId, menuId);
+	const filter = recordIn(guildId, menuId);
 	if (filter === null) return null;
 
 	const row = await RoleMenu.findOne(filter).lean<Lean>().exec();
@@ -59,7 +56,7 @@ export async function updateRoleMenu(
 	fields: Partial<RoleMenuFields>,
 	updatedBy: string | null,
 ): Promise<StoredRoleMenu | null> {
-	const filter = scope(guildId, menuId);
+	const filter = recordIn(guildId, menuId);
 	if (filter === null) return null;
 
 	const row = await RoleMenu.findOneAndUpdate(filter, { $set: { ...fields, updatedBy } }, { new: true })
@@ -69,7 +66,7 @@ export async function updateRoleMenu(
 }
 
 export async function setRoleMenuMessage(guildId: string, menuId: string, messageId: string | null): Promise<void> {
-	const filter = scope(guildId, menuId);
+	const filter = recordIn(guildId, menuId);
 	if (filter === null) return;
 
 	await RoleMenu.updateOne(filter, { $set: { messageId } }).exec();
@@ -77,7 +74,7 @@ export async function setRoleMenuMessage(guildId: string, menuId: string, messag
 
 /** Answers with what was deleted, so the caller can take its post down too. */
 export async function deleteRoleMenu(guildId: string, menuId: string): Promise<StoredRoleMenu | null> {
-	const filter = scope(guildId, menuId);
+	const filter = recordIn(guildId, menuId);
 	if (filter === null) return null;
 
 	const row = await RoleMenu.findOneAndDelete(filter).lean<Lean>().exec();

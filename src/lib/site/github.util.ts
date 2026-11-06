@@ -59,6 +59,10 @@ export class TimedCache<T> {
 		}
 		return value;
 	}
+
+	clear(): void {
+		this.#entries.clear();
+	}
 }
 
 const repositorySchema = z.object({

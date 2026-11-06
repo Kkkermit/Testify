@@ -8,7 +8,13 @@ import {
 	reopenAppeal,
 	type StoredAppeal,
 } from "@database/repositories/appealRepository";
-import { applyAppealSettings, decideOnAppeal, readOwnAppeals, submitAppeal } from "@lib/appeals/appealActions.util";
+import {
+	applyAppealSettings,
+	clearListedBans,
+	decideOnAppeal,
+	readOwnAppeals,
+	submitAppeal,
+} from "@lib/appeals/appealActions.util";
 import { unbanUser } from "@lib/moderation/sanctions.util";
 
 jest.mock("@database/repositories/appealRepository", () => ({
@@ -186,6 +192,7 @@ describe("readOwnAppeals", () => {
 		jest.mocked(appealGuildIds).mockResolvedValue([GUILD, "900000000000000009"]);
 
 		const banned = await readOwnAppeals(world().client, KATE.id);
+		clearListedBans();
 		const free = await readOwnAppeals(world({ banned: false }).client, KATE.id);
 
 		expect(banned.servers.map((server) => server.guildId)).toEqual([GUILD]);
