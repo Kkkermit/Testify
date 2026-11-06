@@ -67,7 +67,7 @@ numbers, which drift):
 | Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
 | `src/lib` helpers    | 236, in 34 domain folders         |
-| Schemas/repositories | 52 / 51                           |
+| Schemas/repositories | 53 / 52                           |
 | Scheduled jobs       | 11                                |
 | Tests                | 4,115 across 554 suites           |
 
@@ -244,8 +244,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           52 Mongoose schemas, one file per feature
-│   └── repositories/     51 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           53 Mongoose schemas, one file per feature
+│   └── repositories/     52 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
