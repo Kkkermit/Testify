@@ -1,3 +1,5 @@
+import { type AccessArea, type AccessPerson } from "./access";
+
 export interface ApiErrorBody {
 	error: {
 		code: string;
@@ -32,11 +34,6 @@ export interface DashboardUser {
 	avatarUrl: string | null;
 }
 
-/** Manage Server opens every screen; any of `MODERATOR_PERMISSIONS` without it opens only the moderation ones. */
-export type GuildAccess = "manage" | "moderate";
-
-export const MODERATOR_PERMISSIONS = ["ModerateMembers", "KickMembers", "BanMembers"] as const;
-
 export interface ManageableGuild {
 	id: string;
 	name: string;
@@ -44,7 +41,8 @@ export interface ManageableGuild {
 	memberCount: number | null;
 	botPresent: boolean;
 	canInvite: boolean;
-	access: GuildAccess;
+	/** Null for somebody who manages the server and sees every screen; otherwise the screens they were given. */
+	areas: AccessArea[] | null;
 }
 
 /** Everything the bot asks for on the invite, as one bitfield, rather than Administrator. */
@@ -165,6 +163,8 @@ export interface GuildOverview {
 	missingPermissions: WatchedPermission[];
 	/** Which of `READER_PERMISSIONS` the person reading holds here; every one, for a bot owner. */
 	yourPermissions: ReaderPermission[];
+	/** Null for somebody who manages the server; otherwise the screens its admins gave them. */
+	yourAreas: AccessArea[] | null;
 	/** Empty, like `features`, for a reader without Manage Server, since both describe the server's settings. */
 	recentChanges: AuditEntrySummary[];
 }
@@ -220,4 +220,10 @@ export interface Paged<T> {
 	total: number;
 	page: number;
 	perPage: number;
+}
+
+/** One person given part of a server's dashboard, and what they did there lately. */
+export interface AccessActivity {
+	person: AccessPerson;
+	items: AuditEntrySummary[];
 }

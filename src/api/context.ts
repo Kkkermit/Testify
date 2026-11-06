@@ -5,6 +5,7 @@ import { type OauthConfig } from "@api/oauth";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
+import { type AccessArea } from "@testify/shared";
 
 export interface ApiBindings {
 	Variables: {
@@ -18,6 +19,8 @@ export interface ApiBindings {
 		/** Absent for a bot owner, who is not necessarily in the guild at all. */
 		member?: GuildMember;
 		isOwner?: boolean;
+		/** The screens a person without Manage Server was given; absent for anybody who sees every screen. */
+		areas?: readonly AccessArea[];
 	};
 }
 
@@ -36,6 +39,11 @@ export function guildIdOf(context: Context<ApiBindings>): string {
 /** The person reading, as the permission rules want them; a bot owner need not be in the server, so has none. */
 export function readerOf(context: Context<ApiBindings>): GuildMember | undefined {
 	return context.get("isOwner") === true ? undefined : context.get("member");
+}
+
+/** Null for somebody who sees every screen, otherwise the screens they were given. */
+export function areasOf(context: Context<ApiBindings>): readonly AccessArea[] | null {
+	return context.get("areas") ?? null;
 }
 
 export function actorOf(context: Context<ApiBindings>): { id: string; name: string } {

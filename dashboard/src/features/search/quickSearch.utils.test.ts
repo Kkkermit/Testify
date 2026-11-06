@@ -34,9 +34,9 @@ describe("searchEntries", () => {
 		expect(ban?.to).toBe("/commands?q=ban");
 	});
 
-	/** A moderator searching for `/levelling` was sent to a screen that only refused them. */
-	it("keeps a moderator's results to what opens for them", () => {
-		const entries = entriesIn({ ...aGuild, access: "moderate" });
+	/** Somebody given Members alone searching for `/levelling` was sent to a screen that only refused them. */
+	it("keeps the results of somebody given access to what opens for them", () => {
+		const entries = entriesIn({ ...aGuild, areas: ["members"] });
 		const at = (label: string) => entries.find((entry) => entry.label === label)?.to;
 
 		expect([at("/ban"), at("/levelling"), at("Welcome")]).toEqual([

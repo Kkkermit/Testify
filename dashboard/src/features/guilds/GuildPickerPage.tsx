@@ -39,12 +39,7 @@ export function GuildPickerPage(): React.JSX.Element {
 		if (notice !== null) void navigate(".", { replace: true, state: null });
 	}, [notice, navigate]);
 
-	const reach = {
-		manage: permissionLabel("ManageGuild", t),
-		timeout: permissionLabel("ModerateMembers", t),
-		kick: permissionLabel("KickMembers", t),
-		ban: permissionLabel("BanMembers", t),
-	};
+	const manage = { manage: permissionLabel("ManageGuild", t) };
 	const groups = useMemo(() => groupGuilds(filterGuilds(me.data?.guilds ?? [], search)), [me.data, search]);
 	const found = groups.reduce((total, group) => total + group.guilds.length, 0);
 
@@ -76,7 +71,7 @@ export function GuildPickerPage(): React.JSX.Element {
 		<>
 			<PageHeader title={t("guilds.title")} subtitle={t("guilds.subtitle")} />
 			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
-			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused", reach)}</Warning>}
+			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused", manage)}</Warning>}
 
 			<label className="relative block">
 				<span className="sr-only">{t("guilds.search")}</span>
@@ -158,7 +153,7 @@ export function GuildPickerPage(): React.JSX.Element {
 
 			{found > 0 && (
 				<p className="text-muted-foreground text-sm">
-					{t("guilds.whoIsListed", { ...reach, channels: permissionLabel("ManageChannels", t) })}
+					{t("guilds.whoIsListed", { ...manage, channels: permissionLabel("ManageChannels", t) })}
 				</p>
 			)}
 

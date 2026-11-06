@@ -14,6 +14,7 @@ import { CasinoStats } from "@database/models/casinoStats.schema";
 import { CommandRuns } from "@database/models/commandRuns.schema";
 import { CommandToggleConfig } from "@database/models/commandToggles.schema";
 import { Counting } from "@database/models/counting.schema";
+import { DashboardAccess } from "@database/models/dashboardAccess.schema";
 import { DashboardAudits } from "@database/models/dashboardAudit.schema";
 import { DashboardSessions } from "@database/models/dashboardSession.schema";
 import { Economy } from "@database/models/economy.schema";
@@ -156,6 +157,7 @@ const THEIRS = [
 	CasinoHand,
 	CasinoStats,
 	CommandRuns,
+	DashboardAccess,
 	DashboardSessions,
 	Economy,
 	MemberDays,
@@ -250,6 +252,12 @@ describeWithMongo("eraseUserData", () => {
 			]),
 			Blacklist.collection.insertOne({ userId: PERSON, reason: "spam" }),
 			DashboardAudits.collection.insertOne({ actorId: PERSON, actorTag: "person", guildId: GUILD }),
+			DashboardAccess.collection.insertOne({
+				guildId: OTHER_GUILD,
+				userId: OTHER,
+				addedBy: PERSON,
+				addedByName: "person",
+			}),
 			BotNotice.collection.insertOne({ title: "Hi", authorId: PERSON }),
 			FixedStats.collection.insertOne({ guildId: GUILD, userId: PERSON }),
 			StarPost.collection.insertOne({ guildId: GUILD, messageId: "2", authorId: PERSON }),
@@ -291,6 +299,10 @@ describeWithMongo("eraseUserData", () => {
 		expect(await Appeal.collection.findOne({ userId: OTHER })).toMatchObject({ decidedBy: null, decidedByName: null });
 		expect(await ModmailThread.collection.findOne({ userId: OTHER })).toMatchObject({ closedBy: null });
 		expect(await InviteJoin.collection.countDocuments({ memberId: PERSON })).toBe(0);
+		expect(await DashboardAccess.collection.findOne({ userId: OTHER })).toMatchObject({
+			addedBy: DELETED_USER_ID,
+			addedByName: DELETED_USER_NAME,
+		});
 		expect(await InviteJoin.collection.findOne({ memberId: OTHER })).toMatchObject({
 			inviterId: DELETED_USER_ID,
 			inviterName: DELETED_USER_NAME,

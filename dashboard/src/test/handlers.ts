@@ -1,5 +1,6 @@
 import { type SupportReply, type WarnLadder } from "@testify/shared";
 import { http, HttpResponse } from "msw";
+import { helper, helperActivity } from "@/test/fixtures/access";
 import {
 	botStatus,
 	catalogue,
@@ -247,6 +248,11 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/temp-voice", () => HttpResponse.json(tempVoiceSettings)),
 	http.patch("/api/guilds/:guildId/temp-voice", () => HttpResponse.json(tempVoiceSettings)),
 	http.post("/api/guilds/:guildId/temp-voice/lobby", () => HttpResponse.json(tempVoiceSettings)),
+	http.get("/api/guilds/:guildId/access", () => HttpResponse.json({ people: [helper] })),
+	http.post("/api/guilds/:guildId/access", () => HttpResponse.json(helper, { status: 201 })),
+	http.get("/api/guilds/:guildId/access/:userId", () => HttpResponse.json(helperActivity)),
+	http.put("/api/guilds/:guildId/access/:userId", () => HttpResponse.json(helper)),
+	http.delete("/api/guilds/:guildId/access/:userId", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/guilds/:guildId/ideas/list", () => HttpResponse.json(ideaPage)),
 	http.post("/api/guilds/:guildId/ideas/:ideaId/decision", () => HttpResponse.json(ideaPage.items[0])),
 	http.delete("/api/guilds/:guildId/ideas/:ideaId", () => new HttpResponse(null, { status: 204 })),

@@ -1,4 +1,4 @@
-import { type GuildOverview } from "@testify/shared";
+import { type AccessArea, type GuildOverview } from "@testify/shared";
 import { Hash, Shield, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
@@ -6,14 +6,12 @@ import { ErrorState } from "@/app/ErrorState";
 import { DividedList, HoverChevron, SectionHeading, PageHeader, Skeleton, StatTile } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { allNavItems, navigationFor } from "@/config/navigation";
-import { permissionLabel } from "@/features/commands/permissions.labels";
 import { FeatureGrid } from "@/features/guild-overview/components/FeatureGrid";
 import { InboxLine } from "@/features/guild-overview/components/InboxLine";
 import { MissingPermissions } from "@/features/guild-overview/components/MissingPermissions";
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
 import { SetupChecklist } from "@/features/guild-overview/components/SetupChecklist";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
-import { accessFrom } from "@/features/guild-overview/useLacks";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
@@ -28,7 +26,7 @@ export function GuildOverviewPage(): React.JSX.Element {
 	if (overview.isError) return <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />;
 
 	const guild = overview.data;
-	if (accessFrom(guild) === "moderate") return <ModeratorOverview guild={guild} />;
+	if (guild.yourAreas !== null) return <GrantedOverview guild={guild} areas={guild.yourAreas} />;
 
 	return (
 		<>
@@ -78,16 +76,16 @@ export function GuildOverviewPage(): React.JSX.Element {
 
 const ROW = "hover:bg-muted/60 group flex items-center gap-3 px-4 py-3 transition-colors duration-150";
 
-/** Somebody who can moderate but not manage gets the server's figures and the way into each tool they may use. */
-function ModeratorOverview({ guild }: { guild: GuildOverview }): React.JSX.Element {
+/** Somebody given part of the server gets its figures and the way into each screen they were given. */
+function GrantedOverview({ guild, areas }: { guild: GuildOverview; areas: AccessArea[] }): React.JSX.Element {
 	const { t } = useTranslation();
-	const screens = allNavItems(navigationFor({ guild: { ...guild, access: "moderate" }, isOwner: false })).filter(
-		(item) => item.to.startsWith(`/guilds/${guild.id}/`),
+	const screens = allNavItems(navigationFor({ guild: { ...guild, areas }, isOwner: false })).filter((item) =>
+		item.to.startsWith(`/guilds/${guild.id}/`),
 	);
 
 	return (
 		<>
-			<PageHeader title={guild.name} subtitle={t("overview.moderatorSubtitle")} />
+			<PageHeader title={guild.name} subtitle={t("overview.grantedSubtitle")} />
 
 			<section aria-label={t("overview.glance")} className="grid gap-4 sm:grid-cols-3">
 				<StatTile label={t("overview.members")} value={guild.memberCount} icon={Users} tint="text-hue-green" />
@@ -97,15 +95,15 @@ function ModeratorOverview({ guild }: { guild: GuildOverview }): React.JSX.Eleme
 
 			<MissingPermissions permissions={guild.missingPermissions} />
 
-			<section aria-labelledby="moderation-heading" className="flex flex-col gap-3">
-				<SectionHeading as="h2" id="moderation-heading">
-					{t("overview.moderatorScreens")}
+			<section aria-labelledby="granted-heading" className="flex flex-col gap-3">
+				<SectionHeading as="h2" id="granted-heading">
+					{t("overview.grantedScreens")}
 				</SectionHeading>
 				<DividedList className="bg-card">
 					{screens.map(({ to, labelKey, hintKey, icon: Icon }) => (
 						<li key={to}>
 							<Link to={to} className={ROW}>
-								<Icon size={18} aria-hidden="true" className="text-hue-red shrink-0" />
+								<Icon size={18} aria-hidden="true" className="text-muted-foreground shrink-0" />
 								<span className="min-w-0 flex-1">
 									<span className="block font-medium">{t(labelKey)}</span>
 									{hintKey !== undefined && <span className="text-muted-foreground block text-sm">{t(hintKey)}</span>}
@@ -115,9 +113,7 @@ function ModeratorOverview({ guild }: { guild: GuildOverview }): React.JSX.Eleme
 						</li>
 					))}
 				</DividedList>
-				<p className="text-muted-foreground text-sm">
-					{t("overview.moderatorSettings", { permission: permissionLabel("ManageGuild", t) })}
-				</p>
+				<p className="text-muted-foreground text-sm">{t("overview.grantedMore")}</p>
 			</section>
 		</>
 	);

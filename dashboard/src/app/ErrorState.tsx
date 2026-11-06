@@ -50,6 +50,8 @@ export function describe(error: unknown, t: TFunction): { title: string; body: s
 			return { title: t("error.cannotManageTitle"), body: t("error.cannotManageBody"), retryable: false };
 		case "not_a_member":
 			return { title: t("error.notAMemberTitle"), body: t("error.notAMemberBody"), retryable: false };
+		case "not_granted":
+			return { title: t("guilds.notGrantedTitle"), body: t("guilds.notGranted"), retryable: false };
 		case "rate_limited":
 			return { title: t("error.rateLimitedTitle"), body: error.message, retryable: true };
 		case "setup_required":

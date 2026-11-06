@@ -27,7 +27,7 @@ export function GuildCard({
 		</>
 	);
 
-	if (group === "configurable" || group === "moderatable") {
+	if (group === "configurable" || group === "granted") {
 		return (
 			<Link to={`/guilds/${guild.id}`} className={cardClass("compact", CARD_ROW, "hover:border-input group")}>
 				{body}

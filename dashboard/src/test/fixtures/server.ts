@@ -29,6 +29,7 @@ export const overview: GuildOverview = {
 	],
 	missingPermissions: [],
 	yourPermissions: [...READER_PERMISSIONS],
+	yourAreas: null,
 	recentChanges: [],
 };
 

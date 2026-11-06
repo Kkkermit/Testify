@@ -53,13 +53,7 @@ export function CasesPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader server={overview.data} title={t("cases.title")} subtitle={t("cases.subtitle")} />
-			{lacks("ManageGuild") ? (
-				<NeedsPermissionPanel title={t("cases.log")} permission="ManageGuild" />
-			) : holds("ManageGuild") ? (
-				<LogCard guildId={guildId} />
-			) : (
-				<Skeleton className="h-36 w-full" />
-			)}
+			<LogCard guildId={guildId} />
 			{lacks("ModerateMembers") ? (
 				<NeedsPermissionPanel title={t("cases.list")} permission="ModerateMembers" />
 			) : holds("ModerateMembers") ? (

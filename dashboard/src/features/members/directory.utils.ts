@@ -104,9 +104,10 @@ function allowed(action: MemberAction, page: DirectoryPage): boolean {
 }
 
 /** What a row offers: roles to anybody but the untouchable three, the rest only to somebody the reader outranks. */
-export function rowActions(row: DirectoryRow, page: DirectoryPage): MemberAction[] {
+export function rowActions(row: DirectoryRow, page: DirectoryPage, mayWarn = true): MemberAction[] {
 	return (["give", "take", "timeout", "warn", "kick", "ban"] as const).filter((action) => {
 		if (!allowed(action, page)) return false;
+		if (action === "warn" && !mayWarn) return false;
 		if (action === "give" || action === "take") return !untouchable(row);
 		if (action === "warn" && row.isBot) return false;
 		return row.block === null;

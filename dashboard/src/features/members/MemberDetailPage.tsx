@@ -4,9 +4,9 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Refusal, SavingIndicator, savingStateOf } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
-import { NeedsPermissionPanel } from "@/features/guild-overview/components/NeedsPermission";
+import { NeedsPermissionPanel, NotGivenPanel } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
-import { useLacks } from "@/features/guild-overview/useLacks";
+import { useLacks, useMayOpen } from "@/features/guild-overview/useLacks";
 import { LevelCard } from "@/features/members/components/LevelCard";
 import { MemberIdentity, MemberStanding } from "@/features/members/components/MemberIdentity";
 import { MoneyCard } from "@/features/members/components/MoneyCard";
@@ -27,6 +27,7 @@ export function MemberDetailPage(): React.JSX.Element {
 
 	const overview = useGuildOverview(guildId);
 	const lacks = useLacks(guildId);
+	const mayOpen = useMayOpen(guildId);
 	const actions = useMemberActions(guildId, userId);
 	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = actions;
 	const [result, setResult] = useState<string | null>(null);
@@ -116,6 +117,8 @@ export function MemberDetailPage(): React.JSX.Element {
 
 			{lacks("ModerateMembers") ? (
 				<NeedsPermissionPanel title={t("members.warnings")} permission="ModerateMembers" />
+			) : !mayOpen("warnings") ? (
+				<NotGivenPanel title={t("members.warnings")} screen={t("nav.warnings")} />
 			) : (
 				<WarningsCard
 					detail={detail}

@@ -22,11 +22,10 @@ export function useCases(
 	});
 }
 
-export function useCaseSettings(guildId: string, enabled = true): UseQueryResult<CaseSettings> {
+export function useCaseSettings(guildId: string): UseQueryResult<CaseSettings> {
 	return useQuery({
 		queryKey: keys.guild(guildId).caseSettings(),
 		queryFn: () => api.get<CaseSettings>(`/guilds/${guildId}/cases/settings`),
-		enabled,
 	});
 }
 

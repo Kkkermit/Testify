@@ -14,12 +14,16 @@ function renderPage() {
 }
 
 describe("the guild overview", () => {
-	/** A moderator's overview asked for the inbox and the setup checklist, both closed to them, and showed two errors. */
-	it("gives a moderator their tools and asks for nothing closed to them", async () => {
+	/** The overview of somebody given access would ask for the inbox and the checklist, both closed to them. */
+	it("gives somebody given access their screens and asks for nothing closed to them", async () => {
 		const asked: string[] = [];
 		server.use(
 			http.get("/api/guilds/:guildId/overview", () =>
-				HttpResponse.json({ ...overview, features: [], yourPermissions: ["KickMembers"] }),
+				HttpResponse.json({
+					...overview,
+					features: [],
+					yourAreas: ["members", "warnings", "cases", "bans", "appeals"],
+				}),
 			),
 			http.get("/api/guilds/:guildId/:screen", ({ params }) => {
 				asked.push(String(params.screen));
@@ -29,7 +33,7 @@ describe("the guild overview", () => {
 
 		const { container } = renderPage();
 
-		const tools = await screen.findByRole("heading", { name: "Your moderation tools" });
+		const tools = await screen.findByRole("heading", { name: "Your screens" });
 		const list = tools.parentElement?.querySelector("ul");
 		expect(
 			within(list as HTMLElement)

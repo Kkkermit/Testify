@@ -4,6 +4,7 @@ import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { guilds } from "@api/routes/guilds";
 import { type TestifyClient } from "@core/client";
+import { findAccess, markAccessSeen } from "@database/repositories/dashboardAccessRepository";
 import { auditPage, auditsSince, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import {
@@ -16,6 +17,10 @@ import {
 } from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+	markAccessSeen: jest.fn(() => Promise.resolve()),
+}));
 jest.mock("@database/repositories/casinoRepository", () => ({
 	getCasinoSettings: jest.fn(() => Promise.resolve(null)),
 }));
@@ -283,14 +288,16 @@ describe("the guild overview", () => {
 		expect(owned.yourPermissions).toEqual([...READER_PERMISSIONS]);
 	});
 
-	/** A moderator reaches the overview to find their way round, and the server's settings are not theirs to read. */
-	it("leaves the features and the changes out for a reader who can moderate but not manage", async () => {
-		const moderator = appFor({ readerHolds: [PermissionFlagsBits.BanMembers] });
-		const body = (await (await moderator.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+	/** Somebody given two screens finds their way from the overview, and the server's settings are not theirs to read. */
+	it("tells somebody given access which screens they have, leaves the settings out, and notes they were here", async () => {
+		jest.mocked(findAccess).mockResolvedValueOnce({ areas: ["bans", "cases"] } as never);
+		const given = appFor({ readerHolds: [PermissionFlagsBits.BanMembers] });
+		const body = (await (await given.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 		const managed = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 
-		expect([body.features, body.recentChanges, body.yourPermissions]).toEqual([[], [], ["BanMembers"]]);
-		expect(managed.features.length).toBeGreaterThan(0);
+		expect([body.yourAreas, body.features, body.recentChanges]).toEqual([["bans", "cases"], [], []]);
+		expect(markAccessSeen).toHaveBeenCalledTimes(1);
+		expect([managed.yourAreas, managed.features.length > 0]).toEqual([null, true]);
 	});
 
 	/** The bot's own member is missing while the cache is still filling; that is not a permission problem. */

@@ -10,7 +10,6 @@ import {
 	setSessionCookie,
 } from "@api/cookies";
 import {
-	accessOf,
 	authoriseUrl,
 	avatarUrl,
 	callbackUrl,
@@ -31,6 +30,7 @@ import { missingSettings, type OauthConfig, requireOauth } from "@api/oauth";
 import { parseBody, parseQuery } from "@api/validate";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
+import { accessFor } from "@database/repositories/dashboardAccessRepository";
 import {
 	createSession,
 	deleteSession,
@@ -43,7 +43,7 @@ import { ownerContacts } from "@lib/bot";
 import {
 	confirmsName,
 	eraseAccountSchema,
-	type GuildAccess,
+	type AccessArea,
 	type ManageableGuild,
 	type MeResponse,
 	returnTo as returnToSchema,
@@ -218,14 +218,17 @@ async function guildsFor(
 ): Promise<ManageableGuild[]> {
 	const client = context.get("client");
 	const owner = client.isOwner(session.userId);
+	const [guilds, given] = await Promise.all([rawGuilds(oauth, session), accessFor(session.userId)]);
+	const granted = new Map(given.map((access) => [access.guildId, access.areas]));
 
-	return (await rawGuilds(oauth, session))
+	return guilds
 		.flatMap((guild) => {
-			const access: GuildAccess | null = owner ? "manage" : accessOf(guild.permissions);
 			const memberCount = client.guilds.cache.get(guild.id)?.memberCount;
-			// A moderator can neither invite the bot nor do anything where it is not, so only a manager sees one without it.
-			if (access === null || (access === "moderate" && memberCount === undefined)) return [];
-			return [toManageable(guild, memberCount, canManage(guild.permissions), access)];
+			const manages = owner || canManage(guild.permissions);
+			// Access is to the bot's screens, so a server without the bot has nothing to give.
+			const areas = manages ? null : memberCount === undefined ? undefined : granted.get(guild.id);
+			if (areas === undefined) return [];
+			return [toManageable(guild, memberCount, canManage(guild.permissions), areas)];
 		})
 		.sort((a, b) => Number(b.botPresent) - Number(a.botPresent) || a.name.localeCompare(b.name));
 }
@@ -271,7 +274,7 @@ function toManageable(
 	guild: OauthGuild,
 	memberCount: number | undefined,
 	canInvite: boolean,
-	access: GuildAccess,
+	areas: AccessArea[] | null,
 ): ManageableGuild {
 	return {
 		id: guild.id,
@@ -280,6 +283,6 @@ function toManageable(
 		memberCount: memberCount ?? null,
 		botPresent: memberCount !== undefined,
 		canInvite,
-		access,
+		areas,
 	};
 }

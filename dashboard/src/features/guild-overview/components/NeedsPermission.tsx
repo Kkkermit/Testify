@@ -36,3 +36,23 @@ export function NeedsPermissionPanel({
 		</SettingRows>
 	);
 }
+
+/** Said where a part needs another screen of the server that the reader's access does not include. */
+export function NotGiven({ screen, action }: { screen: string; action?: string }): React.JSX.Element {
+	const { t } = useTranslation();
+	return (
+		<Warning>
+			{action === undefined
+				? t("common.screenNotGiven", { screen })
+				: t("common.actionScreenNotGiven", { action, screen })}
+		</Warning>
+	);
+}
+
+export function NotGivenPanel({ title, screen }: { title: string; screen: string }): React.JSX.Element {
+	return (
+		<SettingRows title={title}>
+			<NotGiven screen={screen} />
+		</SettingRows>
+	);
+}

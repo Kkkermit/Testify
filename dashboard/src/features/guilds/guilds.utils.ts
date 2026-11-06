@@ -13,7 +13,7 @@ export function searchIsWorthFocusing(count: number): boolean {
 	return count >= 8;
 }
 
-export type GuildGroupKey = "configurable" | "moderatable" | "invitable" | "locked";
+export type GuildGroupKey = "configurable" | "granted" | "invitable" | "locked";
 
 interface GuildGroup {
 	key: GuildGroupKey;
@@ -32,13 +32,13 @@ const GROUPS: {
 		key: "configurable",
 		titleKey: "guilds.configurableTitle",
 		describesKey: "guilds.configurableBody",
-		holds: (guild) => guild.botPresent && guild.access === "manage",
+		holds: (guild) => guild.botPresent && guild.areas === null,
 	},
 	{
-		key: "moderatable",
-		titleKey: "guilds.moderatableTitle",
-		describesKey: "guilds.moderatableBody",
-		holds: (guild) => guild.botPresent && guild.access === "moderate",
+		key: "granted",
+		titleKey: "guilds.grantedTitle",
+		describesKey: "guilds.grantedBody",
+		holds: (guild) => guild.botPresent && guild.areas !== null,
 	},
 	{
 		key: "invitable",

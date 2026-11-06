@@ -23,7 +23,7 @@ import {
 	useDecideAppeal,
 	useSaveAppealSettings,
 } from "@/features/appeals/useAppeals";
-import { NeedsPermission, NeedsPermissionPanel } from "@/features/guild-overview/components/NeedsPermission";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels } from "@/features/levelling/useLevelling";
@@ -44,11 +44,9 @@ export function BanAppealsPage(): React.JSX.Element {
 	const filter = appealFilterFrom(params.get("status"));
 	const page = pageFrom(params.get("page"));
 
-	const lacks = useLacks(guildId);
-	const holds = useHolds(guildId);
-	const settings = useAppealSettings(guildId, holds("ManageGuild"));
-	const blocked = lacks("BanMembers");
-	const list = useAppealList(guildId, filter, page, holds("BanMembers"));
+	const settings = useAppealSettings(guildId);
+	const blocked = useLacks(guildId)("BanMembers");
+	const list = useAppealList(guildId, filter, page, useHolds(guildId)("BanMembers"));
 	const results = currentData(list);
 	const channels = useChannels(guildId);
 	const overview = useGuildOverview(guildId);
@@ -58,10 +56,10 @@ export function BanAppealsPage(): React.JSX.Element {
 	usePageTitle(t("appeals.title"), overview.data?.name);
 
 	if (settings.isError) return <ErrorState error={settings.error} onRetry={() => void settings.refetch()} />;
-	if (settings.isPending && !lacks("ManageGuild")) return <Skeleton className="h-96 w-full" />;
+	if (settings.isPending) return <Skeleton className="h-96 w-full" />;
 
 	const postable = postableChannels(channels.data ?? []);
-	const channel = channelLabel(postable, settings.data?.channelId ?? null, t);
+	const channel = channelLabel(postable, settings.data.channelId, t);
 
 	function showAppeals(next: { status?: AppealFilter; page?: number }): void {
 		const query = new URLSearchParams(params);
@@ -82,26 +80,20 @@ export function BanAppealsPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(save.isPending || decide.isPending, save.isSuccess)} />}
 			/>
 
-			{settings.data === undefined ? (
-				<NeedsPermissionPanel title={t("appeals.settingsTitle")} permission="ManageGuild" />
-			) : (
-				<>
-					<Summary>{appealSummary(settings.data, channel, t)}</Summary>
-					{settings.data.channelId !== null && !settings.data.canSend && (
-						<Warning>{t("common.cannotPostIn", { channel })}</Warning>
-					)}
-
-					<AppealSettingsRows
-						settings={settings.data}
-						channels={postable}
-						saving={save.isPending}
-						onChange={(patch) => {
-							save.mutate(patch);
-						}}
-					/>
-					<Refusal error={save.error} />
-				</>
+			<Summary>{appealSummary(settings.data, channel, t)}</Summary>
+			{settings.data.channelId !== null && !settings.data.canSend && (
+				<Warning>{t("common.cannotPostIn", { channel })}</Warning>
 			)}
+
+			<AppealSettingsRows
+				settings={settings.data}
+				channels={postable}
+				saving={save.isPending}
+				onChange={(patch) => {
+					save.mutate(patch);
+				}}
+			/>
+			<Refusal error={save.error} />
 
 			<section aria-labelledby="appeals-heading" className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center justify-between gap-3">

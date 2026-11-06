@@ -1,4 +1,4 @@
-import { type GuildAccess, type GuildOverview, type ReaderPermission } from "@testify/shared";
+import { type AccessArea, type GuildOverview, type ReaderPermission } from "@testify/shared";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 
 /** Whether the reader lacks a permission here; nothing is lacking until the overview has said, so the server decides. */
@@ -13,7 +13,13 @@ export function useHolds(guildId: string): (permission: ReaderPermission) => boo
 	return (permission) => held?.includes(permission) === true;
 }
 
-/** Read live, so a manager demoted to a moderator loses the settings screens on their next click. */
-export function accessFrom(overview: GuildOverview): GuildAccess {
-	return overview.yourPermissions.includes("ManageGuild") ? "manage" : "moderate";
+/** Whether the reader may use this screen here; every screen until the overview says otherwise, so the server decides. */
+export function useMayOpen(guildId: string): (area: AccessArea) => boolean {
+	const areas = useGuildOverview(guildId).data?.yourAreas;
+	return (area) => areas === null || areas === undefined || areas.includes(area);
+}
+
+/** The owner, the admins and the bot's owners decide who else may use a server's dashboard. */
+export function mayGrant(overview: GuildOverview | undefined): boolean {
+	return overview?.yourPermissions.includes("Administrator") === true;
 }

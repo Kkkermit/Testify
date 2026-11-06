@@ -36,7 +36,7 @@ export const aGuild: ManageableGuild = {
 	memberCount: 1_234,
 	botPresent: true,
 	canInvite: true,
-	access: "manage",
+	areas: null,
 };
 
 export const withoutBot: ManageableGuild = {
@@ -46,7 +46,7 @@ export const withoutBot: ManageableGuild = {
 	memberCount: null,
 	botPresent: false,
 	canInvite: true,
-	access: "manage",
+	areas: null,
 };
 
 export const cannotAdd: ManageableGuild = {
@@ -56,7 +56,7 @@ export const cannotAdd: ManageableGuild = {
 	memberCount: null,
 	botPresent: false,
 	canInvite: false,
-	access: "manage",
+	areas: null,
 };
 
 export const me: MeResponse = {

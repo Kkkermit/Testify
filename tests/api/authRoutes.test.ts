@@ -11,9 +11,16 @@ import { auth } from "@api/routes/auth";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
+import { accessFor } from "@database/repositories/dashboardAccessRepository";
 import { createSession, deleteSession, deleteSessionsFor } from "@database/repositories/dashboardSessionRepository";
 import { eraseAccount } from "@lib/account";
 import { type SetupStatus } from "@testify/shared";
+
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+	markAccessSeen: jest.fn(() => Promise.resolve()),
+	accessFor: jest.fn(() => Promise.resolve([])),
+}));
 
 jest.mock("@api/discord", () => {
 	const actual = jest.requireActual<typeof discord>("@api/discord");
@@ -356,16 +363,20 @@ describe("GET /auth/me", () => {
 		expect(guildsFetched).not.toHaveBeenCalled();
 	});
 
-	/** Manage Channels once listed nothing and Ban Members nothing either, so a moderator could not reach their own tools. */
-	it("lists the servers somebody can manage, and the ones with the bot they can moderate, and nothing else", async () => {
+	/** Ban Members alone lists nothing; access its admins gave does, and only where the bot is to use it. */
+	it("lists the servers somebody manages, and those with the bot where they were given access, and nothing else", async () => {
 		const at = (id: string, permissions: bigint) => ({ id, name: id, icon: null, permissions: String(permissions) });
 		guildsFetched.mockResolvedValueOnce([
 			at("900000000000000001", PermissionFlagsBits.ManageGuild),
 			at("900000000000000002", PermissionFlagsBits.Administrator),
 			at("900000000000000003", PermissionFlagsBits.BanMembers),
-			at("900000000000000004", PermissionFlagsBits.KickMembers),
-			at("900000000000000005", PermissionFlagsBits.ManageChannels | PermissionFlagsBits.ManageRoles),
-			at("900000000000000006", PermissionFlagsBits.ModerateMembers),
+			at("900000000000000004", 0n),
+			at("900000000000000005", PermissionFlagsBits.ManageChannels),
+			at("900000000000000006", 0n),
+		]);
+		jest.mocked(accessFor).mockResolvedValueOnce([
+			{ guildId: "900000000000000004", areas: ["bans"] },
+			{ guildId: "900000000000000006", areas: ["warnings", "cases"] },
 		]);
 		const botIn = new Map(
 			["900000000000000001", "900000000000000003", "900000000000000005", "900000000000000006"].map((id) => [
@@ -375,14 +386,13 @@ describe("GET /auth/me", () => {
 		);
 
 		const body = (await (await app(envFor(), signedIn("100000000000000014"), botIn).request("/auth/me")).json()) as {
-			guilds: { id: string; access: string; canInvite: boolean }[];
+			guilds: { id: string; areas: string[] | null; canInvite: boolean }[];
 		};
 
-		expect(body.guilds.map(({ id, access, canInvite }) => [id.slice(-1), access, canInvite])).toEqual([
-			["1", "manage", true],
-			["3", "moderate", false],
-			["6", "moderate", false],
-			["2", "manage", true],
+		expect(body.guilds.map(({ id, areas, canInvite }) => [id.slice(-1), areas, canInvite])).toEqual([
+			["1", null, true],
+			["6", ["warnings", "cases"], false],
+			["2", null, true],
 		]);
 	});
 

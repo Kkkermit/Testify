@@ -2339,6 +2339,7 @@ four tabs, three shared components and two testable modules.
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
 | `/guilds/:id/backup`              | Download the settings, or bring a backup or another server's in, matched by name            |
+| `/guilds/:id/access`              | Who else may use the dashboard and which screens; one person's page shows what they did     |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/status`                         | Online or not, uptime, speed and outside services, 30 days back. Public                     |
@@ -2453,18 +2454,19 @@ Everything behind it assumes it ran, so six things in it are load-bearing:
    rather than 403, so a manager never learns the owner console is there.
 5. **`.catch(() => null)` on the fetch.** An unknown member throws, and an unhandled throw would be a 500 that
    looks like a bug rather than a 403 that looks like a denial.
-6. **A moderator reaches the moderation routes and nothing else.** Without Manage Server, somebody holding Moderate,
-   Kick or Ban Members passes only where `openToModerators` in `src/api/middleware/moderators.ts` says, and every
-   other route answers `missing_manage_guild`. It is an allowlist, so a route added later is closed to them until
-   somebody lists it, and each listed route still asks its own permission.
+6. **Somebody without Manage Server gets in only by being given screens.** `findAccess` is read on every request, so
+   access taken away is gone on the next click, and `accessOpens` in `src/api/middleware/access.ts` admits them only to
+   their screens' routes and the reads every screen shares; anything else answers `not_granted`. It is an allowlist,
+   so a route added later is closed to them until a screen lists it, and each listed route still asks its own
+   permission.
 
 `serveDashboard()` is registered in `startApi`, **after** every route, because it is a catch-all — anything
 registered behind it silently never runs.
 
 ### Nothing on the web reaches further than Discord would
 
-Manage Server is what opens a server's screens, or Moderate, Kick or Ban Members its moderation ones, and neither is
-what Discord asks for most of what those screens do.
+Manage Server is what opens a server's screens, or a grant from its admins one screen at a time, and neither is what
+Discord asks for most of what those screens do.
 The dashboard once let a Manage Server manager kick, ban, warn and hand out roles, because the bot has those rights
 and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and five things about it are load-bearing:
 
@@ -2500,14 +2502,14 @@ and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and fiv
   A screen asks `useLacks` and draws `NeedsPermission` — "You need the Ban Members permission in this server to use
   this." — where the control would be, and a read that asks a permission waits on `useHolds`, so nothing is sent only
   to be refused. The member directory names each action it leaves out and the permission it needs
-  (`withheldActions`), and the server picker says which permissions list a server and which open only its moderation.
-  The routes are still the boundary; this is the page telling the reader first.
+  (`withheldActions`), and the server picker says which servers are listed and why. The routes are still the boundary;
+  this is the page telling the reader first.
 
 A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each rule and
 `tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody in the
 server who can neither manage nor moderate it and somebody not in it; a route added without its gate fails the build.
-A moderator without Manage Server must reach exactly the routes in `MODERATION`, so opening another to them is a line
-in that list. It also asks
+Somebody given two screens must reach exactly the routes in `GRANTED`, so widening what a screen opens is a line in
+that list. It also asks
 every server route as a manager holding Manage Server and nothing else, and the routes that refuse them must be
 exactly `ASKS_MORE`, so gaining or losing a gate is a line in that list. Every write is sent a body nested ten
 thousand deep and one aimed at `Object.prototype`, and none may crash or pollute anything. The gate list and the
@@ -2525,26 +2527,35 @@ Manage Server sends the reader to `/guilds` with a notice, and any refusal later
 mid-session ejects. A refusal about one action — `missing_permission` — re-asks and finds access intact, so a
 manager without Kick Members stays where they are. `useRecheckOnRefusal` is the one mechanism both gates share.
 
-### A moderator sees the moderation screens, and no setting
+### Anybody else is given screens, one at a time, by the server's admins
 
-Somebody with Moderate Members, Kick Members or Ban Members but not Manage Server gets a server's Members, Warnings,
-Cases, Bans and Appeals and nothing else; somebody with neither, Manage Channels say, never sees the server. Four things
-about it are load-bearing:
+Manage Server, Administrator, the server's owner and the bot's owners see every screen. The owner, the admins and the
+bot's owners give anybody else some of them by user ID on **Dashboard access** (`/guilds/:id/access`), where they also
+change them, take them away and see what each person did. Six things about it are load-bearing:
 
-- **The list and the page read the same rule.** `accessOf` in `src/api/discord.ts` reads the OAuth bits, counting
-  Administrator as managing, and `/auth/me` lists a moderated server as `access: "moderate"` only while the bot is in
-  it, since a moderator can neither invite it nor do anything without it. Inside a server the page reads `accessFrom`
-  of the live overview, whose `yourPermissions` now carries `ManageGuild`, so the sidebar, the switcher and the gate
-  follow a demotion on the next click.
-- **`moderatorMayOpen` in `config/navigation.ts` is the dashboard's list**, beside the API's: the sidebar and quick
-  search offer only those screens, a command configured elsewhere opens `/commands?q=`, the switcher sends a setting
-  to the other server's overview, and `RequireGuild` draws `ManagersOnly` — the screen's name and the Manage Server
-  notice — for anything else, so a bookmarked setting asks the API nothing.
-- **The overview answers a moderator with no features and no changes**, since both describe the server's settings,
-  and the page draws its figures, the bot's missing permissions and a link to each tool instead.
-- **The settings inside those screens stay Manage Server's**, as in Discord: `/warn punishments`, `/case` settings and
-  `/appeals` all ask it, so the warning steps, the cases' channel and the appeal settings are a notice and are never
-  read. `/members/leaderboard`, `/channels` and `/roles` are open because the member pages draw them.
+- **A grant stands in for Manage Server on its screens and nothing more.** The routes each screen calls are
+  `AREA_ROUTES` in `src/api/middleware/access.ts`, plus `SHARED` (the overview, the channel and role lists, and Send me
+  a test, which checks the kind of post against the screens), and every one of them still asks its own permission, so
+  a grantee given Bans still needs Ban Members to ban. `under` refuses a `.` or `..` segment even though the URL
+  parser would have resolved one. Inbox, This week, Backup and the access screen itself are never given.
+- **Only Administrator hands screens out.** Every `/access` route asks it, which the owner holds in discord.js and
+  `holdsPermission` grants the bot's owners; Manage Server sees every screen but cannot widen anybody's reach, and
+  `ASKS_MORE` lists all five routes. Nobody who already sees everything, no bot and nobody outside the server can be
+  given access, and a server holds at most `ACCESS_LIMITS.maxPeople` (50).
+- **`ACCESS_AREAS` in `@testify/shared` names a screen by its path**, and the dashboard's `mayOpen` in
+  `config/navigation.ts` reads the same names off the sidebar, so the sidebar, quick search, the switcher and
+  `RequireGuild` agree with the API. `access.utils.test.ts` fails if the picker and the list drift, which is what
+  caught Commands living in the sidebar's top group. A screen that is not theirs draws `NotGranted` and asks the API
+  nothing.
+- **A part that needs another screen says so.** A member's warnings and the directory's Warn need Warnings; a
+  channel's welcome, goodbye and birthday posts are edited there only with those screens; `NotGiven` names the screen,
+  as `NeedsPermission` names a permission.
+- **The record is `dashboardaccess`**, one per person per server: the screens, who gave them and when, and when the
+  person last opened the overview, at most once every ten minutes (`markAccessSeen`). Leaving the server deletes it
+  (`guildMemberRemove`), so does `purgeGuild`, and Delete my data deletes theirs and takes their name off the ones they
+  gave. The privacy notice says so (`legal.storedL19`, `legal.retentionL21`).
+- **What a grantee did is the audit record everybody's changes go into**, read per person with `auditsBy` and
+  counted with `changesBy`; the panel's own changes are `access.grant`, `access.update` and `access.revoke`.
 
 ### The moderation screens ask what Discord would
 

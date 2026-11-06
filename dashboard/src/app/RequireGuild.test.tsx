@@ -108,10 +108,10 @@ describe("reaching a server's screens", () => {
 		});
 	});
 
-	/** A moderator who follows a link to a setting is told what it needs, and the setting is never asked for. */
-	it("shows a moderator without Manage Server what a settings screen needs, and asks the API nothing for it", async () => {
+	/** Somebody given part of a server who follows a link to another part is told so, and it is never asked for. */
+	it("tells somebody given other screens that this one is not theirs, and asks the API nothing for it", async () => {
 		const asked: string[] = [];
-		overviewAnswers(() => HttpResponse.json({ ...overview, yourPermissions: ["BanMembers", "ModerateMembers"] }));
+		overviewAnswers(() => HttpResponse.json({ ...overview, yourAreas: ["bans", "cases"] }));
 		server.use(
 			http.get(`/api/guilds/${GUILD}/settings`, () => {
 				asked.push("settings");
@@ -120,9 +120,7 @@ describe("reaching a server's screens", () => {
 		);
 		visit();
 
-		expect(
-			await screen.findByText("You need the Manage Server permission in this server to use this."),
-		).toBeInTheDocument();
+		expect(await screen.findByText(/your access to this server doesn’t include this screen/i)).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 1, name: "Settings" })).toBeInTheDocument();
 		expect(screen.queryByRole("heading", { name: "Server settings" })).toBeNull();
 		expect(asked).toEqual([]);
@@ -154,9 +152,7 @@ describe("the server list after being sent back from a server", () => {
 		);
 
 		expect(
-			await screen.findByText(
-				/you need manage server, timeout members, kick members or ban members to open that server/i,
-			),
+			await screen.findByText(/you need the manage server permission there, or access from its admins/i),
 		).toBeInTheDocument();
 	});
 });

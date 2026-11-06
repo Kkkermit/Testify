@@ -1,7 +1,7 @@
 import { type ChannelSummary, type CommandSummary, type ManageableGuild } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { Columns3, FileText, Hash, type LucideIcon, Palette, ShieldQuestion, Terminal, Volume2 } from "lucide-react";
-import { allNavItems, moderatorMayOpen, type NavAudience, navigationFor } from "@/config/navigation";
+import { allNavItems, mayOpen, type NavAudience, navigationFor } from "@/config/navigation";
 import { channelPath, channelTree } from "@/features/channels/channelMap.utils";
 import { configurableAt } from "@/features/commands/commands.utils";
 
@@ -30,6 +30,7 @@ export function searchEntries({
 	guild,
 	guilds,
 	isOwner,
+	mayGrant,
 	commands,
 	channels = [],
 }: NavAudience & {
@@ -38,19 +39,20 @@ export function searchEntries({
 	commands: readonly CommandSummary[];
 	channels?: readonly ChannelSummary[];
 }): SearchEntry[] {
-	const screens = [...allNavItems(navigationFor({ guild, isOwner })), ...EXTRA_PAGES].map<SearchEntry>((item) => ({
-		id: `screen:${item.to}`,
-		kind: "screen",
-		label: t(item.labelKey),
-		detail: item.hintKey === undefined ? "" : t(item.hintKey),
-		to: item.to,
-		icon: item.icon,
-		terms: [],
-	}));
+	const screens = [...allNavItems(navigationFor({ guild, isOwner, mayGrant })), ...EXTRA_PAGES].map<SearchEntry>(
+		(item) => ({
+			id: `screen:${item.to}`,
+			kind: "screen",
+			label: t(item.labelKey),
+			detail: item.hintKey === undefined ? "" : t(item.hintKey),
+			to: item.to,
+			icon: item.icon,
+			terms: [],
+		}),
+	);
 
-	const moderates = guild?.access === "moderate";
 	const channelEntries =
-		guild === undefined || moderates
+		guild === undefined || !mayOpen(`/guilds/${guild.id}/channels`, guild.id, guild.areas)
 			? []
 			: channelTree(channels)
 					.flatMap((group) => group.channels)
@@ -77,10 +79,13 @@ export function searchEntries({
 			terms: [],
 		}));
 
-	const commandList = guild === undefined || moderates ? "/commands" : `/guilds/${guild.id}/commands`;
+	const commandList =
+		guild === undefined || !mayOpen(`/guilds/${guild.id}/commands`, guild.id, guild.areas)
+			? "/commands"
+			: `/guilds/${guild.id}/commands`;
 	const commandEntries = commands.map<SearchEntry>((command) => {
 		const found = configurableAt(command, guild?.id ?? null);
-		const closed = found !== null && guild !== undefined && moderates && !moderatorMayOpen(found.path, guild.id);
+		const closed = found !== null && guild !== undefined && !mayOpen(found.path, guild.id, guild.areas);
 		const place = closed ? null : found;
 		const screen = place === null ? null : (screens.find((entry) => entry.to === place.path)?.label ?? place.screen);
 		return {
