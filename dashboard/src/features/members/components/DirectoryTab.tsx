@@ -43,6 +43,7 @@ import { useDirectory } from "@/features/members/useDirectory";
 import { useDebounced } from "@/hooks/useDebounced";
 import { cn } from "@/lib/cn";
 import { dateAndTime, shortDate } from "@/lib/datetime";
+import { currentData } from "@/lib/queries";
 
 interface Acting {
 	action: MemberAction;
@@ -65,7 +66,9 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 	const cursors = trail.key === filterKey ? trail.cursors : [null];
 	const after = cursors.at(-1) ?? null;
 	const directory = useDirectory(guildId, directorySearch(settled, after));
+	// The last answer keeps the filters' own options while the next loads; the list waits for its own.
 	const page = directory.data;
+	const results = currentData(directory);
 
 	const [selected, setSelected] = useState<Map<string, DirectoryRow>>(new Map());
 	const [acting, setActing] = useState<Acting | null>(null);
@@ -171,15 +174,15 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 				</div>
 			</Card>
 
-			{page !== undefined && (
+			{results !== undefined && (
 				<div aria-live="polite" className="flex flex-col gap-1">
-					<Summary>{t("directory.inServer", { count: page.memberCount })}</Summary>
-					{page.searchCut && (
+					<Summary>{t("directory.inServer", { count: results.memberCount })}</Summary>
+					{results.searchCut && (
 						<p className="text-muted-foreground text-sm">
 							{t("directory.searchCut", { count: DIRECTORY_LIMITS.readBatch })}
 						</p>
 					)}
-					{page.scanStopped && (
+					{results.scanStopped && (
 						<p className="text-muted-foreground text-sm">
 							{t("directory.scanStopped", { count: DIRECTORY_LIMITS.maxScan })}
 						</p>
@@ -215,19 +218,19 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 
 			{directory.isError ? (
 				<ErrorState as="h2" error={directory.error} onRetry={() => void directory.refetch()} />
-			) : page === undefined ? (
-				<Skeleton className="h-96 w-full" />
-			) : page.rows.length === 0 ? (
+			) : results === undefined ? (
+				<RowsSkeleton />
+			) : results.rows.length === 0 ? (
 				<EmptyState icon={<Users size={28} />} title={t("directory.noneTitle")} body={t("directory.noneBody")} />
 			) : (
 				<Card padding="none">
 					<DividedList aria-label={t("directory.listLabel")}>
-						{page.rows.map((row) => (
+						{results.rows.map((row) => (
 							<MemberRow
 								key={row.userId}
 								guildId={guildId}
 								row={row}
-								page={page}
+								page={results}
 								ticked={selected.has(row.userId)}
 								onTick={() => {
 									setSelected((current) => toggled(current, row));
@@ -254,7 +257,7 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 				<nav aria-label={t("directory.pages")} className="flex justify-between gap-2">
 					<Button
 						variant="secondary"
-						disabled={cursors.length <= 1}
+						disabled={cursors.length <= 1 || directory.isPlaceholderData}
 						onClick={() => {
 							move(cursors.slice(0, -1));
 						}}
@@ -263,7 +266,7 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 					</Button>
 					<Button
 						variant="secondary"
-						disabled={page.next === null}
+						disabled={page.next === null || directory.isPlaceholderData}
 						onClick={() => {
 							move([...cursors, page.next]);
 						}}
@@ -432,5 +435,22 @@ function MemberRow({
 				</div>
 			)}
 		</li>
+	);
+}
+
+/** Shaped like the rows it stands in for, so the list does not jump when they arrive. */
+function RowsSkeleton(): React.JSX.Element {
+	return (
+		<Card padding="none" className="divide-border flex flex-col divide-y">
+			{[0, 1, 2, 3, 4].map((index) => (
+				<div key={index} className="flex items-center gap-4 px-6 py-4">
+					<Skeleton className="size-10 shrink-0" />
+					<div className="flex min-w-0 flex-1 flex-col gap-2">
+						<Skeleton className="h-4 w-40 max-w-full" />
+						<Skeleton className="h-3 w-64 max-w-full" />
+					</div>
+				</div>
+			))}
+		</Card>
 	);
 }

@@ -31,6 +31,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
 import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
+import { currentData } from "@/lib/queries";
 
 const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
 	all: "ideas.filterAll",
@@ -48,6 +49,7 @@ export function IdeasPage(): React.JSX.Element {
 
 	const settings = useIdeaSettings(guildId);
 	const list = useIdeaList(guildId, filter, page);
+	const results = currentData(list);
 	const channels = useChannels(guildId);
 	const overview = useGuildOverview(guildId);
 	const save = useSaveIdeaSettings(guildId);
@@ -124,9 +126,9 @@ export function IdeasPage(): React.JSX.Element {
 
 				{list.isError ? (
 					<ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />
-				) : list.data === undefined ? (
+				) : results === undefined ? (
 					<Skeleton className="h-48 w-full" />
-				) : list.data.items.length === 0 ? (
+				) : results.items.length === 0 ? (
 					<Card>
 						<EmptyState
 							icon={<Lightbulb size={28} />}
@@ -136,7 +138,7 @@ export function IdeasPage(): React.JSX.Element {
 					</Card>
 				) : (
 					<ul className="flex flex-col gap-3">
-						{list.data.items
+						{results.items
 							.filter((idea) => !undo.isHidden(`idea:${guildId}:${idea.id}`))
 							.map((idea) => (
 								<IdeaItem

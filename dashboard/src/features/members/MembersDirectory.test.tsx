@@ -41,11 +41,18 @@ describe("the member directory", () => {
 		expect(within(rowOf("Kate")).getByText(/Joined/)).toBeInTheDocument();
 	});
 
-	it("asks the API again with a filter, and keeps it in the address", async () => {
+	/** The last filter's members once stood in for the new filter's until it answered, as if nothing had changed. */
+	it("asks the API again with a filter, and shows a skeleton rather than the last filter's members meanwhile", async () => {
 		const asked: URL[] = [];
+		let answer = (): void => undefined;
+		const held = new Promise<void>((resolve) => {
+			answer = resolve;
+		});
 		server.use(
-			http.get(`/api/guilds/${GUILD}/members`, ({ request }) => {
-				asked.push(new URL(request.url));
+			http.get(`/api/guilds/${GUILD}/members`, async ({ request }) => {
+				const url = new URL(request.url);
+				asked.push(url);
+				if (url.searchParams.has("roleId")) await held;
 				return HttpResponse.json(memberDirectory);
 			}),
 		);
@@ -53,13 +60,16 @@ describe("the member directory", () => {
 		await screen.findByRole("link", { name: "Kate" });
 
 		await userEvent.selectOptions(screen.getByLabelText("Role"), "Regulars");
-
 		await waitFor(() => {
 			expect(asked.at(-1)?.searchParams.get("roleId")).toBe("300000000000000001");
 		});
+		expect(screen.queryByRole("link", { name: "Kate" })).not.toBeInTheDocument();
+		expect(within(screen.getByLabelText("Role")).getByRole("option", { name: "Regulars" })).toBeInTheDocument();
+
+		answer();
+		expect(await screen.findByRole("link", { name: "Kate" })).toBeInTheDocument();
 	});
 
-	/** A member the reader cannot moderate shows why in place of the buttons, and the reader is never offered. */
 	it("offers on each row only what the reader may do to that member", async () => {
 		renderPage();
 		await screen.findByRole("link", { name: "Kate" });

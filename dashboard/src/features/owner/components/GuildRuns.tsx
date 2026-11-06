@@ -23,6 +23,7 @@ import { PER_PAGE, useGuildRuns } from "@/features/owner/useOwner";
 import { cn } from "@/lib/cn";
 import { dateAndTime, since } from "@/lib/datetime";
 import { pageCount, pageFrom } from "@/lib/paging";
+import { currentData } from "@/lib/queries";
 
 export function GuildRuns({ guildId, report }: { guildId: string; report: GuildUsageReport }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -31,6 +32,7 @@ export function GuildRuns({ guildId, report }: { guildId: string; report: GuildU
 	const member = snowflakeFrom(params.get("member"));
 	const command = commandFrom(params.get("command"));
 	const runs = useGuildRuns(guildId, report.days, page, member, command);
+	const results = currentData(runs);
 	const memberName = runs.data?.items.find((run) => run.userId === member)?.username ?? member;
 
 	function put(changes: Record<string, string | null>): void {
@@ -81,7 +83,7 @@ export function GuildRuns({ guildId, report }: { guildId: string; report: GuildU
 
 			{runs.isError ? (
 				<ErrorState as="h2" error={runs.error} onRetry={() => void runs.refetch()} />
-			) : runs.isPending ? (
+			) : results === undefined ? (
 				<Skeleton className="h-48 w-full" />
 			) : (
 				<>
@@ -107,14 +109,14 @@ export function GuildRuns({ guildId, report }: { guildId: string; report: GuildU
 							</>
 						}
 					>
-						{runs.data.items.length === 0 && (
+						{results.items.length === 0 && (
 							<tr>
 								<td colSpan={5} className={cn(CELL, "text-muted-foreground")}>
 									{t("owner.noRuns")}
 								</td>
 							</tr>
 						)}
-						{runs.data.items.map((run, index) => (
+						{results.items.map((run, index) => (
 							<tr key={`${run.at}-${run.userId}-${String(index)}`}>
 								<td className={cn(CELL, "text-muted-foreground")} title={dateAndTime(run.at)}>
 									{since(run.at)}
@@ -159,16 +161,17 @@ export function GuildRuns({ guildId, report }: { guildId: string; report: GuildU
 							</tr>
 						))}
 					</DataTable>
-
-					<Pager
-						label={t("owner.recentRuns")}
-						page={page}
-						pages={pageCount(runs.data.total, PER_PAGE)}
-						onChange={(next) => {
-							put({ runs: String(next) });
-						}}
-					/>
 				</>
+			)}
+			{runs.data !== undefined && !runs.isError && (
+				<Pager
+					label={t("owner.recentRuns")}
+					page={page}
+					pages={pageCount(runs.data.total, PER_PAGE)}
+					onChange={(next) => {
+						put({ runs: String(next) });
+					}}
+				/>
 			)}
 		</section>
 	);

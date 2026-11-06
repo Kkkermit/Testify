@@ -13,6 +13,7 @@ import { useDebounced } from "@/hooks/useDebounced";
 import { formatUptime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
+import { currentData } from "@/lib/queries";
 
 export function OverviewTab(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -23,6 +24,7 @@ export function OverviewTab(): React.JSX.Element {
 	const search = params.get("search") ?? "";
 	const health = useOwnerStats();
 	const guilds = useOwnerGuilds(page, sort, filter, useDebounced(search));
+	const results = currentData(guilds);
 
 	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
 
@@ -138,11 +140,11 @@ export function OverviewTab(): React.JSX.Element {
 
 				{guilds.isError ? (
 					<ErrorState as="h2" error={guilds.error} onRetry={() => void guilds.refetch()} />
-				) : guilds.data === undefined ? (
+				) : results === undefined ? (
 					<Skeleton className="h-64 w-full" />
 				) : (
 					<OwnerGuildTable
-						guilds={guilds.data.items}
+						guilds={results.items}
 						sort={sort}
 						filter={filter}
 						empty={
