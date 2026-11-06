@@ -1966,11 +1966,13 @@ things about them are load-bearing:
 appeal; banned members write theirs on the dashboard's `/appeals` page, which the ban's direct message links to
 (`appealLink`). Five things about it are load-bearing:
 
-- **Only somebody the server has banned can appeal it, asked live.** `readOwnAppeals` and `submitAppeal` look up the
-  ban with `guild.bans.fetch` on every read and every send, over only the servers that take appeals
-  (`appealGuildIds`), so a session cannot name a server it was never banned from and post into its staff channel.
-  The route takes the person from the session alone. Appeals cannot be turned on without the dashboard
-  (`takesAppeals`), because there would be nowhere to write one.
+- **Only somebody the server has banned can appeal it, asked live.** `submitAppeal` looks up the ban with
+  `guild.bans.fetch` on every send, over only the servers that take appeals (`appealGuildIds`), so a session cannot
+  name a server it was never banned from and post into its staff channel. The list, `readOwnAppeals`, keeps each
+  answer a minute (`listedBans`), because it asks once per server and a reload would otherwise be that many requests
+  to Discord; only the send takes the strict `APPEAL_LIMITS.perMinute`. The route takes the person from the session
+  alone. Appeals cannot be turned on without the dashboard (`takesAppeals`), because there would be nowhere to write
+  one.
 - **One waiting per person per server, and a refusal holds back the next.** A partial unique index on
   `{ guildId, userId }` for open appeals decides, not a read, and `appealAgainAt` is the wait a refusal sets, from
   `APPEAL_LIMITS.cooldownChoices`. A decided appeal is kept `keepDays` (180) under a TTL so the wait can still be
@@ -2006,8 +2008,8 @@ server from `offerPanel`; each gets a public thread in that channel. Five things
 - **Every relay goes out with `allowedMentions: { parse: [] }`**, and the opening post pings only the chosen role,
   never `@everyone`, which `applyModmailSettings` refuses as a ping role. Closing asks Manage Messages on the button,
   the command and the dashboard's route (`ASKS_MORE`).
-- **The dashboard lists conversations only to a reader who can see the channel** (`readerSees`), as Discord would
-  hide its threads; otherwise the list answers `visible: false` and the page says why. Offering the servers in a
+- **The dashboard lists and closes conversations only for a reader who can see the channel** (`readerSees`), as
+  Discord would hide its threads; otherwise the list answers `visible: false` and the page says why. Offering the servers in a
   direct message reads the member cache first and fetches at most `maxServersOffered` more, once per
   `offerEveryMinutes`, because each fetch is a request to Discord.
 
