@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type GoodbyePatch, type GoodbyeSettings } from "@testify/shared";
+import { useOptimisticMutation } from "@/hooks/useOptimisticMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -27,27 +22,10 @@ export function useGoodbye(guildId: string): UseQueryResult<GoodbyeSettings> {
 }
 
 export function useUpdateGoodbye(guildId: string): UseMutationResult<GoodbyeSettings, Error, GoodbyePatch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).goodbye();
-
-	return useMutation({
-		mutationFn: (patch: GoodbyePatch) => api.patch<GoodbyeSettings>(`/guilds/${guildId}/goodbye`, patch),
-		onMutate: async (patch) => {
-			await client.cancelQueries({ queryKey: key });
-			const previous = client.getQueryData<GoodbyeSettings>(key);
-
-			if (previous !== undefined) client.setQueryData<GoodbyeSettings>(key, applyPatch(previous, patch));
-
-			return { previous };
-		},
-		onError: (_error, _patch, context) => {
-			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
-		},
-		onSuccess: (settings) => {
-			client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useOptimisticMutation(
+		keys.guild(guildId).goodbye(),
+		(patch: GoodbyePatch) => api.patch<GoodbyeSettings>(`/guilds/${guildId}/goodbye`, patch),
+		applyPatch,
+		[keys.guild(guildId).overview()],
+	);
 }
