@@ -239,5 +239,6 @@ function kindOf(channel: GuildBasedChannel): ChannelKind {
 }
 
 function colourOf(role: Role): string | null {
-	return role.color === 0 ? null : `#${role.color.toString(16).padStart(6, "0")}`;
+	const { primaryColor } = role.colors;
+	return primaryColor === 0 ? null : `#${primaryColor.toString(16).padStart(6, "0")}`;
 }

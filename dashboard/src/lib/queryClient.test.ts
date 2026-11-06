@@ -13,12 +13,12 @@ describe("the query client", () => {
 		client.setQueryData(keys.me(), me);
 
 		await client
-			.fetchQuery({ queryKey: ["other"], queryFn: () => Promise.reject(refusal("missing_manage_guild")) })
+			.query({ queryKey: ["other"], queryFn: () => Promise.reject(refusal("missing_manage_guild")) })
 			.catch(() => undefined);
 		expect(client.getQueryState(keys.me())?.isInvalidated).toBe(false);
 
 		await client
-			.fetchQuery({ queryKey: ["blocked"], queryFn: () => Promise.reject(refusal("blacklisted")) })
+			.query({ queryKey: ["blocked"], queryFn: () => Promise.reject(refusal("blacklisted")) })
 			.catch(() => undefined);
 		expect(client.getQueryState(keys.me())?.isInvalidated).toBe(true);
 

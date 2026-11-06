@@ -178,7 +178,7 @@ function fakeGuild(options: Options = {}) {
 		id,
 		name,
 		position,
-		color: colour,
+		colors: { primaryColor: colour, secondaryColor: null, tertiaryColor: null },
 		managed,
 		permissions: new PermissionsBitField(name === "Admin" ? [PermissionFlagsBits.Administrator] : []),
 	});

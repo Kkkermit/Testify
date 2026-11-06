@@ -4,6 +4,7 @@ import {
 	ButtonStyle,
 	ChannelSelectMenuBuilder,
 	ChannelType,
+	LabelBuilder,
 	type MessageActionRowComponentBuilder,
 	ModalBuilder,
 	RoleSelectMenuBuilder,
@@ -225,11 +226,10 @@ export function modalForm(options: {
 		.setCustomId(customId(options.id, options.action, ...(options.args ?? [])))
 		.setTitle(options.title.slice(0, 45));
 
-	modal.addComponents(
+	modal.addLabelComponents(
 		options.fields.map((field) => {
 			const input = new TextInputBuilder()
 				.setCustomId(field.id)
-				.setLabel(field.label.slice(0, 45))
 				.setStyle(field.paragraph === true ? TextInputStyle.Paragraph : TextInputStyle.Short)
 				.setRequired(field.required ?? true);
 
@@ -237,7 +237,7 @@ export function modalForm(options: {
 			if (field.maxLength !== undefined) input.setMaxLength(field.maxLength);
 			if (field.value !== undefined && field.value !== "") input.setValue(field.value);
 
-			return new ActionRowBuilder<TextInputBuilder>().addComponents(input);
+			return new LabelBuilder().setLabel(field.label.slice(0, 45)).setTextInputComponent(input);
 		}),
 	);
 

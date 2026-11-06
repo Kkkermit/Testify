@@ -43,7 +43,7 @@ const fields = z.object({
 	// Dashboard. Off by default, so a bot-only install needs none of these. The website shares its port and address.
 	DASHBOARD_ENABLED: flag.default(false),
 	DISCORD_CLIENT_SECRET: z.string().min(1).optional(),
-	DASHBOARD_BASE_URL: z.string().url().optional(),
+	DASHBOARD_BASE_URL: z.url().optional(),
 	DASHBOARD_SESSION_SECRET: z.string().min(32, "needs at least 32 characters").optional(),
 	DASHBOARD_PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
 	DASHBOARD_BIND: z.string().min(1).default("127.0.0.1"),

@@ -1,6 +1,6 @@
 import { type SupportArticleLink, type SupportReply, SUPPORT_LIMITS } from "@testify/shared";
 import { MessageCircleQuestion, Search } from "lucide-react";
-import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from "react";
+import { type KeyboardEvent, type SubmitEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { describe } from "@/app/ErrorState";
@@ -37,7 +37,7 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 		setActive(-1);
 	}
 
-	function submit(event: FormEvent): void {
+	function submit(event: SubmitEvent<HTMLFormElement>): void {
 		event.preventDefault();
 		if (trimmed.length < SUPPORT_LIMITS.questionMin || ask.isPending) return;
 

@@ -1,6 +1,5 @@
 import {
 	type APIInteractionGuildMember,
-	type ChatInputCommandInteraction,
 	type AutocompleteInteraction,
 	type Client,
 	type EmbedBuilder,
@@ -162,11 +161,6 @@ export interface Command {
 	run?(interaction: CommandInput, client: TestifyClient): Promise<void>;
 	autocomplete?(interaction: AutocompleteInteraction, client: TestifyClient): Promise<void>;
 }
-
-/** Proof that a real slash interaction satisfies the contract. */
-const _slashSatisfiesCommandInput: (interaction: ChatInputCommandInteraction) => CommandInput = (interaction) =>
-	interaction;
-void _slashSatisfiesCommandInput;
 
 export function defineCommand(command: Command): Command {
 	return command;

@@ -1,4 +1,4 @@
-import { type FormEvent, type ReactNode, useId } from "react";
+import { type ReactNode, type SubmitEvent, useId } from "react";
 import { RowLayout } from "@/components/form/rowLayout";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 
@@ -12,7 +12,7 @@ export function SettingRows({
 	title?: string;
 	description?: ReactNode;
 	action?: ReactNode;
-	onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
+	onSubmit?: (event: SubmitEvent<HTMLFormElement>) => void;
 	children: ReactNode;
 }): React.JSX.Element {
 	const headingId = useId();

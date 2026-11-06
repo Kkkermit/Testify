@@ -21,7 +21,7 @@ export default defineCommand({
 		await reply(interaction, {
 			embeds: [
 				embed({
-					colour: role.color === 0 ? undefined : role.hexColor,
+					colour: role.colors.primaryColor === 0 ? undefined : role.hexColor,
 					category: "info",
 					title: `Role: ${role.name}`,
 					fields: [

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { initialOf } from "@/lib/people";
 
 export function BotMark({
 	src,
@@ -15,7 +16,7 @@ export function BotMark({
 	const [broken, setBroken] = useState<string | null>(null);
 
 	if (src === null || src === undefined || broken === src) {
-		const initial = name === null ? "" : (Array.from(name.trim())[0]?.toLocaleUpperCase() ?? "");
+		const initial = name === null ? "" : (initialOf(name) ?? "");
 		return (
 			<span
 				aria-hidden="true"
