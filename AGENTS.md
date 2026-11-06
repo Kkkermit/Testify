@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 220, in 31 domain folders         |
 | Schemas/repositories | 47 / 46                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,946 across 518 suites           |
+| Tests                | 3,947 across 519 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 337 suites; the dashboard's 181 sit beside its code.
+tests/                    Mirrors src/. 337 suites; the dashboard's 182 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
