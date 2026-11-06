@@ -109,7 +109,7 @@ interface ErasedPost {
 	messageId: string;
 }
 
-type Place = { channelId: string | null; messageId: string | null }[];
+type Place = { channelId?: string | null; messageId?: string | null }[];
 
 /** Applies `ERASURE` to one person; it cannot be undone, and the posts it returns are the caller's to take down. */
 export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
@@ -207,7 +207,8 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		TempVoiceSettingsConfig.updateMany({ updatedBy: userId }, { $set: { updatedBy: null } }).exec(),
 	]);
 
+	// A record written before its post went up has neither field, and nothing to take down.
 	return [...ideas, ...appeals].flatMap(({ channelId, messageId }) =>
-		channelId === null || messageId === null ? [] : [{ channelId, messageId }],
+		typeof channelId === "string" && typeof messageId === "string" ? [{ channelId, messageId }] : [],
 	);
 }
