@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 52 / 51                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,070 across 546 suites           |
+| Tests                | 4,083 across 549 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -2290,9 +2290,10 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/members`             | Everybody, searched and filtered, acted on one at a time or 25 at once; the boards a tab    |
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
+| `/guilds/:id/backup`              | Download the settings, or bring a backup or another server's in, matched by name            |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
-| `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
+| `/status`                         | Online or not, uptime, speed and outside services, 30 days back. Public                     |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
 | `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
 | `/appeals`                        | Appeal a ban: every server that banned the reader and takes appeals, and past appeals       |
@@ -2994,8 +2995,8 @@ names any screen that stopped passing it, because the prop existed unused on all
 existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
 
-**A server's sidebar names its screens, never its channels.** Overview, Inbox, This week, Channels, Members, Roles and
-Settings come first, then
+**A server's sidebar names its screens, never its channels.** Overview, Inbox, This week, Channels, Members, Roles,
+Settings and Back up and copy come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
 messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
@@ -3093,11 +3094,33 @@ several servers sees at a glance where one is set up differently. Three things a
   bot where the reader could manage it, and `chosenFrom` drops any id in `?servers=` that is not one of them, so a
   typed address cannot ask about a server the reader was never shown.
 - **It is read-only.** Every cell links to the feature on that server, and "only where they differ" leaves out which
-  channel a feature posts in, because two servers can never share one. Copying a setup across servers is a write
-  across several permission checks and is not built.
+  channel a feature posts in, because two servers can never share one. Copying a setup across servers is the
+  **Back up and copy** screen's job, below.
 
 Its header carries **Back to your servers**, through `PageHeader`'s `back`, which the member, role and channel pages use too:
 a phone has no sidebar on screen, so a screen opened from another one names the way back to it.
+
+### A backup is the reader's own reads, and bringing one in is the screens' own writes
+
+`/guilds/:id/backup` downloads a server's settings as a file, brings a file back in, or copies another server's
+setup, all over the eighteen sections `RESTORABLE` already lists for Put back. Five things about it are load-bearing:
+
+- **It has no route of its own.** `readServerSettings` asks each section's own read route as the reader, and
+  `useApplyBackup` sends each section to its own write route, in turn, so `requireGuild`, `requireReach`, the
+  permission each asks and its schema decide every part exactly as they decide the screen. A section the reader may
+  not read is left out of a backup and the page names it; a write the route refuses is shown beside its section with
+  the server's own words, and the rest still go.
+- **A backup holds only what Put back could send** (`restorableFields`), and the names of the channels and roles it
+  points at. Nothing that acts rather than stores, no messages and nobody's data. `backupDocument` is the only shape
+  read back: section and field keys are plain words and place keys are snowflakes, so no key in a file can reach an
+  object's prototype, and a file over `BACKUP_LIMITS.maxBytes` is refused before it is read.
+- **Ids are moved by name** (`planBackup`): an id this server has is kept, otherwise the name the file stored is
+  matched without regard to case against channels the reader can see and roles here, and anything with no match is
+  left as it is and named. A list where nothing matched is left alone rather than emptied, and a section with nothing
+  left to send is reported as left as it is.
+- **Nothing is written before the plan is shown**, and only what is ticked. A section already the same here starts
+  unticked, so copying from a server set up alike does nothing until somebody chooses otherwise.
+- **Every section saved is an ordinary change**, recorded by its route, so the Changes page can put each one back.
 
 ### Your account is the reader's own, and nothing on it is about anybody else
 
@@ -3458,8 +3481,11 @@ the dashboard's, which is every record written before commands were. Four things
 
 ### The status page
 
-`/status` is open to anybody signed in, because it names no server and no member — only how the bot itself is
-doing. `GET /api/status` builds it from `statusReport` in `src/lib/bot/status.util.ts`, and every threshold
+`/status` is public, on the website as well as in the dashboard, because it names no server and no member — only how
+the bot itself is doing. Its API route is mounted with the public ones, so a site-only install has it, and a
+blacklisted account may read it like anybody signed out; `routes.test.tsx` pins the pages outside the sign-in gate.
+It has never listed package versions, and must not: which versions a host runs is the host's business, not every
+visitor's. `GET /api/status` builds it from `statusReport` in `src/lib/bot/status.util.ts`, and every threshold
 that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Seven things about it are load-bearing:
 
 - **Downtime is known by its gaps.** The dashboard lives inside the bot, so nothing can report the bot being off
@@ -3493,7 +3519,7 @@ same `DASHBOARD_PORT` and `DASHBOARD_BIND` — a second set of names would have 
 listener. Five things about it are load-bearing:
 
 - **With the dashboard off, nothing of it is mounted.** `createApi` always mounts the public routes — health,
-  `/api/bot`, `/api/site` and the help articles — and everything else only under `DASHBOARD_ENABLED`, so a site-only
+  `/api/bot`, `/api/site`, `/api/status` and the help articles — and everything else only under `DASHBOARD_ENABLED`, so a site-only
   install answers 404 to `/api/auth` rather than a half-configured sign-in. `GET /api/site` tells the page which it
   is: the header's dashboard link and the landing page's sign-in disappear, and `/sign-in` explains why. The support
   router is split for the same reason: reading articles is public, asking needs a session.

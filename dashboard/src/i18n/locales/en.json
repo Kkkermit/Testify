@@ -175,7 +175,9 @@
 		"invites": "Invites",
 		"invitesHint": "Whose invites brought members in",
 		"economyRates": "Economy settings",
-		"economyRatesHint": "Pay, robbing and roles for sale"
+		"economyRatesHint": "Pay, robbing and roles for sale",
+		"backup": "Back up and copy",
+		"backupHint": "Save this server’s settings, or copy another server’s"
 	},
 	"account": {
 		"title": "Your account",
@@ -2946,5 +2948,39 @@
 		"priceOf": "Price of {{name}}",
 		"takeOffSale": "Take {{name}} off sale",
 		"deletedRole": "A deleted role"
+	},
+	"backup": {
+		"title": "Back up and copy",
+		"subtitle": "Keep this server’s settings in a file, put them back later, or bring another server’s across.",
+		"readFailed": "The settings could not be read. Try again in a moment.",
+		"saveTitle": "Back up",
+		"saveBody": "Download every setting you can see here as a file. It holds no messages and nobody’s data, only how the bot is set up.",
+		"download": "Download a backup",
+		"leftOut": "Left out, because you cannot read them here: {{sections}}.",
+		"bringTitle": "Bring settings in",
+		"bringBody": "Nothing changes until you have seen what would and pressed Apply.",
+		"fromFile": "From a backup file",
+		"fromFileHint": "A file downloaded from this page, here or on another server.",
+		"tooLarge": "That file is too large to be a backup.",
+		"notBackup": "That file is not a backup from this page.",
+		"fromServer": "From another server",
+		"fromServerHint": "Copies its setup here. Channels and roles are matched by name.",
+		"chooseServer": "Choose a server",
+		"readServer": "Read its settings",
+		"previewTitle": "From {{name}}",
+		"previewBody": "Saved {{time}}. Untick anything you want to leave as it is.",
+		"nothing": "There is nothing in it this server can use.",
+		"same": "Already the same here",
+		"changes_one": "{{count, number}} setting to bring in",
+		"changes_other": "{{count, number}} settings to bring in",
+		"missingChannel": "No channel here is called #{{name}}, so that part stays as it is.",
+		"missingRole": "No role here is called @{{name}}, so that part stays as it is.",
+		"missingChannelUnnamed": "A channel it names has no match here, so that part stays as it is.",
+		"missingRoleUnnamed": "A role it names has no match here, so that part stays as it is.",
+		"saved": "Saved",
+		"unusable": "These could not be read, so they are left out: {{sections}}.",
+		"apply_one": "Apply {{count, number}} section",
+		"apply_other": "Apply {{count, number}} sections",
+		"leftAsIs": "{{section}} stays as it is here."
 	}
 }

@@ -57,6 +57,7 @@ describe("navigationFor", () => {
 				"/auto-responders",
 				"/automod",
 				"/bans",
+				"/backup",
 				"/birthdays",
 				"/bot-stats",
 				"/cases",

@@ -11,6 +11,8 @@ describe("what a blacklisted account may still reach", () => {
 			["GET", "/api/health", true],
 			["GET", "/api/bot", true],
 			["GET", "/api/site/tree", true],
+			["GET", "/api/status", true],
+			["GET", "/api/statuses", false],
 			["GET", "/api/support/articles/levelling", true],
 			["GET", "/api/auth/meh", false],
 			["GET", "/api/auth/me/sessions", false],

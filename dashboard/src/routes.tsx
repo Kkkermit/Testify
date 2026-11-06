@@ -47,6 +47,7 @@ const AppealBanPage = page(async () => import("@/features/appeals/AppealBanPage"
 const ModmailPage = page(async () => import("@/features/modmail/ModmailPage"), "ModmailPage");
 const InvitesPage = page(async () => import("@/features/invites/InvitesPage"), "InvitesPage");
 const EconomyPage = page(async () => import("@/features/economy/EconomyPage"), "EconomyPage");
+const BackupPage = page(async () => import("@/features/backup/BackupPage"), "BackupPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
 const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
 const InboxPage = page(async () => import("@/features/inbox/InboxPage"), "InboxPage");
@@ -108,7 +109,13 @@ export const routes = [
 	{
 		element: <ReaderShell />,
 		children: [
-			{ errorElement: <RouteError />, children: [{ path: "/appearance", element: lazily(<AppearancePage />) }] },
+			{
+				errorElement: <RouteError />,
+				children: [
+					{ path: "/appearance", element: lazily(<AppearancePage />) },
+					{ path: "/status", element: lazily(<StatusPage />) },
+				],
+			},
 		],
 	},
 	{ path: "/sign-in", element: <SignInPage /> },
@@ -158,6 +165,7 @@ export const routes = [
 									{ path: "/guilds/:guildId/channels", element: lazily(<ChannelsPage />) },
 									{ path: "/guilds/:guildId/temp-voice", element: lazily(<TempVoicePage />) },
 									{ path: "/guilds/:guildId/economy", element: lazily(<EconomyPage />) },
+									{ path: "/guilds/:guildId/backup", element: lazily(<BackupPage />) },
 									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 									{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
 									{ path: "/guilds/:guildId/casino", element: lazily(<CasinoPage />) },
@@ -175,7 +183,6 @@ export const routes = [
 							},
 							{ path: "/commands", element: lazily(<CommandsPage />) },
 							{ path: "/help", element: lazily(<HelpPage />) },
-							{ path: "/status", element: lazily(<StatusPage />) },
 							{ path: "/notifications", element: lazily(<NotificationsPage />) },
 							{ path: "/account", element: lazily(<AccountPage />) },
 							{ path: "/appeals", element: lazily(<AppealBanPage />) },

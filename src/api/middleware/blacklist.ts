@@ -8,7 +8,7 @@ import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
  * Discord; every other route refuses it. The public routes stay open, since anybody signed out can read them anyway.
  */
 const OPEN: readonly { methods: readonly string[]; path: RegExp }[] = [
-	{ methods: ["GET", "HEAD"], path: /^\/api\/(?:health|bot|site)(?:\/[^?]*)?$/ },
+	{ methods: ["GET", "HEAD"], path: /^\/api\/(?:health|bot|site|status)(?:\/[^?]*)?$/ },
 	{ methods: ["GET", "HEAD"], path: /^\/api\/support(?:\/articles\/[^/]+)?$/ },
 	{ methods: ["GET", "HEAD"], path: /^\/api\/auth\/(?:setup|login|callback|me)$/ },
 	{ methods: ["POST"], path: /^\/api\/auth\/(?:logout|logout-all|erase)$/ },

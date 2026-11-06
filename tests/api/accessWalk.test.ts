@@ -38,6 +38,7 @@ const PUBLIC = new Set([
 	"GET /api/support",
 	"GET /api/support/articles/:articleId",
 	"GET /api/site",
+	"GET /api/status",
 	"GET /api/site/repository",
 	"GET /api/site/traffic",
 	"GET /api/site/tree",

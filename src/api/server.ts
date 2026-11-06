@@ -141,6 +141,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.route("/api/bot", bot);
 	app.route("/api/site", siteRoutes(github));
 	app.route("/api/support", supportArticles);
+	app.route("/api/status", status);
 
 	// Without the dashboard these do not exist at all, rather than answering every request with a refusal.
 	if (env.DASHBOARD_ENABLED) {
@@ -152,7 +153,6 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 		app.route("/api/owner", owner);
 		app.route("/api/analytics", analytics);
 		app.route("/api/screens", screens);
-		app.route("/api/status", status);
 		app.route("/api/notices", notices);
 		app.route("/api/support", supportQuestions);
 		app.route("/api/control", control);

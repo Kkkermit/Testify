@@ -176,7 +176,9 @@
 		"invites": "Inviti",
 		"invitesHint": "Gli inviti che hanno portato membri",
 		"economyRates": "Impostazioni dell’economia",
-		"economyRatesHint": "Paghe, rapine e ruoli in vendita"
+		"economyRatesHint": "Paghe, rapine e ruoli in vendita",
+		"backup": "Backup e copia",
+		"backupHint": "Salva le impostazioni di questo server o copia quelle di un altro"
 	},
 	"account": {
 		"title": "Il tuo account",
@@ -3029,5 +3031,41 @@
 		"priceOf": "Prezzo di {{name}}",
 		"takeOffSale": "Togli {{name}} dalla vendita",
 		"deletedRole": "Un ruolo eliminato"
+	},
+	"backup": {
+		"title": "Backup e copia",
+		"subtitle": "Conserva le impostazioni di questo server in un file, ripristinale più tardi o porta qui quelle di un altro server.",
+		"readFailed": "Non è stato possibile leggere le impostazioni. Riprova tra un momento.",
+		"saveTitle": "Backup",
+		"saveBody": "Scarica in un file tutte le impostazioni che vedi qui. Non contiene messaggi né dati di nessuno, solo come è configurato il bot.",
+		"download": "Scarica un backup",
+		"leftOut": "Esclusi perché qui non puoi leggerli: {{sections}}.",
+		"bringTitle": "Importa impostazioni",
+		"bringBody": "Nulla cambia finché non hai visto cosa cambierebbe e premuto Applica.",
+		"fromFile": "Da un file di backup",
+		"fromFileHint": "Un file scaricato da questa pagina, qui o su un altro server.",
+		"tooLarge": "Questo file è troppo grande per essere un backup.",
+		"notBackup": "Questo file non è un backup di questa pagina.",
+		"fromServer": "Da un altro server",
+		"fromServerHint": "Copia qui la sua configurazione. Canali e ruoli vengono abbinati per nome.",
+		"chooseServer": "Scegli un server",
+		"readServer": "Leggi le impostazioni",
+		"previewTitle": "Da {{name}}",
+		"previewBody": "Salvato il {{time}}. Togli la spunta da ciò che vuoi lasciare com’è.",
+		"nothing": "Non contiene nulla che questo server possa usare.",
+		"same": "Qui è già uguale",
+		"changes_one": "{{count, number}} impostazione da importare",
+		"changes_many": "{{count, number}} di impostazioni da importare",
+		"changes_other": "{{count, number}} impostazioni da importare",
+		"missingChannel": "Qui nessun canale si chiama #{{name}}, quindi quella parte resta com’è.",
+		"missingRole": "Qui nessun ruolo si chiama @{{name}}, quindi quella parte resta com’è.",
+		"missingChannelUnnamed": "Un canale che nomina non ha corrispondenza qui, quindi quella parte resta com’è.",
+		"missingRoleUnnamed": "Un ruolo che nomina non ha corrispondenza qui, quindi quella parte resta com’è.",
+		"saved": "Salvato",
+		"unusable": "Questi non sono leggibili e vengono esclusi: {{sections}}.",
+		"apply_one": "Applica {{count, number}} sezione",
+		"apply_many": "Applica {{count, number}} di sezioni",
+		"apply_other": "Applica {{count, number}} sezioni",
+		"leftAsIs": "{{section}} resta com’è qui."
 	}
 }

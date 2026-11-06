@@ -174,7 +174,9 @@
 		"invites": "招待",
 		"invitesHint": "誰の招待でメンバーが来たか",
 		"economyRates": "経済の設定",
-		"economyRatesHint": "報酬、強盗、販売ロール"
+		"economyRatesHint": "報酬、強盗、販売ロール",
+		"backup": "バックアップとコピー",
+		"backupHint": "このサーバーの設定を保存するか、別のサーバーの設定をコピーします"
 	},
 	"account": {
 		"title": "アカウント",
@@ -2863,5 +2865,37 @@
 		"priceOf": "{{name}} の価格",
 		"takeOffSale": "{{name}} の販売をやめる",
 		"deletedRole": "削除されたロール"
+	},
+	"backup": {
+		"title": "バックアップとコピー",
+		"subtitle": "このサーバーの設定をファイルに保存し、後で元に戻したり、別のサーバーの設定を取り込んだりできます。",
+		"readFailed": "設定を読み込めませんでした。少し待ってからもう一度お試しください。",
+		"saveTitle": "バックアップ",
+		"saveBody": "ここで見られる設定をすべてファイルとしてダウンロードします。メッセージや個人のデータは含まれず、ボットの設定内容だけが入ります。",
+		"download": "バックアップをダウンロード",
+		"leftOut": "ここでは読めないため含まれていません：{{sections}}。",
+		"bringTitle": "設定を取り込む",
+		"bringBody": "何が変わるかを確認して「適用」を押すまで、何も変わりません。",
+		"fromFile": "バックアップファイルから",
+		"fromFileHint": "このページからダウンロードしたファイル（このサーバーでも別のサーバーでも）。",
+		"tooLarge": "このファイルはバックアップにしては大きすぎます。",
+		"notBackup": "このファイルはこのページのバックアップではありません。",
+		"fromServer": "別のサーバーから",
+		"fromServerHint": "その設定をここにコピーします。チャンネルとロールは名前で対応付けられます。",
+		"chooseServer": "サーバーを選択",
+		"readServer": "設定を読み込む",
+		"previewTitle": "{{name}} から",
+		"previewBody": "{{time}} に保存。そのままにしたい項目はチェックを外してください。",
+		"nothing": "このサーバーで使えるものは含まれていません。",
+		"same": "ここではすでに同じです",
+		"changes_other": "取り込む設定 {{count, number}} 件",
+		"missingChannel": "ここには #{{name}} というチャンネルがないため、その部分はそのままです。",
+		"missingRole": "ここには @{{name}} というロールがないため、その部分はそのままです。",
+		"missingChannelUnnamed": "指定されたチャンネルに該当するものがここにないため、その部分はそのままです。",
+		"missingRoleUnnamed": "指定されたロールに該当するものがここにないため、その部分はそのままです。",
+		"saved": "保存しました",
+		"unusable": "次の項目は読み込めないため除外します：{{sections}}。",
+		"apply_other": "{{count, number}} 件を適用",
+		"leftAsIs": "{{section}} はここではそのままです。"
 	}
 }

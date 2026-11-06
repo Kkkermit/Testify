@@ -6,6 +6,7 @@ export * from "./appeals";
 export * from "./auditLog";
 export * from "./automod";
 export * from "./autoResponders";
+export * from "./backup";
 export * from "./bans";
 export * from "./birthdays";
 export * from "./blacklist";

@@ -17,6 +17,7 @@ const PUBLIC = new Map<string, string>([
 	["/api/bot", "the bot's public profile, needed by the sign-in screen before a session exists"],
 	["/api/support", "the help articles' titles, which the docs list before anybody signs in"],
 	["/api/support/articles/:articleId", "one help article, which the docs show; asking a question stays signed in"],
+	["/api/status", "how the bot itself is doing, which names no server and no member"],
 ]);
 
 /** The website's own API: the landing page, the docs and the source browser, which name no server and no member. */

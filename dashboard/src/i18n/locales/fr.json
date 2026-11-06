@@ -176,7 +176,9 @@
 		"invites": "Invitations",
 		"invitesHint": "Les invitations qui ont amené des membres",
 		"economyRates": "Réglages de l’économie",
-		"economyRatesHint": "Paie, vols et rôles en vente"
+		"economyRatesHint": "Paie, vols et rôles en vente",
+		"backup": "Sauvegarder et copier",
+		"backupHint": "Sauvegarder les réglages de ce serveur, ou copier ceux d’un autre"
 	},
 	"account": {
 		"title": "Ton compte",
@@ -3029,5 +3031,41 @@
 		"priceOf": "Prix de {{name}}",
 		"takeOffSale": "Retirer {{name}} de la vente",
 		"deletedRole": "Un rôle supprimé"
+	},
+	"backup": {
+		"title": "Sauvegarder et copier",
+		"subtitle": "Gardez les réglages de ce serveur dans un fichier, remettez-les plus tard, ou reprenez ceux d’un autre serveur.",
+		"readFailed": "Les réglages n’ont pas pu être lus. Réessayez dans un instant.",
+		"saveTitle": "Sauvegarder",
+		"saveBody": "Téléchargez dans un fichier tous les réglages que vous voyez ici. Il ne contient aucun message ni aucune donnée sur quiconque, seulement la configuration du bot.",
+		"download": "Télécharger une sauvegarde",
+		"leftOut": "Laissés de côté, car vous ne pouvez pas les lire ici : {{sections}}.",
+		"bringTitle": "Reprendre des réglages",
+		"bringBody": "Rien ne change tant que vous n’avez pas vu ce qui changerait et appuyé sur Appliquer.",
+		"fromFile": "Depuis un fichier de sauvegarde",
+		"fromFileHint": "Un fichier téléchargé depuis cette page, ici ou sur un autre serveur.",
+		"tooLarge": "Ce fichier est trop volumineux pour être une sauvegarde.",
+		"notBackup": "Ce fichier n’est pas une sauvegarde de cette page.",
+		"fromServer": "Depuis un autre serveur",
+		"fromServerHint": "Copie sa configuration ici. Les salons et les rôles sont associés par leur nom.",
+		"chooseServer": "Choisissez un serveur",
+		"readServer": "Lire ses réglages",
+		"previewTitle": "Depuis {{name}}",
+		"previewBody": "Enregistré le {{time}}. Décochez ce que vous voulez laisser tel quel.",
+		"nothing": "Il ne contient rien que ce serveur puisse utiliser.",
+		"same": "Déjà identique ici",
+		"changes_one": "{{count, number}} réglage à reprendre",
+		"changes_many": "{{count, number}} de réglages à reprendre",
+		"changes_other": "{{count, number}} réglages à reprendre",
+		"missingChannel": "Aucun salon ne s’appelle #{{name}} ici, donc cette partie reste telle quelle.",
+		"missingRole": "Aucun rôle ne s’appelle @{{name}} ici, donc cette partie reste telle quelle.",
+		"missingChannelUnnamed": "Un salon qu’il nomme n’a pas d’équivalent ici, donc cette partie reste telle quelle.",
+		"missingRoleUnnamed": "Un rôle qu’il nomme n’a pas d’équivalent ici, donc cette partie reste telle quelle.",
+		"saved": "Enregistré",
+		"unusable": "Ceux-ci n’ont pas pu être lus et sont laissés de côté : {{sections}}.",
+		"apply_one": "Appliquer {{count, number}} section",
+		"apply_many": "Appliquer {{count, number}} de sections",
+		"apply_other": "Appliquer {{count, number}} sections",
+		"leftAsIs": "{{section}} reste tel quel ici."
 	}
 }
