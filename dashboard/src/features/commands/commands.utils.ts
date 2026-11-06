@@ -33,6 +33,12 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	"raid-protection": { path: (guildId) => `/guilds/${guildId}/raid-protection`, screen: "Raid protection" },
 	kick: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
 	ban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	softban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	mute: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	unmute: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	nickname: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	role: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	give: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
 	unban: { path: (guildId) => `/guilds/${guildId}/bans`, screen: "Bans" },
 	lock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
 	unlock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
@@ -42,6 +48,10 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 	"bot-notifications": { path: () => "/notifications", screen: "Notifications" },
 	"delete-my-data": { path: () => "/account?tab=data", screen: "Your account" },
+	profile: { path: () => "/account?tab=profile", screen: "Your account" },
+	remind: { path: () => "/account?tab=reminders", screen: "Your account" },
+	blacklist: { path: () => "/owner?tab=blacklist", screen: "Owner console" },
+	"guild-list": { path: () => "/owner?tab=overview", screen: "Owner console" },
 };
 
 export interface CommandPlace {
