@@ -70,6 +70,7 @@ export const memberDetail: MemberDetail = {
 			edited: false,
 			step: { action: "timeout", minutes: 10 },
 			stepProblem: null,
+			expired: false,
 		},
 	],
 	softban: null,
@@ -78,6 +79,7 @@ export const memberDetail: MemberDetail = {
 
 export const warnLadder: WarnLadder = {
 	steps: [{ action: "warn" }, { action: "timeout", minutes: 10 }, { action: "kick" }, { action: "ban" }],
+	expireAfterDays: null,
 };
 
 export const guildWarnings: GuildWarningsPage = {
@@ -93,6 +95,7 @@ export const guildWarnings: GuildWarningsPage = {
 			edited: false,
 			step: { action: "timeout", minutes: 10 },
 			stepProblem: null,
+			expired: false,
 		},
 	],
 	total: 1,

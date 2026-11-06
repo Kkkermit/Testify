@@ -49,7 +49,8 @@
 		"deletedChannelTitle": "Удалённый канал",
 		"hiddenChannel": "канале, который вы не видите",
 		"hiddenChannelTitle": "Канал, который вы не видите",
-		"hiddenChannelWarning": "Вы не видите этот канал в Discord, поэтому изменить его может только тот, кто его видит."
+		"hiddenChannelWarning": "Вы не видите этот канал в Discord, поэтому изменить его может только тот, кто его видит.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Роли",
@@ -2464,7 +2465,19 @@
 		"searchCount_other": "Предупреждений для этого имени или ID: {{count, number}}.",
 		"searchLabel": "Найти предупреждения участника",
 		"searchHint": "Ищите по имени или вставьте Discord ID.",
-		"searchNone": "Для этого имени или ID предупреждений нет."
+		"searchNone": "Для этого имени или ID предупреждений нет.",
+		"expiryLabel": "Предупреждения учитываются",
+		"expiryNever": "Всегда",
+		"expiryDays_one": "{{count, number}} день",
+		"expiryDays_few": "{{count, number}} дня",
+		"expiryDays_many": "{{count, number}} дней",
+		"expiryDays_other": "{{count, number}} дня",
+		"expiryHelp": "Более старое предупреждение больше не продвигает участника по ступеням наказаний. Оно остаётся в его истории.",
+		"expired": "Больше не учитывается",
+		"summaryExpiry_one": "Каждое предупреждение учитывается {{count, number}} день.",
+		"summaryExpiry_few": "Каждое предупреждение учитывается {{count, number}} дня.",
+		"summaryExpiry_many": "Каждое предупреждение учитывается {{count, number}} дней.",
+		"summaryExpiry_other": "Каждое предупреждение учитывается {{count, number}} дня."
 	},
 	"changes": {
 		"title": "Изменения",

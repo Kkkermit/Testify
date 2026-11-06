@@ -48,7 +48,8 @@
 		"deletedChannelTitle": "Un canal eliminado",
 		"hiddenChannel": "un canal que no puedes ver",
 		"hiddenChannelTitle": "Un canal que no puedes ver",
-		"hiddenChannelWarning": "No puedes ver este canal en Discord, así que solo puede cambiarlo alguien que sí lo vea."
+		"hiddenChannelWarning": "No puedes ver este canal en Discord, así que solo puede cambiarlo alguien que sí lo vea.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Roles",
@@ -2394,7 +2395,17 @@
 		"searchCount_other": "{{count, number}} advertencias para ese nombre o ID.",
 		"searchLabel": "Buscar las advertencias de un miembro",
 		"searchHint": "Busca por nombre o pega un ID de Discord.",
-		"searchNone": "No hay advertencias para ese nombre o ID."
+		"searchNone": "No hay advertencias para ese nombre o ID.",
+		"expiryLabel": "Las advertencias cuentan durante",
+		"expiryNever": "Siempre",
+		"expiryDays_one": "{{count, number}} día",
+		"expiryDays_many": "{{count, number}} de días",
+		"expiryDays_other": "{{count, number}} días",
+		"expiryHelp": "Una advertencia más antigua deja de hacer avanzar al miembro en los castigos. Sigue en su historial.",
+		"expired": "Ya no cuenta",
+		"summaryExpiry_one": "Cada advertencia cuenta durante {{count, number}} día.",
+		"summaryExpiry_many": "Cada advertencia cuenta durante {{count, number}} de días.",
+		"summaryExpiry_other": "Cada advertencia cuenta durante {{count, number}} días."
 	},
 	"changes": {
 		"title": "Cambios",

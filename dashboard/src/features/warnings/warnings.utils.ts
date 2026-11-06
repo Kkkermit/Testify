@@ -1,8 +1,11 @@
 import {
 	type MemberWarning,
 	stepValue,
+	WARN_EXPIRY_DAYS,
 	WARN_LIMITS,
 	WARN_STEP_CHOICES,
+	type WarnExpiry,
+	type WarnLadder,
 	type WarnOutcome,
 	type WarnProblem,
 	type WarnStep,
@@ -81,8 +84,20 @@ export function pageCountOf(total: number, perPage: number): number {
 	return Math.max(1, Math.ceil(total / perPage));
 }
 
-export function warningsSummary(steps: readonly WarnStep[], t: TFunction): string {
+export function warningsSummary({ steps, expireAfterDays }: WarnLadder, t: TFunction): string {
 	const last = steps.at(-1);
-	if (last === undefined) return t("warnings.summaryNone");
-	return t("warnings.summary", { count: steps.length, last: stepText(last, t) });
+	const ladder =
+		last === undefined
+			? t("warnings.summaryNone")
+			: t("warnings.summary", { count: steps.length, last: stepText(last, t) });
+
+	return expireAfterDays === null || last === undefined
+		? ladder
+		: [ladder, t("warnings.summaryExpiry", { count: expireAfterDays })].join(t("common.sentenceSeparator"));
+}
+
+export const EXPIRY_OPTIONS: readonly (WarnExpiry | null)[] = [null, ...WARN_EXPIRY_DAYS];
+
+export function expiryText(expireAfterDays: WarnExpiry | null, t: TFunction): string {
+	return expireAfterDays === null ? t("warnings.expiryNever") : t("warnings.expiryDays", { count: expireAfterDays });
 }

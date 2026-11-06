@@ -20,7 +20,7 @@ export function WarningsPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader server={overview.data} title={t("warnings.title")} subtitle={t("warnings.subtitle")} />
-			{punishments.data !== undefined && <Summary>{warningsSummary(punishments.data.steps, t)}</Summary>}
+			{punishments.data !== undefined && <Summary>{warningsSummary(punishments.data, t)}</Summary>}
 			<PunishmentsCard guildId={guildId} />
 			<WarnMemberCard guildId={guildId} />
 			<WarningsListCard guildId={guildId} />

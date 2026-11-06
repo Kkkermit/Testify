@@ -7,6 +7,7 @@ import {
 	storedStep,
 	WARN_LIMITS,
 	type WarnStep,
+	warningExpired,
 	warningMatches,
 	warnLadderPut,
 } from "@testify/shared";
@@ -45,6 +46,27 @@ describe("warnLadderPut", () => {
 
 	it("refuses a timeout with no length", () => {
 		expect(warnLadderPut.safeParse({ steps: [{ action: "timeout" }] }).success).toBe(false);
+	});
+
+	/** The Discord panel only offers fixed windows, so the web may not store one it would show as nothing. */
+	it("takes only a window the panel offers, or none", () => {
+		expect(
+			[30, null, 31, 0].map((expireAfterDays) => warnLadderPut.safeParse({ steps: [], expireAfterDays }).success),
+		).toEqual([true, true, false, false]);
+	});
+});
+
+describe("warningExpired", () => {
+	const NOW = Date.UTC(2026, 10, 6);
+	const DAY = 86_400_000;
+
+	/** The count and the "no longer counts" mark share one boundary, or a list would disagree with the step taken. */
+	it("stops counting a warning once it is older than the window, and never without one", () => {
+		expect([
+			warningExpired(new Date(NOW - 30 * DAY), 30, NOW),
+			warningExpired(new Date(NOW - 30 * DAY - 1), 30, NOW),
+			warningExpired(new Date(NOW - 400 * DAY), null, NOW),
+		]).toEqual([false, true, false]);
 	});
 });
 

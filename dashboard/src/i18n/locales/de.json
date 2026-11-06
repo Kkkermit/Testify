@@ -47,7 +47,8 @@
 		"deletedChannelTitle": "Ein gelöschter Kanal",
 		"hiddenChannel": "einem Kanal, den du nicht sehen kannst",
 		"hiddenChannelTitle": "Ein Kanal, den du nicht sehen kannst",
-		"hiddenChannelWarning": "Du kannst diesen Kanal in Discord nicht sehen, daher kann ihn nur jemand ändern, der ihn sieht."
+		"hiddenChannelWarning": "Du kannst diesen Kanal in Discord nicht sehen, daher kann ihn nur jemand ändern, der ihn sieht.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Rollen",
@@ -2324,7 +2325,15 @@
 		"searchCount_other": "{{count, number}} Verwarnungen für diesen Namen oder diese ID.",
 		"searchLabel": "Verwarnungen eines Mitglieds finden",
 		"searchHint": "Suche nach Namen oder füge eine Discord-ID ein.",
-		"searchNone": "Keine Verwarnungen für diesen Namen oder diese ID."
+		"searchNone": "Keine Verwarnungen für diesen Namen oder diese ID.",
+		"expiryLabel": "Verwarnungen zählen für",
+		"expiryNever": "Immer",
+		"expiryDays_one": "{{count, number}} Tag",
+		"expiryDays_other": "{{count, number}} Tage",
+		"expiryHelp": "Eine ältere Verwarnung bringt ein Mitglied keine Stufe mehr weiter. Sie bleibt in seiner Akte.",
+		"expired": "Zählt nicht mehr",
+		"summaryExpiry_one": "Jede Verwarnung zählt {{count, number}} Tag lang.",
+		"summaryExpiry_other": "Jede Verwarnung zählt {{count, number}} Tage lang."
 	},
 	"changes": {
 		"title": "Änderungen",

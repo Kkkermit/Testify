@@ -48,7 +48,8 @@
 		"deletedChannelTitle": "Un canale eliminato",
 		"hiddenChannel": "un canale che non puoi vedere",
 		"hiddenChannelTitle": "Un canale che non puoi vedere",
-		"hiddenChannelWarning": "Non puoi vedere questo canale su Discord, quindi solo chi lo vede può cambiarlo."
+		"hiddenChannelWarning": "Non puoi vedere questo canale su Discord, quindi solo chi lo vede può cambiarlo.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Ruoli",
@@ -2394,7 +2395,17 @@
 		"searchCount_other": "{{count, number}} avvisi per quel nome o ID.",
 		"searchLabel": "Trova gli avvisi di un membro",
 		"searchHint": "Cerca per nome oppure incolla un ID Discord.",
-		"searchNone": "Nessun avviso per quel nome o ID."
+		"searchNone": "Nessun avviso per quel nome o ID.",
+		"expiryLabel": "Gli avvertimenti contano per",
+		"expiryNever": "Sempre",
+		"expiryDays_one": "{{count, number}} giorno",
+		"expiryDays_many": "{{count, number}} di giorni",
+		"expiryDays_other": "{{count, number}} giorni",
+		"expiryHelp": "Un avvertimento più vecchio non fa più avanzare il membro nelle punizioni. Resta nel suo registro.",
+		"expired": "Non conta più",
+		"summaryExpiry_one": "Ogni avvertimento conta per {{count, number}} giorno.",
+		"summaryExpiry_many": "Ogni avvertimento conta per {{count, number}} di giorni.",
+		"summaryExpiry_other": "Ogni avvertimento conta per {{count, number}} giorni."
 	},
 	"changes": {
 		"title": "Modifiche",

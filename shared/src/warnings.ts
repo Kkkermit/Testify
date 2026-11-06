@@ -30,11 +30,45 @@ export const warnStep = z.discriminatedUnion("action", [
 	z.object({ action: z.literal("ban") }),
 ]);
 
-export const warnLadderPut = z.object({ steps: z.array(warnStep).max(WARN_LIMITS.maxSteps) });
+/** How many days a warning counts towards the punishments; a server that picks none counts every warning for ever. */
+export const WARN_EXPIRY_DAYS = [7, 14, 30, 60, 90, 180, 365] as const;
+
+export type WarnExpiry = (typeof WARN_EXPIRY_DAYS)[number];
+
+const expiryDays = z.union(WARN_EXPIRY_DAYS.map((days) => z.literal(days)));
+
+/** Leaving `expireAfterDays` out keeps what is stored, so a client that only edits the steps cannot clear it. */
+export const warnLadderPut = z.object({
+	steps: z.array(warnStep).max(WARN_LIMITS.maxSteps),
+	expireAfterDays: expiryDays.nullable().optional(),
+});
+
+export type WarnLadderPut = z.infer<typeof warnLadderPut>;
 
 export interface WarnLadder {
 	/** The first entry is what a first warning does, the second a second, and so on. */
 	steps: WarnStep[];
+	/** Null when every warning counts for ever. */
+	expireAfterDays: WarnExpiry | null;
+}
+
+/** Reads a stored length back, so an old record or a hand-edited one counts every warning rather than an odd window. */
+export function expiryOf(stored: number | null | undefined): WarnExpiry | null {
+	return WARN_EXPIRY_DAYS.find((days) => days === stored) ?? null;
+}
+
+/** The moment a warning has to be given at or after to still count, or null when every warning counts. */
+export function countsSince(expireAfterDays: WarnExpiry | null, now: number = Date.now()): Date | null {
+	return expireAfterDays === null ? null : new Date(now - expireAfterDays * 86_400_000);
+}
+
+export function warningExpired(
+	at: Date | string,
+	expireAfterDays: WarnExpiry | null,
+	now: number = Date.now(),
+): boolean {
+	const since = countsSince(expireAfterDays, now);
+	return since !== null && new Date(at) < since;
 }
 
 /** The step a member's Nth warning triggers; past the end of the list, the last step repeats. */

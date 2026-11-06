@@ -30,6 +30,7 @@ jest.mock("@database/repositories/levelRepository", () => ({
 }));
 jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnings: jest.fn(() => Promise.resolve(null)),
+	getWarnLadder: jest.fn(() => Promise.resolve(null)),
 	getActiveSoftban: jest.fn(() => Promise.resolve(null)),
 	deactivateSoftban: jest.fn(() => Promise.resolve(true)),
 }));

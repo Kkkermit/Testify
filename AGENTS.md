@@ -1456,7 +1456,7 @@ yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports whic
 A server can say what each warning does: `WarnStep` in `shared/src/warnings.ts` is a plain warning, a timeout
 from a fixed list of lengths, a kick or a ban, and the list is stored per server in `warnpunishments`.
 `issueWarning` in `src/lib/moderation/warnActions.util.ts` is the **one path** a warning takes — `/warn create`,
-the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Four things
+the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Five things
 about it are load-bearing:
 
 - **The Nth warning takes the Nth step, and past the end the last step repeats** (`stepFor`). A fifth warning on
@@ -1467,6 +1467,11 @@ about it are load-bearing:
   `warnProblemText` in English for Discord, a translation key on the dashboard.
 - **The panel puts the warning number in every option's label**, so a step costs two components rather than
   three and ten of them fit Discord's 40 with room to spare. The test counts them.
+- **A warning can stop counting, and nothing is deleted when it does.** A server may pick `expireAfterDays` from
+  `WARN_EXPIRY_DAYS`, and `countsSince` is the one boundary: `issueWarning` counts only the warnings on or after it,
+  and `warningExpired` marks the older ones in `/warn list`, `/warn info` and on the dashboard, so a list can never
+  disagree with the step a warning took. A record from before the window existed, or one with a length the panel does
+  not offer, counts every warning (`expiryOf`). The put body may leave the window out, which keeps what is stored.
 
 **Each warning stores the step it took**, as `step` and `stepProblem` on the entry, written after the step runs, so
 `/warn list`, `/warn info` and the dashboard say what a warning did rather than guessing from today's list, which

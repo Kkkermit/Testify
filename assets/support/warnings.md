@@ -2,8 +2,8 @@
 id: warnings
 title: Warnings
 topic: moderation
-keywords: warn, warning, warnings, search warnings, recent warnings, strike, infraction, warn list, clear warnings, delete warning, edit warning, punishment, punishments, escalate, auto mute, auto kick, auto ban
-questions: How do I warn someone? | How do I see someone's warnings? | How do I remove a warning? | Can a warning mute, kick or ban someone automatically? | How do I set punishments for warnings?
+keywords: warn, warning, warnings, search warnings, recent warnings, strike, infraction, warn list, clear warnings, delete warning, edit warning, punishment, punishments, escalate, auto mute, auto kick, auto ban, expire, expiry, old warnings, decay
+questions: How do I warn someone? | How do I see someone's warnings? | How do I remove a warning? | Can a warning mute, kick or ban someone automatically? | How do I set punishments for warnings? | Do warnings expire?
 commands: warn
 related: moderation, dashboard-members, link-filter
 ---
@@ -21,6 +21,8 @@ When a command needs a particular warning, start typing and pick it from the lis
 
 ### Punishments
 Each warning number can do something on top of being recorded: nothing more, a timeout from five minutes to a week, a kick, or a ban. For example, the first warning could be only a warning, the second a ten-minute timeout, the third a kick and the fourth a ban. Past the last step, the last one repeats.
+
+Warnings can also stop counting after a while: pick a window from seven days to a year in `/warn punishments`, or on the dashboard. A warning older than that no longer pushes a member up the steps, so a member warned once a year ago starts again from the first step. It stays on their record, and `/warn list` marks it as no longer counting.
 
 The member is told the reason and what happens next before it happens. If the bot cannot carry out a step, because its role is not above the member's or it lacks the permission, the warning is still recorded and whoever issued it is told why.
 

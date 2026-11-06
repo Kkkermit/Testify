@@ -244,8 +244,14 @@ describe("DELETE /warnings/:userId", () => {
 });
 
 describe("the punishments", () => {
-	it("reads an empty list for a server that never set one", async () => {
-		expect(await (await send("GET", "/punishments")).json()).toEqual({ steps: [] });
+	it("reads an empty list for a server that never set one, counting every warning", async () => {
+		expect(await (await send("GET", "/punishments")).json()).toEqual({ steps: [], expireAfterDays: null });
+	});
+
+	/** A client that only edits the steps must not clear the window somebody chose in Discord. */
+	it("keeps the stored window when a write leaves it out", async () => {
+		expect((await send("PUT", "/punishments", { steps: [] })).status).toBe(200);
+		expect(savedLadder).toHaveBeenCalledWith(GUILD, [], expect.any(String), undefined);
 	});
 
 	it("refuses a timeout length nobody offered", async () => {

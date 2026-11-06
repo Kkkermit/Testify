@@ -17,6 +17,8 @@ export interface MemberWarning {
 	step: WarnStep | null;
 	/** Set when the step was due but could not be carried out. */
 	stepProblem: WarnProblem | null;
+	/** True once it is older than the server's window, so it no longer counts towards the punishments. */
+	expired: boolean;
 }
 
 export interface MemberSoftban {

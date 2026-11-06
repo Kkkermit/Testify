@@ -48,7 +48,8 @@
 		"deletedChannelTitle": "Un salon supprimé",
 		"hiddenChannel": "un salon que tu ne peux pas voir",
 		"hiddenChannelTitle": "Un salon que tu ne peux pas voir",
-		"hiddenChannelWarning": "Tu ne peux pas voir ce salon dans Discord, donc seule une personne qui le voit peut le modifier."
+		"hiddenChannelWarning": "Tu ne peux pas voir ce salon dans Discord, donc seule une personne qui le voit peut le modifier.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Rôles",
@@ -2394,7 +2395,17 @@
 		"searchCount_other": "{{count, number}} avertissements pour ce nom ou cet identifiant.",
 		"searchLabel": "Trouver les avertissements d’un membre",
 		"searchHint": "Cherchez par nom, ou collez un identifiant Discord.",
-		"searchNone": "Aucun avertissement pour ce nom ou cet identifiant."
+		"searchNone": "Aucun avertissement pour ce nom ou cet identifiant.",
+		"expiryLabel": "Les avertissements comptent pendant",
+		"expiryNever": "Toujours",
+		"expiryDays_one": "{{count, number}} jour",
+		"expiryDays_many": "{{count, number}} de jours",
+		"expiryDays_other": "{{count, number}} jours",
+		"expiryHelp": "Un avertissement plus ancien ne fait plus avancer le membre dans les sanctions. Il reste dans son dossier.",
+		"expired": "Ne compte plus",
+		"summaryExpiry_one": "Chaque avertissement compte pendant {{count, number}} jour.",
+		"summaryExpiry_many": "Chaque avertissement compte pendant {{count, number}} de jours.",
+		"summaryExpiry_other": "Chaque avertissement compte pendant {{count, number}} jours."
 	},
 	"changes": {
 		"title": "Modifications",

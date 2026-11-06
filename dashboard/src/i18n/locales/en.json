@@ -47,7 +47,8 @@
 		"deletedChannelTitle": "A deleted channel",
 		"hiddenChannel": "a channel you can’t see",
 		"hiddenChannelTitle": "A channel you can’t see",
-		"hiddenChannelWarning": "You can’t see this channel in Discord, so only somebody who can may change it."
+		"hiddenChannelWarning": "You can’t see this channel in Discord, so only somebody who can may change it.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Roles",
@@ -2324,7 +2325,15 @@
 		"searchCount_other": "{{count, number}} warnings for that name or ID.",
 		"searchLabel": "Find a member’s warnings",
 		"searchHint": "Search by name, or paste a Discord ID.",
-		"searchNone": "No warnings for that name or ID."
+		"searchNone": "No warnings for that name or ID.",
+		"expiryLabel": "Warnings count for",
+		"expiryNever": "Always",
+		"expiryDays_one": "{{count, number}} day",
+		"expiryDays_other": "{{count, number}} days",
+		"expiryHelp": "A warning older than this stops pushing a member up the punishments. It stays on their record.",
+		"expired": "No longer counts",
+		"summaryExpiry_one": "Each warning counts for {{count, number}} day.",
+		"summaryExpiry_other": "Each warning counts for {{count, number}} days."
 	},
 	"changes": {
 		"title": "Changes",

@@ -46,7 +46,8 @@
 		"deletedChannelTitle": "削除されたチャンネル",
 		"hiddenChannel": "あなたには見えないチャンネル",
 		"hiddenChannelTitle": "あなたには見えないチャンネル",
-		"hiddenChannelWarning": "このチャンネルは Discord であなたには見えないため、見える人だけが変更できます。"
+		"hiddenChannelWarning": "このチャンネルは Discord であなたには見えないため、見える人だけが変更できます。",
+		"sentenceSeparator": ""
 	},
 	"nav": {
 		"roles": "ロール",
@@ -2254,7 +2255,13 @@
 		"searchCount_other": "その名前または ID の警告は {{count, number}} 件です。",
 		"searchLabel": "メンバーの警告を探す",
 		"searchHint": "名前で検索するか、Discord ID を貼り付けてください。",
-		"searchNone": "その名前または ID の警告はありません。"
+		"searchNone": "その名前または ID の警告はありません。",
+		"expiryLabel": "警告が有効な期間",
+		"expiryNever": "無期限",
+		"expiryDays_other": "{{count, number}}日間",
+		"expiryHelp": "これより古い警告は処罰の段階に数えられなくなります。記録には残ります。",
+		"expired": "カウント対象外",
+		"summaryExpiry_other": "各警告は{{count, number}}日間有効です。"
 	},
 	"changes": {
 		"title": "変更履歴",

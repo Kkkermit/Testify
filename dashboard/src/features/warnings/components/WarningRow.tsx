@@ -67,6 +67,7 @@ export function WarningRow({
 						<time dateTime={warning.at}>{shortDate(warning.at)}</time>
 					</span>
 					<Badge tone={action.tone}>{action.label}</Badge>
+					{warning.expired && <Badge>{t("warnings.expired")}</Badge>}
 					{warning.edited && <Badge tone="warning">{t("members.edited")}</Badge>}
 				</p>
 			</div>

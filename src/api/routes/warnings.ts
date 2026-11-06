@@ -62,9 +62,9 @@ warnings.get("/punishments", async (context) => context.json(await readWarnLadde
 
 warnings.put("/punishments", async (context) => {
 	const guild = guildOf(context);
-	const { steps } = await parseBody(context, warnLadderPut);
+	const { steps, expireAfterDays } = await parseBody(context, warnLadderPut);
 
-	const saved = await writeWarnLadder(guild.id, steps, actor(context).id);
+	const saved = await writeWarnLadder(guild.id, steps, actor(context).id, expireAfterDays);
 	await auditChange(context, {
 		action: "warnings.punishments",
 		summary: saved.steps.length === 0 ? "Cleared the warning punishments" : "Changed the warning punishments",
@@ -103,7 +103,7 @@ warnings.post("/", requirePermission(PermissionFlagsBits.ModerateMembers), async
 		after: { reason: body.reason, count: outcome.count, step: outcome.step },
 	});
 
-	const answer: WarningAdded = { warning: toGuildWarning(member.id, member.user.username, entry), outcome };
+	const answer: WarningAdded = { warning: toGuildWarning(member.id, member.user.username, entry, null), outcome };
 	return context.json(answer);
 });
 
@@ -122,7 +122,8 @@ warnings.patch("/:userId/:warnId", requirePermission(PermissionFlagsBits.Moderat
 	const edited = record?.warnings.find((warning) => warning.warnId === warnId);
 	if (record === null || edited === undefined) throw notFound("warning_not_found", "That warning has already gone.");
 
-	return context.json(toGuildWarning(userId, record.userTag, edited));
+	const { expireAfterDays } = await readWarnLadder(guild.id);
+	return context.json(toGuildWarning(userId, record.userTag, edited, expireAfterDays));
 });
 
 warnings.delete("/:userId/:warnId", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {

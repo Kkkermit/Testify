@@ -46,6 +46,7 @@ describe("warningSummary", () => {
 			edited: false,
 			step: null,
 			stepProblem: null,
+			expired: false,
 		}));
 
 		expect(warningSummary(warnings, t)).toBe(expected);
@@ -70,6 +71,7 @@ describe("memberSummary", () => {
 		edited: false,
 		step: null,
 		stepProblem: null,
+		expired: false,
 	};
 
 	/** A softban outranks a warning count, and a timeout that has run out says nothing about today. */

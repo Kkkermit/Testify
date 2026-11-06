@@ -1,8 +1,15 @@
 import { type GuildMember, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { readWarnLadder, stepLabel, WARN_LADDER_ID, warnLadderPanel, writeWarnLadder } from "@lib/moderation";
-import { stepFromValue, WARN_LIMITS, type WarnStep } from "@testify/shared";
+import {
+	expiryLabel,
+	readWarnLadder,
+	stepLabel,
+	WARN_LADDER_ID,
+	warnLadderPanel,
+	writeWarnLadder,
+} from "@lib/moderation";
+import { expiryOf, stepFromValue, WARN_LIMITS, type WarnStep } from "@testify/shared";
 
 const STALE = "That step has changed since this panel was drawn. Open it again with `/warn punishments`.";
 
@@ -21,6 +28,18 @@ export default defineButton({
 		const { steps } = await readWarnLadder(guild.id);
 		let next: WarnStep[];
 		let note: string;
+
+		if (action === "expiry") {
+			if (!interaction.isStringSelectMenu()) return;
+
+			const value = interaction.values[0] ?? "";
+			const days = value === "never" ? null : expiryOf(Number(value));
+			if (value !== "never" && days === null) throw new UserFacingError(STALE);
+
+			const saved = await writeWarnLadder(guild.id, steps, interaction.user.id, days);
+			await interaction.update(warnLadderPanel(saved, interaction.user.id, `${expiryLabel(days)}.`));
+			return;
+		}
 
 		if (action === "set") {
 			if (!interaction.isStringSelectMenu()) return;

@@ -28,6 +28,7 @@ import { type RewardOutcome } from "@lib/levelling/levelling.types";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 import { blockText, moderationProblem } from "@lib/moderation/moderationActions.util";
+import { memberWarningOf, readWarnLadder } from "@lib/moderation/warnActions.util";
 import {
 	BOARD_PAGE_SIZE,
 	type BoardPage,
@@ -36,11 +37,9 @@ import {
 	type BoardScope,
 	type MemberBoard,
 	type MemberDetail,
-	type MemberWarning,
 	type MoneyPurse,
 	type MoneySort,
 	pageOfRank,
-	storedStep,
 } from "@testify/shared";
 
 export interface BoardEntry {
@@ -179,27 +178,6 @@ function timedOutUntil(member: GuildMember | null, now: number = Date.now()): st
 	return until !== null && until > now ? new Date(until).toISOString() : null;
 }
 
-function toWarning(entry: {
-	warnId: string;
-	reason: string;
-	executorId: string;
-	executorTag: string;
-	timestamp: Date;
-	edits?: unknown[];
-	step?: string | null;
-	stepProblem?: string | null;
-}): MemberWarning {
-	return {
-		id: entry.warnId,
-		reason: entry.reason,
-		byId: entry.executorId,
-		byTag: entry.executorTag,
-		at: entry.timestamp.toISOString(),
-		edited: (entry.edits ?? []).length > 0,
-		...storedStep(entry.step, entry.stepProblem),
-	};
-}
-
 /** Everything one member's page shows, in one read; `member` is null once they leave, and every section survives it. */
 export async function readMemberDetail(options: {
 	guild: Guild;
@@ -210,13 +188,14 @@ export async function readMemberDetail(options: {
 }): Promise<MemberDetail> {
 	const { guild, userId, member, moderator, botId } = options;
 
-	const [account, economyRank, level, levelRank, warnings, softban] = await Promise.all([
+	const [account, economyRank, level, levelRank, warnings, softban, ladder] = await Promise.all([
 		findAccount(guild.id, userId),
 		getEconomyRank(guild.id, userId),
 		getUserLevel(guild.id, userId),
 		getRank(guild.id, userId),
 		getWarnings(guild.id, userId),
 		getActiveSoftban(guild.id, userId),
+		readWarnLadder(guild.id),
 	]);
 
 	return {
@@ -250,7 +229,7 @@ export async function readMemberDetail(options: {
 						rank: economyRank,
 					},
 		levels: level === null ? null : { level: level.level, xp: level.xp, rank: levelRank },
-		warnings: (warnings?.warnings ?? []).map(toWarning).reverse(),
+		warnings: (warnings?.warnings ?? []).map((entry) => memberWarningOf(entry, ladder.expireAfterDays)).reverse(),
 		softban:
 			softban === null
 				? null

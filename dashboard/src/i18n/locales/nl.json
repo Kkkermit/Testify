@@ -47,7 +47,8 @@
 		"deletedChannelTitle": "Een verwijderd kanaal",
 		"hiddenChannel": "een kanaal dat je niet kunt zien",
 		"hiddenChannelTitle": "Een kanaal dat je niet kunt zien",
-		"hiddenChannelWarning": "Je kunt dit kanaal in Discord niet zien, dus alleen iemand die dat wel kan, mag het wijzigen."
+		"hiddenChannelWarning": "Je kunt dit kanaal in Discord niet zien, dus alleen iemand die dat wel kan, mag het wijzigen.",
+		"sentenceSeparator": " "
 	},
 	"nav": {
 		"roles": "Rollen",
@@ -2324,7 +2325,15 @@
 		"searchCount_other": "{{count, number}} waarschuwingen voor die naam of ID.",
 		"searchLabel": "De waarschuwingen van een lid zoeken",
 		"searchHint": "Zoek op naam, of plak een Discord-ID.",
-		"searchNone": "Geen waarschuwingen voor die naam of ID."
+		"searchNone": "Geen waarschuwingen voor die naam of ID.",
+		"expiryLabel": "Waarschuwingen tellen gedurende",
+		"expiryNever": "Altijd",
+		"expiryDays_one": "{{count, number}} dag",
+		"expiryDays_other": "{{count, number}} dagen",
+		"expiryHelp": "Een oudere waarschuwing brengt een lid niet verder in de straffen. Ze blijft in zijn dossier staan.",
+		"expired": "Telt niet meer",
+		"summaryExpiry_one": "Elke waarschuwing telt {{count, number}} dag.",
+		"summaryExpiry_other": "Elke waarschuwing telt {{count, number}} dagen."
 	},
 	"changes": {
 		"title": "Wijzigingen",
