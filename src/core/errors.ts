@@ -1,10 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { type ContextMenuCommandInteraction, EmbedBuilder, MessageFlags } from "discord.js";
-import { strings } from "@config/strings";
 import { theme } from "@config/theme";
 import { type ComponentInteraction } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptions } from "@core/command";
+import { readerLanguage, say } from "@core/language";
 import { triageRow } from "@lib/bot/errorTriage.util";
 import { logAuthor, loggedOptionsText, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
 import { embed } from "@lib/discord/embeds.util";
@@ -108,7 +108,7 @@ async function reportFailure(
 
 	if (error instanceof ServiceError) {
 		client.logger.error({ err: error, command: label }, "[COMMAND_ERROR] A command failed.");
-		await tell(interaction, failureEmbed(strings.generic.serviceDown(error.service)));
+		await tell(interaction, failureEmbed(say(readerLanguage(interaction), "serviceDown", { service: error.service })));
 		return null;
 	}
 
@@ -118,7 +118,12 @@ async function reportFailure(
 		"[COMMAND_ERROR] A command failed.",
 	);
 	await postToErrorChannel(client, { label, reference, interaction, error: toError(error), command });
-	await tell(interaction, failureEmbed(strings.generic.failure(what, reference), strings.generic.failureTitle));
+	const language = readerLanguage(interaction);
+	const doing = what === null ? say(language, "failureDoing") : say(language, "failureRunning", { command: what });
+	await tell(
+		interaction,
+		failureEmbed(say(language, "failure", { what: doing, reference }), say(language, "failureTitle")),
+	);
 	return reference;
 }
 

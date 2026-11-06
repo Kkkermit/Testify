@@ -38,9 +38,18 @@ export function defineContextMenu<T extends ContextMenu>(menu: T): T {
 	return menu;
 }
 
-export function buildContextMenu(menu: ContextMenu): ContextMenuCommandBuilder {
+/** The key an action's translated names are filed under, beside the commands' descriptions. */
+export function menuKey(menu: Pick<ContextMenu, "name">): string {
+	return `menu: ${menu.name}`;
+}
+
+export function buildContextMenu(
+	menu: ContextMenu,
+	localise: (key: string) => Record<string, string> | undefined = () => undefined,
+): ContextMenuCommandBuilder {
 	return new ContextMenuCommandBuilder()
 		.setName(menu.name)
+		.setNameLocalizations(localise(menuKey(menu)) ?? null)
 		.setType(menu.type === "user" ? ApplicationCommandType.User : ApplicationCommandType.Message)
 		.setContexts(InteractionContextType.Guild)
 		.setDefaultMemberPermissions(

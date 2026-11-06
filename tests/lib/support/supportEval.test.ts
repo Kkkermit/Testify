@@ -116,6 +116,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["make the economy pay double", ["economy-admin"]],
 	["report a message to the mods", ["right-click-actions"]],
 	["copy my server setup to my other server", ["backup-and-copy"]],
+	["can the bot reply in german", ["languages"]],
 	["delete 50 messages", ["clearing-messages", "command-clear"]],
 	["lock the channel", ["channel-controls"]],
 	["make the bot say something", ["announcements"]],

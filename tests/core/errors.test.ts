@@ -38,6 +38,21 @@ describe("runCommand", () => {
 		expect(outcome).toEqual({ ok: false, reference });
 	});
 
+	/** The apology and its reference reach a French reader in French, with the reference still the one in the log. */
+	it("apologises in the reader's language", async () => {
+		const interaction = createMockInteraction({ overrides: { locale: "fr" } as never });
+
+		await runCommand(
+			interaction,
+			command(() => Promise.reject(new Error("boom"))),
+			createMockClient({ logger: { error: jest.fn() } } as never),
+		);
+
+		const sent = JSON.stringify(interaction.sent);
+		expect(sent).toContain("Ça n’a pas marché");
+		expect(sent).toMatch(/pendant `\/demo`.*\*\*[0-9A-Z]{6}\*\*/);
+	});
+
 	/** A refusal is the reader's to fix and is never logged as a failure, so it has no reference to follow. */
 	it("returns no reference for a failure that was not logged as a bug", async () => {
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);

@@ -195,6 +195,7 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **Games** — guess the number, guess the Pokémon, fast type, RPS, 8ball
 - **`/ask`** — a help desk that answers from written articles, never generated text
 - **Per-command switches**, per server or bot-wide, from Discord or the dashboard
+- **Eight languages** — the slash menus and the replies every command shares follow each reader's Discord
 - **Notifications from the bot's owners**, mentioned once after your next command and on the dashboard, scheduled and
   taken down on a timer if they choose
 
