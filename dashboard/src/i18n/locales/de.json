@@ -2947,7 +2947,8 @@
 		"putOnSale": "Zum Kauf anbieten",
 		"priceOf": "Preis von {{name}}",
 		"takeOffSale": "{{name}} aus dem Verkauf nehmen",
-		"deletedRole": "Eine gelöschte Rolle"
+		"deletedRole": "Eine gelöschte Rolle",
+		"shopRolesNeedManageRoles": "Rollen zum Verkauf anbieten, ihre Preise ändern und sie wieder herausnehmen erfordert die Berechtigung „Rollen verwalten“ auf diesem Server."
 	},
 	"backup": {
 		"title": "Sichern und kopieren",

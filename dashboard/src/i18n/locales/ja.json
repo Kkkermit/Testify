@@ -2864,7 +2864,8 @@
 		"putOnSale": "販売する",
 		"priceOf": "{{name}} の価格",
 		"takeOffSale": "{{name}} の販売をやめる",
-		"deletedRole": "削除されたロール"
+		"deletedRole": "削除されたロール",
+		"shopRolesNeedManageRoles": "ロールの出品、価格の変更、出品の取り下げには、このサーバーでの「ロールの管理」権限が必要です。"
 	},
 	"backup": {
 		"title": "バックアップとコピー",

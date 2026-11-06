@@ -1,4 +1,5 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import economy from "@commands/economy/create.command";
 import lottery from "@commands/economy/lottery.command";
 import {
 	checkCasinoPlay,
@@ -376,6 +377,27 @@ describe("the lottery", () => {
 		const interaction = createMockInteraction({ subcommand: name, overrides: memberWith(0n) });
 
 		expect(await runChecks(interaction, lottery, createMockClient())).toBeNull();
+	});
+});
+
+/** Selling a role hands it out, so Manage Server alone may not choose what the shop sells. */
+describe("the shop's roles", () => {
+	it("refuses shop-role to somebody who can manage the server but not its roles", async () => {
+		const interaction = createMockInteraction({
+			subcommand: "shop-role",
+			overrides: memberWith(PermissionFlagsBits.ManageGuild),
+		});
+
+		expect(await runChecks(interaction, economy, createMockClient())).toContain("manage roles");
+	});
+
+	it("lets somebody with Manage Roles through", async () => {
+		const interaction = createMockInteraction({
+			subcommand: "shop-role",
+			overrides: memberWith(PermissionFlagsBits.ManageRoles),
+		});
+
+		expect(await runChecks(interaction, economy, createMockClient())).toBeNull();
 	});
 });
 

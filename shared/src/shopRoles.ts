@@ -12,6 +12,12 @@ export interface ShopRole {
 	problem: string | null;
 }
 
+/** What the shop sells, and whether the person reading may change it, which asks Manage Roles as `/economy shop-role` does. */
+export interface ShopRoleList {
+	roles: ShopRole[];
+	canManage: boolean;
+}
+
 export const shopRoleBody = z.object({
 	price: z.number().int().min(SHOP_ROLE_LIMITS.minPrice).max(SHOP_ROLE_LIMITS.maxPrice),
 });
