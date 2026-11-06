@@ -1,9 +1,9 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
-import { modalForm } from "@lib/discord";
+import { modalForm, redrawPanel } from "@lib/discord";
 import {
 	checkPrefix,
 	PREFIX_LIMITS,
@@ -35,14 +35,7 @@ export default recordsSettings(
 			const state = await prefixState(guildId);
 
 			const show = async (next: PrefixPanelState, note?: string): Promise<void> => {
-				const payload = prefixPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId);
-
-				if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-					await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
-					return;
-				}
-
-				await interaction.update(payload);
+				await redrawPanel(interaction, prefixPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId));
 			};
 
 			switch (context.action) {

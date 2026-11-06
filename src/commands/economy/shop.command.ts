@@ -1,8 +1,7 @@
-import { balancesOf } from "@buttons/shop";
 import { defineCommand, inGuild } from "@core/command";
 import { requireAccount } from "@database/repositories/economyRepository";
 import { reply } from "@lib/discord";
-import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/economy";
+import { balancesOf, isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/economy";
 
 export default defineCommand({
 	name: "shop",

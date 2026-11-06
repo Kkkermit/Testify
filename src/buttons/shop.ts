@@ -9,7 +9,7 @@ import {
 	setFields,
 } from "@database/repositories/economyRepository";
 import {
-	type Balances,
+	balancesOf,
 	decodeShopState,
 	findBusiness,
 	findEntry,
@@ -23,18 +23,6 @@ import {
 	type ShopState,
 } from "@lib/economy";
 import { formatNumber } from "@lib/format";
-
-export function balancesOf(account: EconomyAccount): Balances {
-	return {
-		wallet: account.wallet,
-		ownsHouse: account.house !== null,
-		...(account.house !== null ? { houseId: account.house.houseId } : {}),
-		ownedBusinessIds: account.businesses.map((business) => business.businessId),
-		ownedItemIds: account.inventory.filter((entry) => entry.quantity > 0).map((entry) => entry.itemId),
-		job: account.job,
-		hasPet: account.pet !== null,
-	};
-}
 
 async function purchase(state: ShopState, guildId: string, userId: string, account: EconomyAccount): Promise<string> {
 	const id = state.selectedId ?? "";

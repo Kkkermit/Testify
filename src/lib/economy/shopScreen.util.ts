@@ -1,5 +1,6 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
+import { type EconomyAccount } from "@database/models/economy.schema";
 import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
@@ -363,4 +364,17 @@ export function shopScreen(state: ShopState, balances: Balances, ownerId: string
 	}
 
 	return catalogue(state, balances, ownerId, note);
+}
+
+/** What the shop needs to know about a person to price and enable its buttons. */
+export function balancesOf(account: EconomyAccount): Balances {
+	return {
+		wallet: account.wallet,
+		ownsHouse: account.house !== null,
+		...(account.house !== null ? { houseId: account.house.houseId } : {}),
+		ownedBusinessIds: account.businesses.map((business) => business.businessId),
+		ownedItemIds: account.inventory.filter((entry) => entry.quantity > 0).map((entry) => entry.itemId),
+		job: account.job,
+		hasPet: account.pet !== null,
+	};
 }

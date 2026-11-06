@@ -6,16 +6,7 @@ import { type ComponentInteraction } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptions } from "@core/command";
 import { triageRow } from "@lib/bot/errorTriage.util";
-import {
-	logAuthor,
-	loggedChannel,
-	loggedChannelText,
-	loggedGuild,
-	loggedGuildText,
-	loggedOptionsText,
-	loggedUser,
-	loggedUserText,
-} from "@lib/bot/logFields.util";
+import { logAuthor, loggedOptionsText, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
 import { embed } from "@lib/discord/embeds.util";
 
 /** Throw this when the user needs to read the message — a bad argument, not enough money, a missing role. */
@@ -166,12 +157,7 @@ function errorLogEmbed(report: FailureReport): EmbedBuilder {
 	const fields = [
 		{ name: "Reference", value: `\`${report.reference}\``, inline: true },
 		{ name: "User", value: loggedUserText(user), inline: true },
-		{ name: "Server", value: loggedGuildText(loggedGuild(interaction.guild)), inline: true },
-		{
-			name: "Channel",
-			value: loggedChannelText(interaction.guild === null ? null : loggedChannel(interaction.channel, null)),
-			inline: true,
-		},
+		...placeFields(interaction),
 	];
 
 	// Only `runCommand` passes a command, and it only ever has a command's input.

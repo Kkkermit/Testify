@@ -1,9 +1,8 @@
-import { ButtonStyle } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { PREFIX_LIMITS, PREFIX_PANEL_ID } from "@lib/settings/settings.constants";
 import { type PrefixPanelState } from "@lib/settings/settings.types";
-import { settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
+import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 
 /** The prefix for text commands, from one screen rather than four subcommands. */
 
@@ -35,11 +34,7 @@ export function prefixPanel(state: PrefixPanelState, ownerId: string): Container
 			{ label: "Text commands", value: statusDot(state.isEnabled) },
 		],
 		actions: [
-			{
-				action: "toggle",
-				label: state.isEnabled ? "Turn off" : "Turn on",
-				style: state.isEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
-			},
+			switchAction(state.isEnabled),
 			{ action: "reset", label: `Reset to ${DEFAULT_PREFIX}`, disabled: state.prefix === DEFAULT_PREFIX },
 		],
 		footer: "Mentioning the bot works as a prefix too, whatever this is set to.",

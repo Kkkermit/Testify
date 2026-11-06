@@ -4,15 +4,7 @@ import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { chosenSubcommand, type Command, type CommandInput, givenOptions } from "@core/command";
 import { postToLogChannel } from "@lib/bot/logChannel.util";
-import {
-	logAuthor,
-	loggedChannel,
-	loggedChannelText,
-	loggedGuild,
-	loggedGuildText,
-	loggedUser,
-	loggedUserText,
-} from "@lib/bot/logFields.util";
+import { logAuthor, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
 import { embed } from "@lib/discord/embeds.util";
 import { truncate } from "@lib/format/format.util";
 
@@ -65,15 +57,7 @@ function codeBlock(code: string, max: number): string {
 }
 
 function whoAndWhere(input: CommandInput): { name: string; value: string; inline: boolean }[] {
-	return [
-		{ name: "User", value: loggedUserText(loggedUser(input.user)), inline: true },
-		{ name: "Server", value: loggedGuildText(loggedGuild(input.guild)), inline: true },
-		{
-			name: "Channel",
-			value: loggedChannelText(input.guild === null ? null : loggedChannel(input.channel, null)),
-			inline: true,
-		},
-	];
+	return [{ name: "User", value: loggedUserText(loggedUser(input.user)), inline: true }, ...placeFields(input)];
 }
 
 function ownerAttemptEmbed(input: CommandInput, command: Command, held: number): EmbedBuilder {

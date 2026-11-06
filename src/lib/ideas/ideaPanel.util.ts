@@ -6,7 +6,7 @@ import { button, channelSelect, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { IDEA_ID, IDEA_SETTINGS_ID } from "@lib/ideas/ideas.constants";
-import { settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
+import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type IdeaSettings, type IdeaStatus } from "@testify/shared";
 
 const seconds = (date: Date): string => String(Math.floor(date.getTime() / 1_000));
@@ -117,14 +117,7 @@ export function ideaSettingsPanel(settings: IdeaSettings, ownerId: string, note?
 				),
 			},
 		],
-		actions: [
-			{
-				action: "toggle",
-				label: settings.enabled ? "Turn off" : "Turn on",
-				style: settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
-				disabled: !settings.enabled && settings.channelId === null,
-			},
-		],
+		actions: [switchAction(settings.enabled, settings.channelId !== null)],
 		footer:
 			"Members post with `/idea submit`. Staff with Manage Server accept or decline them. `/suggest` is different: it goes to the bot's developers.",
 	});

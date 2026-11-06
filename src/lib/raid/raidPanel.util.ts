@@ -1,11 +1,10 @@
-import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { channelSelect, roleSelect, row } from "@lib/discord/components.util";
 import { withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { RAID_PANEL_ID } from "@lib/raid/raid.constants";
 import { hasWork } from "@lib/raid/raidActions.util";
-import { settingsScreen, type ScreenRow, statusDot } from "@lib/settings/settingsScreen.util";
+import { type ScreenRow, settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type RaidOverview } from "@testify/shared";
 
 const days = (count: number): string => `${String(count)} ${count === 1 ? "day" : "days"}`;
@@ -95,14 +94,7 @@ export function raidPanel(
 					),
 				},
 			],
-			actions: [
-				{
-					action: "toggle",
-					label: raid.enabled ? "Turn off" : "Turn on",
-					style: raid.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
-					disabled: !raid.enabled && !hasWork(raid),
-				},
-			],
+			actions: [switchAction(raid.enabled, hasWork(raid))],
 			footer:
 				"Nothing here kicks or bans. Lift a hold sooner with `/unmute`. Joins are counted in memory and never stored.",
 		}),

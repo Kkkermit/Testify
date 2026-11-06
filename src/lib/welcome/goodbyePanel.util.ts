@@ -1,9 +1,8 @@
-import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { channelSelect, row } from "@lib/discord/components.util";
 import { withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
-import { settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
+import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { GOODBYE_PANEL_ID } from "@lib/welcome/welcome.constants";
 import { PLACEHOLDER_HELP } from "@lib/welcome/welcome.util";
 import { type GoodbyeSettings, WELCOME_PLACEHOLDERS } from "@testify/shared";
@@ -61,15 +60,7 @@ export function goodbyePanel(
 					),
 				},
 			],
-			actions: [
-				{ action: "preview", label: "Preview" },
-				{
-					action: "toggle",
-					label: settings.enabled ? "Turn off" : "Turn on",
-					style: settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
-					disabled: !settings.enabled && settings.channelId === null,
-				},
-			],
+			actions: [{ action: "preview", label: "Preview" }, switchAction(settings.enabled, settings.channelId !== null)],
 			footer: `Placeholders: ${placeholders}. Nobody is pinged, because the member has already left.`,
 		}),
 	);

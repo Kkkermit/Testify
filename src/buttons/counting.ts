@@ -1,8 +1,8 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 import {
 	COUNTING_LIMITS,
@@ -41,14 +41,7 @@ export default recordsSettings(
 			const state = await countingState(guild.id);
 
 			const show = async (next: CountingPanelState, note?: string): Promise<void> => {
-				const payload = countingPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId);
-
-				if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-					await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
-					return;
-				}
-
-				await interaction.update(payload);
+				await redrawPanel(interaction, countingPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId));
 			};
 
 			switch (context.action) {

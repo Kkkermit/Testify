@@ -1,7 +1,7 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { type ComponentInteraction, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { type ContainerMessage, modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import {
 	changeSchedule,
 	nextRepeat,
@@ -14,15 +14,6 @@ import {
 	scheduleHub,
 } from "@lib/scheduledMessages";
 import { SCHEDULE_LIMITS } from "@testify/shared";
-
-async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately.
-	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
-	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
-		await interaction.update(panel);
-	}
-}
 
 function typed(interaction: ComponentInteraction, field: string): string {
 	if (!interaction.isModalSubmit()) throw new UserFacingError("Open the form again and fill it in.");
@@ -44,7 +35,7 @@ export default defineButton({
 		const ownerId = interaction.user.id;
 		const [id = ""] = context.args;
 		const editor = async (note?: string, confirmingDelete = false): Promise<void> =>
-			show(
+			redrawPanel(
 				interaction,
 				scheduleEditor(
 					{
@@ -60,7 +51,7 @@ export default defineButton({
 			case "open": {
 				if (!interaction.isStringSelectMenu()) return;
 				const schedule = await readSchedule(guild, interaction.values[0] ?? "");
-				await show(interaction, scheduleEditor({ schedule }, ownerId));
+				await redrawPanel(interaction, scheduleEditor({ schedule }, ownerId));
 				return;
 			}
 
@@ -132,14 +123,14 @@ export default defineButton({
 
 			case "delete-yes":
 				await removeSchedule(guild, id);
-				await show(
+				await redrawPanel(
 					interaction,
 					scheduleHub((await readSchedules(guild)).messages, ownerId, "Deleted. It will not be posted."),
 				);
 				return;
 
 			case "hub":
-				await show(interaction, scheduleHub((await readSchedules(guild)).messages, ownerId));
+				await redrawPanel(interaction, scheduleHub((await readSchedules(guild)).messages, ownerId));
 				return;
 		}
 	},

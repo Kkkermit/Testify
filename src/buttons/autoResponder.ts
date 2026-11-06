@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { type ComponentInteraction, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import {
@@ -12,17 +12,8 @@ import {
 	readAutoResponders,
 	removeAutoResponder,
 } from "@lib/autoResponders";
-import { type ContainerMessage, modalForm } from "@lib/discord";
+import { modalForm, redrawPanel } from "@lib/discord";
 import { AUTO_RESPONDER_LIMITS, type AutoResponder } from "@testify/shared";
-
-async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately.
-	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
-	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
-		await interaction.update(panel);
-	}
-}
 
 function responderForm(action: string, args: string[], responder?: AutoResponder): ReturnType<typeof modalForm> {
 	return modalForm({
@@ -73,7 +64,7 @@ export default defineButton({
 		const ownerId = interaction.user.id;
 		const [id = ""] = context.args;
 		const hub = async (note?: string): Promise<void> =>
-			show(interaction, autoResponderHub((await readAutoResponders(guild.id)).responders, ownerId, note));
+			redrawPanel(interaction, autoResponderHub((await readAutoResponders(guild.id)).responders, ownerId, note));
 
 		switch (context.action) {
 			case "new":
@@ -82,14 +73,17 @@ export default defineButton({
 
 			case "create": {
 				const responder = await addAutoResponder(guild.id, { ...typed(interaction), match: "word" }, ownerId);
-				await show(interaction, autoResponderEditor({ responder, note: "Added. It answers from now on." }, ownerId));
+				await redrawPanel(
+					interaction,
+					autoResponderEditor({ responder, note: "Added. It answers from now on." }, ownerId),
+				);
 				return;
 			}
 
 			case "open": {
 				if (!interaction.isStringSelectMenu()) return;
 				const responder = await readAutoResponder(guild.id, interaction.values[0] ?? "");
-				await show(interaction, autoResponderEditor({ responder }, ownerId));
+				await redrawPanel(interaction, autoResponderEditor({ responder }, ownerId));
 				return;
 			}
 
@@ -107,7 +101,7 @@ export default defineButton({
 					{ ...typed(interaction), match: current.match },
 					ownerId,
 				);
-				await show(interaction, autoResponderEditor({ responder, note: "Saved." }, ownerId));
+				await redrawPanel(interaction, autoResponderEditor({ responder, note: "Saved." }, ownerId));
 				return;
 			}
 
@@ -119,13 +113,13 @@ export default defineButton({
 					{ ...current, match: nextMatch(current.match) },
 					ownerId,
 				);
-				await show(interaction, autoResponderEditor({ responder }, ownerId));
+				await redrawPanel(interaction, autoResponderEditor({ responder }, ownerId));
 				return;
 			}
 
 			case "delete":
 			case "delete-no":
-				await show(
+				await redrawPanel(
 					interaction,
 					autoResponderEditor(
 						{ responder: await readAutoResponder(guild.id, id), confirmingDelete: context.action === "delete" },
