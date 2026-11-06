@@ -3,9 +3,13 @@ import {
 	createSession,
 	deleteSession,
 	deleteSessionsFor,
+	endOtherSessions,
+	endSessionByHandle,
 	findSession,
 	type NewSession,
 	readTokens,
+	sessionHandleOf,
+	sessionsFor,
 	touchSession,
 	updateTokens,
 } from "@database/repositories/dashboardSessionRepository";
@@ -118,5 +122,45 @@ describeWithMongo("the dashboard session repository", () => {
 
 		expect(await deleteSessionsFor(USER)).toBe(2);
 		expect(await findSession(other.id)).not.toBeNull();
+	});
+
+	/** The list goes to a browser, so it must name each sign-in without handing over a cookie that is one. */
+	it("lists a user's sign-ins by a digest, marking the one asking", async () => {
+		const here = await createSession(box, details(), 7);
+		const there = await createSession(box, details(), 7);
+		await createSession(box, details({ userId: "200000000000000002" }), 7);
+
+		const listed = await sessionsFor(USER, here.id);
+
+		expect(listed.map((row) => row.handle).sort()).toEqual(
+			[sessionHandleOf(here.id), sessionHandleOf(there.id)].sort(),
+		);
+		expect(JSON.stringify(listed)).not.toContain(here.id);
+		expect(listed.find((row) => row.current)?.handle).toBe(sessionHandleOf(here.id));
+	});
+
+	/** A handle from somebody else's list, or the reader's own browser, must end nothing. */
+	it("ends one other sign-in by its handle, never the one asking or another person's", async () => {
+		const here = await createSession(box, details(), 7);
+		const there = await createSession(box, details(), 7);
+		const stranger = await createSession(box, details({ userId: "200000000000000002" }), 7);
+
+		expect(await endSessionByHandle(USER, sessionHandleOf(stranger.id), here.id)).toBe(false);
+		expect(await endSessionByHandle(USER, sessionHandleOf(here.id), here.id)).toBe(false);
+		expect(await endSessionByHandle(USER, sessionHandleOf(there.id), here.id)).toBe(true);
+
+		expect(await findSession(here.id)).not.toBeNull();
+		expect(await findSession(there.id)).toBeNull();
+		expect(await findSession(stranger.id)).not.toBeNull();
+	});
+
+	it("signs a user out of every other browser and keeps the one asking", async () => {
+		const here = await createSession(box, details(), 7);
+		await createSession(box, details(), 7);
+		const stranger = await createSession(box, details({ userId: "200000000000000002" }), 7);
+
+		expect(await endOtherSessions(USER, here.id)).toBe(1);
+		expect(await findSession(here.id)).not.toBeNull();
+		expect(await findSession(stranger.id)).not.toBeNull();
 	});
 });

@@ -1,10 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 import { applyStoredPreferences } from "@/hooks/preferences";
-import { ApiError } from "@/lib/api";
 import { greetTheConsole } from "@/lib/consoleGreeting";
+import { createQueryClient } from "@/lib/queryClient";
 import { router } from "@/routes";
 import "@/i18n";
 import "@/index.css";
@@ -12,15 +12,7 @@ import "@/index.css";
 applyStoredPreferences();
 greetTheConsole();
 
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			staleTime: 30_000,
-			// Retrying a refusal only delays the screen that explains it.
-			retry: (failureCount, error) => !(error instanceof ApiError && error.status < 500) && failureCount < 2,
-		},
-	},
-});
+const queryClient = createQueryClient();
 
 const root = document.getElementById("root");
 if (root === null) throw new Error("index.html is missing #root, so there is nowhere to mount.");

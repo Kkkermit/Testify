@@ -21,7 +21,7 @@ related: sign-in
 - Nothing is sold or shared for advertising.
 
 ### Removing your data
-- `/delete-my-data` in Discord, or [Your data](/account) on the dashboard, deletes everything that is yours, in every server, at once. Only you see it, it asks for your username first, and it cannot be undone.
+- `/delete-my-data` in Discord, or the Your data tab of [your account](/account) on the dashboard, deletes everything that is yours, in every server, at once. Only you see it, it asks for your username first, and it cannot be undone.
 - Warnings, cases and blocks against you are kept, because they protect the servers you are in. Only the bot's owners can add or lift a block.
 - `/profile delete` removes only your public profile, and `/economy delete` only your account in one server.
 

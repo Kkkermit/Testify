@@ -13,6 +13,13 @@ export const keys = {
 	commands: () => ["commands"] as const,
 	status: () => ["status"] as const,
 	notices: () => ["notices"] as const,
+	account: {
+		all: () => ["account"] as const,
+		history: (page: number, server: string) => ["account", "history", page, server] as const,
+		reminders: () => ["account", "reminders"] as const,
+		sessions: () => ["account", "sessions"] as const,
+		profile: () => ["account", "profile"] as const,
+	},
 	support: () => ["support"] as const,
 	supportArticle: (id: string) => ["support", "article", id] as const,
 	commandToggles: (guildId: string | null) => ["command-toggles", guildId ?? "global"] as const,

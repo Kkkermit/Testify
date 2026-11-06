@@ -25,6 +25,20 @@ describe("the app shell", () => {
 		expect(screen.getByRole("link", { name: "English" })).toHaveAttribute("href", "/appearance#language");
 	});
 
+	/** The reader's own picture is where their account is found, in the sidebar and in the phone's header. */
+	it("opens the reader's account from their picture, and no longer lists it among the footer links", async () => {
+		renderWithProviders(<AppShell />, { path: "/guilds" });
+
+		const sidebar = screen.getByTestId("sidebar");
+		const account = await within(sidebar).findByRole("link", { name: /someone/ });
+		expect(account).toHaveAttribute("href", "/account");
+		expect(within(sidebar).getAllByRole("link", { name: /Your account/ })).toHaveLength(1);
+		expect(within(sidebar).queryByRole("link", { name: "Your data" })).toBeNull();
+
+		const phone = screen.getByRole("banner");
+		expect(within(phone).getByRole("link", { name: "Your account" })).toHaveAttribute("href", "/account");
+	});
+
 	describe("the server switcher", () => {
 		const second = { ...aGuild, id: "900000000000000009", name: "Second Server" };
 

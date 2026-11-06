@@ -447,19 +447,19 @@ Three files with their own segmented control is three places to fix an `aria-pre
 
 ### Primitives
 
-| Component                                                    | Notes                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>`  |
-| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`           |
-| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                   |
-| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`              |
-| `PageHeader`                                                 | `title`, `subtitle`, `action`, `server` — a breadcrumb, on guild screens |
-| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                     |
-| `Skeleton`                                                   | What `isPending` returns                                                 |
-| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike       |
-| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page     |
-| `Summary`                                                    | The one sentence under a page's header saying what the feature does now  |
-| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                          |
+| Component                                                    | Notes                                                                      |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>`    |
+| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`             |
+| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                     |
+| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`                |
+| `PageHeader`                                                 | `title`, `subtitle`, `action`, `server` — a breadcrumb, `back` — a link up |
+| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                       |
+| `Skeleton`                                                   | What `isPending` returns                                                   |
+| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike         |
+| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page       |
+| `Summary`                                                    | The one sentence under a page's header saying what the feature does now    |
+| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                            |
 
 ### Form
 
@@ -779,7 +779,7 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
-| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
+| `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
@@ -1274,11 +1274,16 @@ a setting.
 
 **Who:** anybody signed in, manager or not. The one journey that needs no server.
 
-1. The sidebar's footer links **Your data** (`/account`), beside Appearance.
+1. Their picture, at the foot of the sidebar or in the phone's header, opens **Your account**; the **Your data** tab
+   is the last of five (`/account?tab=data`).
 2. The page lists what goes and what stays before it offers anything to press.
 3. **Delete my data** opens a warning that it is immediate and cannot be undone, and a field for their username or
    Discord ID. Delete everything stays disabled until it matches.
 4. On success the query cache is emptied and the reader lands on `/` signed out, with a notice saying it is done.
+
+A blacklisted account signs in to `BlockedPage` whatever address it opens: the reason, since when, the owners to
+contact, Sign out and these same steps, and that deleting the data does not lift the block. Every other route
+refuses it on the server (`refuseBlacklisted`).
 
 ### 20.7 The owner journeys
 

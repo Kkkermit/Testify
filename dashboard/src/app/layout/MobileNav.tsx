@@ -2,8 +2,10 @@ import { type DashboardUser, type ManageableGuild } from "@testify/shared";
 import { Menu, Search, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { BotMark } from "@/components/brand/BotMark";
+import { Avatar } from "@/components/primitives";
 import { type NavAudience } from "@/config/navigation";
 import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 
@@ -81,6 +83,12 @@ export function MobileNav({
 					<Search size={20} aria-hidden="true" />
 					<span className="sr-only">{t("search.open")}</span>
 				</button>
+				{user !== null && (
+					<Link to="/account" className="hover:bg-card/60 rounded-full p-1 transition-colors duration-150">
+						<Avatar name={user.username} url={user.avatarUrl} size={28} seed={user.id} />
+						<span className="sr-only">{t("nav.account")}</span>
+					</Link>
+				)}
 			</header>
 
 			{open && (

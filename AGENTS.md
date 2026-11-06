@@ -1907,7 +1907,8 @@ they do not vanish while being read.
 
 ### Delete my data wipes what is theirs, at once and for good
 
-Anybody can delete everything the bot keeps about them, in every server: on the dashboard's **Your data** (`/account`)
+Anybody can delete everything the bot keeps about them, in every server: on the **Your data** tab of the dashboard's
+account page (`/account?tab=data`)
 or with `/delete-my-data` in Discord, both ending in `eraseAccount`. Each asks for their username or Discord ID back
 (`confirmsName`, compared on the server) before anything goes. Nothing is held for a grace period and nothing can bring
 it back, which both say before the button. Six things about it are load-bearing:
@@ -1940,8 +1941,31 @@ it back, which both say before the button. Six things about it are load-bearing:
   calls `eraseAccount`. Discord's forms cannot hold buttons, which is why the warning with its buttons is a message
   and the form is the confirmation. `buttons/deleteMyData.ts` is `ownerOnly` and checks the presser again. The
   command is in `ALWAYS_ENABLED`, so no server can switch it off, and it is the one command `runChecks` lets a
-  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`), as the dashboard already did: the blacklist entry stays.
+  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`): the blacklist entry stays. Its refusal of every other command
+  says so, and names the owners Discord can find (`ownerContacts`) as the people to ask.
   `deleteMyData.test.ts` pins every step, and Delete erasing straight away was proved to turn it red.
+
+### A blacklisted account may only see why, sign out and delete its data
+
+The dashboard keeps exactly what Discord keeps for a blocked account, and the server is what enforces it.
+`refuseBlacklisted` in `src/api/middleware/blacklist.ts` runs after the session loads on every `/api/*` request and
+answers 403 `blacklisted` unless the path is one `openToTheBlacklisted` matches whole: the public routes, which
+anybody signed out can read anyway, `GET /auth/me`, and `POST /auth/logout`, `/auth/logout-all` and `/auth/erase`.
+Three things about it are load-bearing:
+
+- **It is one middleware with an allowlist, not a check per route**, so a route added later is closed to a blocked
+  account until somebody lists it. `accessWalk.test.ts` asks every route as a blocked account and fails on any
+  that does not refuse it, and on any kept route that does; `blacklistGuard.test.ts` pins that each pattern matches
+  whole, so `/auth/me` opens nothing beside it. Unmounting the guard, closing erase and dropping an anchor were each
+  proved to go red.
+- **`/auth/me` says why.** It carries `blacklist` — the reason, since when and the owners to ask — and an empty
+  server list, so Discord is not asked for servers the account could not open. `RequireAuth` then draws
+  `BlockedPage` in place of every signed-in screen: the reason, the owners with a link to each one's Discord
+  profile, Sign out and Delete my data. It says, as the Discord refusal does, that deleting the data leaves the
+  block in place and that asking an owner is the only way to have it lifted. The page is a courtesy; the guard is
+  the boundary.
+- **A block made mid-session shows on the next click.** `createQueryClient` asks `/auth/me` again whenever any
+  query or write is refused as `blacklisted`, so the page turns into `BlockedPage` rather than a screen of errors.
 
 ### Global by design
 
@@ -2111,7 +2135,7 @@ four tabs, three shared components and two testable modules.
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
-| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
+| `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
@@ -2177,6 +2201,7 @@ writing it once. Every piece has a test proven able to fail.
 | `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
 | `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
 | `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach     |
+| `middleware/blacklist.ts` | A blacklisted session reaches only who it is, signing out and Delete my data   |
 | `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
 | `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
 | `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
@@ -2907,6 +2932,54 @@ several servers sees at a glance where one is set up differently. Three things a
 - **It is read-only.** Every cell links to the feature on that server, and "only where they differ" leaves out which
   channel a feature posts in, because two servers can never share one. Copying a setup across servers is a write
   across several permission checks and is not built.
+
+Its header carries **Back to your servers**, through `PageHeader`'s `back`, which the member, role and channel pages use too:
+a phone has no sidebar on screen, so a screen opened from another one names the way back to it.
+
+### Your account is the reader's own, and nothing on it is about anybody else
+
+The reader's picture opens `/account`, in the sidebar's foot and in the phone's header; there is no footer link
+beside Appearance any more. It has five tabs — **Profile**, **History**, **Reminders**, **Sign-ins** and **Your data**
+— over `/api/account`, which sits behind `requireAuth` and reads whose data from the session alone. The first two
+tabs and Reminders are the command data that is the person's own rather than a server's: `/profile` and `/remind`.
+Seven things about it are load-bearing:
+
+- **The profile is written by the command's rules, in one place.** `PROFILE_LIMITS`, `profileBody` and
+  `birthdayFrom` live in `@testify/shared`, and `profileProblem` and `saveOwnProfile` in `src/lib/info/`, so
+  `/profile set` and `PUT /account/profile` share the lengths, the word filter and the birthday check. A birthday is
+  a real day from 1900 to today: `new Date("2026-02-30")` rolls on to 2 March, which is how the command used to store
+  a day nobody chose. The year shows to anybody who runs `/profile view`, and the tab says so.
+- **History is the reader's own change records, in every server** (`auditsBy`, on an `{ actorId, at }` index), the
+  dashboard's and those made with the bot's commands, for the 90 days the records are kept. Each row is the summary,
+  the server and the time, never the before and after; a server the bot has left reads as one, and a row links to
+  that server's Changes page only while `comparable` still offers it, so a manager who lost Manage Server is not
+  sent into a refusal. Delete my data anonymises the records, so the history empties with it.
+- **Reminders are the same records `/remind list` shows**, cancelled, switched and edited through the repository's
+  `userId`-filtered lookups, so an id from anybody else's list finds nothing. An edit takes words and a time within
+  `REMINDER_RULES` (shared with `/remind me`), and `editReminder` refuses a reminder whose delivery holds its lease,
+  so an edit is never lost under a send. The channel a reminder pings in is never named, because the reader may no
+  longer be able to see it; only the server is. A reminder set in a direct message has no channel, so it is offered
+  no switch and the API refuses one (`canPingHere`). Cancelling goes through `UndoProvider`, and so does deleting
+  the profile.
+- **A sign-in is named by a digest of its cookie, never the cookie** (`sessionHandleOf`, 24 hex characters of a
+  SHA-256), because the list goes to a browser and the cookie is the session. Ending one finds it among the reader's
+  own sessions by that digest and refuses the browser asking, which signs out from the sidebar instead; **Sign out
+  everywhere else** keeps the one asking. Nothing about a device is stored, so a sign-in is told apart only by its
+  times, and the tab says so.
+- **A blacklisted account sees none of it.** The server refuses it every route here, as below.
+- **Your data is the old page**, unchanged: what goes, what stays, and the typed confirmation. The privacy notice
+  still calls it Your data, which is the tab's name.
+- **Nothing here writes an audit record.** These are the reader's own things, and the server's Changes page is no
+  place for somebody's reminders or browsers.
+
+`tests/api/accountPentest.test.ts` attacks every account route through the real app: forged and stale cookies,
+missing and planted CSRF secrets, another person's id in the query and the body, MongoDB operators and arrays in
+every field, malformed path ids including the cookie itself, `__proto__`, a body ten thousand deep or past the size
+limit, control and direction characters in a public profile, a blacklisted account on every route and every
+spelling of one, the wrong method, and
+any answer carrying a cookie, a secret or a cacheable header. Taking away the blacklist guard, the id shape, the
+text cleaning or the session's own id each turns it red; `requireAuth` and the handlers' own `sessionOf` are two
+layers, and only removing both does.
 
 ### Getting every command onto the dashboard
 

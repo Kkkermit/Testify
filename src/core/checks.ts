@@ -7,6 +7,7 @@ import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { reportOwnerAttempt } from "@lib/bot/ownerAudit.util";
+import { ownerContacts } from "@lib/bot/owners.util";
 import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND, CASINO_STATS_SUBCOMMAND } from "@lib/casino/casino.constants";
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { formatDuration, humanisePermission } from "@lib/format/format.util";
@@ -52,7 +53,9 @@ export async function runChecks(
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
-	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) return blacklistRefusal(blacklisted);
+	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) {
+		return blacklistRefusal(blacklisted, await ownerNames(client));
+	}
 
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId);
 	if (switchedOff !== null) return switchedOff;
@@ -93,14 +96,31 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
-export function blacklistRefusal(entry: { reason: string; createdAt: Date }): TitledRefusal {
+async function ownerNames(client: TestifyClient): Promise<string[]> {
+	return (await ownerContacts(client)).map((owner) => owner.name);
+}
+
+function listed(names: readonly string[]): string {
+	return names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} or ${names.at(-1) ?? ""}`;
+}
+
+export function blacklistRefusal(
+	entry: { reason: string; createdAt: Date },
+	owners: readonly string[] = [],
+): TitledRefusal {
 	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
+	const named = listed(owners.map((name) => `**${name}**`));
+	const ask =
+		owners.length === 0
+			? "Contact the bot's owner."
+			: `Contact ${named}, the bot's ${owners.length === 1 ? "owner" : "owners"}.`;
 
 	return {
 		title: `🚫 You are blocked from ${botName()}`,
 		message:
-			`The bot's owner has blocked your account, so you can no longer use ${botName()}. None of its commands, ` +
-			"buttons or menus will work for you, in this server or any other.",
+			`The bot's owner has blocked your account, so ${botName()} no longer works for you, in this server or any ` +
+			`other. Only \`/delete-my-data\` still does, to delete everything ${botName()} keeps about you, here or on ` +
+			"the dashboard, and deleting it does not lift the block.",
 		fields: [
 			{ name: "Reason", value: entry.reason.trim() === "" ? "No reason was given." : entry.reason.slice(0, 1_000) },
 			{
@@ -109,7 +129,7 @@ export function blacklistRefusal(entry: { reason: string; createdAt: Date }): Ti
 			},
 			{
 				name: "Think this is a mistake?",
-				value: "Only the bot's owner can lift a block. Server moderators and admins cannot.",
+				value: `${ask} Asking them is the only way to have the block lifted; server moderators and admins cannot lift it.`,
 			},
 		],
 		tone: "error",
@@ -129,7 +149,7 @@ export async function checkOpenControl(
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(who.userId);
-	if (blacklisted) return blacklistRefusal(blacklisted);
+	if (blacklisted) return blacklistRefusal(blacklisted, await ownerNames(client));
 
 	return checkSwitchedOff(command, who.guildId);
 }
