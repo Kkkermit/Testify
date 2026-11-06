@@ -2154,7 +2154,8 @@
 		"messagesP4": "Modmail ist die andere. Solange du ein Modmail-Gespräch offen hast, geht, was du dem Bot per DM schickst, an das Team dieses Servers, in einen Thread in dessen Modmail-Kanal, und wird nicht an den Betreiber weitergeleitet. Was das Team im Thread schreibt, kommt auf demselben Weg zu dir zurück. Beide Kopien liegen in Discord: Der Bot speichert nur, welchem Server du geschrieben hast, den Thread, ob eine Antwort aussteht und wann es begann und endete.",
 		"retentionL19": "Modmail-Gespräche: 90 Tage nach dem Schließen, dann automatisch gelöscht. Die Threads selbst bleiben im Discord des Servers.",
 		"storedL18": "Einladungs-Tracking: wenn ein Server es einschaltet, mit welcher Einladung jedes neue Mitglied kam, wessen Einladung es war, beide Nutzernamen und ob es seitdem gegangen ist.",
-		"retentionL20": "Einladungs-Tracking: 365 Tage nach jedem Beitritt, dann automatisch gelöscht, und alles, wenn der Bot vom Server entfernt wird."
+		"retentionL20": "Einladungs-Tracking: 365 Tage nach jedem Beitritt, dann automatisch gelöscht, und alles, wenn der Bot vom Server entfernt wird.",
+		"messagesP5": "Das Melden einer Nachricht ist das Letzte. Wenn du mit Rechtsklick auf eine Nachricht „Report message“ wählst, postet {{bot}} sie im Modmail-Kanal dieses Servers für dessen Team: den Text der Nachricht, wer sie geschrieben hat, wer sie gemeldet hat und was du dazu gesagt hast. Dieser Beitrag liegt in Discord, nicht in der Datenbank des Bots. Der Bot merkt sich eine Stunde lang, nur im Arbeitsspeicher, welche Nachrichten du gemeldet hast, damit dieselbe nicht zweimal gemeldet wird; ein Neustart vergisst es."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",

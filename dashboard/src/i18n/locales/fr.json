@@ -2219,7 +2219,8 @@
 		"messagesP4": "La messagerie modération est l’autre. Tant que vous avez une conversation ouverte, ce que vous envoyez au bot en DM va à l’équipe de ce serveur, dans un fil de son salon de messagerie, et n’est pas transmis à l’opérateur. Ce que l’équipe écrit dans le fil vous revient de la même façon. Les deux copies sont dans Discord : le bot ne garde que le serveur auquel vous avez écrit, le fil, si une réponse est attendue, et quand la conversation a commencé et pris fin.",
 		"retentionL19": "Conversations de messagerie : 90 jours après leur fermeture, puis supprimées automatiquement. Les fils restent dans le Discord du serveur.",
 		"storedL18": "Suivi des invitations : quand un serveur l’active, l’invitation avec laquelle chaque nouveau membre est arrivé, à qui elle appartenait, les deux noms d’utilisateur et s’il est parti depuis.",
-		"retentionL20": "Suivi des invitations : 365 jours après chaque arrivée, puis supprimé automatiquement, et entièrement quand le bot est retiré du serveur."
+		"retentionL20": "Suivi des invitations : 365 jours après chaque arrivée, puis supprimé automatiquement, et entièrement quand le bot est retiré du serveur.",
+		"messagesP5": "Signaler un message est la dernière. Quand vous faites un clic droit sur un message et choisissez Report message, {{bot}} le publie dans le salon de messagerie modération de ce serveur pour son équipe : le texte du message, qui l’a écrit, qui l’a signalé et ce que vous en avez dit. Cette publication est dans Discord, pas dans la base de données du bot. Le bot retient pendant une heure, en mémoire seulement, les messages que vous avez signalés, pour qu’un même message ne soit pas signalé deux fois ; un redémarrage l’oublie."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",

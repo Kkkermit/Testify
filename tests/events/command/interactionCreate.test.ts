@@ -1,7 +1,15 @@
 import { Collection, DiscordAPIError, type Interaction } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type Command } from "@core/command";
+import { type ContextMenu } from "@core/contextMenu";
 import interactionCreate from "@events/command/interactionCreate.event";
+
+const checkContextMenu = jest.fn<Promise<string | null>, []>(() => Promise.resolve(null));
+
+jest.mock("@core/checks", () => ({
+	...jest.requireActual<object>("@core/checks"),
+	checkContextMenu: () => checkContextMenu(),
+}));
 
 /** How the autocomplete branch reports a failure, which is the one place a routine refusal looked like a bug. */
 
@@ -77,4 +85,50 @@ it("says nothing at all when the autocomplete answers", async () => {
 	expect(logger.error).not.toHaveBeenCalled();
 	expect(logger.debug).not.toHaveBeenCalled();
 	expect(logger.trace).not.toHaveBeenCalled();
+});
+
+describe("a right-click action", () => {
+	const run = jest.fn(() => Promise.resolve());
+	const menu: ContextMenu = { name: "Warn", description: "Warns.", type: "user", switchedBy: "warn", run };
+
+	function rightClick() {
+		return {
+			isAutocomplete: () => false,
+			isChatInputCommand: () => false,
+			isContextMenuCommand: () => true,
+			isUserContextMenuCommand: () => true,
+			isMessageContextMenuCommand: () => false,
+			inCachedGuild: () => true,
+			commandName: "Warn",
+			guildId: "400000000000000004",
+			user: { id: "200000000000000002" },
+			reply: jest.fn(() => Promise.resolve()),
+		};
+	}
+
+	const client = () =>
+		({
+			commands: new Collection(),
+			contextMenus: new Collection([["Warn", menu]]),
+			logger,
+		}) as unknown as TestifyClient;
+
+	it("runs once its gates pass", async () => {
+		const interaction = rightClick();
+
+		await interactionCreate.run(client(), interaction as unknown as Interaction);
+
+		expect(run).toHaveBeenCalledWith(interaction, expect.anything());
+	});
+
+	/** The refusal goes to the person who clicked, and the action never starts. */
+	it("refuses privately when a gate says no", async () => {
+		checkContextMenu.mockResolvedValueOnce("You need these permissions: `Moderate Members`");
+		const interaction = rightClick();
+
+		await interactionCreate.run(client(), interaction as unknown as Interaction);
+
+		expect(run).not.toHaveBeenCalled();
+		expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: 64 }));
+	});
 });

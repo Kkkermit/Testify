@@ -2219,7 +2219,8 @@
 		"messagesP4": "La posta allo staff è l’altra. Finché hai una conversazione aperta, ciò che invii al bot in DM va allo staff di quel server, in un thread del suo canale della posta, e non viene inoltrato all’operatore. Ciò che lo staff scrive nel thread ti torna allo stesso modo. Entrambe le copie restano su Discord: il bot conserva solo a quale server hai scritto, il thread, se è attesa una risposta e quando si è aperta e chiusa.",
 		"retentionL19": "Conversazioni della posta allo staff: 90 giorni dopo la chiusura, poi eliminate automaticamente. I thread restano nel Discord del server.",
 		"storedL18": "Tracciamento degli inviti: se un server lo attiva, con quale invito è entrato ogni nuovo membro, di chi era, entrambi i nomi utente e se nel frattempo è uscito.",
-		"retentionL20": "Tracciamento degli inviti: 365 giorni dopo ogni ingresso, poi eliminato automaticamente, e tutto quando il bot viene rimosso dal server."
+		"retentionL20": "Tracciamento degli inviti: 365 giorni dopo ogni ingresso, poi eliminato automaticamente, e tutto quando il bot viene rimosso dal server.",
+		"messagesP5": "Segnalare un messaggio è l’ultima. Quando fai clic destro su un messaggio e scegli Report message, {{bot}} lo pubblica nel canale della posta allo staff di quel server: il testo del messaggio, chi l’ha scritto, chi l’ha segnalato e ciò che hai detto. Quella pubblicazione resta su Discord, non nel database del bot. Il bot ricorda per un’ora, solo in memoria, quali messaggi hai segnalato, perché lo stesso non venga segnalato due volte; un riavvio lo dimentica."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",

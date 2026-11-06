@@ -1,8 +1,10 @@
 import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
 import { strings } from "@config/strings";
+import { theme } from "@config/theme";
 import { asMember, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
+import { formatDurationLong } from "@lib/format/format.util";
 import { type MemberBlock } from "@testify/shared";
 
 /** Why this moderator may not act on this target, as a code, or null; every surface asks here. */
@@ -77,6 +79,29 @@ export function actionEmbed(options: {
 		],
 		thumbnail: options.target.displayAvatarURL(),
 		footer: options.guild.name,
+	});
+}
+
+/** What `/mute` and the Time out action answer with. */
+export function timedOutEmbed(options: {
+	guild: Guild;
+	target: User;
+	moderator: User;
+	reason: string;
+	durationMs: number;
+	notified: boolean;
+}): EmbedBuilder {
+	return actionEmbed({
+		action: "Member timed out",
+		emoji: theme.emoji.moderation,
+		guild: options.guild,
+		target: options.target,
+		moderator: options.moderator,
+		reason: options.reason,
+		extra: [
+			{ name: "Duration", value: formatDurationLong(options.durationMs), inline: true },
+			{ name: "Notified", value: options.notified ? "Yes" : "No", inline: true },
+		],
 	});
 }
 

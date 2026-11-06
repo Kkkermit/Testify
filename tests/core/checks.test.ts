@@ -2,6 +2,7 @@ import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import lottery from "@commands/economy/lottery.command";
 import {
 	checkCasinoPlay,
+	checkContextMenu,
 	checkMusicControl,
 	clearCooldowns,
 	OWNER_ONLY_REFUSAL,
@@ -510,5 +511,45 @@ describe("the casino's switches", () => {
 			casinoSettings.mockResolvedValue({ ...closed, enabled: true, disabledGames: ["slots"] });
 			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/Slots is switched off/);
 		});
+	});
+});
+
+describe("checkContextMenu", () => {
+	beforeEach(() => {
+		findBlacklistEntry.mockResolvedValue(null);
+		offGlobally.mockResolvedValue([]);
+		offInGuild.mockResolvedValue([]);
+	});
+
+	const pressing = (member: bigint, bot: bigint) => ({
+		user: { id: USER_ID },
+		guildId: "400000000000000004",
+		memberPermissions: new PermissionsBitField(member),
+		appPermissions: new PermissionsBitField(bot),
+	});
+	const warn = { switchedBy: "warn", permissions: [PermissionFlagsBits.ModerateMembers] };
+	const timeout = { ...warn, switchedBy: "mute", botPermissions: [PermissionFlagsBits.ModerateMembers] };
+
+	/** A server can hand a right-click action to anybody in its own settings, so the permission is asked here too. */
+	it("asks the person for the action's permissions, and the bot for its own", async () => {
+		const client = createMockClient();
+		const moderator = PermissionFlagsBits.ModerateMembers;
+
+		await expect(checkContextMenu(client, pressing(0n, moderator), warn)).resolves.toMatch(
+			/You need.*moderate members/,
+		);
+		await expect(checkContextMenu(client, pressing(moderator, 0n), timeout)).resolves.toMatch(
+			/I need.*moderate members/,
+		);
+		await expect(checkContextMenu(client, pressing(moderator, moderator), timeout)).resolves.toBeNull();
+	});
+
+	/** Turning `/warn` off has to take the Warn action with it, or the switch only hides half of the feature. */
+	it("is off wherever the command it belongs to is off", async () => {
+		offInGuild.mockResolvedValue(["warn"]);
+
+		const refusal = await checkContextMenu(createMockClient(), pressing(PermissionFlagsBits.ModerateMembers, 0n), warn);
+
+		expect(refusal).toMatch(/switched off in this server/);
 	});
 });

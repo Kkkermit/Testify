@@ -2154,7 +2154,8 @@
 		"messagesP4": "Modmail is de andere. Zolang je een modmailgesprek open hebt, gaat wat je de bot in een DM stuurt naar het team van die server, in een thread in hun modmailkanaal, en wordt het niet doorgestuurd naar de beheerder. Wat het team in de thread schrijft komt op dezelfde manier bij jou terug. Beide kopieën staan in Discord: de bot bewaart alleen aan welke server je schreef, de thread, of er een antwoord verwacht wordt en wanneer het begon en eindigde.",
 		"retentionL19": "Modmailgesprekken: 90 dagen nadat ze gesloten zijn, daarna automatisch verwijderd. De threads zelf blijven in de Discord van de server.",
 		"storedL18": "Uitnodigingen volgen: als een server het aanzet, met welke uitnodiging elk nieuw lid binnenkwam, van wie die was, beide gebruikersnamen en of het lid sindsdien vertrokken is.",
-		"retentionL20": "Uitnodigingen volgen: 365 dagen na elke binnenkomst, daarna automatisch verwijderd, en alles wanneer de bot van de server wordt verwijderd."
+		"retentionL20": "Uitnodigingen volgen: 365 dagen na elke binnenkomst, daarna automatisch verwijderd, en alles wanneer de bot van de server wordt verwijderd.",
+		"messagesP5": "Een bericht melden is de laatste. Als je met de rechtermuisknop op een bericht Report message kiest, plaatst {{bot}} het in het modmailkanaal van die server voor het team: de tekst van het bericht, wie het schreef, wie het meldde en wat je erover zei. Dat bericht staat in Discord, niet in de database van de bot. De bot onthoudt een uur lang, alleen in het geheugen, welke berichten je meldde, zodat hetzelfde niet twee keer gemeld kan worden; een herstart vergeet het."
 	},
 	"problem": {
 		"automodMentionLimit": "Kies hoeveel mentions je toestaat.",

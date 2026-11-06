@@ -2219,7 +2219,8 @@
 		"messagesP4": "El correo al equipo es la otra. Mientras tengas una conversación abierta, lo que envíes al bot por DM va al equipo de ese servidor, a un hilo en su canal de correo, y no se reenvía al operador. Lo que el equipo escribe en el hilo te llega del mismo modo. Ambas copias están en Discord: el bot solo guarda a qué servidor escribiste, el hilo, si se debe una respuesta y cuándo se abrió y cerró.",
 		"retentionL19": "Conversaciones de correo al equipo: 90 días después de cerrarse, y luego se borran automáticamente. Los hilos siguen en el Discord del servidor.",
 		"storedL18": "Seguimiento de invitaciones: si un servidor lo activa, con qué invitación entró cada miembro nuevo, de quién era, ambos nombres de usuario y si se ha ido desde entonces.",
-		"retentionL20": "Seguimiento de invitaciones: 365 días después de cada entrada, y luego se borra automáticamente; todo se borra cuando el bot se quita del servidor."
+		"retentionL20": "Seguimiento de invitaciones: 365 días después de cada entrada, y luego se borra automáticamente; todo se borra cuando el bot se quita del servidor.",
+		"messagesP5": "Denunciar un mensaje es lo último. Cuando haces clic derecho en un mensaje y eliges Report message, {{bot}} lo publica en el canal de correo al equipo de ese servidor: el texto del mensaje, quién lo escribió, quién lo denunció y lo que dijiste sobre él. Esa publicación vive en Discord, no en la base de datos del bot. El bot recuerda durante una hora, solo en memoria, qué mensajes denunciaste, para que el mismo no se denuncie dos veces; un reinicio lo olvida."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",

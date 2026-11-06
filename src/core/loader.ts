@@ -5,6 +5,7 @@ import { isCategory } from "@config/categories";
 import { type Button } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, type Command, subcommandsOf } from "@core/command";
+import { buildContextMenu, type ContextMenu } from "@core/contextMenu";
 import { SetupError, toError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
 import { MESSAGE_HANDLER, type MessageHandler } from "@core/message";
@@ -43,6 +44,7 @@ interface LoadCounts {
 	commands: number;
 	events: number;
 	buttons: number;
+	menus: number;
 	messageHandlers: number;
 }
 
@@ -50,6 +52,7 @@ export function loadEverything(client: TestifyClient): LoadCounts {
 	const counts = {
 		commands: loadCommands(client),
 		buttons: loadButtons(client),
+		menus: loadContextMenus(client),
 		messageHandlers: loadMessageHandlers(client),
 		events: loadEvents(client),
 	};
@@ -107,6 +110,24 @@ function loadButtons(client: TestifyClient): number {
 	}
 
 	return client.buttons.size;
+}
+
+function loadContextMenus(client: TestifyClient): number {
+	for (const file of find("menus/*.menu.{js,ts}")) {
+		const menu = importFile(file);
+
+		if (!isObject(menu)) fail(file, "should `export default defineContextMenu({ … })`");
+		if (typeof menu.name !== "string" || !menu.name) fail(file, "is missing `name`");
+		if (typeof menu.description !== "string" || !menu.description) fail(file, "is missing `description`");
+		if (menu.type !== "user" && menu.type !== "message") fail(file, "needs a `type` of user or message");
+		if (typeof menu.switchedBy !== "string" || !menu.switchedBy) fail(file, "is missing `switchedBy`");
+		if (typeof menu.run !== "function") fail(file, "is missing `run`");
+		if (client.contextMenus.has(menu.name)) fail(file, `uses the menu name "${menu.name}" twice`);
+
+		client.contextMenus.set(menu.name, menu as unknown as ContextMenu);
+	}
+
+	return client.contextMenus.size;
 }
 
 function loadMessageHandlers(client: TestifyClient): number {
@@ -175,7 +196,11 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 		);
 	}
 
-	const body = [...client.commands.values()].map((command) => buildSlashCommand(command).toJSON());
+	// Right-click actions have their own limit of five of each kind, apart from the hundred slash commands.
+	const body = [
+		...[...client.commands.values()].map((command) => buildSlashCommand(command).toJSON()),
+		...[...client.contextMenus.values()].map((menu) => buildContextMenu(menu).toJSON()),
+	];
 	const rest = new REST({ version: "10" }).setToken(client.env.DISCORD_TOKEN);
 
 	const guildId = client.env.DISCORD_DEV_GUILD_ID;

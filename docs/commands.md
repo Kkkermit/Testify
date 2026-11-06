@@ -183,3 +183,14 @@
 | ------------- | ------------------------------------- | ----------- | -------------- | ----- |
 | `/bug-report` | Reports a bug to the developers.      | —           | —              | —     |
 | `/suggest`    | Sends a suggestion to the developers. | —           | —              | —     |
+
+## 🖱️ Right-click actions
+
+In a server, right-click a member or a message (or long-press it on a phone) and open **Apps**.
+
+| Action               | On        | What it does                                                                     | Needs            |
+| -------------------- | --------- | -------------------------------------------------------------------------------- | ---------------- |
+| **Add to starboard** | A message | Puts a message on the starboard however many stars it has.                       | Manage messages  |
+| **Report message**   | A message | Sends a message, and what is wrong with it, to the server's mod mail channel.    | —                |
+| **Time out**         | A member  | Times a member out for as long as is typed in a form, exactly as `/mute` does.   | Moderate members |
+| **Warn**             | A member  | Warns a member, with the reason typed in a form, exactly as `/warn create` does. | Moderate members |

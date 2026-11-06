@@ -63,12 +63,13 @@ numbers, which drift):
 | Command files        | 117 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
-| Button handlers      | 51                                |
+| Button handlers      | 53                                |
+| Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
-| `src/lib` helpers    | 234, in 34 domain folders         |
+| `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 52 / 51                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,040 across 543 suites           |
+| Tests                | 4,070 across 546 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -198,12 +199,13 @@ Grouped by **technical role first, then domain**. One feature is spread across l
 ```
 src/
 ├── index.ts              Entry point. One async main() that awaits each step in order.
-├── core/                 The framework. 18 files, no domain logic.
+├── core/                 The framework. 19 files, no domain logic.
 │   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
 │   ├── loader.ts         Finds and registers everything from disk. Globs live here.
 │   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
 │   ├── prefix.ts         The ONLY file that knows prefix commands exist
 │   ├── button.ts         Button contract, defineButton, customId / parseCustomId
+│   ├── contextMenu.ts    Right-click action contract, defineContextMenu, buildContextMenu
 │   ├── event.ts          defineEvent
 │   ├── message.ts        Message-handler contract (automod, counting, levelling XP …)
 │   ├── checks.ts         Gates: permissions, cooldowns, guildOnly, ownerOnly, nsfw
@@ -220,7 +222,8 @@ src/
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
-├── buttons/              51 component handlers, keyed by custom-ID prefix
+├── buttons/              53 component handlers, keyed by custom-ID prefix
+├── menus/                4 right-click actions, on a member or a message
 ├── lib/                  234 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
@@ -259,34 +262,35 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 ### Where to look for a given job
 
-| I want to…                                 | Go to                                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| Add or change a command                    | `src/commands/<category>/*.command.ts`                                    |
-| Change how commands are found              | `src/core/loader.ts` (the globs)                                          |
-| Change a permission or cooldown gate       | `src/core/checks.ts`                                                      |
-| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                |
-| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                      |
-| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"   |
-| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                      |
-| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)  |
-| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it         |
-| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback     |
-| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database           |
-| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                           |
-| Format a number, duration, time            | `src/lib/format/format.util.ts`                                           |
-| Query the database                         | `src/database/repositories/*.ts` — never a model directly                 |
-| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`        |
-| Change user-facing copy                    | `src/config/strings.ts`                                                   |
-| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot          |
-| Change a colour or emoji                   | `src/config/theme.ts`                                                     |
-| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`               |
-| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
-| Change how the owners' notifications work  | `src/lib/notices/` — `/bot-notifications`, the hint and the web share it  |
-| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
-| Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
-| Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers    |
-| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in        |
-| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                      |
+| I want to…                                 | Go to                                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                                              |
+| Add or change a right-click action         | `src/menus/*.menu.ts` — see [§21](#right-click-actions-ask-what-their-command-asks) |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                                    |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                                                |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                          |
+| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                                |
+| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"             |
+| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                                |
+| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)            |
+| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it                   |
+| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback               |
+| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database                     |
+| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                                     |
+| Format a number, duration, time            | `src/lib/format/format.util.ts`                                                     |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly                           |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`                  |
+| Change user-facing copy                    | `src/config/strings.ts`                                                             |
+| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot                    |
+| Change a colour or emoji                   | `src/config/theme.ts`                                                               |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`                         |
+| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`                  |
+| Change how the owners' notifications work  | `src/lib/notices/` — `/bot-notifications`, the hint and the web share it            |
+| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)                 |
+| Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it           |
+| Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers              |
+| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in                  |
+| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                                |
 
 ### The panel renderers in `src/lib`
 
@@ -375,6 +379,7 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
   any case, so `T?help` — what a phone's auto-capitalisation types — runs `t?help`
 - Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
   `button.run(interaction, { client, action, args })`
+- Right-click → the same listener → `client.contextMenus` by name → `checkContextMenu` → `menu.run(interaction, client)`
 
 There is **exactly one** `interactionCreate` listener. The original had 27.
 
@@ -390,13 +395,14 @@ A file that misses its suffix is silently never registered.
 | --------------- | -------------------------------- | ------------------------------------ |
 | `.command.ts`   | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
 | `.event.ts`     | a gateway event handler          | `events/ready/ready.event.ts`        |
+| `.menu.ts`      | a right-click action             | `menus/warn.menu.ts`                 |
 | `.util.ts`      | a shared helper                  | `lib/format/duration.util.ts`        |
 | `.types.ts`     | a domain's shared types          | `lib/music/music.types.ts`           |
 | `.constants.ts` | a domain's shared constants      | `lib/music/music.constants.ts`       |
 | `.schema.ts`    | a Mongoose model                 | `database/models/economy.schema.ts`  |
 | `.test.ts`      | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
 
-Loader globs: `commands/*/*.command.{js,ts}` and `events/**/*.event.{js,ts}`.
+Loader globs: `commands/*/*.command.{js,ts}`, `events/**/*.event.{js,ts}` and `menus/*.menu.{js,ts}`.
 `tests/core/conventions.test.ts` enforces the suffixes.
 
 **Unsuffixed, deliberately:** `src/index.ts`, everything in `src/core/` and `src/config/`, everything in
@@ -421,14 +427,14 @@ import { embed } from "@lib/discord";
 import { defineCommand, type CommandInput } from "@core/command";
 ```
 
-| Alias                                                                      | Points at               | Barrel? |
-| -------------------------------------------------------------------------- | ----------------------- | ------- |
-| `@core`                                                                    | `src/core/index.ts`     | yes     |
-| `@config`                                                                  | `src/config/index.ts`   | yes     |
-| `@lib`                                                                     | `src/lib/index.ts`      | yes     |
-| `@lib/<domain>` — `@lib/music`, `@lib/discord`, …                          | `src/lib/*/index.ts`    | yes     |
-| `@database`                                                                | `src/database/index.ts` | yes     |
-| `@commands/*`, `@events/*`, `@buttons/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
+| Alias                                                                                  | Points at               | Barrel? |
+| -------------------------------------------------------------------------------------- | ----------------------- | ------- |
+| `@core`                                                                                | `src/core/index.ts`     | yes     |
+| `@config`                                                                              | `src/config/index.ts`   | yes     |
+| `@lib`                                                                                 | `src/lib/index.ts`      | yes     |
+| `@lib/<domain>` — `@lib/music`, `@lib/discord`, …                                      | `src/lib/*/index.ts`    | yes     |
+| `@database`                                                                            | `src/database/index.ts` | yes     |
+| `@commands/*`, `@events/*`, `@buttons/*`, `@menus/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
 
 **One alias map only** — `tsconfig.json` `compilerOptions.paths`. `jest.config.ts` derives its mapper from it;
 `tsup` reads it and `tsc-alias` rewrites the build from it. Never write a second literal copy. Each aliased
@@ -1789,6 +1795,31 @@ star counts; the `community` events do the rest. Five things about it are load-b
   the count is stored, and the privacy notice says so (`legal.storedL10`).
 - **Every quiet way out says why at `debug`**, and one the operator can fix — a channel the bot cannot read, a board
   it cannot post on — at `warn`, with the permission to grant. A ⭐ that did nothing is then one log line away.
+
+### Right-click actions ask what their command asks
+
+A member's right-click menu has **Warn** and **Time out**, and a message's has **Report message** and **Add to
+starboard**, under **Apps**. Each is one `.menu.ts` file in `src/menus/`, exported with `defineContextMenu`, which the
+loader finds and registers beside the commands. Five things about them are load-bearing:
+
+- **Each belongs to a command and goes off with it.** `switchedBy` names the command (`warn`, `mute`, `modmail`,
+  `starboard`), and `checkContextMenu` in `checks.ts` asks its pause, blacklist and switches through
+  `checkOpenControl`, then the action's own `permissions` and the bot's `botPermissions`. Discord hides an action from
+  anybody without its default permissions, but a server can hand it to anybody in its own settings, so the gate is
+  asked here too. The loader test fails on a `switchedBy` that names no command.
+- **A form is asked the same again on submit**, because a role can change while it is open. Warn and Time out open a
+  form (`buttons/moderationForm.ts`), Report message one of its own (`buttons/messageReport.ts`), and both are
+  `ownerOnly` with the person last.
+- **They do exactly what the command does.** Warn goes through `issueWarning`, Time out through `timeoutMember`, and
+  both answer with the command's own embed (`warnedEmbed`, `timedOutEmbed`), so the case is numbered and the step is
+  taken as `/warn create` and `/mute` would. Add to starboard is `addToStarboard`, which claims the post like a star
+  would, so two moderators cannot post it twice, and puts back a repost that was taken down because a moderator asked.
+- **A report is posted, never stored.** `sendReport` reads the message again and posts it to the mod mail channel with
+  `allowedMentions` letting through only the role the server chose, since the quote is somebody's own words. Each
+  person may report a message once and `REPORT_LIMITS.perHour` messages an hour, remembered in memory only
+  (`clearReports`). The privacy notice says so (`legal.messagesP5`).
+- **Discord takes five of each kind**, and a sixth refuses every command in the same registration, which the loader
+  test pins. A menu has a `description` that Discord never shows; `docs/commands.md` lists them from it.
 
 ### Join to create deletes only what it made
 

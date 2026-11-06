@@ -30,6 +30,11 @@ describe("file naming", () => {
 		expect(wrong).toEqual([]);
 	});
 
+	it("gives every right-click action the .menu.ts suffix", () => {
+		const wrong = filesIn("menus", /\.ts$/).filter((file) => !file.endsWith(".menu.ts"));
+		expect(wrong).toEqual([]);
+	});
+
 	it("gives every model the .schema.ts suffix", () => {
 		const wrong = filesIn("database/models", /\.ts$/).filter((file) => !file.endsWith(".schema.ts"));
 		expect(wrong).toEqual([]);
