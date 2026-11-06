@@ -133,6 +133,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run test:coverage`  | Jest with the 75/75/75/75 thresholds enforced                        |
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
+| `npm run i18n:commands`  | Regenerate `assets/locales/commands/en.json`, what translators read  |
 | `npm run docs:images`    | Redraw the card images in `docs/images/bot/` from the real renderers |
 | `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
@@ -199,10 +200,12 @@ Grouped by **technical role first, then domain**. One feature is spread across l
 ```
 src/
 ├── index.ts              Entry point. One async main() that awaits each step in order.
-├── core/                 The framework. 19 files, no domain logic.
+├── core/                 The framework. 21 files, no domain logic.
 │   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
 │   ├── loader.ts         Finds and registers everything from disk. Globs live here.
 │   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
+│   ├── commandLocales.ts The menus' translations, read from assets/locales/commands
+│   ├── language.ts       Which language a reader gets, and `say` for the shared replies
 │   ├── prefix.ts         The ONLY file that knows prefix commands exist
 │   ├── button.ts         Button contract, defineButton, customId / parseCustomId
 │   ├── contextMenu.ts    Right-click action contract, defineContextMenu, buildContextMenu
@@ -219,6 +222,8 @@ src/
 │   ├── categories.ts     The category union — single source of truth
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
+│   ├── languages.ts      The bot's eight languages and the Discord locales each answers
+│   ├── replies.ts        The refusals and apology every command shares, in each language
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
@@ -281,6 +286,8 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Query the database                         | `src/database/repositories/*.ts` — never a model directly                           |
 | Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`                  |
 | Change user-facing copy                    | `src/config/strings.ts`                                                             |
+| Translate a command's menu text            | `assets/locales/commands/<lang>.json`, after `npm run i18n:commands`                |
+| Change a refusal every command shares      | `src/config/replies.ts`, in all eight languages at once                             |
 | Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot                    |
 | Change a colour or emoji                   | `src/config/theme.ts`                                                               |
 | Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`                         |
@@ -514,7 +521,8 @@ Rules:
    `run`. `checks.ts` handles them uniformly and the failure messages stay consistent.
 7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
    to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
-8. Run `npm run docs:commands` afterwards.
+8. Run `npm run docs:commands` afterwards, and `npm run i18n:commands`, then add the new strings to each file in
+   `assets/locales/commands/`. The suite names every one missing.
 
 **`private: true` is how a command answers only the person who ran it**, set on the command or on one
 subcommand and applied by `dispatch` — never a hand-written `MessageFlags.Ephemeral`. On a slash command every
@@ -1821,6 +1829,30 @@ loader finds and registers beside the commands. Five things about them are load-
 - **Discord takes five of each kind**, and a sixth refuses every command in the same registration, which the loader
   test pins. A menu has a `description` that Discord never shows; `docs/commands.md` lists them from it.
 
+### The bot speaks eight languages in its menus and its refusals, and English everywhere else
+
+The dashboard's eight languages — English, German, Spanish, French, Italian, Russian, Dutch and Japanese — reach the
+bot in two places. Four things about it are load-bearing:
+
+- **Discord's menus are translated, the names never are.** Every command, subcommand and option description and every
+  right-click action's name is registered with Discord's localisations, so a reader whose Discord is in German sees
+  German in the slash menu and under **Apps**. Names stay English, because a prefix command and its aliases are typed
+  and a name that changed per reader would not be one command. `commandStrings` files each description under a key —
+  `warn`, `warn create`, `warn create --reason`, `menu: Warn` — and `npm run i18n:commands` writes them to
+  `assets/locales/commands/en.json`, which translators work from. Owner commands are left out; only owners see them.
+- **A translation is checked against the bot, not trusted.** `commandLocales.test.ts` fails when `en.json` no longer
+  matches the registry, when a language misses or keeps a stale key, when a string passes Discord's 100 characters (32
+  for an action's name), or when a code span such as `` `all` `` or `` `/automod list` `` was translated, since those
+  are typed as written. Spanish is registered for Spain and Latin America alike (`DISCORD_LOCALES`).
+- **The replies every command can give are translated; a command's own replies are not, yet.** `REPLIES` in
+  `src/config/replies.ts` holds the gates' refusals, the cooldown, the blacklist notice and the apology with its
+  reference, typed `Record<BotLanguage, Record<ReplyKey, string>>` so a language missing a key is a compile error.
+  `say(language, key, values)` fills `{name}`; `replies.test.ts` fails on a placeholder or code span a language
+  changed. Everything else a command says is still English.
+- **The reader's language comes from Discord.** `readerLanguage` takes an interaction's `locale` — the reader's own
+  Discord language — and falls back to the server's `preferredLocale`, which is all a prefix command has, then to
+  English for any language the bot does not speak. Nothing is stored and nothing is asked.
+
 ### Join to create deletes only what it made
 
 `/temp-voice` and the **Join to create** screen pick a lobby, or make one, and say what each new channel is called,
@@ -2190,7 +2222,8 @@ degrade automatically rather than fail.
 
 **Read the log the user pasted, all of it.** The line that mattered in a 900-line FFmpeg dump was the last one.
 
-**Regenerate, do not hand-edit.** `docs/commands.md` comes from `npm run docs:commands`, and the card images in
+**Regenerate, do not hand-edit.** `docs/commands.md` comes from `npm run docs:commands`, the English command
+strings in `assets/locales/commands/en.json` from `npm run i18n:commands`, and the card images in
 `docs/images/bot/` from `npm run docs:images`, which draws them with invented members so no real account appears.
 
 ---
