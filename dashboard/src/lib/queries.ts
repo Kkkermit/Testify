@@ -1,3 +1,5 @@
+import { type UseQueryResult } from "@tanstack/react-query";
+
 export const keys = {
 	setup: () => ["setup"] as const,
 	me: () => ["me"] as const,
@@ -115,3 +117,8 @@ export const keys = {
 		notices: () => ["owner", "notices"] as const,
 	},
 };
+
+/** A query's answer to what is asked now; the previous answer it keeps while a changed filter loads is not one. */
+export function currentData<T>(query: UseQueryResult<T>): T | undefined {
+	return query.isPlaceholderData ? undefined : query.data;
+}

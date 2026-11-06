@@ -16,5 +16,6 @@ Choose a backup file, or pick another server you manage and press **Read its set
 - **Channels and roles are matched by name**, because another server's have different ids. Anything with no match here stays as it is.
 - **Each section is saved the way its own screen saves it**, so the same permissions apply, and a section you could not change by hand is refused and says why.
 - Every section saved is a change on the [Changes page](/guilds), so it can be put back from there.
+- **Only a backup downloaded from this page can be brought in.** The file is read in your browser and never uploaded, and a program, a script, an archive or anything else that is not exactly a backup is refused before anything in it is read. Choosing a program or a script blocks your account from {bot}, and only the bot's owners can lift that. If somebody tells you to choose a file there, stop and check it is a backup you downloaded from that page yourself.
 
 > A backup cannot hold tickets, giveaways, role menus or posts. It is how {bot} is set up, not what it has posted.

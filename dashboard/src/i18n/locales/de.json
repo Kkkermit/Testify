@@ -2038,7 +2038,7 @@
 		"dashboardP4": "Bildschirmzahlen: welcher Dashboard-Bildschirm geöffnet wurde, pro Tag. Sie werden botweit gezählt – weder Benutzer-ID noch Server-ID wird dabei gespeichert –, zeigen also, welche Bildschirme genutzt werden, und nichts darüber, wer sie genutzt hat.",
 		"dashboardP5": "Anfragen sind pro Sitzung und pro Netzwerkadresse begrenzt. Die Adresse wird nur für die Dauer dieser Begrenzung im Arbeitsspeicher gehalten und nie gespeichert.",
 		"blacklist": "Die Blacklist",
-		"blacklistP1": "Setzt die Betreiberin ein Konto auf die Blacklist, werden seine Benutzer-ID und der angegebene Grund gespeichert, damit jeder Befehl es abweist. Die Blacklist gilt auf jedem Server, den diese Instanz bedient, bis die Betreiberin sie aufhebt.",
+		"blacklistP1": "Setzt die Betreiberin ein Konto auf die Blacklist, werden seine Benutzer-ID und der angegebene Grund gespeichert, damit jeder Befehl es abweist. Die Blacklist gilt auf jedem Server, den diese Instanz bedient, bis die Betreiberin sie aufhebt. Ein Konto wird außerdem automatisch gesperrt, wenn es auf dem Dashboard ein Programm oder ein Skript als Einstellungssicherung auswählt.",
 		"logConsole": "Die Log-Konsole",
 		"logConsoleP1": "Die Betreiberin kann die letzten Log-Zeilen des Bots in der Inhaber-Konsole lesen. Zeilen können Benutzer- und Server-IDs enthalten. Alles, was wie ein Token, ein Passwort oder eine Verbindungszeichenfolge aussieht, wird entfernt, bevor eine Zeile aufbewahrt wird, und nur die letzten 1.000 Zeilen werden gehalten, im Arbeitsspeicher – ein Neustart leert sie.",
 		"helpQuestions": "Hilfefragen",
@@ -2962,6 +2962,8 @@
 		"bringBody": "Nichts ändert sich, bevor du gesehen hast, was sich ändern würde, und auf Übernehmen gedrückt hast.",
 		"fromFile": "Aus einer Sicherungsdatei",
 		"fromFileHint": "Eine von dieser Seite heruntergeladene Datei, von hier oder von einem anderen Server.",
+		"programWarning": "Wer hier ein Programm oder ein Skript wählt, wird für {{bot}} gesperrt, und nur seine Besitzer können das aufheben.",
+		"toldToWarning": "Hat dich jemand aufgefordert, hier eine Datei zu wählen, halte inne. Vergewissere dich, dass es eine Sicherung ist, die du selbst von dieser Seite heruntergeladen hast, sonst kann dein Konto gesperrt werden.",
 		"tooLarge": "Diese Datei ist zu groß für eine Sicherung.",
 		"notBackup": "Diese Datei ist keine Sicherung von dieser Seite.",
 		"fromServer": "Von einem anderen Server",
@@ -2983,6 +2985,8 @@
 		"apply_one": "{{count, number}} Bereich übernehmen",
 		"apply_other": "{{count, number}} Bereiche übernehmen",
 		"leftAsIs": "{{section}} bleibt hier, wie es ist.",
-		"chooseFile": "Sicherungsdatei auswählen"
+		"chooseFile": "Sicherungsdatei auswählen",
+		"notJson": "Wähle eine Sicherungsdatei: eine auf .json endende Datei, die von dieser Seite heruntergeladen wurde.",
+		"program": "Das ist ein Programm, ein Skript oder eine andere Art von Datei, keine Sicherung. Nichts darin wurde geöffnet oder ausgeführt."
 	}
 }

@@ -12,6 +12,7 @@ import { useAccountHistory } from "@/features/account/useAccount";
 import { useMe } from "@/features/auth/useMe";
 import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { dateAndTime, since } from "@/lib/datetime";
+import { currentData } from "@/lib/queries";
 
 export function HistoryTab(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -19,16 +20,19 @@ export function HistoryTab(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const [server, setServer] = useState("");
 	const history = useAccountHistory(page, server);
+	const results = currentData(history);
 
 	if (history.isError) return <ErrorState as="h2" error={history.error} onRetry={() => void history.refetch()} />;
 	if (history.isPending) return <Skeleton className="h-64 w-full" />;
 
-	const { items, servers, total, perPage } = history.data;
+	const { servers, total, perPage } = history.data;
 	const guilds = me.data?.guilds ?? [];
 
 	return (
 		<>
-			<Summary>{t("account.historySummary", { count: total, days: ACCOUNT_LIMITS.historyDays })}</Summary>
+			{results !== undefined && (
+				<Summary>{t("account.historySummary", { count: results.total, days: ACCOUNT_LIMITS.historyDays })}</Summary>
+			)}
 
 			{servers.length > 1 && (
 				<Card>
@@ -53,7 +57,9 @@ export function HistoryTab(): React.JSX.Element {
 				</Card>
 			)}
 
-			{items.length === 0 ? (
+			{results === undefined ? (
+				<Skeleton className="h-64 w-full" />
+			) : results.items.length === 0 ? (
 				<EmptyState
 					icon={<History size={28} />}
 					title={t("account.historyNone")}
@@ -62,7 +68,7 @@ export function HistoryTab(): React.JSX.Element {
 			) : (
 				<Card padding="none">
 					<DividedList className="rounded-card border-0">
-						{items.map((change) => (
+						{results.items.map((change) => (
 							<HistoryRow key={change.id} change={change} link={changeLink(change, guilds)} />
 						))}
 					</DividedList>

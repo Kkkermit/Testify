@@ -2038,7 +2038,7 @@
 		"dashboardP4": "Schermtellingen: welk dashboardscherm werd geopend, per dag. Ze worden bot-breed geteld — hierbij worden geen gebruikers-ID en geen server-ID opgeslagen — dus ze tonen welke schermen worden gebruikt en niets over wie ze gebruikte.",
 		"dashboardP5": "Verzoeken worden begrensd per sessie en per netwerkadres. Het adres wordt alleen in het geheugen bewaard zolang die grens duurt, en wordt nooit opgeschreven.",
 		"blacklist": "De zwarte lijst",
-		"blacklistP1": "Als de beheerder een account op de zwarte lijst zet, worden de gebruikers-ID en de opgegeven reden opgeslagen, zodat elk commando het weigert. De zwarte lijst geldt voor elke server die deze instantie bedient en blijft staan totdat de beheerder hem opheft.",
+		"blacklistP1": "Als de beheerder een account op de zwarte lijst zet, worden de gebruikers-ID en de opgegeven reden opgeslagen, zodat elk commando het weigert. De zwarte lijst geldt voor elke server die deze instantie bedient en blijft staan totdat de beheerder hem opheft. Een account wordt ook automatisch geblokkeerd als het op het dashboard een programma of script als back-up van de instellingen kiest.",
 		"logConsole": "De logconsole",
 		"logConsoleP1": "De beheerder kan de recente logregels van de bot lezen in de eigenaarsconsole. Regels kunnen gebruikers- en server-ID’s bevatten. Alles wat op een token, wachtwoord of verbindingsstring lijkt, wordt verwijderd voordat een regel wordt bewaard, en alleen de laatste 1.000 regels worden bewaard, in het geheugen — een herstart wist ze.",
 		"helpQuestions": "Hulpvragen",
@@ -2962,6 +2962,8 @@
 		"bringBody": "Er verandert niets tot je hebt gezien wat er zou veranderen en op Toepassen hebt gedrukt.",
 		"fromFile": "Uit een back-upbestand",
 		"fromFileHint": "Een bestand gedownload van deze pagina, hier of op een andere server.",
+		"programWarning": "Kies je hier een programma of script, dan wordt je account voor {{bot}} geblokkeerd, en alleen de eigenaren kunnen dat opheffen.",
+		"toldToWarning": "Heeft iemand je gezegd hier een bestand te kiezen, stop dan. Zorg dat het een back-up is die je zelf van deze pagina hebt gedownload, anders kan het kiezen ervan je account blokkeren.",
 		"tooLarge": "Dat bestand is te groot voor een back-up.",
 		"notBackup": "Dat bestand is geen back-up van deze pagina.",
 		"fromServer": "Van een andere server",
@@ -2983,6 +2985,8 @@
 		"apply_one": "{{count, number}} onderdeel toepassen",
 		"apply_other": "{{count, number}} onderdelen toepassen",
 		"leftAsIs": "{{section}} blijft hier zoals het is.",
-		"chooseFile": "Back-upbestand kiezen"
+		"chooseFile": "Back-upbestand kiezen",
+		"notJson": "Kies een back-upbestand: een bestand dat eindigt op .json en van deze pagina is gedownload.",
+		"program": "Dat is een programma, een script of een ander soort bestand, geen back-up. Er is niets uit geopend of uitgevoerd."
 	}
 }

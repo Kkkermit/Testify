@@ -1,26 +1,56 @@
 import { z } from "zod";
+import { containsMarkup } from "./markup";
 import { RESTORABLE, type Restorable, type RestorableAction, restorableFields, sameValue } from "./restore";
+import { plainLine, sanitiseLine } from "./text";
 
 /** A server’s settings as a file to keep, or to copy to another server, over the same writes Put back uses. */
 
-export const BACKUP_LIMITS = { maxBytes: 256 * 1024, maxNames: 1_000, maxName: 100 } as const;
+export const BACKUP_LIMITS = {
+	maxBytes: 256 * 1024,
+	maxNames: 1_000,
+	maxName: 100,
+	maxText: 4_000,
+	maxList: 100,
+	/** Enough of a file's start for the server to tell a program by, and nothing of what follows. */
+	reportedBytes: 8,
+} as const;
 
 export const BACKUP_SECTIONS = Object.keys(RESTORABLE) as RestorableAction[];
 
 type Plain = Record<string, unknown>;
 
 const snowflake = z.string().regex(/^\d{17,20}$/);
+const name = plainLine(0, BACKUP_LIMITS.maxName);
 const names = z
-	.record(snowflake, z.string().max(BACKUP_LIMITS.maxName))
+	.record(snowflake, name)
 	.refine((value) => Object.keys(value).length <= BACKUP_LIMITS.maxNames, "Too many names.");
 
-/** Section and field names are plain words, so no key in a file can reach an object's prototype. */
-export const backupDocument = z.object({
+/** A setting is text, a number, a switch or a short list of those; nothing in a backup nests any deeper. */
+const settingScalar = z.union([z.string().max(BACKUP_LIMITS.maxText), z.number(), z.boolean(), z.null()]);
+const settingValue = z.union([settingScalar, z.array(settingScalar).max(BACKUP_LIMITS.maxList)]);
+
+/** Only the sections Put back covers, and in each only the fields its route takes. */
+const sections = z.record(z.string(), z.record(z.string(), settingValue)).superRefine((value, context) => {
+	for (const [action, section] of Object.entries(value)) {
+		if (!Object.hasOwn(RESTORABLE, action)) {
+			context.addIssue({ code: "custom", message: "Not a section a backup holds.", path: [action] });
+			continue;
+		}
+		const fields: readonly string[] = RESTORABLE[action as RestorableAction].fields;
+		for (const field of Object.keys(section)) {
+			if (!fields.includes(field)) {
+				context.addIssue({ code: "custom", message: "Not a field this section holds.", path: [action, field] });
+			}
+		}
+	}
+});
+
+export const backupDocument = z.strictObject({
 	kind: z.literal("testify-backup"),
 	version: z.literal(1),
-	guildName: z.string().max(BACKUP_LIMITS.maxName),
+	guildName: name,
 	exportedAt: z.iso.datetime(),
-	sections: z.record(z.string().regex(/^[a-z-]+\.[a-z-]+$/), z.record(z.string().regex(/^[A-Za-z]+$/), z.unknown())),
+	sections,
 	/** Names of the channels and roles the sections point at, so a copy to another server can find its own. */
 	channels: names,
 	roles: names,
@@ -28,11 +58,92 @@ export const backupDocument = z.object({
 
 export type BackupDocument = z.infer<typeof backupDocument>;
 
+/** Why a file was refused, before anything in it was read as settings. */
+export type BackupRefusal = "tooLarge" | "notJson" | "program" | "notBackup";
+
+export interface BackupFile {
+	name: string;
+	type: string;
+	bytes: Uint8Array;
+}
+
+/** The first bytes of programs and scripts; nobody chooses one of these as a backup by mistake. */
+const PROGRAMS: readonly (readonly number[])[] = [
+	[0x4d, 0x5a], // MZ: a Windows .exe or .dll
+	[0x7f, 0x45, 0x4c, 0x46], // ELF: a Linux program
+	[0xcf, 0xfa, 0xed, 0xfe], // Mach-O: a macOS program, 64-bit
+	[0xce, 0xfa, 0xed, 0xfe], // Mach-O, 32-bit
+	[0xca, 0xfe, 0xba, 0xbe], // a macOS universal program, or a Java class
+	[0x23, 0x21], // #!: a shell, Bash, Python or other script
+];
+
+/** The first bytes of archives and documents, refused like a program but plausibly chosen by mistake. */
+const OTHER_FILES: readonly (readonly number[])[] = [
+	[0x50, 0x4b, 0x03, 0x04], // PK: a zip, .jar, .apk or Office file
+	[0x1f, 0x8b], // gzip
+	[0x52, 0x61, 0x72, 0x21], // Rar!
+	[0x37, 0x7a, 0xbc, 0xaf], // 7z
+	[0xd0, 0xcf, 0x11, 0xe0], // an .msi or old Office file
+	[0x25, 0x50, 0x44, 0x46], // %PDF
+];
+
+const startsWith = (bytes: Uint8Array, signature: readonly number[]): boolean =>
+	signature.every((byte, index) => bytes[index] === byte);
+
+/** Whether a file starts like a program or a script, judged on its first bytes alone. */
+export function runsAsProgram(head: Uint8Array): boolean {
+	return PROGRAMS.some((signature) => startsWith(head, signature));
+}
+
+/** What the browser sends when somebody chooses a program as a backup: the file's first bytes, never the file. */
+export const programReport = z.strictObject({
+	head: z.array(z.int().min(0).max(255)).min(2).max(BACKUP_LIMITS.reportedBytes),
+});
+
+/** JSON.parse keeps these as ordinary keys, but no backup has a reason to carry one. */
+const PROTOTYPE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+function refusePrototypeKeys(key: string, value: unknown): unknown {
+	if (PROTOTYPE_KEYS.has(key)) throw new SyntaxError("A backup carries no prototype keys.");
+	return value;
+}
+
+/** A backup file's settings, or why it is refused; each check runs before the next part of the file is read. */
+export function readBackupFile(file: BackupFile): BackupDocument | BackupRefusal {
+	const { bytes } = file;
+	if (bytes.length > BACKUP_LIMITS.maxBytes) return "tooLarge";
+	if (!/^[^\\/]+\.json$/i.test(file.name) || (file.type !== "" && file.type !== "application/json")) return "notJson";
+	if ([...PROGRAMS, ...OTHER_FILES].some((signature) => startsWith(bytes, signature))) return "program";
+
+	let text: string;
+	try {
+		text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+	} catch {
+		return "program";
+	}
+
+	let value: unknown;
+	try {
+		value = JSON.parse(text, refusePrototypeKeys);
+	} catch {
+		// A syntax error, a prototype key, or a stack overflow from nesting no backup has.
+		return "notBackup";
+	}
+	const parsed = backupDocument.safeParse(value);
+	return parsed.success ? parsed.data : "notBackup";
+}
+
 /** Which fields name a channel or a role, by the same rule the server's reach check reads them by. */
 export function placeKind(field: string): "channel" | "role" | null {
 	if (/channel|category/i.test(field)) return "channel";
 	if (/role/i.test(field)) return "role";
 	return null;
+}
+
+/** Discord allows a name the read would refuse as HTML, so a backup writes its `<` as a look-alike and still reads back. */
+function backupName(value: string): string {
+	const line = sanitiseLine(value);
+	return containsMarkup(line) ? line.replaceAll("<", "\u2039") : line;
 }
 
 function isPlain(value: unknown): value is Plain {
@@ -69,15 +180,16 @@ export function buildBackup(
 
 	const nameOf = (list: readonly { id: string; name: string | null }[], ids: Set<string>): Record<string, string> =>
 		Object.fromEntries(
-			list.flatMap((entry) => (ids.has(entry.id) && entry.name !== null ? [[entry.id, entry.name]] : [])),
+			list.flatMap((entry) => (ids.has(entry.id) && entry.name !== null ? [[entry.id, backupName(entry.name)]] : [])),
 		);
 
 	return {
 		kind: "testify-backup",
 		version: 1,
-		guildName,
+		guildName: backupName(guildName),
 		exportedAt: now.toISOString(),
-		sections,
+		// Restorable fields are the routes' own settings, which are all scalars or lists of them.
+		sections: sections as BackupDocument["sections"],
 		channels: nameOf(places.channels, named.channel),
 		roles: nameOf(places.roles, named.role),
 	};
@@ -127,8 +239,9 @@ export function planBackup(
 			if (typeof id !== "string") return undefined;
 			if (visible[kind].some((place) => place.id === id)) return id;
 			const name = (kind === "channel" ? document.channels : document.roles)[id] ?? null;
+			const wanted = name === null ? null : backupName(name).toLowerCase();
 			const match =
-				name === null ? undefined : visible[kind].find((place) => place.name.toLowerCase() === name.toLowerCase());
+				wanted === null ? undefined : visible[kind].find((place) => backupName(place.name).toLowerCase() === wanted);
 			if (match !== undefined) return match.id;
 			missing.push({ kind, name });
 			return undefined;
@@ -154,10 +267,14 @@ export function planBackup(
 			if (missing.length > 0) left.push({ action, missing });
 			continue;
 		}
-		if (!entry.schema.safeParse(body).success) {
+		const checked = entry.schema.safeParse(body);
+		if (!checked.success || !isPlain(checked.data)) {
 			unusable.push(action);
 			continue;
 		}
+		// What is sent is what the route's schema made of it, with its text cleaned, never the file's own values.
+		const clean: Plain = checked.data;
+		for (const field of Object.keys(body)) body[field] = clean[field];
 
 		const now = restorableFields(action, current[action]);
 		const unchanged = Object.entries(body).every(([field, value]) => sameValue(now[field], value));

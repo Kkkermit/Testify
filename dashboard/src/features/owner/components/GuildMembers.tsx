@@ -26,6 +26,7 @@ import { cn } from "@/lib/cn";
 import { dateAndTime, since } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
+import { currentData } from "@/lib/queries";
 
 export function GuildMembers({ guildId, report }: { guildId: string; report: GuildUsageReport }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -34,6 +35,7 @@ export function GuildMembers({ guildId, report }: { guildId: string; report: Gui
 	const page = pageFrom(params.get("people"));
 	const chosen = snowflakeFrom(params.get("member"));
 	const members = useGuildMembers(guildId, report.days, page, useDebounced(search));
+	const results = currentData(members);
 
 	function put(changes: Record<string, string | null>, replace = false): void {
 		setParams(new URLSearchParams(searchWith(params, changes)), { replace });
@@ -59,7 +61,7 @@ export function GuildMembers({ guildId, report }: { guildId: string; report: Gui
 
 			{members.isError ? (
 				<ErrorState as="h2" error={members.error} onRetry={() => void members.refetch()} />
-			) : members.isPending ? (
+			) : results === undefined ? (
 				<Skeleton className="h-48 w-full" />
 			) : (
 				<>
@@ -85,14 +87,14 @@ export function GuildMembers({ guildId, report }: { guildId: string; report: Gui
 							</>
 						}
 					>
-						{members.data.items.length === 0 && (
+						{results.items.length === 0 && (
 							<tr>
 								<td colSpan={5} className={cn(CELL, "text-muted-foreground")}>
 									{search.trim() === "" ? t("owner.noMemberRan") : t("owner.noMemberMatches")}
 								</td>
 							</tr>
 						)}
-						{members.data.items.map((member) => (
+						{results.items.map((member) => (
 							<tr
 								key={member.userId}
 								className={cn(
@@ -160,16 +162,17 @@ export function GuildMembers({ guildId, report }: { guildId: string; report: Gui
 							</tr>
 						))}
 					</DataTable>
-
-					<Pager
-						label={t("owner.whoRan")}
-						page={page}
-						pages={pageCount(members.data.total, PER_PAGE)}
-						onChange={(next) => {
-							put({ people: String(next) });
-						}}
-					/>
 				</>
+			)}
+			{members.data !== undefined && !members.isError && (
+				<Pager
+					label={t("owner.whoRan")}
+					page={page}
+					pages={pageCount(members.data.total, PER_PAGE)}
+					onChange={(next) => {
+						put({ people: String(next) });
+					}}
+				/>
 			)}
 		</section>
 	);

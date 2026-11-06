@@ -2103,7 +2103,7 @@
 		"dashboardP4": "Comptages d’écrans : quel écran du tableau de bord a été ouvert, par jour. Ils sont comptés pour tout le bot — ni identifiant d’utilisateur ni identifiant de serveur n’y est joint —, et montrent donc quels écrans servent, sans rien dire de qui les a utilisés.",
 		"dashboardP5": "Les requêtes sont limitées par session et par adresse réseau. L’adresse n’est gardée en mémoire que le temps de cette limite et n’est jamais enregistrée.",
 		"blacklist": "La liste noire",
-		"blacklistP1": "Si l’exploitant met un compte sur liste noire, son identifiant et le motif donné sont enregistrés pour que chaque commande le refuse. La liste noire s’applique à tous les serveurs que dessert cette instance et dure jusqu’à ce que l’exploitant la lève.",
+		"blacklistP1": "Si l’exploitant met un compte sur liste noire, son identifiant et le motif donné sont enregistrés pour que chaque commande le refuse. La liste noire s’applique à tous les serveurs que dessert cette instance et dure jusqu’à ce que l’exploitant la lève. Un compte est aussi bloqué automatiquement s’il choisit un programme ou un script comme sauvegarde des paramètres sur le tableau de bord.",
 		"logConsole": "La console de journal",
 		"logConsoleP1": "L’exploitant peut lire les dernières lignes du journal du bot depuis la console propriétaire. Elles peuvent contenir des identifiants d’utilisateurs et de serveurs. Tout ce qui ressemble à un jeton, un mot de passe ou une chaîne de connexion est retiré avant qu’une ligne soit conservée, et seules les 1 000 dernières lignes sont gardées, en mémoire — un redémarrage les efface.",
 		"helpQuestions": "Questions d’aide",
@@ -3045,6 +3045,8 @@
 		"bringBody": "Rien ne change tant que vous n’avez pas vu ce qui changerait et appuyé sur Appliquer.",
 		"fromFile": "Depuis un fichier de sauvegarde",
 		"fromFileHint": "Un fichier téléchargé depuis cette page, ici ou sur un autre serveur.",
+		"programWarning": "Choisir ici un programme ou un script bloque votre compte sur {{bot}}, et seuls ses propriétaires peuvent lever ce blocage.",
+		"toldToWarning": "Si quelqu’un vous a demandé de choisir un fichier ici, arrêtez-vous. Assurez-vous qu’il s’agit d’une sauvegarde que vous avez téléchargée vous-même depuis cette page, sinon le choisir pourrait bloquer votre compte.",
 		"tooLarge": "Ce fichier est trop volumineux pour être une sauvegarde.",
 		"notBackup": "Ce fichier n’est pas une sauvegarde de cette page.",
 		"fromServer": "Depuis un autre serveur",
@@ -3068,6 +3070,8 @@
 		"apply_many": "Appliquer {{count, number}} de sections",
 		"apply_other": "Appliquer {{count, number}} sections",
 		"leftAsIs": "{{section}} reste tel quel ici.",
-		"chooseFile": "Choisir un fichier de sauvegarde"
+		"chooseFile": "Choisir un fichier de sauvegarde",
+		"notJson": "Choisissez un fichier de sauvegarde : un fichier en .json, téléchargé depuis cette page.",
+		"program": "C’est un programme, un script ou un autre type de fichier, pas une sauvegarde. Rien de son contenu n’a été ouvert ni exécuté."
 	}
 }
