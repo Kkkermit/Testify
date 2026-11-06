@@ -2982,6 +2982,7 @@
 		"unusable": "These could not be read, so they are left out: {{sections}}.",
 		"apply_one": "Apply {{count, number}} section",
 		"apply_other": "Apply {{count, number}} sections",
-		"leftAsIs": "{{section}} stays as it is here."
+		"leftAsIs": "{{section}} stays as it is here.",
+		"chooseFile": "Choose a backup file"
 	}
 }

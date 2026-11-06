@@ -7,7 +7,7 @@ import {
 	type BackupStep,
 } from "@testify/shared";
 import { type TFunction } from "i18next";
-import { Check } from "lucide-react";
+import { Check, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
@@ -20,6 +20,7 @@ import { readServerSettings, type ServerSettings, type StepResult, useApplyBacku
 import { comparable } from "@/features/compare/compare.utils";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 
 interface Incoming {
@@ -92,7 +93,7 @@ export function BackupPage(): React.JSX.Element {
 						type="file"
 						accept="application/json,.json"
 						disabled={busy}
-						className="text-sm"
+						className="peer sr-only"
 						onChange={(event) => {
 							const file = event.target.files?.[0];
 							event.target.value = "";
@@ -109,6 +110,18 @@ export function BackupPage(): React.JSX.Element {
 							});
 						}}
 					/>
+					{/* The browser's own picker is in the browser's language, so this label stands in for it. */}
+					<label
+						htmlFor="backup-file"
+						className={cn(
+							"border-border bg-muted text-foreground hover:bg-muted/70 rounded-card inline-flex min-h-11 w-fit cursor-pointer items-center gap-2 border px-4 py-2 text-sm font-medium",
+							"peer-focus-visible:outline-ring peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2",
+							"peer-disabled:pointer-events-none peer-disabled:opacity-50",
+						)}
+					>
+						<Upload size={16} aria-hidden="true" />
+						{t("backup.chooseFile")}
+					</label>
 				</Field>
 				{others.length > 0 && (
 					<Field label={t("backup.fromServer")} hint={t("backup.fromServerHint")} htmlFor="backup-source">

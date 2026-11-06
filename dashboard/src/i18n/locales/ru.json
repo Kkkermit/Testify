@@ -3152,6 +3152,7 @@
 		"apply_few": "Применить {{count, number}} раздела",
 		"apply_many": "Применить {{count, number}} разделов",
 		"apply_other": "Применить {{count, number}} раздела",
-		"leftAsIs": "{{section}}: здесь остаётся как есть."
+		"leftAsIs": "{{section}}: здесь остаётся как есть.",
+		"chooseFile": "Выбрать файл резервной копии"
 	}
 }
