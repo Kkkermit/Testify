@@ -1,8 +1,10 @@
 import { PermissionFlagsBits, type PermissionResolvable, PermissionsBitField } from "discord.js";
+import { type BotLanguage } from "@config/languages";
 import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, type Subcommand } from "@core/command";
+import { eitherOf, readerLanguage, say } from "@core/language";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
@@ -32,7 +34,7 @@ export function refusalText(refusal: string | TitledRefusal): string {
 	return [`**${refusal.title}**`, refusal.message, ...fields].join("\n");
 }
 
-export const OWNER_ONLY_REFUSAL = "This command is only for the bot owner. The attempt has been logged.";
+export const OWNER_ONLY_REFUSAL = say("en", "ownerOnly");
 
 const cooldowns = new Map<string, number>();
 
@@ -44,20 +46,22 @@ export async function runChecks(
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
+	const language = readerLanguage(interaction);
+
 	// First, so an attempt is recorded and refused whatever else would have stopped it.
 	if (command.ownerOnly === true && !client.isOwner(interaction.user.id)) {
 		await reportOwnerAttempt(client, interaction, command);
-		return OWNER_ONLY_REFUSAL;
+		return say(language, "ownerOnly");
 	}
 
-	if (client.paused) return pausedRefusal();
+	if (client.paused) return pausedRefusal(language);
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
 	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) {
-		return blacklistRefusal(blacklisted, await ownerNames(client));
+		return blacklistRefusal(blacklisted, await ownerNames(client), language);
 	}
 
-	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId);
+	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId, language);
 	if (switchedOff !== null) return switchedOff;
 
 	const musicOff = await checkMusicSystem(interaction, command);
@@ -67,13 +71,13 @@ export async function runChecks(
 	if (casinoClosed !== null) return casinoClosed;
 
 	if (command.guildOnly && !interaction.guild) {
-		return "This command only works inside a server.";
+		return say(language, "guildOnly");
 	}
 
 	if (command.nsfw) {
 		const channel = interaction.channel;
 		const isNsfw = channel !== null && "nsfw" in channel && channel.nsfw;
-		if (!isNsfw) return "This command only works in age-restricted channels.";
+		if (!isNsfw) return say(language, "nsfwOnly");
 	}
 
 	const member = interaction.member;
@@ -82,77 +86,84 @@ export async function runChecks(
 	if (needed.length > 0 && member !== null) {
 		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
 		if (missing.length > 0) {
-			return lacking("You need", missing);
+			return lacking(language, "youNeed", missing);
 		}
 	}
 
 	if (command.botPermissions?.length && interaction.guild?.members.me) {
 		const missing = interaction.guild.members.me.permissions.missing(new PermissionsBitField(command.botPermissions));
 		if (missing.length > 0) {
-			return lacking("I need", missing);
+			return lacking(language, "iNeed", missing);
 		}
 	}
 
-	return checkCooldown(interaction, command, client);
+	return checkCooldown(interaction, command, client, language);
 }
 
-function lacking(who: "You need" | "I need", missing: string[]): string {
-	return `${who} these permissions: ${missing.map((p) => `\`${humanisePermission(p)}\``).join(", ")}`;
+function lacking(language: BotLanguage, who: "youNeed" | "iNeed", missing: string[]): string {
+	return say(language, who, { permissions: missing.map((p) => `\`${humanisePermission(p)}\``).join(", ") });
 }
 
 async function ownerNames(client: TestifyClient): Promise<string[]> {
 	return (await ownerContacts(client)).map((owner) => owner.name);
 }
 
-function listed(names: readonly string[]): string {
-	return names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} or ${names.at(-1) ?? ""}`;
-}
-
-function blacklistRefusal(entry: { reason: string; createdAt: Date }, owners: readonly string[] = []): TitledRefusal {
+function blacklistRefusal(
+	entry: { reason: string; createdAt: Date },
+	owners: readonly string[] = [],
+	language: BotLanguage = "en",
+): TitledRefusal {
 	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
-	const named = listed(owners.map((name) => `**${name}**`));
+	const names = eitherOf(
+		language,
+		owners.map((name) => `**${name}**`),
+	);
 	const ask =
 		owners.length === 0
-			? "Contact the bot's owner."
-			: `Contact ${named}, the bot's ${owners.length === 1 ? "owner" : "owners"}.`;
+			? say(language, "askOwner")
+			: say(language, owners.length === 1 ? "askOne" : "askMany", { names });
+	const bot = botName();
 
 	return {
-		title: `🚫 You are blocked from ${botName()}`,
-		message:
-			`The bot's owner has blocked your account, so ${botName()} no longer works for you, in this server or any ` +
-			`other. Only \`/delete-my-data\` still does, to delete everything ${botName()} keeps about you, here or on ` +
-			"the dashboard, and deleting it does not lift the block.",
+		title: `🚫 ${say(language, "blockedTitle", { bot })}`,
+		message: say(language, "blocked", { bot }),
 		fields: [
-			{ name: "Reason", value: entry.reason.trim() === "" ? "No reason was given." : entry.reason.slice(0, 1_000) },
 			{
-				name: "Blocked since",
-				value: Number.isFinite(since) ? `<t:${String(since)}:D> (<t:${String(since)}:R>)` : "Unknown",
+				name: say(language, "blockedReason"),
+				value: entry.reason.trim() === "" ? say(language, "blockedNoReason") : entry.reason.slice(0, 1_000),
 			},
 			{
-				name: "Think this is a mistake?",
-				value: `${ask} Asking them is the only way to have the block lifted; server moderators and admins cannot lift it.`,
+				name: say(language, "blockedSince"),
+				value: Number.isFinite(since)
+					? `<t:${String(since)}:D> (<t:${String(since)}:R>)`
+					: say(language, "blockedUnknown"),
+			},
+			{
+				name: say(language, "blockedMistake"),
+				value: `${ask}${say(language, "sentenceGap")}${say(language, "askOnly")}`,
 			},
 		],
 		tone: "error",
 	};
 }
 
-function pausedRefusal(): string {
-	return `${botName()} is paused right now. The bot owner can resume it from the dashboard.`;
+function pausedRefusal(language: BotLanguage): string {
+	return say(language, "paused", { bot: botName() });
 }
 
 /** The gates a control anybody may press passes, since whoever posted it having passed them says nothing about them. */
 export async function checkOpenControl(
 	client: TestifyClient,
-	who: { userId: string; guildId: string },
+	who: { userId: string; guildId: string; locale?: string | null },
 	command: string,
 ): Promise<CheckFailure> {
-	if (client.paused) return pausedRefusal();
+	const language = readerLanguage(who);
+	if (client.paused) return pausedRefusal(language);
 
 	const blacklisted = await findBlacklistEntry(who.userId);
-	if (blacklisted) return blacklistRefusal(blacklisted, await ownerNames(client));
+	if (blacklisted) return blacklistRefusal(blacklisted, await ownerNames(client), language);
 
-	return checkSwitchedOff(command, who.guildId);
+	return checkSwitchedOff(command, who.guildId, language);
 }
 
 /** The gates a right-click action and its form pass: those of its command, then its own permissions and the bot's. */
@@ -161,20 +172,22 @@ export async function checkContextMenu(
 	interaction: {
 		user: { id: string };
 		guildId: string;
+		locale?: string;
 		memberPermissions: Readonly<PermissionsBitField>;
 		appPermissions: Readonly<PermissionsBitField>;
 	},
 	menu: { switchedBy: string; permissions?: PermissionResolvable[]; botPermissions?: PermissionResolvable[] },
 ): Promise<CheckFailure> {
-	const who = { userId: interaction.user.id, guildId: interaction.guildId };
+	const who = { userId: interaction.user.id, guildId: interaction.guildId, locale: interaction.locale ?? null };
 	const refused = await checkOpenControl(client, who, menu.switchedBy);
 	if (refused !== null) return refused;
 
+	const language = readerLanguage(who);
 	const missing = interaction.memberPermissions.missing(new PermissionsBitField(menu.permissions ?? []));
-	if (missing.length > 0) return lacking("You need", missing);
+	if (missing.length > 0) return lacking(language, "youNeed", missing);
 
 	const botMissing = interaction.appPermissions.missing(new PermissionsBitField(menu.botPermissions ?? []));
-	return botMissing.length > 0 ? lacking("I need", botMissing) : null;
+	return botMissing.length > 0 ? lacking(language, "iNeed", botMissing) : null;
 }
 
 /** The gates `/play` passes, for a control anybody may press to queue music. */
@@ -205,18 +218,18 @@ export async function checkCasinoPlay(
 }
 
 /** Nobody bypasses a switch, the bot owner included. */
-async function checkSwitchedOff(name: string, guildId: string | null): Promise<CheckFailure> {
+async function checkSwitchedOff(name: string, guildId: string | null, language: BotLanguage): Promise<CheckFailure> {
 	if (isAlwaysEnabled(name)) return null;
 
 	if ((await disabledGlobally()).includes(name)) {
 		return {
-			title: `${theme.emoji.maintenance} This command is under maintenance`,
-			message: `The bot's owner has switched \`/${name}\` off for now. It may come back in the future, so try again later.`,
+			title: `${theme.emoji.maintenance} ${say(language, "maintenanceTitle")}`,
+			message: say(language, "maintenance", { name }),
 		};
 	}
 
 	if (guildId !== null && (await disabledInGuild(guildId)).includes(name)) {
-		return "That command is switched off in this server. Anybody with Manage Server can turn it back on.";
+		return say(language, "offHere");
 	}
 
 	return null;
@@ -277,7 +290,12 @@ async function checkCasino(interaction: CommandInput, command: Command): Promise
 	);
 }
 
-function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {
+function checkCooldown(
+	interaction: CommandInput,
+	command: Command,
+	client: TestifyClient,
+	language: BotLanguage,
+): CheckFailure {
 	if (!command.cooldown || client.isOwner(interaction.user.id)) return null;
 
 	// Per guild, because the features a cooldown protects are per guild.
@@ -285,7 +303,7 @@ function checkCooldown(interaction: CommandInput, command: Command, client: Test
 	const now = Date.now();
 	const readyAt = cooldowns.get(key) ?? 0;
 
-	if (readyAt > now) return `Slow down — try again in ${formatDuration(readyAt - now)}.`;
+	if (readyAt > now) return say(language, "cooldown", { time: formatDuration(readyAt - now) });
 
 	cooldowns.set(key, now + command.cooldown);
 	if (cooldowns.size > 5_000) {

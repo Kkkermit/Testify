@@ -21,5 +21,6 @@ export function say(language: BotLanguage, key: ReplyKey, values: Readonly<Recor
 
 /** A list joined the way the language joins one, ending in its own word for "or". */
 export function eitherOf(language: BotLanguage, items: readonly string[]): string {
-	return new Intl.ListFormat(language, { type: "disjunction" }).format(items);
+	// The bot writes British English, which has no comma before "or".
+	return new Intl.ListFormat(language === "en" ? "en-GB" : language, { type: "disjunction" }).format(items);
 }

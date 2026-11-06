@@ -32,6 +32,8 @@ const en = {
 	askOne: "Contact {names}, the bot's owner.",
 	askMany: "Contact {names}, the bot's owners.",
 	askOnly: "Asking them is the only way to have the block lifted; server moderators and admins cannot lift it.",
+	/** What goes between two sentences: a space, or nothing in Japanese. */
+	sentenceGap: " ",
 };
 
 export type ReplyKey = keyof typeof en;
@@ -70,6 +72,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askOne: "Wende dich an {names}, den Betreiber des Bots.",
 		askMany: "Wende dich an {names}, die Betreiber des Bots.",
 		askOnly: "Nur so lässt sich die Sperre aufheben; Moderatoren und Admins eines Servers können sie nicht aufheben.",
+		sentenceGap: " ",
 	},
 	es: {
 		guildOnly: "Este comando solo funciona dentro de un servidor.",
@@ -104,6 +107,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askMany: "Ponte en contacto con {names}, los dueños del bot.",
 		askOnly:
 			"Pedírselo es la única forma de levantar el bloqueo; los moderadores y administradores de un servidor no pueden hacerlo.",
+		sentenceGap: " ",
 	},
 	fr: {
 		guildOnly: "Cette commande ne fonctionne que sur un serveur.",
@@ -137,6 +141,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askMany: "Contactez {names}, les propriétaires du bot.",
 		askOnly:
 			"Leur demander est le seul moyen de lever le blocage ; les modérateurs et administrateurs d’un serveur ne le peuvent pas.",
+		sentenceGap: " ",
 	},
 	it: {
 		guildOnly: "Questo comando funziona solo in un server.",
@@ -170,6 +175,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askMany: "Contatta {names}, i proprietari del bot.",
 		askOnly:
 			"Chiederlo a loro è l’unico modo per togliere il blocco; moderatori e amministratori di un server non possono farlo.",
+		sentenceGap: " ",
 	},
 	ru: {
 		guildOnly: "Эта команда работает только на сервере.",
@@ -200,6 +206,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askOne: "Свяжитесь с {names}, владельцем бота.",
 		askMany: "Свяжитесь с {names}, владельцами бота.",
 		askOnly: "Снять блокировку можно только через них; модераторы и администраторы сервера этого не могут.",
+		sentenceGap: " ",
 	},
 	nl: {
 		guildOnly: "Deze opdracht werkt alleen in een server.",
@@ -232,6 +239,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askOne: "Neem contact op met {names}, de eigenaar van de bot.",
 		askMany: "Neem contact op met {names}, de eigenaars van de bot.",
 		askOnly: "Alleen zij kunnen de blokkade opheffen; moderators en beheerders van een server kunnen dat niet.",
+		sentenceGap: " ",
 	},
 	ja: {
 		guildOnly: "このコマンドはサーバー内でのみ使えます。",
@@ -263,5 +271,6 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		askOne: "ボットのオーナーである {names} に連絡してください。",
 		askMany: "ボットのオーナーである {names} に連絡してください。",
 		askOnly: "ブロックを解除してもらう方法はそれだけです。サーバーのモデレーターや管理者は解除できません。",
+		sentenceGap: "",
 	},
 };

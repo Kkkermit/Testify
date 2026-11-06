@@ -42,6 +42,8 @@ export interface CommandInput {
 	readonly channel: TextBasedChannel | null;
 	readonly client: Client;
 	readonly commandName: string;
+	/** The reader's own Discord language, which only an interaction carries; a prefix command has none. */
+	readonly locale?: string;
 	readonly deferred: boolean;
 	readonly replied: boolean;
 
