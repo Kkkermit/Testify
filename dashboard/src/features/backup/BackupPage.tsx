@@ -4,7 +4,10 @@ import {
 	type RestorableAction,
 	BACKUP_LIMITS,
 	type BackupDocument,
+	type BackupRefusal,
 	type BackupStep,
+	readBackupFile,
+	runsAsProgram,
 } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { Check, Upload } from "lucide-react";
@@ -15,13 +18,27 @@ import { Field, Refusal, RowActions, SELECT, SettingRows, Warning } from "@/comp
 import { Button, DividedList, PageHeader, SectionHeading } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
 import { BACKUP_SECTION_LABELS } from "@/features/backup/backup.labels";
-import { backupFileName, readBackup, saveFile } from "@/features/backup/backup.utils";
-import { readServerSettings, type ServerSettings, type StepResult, useApplyBackup } from "@/features/backup/useBackup";
+import { backupFileName, saveFile } from "@/features/backup/backup.utils";
+import {
+	readServerSettings,
+	type ServerSettings,
+	type StepResult,
+	useApplyBackup,
+	useReportProgram,
+} from "@/features/backup/useBackup";
 import { comparable } from "@/features/compare/compare.utils";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
+
+const REFUSALS: Record<BackupRefusal, TranslationKey> = {
+	tooLarge: "backup.tooLarge",
+	notJson: "backup.notJson",
+	program: "backup.program",
+	notBackup: "backup.notBackup",
+};
 
 interface Incoming {
 	document: BackupDocument;
@@ -34,6 +51,7 @@ export function BackupPage(): React.JSX.Element {
 	const overview = useGuildOverview(guildId);
 	const me = useMe();
 	const apply = useApplyBackup(guildId);
+	const reportProgram = useReportProgram(guildId);
 	const [busy, setBusy] = useState(false);
 	const [problem, setProblem] = useState<string | null>(null);
 	const [incoming, setIncoming] = useState<Incoming | null>(null);
@@ -98,16 +116,26 @@ export function BackupPage(): React.JSX.Element {
 							const file = event.target.files?.[0];
 							event.target.value = "";
 							if (file === undefined) return;
-							if (file.size > BACKUP_LIMITS.maxBytes) {
-								setProblem(t("backup.tooLarge"));
-								return;
-							}
-							void file.text().then((text) => {
-								const read = readBackup(text);
-								if (typeof read === "string")
-									setProblem(t(read === "tooLarge" ? "backup.tooLarge" : "backup.notBackup"));
-								else void bringIn(read);
-							});
+							void file
+								.slice(0, BACKUP_LIMITS.reportedBytes)
+								.arrayBuffer()
+								.then(async (start) => {
+									// A program is judged by its first bytes alone, whatever it is called and however large.
+									const head = new Uint8Array(start);
+									if (runsAsProgram(head)) {
+										reportProgram.mutate(head);
+										setProblem(t("backup.program"));
+										return;
+									}
+									if (file.size > BACKUP_LIMITS.maxBytes) {
+										setProblem(t("backup.tooLarge"));
+										return;
+									}
+									const bytes = new Uint8Array(await file.arrayBuffer());
+									const read = readBackupFile({ name: file.name, type: file.type, bytes });
+									if (typeof read === "string") setProblem(t(REFUSALS[read]));
+									else void bringIn(read);
+								});
 						}}
 					/>
 					{/* The browser's own picker is in the browser's language, so this label stands in for it. */}
@@ -122,6 +150,8 @@ export function BackupPage(): React.JSX.Element {
 						<Upload size={16} aria-hidden="true" />
 						{t("backup.chooseFile")}
 					</label>
+					<Warning>{t("backup.programWarning")}</Warning>
+					<Warning>{t("backup.toldToWarning")}</Warning>
 				</Field>
 				{others.length > 0 && (
 					<Field label={t("backup.fromServer")} hint={t("backup.fromServerHint")} htmlFor="backup-source">

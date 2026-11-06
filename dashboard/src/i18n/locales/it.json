@@ -2103,7 +2103,7 @@
 		"dashboardP4": "Conteggi delle schermate: quale schermata della dashboard è stata aperta, per giorno. Sono contati per tutto il bot — senza ID utente né ID server — quindi mostrano quali schermate vengono usate e nulla su chi le ha usate.",
 		"dashboardP5": "Le richieste sono limitate per sessione e per indirizzo di rete. L’indirizzo resta in memoria solo per la durata di quel limite e non viene mai salvato.",
 		"blacklist": "La blacklist",
-		"blacklistP1": "Se l’operatore mette un account nella blacklist, vengono conservati il suo ID utente e il motivo indicato, così che ogni comando lo rifiuti. La blacklist vale in ogni server servito da questa istanza e dura finché l’operatore non la toglie.",
+		"blacklistP1": "Se l’operatore mette un account nella blacklist, vengono conservati il suo ID utente e il motivo indicato, così che ogni comando lo rifiuti. La blacklist vale in ogni server servito da questa istanza e dura finché l’operatore non la toglie. Un account viene inoltre bloccato automaticamente se sceglie un programma o uno script come backup delle impostazioni nella dashboard.",
 		"logConsole": "La console dei log",
 		"logConsoleP1": "L’operatore può leggere le righe di log recenti del bot dalla console del proprietario. Le righe possono contenere ID di utenti e server. Tutto ciò che sembra un token, una password o una stringa di connessione viene rimosso prima che una riga sia conservata, e vengono tenute solo le ultime 1.000 righe, in memoria: un riavvio le cancella.",
 		"helpQuestions": "Domande di aiuto",
@@ -3045,6 +3045,8 @@
 		"bringBody": "Nulla cambia finché non hai visto cosa cambierebbe e premuto Applica.",
 		"fromFile": "Da un file di backup",
 		"fromFileHint": "Un file scaricato da questa pagina, qui o su un altro server.",
+		"programWarning": "Scegliere qui un programma o uno script blocca il tuo account su {{bot}}, e solo i suoi proprietari possono revocare il blocco.",
+		"toldToWarning": "Se qualcuno ti ha detto di scegliere un file qui, fermati. Assicurati che sia un backup scaricato da te da questa pagina, altrimenti sceglierlo potrebbe bloccare il tuo account.",
 		"tooLarge": "Questo file è troppo grande per essere un backup.",
 		"notBackup": "Questo file non è un backup di questa pagina.",
 		"fromServer": "Da un altro server",
@@ -3068,6 +3070,8 @@
 		"apply_many": "Applica {{count, number}} di sezioni",
 		"apply_other": "Applica {{count, number}} sezioni",
 		"leftAsIs": "{{section}} resta com’è qui.",
-		"chooseFile": "Scegli un file di backup"
+		"chooseFile": "Scegli un file di backup",
+		"notJson": "Scegli un file di backup: uno che termina in .json, scaricato da questa pagina.",
+		"program": "Questo è un programma, uno script o un altro tipo di file, non un backup. Niente al suo interno è stato aperto o eseguito."
 	}
 }

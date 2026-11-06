@@ -4,6 +4,7 @@ import {
 	RESTORABLE,
 	type RestorableAction,
 	type RoleSummary,
+	BACKUP_LIMITS,
 	BACKUP_SECTIONS,
 	type BackupStep,
 } from "@testify/shared";
@@ -66,5 +67,15 @@ export function useApplyBackup(guildId: string): UseMutationResult<StepResult[],
 			return results;
 		},
 		onSettled: () => client.invalidateQueries({ queryKey: keys.guild(guildId).all() }),
+	});
+}
+
+/** Tells the server a program or a script was chosen, by its first bytes; the server judges them before blocking anybody. */
+export function useReportProgram(guildId: string): UseMutationResult<void, Error, Uint8Array> {
+	return useMutation({
+		mutationFn: (bytes: Uint8Array) =>
+			api.post<void>(`/guilds/${guildId}/backup/program`, {
+				head: Array.from(bytes.subarray(0, BACKUP_LIMITS.reportedBytes)),
+			}),
 	});
 }
