@@ -82,7 +82,7 @@ export async function announceGuildChange(client: TestifyClient, guild: Guild, k
 
 	client.logger.info(
 		{ guildId: guild.id, guildName: guild.name, members: guild.memberCount, total: client.guilds.cache.size },
-		kind === "joined" ? "Added to a guild" : "Removed from a guild",
+		kind === "joined" ? "[GUILD] Added to a server." : "[GUILD] Removed from a server.",
 	);
 
 	if (channelId === undefined) return;
@@ -92,6 +92,6 @@ export async function announceGuildChange(client: TestifyClient, guild: Guild, k
 		if (!channel?.isTextBased() || !channel.isSendable()) return;
 		await channel.send({ embeds: [await buildGuildEmbed(client, guild, kind)], allowedMentions: { parse: [] } });
 	} catch (error) {
-		client.logger.warn({ err: toError(error) }, "Could not announce the guild change");
+		client.logger.warn({ err: toError(error) }, "[GUILD] Could not post the server change to the guild log channel.");
 	}
 }

@@ -64,7 +64,7 @@ it("still reports anything else as a failure, with its stack", async () => {
 
 	expect(logger.error).toHaveBeenCalledWith(
 		expect.objectContaining({ err: expect.any(TypeError) }),
-		"Autocomplete failed",
+		"[AUTOCOMPLETE_ERROR] An autocomplete failed.",
 	);
 });
 

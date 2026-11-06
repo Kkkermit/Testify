@@ -15,7 +15,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 	if (stopping) return;
 	stopping = true;
 
-	client.logger.info({ reason }, "Shutting down");
+	client.logger.info({ reason }, "[SHUTDOWN] Shutting down.");
 
 	try {
 		client.timers.stopAll();
@@ -28,7 +28,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 		await disconnectDatabase();
 		await client.destroy();
 	} catch (error) {
-		client.logger.error({ err: toError(error) }, "Something went wrong while shutting down");
+		client.logger.error({ err: toError(error) }, "[SHUTDOWN_ERROR] Something went wrong while shutting down.");
 		code = code === 0 ? 1 : code;
 	}
 

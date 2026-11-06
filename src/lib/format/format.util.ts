@@ -110,6 +110,10 @@ export function escapeMarkdown(text: string): string {
 	return djsEscapeMarkdown(text);
 }
 
+export function capitalise(text: string): string {
+	return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function titleCase(text: string): string {
 	return text
 		.split(/[\s_-]+/)

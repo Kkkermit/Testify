@@ -1,7 +1,7 @@
 import { type Guild, type GuildMember, type VoiceBasedChannel } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type CommandInput } from "@core/command";
-import { UserFacingError } from "@core/errors";
+import { UserFacingError, toError } from "@core/errors";
 import { reply } from "@lib/discord/reply.util";
 import { type MusicBinaries, type ProblemKind, type Query, type Track } from "@lib/music/music.types";
 import { findBinaries } from "@lib/music/musicBinaries.util";
@@ -196,6 +196,6 @@ async function watchReply(
 		});
 	} catch (error) {
 		// A panel that cannot be found again is simply not live; the reply the person can see is unaffected.
-		session.logger.debug({ err: error, guildId: session.guildId }, "[MUSIC] Could not attach the live panel.");
+		session.logger.debug({ err: toError(error), guildId: session.guildId }, "[MUSIC] Could not attach the live panel.");
 	}
 }

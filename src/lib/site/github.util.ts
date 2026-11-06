@@ -1,7 +1,7 @@
 import { extname } from "node:path";
 import { z } from "zod";
 import { DAY_MS, MINUTE_MS } from "@config/constants";
-import { ServiceError } from "@core/errors";
+import { ServiceError, toError } from "@core/errors";
 import { type Logger } from "@core/logger";
 import { keepTrafficDays, readTrafficDays } from "@database/repositories/githubTrafficRepository";
 import { fetchJson, fetchRaw } from "@lib/infra/http.util";
@@ -295,7 +295,7 @@ export class GitHubReader {
 			return await readTrafficDays(daysBefore(now, SITE_LIMITS.trafficDaysShown));
 		} catch (error) {
 			this.#options.logger.warn(
-				{ err: error },
+				{ err: toError(error) },
 				"[SITE] Could not keep the repository's traffic. Showing GitHub's last 14 days instead.",
 			);
 			return fresh;

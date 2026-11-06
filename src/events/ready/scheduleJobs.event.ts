@@ -45,6 +45,6 @@ export default defineEvent({
 		client.timers.after("status-first", 60_000, () => recordHeartbeat(client));
 		client.timers.every("status", STATUS_LIMITS.sampleEveryMs, () => recordHeartbeat(client));
 
-		client.logger.debug({ jobs: client.timers.names() }, "Background jobs scheduled");
+		client.logger.debug({ jobs: client.timers.names() }, "[JOBS] Scheduled the background jobs.");
 	},
 });

@@ -96,21 +96,23 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 
 	mongoose.connection.on("disconnected", () => {
 		// Only worth saying after a connection has been lost.
-		if (everConnected) options.logger.warn("Lost connection to MongoDB");
+		if (everConnected)
+			options.logger.warn("[DATABASE] Lost the connection to MongoDB. Mongoose is reconnecting on its own.");
 	});
 	mongoose.connection.on("reconnected", () => {
-		options.logger.info("Reconnected to MongoDB");
+		options.logger.info("[DATABASE] Reconnected to MongoDB.");
 	});
 	mongoose.connection.on("error", (error: unknown) => {
 		// The retry loop below reports a failure to connect, so this would only say the same thing twice.
-		if (everConnected) options.logger.error({ err: toError(error) }, "MongoDB connection error");
+		if (everConnected)
+			options.logger.error({ err: toError(error) }, "[DATABASE_ERROR] The MongoDB connection reported an error.");
 	});
 
 	for (let attempt = 1; attempt <= retries; attempt += 1) {
 		try {
 			await mongoose.connect(options.uri, { serverSelectionTimeoutMS: 10_000 });
 			everConnected = true;
-			options.logger.debug({ database: mongoose.connection.name }, "Connected to MongoDB");
+			options.logger.debug({ database: mongoose.connection.name }, "[DATABASE] Connected to MongoDB.");
 			return mongoose;
 		} catch (error) {
 			if (attempt === retries) throw new SetupError(explainConnectionFailure(error, options.uri));

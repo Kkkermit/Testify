@@ -32,7 +32,7 @@ export default defineMessageHandler({
 		const command = client.commands.get(name);
 		if (!command) return;
 
-		client.logger.debug({ command: command.name, user: message.author.id }, "Running a prefix command");
+		client.logger.debug({ command: command.name, user: message.author.id }, "[PREFIX] Running a prefix command.");
 
 		const interaction = new PrefixInteraction(message, command, args);
 		await interaction.options.prepare();

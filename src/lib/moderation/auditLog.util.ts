@@ -56,6 +56,9 @@ export async function writeAuditLog(client: TestifyClient, guild: Guild, entry: 
 			],
 		});
 	} catch (error) {
-		client.logger.warn({ err: toError(error), guildId: guild.id }, "Could not write the audit log entry");
+		client.logger.warn(
+			{ err: toError(error), guildId: guild.id },
+			"[AUDIT_LOG] Could not write the audit log entry. Check the bot can post in the log channel.",
+		);
 	}
 }

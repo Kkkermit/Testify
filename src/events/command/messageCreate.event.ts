@@ -14,7 +14,7 @@ export default defineEvent({
 		if (!warnedAboutContent && message.content === "" && message.attachments.size === 0 && !message.author.bot) {
 			warnedAboutContent = true;
 			client.logger.warn(
-				"Messages are arriving with no text. Turn on the Message Content intent: " +
+				"[INTENTS] Messages are arriving with no text. Turn on the Message Content intent: " +
 					"Discord Developer Portal → your app → Bot → Privileged Gateway Intents. " +
 					"Prefix commands cannot work until you do.",
 			);

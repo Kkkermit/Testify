@@ -106,13 +106,14 @@ async function reportFailure(
 	command?: Command,
 ): Promise<string | null> {
 	if (error instanceof UserFacingError || error instanceof SetupError) {
-		if (error instanceof SetupError) client.logger.error({ err: error, command: label }, "Command failed");
+		if (error instanceof SetupError)
+			client.logger.error({ err: error, command: label }, "[COMMAND_ERROR] A command failed.");
 		await tell(interaction, failureEmbed(error.message));
 		return null;
 	}
 
 	if (error instanceof ServiceError) {
-		client.logger.error({ err: error, command: label }, "Command failed");
+		client.logger.error({ err: error, command: label }, "[COMMAND_ERROR] A command failed.");
 		await tell(interaction, failureEmbed(strings.generic.serviceDown(error.service)));
 		return null;
 	}
@@ -120,7 +121,7 @@ async function reportFailure(
 	const reference = errorReference();
 	client.logger.error(
 		{ err: toError(error), command: label, reference, user: interaction.user.id, guild: interaction.guildId },
-		"Command failed",
+		"[COMMAND_ERROR] A command failed.",
 	);
 	await postToErrorChannel(client, { label, reference, interaction, error: toError(error), command });
 	await tell(interaction, failureEmbed(strings.generic.failure(what, reference), strings.generic.failureTitle));
@@ -216,6 +217,9 @@ async function postToErrorChannel(client: TestifyClient, report: FailureReport):
 			allowedMentions: { parse: [] },
 		});
 	} catch (reportError) {
-		client.logger.warn({ err: toError(reportError) }, "Could not post to the error channel");
+		client.logger.warn(
+			{ err: toError(reportError) },
+			"[ERROR_CHANNEL] Could not post to the error channel. Check the bot can send messages and embeds there.",
+		);
 	}
 }

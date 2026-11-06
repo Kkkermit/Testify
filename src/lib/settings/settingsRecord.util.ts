@@ -2,6 +2,7 @@ import { type Guild, type User } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
+import { capitalise } from "@lib/format/format.util";
 import { SETTING_READERS } from "@lib/settings/settingsReaders.util";
 import { RESTORABLE, type RestorableAction, restorableFields, sameValue } from "@testify/shared";
 
@@ -90,10 +91,6 @@ const WORDS: { [Action in RestorableAction]: { noun: string; fields: Record<Labe
 		fields: { memberChannelId: "member channel", botChannelId: "bot channel" },
 	},
 };
-
-function capitalise(text: string): string {
-	return text.charAt(0).toUpperCase() + text.slice(1);
-}
 
 function listed(words: string[]): string {
 	return words.length <= 1 ? (words[0] ?? "") : `${words.slice(0, -1).join(", ")} and ${words.at(-1) ?? ""}`;

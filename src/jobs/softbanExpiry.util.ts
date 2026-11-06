@@ -12,14 +12,17 @@ export async function processExpiredSoftbans(client: TestifyClient): Promise<voi
 
 		try {
 			await guild.bans.remove(softban.userId, `Softban expired. Original reason: ${softban.reason}`);
-			client.logger.info({ guildId: softban.guildId, userId: softban.userId }, "Softban expired and was lifted");
+			client.logger.info(
+				{ guildId: softban.guildId, userId: softban.userId },
+				"[SOFTBAN] A softban expired and was lifted.",
+			);
 		} catch (error) {
 			// 10026 is "unknown ban" — already unbanned, which is not a failure.
 			const code = (error as { code?: number }).code;
 			if (code !== 10_026) {
 				client.logger.warn(
 					{ err: toError(error), guildId: softban.guildId, userId: softban.userId },
-					"Could not lift an expired softban",
+					"[SOFTBAN_ERROR] Could not lift an expired softban. It is tried again on the next run.",
 				);
 			}
 		}

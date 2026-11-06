@@ -1,5 +1,6 @@
 import { getHeapStatistics } from "node:v8";
 import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
 import { pingDatabase } from "@database/connection";
 import { firstStatusSampleAt, type SampleInput, statusSamplesSince } from "@database/repositories/statusRepository";
 import { commandTimes, type CommandTimes, eventLoopDelay, type LoopDelay } from "@lib/bot/performance.util";
@@ -260,7 +261,7 @@ export async function statusReport(client: TestifyClient, sources: StatusSources
 				firstStatusSampleAt().then((first) => first?.getTime() ?? null),
 			]);
 		} catch (error) {
-			client.logger.debug({ err: error }, "[STATUS] Could not read the heartbeat history.");
+			client.logger.debug({ err: toError(error) }, "[STATUS] Could not read the heartbeat history.");
 		}
 	}
 

@@ -28,7 +28,7 @@ async function rename(client: TestifyClient, guild: Guild, channelId: string | n
 	} catch (error) {
 		client.logger.debug(
 			{ err: toError(error), guildId: guild.id, channelId },
-			"Could not rename the counter channel, most likely rate limited",
+			"[MEMBER_COUNT] Could not rename a counter channel, most likely because Discord rate-limits renames.",
 		);
 	}
 }

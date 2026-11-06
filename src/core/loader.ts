@@ -5,7 +5,7 @@ import { isCategory } from "@config/categories";
 import { type Button } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, type Command, subcommandsOf } from "@core/command";
-import { SetupError } from "@core/errors";
+import { SetupError, toError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
 import { MESSAGE_HANDLER, type MessageHandler } from "@core/message";
 
@@ -73,9 +73,9 @@ function loadCommands(client: TestifyClient): number {
 		}
 		if (client.commands.has(command.name)) fail(file, `uses the command name "${command.name}" twice`);
 
-		client.commands.set(command.name, command as unknown as Command);
-
 		const loadedCommand = command as unknown as Command;
+		client.commands.set(loadedCommand.name, loadedCommand);
+
 		const named: [string, string][] = [
 			...(loadedCommand.aliases ?? []).map((alias): [string, string] => [alias, loadedCommand.name]),
 			// Only aliases a subcommand asks for; registering every subcommand name would collide.
@@ -145,7 +145,7 @@ function loadEvents(client: TestifyClient): number {
 			void Promise.resolve(
 				(handler.run as (client: TestifyClient, ...rest: unknown[]) => Promise<void> | void)(client, ...args),
 			).catch((error: unknown) => {
-				client.logger.error({ err: error, event: handler.name }, "Event handler failed");
+				client.logger.error({ err: toError(error), event: handler.name }, "[EVENT_ERROR] An event handler failed.");
 			});
 		};
 
@@ -185,7 +185,7 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 
 	await rest.put(route, { body });
 
-	client.logger.debug({ count: body.length, guildId: guildId ?? null }, "Published commands");
+	client.logger.debug({ count: body.length, guildId: guildId ?? null }, "[COMMANDS] Published the commands.");
 
 	return body.length;
 }

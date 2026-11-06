@@ -1,5 +1,6 @@
 import { type Message } from "discord.js";
 import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
 
 export interface MessageHandler {
 	name: string;
@@ -26,7 +27,10 @@ export async function runMessageHandlers(message: Message, client: TestifyClient
 		try {
 			if ((await handler.run(message, client)) === true) return;
 		} catch (error) {
-			client.logger.error({ err: error, handler: handler.name }, "Message handler failed");
+			client.logger.error(
+				{ err: toError(error), handler: handler.name },
+				"[MESSAGE_HANDLER_ERROR] A message handler failed.",
+			);
 		}
 	}
 }

@@ -13,7 +13,7 @@ import {
 } from "@lib/economy/economy.types";
 import { ALL_PETS, PETS_BY_RARITY } from "@lib/economy/pets.util";
 import { BUSINESSES, HOUSES, JOBS, SHOP_ITEMS } from "@lib/economy/shop.util";
-import { formatNumber } from "@lib/format/format.util";
+import { capitalise, formatNumber } from "@lib/format/format.util";
 
 /** The shop, as a drill-down rather than a list of IDs to copy. */
 
@@ -258,7 +258,7 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 				...PET_RARITIES.map((rarity) =>
 					button({
 						id: encodeShopState("nav", { section: "pets", rarity, ...origin(state) }, ownerId),
-						label: rarity[0]!.toUpperCase() + rarity.slice(1),
+						label: capitalise(rarity),
 						disabled: rarity === state.rarity,
 					}),
 				),
