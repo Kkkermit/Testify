@@ -13,6 +13,7 @@ export const USE_SCREENS: Record<RoleUseKind, { path: string; labelKey: Translat
 	ticketStaff: { path: "/tickets", labelKey: "nav.tickets" },
 	raidPing: { path: "/raid-protection", labelKey: "nav.raid" },
 	verified: { path: "/settings", labelKey: "nav.settings" },
+	shop: { path: "/economy", labelKey: "nav.economyRates" },
 };
 
 export function useText(use: RoleUse, t: TFunction): string {
@@ -35,6 +36,8 @@ export function useText(use: RoleUse, t: TFunction): string {
 			return t("roles.raidPing");
 		case "verified":
 			return t("roles.verified");
+		case "shop":
+			return t("roles.shop", { price: formatNumber(use.price) });
 	}
 }
 

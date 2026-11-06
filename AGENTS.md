@@ -65,10 +65,10 @@ numbers, which drift):
 | Prefix aliases       | 107                               |
 | Button handlers      | 51                                |
 | Events               | 36, in 6 groups                   |
-| `src/lib` helpers    | 233, in 34 domain folders         |
-| Schemas/repositories | 51 / 50                           |
+| `src/lib` helpers    | 234, in 34 domain folders         |
+| Schemas/repositories | 52 / 51                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,033 across 542 suites           |
+| Tests                | 4,040 across 543 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -221,7 +221,7 @@ src/
 ├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
 ├── buttons/              51 component handlers, keyed by custom-ID prefix
-├── lib/                  233 helpers in 34 domain folders, each behind its own index.ts barrel
+├── lib/                  234 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -235,8 +235,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           51 Mongoose schemas, one file per feature
-│   └── repositories/     50 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           52 Mongoose schemas, one file per feature
+│   └── repositories/     51 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -1963,7 +1963,7 @@ who stayed. Four things about it are load-bearing:
 
 ### A server tunes its economy and XP by rates, never by rewriting the numbers
 
-`/economy settings`, the **Pay and rates** screen and two rows on the Levelling page change one record, `servertuning`:
+`/economy settings`, the **Economy settings** screen and two rows on the Levelling page change one record, `servertuning`:
 a pay rate, the starting wallet, whether `/rob` works, an XP rate and the XP cooldown. Three things about it are
 load-bearing:
 
@@ -1975,6 +1975,21 @@ load-bearing:
   stored value no list offers reads as the default (`tuningOf`), so a hand-edited record cannot hand out 1,000% XP.
 - **It asks Manage Server, not Administrator.** It changes rates for everybody rather than one member's balance or
   level, which is what `/give` and the member page's money and level controls ask Administrator for.
+
+### A role sold in the shop is paid for first, and never one that moderates
+
+`/economy shop-role`, the shop's **Roles** tab and **Roles for sale** on the Economy settings screen sell a server's
+roles for coins. Three things about it are load-bearing:
+
+- **Only what a role menu could offer can be sold.** `sellShopRole` asks `offerProblem` of the person putting it on
+  sale, and the dashboard's write asks Manage Roles and `requireGrantable` with the same rule, because a role with
+  Kick Members sold for coins lets anybody with enough money kick. At most `SHOP_ROLE_LIMITS.max` (10) are for sale.
+- **Debit before you deliver, and give it back if Discord refuses.** `buyShopRole` checks `pickProblem` on the press,
+  takes the price with the conditional `debitWallet`, then adds the role, and refunds with `adjustWallet` if the add
+  fails, so nobody pays for a role they never got.
+- **The roles for sale are read with every shop screen** (`balancesFor` in `buttons/shop.ts`), since a role can be
+  moved above the bot or deleted while the shop is open; a role that has gone is left off the tab and still listed on
+  the dashboard, so it can be taken off sale. The Roles page counts a role on sale as one of its uses.
 
 ### The owners' notifications are mentioned once, and only the owners change them
 
@@ -2232,7 +2247,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                 |
 | `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                         |
 | `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                        |
-| `/guilds/:id/economy`             | Pay, the starting wallet and robbing; the XP rate sits on the Levelling page                |
+| `/guilds/:id/economy`             | Pay, the starting wallet, robbing and roles for sale; the XP rate sits on Levelling         |
 | `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                               |
 | `/guilds/:id/music`               | The music kill switch and the DJ roles                                                      |
 | `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                        |
@@ -2953,8 +2968,8 @@ Settings come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
 messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
-tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (pay and rates, treasure, the
-lottery, the casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
+tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (economy settings, treasure,
+the lottery, the casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,
 with a count beside each and features dragged onto them, and both were taken out after review: a real server's

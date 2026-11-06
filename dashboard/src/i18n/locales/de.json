@@ -174,8 +174,8 @@
 		"modmailHint": "Mitglieder schreiben privat ans Team",
 		"invites": "Einladungen",
 		"invitesHint": "Wessen Einladungen Mitglieder gebracht haben",
-		"economyRates": "Bezahlung und Raten",
-		"economyRatesHint": "Wie viel die Wirtschaft zahlt, und Rauben"
+		"economyRates": "Wirtschaftseinstellungen",
+		"economyRatesHint": "Bezahlung, Rauben und Rollen zum Kauf"
 	},
 	"account": {
 		"title": "Dein Konto",
@@ -1339,7 +1339,8 @@
 		"raidPing": "Wird bei einem Raid angepingt",
 		"verified": "Wird Mitgliedern gegeben, die sich verifizieren",
 		"emptyTitle": "Noch keine Rollen",
-		"emptyBody": "In Discord erstellte Rollen erscheinen hier."
+		"emptyBody": "In Discord erstellte Rollen erscheinen hier.",
+		"shop": "Im Shop für {{price}} verkauft"
 	},
 	"testPost": {
 		"send": "Schick mir einen Test",
@@ -2918,7 +2919,7 @@
 		"viaUnknown": "Die Einladung ließ sich nicht bestimmen."
 	},
 	"economy": {
-		"title": "Bezahlung und Raten",
+		"title": "Wirtschaftseinstellungen",
 		"subtitle": "Wie die Wirtschaft dieses Servers von den Werten von {{bot}} abweicht. Die XP-Rate steht auf der Levelling-Seite.",
 		"summary": "Die Bezahlung liegt bei {{rate}} des Üblichen, und neue Konten starten mit {{wallet}}.",
 		"usualRate": "{{rate}} (üblich)",
@@ -2933,6 +2934,16 @@
 		"xpRateHint": "Skaliert die XP vor jeder Boost-Rolle.",
 		"xpCooldown": "Zeit zwischen Nachrichten, die XP bringen",
 		"xpCooldownHint": "Nachrichten, die früher gesendet werden, bringen nichts.",
-		"couldNotRead": "Die XP-Rate konnte nicht gelesen werden. Lade die Seite neu."
+		"couldNotRead": "Die XP-Rate konnte nicht gelesen werden. Lade die Seite neu.",
+		"shopRoles": "Rollen zum Kauf",
+		"shopRolesBody": "Mitglieder kaufen sie im Reiter Rollen von /shop und behalten sie. Eine Rolle, die moderiert oder die {{bot}} nicht vergeben kann, lässt sich nicht verkaufen.",
+		"shopRolesFull": "Der Shop verkauft {{max}} Rollen, so viele wie möglich. Nimm eine heraus, um eine andere hinzuzufügen.",
+		"shopRole": "Rolle",
+		"chooseRole": "Rolle wählen",
+		"shopPrice": "Preis",
+		"putOnSale": "Zum Kauf anbieten",
+		"priceOf": "Preis von {{name}}",
+		"takeOffSale": "{{name}} aus dem Verkauf nehmen",
+		"deletedRole": "Eine gelöschte Rolle"
 	}
 }

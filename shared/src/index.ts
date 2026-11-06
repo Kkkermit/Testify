@@ -46,6 +46,7 @@ export * from "./roleMenus";
 export * from "./roleUses";
 export * from "./scheduledMessages";
 export * from "./schemas";
+export * from "./shopRoles";
 export * from "./settings";
 export * from "./setup";
 export * from "./site";

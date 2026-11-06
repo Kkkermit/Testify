@@ -174,8 +174,8 @@
 		"modmailHint": "Members writing privately to staff",
 		"invites": "Invites",
 		"invitesHint": "Whose invites brought members in",
-		"economyRates": "Pay and rates",
-		"economyRatesHint": "How much the economy pays, and robbing"
+		"economyRates": "Economy settings",
+		"economyRatesHint": "Pay, robbing and roles for sale"
 	},
 	"account": {
 		"title": "Your account",
@@ -1339,7 +1339,8 @@
 		"raidPing": "Pinged when a raid is spotted",
 		"verified": "Given to members who verify",
 		"emptyTitle": "No roles yet",
-		"emptyBody": "Roles made in Discord appear here."
+		"emptyBody": "Roles made in Discord appear here.",
+		"shop": "Sold in the shop for {{price}}"
 	},
 	"testPost": {
 		"send": "Send me a test",
@@ -2918,7 +2919,7 @@
 		"viaUnknown": "The invite could not be told."
 	},
 	"economy": {
-		"title": "Pay and rates",
+		"title": "Economy settings",
 		"subtitle": "How this server’s economy differs from {{bot}}’s own numbers. The XP rate is on the Levelling page.",
 		"summary": "Pay is {{rate}} of the usual, and new accounts start with {{wallet}}.",
 		"usualRate": "{{rate}} (the usual)",
@@ -2933,6 +2934,16 @@
 		"xpRateHint": "Scales the XP before any boost role.",
 		"xpCooldown": "Time between messages that earn XP",
 		"xpCooldownHint": "Messages sent sooner after the last one earn nothing.",
-		"couldNotRead": "The XP rate could not be read. Reload the page to try again."
+		"couldNotRead": "The XP rate could not be read. Reload the page to try again.",
+		"shopRoles": "Roles for sale",
+		"shopRolesBody": "Members buy these from the Roles tab of /shop and keep them. A role that moderates, or one {{bot}} cannot give, cannot be sold.",
+		"shopRolesFull": "The shop sells {{max}} roles, as many as it can. Take one off to add another.",
+		"shopRole": "Role",
+		"chooseRole": "Choose a role",
+		"shopPrice": "Price",
+		"putOnSale": "Put on sale",
+		"priceOf": "Price of {{name}}",
+		"takeOffSale": "Take {{name}} off sale",
+		"deletedRole": "A deleted role"
 	}
 }

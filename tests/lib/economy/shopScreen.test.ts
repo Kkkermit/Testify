@@ -23,6 +23,7 @@ const RICH: Balances = {
 	ownedItemIds: SHOP_ITEMS.map((item) => item.id),
 	job: "Unemployed",
 	hasPet: false,
+	rolesForSale: [],
 };
 
 const BROKE: Balances = { ...RICH, wallet: 0, ownedItemIds: [] };

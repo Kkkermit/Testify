@@ -22,6 +22,7 @@ import { purgeRaidSettings } from "@database/repositories/raidRepository";
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
 import { purgeSchedules } from "@database/repositories/scheduledMessageRepository";
+import { purgeShopRoles } from "@database/repositories/shopRoleRepository";
 import { purgeStarboard } from "@database/repositories/starboardRepository";
 import { purgeSticky } from "@database/repositories/stickyRepository";
 import { purgeTempVoice } from "@database/repositories/tempVoiceRepository";
@@ -38,6 +39,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeModmail(guildId),
 		purgeInvites(guildId),
 		purgeTuning(guildId),
+		purgeShopRoles(guildId),
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
 		purgeBirthdays(guildId),

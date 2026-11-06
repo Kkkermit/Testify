@@ -173,8 +173,8 @@
 		"modmailHint": "メンバーからスタッフへの非公開メッセージ",
 		"invites": "招待",
 		"invitesHint": "誰の招待でメンバーが来たか",
-		"economyRates": "報酬とレート",
-		"economyRatesHint": "経済の報酬と強盗"
+		"economyRates": "経済の設定",
+		"economyRatesHint": "報酬、強盗、販売ロール"
 	},
 	"account": {
 		"title": "アカウント",
@@ -1292,7 +1292,8 @@
 		"raidPing": "レイド検知時に通知",
 		"verified": "認証したメンバーに付与",
 		"emptyTitle": "ロールはまだありません",
-		"emptyBody": "Discord で作ったロールがここに表示されます。"
+		"emptyBody": "Discord で作ったロールがここに表示されます。",
+		"shop": "ショップで {{price}} で販売"
 	},
 	"testPost": {
 		"send": "テストを自分に送る",
@@ -2835,7 +2836,7 @@
 		"viaUnknown": "招待を特定できませんでした。"
 	},
 	"economy": {
-		"title": "報酬とレート",
+		"title": "経済の設定",
 		"subtitle": "このサーバーの経済が {{bot}} 標準の数値とどう違うか。XP レートはレベルのページにあります。",
 		"summary": "報酬は通常の {{rate}}、新しい口座は {{wallet}} から始まります。",
 		"usualRate": "{{rate}}（標準）",
@@ -2850,6 +2851,16 @@
 		"xpRateHint": "ブーストロールの前に XP に掛かります。",
 		"xpCooldown": "XP を得られるメッセージの間隔",
 		"xpCooldownHint": "それより早く送ったメッセージは XP になりません。",
-		"couldNotRead": "XP レートを読み込めませんでした。ページを再読み込みしてください。"
+		"couldNotRead": "XP レートを読み込めませんでした。ページを再読み込みしてください。",
+		"shopRoles": "販売ロール",
+		"shopRolesBody": "メンバーは /shop のロールタブで購入し、そのまま保持します。モデレーション権限のあるロールや {{bot}} が付与できないロールは販売できません。",
+		"shopRolesFull": "ショップは上限の {{max}} 件のロールを販売しています。追加するには 1 件外してください。",
+		"shopRole": "ロール",
+		"chooseRole": "ロールを選択",
+		"shopPrice": "価格",
+		"putOnSale": "販売する",
+		"priceOf": "{{name}} の価格",
+		"takeOffSale": "{{name}} の販売をやめる",
+		"deletedRole": "削除されたロール"
 	}
 }

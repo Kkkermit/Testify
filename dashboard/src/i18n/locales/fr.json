@@ -175,8 +175,8 @@
 		"modmailHint": "Les membres écrivent en privé à l’équipe",
 		"invites": "Invitations",
 		"invitesHint": "Les invitations qui ont amené des membres",
-		"economyRates": "Paie et taux",
-		"economyRatesHint": "Ce que l’économie rapporte, et les vols"
+		"economyRates": "Réglages de l’économie",
+		"economyRatesHint": "Paie, vols et rôles en vente"
 	},
 	"account": {
 		"title": "Ton compte",
@@ -1386,7 +1386,8 @@
 		"raidPing": "Mentionné quand un raid est repéré",
 		"verified": "Donné aux membres qui se vérifient",
 		"emptyTitle": "Pas encore de rôles",
-		"emptyBody": "Les rôles créés dans Discord apparaissent ici."
+		"emptyBody": "Les rôles créés dans Discord apparaissent ici.",
+		"shop": "Vendu dans la boutique pour {{price}}"
 	},
 	"testPost": {
 		"send": "M’envoyer un test",
@@ -3001,7 +3002,7 @@
 		"viaUnknown": "L’invitation n’a pas pu être identifiée."
 	},
 	"economy": {
-		"title": "Paie et taux",
+		"title": "Réglages de l’économie",
 		"subtitle": "En quoi l’économie de ce serveur diffère des valeurs de {{bot}}. Le taux d’XP est sur la page Niveaux.",
 		"summary": "La paie est à {{rate}} de l’habituel, et les nouveaux comptes commencent avec {{wallet}}.",
 		"usualRate": "{{rate}} (l’habituel)",
@@ -3016,6 +3017,16 @@
 		"xpRateHint": "Ajuste l’XP avant tout rôle de boost.",
 		"xpCooldown": "Délai entre deux messages qui rapportent de l’XP",
 		"xpCooldownHint": "Les messages envoyés plus tôt ne rapportent rien.",
-		"couldNotRead": "Le taux d’XP n’a pas pu être lu. Rechargez la page."
+		"couldNotRead": "Le taux d’XP n’a pas pu être lu. Rechargez la page.",
+		"shopRoles": "Rôles en vente",
+		"shopRolesBody": "Les membres les achètent dans l’onglet Rôles de /shop et les gardent. Un rôle qui modère, ou que {{bot}} ne peut pas donner, ne peut pas être vendu.",
+		"shopRolesFull": "La boutique vend {{max}} rôles, le maximum. Retirez-en un pour en ajouter un autre.",
+		"shopRole": "Rôle",
+		"chooseRole": "Choisir un rôle",
+		"shopPrice": "Prix",
+		"putOnSale": "Mettre en vente",
+		"priceOf": "Prix de {{name}}",
+		"takeOffSale": "Retirer {{name}} de la vente",
+		"deletedRole": "Un rôle supprimé"
 	}
 }

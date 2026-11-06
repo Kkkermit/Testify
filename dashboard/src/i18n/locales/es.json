@@ -175,8 +175,8 @@
 		"modmailHint": "Miembros que escriben en privado al equipo",
 		"invites": "Invitaciones",
 		"invitesHint": "Qué invitaciones trajeron miembros",
-		"economyRates": "Pagos y tasas",
-		"economyRatesHint": "Cuánto paga la economía, y los robos"
+		"economyRates": "Ajustes de economía",
+		"economyRatesHint": "Pagos, robos y roles a la venta"
 	},
 	"account": {
 		"title": "Tu cuenta",
@@ -1386,7 +1386,8 @@
 		"raidPing": "Se le menciona cuando se detecta un raid",
 		"verified": "Se da a los miembros que se verifican",
 		"emptyTitle": "Aún no hay roles",
-		"emptyBody": "Los roles creados en Discord aparecen aquí."
+		"emptyBody": "Los roles creados en Discord aparecen aquí.",
+		"shop": "Se vende en la tienda por {{price}}"
 	},
 	"testPost": {
 		"send": "Envíame una prueba",
@@ -3001,7 +3002,7 @@
 		"viaUnknown": "No se pudo saber la invitación."
 	},
 	"economy": {
-		"title": "Pagos y tasas",
+		"title": "Ajustes de economía",
 		"subtitle": "En qué se diferencia la economía de este servidor de los valores de {{bot}}. La tasa de XP está en la página de Niveles.",
 		"summary": "Los pagos son el {{rate}} de lo habitual, y las cuentas nuevas empiezan con {{wallet}}.",
 		"usualRate": "{{rate}} (lo habitual)",
@@ -3016,6 +3017,16 @@
 		"xpRateHint": "Ajusta la XP antes de cualquier rol de impulso.",
 		"xpCooldown": "Tiempo entre mensajes que dan XP",
 		"xpCooldownHint": "Los mensajes enviados antes no dan nada.",
-		"couldNotRead": "No se pudo leer la tasa de XP. Recarga la página."
+		"couldNotRead": "No se pudo leer la tasa de XP. Recarga la página.",
+		"shopRoles": "Roles a la venta",
+		"shopRolesBody": "Los miembros los compran en la pestaña Roles de /shop y se los quedan. Un rol que modera, o uno que {{bot}} no puede dar, no se puede vender.",
+		"shopRolesFull": "La tienda vende {{max}} roles, el máximo. Quita uno para añadir otro.",
+		"shopRole": "Rol",
+		"chooseRole": "Elige un rol",
+		"shopPrice": "Precio",
+		"putOnSale": "Poner a la venta",
+		"priceOf": "Precio de {{name}}",
+		"takeOffSale": "Retirar {{name}} de la venta",
+		"deletedRole": "Un rol eliminado"
 	}
 }

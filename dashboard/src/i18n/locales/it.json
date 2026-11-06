@@ -175,8 +175,8 @@
 		"modmailHint": "Membri che scrivono in privato allo staff",
 		"invites": "Inviti",
 		"invitesHint": "Gli inviti che hanno portato membri",
-		"economyRates": "Paghe e tassi",
-		"economyRatesHint": "Quanto paga l’economia, e le rapine"
+		"economyRates": "Impostazioni dell’economia",
+		"economyRatesHint": "Paghe, rapine e ruoli in vendita"
 	},
 	"account": {
 		"title": "Il tuo account",
@@ -1386,7 +1386,8 @@
 		"raidPing": "Menzionato quando viene rilevato un raid",
 		"verified": "Assegnato ai membri che si verificano",
 		"emptyTitle": "Ancora nessun ruolo",
-		"emptyBody": "I ruoli creati in Discord compaiono qui."
+		"emptyBody": "I ruoli creati in Discord compaiono qui.",
+		"shop": "Venduto nel negozio a {{price}}"
 	},
 	"testPost": {
 		"send": "Inviami una prova",
@@ -3001,7 +3002,7 @@
 		"viaUnknown": "Non è stato possibile capire l’invito."
 	},
 	"economy": {
-		"title": "Paghe e tassi",
+		"title": "Impostazioni dell’economia",
 		"subtitle": "In cosa l’economia di questo server differisce dai valori di {{bot}}. Il tasso di XP è nella pagina Livelli.",
 		"summary": "Le paghe sono al {{rate}} del solito, e i nuovi conti partono con {{wallet}}.",
 		"usualRate": "{{rate}} (il solito)",
@@ -3016,6 +3017,16 @@
 		"xpRateHint": "Regola gli XP prima di qualsiasi ruolo boost.",
 		"xpCooldown": "Tempo tra messaggi che danno XP",
 		"xpCooldownHint": "I messaggi inviati prima non danno nulla.",
-		"couldNotRead": "Non è stato possibile leggere il tasso di XP. Ricarica la pagina."
+		"couldNotRead": "Non è stato possibile leggere il tasso di XP. Ricarica la pagina.",
+		"shopRoles": "Ruoli in vendita",
+		"shopRolesBody": "I membri li comprano nella scheda Ruoli di /shop e li tengono. Un ruolo che modera, o che {{bot}} non può dare, non si può vendere.",
+		"shopRolesFull": "Il negozio vende {{max}} ruoli, il massimo. Togline uno per aggiungerne un altro.",
+		"shopRole": "Ruolo",
+		"chooseRole": "Scegli un ruolo",
+		"shopPrice": "Prezzo",
+		"putOnSale": "Metti in vendita",
+		"priceOf": "Prezzo di {{name}}",
+		"takeOffSale": "Togli {{name}} dalla vendita",
+		"deletedRole": "Un ruolo eliminato"
 	}
 }

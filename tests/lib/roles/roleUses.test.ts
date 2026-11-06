@@ -12,6 +12,7 @@ jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: j
 jest.mock("@database/repositories/musicSettingsRepository", () => ({ getMusicSettings: jest.fn() }));
 jest.mock("@database/repositories/raidRepository", () => ({ getRaidSettings: jest.fn() }));
 jest.mock("@database/repositories/roleMenuRepository", () => ({ listRoleMenus: jest.fn() }));
+jest.mock("@database/repositories/shopRoleRepository", () => ({ listShopRoles: jest.fn(() => Promise.resolve([])) }));
 jest.mock("@database/repositories/ticketRepository", () => ({ getTicketSetup: jest.fn() }));
 jest.mock("@database/repositories/verificationRepository", () => ({ getVerifyConfig: jest.fn() }));
 

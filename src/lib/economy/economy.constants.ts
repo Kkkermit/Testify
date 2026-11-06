@@ -10,7 +10,7 @@ export const LEADERBOARD_ID = "board";
 
 export const SHOP_ID = "shop";
 
-export const SHOP_SECTIONS = ["items", "houses", "businesses", "jobs", "pets"] as const;
+export const SHOP_SECTIONS = ["items", "houses", "businesses", "jobs", "pets", "roles"] as const;
 
 export const PET_RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
 

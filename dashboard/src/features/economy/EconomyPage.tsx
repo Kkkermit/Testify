@@ -6,6 +6,7 @@ import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Field, Refusal, SavingIndicator, savingStateOf, SettingRows, Toggle, Warning } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { RateSelect } from "@/features/economy/components/RateSelect";
+import { ShopRolesSection } from "@/features/economy/components/ShopRolesSection";
 import { useSaveTuning, useTuning } from "@/features/economy/useTuning";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { numberIn } from "@/features/raid-protection/raid.utils";
@@ -72,6 +73,8 @@ export function EconomyPage(): React.JSX.Element {
 				/>
 			</SettingRows>
 			<Refusal error={save.error} />
+
+			<ShopRolesSection guildId={guildId} />
 		</>
 	);
 }

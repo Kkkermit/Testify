@@ -174,8 +174,8 @@
 		"modmailHint": "Leden die privé het team schrijven",
 		"invites": "Uitnodigingen",
 		"invitesHint": "Wiens uitnodigingen leden binnenbrachten",
-		"economyRates": "Loon en tarieven",
-		"economyRatesHint": "Hoeveel de economie betaalt, en beroven"
+		"economyRates": "Economie-instellingen",
+		"economyRatesHint": "Loon, beroven en rollen te koop"
 	},
 	"account": {
 		"title": "Je account",
@@ -1339,7 +1339,8 @@
 		"raidPing": "Gepingd als er een raid wordt opgemerkt",
 		"verified": "Gegeven aan leden die zich verifiëren",
 		"emptyTitle": "Nog geen rollen",
-		"emptyBody": "Rollen die in Discord worden gemaakt, verschijnen hier."
+		"emptyBody": "Rollen die in Discord worden gemaakt, verschijnen hier.",
+		"shop": "Verkocht in de winkel voor {{price}}"
 	},
 	"testPost": {
 		"send": "Stuur mij een test",
@@ -2918,7 +2919,7 @@
 		"viaUnknown": "De uitnodiging was niet te bepalen."
 	},
 	"economy": {
-		"title": "Loon en tarieven",
+		"title": "Economie-instellingen",
 		"subtitle": "Hoe de economie van deze server afwijkt van de waarden van {{bot}}. Het XP-tarief staat op de pagina Levels.",
 		"summary": "Het loon is {{rate}} van normaal, en nieuwe rekeningen beginnen met {{wallet}}.",
 		"usualRate": "{{rate}} (normaal)",
@@ -2933,6 +2934,16 @@
 		"xpRateHint": "Schaalt de XP vóór elke boostrol.",
 		"xpCooldown": "Tijd tussen berichten die XP opleveren",
 		"xpCooldownHint": "Berichten die eerder worden gestuurd leveren niets op.",
-		"couldNotRead": "Het XP-tarief kon niet worden gelezen. Laad de pagina opnieuw."
+		"couldNotRead": "Het XP-tarief kon niet worden gelezen. Laad de pagina opnieuw.",
+		"shopRoles": "Rollen te koop",
+		"shopRolesBody": "Leden kopen ze op het tabblad Rollen van /shop en houden ze. Een rol die modereert, of een die {{bot}} niet kan geven, kan niet verkocht worden.",
+		"shopRolesFull": "De winkel verkoopt {{max}} rollen, zoveel als kan. Haal er een weg om een andere toe te voegen.",
+		"shopRole": "Rol",
+		"chooseRole": "Kies een rol",
+		"shopPrice": "Prijs",
+		"putOnSale": "Te koop zetten",
+		"priceOf": "Prijs van {{name}}",
+		"takeOffSale": "{{name}} uit de verkoop halen",
+		"deletedRole": "Een verwijderde rol"
 	}
 }
