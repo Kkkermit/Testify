@@ -62,13 +62,13 @@ numbers, which drift):
 | Commands             | 93, across 14 categories          |
 | Command files        | 114 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
-| Prefix aliases       | 106                               |
+| Prefix aliases       | 107                               |
 | Button handlers      | 45                                |
 | Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 207, in 30 domain folders         |
-| Schemas/repositories | 47 / 45                           |
+| `src/lib` helpers    | 220, in 31 domain folders         |
+| Schemas/repositories | 47 / 46                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,833 across 500 suites           |
+| Tests                | 3,946 across 518 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -218,10 +218,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  113 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  114 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               31 handlers in command, community, create, logging, ready and message
-├── buttons/              44 component handlers, keyed by custom-ID prefix
-├── lib/                  207 helpers in 30 domain folders, each behind its own index.ts barrel
+├── buttons/              45 component handlers, keyed by custom-ID prefix
+├── lib/                  220 helpers in 31 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,16 +232,16 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/ notices/
+│       site/ notices/ account/
 ├── database/
 │   ├── connection.ts
 │   ├── models/           47 Mongoose schemas, one file per feature
-│   └── repositories/     45 query layers, one per feature. Commands never touch a model directly.
+│   └── repositories/     46 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 325 suites; the dashboard's 175 sit beside its code.
+tests/                    Mirrors src/. 337 suites; the dashboard's 181 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -1271,7 +1271,7 @@ downloader that has stopped reading its own socket gets the connection dropped u
 `ERR_STREAM_PREMATURE_CLOSE` three to five seconds in, every track, on every source. `BUFFER_BYTES` (16 MB, over
 a quarter of an hour of Opus) is a `PassThrough` between the last process and the player, so an ordinary track is
 downloaded once and played out of memory. On the transcoding path it goes **after** FFmpeg, because FFmpeg reads
-eagerly and is what keeps yt-dlp off the pipe. `tests/lib/musicSource.test.ts` proves it with a downloader that
+eagerly and is what keeps yt-dlp off the pipe. `tests/lib/music/musicSource.test.ts` proves it with a downloader that
 writes a megabyte and then touches a file: without the buffer the file never appears.
 
 Two things go with it. `ytDlpStreamArgs` passes `--no-playlist` — a YouTube link copied out of a playlist carries
@@ -1633,7 +1633,7 @@ it. Five things about it are load-bearing:
 **Roulette is a shared round, and the table waits for its first bet.** `/casino roulette` posts a board anybody in the
 channel can bet on, through `buttons/roulette.ts` — a handler that is deliberately **not** `ownerOnly`, and runs
 every press through `checkCasinoPlay`. There is a button per outside bet, a **Number…** form that takes one number or
-several, chip-size buttons scaled from the table's chip (`chipSteps`) and **Clear mine**. The countdown starts on
+several, chip-size buttons and **Clear mine**. The countdown starts on
 the first bet, not on the post: `startClock` sets `closesAt` only while it is null, so only the call that started it
 sets the spin's timer, and later bets never push it back. The command asks for no amount: the table opens at
 `openingChip` (100, moved inside the server's bet limits) and each player picks their own size from

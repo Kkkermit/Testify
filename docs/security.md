@@ -69,7 +69,7 @@ runs:
 
 1. **Owner only** — refused first for anybody not in `DISCORD_OWNER_IDS`, and the attempt is recorded
 2. **Paused** — the owner console's pause stops everything
-3. **Blacklist** — a bot-wide block on an account
+3. **Blacklist** — a bot-wide block on an account, which may still run `/delete-my-data`
 4. **Switched off** — the command itself, the music system or the casino, in this server or everywhere
 5. **Server only** — commands that make no sense in a DM
 6. **NSFW** — commands kept to age-restricted channels
@@ -94,6 +94,7 @@ The dashboard is **off by default**. Turned on, it is guarded in layers, each wi
 | **Server access**           | Manage Server is checked against Discord **live, on every request**, so losing it locks you out on your next click         |
 | **Reach**                   | An action asks what its command asks — Kick Members to kick — and every channel and role named must belong to that server  |
 | **Owner console**           | Answers **404** to anybody not in `DISCORD_OWNER_IDS`, and its code is only ever served to an owner's session              |
+| **Blacklist**               | A blocked account reaches only who it is, signing out and Delete my data; every other route answers 403                    |
 | **Rate limiting**           | A bounded fixed window per session, falling back to the address                                                            |
 | **Cookies**                 | Set in one place, always `HttpOnly` and `SameSite=Lax`, and `Secure` outside development                                   |
 
