@@ -141,30 +141,23 @@ connection open. There is no configuration that makes this bot run there.
 
 ---
 
-## 🩺 There is deliberately no HEALTHCHECK
+## 🩺 The health check
 
-The obvious probe is `/api/health`, and it only exists while the website or the dashboard is on — so baking it into
-the image would mark every install with `SITE_ENABLED=false` permanently unhealthy. There is no HTTP surface to check on a bot whose
-job is holding a gateway websocket open, and "the process is alive" is what `restart: unless-stopped` already
-acts on.
+The image carries a `HEALTHCHECK` that runs `dist/healthcheck.js` every 30 seconds. It asks the bot's own
+`/api/health` from inside the container and passes only when that answers `ok`: Discord is ready and the database
+is connected. A bot that hangs, or one that has lost Discord or MongoDB for three checks in a row, shows as
+`unhealthy` in `docker ps` and to anything watching Docker's health status.
 
-If you run with either on and want one, add it to your own compose file rather than the image:
+Two things about it are worth knowing:
 
-```yaml
-healthcheck:
-  test:
-    [
-      "CMD",
-      "node",
-      "-e",
-      "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))",
-    ]
-  interval: 30s
-  start_period: 60s
-```
+- **With the website and the dashboard both off, it always passes.** `/api/health` only exists while one of them is
+  on, so with `SITE_ENABLED=false` and `DASHBOARD_ENABLED=false` there is nothing to ask, and the check reports the
+  process being up rather than marking every such install unhealthy for ever.
+- **The first two minutes do not count** (`--start-period=2m`). The API starts after `client.login()`, so there is
+  nothing on the port while the bot connects to Discord.
 
-`start_period` matters more than it looks: the API starts _after_ `client.login()`, so there is nothing on the
-port for the twenty-odd seconds the bot spends connecting to Discord.
+Docker records the result but does not act on it. `restart: unless-stopped` restarts a bot whose process ends, not
+one marked unhealthy; put something that watches health in front if you want that.
 
 ---
 
@@ -205,4 +198,9 @@ Discord. Separately, in a Linux sandbox:
 - **The stack starts under compose.** The bot waits for MongoDB's health check, connects to it at `mongo:27017`,
   and loads every command, button and event from the runtime install.
 
-Still untested: the healthcheck sample above, and the base image tag, which is not pinned to a digest.
+- **The health check runs in the image.** Docker reads it from the image, runs it as the `node` user, reports
+  `healthy` against a listener that answers like a ready bot, and fails it with nothing listening; with the website
+  and the dashboard both off it passes.
+
+Still untested: the health check against a bot really connected to Discord, and the base image tag, which is not
+pinned to a digest.
