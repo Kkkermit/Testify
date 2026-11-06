@@ -1,9 +1,8 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { globalCommandToggles, guildCommandToggles } from "@api/routes/commandToggles";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import {
 	disabledGlobally,
@@ -43,19 +42,10 @@ function app(userId = OWNER): Hono<ApiBindings> {
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId, username: "someone" });
 	instance.route("/guilds/:guildId/commands", guildCommandToggles);
 	instance.route("/owner/commands", globalCommandToggles);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

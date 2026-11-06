@@ -1,11 +1,9 @@
 import { ChannelType, Collection, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, problemBody } from "@api/errors";
 import { channelTools } from "@api/routes/channelTools";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { type ToolChannel } from "@testify/shared";
 
@@ -48,23 +46,9 @@ function app(botFlags: bigint[] = [PermissionFlagsBits.ManageRoles, PermissionFl
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: OWNER, username: "owner" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId: OWNER, username: "owner" });
 	instance.route("/guilds/:guildId/channel-tools", channelTools);
-	instance.onError((error) => {
-		const problem =
-			error instanceof ApiProblem
-				? error
-				: error instanceof UserFacingError
-					? badRequest(error.message)
-					: new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 	return { instance, edit, setRateLimitPerUser };
 }
 

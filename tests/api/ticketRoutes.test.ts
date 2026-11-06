@@ -1,9 +1,8 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { tickets } from "@api/routes/tickets";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import {
@@ -61,18 +60,9 @@ function app(): Hono<ApiBindings> {
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: OWNER, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId: OWNER, username: "someone" });
 	instance.route("/guilds/:guildId/tickets", tickets);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

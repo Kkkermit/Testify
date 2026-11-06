@@ -1,7 +1,7 @@
 import { Collection, PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { screens } from "@api/routes/screens";
 import { type TestifyClient } from "@core/client";
 import { recordDashboardView, recordScreenView } from "@database/repositories/usageRepository";
@@ -48,10 +48,7 @@ function appFor(userId: string | null): Hono<ApiBindings> {
 		await next();
 	});
 	app.route("/screens", screens);
-	app.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(app);
 
 	return app;
 }

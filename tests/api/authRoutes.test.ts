@@ -1,8 +1,9 @@
 import { Hono } from "hono";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import type * as discord from "@api/discord";
 import { exchangeCode, fetchGuilds } from "@api/discord";
-import { ApiProblem, problemBody, UpstreamProblem } from "@api/errors";
+import { UpstreamProblem } from "@api/errors";
 import { guildLists } from "@api/guildCache";
 import { oauthConfigFrom } from "@api/oauth";
 import { auth } from "@api/routes/auth";
@@ -73,10 +74,7 @@ function app(env: Env = envFor(), session: object | undefined = undefined): Hono
 		await next();
 	});
 	instance.route("/auth", auth);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

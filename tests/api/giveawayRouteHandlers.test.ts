@@ -1,9 +1,8 @@
 import { Collection, type Guild } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { giveaways } from "@api/routes/giveaways";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { deleteGiveaway, endGiveaway, listGiveaways, rerollGiveaway, startGiveaway } from "@lib/giveaways";
@@ -40,18 +39,9 @@ function app(): Hono<ApiBindings> {
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: ACTOR, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId: ACTOR, username: "someone" });
 	instance.route("/guilds/:guildId/giveaways", giveaways);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 	return instance;
 }
 

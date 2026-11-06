@@ -1,9 +1,8 @@
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, problemBody } from "@api/errors";
 import { botStats } from "@api/routes/botStats";
 import { memberCount } from "@api/routes/memberCount";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
@@ -44,24 +43,10 @@ function app(): Hono<ApiBindings> {
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: OWNER, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId: OWNER, username: "someone" });
 	instance.route("/guilds/:guildId/bot-stats", botStats);
 	instance.route("/guilds/:guildId/member-count", memberCount);
-	instance.onError((error) => {
-		const problem =
-			error instanceof ApiProblem
-				? error
-				: error instanceof UserFacingError
-					? badRequest(error.message)
-					: new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }
