@@ -78,6 +78,23 @@ describe("buyShopRole", () => {
 		expect(adjustWallet).toHaveBeenCalledWith(GUILD, raw.id, 500);
 	});
 
+	/** Both presses of a double click would pass the "already held" check before either role landed. */
+	it("charges once when the button is pressed twice at once", async () => {
+		const { guild, member } = world();
+
+		const [first, second] = await Promise.allSettled([
+			buyShopRole(guild, member, VIP),
+			buyShopRole(guild, member, VIP),
+		]);
+
+		expect(first.status).toBe("fulfilled");
+		expect(second).toMatchObject({
+			status: "rejected",
+			reason: expect.objectContaining({ message: expect.stringMatching(/already going through/) }),
+		});
+		expect(debitWallet).toHaveBeenCalledTimes(1);
+	});
+
 	it("charges nothing for a role already held, or one that cannot be afforded", async () => {
 		await expect(buyShopRole(world({ holds: true }).guild, world({ holds: true }).member, VIP)).rejects.toThrow(
 			/already have/,

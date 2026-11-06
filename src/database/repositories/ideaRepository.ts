@@ -1,5 +1,6 @@
-import { isValidObjectId, type Types } from "mongoose";
+import { type Types } from "mongoose";
 import { Idea, type IdeaRecord, IdeaSettingsConfig, type IdeaSettingsRecord } from "@database/models/idea.schema";
+import { recordIn } from "@database/recordFilter.util";
 import { type IdeaFilter, type IdeaStatus } from "@testify/shared";
 
 type StoredIdeaSettings = Pick<IdeaSettingsRecord, "enabled" | "channelId">;
@@ -30,10 +31,6 @@ function toIdea(row: Lean): StoredIdea {
 }
 
 /** Every lookup by id is scoped to the server too, so one server's panel can never reach another's idea. */
-function scope(guildId: string, ideaId: string): { guildId: string; _id: string } | null {
-	return isValidObjectId(ideaId) ? { guildId, _id: ideaId } : null;
-}
-
 export async function getIdeaSettings(guildId: string): Promise<StoredIdeaSettings | null> {
 	return IdeaSettingsConfig.findOne({ guildId }).select("enabled channelId").lean<StoredIdeaSettings>().exec();
 }
@@ -87,12 +84,12 @@ export async function lastIdeaAt(guildId: string, authorId: string): Promise<Dat
 }
 
 export async function setIdeaMessage(guildId: string, ideaId: string, messageId: string | null): Promise<void> {
-	const filter = scope(guildId, ideaId);
+	const filter = recordIn(guildId, ideaId);
 	if (filter !== null) await Idea.updateOne(filter, { $set: { messageId } }).exec();
 }
 
 export async function findIdea(guildId: string, ideaId: string): Promise<StoredIdea | null> {
-	const filter = scope(guildId, ideaId);
+	const filter = recordIn(guildId, ideaId);
 	if (filter === null) return null;
 
 	const row = await Idea.findOne(filter).lean<Lean>().exec();
@@ -106,7 +103,7 @@ export async function voteOnIdea(
 	userId: string,
 	side: "up" | "down",
 ): Promise<StoredIdea | null> {
-	const filter = scope(guildId, ideaId);
+	const filter = recordIn(guildId, ideaId);
 	if (filter === null) return null;
 
 	const mine = side === "up" ? "upVoters" : "downVoters";
@@ -136,7 +133,7 @@ export async function decideIdea(
 	ideaId: string,
 	decision: { status: IdeaStatus; reason: string; by: string; byName: string; at: Date },
 ): Promise<StoredIdea | null> {
-	const filter = scope(guildId, ideaId);
+	const filter = recordIn(guildId, ideaId);
 	if (filter === null) return null;
 
 	const reopened = decision.status === "open";
@@ -185,7 +182,7 @@ export async function countIdeas(guildId: string): Promise<Record<IdeaStatus, nu
 
 /** Answers with what was deleted, so the caller can take its post down too. */
 export async function deleteIdea(guildId: string, ideaId: string): Promise<StoredIdea | null> {
-	const filter = scope(guildId, ideaId);
+	const filter = recordIn(guildId, ideaId);
 	if (filter === null) return null;
 
 	const row = await Idea.findOneAndDelete(filter).lean<Lean>().exec();

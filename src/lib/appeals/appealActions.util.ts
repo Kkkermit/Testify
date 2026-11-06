@@ -1,4 +1,5 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import {
@@ -19,6 +20,7 @@ import { takesAppeals } from "@lib/appeals/appealLink.util";
 import { appealDecisionText, appealPost } from "@lib/appeals/appealPanel.util";
 import { canPostIn } from "@lib/discord/channels.util";
 import { moderatorOf, unbanUser } from "@lib/moderation/sanctions.util";
+import { TimedCache } from "@lib/site/github.util";
 import {
 	appealAgainAt,
 	type AppealableServer,
@@ -105,6 +107,13 @@ async function isBanned(guild: Guild, userId: string): Promise<boolean> {
 	);
 }
 
+/** The listing's answers, kept a minute so reloading it is not a request to Discord for every server each time. */
+const listedBans = new TimedCache<boolean>(MINUTE_MS, 10_000);
+
+export function clearListedBans(): void {
+	listedBans.clear();
+}
+
 /** The appeal still waiting here, and when a refused one allows the next. */
 async function appealBlock(
 	guild: Guild,
@@ -128,7 +137,7 @@ export async function readOwnAppeals(client: TestifyClient, userId: string): Pro
 
 	const servers = await Promise.all(
 		guilds.map(async (guild): Promise<AppealableServer | null> => {
-			if (!(await isBanned(guild, userId))) return null;
+			if (!(await listedBans.get(`${guild.id}:${userId}`, () => isBanned(guild, userId)))) return null;
 
 			const settings = await getAppealSettings(guild.id);
 			const { open, againAt } = await appealBlock(guild, userId, settings?.cooldownDays ?? 0);

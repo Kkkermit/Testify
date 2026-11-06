@@ -86,7 +86,21 @@ export async function withdrawShopRole(
 }
 
 /** The money moves first and comes back if Discord refuses the role, so nobody pays for a role they never got. */
+/** Purchases on their way, so a double click cannot pay twice for one role. */
+const buying = new Set<string>();
+
 export async function buyShopRole(guild: Guild, member: GuildMember, roleId: string): Promise<string> {
+	const key = `${guild.id}:${member.id}:${roleId}`;
+	if (buying.has(key)) throw new UserFacingError("That purchase is already going through.");
+	buying.add(key);
+	try {
+		return await chargeForRole(guild, member, roleId);
+	} finally {
+		buying.delete(key);
+	}
+}
+
+async function chargeForRole(guild: Guild, member: GuildMember, roleId: string): Promise<string> {
 	const entry = await findShopRole(guild.id, roleId);
 	if (entry === null) throw new UserFacingError("That role is no longer for sale.");
 

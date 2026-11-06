@@ -1,10 +1,12 @@
-import { isValidObjectId, type Types } from "mongoose";
+import { type Types } from "mongoose";
+import { DAY_MS } from "@config/constants";
 import {
 	Appeal,
 	type AppealRecord,
 	AppealSettingsConfig,
 	type AppealSettingsRecord,
 } from "@database/models/appeal.schema";
+import { recordIn } from "@database/recordFilter.util";
 import { APPEAL_LIMITS, type AppealFilter, type AppealStatus } from "@testify/shared";
 
 type StoredAppealSettings = Pick<AppealSettingsRecord, "enabled" | "channelId" | "cooldownDays">;
@@ -32,10 +34,6 @@ function toAppeal(row: Lean): StoredAppeal {
 }
 
 /** Every lookup by id is scoped to the server too, so one server's staff can never reach another's appeal. */
-function scope(guildId: string, appealId: string): { guildId: string; _id: string } | null {
-	return isValidObjectId(appealId) ? { guildId, _id: appealId } : null;
-}
-
 const SETTINGS = "enabled channelId cooldownDays";
 
 export async function getAppealSettings(guildId: string): Promise<StoredAppealSettings | null> {
@@ -76,14 +74,6 @@ export async function createAppeal(
 	}
 }
 
-export async function findAppeal(guildId: string, appealId: string): Promise<StoredAppeal | null> {
-	const filter = scope(guildId, appealId);
-	if (filter === null) return null;
-
-	const row = await Appeal.findOne(filter).lean<Lean>().exec();
-	return row === null ? null : toAppeal(row);
-}
-
 /** This person's newest appeal to this server, whatever became of it. */
 export async function latestAppeal(guildId: string, userId: string): Promise<StoredAppeal | null> {
 	const row = await Appeal.findOne({ guildId, userId }).sort({ createdAt: -1 }).lean<Lean>().exec();
@@ -100,7 +90,7 @@ export async function setAppealMessage(
 	appealId: string,
 	place: { channelId: string; messageId: string },
 ): Promise<void> {
-	const filter = scope(guildId, appealId);
+	const filter = recordIn(guildId, appealId);
 	if (filter !== null) await Appeal.updateOne(filter, { $set: place }).exec();
 }
 
@@ -110,7 +100,7 @@ export async function decideAppeal(
 	appealId: string,
 	decision: { status: Exclude<AppealStatus, "open">; reason: string; by: string; byName: string; at: Date },
 ): Promise<StoredAppeal | null> {
-	const filter = scope(guildId, appealId);
+	const filter = recordIn(guildId, appealId);
 	if (filter === null) return null;
 
 	const row = await Appeal.findOneAndUpdate(
@@ -122,7 +112,7 @@ export async function decideAppeal(
 				decidedBy: decision.by,
 				decidedByName: decision.byName,
 				decidedAt: decision.at,
-				expiresAt: new Date(decision.at.getTime() + APPEAL_LIMITS.keepDays * 86_400_000),
+				expiresAt: new Date(decision.at.getTime() + APPEAL_LIMITS.keepDays * DAY_MS),
 			},
 		},
 		{ new: true },
@@ -134,7 +124,7 @@ export async function decideAppeal(
 
 /** Puts a claimed decision back, for an unban Discord refused after the appeal was marked accepted. */
 export async function reopenAppeal(guildId: string, appealId: string): Promise<void> {
-	const filter = scope(guildId, appealId);
+	const filter = recordIn(guildId, appealId);
 	if (filter === null) return;
 
 	await Appeal.updateOne(filter, {
@@ -143,7 +133,7 @@ export async function reopenAppeal(guildId: string, appealId: string): Promise<v
 }
 
 export async function deleteAppeal(guildId: string, appealId: string): Promise<void> {
-	const filter = scope(guildId, appealId);
+	const filter = recordIn(guildId, appealId);
 	if (filter !== null) await Appeal.deleteOne(filter).exec();
 }
 
