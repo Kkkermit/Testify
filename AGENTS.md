@@ -59,16 +59,17 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 93, across 14 categories          |
-| Command files        | 114 (incl. folded-in subcommands) |
+| Commands             | 96, across 14 categories          |
+| Command files        | 117 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
-| Prefix aliases       | 106                               |
-| Button handlers      | 45                                |
-| Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 207, in 30 domain folders         |
-| Schemas/repositories | 47 / 45                           |
+| Prefix aliases       | 107                               |
+| Button handlers      | 53                                |
+| Right-click actions  | 4                                 |
+| Events               | 36, in 6 groups                   |
+| `src/lib` helpers    | 236, in 34 domain folders         |
+| Schemas/repositories | 52 / 51                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,833 across 500 suites           |
+| Tests                | 4,106 across 553 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -132,6 +133,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run test:coverage`  | Jest with the 75/75/75/75 thresholds enforced                        |
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
+| `npm run i18n:commands`  | Regenerate `assets/locales/commands/en.json`, what translators read  |
 | `npm run docs:images`    | Redraw the card images in `docs/images/bot/` from the real renderers |
 | `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
@@ -198,12 +200,15 @@ Grouped by **technical role first, then domain**. One feature is spread across l
 ```
 src/
 ├── index.ts              Entry point. One async main() that awaits each step in order.
-├── core/                 The framework. 18 files, no domain logic.
+├── core/                 The framework. 21 files, no domain logic.
 │   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
 │   ├── loader.ts         Finds and registers everything from disk. Globs live here.
 │   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
+│   ├── commandLocales.ts The menus' translations, read from assets/locales/commands
+│   ├── language.ts       Which language a reader gets, and `say` for the shared replies
 │   ├── prefix.ts         The ONLY file that knows prefix commands exist
 │   ├── button.ts         Button contract, defineButton, customId / parseCustomId
+│   ├── contextMenu.ts    Right-click action contract, defineContextMenu, buildContextMenu
 │   ├── event.ts          defineEvent
 │   ├── message.ts        Message-handler contract (automod, counting, levelling XP …)
 │   ├── checks.ts         Gates: permissions, cooldowns, guildOnly, ownerOnly, nsfw
@@ -217,11 +222,15 @@ src/
 │   ├── categories.ts     The category union — single source of truth
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
+│   ├── languages.ts      The bot's eight languages and the Discord locales each answers
+│   ├── replies.ts        The refusals and apology every command shares, in each language
+│   ├── permissionNames.ts What each language calls the permissions a refusal names
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  113 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               31 handlers in command, community, create, logging, ready and message
-├── buttons/              44 component handlers, keyed by custom-ID prefix
-├── lib/                  207 helpers in 30 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               36 handlers in command, community, create, logging, ready and message
+├── buttons/              53 component handlers, keyed by custom-ID prefix
+├── menus/                4 right-click actions, on a member or a message
+├── lib/                  234 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,16 +241,16 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/ notices/
+│       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           47 Mongoose schemas, one file per feature
-│   └── repositories/     45 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           52 Mongoose schemas, one file per feature
+│   └── repositories/     51 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 325 suites; the dashboard's 175 sit beside its code.
+tests/                    Mirrors src/. 339 suites; the dashboard's 182 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -259,34 +268,37 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 ### Where to look for a given job
 
-| I want to…                                 | Go to                                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| Add or change a command                    | `src/commands/<category>/*.command.ts`                                    |
-| Change how commands are found              | `src/core/loader.ts` (the globs)                                          |
-| Change a permission or cooldown gate       | `src/core/checks.ts`                                                      |
-| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                |
-| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                      |
-| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"   |
-| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                      |
-| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)  |
-| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it         |
-| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback     |
-| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database           |
-| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                           |
-| Format a number, duration, time            | `src/lib/format/format.util.ts`                                           |
-| Query the database                         | `src/database/repositories/*.ts` — never a model directly                 |
-| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`        |
-| Change user-facing copy                    | `src/config/strings.ts`                                                   |
-| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot          |
-| Change a colour or emoji                   | `src/config/theme.ts`                                                     |
-| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`               |
-| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
-| Change how the owners' notifications work  | `src/lib/notices/` — `/bot-notifications`, the hint and the web share it  |
-| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
-| Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
-| Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers    |
-| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in        |
-| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                      |
+| I want to…                                 | Go to                                                                               |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                                              |
+| Add or change a right-click action         | `src/menus/*.menu.ts` — see [§21](#right-click-actions-ask-what-their-command-asks) |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                                    |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                                                |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                          |
+| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                                |
+| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"             |
+| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                                |
+| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)            |
+| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it                   |
+| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback               |
+| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database                     |
+| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                                     |
+| Format a number, duration, time            | `src/lib/format/format.util.ts`                                                     |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly                           |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`                  |
+| Change user-facing copy                    | `src/config/strings.ts`                                                             |
+| Translate a command's menu text            | `assets/locales/commands/<lang>.json`, after `npm run i18n:commands`                |
+| Change a refusal every command shares      | `src/config/replies.ts`, in all eight languages at once                             |
+| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot                    |
+| Change a colour or emoji                   | `src/config/theme.ts`                                                               |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`                         |
+| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`                  |
+| Change how the owners' notifications work  | `src/lib/notices/` — `/bot-notifications`, the hint and the web share it            |
+| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)                 |
+| Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it           |
+| Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers              |
+| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in                  |
+| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                                |
 
 ### The panel renderers in `src/lib`
 
@@ -350,6 +362,15 @@ async function main(): Promise<void> {
 }
 ```
 
+**One process runs every shard.** `TestifyClient` passes `shards: "auto"`, so discord.js asks Discord how many shards
+the bot needs and runs them all here. Discord refuses an unsharded bot once it is in 2,500 servers, and keeping every
+shard in one process is what lets the dashboard go on reading one live cache; a `ShardingManager` that split them
+across processes would take that away.
+
+**The image asks the bot whether it is serving.** `src/healthcheck.ts` is the `Dockerfile`'s `HEALTHCHECK`: it asks
+`/api/health` and passes only on `ok`, which needs Discord ready and the database connected. With the website and the
+dashboard both off there is no listener to ask, so it passes rather than marking every such install unhealthy.
+
 **Command registration scope** — this is the single-guild vs multi-guild switch:
 
 - `DISCORD_DEV_GUILD_ID` **set** → commands register to that guild only, so a half-built one is not live everywhere.
@@ -366,6 +387,7 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
   any case, so `T?help` — what a phone's auto-capitalisation types — runs `t?help`
 - Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
   `button.run(interaction, { client, action, args })`
+- Right-click → the same listener → `client.contextMenus` by name → `checkContextMenu` → `menu.run(interaction, client)`
 
 There is **exactly one** `interactionCreate` listener. The original had 27.
 
@@ -381,13 +403,14 @@ A file that misses its suffix is silently never registered.
 | --------------- | -------------------------------- | ------------------------------------ |
 | `.command.ts`   | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
 | `.event.ts`     | a gateway event handler          | `events/ready/ready.event.ts`        |
+| `.menu.ts`      | a right-click action             | `menus/warn.menu.ts`                 |
 | `.util.ts`      | a shared helper                  | `lib/format/duration.util.ts`        |
 | `.types.ts`     | a domain's shared types          | `lib/music/music.types.ts`           |
 | `.constants.ts` | a domain's shared constants      | `lib/music/music.constants.ts`       |
 | `.schema.ts`    | a Mongoose model                 | `database/models/economy.schema.ts`  |
 | `.test.ts`      | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
 
-Loader globs: `commands/*/*.command.{js,ts}` and `events/**/*.event.{js,ts}`.
+Loader globs: `commands/*/*.command.{js,ts}`, `events/**/*.event.{js,ts}` and `menus/*.menu.{js,ts}`.
 `tests/core/conventions.test.ts` enforces the suffixes.
 
 **Unsuffixed, deliberately:** `src/index.ts`, everything in `src/core/` and `src/config/`, everything in
@@ -412,14 +435,14 @@ import { embed } from "@lib/discord";
 import { defineCommand, type CommandInput } from "@core/command";
 ```
 
-| Alias                                                                      | Points at               | Barrel? |
-| -------------------------------------------------------------------------- | ----------------------- | ------- |
-| `@core`                                                                    | `src/core/index.ts`     | yes     |
-| `@config`                                                                  | `src/config/index.ts`   | yes     |
-| `@lib`                                                                     | `src/lib/index.ts`      | yes     |
-| `@lib/<domain>` — `@lib/music`, `@lib/discord`, …                          | `src/lib/*/index.ts`    | yes     |
-| `@database`                                                                | `src/database/index.ts` | yes     |
-| `@commands/*`, `@events/*`, `@buttons/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
+| Alias                                                                                  | Points at               | Barrel? |
+| -------------------------------------------------------------------------------------- | ----------------------- | ------- |
+| `@core`                                                                                | `src/core/index.ts`     | yes     |
+| `@config`                                                                              | `src/config/index.ts`   | yes     |
+| `@lib`                                                                                 | `src/lib/index.ts`      | yes     |
+| `@lib/<domain>` — `@lib/music`, `@lib/discord`, …                                      | `src/lib/*/index.ts`    | yes     |
+| `@database`                                                                            | `src/database/index.ts` | yes     |
+| `@commands/*`, `@events/*`, `@buttons/*`, `@menus/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
 
 **One alias map only** — `tsconfig.json` `compilerOptions.paths`. `jest.config.ts` derives its mapper from it;
 `tsup` reads it and `tsc-alias` rewrites the build from it. Never write a second literal copy. Each aliased
@@ -499,7 +522,8 @@ Rules:
    `run`. `checks.ts` handles them uniformly and the failure messages stay consistent.
 7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
    to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
-8. Run `npm run docs:commands` afterwards.
+8. Run `npm run docs:commands` afterwards, and `npm run i18n:commands`, then add the new strings to each file in
+   `assets/locales/commands/`. The suite names every one missing.
 
 **`private: true` is how a command answers only the person who ran it**, set on the command or on one
 subcommand and applied by `dispatch` — never a hand-written `MessageFlags.Ephemeral`. On a slash command every
@@ -571,6 +595,10 @@ database calls, no interaction object. This is what makes it unit-testable.
 Both call the same renderer, so the first render and every re-render cannot drift. Examples to copy:
 `shopScreen.util.ts` + `buttons/shop.ts`, `auditPanel.util.ts` + `buttons/auditLog.ts`,
 `balancePanel.util.ts` + `buttons/balance.ts`, `inventoryScreen.util.ts` + `buttons/inventory.ts`.
+
+A handler shows the next state with `redrawPanel` from `@lib/discord`, which edits the panel in place and answers
+privately instead when its form was opened from somewhere the panel cannot be edited. A settings panel's on and off
+button is `switchAction(enabled, ready)`, so every switch reads, colours and refuses the same way.
 
 ### Custom IDs
 
@@ -830,7 +858,7 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
 
 **Log channels are the third job: posts the operator reads in Discord.** Each `CHANNEL_*_LOG` is optional and off
 while blank. `CHANNEL_ERROR_LOG` gets command failures with their reference, `CHANNEL_GUILD_LOG` servers the bot
-joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_REPORT_LOG` and
+joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot (never one in an open mod mail conversation), and `CHANNEL_BUG_REPORT_LOG` and
 `CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
@@ -943,6 +971,8 @@ Shared harness in `tests/helpers/` (these are not tests):
 - **`mongo.ts`** — `mongodb-memory-server` setup.
 - **`containers.ts`** — `idsOf()`, `buttonsOf()`, `textOf()` for walking a Components V2 tree. A container nests
   sections inside containers and buttons inside sections, so asserting on one means walking it.
+- **`apiHarness.ts`** — `ask()` against the real app, and for a route mounted on its own, `withSession()` for the
+  context the middleware would set and `answerLikeTheApp()` for the boundary's own error mapping (`asProblem`).
 
 What good tests here look like:
 
@@ -967,6 +997,10 @@ What good tests here look like:
   MongoDB reported **41 passing tests that asserted nothing**, and a mutation replacing an atomic `$inc` with
   `$set` survived all of them. `tests/core/conventions.test.ts` refuses the early-return pattern, and CI sets
   `REQUIRE_DB_TESTS=1` so a runner that cannot start a database fails rather than going quietly green.
+- **The test database never runs MongoDB's TTL sweep.** `mongoGlobal.ts` starts it with `ttlMonitorEnabled=false`,
+  because fixtures carry fixed dates: the command run log's are dated 1 August 2026, so they expired on 31 August
+  and the sweep, which runs once a minute, deleted them partway through a test on CI. A test checks that an expiry is
+  set, never that MongoDB acted on it, and `testDatabase.test.ts` pins the setting.
 - **A worker's database outlives each suite.** Every test starts on emptied collections, but the database is not
   dropped between suites, because dropping it made the next suite build every collection and index again: 464
   collection creations a run instead of 137, and on the Windows runner five suites once timed out together while
@@ -1265,7 +1299,7 @@ downloader that has stopped reading its own socket gets the connection dropped u
 `ERR_STREAM_PREMATURE_CLOSE` three to five seconds in, every track, on every source. `BUFFER_BYTES` (16 MB, over
 a quarter of an hour of Opus) is a `PassThrough` between the last process and the player, so an ordinary track is
 downloaded once and played out of memory. On the transcoding path it goes **after** FFmpeg, because FFmpeg reads
-eagerly and is what keeps yt-dlp off the pipe. `tests/lib/musicSource.test.ts` proves it with a downloader that
+eagerly and is what keeps yt-dlp off the pipe. `tests/lib/music/musicSource.test.ts` proves it with a downloader that
 writes a megabyte and then touches a file: without the buffer the file never appears.
 
 Two things go with it. `ytDlpStreamArgs` passes `--no-playlist` — a YouTube link copied out of a playlist carries
@@ -1441,7 +1475,7 @@ yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports whic
 A server can say what each warning does: `WarnStep` in `shared/src/warnings.ts` is a plain warning, a timeout
 from a fixed list of lengths, a kick or a ban, and the list is stored per server in `warnpunishments`.
 `issueWarning` in `src/lib/moderation/warnActions.util.ts` is the **one path** a warning takes — `/warn create`,
-the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Four things
+the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Five things
 about it are load-bearing:
 
 - **The Nth warning takes the Nth step, and past the end the last step repeats** (`stepFor`). A fifth warning on
@@ -1452,6 +1486,11 @@ about it are load-bearing:
   `warnProblemText` in English for Discord, a translation key on the dashboard.
 - **The panel puts the warning number in every option's label**, so a step costs two components rather than
   three and ten of them fit Discord's 40 with room to spare. The test counts them.
+- **A warning can stop counting, and nothing is deleted when it does.** A server may pick `expireAfterDays` from
+  `WARN_EXPIRY_DAYS`, and `countsSince` is the one boundary: `issueWarning` counts only the warnings on or after it,
+  and `warningExpired` marks the older ones in `/warn list`, `/warn info` and on the dashboard, so a list can never
+  disagree with the step a warning took. A record from before the window existed, or one with a length the panel does
+  not offer, counts every warning (`expiryOf`). The put body may leave the window out, which keeps what is stored.
 
 **Each warning stores the step it took**, as `step` and `stepProblem` on the entry, written after the step runs, so
 `/warn list`, `/warn info` and the dashboard say what a warning did rather than guessing from today's list, which
@@ -1627,7 +1666,7 @@ it. Five things about it are load-bearing:
 **Roulette is a shared round, and the table waits for its first bet.** `/casino roulette` posts a board anybody in the
 channel can bet on, through `buttons/roulette.ts` — a handler that is deliberately **not** `ownerOnly`, and runs
 every press through `checkCasinoPlay`. There is a button per outside bet, a **Number…** form that takes one number or
-several, chip-size buttons scaled from the table's chip (`chipSteps`) and **Clear mine**. The countdown starts on
+several, chip-size buttons and **Clear mine**. The countdown starts on
 the first bet, not on the post: `startClock` sets `closesAt` only while it is null, so only the call that started it
 sets the spin's timer, and later bets never push it back. The command asks for no amount: the table opens at
 `openingChip` (100, moved inside the server's bet limits) and each player picks their own size from
@@ -1770,6 +1809,58 @@ star counts; the `community` events do the rest. Five things about it are load-b
 - **Every quiet way out says why at `debug`**, and one the operator can fix — a channel the bot cannot read, a board
   it cannot post on — at `warn`, with the permission to grant. A ⭐ that did nothing is then one log line away.
 
+### Right-click actions ask what their command asks
+
+A member's right-click menu has **Warn** and **Time out**, and a message's has **Report message** and **Add to
+starboard**, under **Apps**. Each is one `.menu.ts` file in `src/menus/`, exported with `defineContextMenu`, which the
+loader finds and registers beside the commands. Five things about them are load-bearing:
+
+- **Each belongs to a command and goes off with it.** `switchedBy` names the command (`warn`, `mute`, `modmail`,
+  `starboard`), and `checkContextMenu` in `checks.ts` asks its pause, blacklist and switches through
+  `checkOpenControl`, then the action's own `permissions` and the bot's `botPermissions`. Discord hides an action from
+  anybody without its default permissions, but a server can hand it to anybody in its own settings, so the gate is
+  asked here too. The loader test fails on a `switchedBy` that names no command.
+- **A form is asked the same again on submit**, because a role can change while it is open. Warn and Time out open a
+  form (`buttons/moderationForm.ts`), Report message one of its own (`buttons/messageReport.ts`), and both are
+  `ownerOnly` with the person last.
+- **They do exactly what the command does.** Warn goes through `issueWarning`, Time out through `timeoutMember`, and
+  both answer with the command's own embed (`warnedEmbed`, `timedOutEmbed`), so the case is numbered and the step is
+  taken as `/warn create` and `/mute` would. Add to starboard is `addToStarboard`, which claims the post like a star
+  would, so two moderators cannot post it twice, and puts back a repost that was taken down because a moderator asked.
+- **A report is posted, never stored.** `sendReport` reads the message again and posts it to the mod mail channel with
+  `allowedMentions` letting through only the role the server chose, since the quote is somebody's own words. Each
+  person may report a message once and `REPORT_LIMITS.perHour` messages an hour, remembered in memory only
+  (`clearReports`). The privacy notice says so (`legal.messagesP5`).
+- **Discord takes five of each kind**, and a sixth refuses every command in the same registration, which the loader
+  test pins. A menu has a `description` that Discord never shows; `docs/commands.md` lists them from it.
+
+### The bot speaks eight languages in its menus and its refusals, and English everywhere else
+
+The dashboard's eight languages — English, German, Spanish, French, Italian, Russian, Dutch and Japanese — reach the
+bot in two places. Four things about it are load-bearing:
+
+- **Discord's menus are translated, the names never are.** Every command, subcommand and option description and every
+  right-click action's name is registered with Discord's localisations, so a reader whose Discord is in German sees
+  German in the slash menu and under **Apps**. Names stay English, because a prefix command and its aliases are typed
+  and a name that changed per reader would not be one command. `commandStrings` files each description under a key —
+  `warn`, `warn create`, `warn create --reason`, `menu: Warn` — and `npm run i18n:commands` writes them to
+  `assets/locales/commands/en.json`, which translators work from. Owner commands are left out; only owners see them.
+- **A translation is checked against the bot, not trusted.** `commandLocales.test.ts` fails when `en.json` no longer
+  matches the registry, when a language misses or keeps a stale key, when a string passes Discord's 100 characters (32
+  for an action's name), or when a code span such as `` `all` `` or `` `/automod list` `` was translated, since those
+  are typed as written. Spanish is registered for Spain and Latin America alike (`DISCORD_LOCALES`).
+- **The replies every command can give are translated; a command's own replies are not, yet.** `REPLIES` in
+  `src/config/replies.ts` holds the gates' refusals, the cooldown, the blacklist notice and the apology with its
+  reference, typed `Record<BotLanguage, Record<ReplyKey, string>>` so a language missing a key is a compile error.
+  `say(language, key, values)` fills `{name}`; `replies.test.ts` fails on a placeholder or code span a language
+  changed. What is filled in is in the reader's language too: `permissionName` reads `PERMISSION_NAMES` in
+  `src/config/permissionNames.ts`, and `durationIn` writes a cooldown with `Intl`, so a German refusal never reads
+  "manage roles" or "12s". `commandLocales.test.ts` walks every permission a command, subcommand or action declares
+  and fails on one a language has no name for. Everything else a command says is still English.
+- **The reader's language comes from Discord.** `readerLanguage` takes an interaction's `locale` — the reader's own
+  Discord language — and falls back to the server's `preferredLocale`, which is all a prefix command has, then to
+  English for any language the bot does not speak. Nothing is stored and nothing is asked.
+
 ### Join to create deletes only what it made
 
 `/temp-voice` and the **Join to create** screen pick a lobby, or make one, and say what each new channel is called,
@@ -1869,6 +1960,114 @@ things about them are load-bearing:
   dashboard's `PATCH`, because a hold is a timeout and somebody who could not `/mute` must not be able to arrange one.
   It cannot be on with nothing to do, and taking away the last thing it did turns it off.
 
+### A ban appeal is written on the web, decided in either place, and never pings
+
+`/appeals` and the **Appeals** screen choose a channel only staff can see and how long a refusal holds back the next
+appeal; banned members write theirs on the dashboard's `/appeals` page, which the ban's direct message links to
+(`appealLink`). Five things about it are load-bearing:
+
+- **Only somebody the server has banned can appeal it, asked live.** `submitAppeal` looks up the ban with
+  `guild.bans.fetch` on every send, over only the servers that take appeals (`appealGuildIds`), so a session cannot
+  name a server it was never banned from and post into its staff channel. The list, `readOwnAppeals`, keeps each
+  answer a minute (`listedBans`), because it asks once per server and a reload would otherwise be that many requests
+  to Discord; only the send takes the strict `APPEAL_LIMITS.perMinute`. The route takes the person from the session
+  alone. Appeals cannot be turned on without the dashboard (`takesAppeals`), because there would be nowhere to write
+  one.
+- **One waiting per person per server, and a refusal holds back the next.** A partial unique index on
+  `{ guildId, userId }` for open appeals decides, not a read, and `appealAgainAt` is the wait a refusal sets, from
+  `APPEAL_LIMITS.cooldownChoices`. A decided appeal is kept `keepDays` (180) under a TTL so the wait can still be
+  read, and the privacy notice says so (`legal.storedL17`, `legal.retentionL18`).
+- **The decision is claimed before the unban.** `decideAppeal` moves only an open appeal, so two staff pressing
+  together cannot both act; an unban Discord refuses hands it back (`reopenAppeal`), and a ban lifted some other way
+  meanwhile still records the appeal as accepted. A refusal needs a reason, on the form and in `appealDecision`.
+- **Deciding asks Ban Members, everywhere.** The post's buttons ask it on the press and again on the form, and the
+  dashboard's list and decision routes sit in `ASKS_MORE`; the settings ask Manage Server.
+- **Every post goes out with `allowedMentions: { parse: [] }`**, because it quotes what a banned person typed. A post
+  that cannot be sent deletes its appeal, which staff would otherwise never see and which would block the next one.
+  Delete my data removes the person's appeals and takes their posts down, and keeps a decision with the decider's
+  name taken off.
+
+### Mod mail relays both ways through direct messages, and keeps none of the words
+
+`/modmail` and the **Mod mail** screen pick a staff-only channel, a role to ping when a conversation opens, and
+whether replies are signed by name. A member starts one with `/modmail open`, or by messaging the bot and picking the
+server from `offerPanel`; each gets a public thread in that channel. Five things about it are load-bearing:
+
+- **One open conversation per person, across every server.** A direct message has to go somewhere, and a partial
+  unique index on `{ userId }` for open conversations is what makes "the one that is open" a single answer. The claim
+  goes before the thread is made, and a thread that cannot be made gives the claim back (`dropConversation`).
+- **Nothing anybody wrote is stored.** `modmailthreads` holds the server, the member, the thread, whether a reply is
+  owed and when it opened and closed; the words live in the thread and the direct messages. A closed conversation
+  expires after `MODMAIL_LIMITS.keepDays` (90). The privacy notice says so (`legal.messagesP4`, `legal.retentionL19`),
+  and a direct message in an open conversation is not posted to the operator's DM log — `directMessageLog` asks
+  `openConversationOf` first.
+- **Both handlers run after the prefix commands** (`modmailDirect` at 11, `modmailReplies` at 15), so a command typed
+  in a direct message or in the thread runs rather than being sent on. A staff message starting with
+  `MODMAIL_NOTE_PREFIX` (`//`) stays in the thread. A thread that is gone or locked ends its conversation on the next
+  message from the member, so staff closing it by hand cannot leave somebody writing into nothing.
+- **Every relay goes out with `allowedMentions: { parse: [] }`**, and the opening post pings only the chosen role,
+  never `@everyone`, which `applyModmailSettings` refuses as a ping role. Closing asks Manage Messages on the button,
+  the command and the dashboard's route (`ASKS_MORE`).
+- **The dashboard lists and closes conversations only for a reader who can see the channel** (`readerSees`), as
+  Discord would hide its threads; otherwise the list answers `visible: false` and the page says why. Offering the servers in a
+  direct message reads the member cache first and fetches at most `maxServersOffered` more, once per
+  `offerEveryMinutes`, because each fetch is a request to Discord.
+
+### Invite tracking credits an invite only when it can tell, and never guesses
+
+`/invites` and the **Invites** screen record which invite each member joined with, and rank inviters by the members
+who stayed. Four things about it are load-bearing:
+
+- **A join is told apart by comparing every invite's use count before and after it** (`usedInvite` in
+  `@testify/shared`). Exactly one invite that went up is the one; an invite that vanished is one Discord deleted on
+  its last use; anything else — two that went up, or nothing seen since a restart — is recorded as unknown, because a
+  wrong guess credits somebody with a member they never brought. Joins in one server are compared one at a time
+  (`inOrder`), so two at once cannot read the same "before".
+- **The counts live in memory and are read once at start-up** (`primeInvites` in `ready/primeInvites.event.ts`, in
+  turn, because each read is a request to Discord), and kept current by `inviteCreate` and `inviteDelete`. Discord lists
+  a server's invites only to Manage Server, so the switch refuses to turn on without it. The intent is `GuildInvites`,
+  which is not privileged.
+- **A join is a member record, and it expires.** `invitejoins` keeps the member, the inviter, both usernames, the code
+  and when they left, for `INVITE_LIMITS.keepDays` (365) under a TTL, and `purgeGuild` takes it all. The privacy
+  notice says so (`legal.storedL18`, `legal.retentionL20`). Delete my data removes the person's joins and takes their
+  name off the joins their invites brought.
+- **The announcement pings nobody** (`allowedMentions: { parse: [] }`), and the board ranks by members who stayed, so
+  a burst of joins that left again cannot top it.
+
+### A server tunes its economy and XP by rates, never by rewriting the numbers
+
+`/economy settings`, the **Economy settings** screen and two rows on the Levelling page change one record, `servertuning`:
+a pay rate, the starting wallet, whether `/rob` works, an XP rate and the XP cooldown. Three things about it are
+load-bearing:
+
+- **The bot's own numbers stay the source; a server only scales them.** A rate is a percentage from `TUNING_RATES`
+  and `atRate` applies it, never below one where there was anything to scale, so `/daily`'s streak, a job's pay and a
+  boost role's multiplier all keep working on top. `DEFAULT_TUNING` must equal `ECONOMY` and `LEVELLING`, which
+  `tuning.test.ts` pins, so a server that tuned nothing plays by the numbers the help articles quote.
+- **It is read on every message that earns XP, so it is cached** like the prefix and replaced on every write, and a
+  stored value no list offers reads as the default (`tuningOf`), so a hand-edited record cannot hand out 1,000% XP.
+- **It asks Manage Server, not Administrator.** It changes rates for everybody rather than one member's balance or
+  level, which is what `/give` and the member page's money and level controls ask Administrator for.
+
+### A role sold in the shop is paid for first, and never one that moderates
+
+`/economy shop-role`, the shop's **Roles** tab and **Roles for sale** on the Economy settings screen sell a server's
+roles for coins. Four things about it are load-bearing:
+
+- **Only Manage Roles changes what is on sale, on every surface.** `/economy shop-role` asks it, the dashboard's
+  `PUT` and `DELETE` ask it, and `sellShopRole` and `withdrawShopRole` ask it of the person again, so a button or
+  panel added later cannot skip it. The read answers `canManage`, and a Manage Server manager without Manage Roles
+  sees the list with no price fields, no Put on sale and no remove, and a line saying what they lack.
+- **Only what a role menu could offer can be sold.** `sellShopRole` asks `offerProblem` of the person putting it on
+  sale, and the dashboard's write asks Manage Roles and `requireGrantable` with the same rule, because a role with
+  Kick Members sold for coins lets anybody with enough money kick. At most `SHOP_ROLE_LIMITS.max` (10) are for sale.
+- **Debit before you deliver, and give it back if Discord refuses.** `buyShopRole` checks `pickProblem` on the press,
+  takes the price with the conditional `debitWallet`, then adds the role, and refunds with `adjustWallet` if the add
+  fails, so nobody pays for a role they never got.
+- **The roles for sale are read with every shop screen** (`balancesFor` in `buttons/shop.ts`), since a role can be
+  moved above the bot or deleted while the shop is open; a role that has gone is left off the tab and still listed on
+  the dashboard, so it can be taken off sale. The Roles page counts a role on sale as one of its uses.
+
 ### The owners' notifications are mentioned once, and only the owners change them
 
 `/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
@@ -1907,7 +2106,8 @@ they do not vanish while being read.
 
 ### Delete my data wipes what is theirs, at once and for good
 
-Anybody can delete everything the bot keeps about them, in every server: on the dashboard's **Your data** (`/account`)
+Anybody can delete everything the bot keeps about them, in every server: on the **Your data** tab of the dashboard's
+account page (`/account?tab=data`)
 or with `/delete-my-data` in Discord, both ending in `eraseAccount`. Each asks for their username or Discord ID back
 (`confirmsName`, compared on the server) before anything goes. Nothing is held for a grace period and nothing can bring
 it back, which both say before the button. Six things about it are load-bearing:
@@ -1940,8 +2140,31 @@ it back, which both say before the button. Six things about it are load-bearing:
   calls `eraseAccount`. Discord's forms cannot hold buttons, which is why the warning with its buttons is a message
   and the form is the confirmation. `buttons/deleteMyData.ts` is `ownerOnly` and checks the presser again. The
   command is in `ALWAYS_ENABLED`, so no server can switch it off, and it is the one command `runChecks` lets a
-  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`), as the dashboard already did: the blacklist entry stays.
+  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`): the blacklist entry stays. Its refusal of every other command
+  says so, and names the owners Discord can find (`ownerContacts`) as the people to ask.
   `deleteMyData.test.ts` pins every step, and Delete erasing straight away was proved to turn it red.
+
+### A blacklisted account may only see why, sign out and delete its data
+
+The dashboard keeps exactly what Discord keeps for a blocked account, and the server is what enforces it.
+`refuseBlacklisted` in `src/api/middleware/blacklist.ts` runs after the session loads on every `/api/*` request and
+answers 403 `blacklisted` unless the path is one `openToTheBlacklisted` matches whole: the public routes, which
+anybody signed out can read anyway, `GET /auth/me`, and `POST /auth/logout`, `/auth/logout-all` and `/auth/erase`.
+Three things about it are load-bearing:
+
+- **It is one middleware with an allowlist, not a check per route**, so a route added later is closed to a blocked
+  account until somebody lists it. `accessWalk.test.ts` asks every route as a blocked account and fails on any
+  that does not refuse it, and on any kept route that does; `blacklistGuard.test.ts` pins that each pattern matches
+  whole, so `/auth/me` opens nothing beside it. Unmounting the guard, closing erase and dropping an anchor were each
+  proved to go red.
+- **`/auth/me` says why.** It carries `blacklist` — the reason, since when and the owners to ask — and an empty
+  server list, so Discord is not asked for servers the account could not open. `RequireAuth` then draws
+  `BlockedPage` in place of every signed-in screen: the reason, the owners with a link to each one's Discord
+  profile, Sign out and Delete my data. It says, as the Discord refusal does, that deleting the data leaves the
+  block in place and that asking an owner is the only way to have it lifted. The page is a courtesy; the guard is
+  the boundary.
+- **A block made mid-session shows on the next click.** `createQueryClient` asks `/auth/me` again whenever any
+  query or write is refused as `blacklisted`, so the page turns into `BlockedPage` rather than a screen of errors.
 
 ### Global by design
 
@@ -2013,7 +2236,8 @@ degrade automatically rather than fail.
 
 **Read the log the user pasted, all of it.** The line that mattered in a 900-line FFmpeg dump was the last one.
 
-**Regenerate, do not hand-edit.** `docs/commands.md` comes from `npm run docs:commands`, and the card images in
+**Regenerate, do not hand-edit.** `docs/commands.md` comes from `npm run docs:commands`, the English command
+strings in `assets/locales/commands/en.json` from `npm run i18n:commands`, and the card images in
 `docs/images/bot/` from `npm run docs:images`, which draws them with invented members so no real account appears.
 
 ---
@@ -2045,11 +2269,13 @@ components/
   brand/        BotMark and BotBanner — the bot's own picture and banner, FlagIcon
   primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
                 SegmentedControl, DataList/Figure, Tooltip
-  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
+  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, Refusal, ConfirmField,
+                FIELD/LABEL
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
-hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced
+hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced, useDocumentMutation,
+                useOptimisticMutation
 lib/            api, cn, datetime and intl, colour and customAccent, paging, queries, redirect, tint, and tokens
                 for reading a colour in JavaScript
 ```
@@ -2076,6 +2302,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/roles`               | Every role and how many features give or read it, deleted roles a setting names first       |
 | `…/roles/:roleId`                 | One role and everything that gives or reads it: what deleting it would stop                 |
 | `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn as Discord draws them and edited there    |
+| `/guilds/:id/invites`             | Whose invites brought members in, the switch, and how each recent member joined             |
 | `/guilds/:id/insights`            | Server facts, messages a day, busiest hours, top channels and members                       |
 | `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                            |
 | `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                |
@@ -2084,6 +2311,8 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/warnings`            | The five latest warnings and a search, the steps, warning a member by name                  |
 | `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                   |
 | `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                          |
+| `/guilds/:id/appeals`             | Where appeals are posted, the wait after a refusal, and every appeal with Accept and Refuse |
+| `/guilds/:id/modmail`             | Where conversations become threads, who is pinged, and every one open now with Close        |
 | `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                        |
 | `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                   |
 | `/guilds/:id/changes`             | Two weeks of changes, from the dashboard and Discord's audit log, searched                  |
@@ -2096,6 +2325,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                 |
 | `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                         |
 | `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                        |
+| `/guilds/:id/economy`             | Pay, the starting wallet, robbing and roles for sale; the XP rate sits on Levelling         |
 | `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                               |
 | `/guilds/:id/music`               | The music kill switch and the DJ roles                                                      |
 | `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                        |
@@ -2107,11 +2337,13 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/members`             | Everybody, searched and filtered, acted on one at a time or 25 at once; the boards a tab    |
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
+| `/guilds/:id/backup`              | Download the settings, or bring a backup or another server's in, matched by name            |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
-| `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
+| `/status`                         | Online or not, uptime, speed and outside services, 30 days back. Public                     |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
-| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
+| `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
+| `/appeals`                        | Appeal a ban: every server that banned the reader and takes appeals, and past appeals       |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
@@ -2177,6 +2409,7 @@ writing it once. Every piece has a test proven able to fail.
 | `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
 | `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
 | `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach     |
+| `middleware/blacklist.ts` | A blacklisted session reaches only who it is, signing out and Delete my data   |
 | `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
 | `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
 | `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
@@ -2346,11 +2579,14 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
 - **A whole-document answer is only trusted while it is the only write in flight.** The settings sections and the
   command toggles each answer with the entire list, and the order those answers arrive in says nothing about the
   order the server applied them — a slow one carries a snapshot taken before a later click and would put that
-  click's control back where it was. Every mutation that writes a shared cache key therefore declares the same
-  `mutationKey` and guards `setQueryData` with `client.isMutating({ mutationKey }) === 1`, ending the burst in an
-  `invalidateQueries` so a read decides. A mutation is counted as pending across `onMutate`, `onSuccess` and
-  `onSettled` — verified in `@tanstack/query-core`'s `mutation.ts`, not assumed. Both are pinned by tests that
-  were proved to go red without the guard.
+  click's control back where it was. Every mutation that writes a shared cache key therefore goes through
+  `useDocumentMutation`, which declares the key as its `mutationKey` and guards `setQueryData` with
+  `client.isMutating({ mutationKey }) === 1`, ending the burst in an `invalidateQueries` so a read decides. A
+  mutation is counted as pending across `onMutate`, `onSuccess` and `onSettled` — verified in
+  `@tanstack/query-core`'s `mutation.ts`, not assumed. `useDocumentMutation.test.tsx` pins both guards, and each
+  was proved to go red without it. A write that shows its change before the answer lands is `useOptimisticMutation`.
+- **A refused write is drawn by `Refusal`**, which shows the server's own wording when it gave one and the fallback
+  otherwise; `refusalText` is the same rule for a place that needs the string.
 - **A control that is typed into does not write the URL per keystroke.** `?q=` is written with `replace: true`,
   or Back walks the user back through every character, and the request behind it is debounced (`useDebounced`) so
   a five-character search is one query rather than five. Confirmed in a real browser, not in jsdom.
@@ -2806,13 +3042,13 @@ names any screen that stopped passing it, because the prop existed unused on all
 existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
 
-**A server's sidebar names its screens, never its channels.** Overview, Inbox, This week, Channels, Members, Roles and
-Settings come first, then
+**A server's sidebar names its screens, never its channels.** Overview, Inbox, This week, Channels, Members, Roles,
+Settings and Back up and copy come first, then
 six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
 menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
-messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, channel tools, tickets,
-the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
-casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
+messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, appeals, mod mail, channel
+tools, tickets, the audit log, changes), **Stats** (insights, invites, member count, bot statistics), **Economy** (economy settings, treasure,
+the lottery, the casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
 for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,
 with a count beside each and features dragged onto them, and both were taken out after review: a real server's
@@ -2905,8 +3141,78 @@ several servers sees at a glance where one is set up differently. Three things a
   bot where the reader could manage it, and `chosenFrom` drops any id in `?servers=` that is not one of them, so a
   typed address cannot ask about a server the reader was never shown.
 - **It is read-only.** Every cell links to the feature on that server, and "only where they differ" leaves out which
-  channel a feature posts in, because two servers can never share one. Copying a setup across servers is a write
-  across several permission checks and is not built.
+  channel a feature posts in, because two servers can never share one. Copying a setup across servers is the
+  **Back up and copy** screen's job, below.
+
+Its header carries **Back to your servers**, through `PageHeader`'s `back`, which the member, role and channel pages use too:
+a phone has no sidebar on screen, so a screen opened from another one names the way back to it.
+
+### A backup is the reader's own reads, and bringing one in is the screens' own writes
+
+`/guilds/:id/backup` downloads a server's settings as a file, brings a file back in, or copies another server's
+setup, all over the eighteen sections `RESTORABLE` already lists for Put back. Five things about it are load-bearing:
+
+- **It has no route of its own.** `readServerSettings` asks each section's own read route as the reader, and
+  `useApplyBackup` sends each section to its own write route, in turn, so `requireGuild`, `requireReach`, the
+  permission each asks and its schema decide every part exactly as they decide the screen. A section the reader may
+  not read is left out of a backup and the page names it; a write the route refuses is shown beside its section with
+  the server's own words, and the rest still go.
+- **A backup holds only what Put back could send** (`restorableFields`), and the names of the channels and roles it
+  points at. Nothing that acts rather than stores, no messages and nobody's data. `backupDocument` is the only shape
+  read back: section and field keys are plain words and place keys are snowflakes, so no key in a file can reach an
+  object's prototype, and a file over `BACKUP_LIMITS.maxBytes` is refused before it is read.
+- **Ids are moved by name** (`planBackup`): an id this server has is kept, otherwise the name the file stored is
+  matched without regard to case against channels the reader can see and roles here, and anything with no match is
+  left as it is and named. A list where nothing matched is left alone rather than emptied, and a section with nothing
+  left to send is reported as left as it is.
+- **Nothing is written before the plan is shown**, and only what is ticked. A section already the same here starts
+  unticked, so copying from a server set up alike does nothing until somebody chooses otherwise.
+- **Every section saved is an ordinary change**, recorded by its route, so the Changes page can put each one back.
+
+### Your account is the reader's own, and nothing on it is about anybody else
+
+The reader's picture opens `/account`, in the sidebar's foot and in the phone's header; there is no footer link
+beside Appearance any more. It has five tabs — **Profile**, **History**, **Reminders**, **Sign-ins** and **Your data**
+— over `/api/account`, which sits behind `requireAuth` and reads whose data from the session alone. The first two
+tabs and Reminders are the command data that is the person's own rather than a server's: `/profile` and `/remind`.
+Seven things about it are load-bearing:
+
+- **The profile is written by the command's rules, in one place.** `PROFILE_LIMITS`, `profileBody` and
+  `birthdayFrom` live in `@testify/shared`, and `profileProblem` and `saveOwnProfile` in `src/lib/info/`, so
+  `/profile set` and `PUT /account/profile` share the lengths, the word filter and the birthday check. A birthday is
+  a real day from 1900 to today: `new Date("2026-02-30")` rolls on to 2 March, which is how the command used to store
+  a day nobody chose. The year shows to anybody who runs `/profile view`, and the tab says so.
+- **History is the reader's own change records, in every server** (`auditsBy`, on an `{ actorId, at }` index), the
+  dashboard's and those made with the bot's commands, for the 90 days the records are kept. Each row is the summary,
+  the server and the time, never the before and after; a server the bot has left reads as one, and a row links to
+  that server's Changes page only while `comparable` still offers it, so a manager who lost Manage Server is not
+  sent into a refusal. Delete my data anonymises the records, so the history empties with it.
+- **Reminders are the same records `/remind list` shows**, cancelled, switched and edited through the repository's
+  `userId`-filtered lookups, so an id from anybody else's list finds nothing. An edit takes words and a time within
+  `REMINDER_RULES` (shared with `/remind me`), and `editReminder` refuses a reminder whose delivery holds its lease,
+  so an edit is never lost under a send. The channel a reminder pings in is never named, because the reader may no
+  longer be able to see it; only the server is. A reminder set in a direct message has no channel, so it is offered
+  no switch and the API refuses one (`canPingHere`). Cancelling goes through `UndoProvider`, and so does deleting
+  the profile.
+- **A sign-in is named by a digest of its cookie, never the cookie** (`sessionHandleOf`, 24 hex characters of a
+  SHA-256), because the list goes to a browser and the cookie is the session. Ending one finds it among the reader's
+  own sessions by that digest and refuses the browser asking, which signs out from the sidebar instead; **Sign out
+  everywhere else** keeps the one asking. Nothing about a device is stored, so a sign-in is told apart only by its
+  times, and the tab says so.
+- **A blacklisted account sees none of it.** The server refuses it every route here, as below.
+- **Your data is the old page**, unchanged: what goes, what stays, and the typed confirmation. The privacy notice
+  still calls it Your data, which is the tab's name.
+- **Nothing here writes an audit record.** These are the reader's own things, and the server's Changes page is no
+  place for somebody's reminders or browsers.
+
+`tests/api/accountPentest.test.ts` attacks every account route through the real app: forged and stale cookies,
+missing and planted CSRF secrets, another person's id in the query and the body, MongoDB operators and arrays in
+every field, malformed path ids including the cookie itself, `__proto__`, a body ten thousand deep or past the size
+limit, control and direction characters in a public profile, a blacklisted account on every route and every
+spelling of one, the wrong method, and
+any answer carrying a cookie, a secret or a cacheable header. Taking away the blacklist guard, the id shape, the
+text cleaning or the session's own id each turns it red; `requireAuth` and the handlers' own `sessionOf` are two
+layers, and only removing both does.
 
 ### Getting every command onto the dashboard
 
@@ -3222,8 +3528,11 @@ the dashboard's, which is every record written before commands were. Four things
 
 ### The status page
 
-`/status` is open to anybody signed in, because it names no server and no member — only how the bot itself is
-doing. `GET /api/status` builds it from `statusReport` in `src/lib/bot/status.util.ts`, and every threshold
+`/status` is public, on the website as well as in the dashboard, because it names no server and no member — only how
+the bot itself is doing. Its API route is mounted with the public ones, so a site-only install has it, and a
+blacklisted account may read it like anybody signed out; `routes.test.tsx` pins the pages outside the sign-in gate.
+It has never listed package versions, and must not: which versions a host runs is the host's business, not every
+visitor's. `GET /api/status` builds it from `statusReport` in `src/lib/bot/status.util.ts`, and every threshold
 that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Seven things about it are load-bearing:
 
 - **Downtime is known by its gaps.** The dashboard lives inside the bot, so nothing can report the bot being off
@@ -3257,7 +3566,7 @@ same `DASHBOARD_PORT` and `DASHBOARD_BIND` — a second set of names would have 
 listener. Five things about it are load-bearing:
 
 - **With the dashboard off, nothing of it is mounted.** `createApi` always mounts the public routes — health,
-  `/api/bot`, `/api/site` and the help articles — and everything else only under `DASHBOARD_ENABLED`, so a site-only
+  `/api/bot`, `/api/site`, `/api/status` and the help articles — and everything else only under `DASHBOARD_ENABLED`, so a site-only
   install answers 404 to `/api/auth` rather than a half-configured sign-in. `GET /api/site` tells the page which it
   is: the header's dashboard link and the landing page's sign-in disappear, and `/sign-in` explains why. The support
   router is split for the same reason: reading articles is public, asking needs a session.

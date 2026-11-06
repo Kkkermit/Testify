@@ -20,9 +20,7 @@ export const insightsQuery = z.object({
 		.default(7),
 });
 
-export const VERIFICATION_LEVELS = ["none", "low", "medium", "high", "highest"] as const;
-
-export type VerificationLevel = (typeof VERIFICATION_LEVELS)[number];
+export type VerificationLevel = "none" | "low" | "medium" | "high" | "highest";
 
 export interface ServerFacts {
 	createdAt: string;
@@ -50,14 +48,14 @@ export interface InsightDay {
 	leaves: number;
 }
 
-export interface ChannelActivity {
+interface ChannelActivity {
 	channelId: string;
 	/** Null once the channel has been deleted. */
 	name: string | null;
 	messages: number;
 }
 
-export interface MemberActivity {
+interface MemberActivity {
 	userId: string;
 	name: string;
 	avatarUrl: string | null;

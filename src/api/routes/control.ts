@@ -7,6 +7,7 @@ import { requireOwner } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
 import { botName } from "@core/brand";
+import { toError } from "@core/errors";
 import { shutdown } from "@core/shutdown";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getCounting } from "@database/repositories/countingRepository";
@@ -161,7 +162,7 @@ control.post("/guilds/:guildId/leave", async (context) => {
 	try {
 		await guild.leave();
 	} catch (error) {
-		client.logger.error({ err: error, guildId }, "[CONTROL_ERROR] Could not leave the server");
+		client.logger.error({ err: toError(error), guildId }, "[CONTROL_ERROR] Could not leave the server");
 		throw badRequest("Discord refused to remove the bot from that server. Try again in a moment.");
 	}
 

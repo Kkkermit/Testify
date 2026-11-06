@@ -4,10 +4,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Warning } from "@/components/form";
+import { Refusal } from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, DividedList, EmptyState, Skeleton } from "@/components/primitives";
 import { useCloseTicket, useOpenTickets } from "@/features/tickets/useTickets";
-import { ApiError } from "@/lib/api";
 import { dateAndTime } from "@/lib/datetime";
 
 export function OpenTicketsCard({ guildId }: { guildId: string }): React.JSX.Element {
@@ -50,9 +49,7 @@ export function OpenTicketsCard({ guildId }: { guildId: string }): React.JSX.Ele
 					</DividedList>
 				)}
 
-				{close.error !== null && (
-					<Warning>{close.error instanceof ApiError ? close.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={close.error} />
 			</Card>
 		</section>
 	);

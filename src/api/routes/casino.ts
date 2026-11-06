@@ -31,10 +31,7 @@ function summaryOf(patch: CasinoPatch): string {
 	const games = Object.entries(patch.games ?? {}).filter(([game]) => isCasinoGame(game));
 	if (games.length > 0) {
 		return games
-			.map(
-				([game, on]) =>
-					`${on === true ? "Opened" : "Closed"} ${CASINO_GAME_LABELS[game as keyof typeof CASINO_GAME_LABELS]}`,
-			)
+			.map(([game, on]) => `${on ? "Opened" : "Closed"} ${CASINO_GAME_LABELS[game as keyof typeof CASINO_GAME_LABELS]}`)
 			.join(", ");
 	}
 

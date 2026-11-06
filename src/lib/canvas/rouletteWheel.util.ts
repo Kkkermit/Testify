@@ -5,12 +5,12 @@ import { pocketColour, WHEEL_ORDER } from "@lib/casino/roulette.util";
 
 /** A single-zero wheel drawn from above, with the ball's path worked out as plain maths so it can be tested. */
 
-export const WHEEL_SIZE = 400;
+const WHEEL_SIZE = 400;
 
 const CENTRE = WHEEL_SIZE / 2;
 const STEP = (Math.PI * 2) / WHEEL_ORDER.length;
 
-export const WHEEL_RADII = {
+const WHEEL_RADII = {
 	rim: 192,
 	trackOuter: 178,
 	trackInner: 152,
@@ -23,7 +23,7 @@ export const WHEEL_RADII = {
 export const TRACK_RADIUS = (WHEEL_RADII.trackOuter + WHEEL_RADII.trackInner) / 2;
 export const POCKET_RADIUS = (WHEEL_RADII.numbersInner + WHEEL_RADII.pocketsInner) / 2;
 
-export const SPIN = {
+const SPIN = {
 	frames: 66,
 	frameMs: 50,
 	turns: 4,

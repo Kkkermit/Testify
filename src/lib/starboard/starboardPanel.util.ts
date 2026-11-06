@@ -1,9 +1,9 @@
-import { ButtonStyle, type MessageCreateOptions } from "discord.js";
+import { type MessageCreateOptions } from "discord.js";
 import { customId } from "@core/button";
 import { channelSelect, linkButton, row } from "@lib/discord/components.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { embed } from "@lib/discord/embeds.util";
-import { settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
+import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { STARBOARD_SETTINGS_ID } from "@lib/starboard/starboard.constants";
 import { STARBOARD_EMOJI, type StarboardSettings } from "@testify/shared";
 
@@ -32,7 +32,7 @@ export function starLine(stars: number, channelId: string): string {
 	return `${STARBOARD_EMOJI} **${String(stars)}** · <#${channelId}>`;
 }
 
-export function messageLink(message: Pick<StarredMessage, "guildId" | "channelId" | "messageId">): string {
+function messageLink(message: Pick<StarredMessage, "guildId" | "channelId" | "messageId">): string {
 	return `https://discord.com/channels/${message.guildId}/${message.channelId}/${message.messageId}`;
 }
 
@@ -100,14 +100,7 @@ export function starboardSettingsPanel(settings: StarboardSettings, ownerId: str
 				),
 			},
 		],
-		actions: [
-			{
-				action: "toggle",
-				label: settings.enabled ? "Turn off" : "Turn on",
-				style: settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
-				disabled: !settings.enabled && settings.channelId === null,
-			},
-		],
+		actions: [switchAction(settings.enabled, settings.channelId !== null)],
 		footer: `React with ${STARBOARD_EMOJI} to a message. Deleting the original takes its repost down too, and a repost a moderator deletes stays off the board.`,
 	});
 }

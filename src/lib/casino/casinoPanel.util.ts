@@ -45,13 +45,13 @@ function gameLine(game: CasinoGame, bet: string): string {
 	return `${CASINO_GAME_EMOJI[game]} **${CASINO_GAME_LABELS[game]}** · ${bet}`;
 }
 
-export function resultTone(staked: number, returned: number): ResultTone {
+function resultTone(staked: number, returned: number): ResultTone {
 	if (returned > staked) return "win";
 	return returned === staked ? "even" : "lose";
 }
 
 /** The first thing a settled message says, in the largest type Discord has. */
-export function resultHeadline(staked: number, returned: number): string {
+function resultHeadline(staked: number, returned: number): string {
 	switch (resultTone(staked, returned)) {
 		case "win":
 			return `# ${theme.emoji.confetti} Congratulations, you won ${formatNumber(returned - staked)}!`;
@@ -63,7 +63,7 @@ export function resultHeadline(staked: number, returned: number): string {
 }
 
 /** The arithmetic behind the headline, or nothing when the whole bet went. */
-export function payoutLine(staked: number, returned: number): string | null {
+function payoutLine(staked: number, returned: number): string | null {
 	if (returned === 0 || returned === staked) return null;
 	if (returned < staked) return `**${formatNumber(returned)}** of your **${formatNumber(staked)}** came back.`;
 

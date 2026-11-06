@@ -22,7 +22,7 @@ import {
 } from "@/features/auto-responders/useAutoResponders";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
@@ -58,7 +58,7 @@ export function AutoRespondersPage(): React.JSX.Element {
 	const blocked = problemText(autoResponderBlocked(draft, all), t) ?? markupWarning(draft.reply);
 	const saving = add.isPending || edit.isPending || remove.isPending;
 	const said = (error: Error | null): string | null =>
-		error === null ? null : error instanceof ApiError ? error.message : t("common.couldNotSave");
+		error === null ? null : refusalText(error, t("common.couldNotSave"));
 
 	function submit(): void {
 		if (blocked !== null || full) return;
@@ -144,7 +144,7 @@ export function AutoRespondersPage(): React.JSX.Element {
 			{remove.error !== null && (
 				<Warning>
 					<Trash2 size={14} aria-hidden="true" className="mr-1 inline" />
-					{remove.error instanceof ApiError ? remove.error.message : t("common.couldNotRemove")}
+					{refusalText(remove.error, t("common.couldNotRemove"))}
 				</Warning>
 			)}
 		</>

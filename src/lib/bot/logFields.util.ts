@@ -78,3 +78,18 @@ export function loggedChannel(channel: { id: string } | null, fallbackId: string
 	}
 	return fallbackId === null ? null : { id: fallbackId, name: null };
 }
+
+/** The server and channel something happened in, as two inline fields. */
+export function placeFields(place: {
+	guild: Parameters<typeof loggedGuild>[0];
+	channel: { id: string } | null;
+}): { name: string; value: string; inline: boolean }[] {
+	return [
+		{ name: "Server", value: loggedGuildText(loggedGuild(place.guild)), inline: true },
+		{
+			name: "Channel",
+			value: loggedChannelText(place.guild === null ? null : loggedChannel(place.channel, null)),
+			inline: true,
+		},
+	];
+}

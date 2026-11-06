@@ -12,14 +12,14 @@ export async function eraseAccount(client: TestifyClient, userId: string): Promi
 	const posts = await eraseUserData(userId);
 	clearAfkCache();
 
-	// An idea's post carries their words, and a post Discord will not let go of is not worth failing the erase over.
+	// An idea's or an appeal's post carries their words, and one Discord will not let go of is not worth failing over.
 	await Promise.all(
 		posts.map(async ({ channelId, messageId }) => {
 			try {
 				const channel = await client.channels.fetch(channelId);
 				if (channel?.isTextBased()) await channel.messages.delete(messageId);
 			} catch (error) {
-				client.logger.debug({ err: toError(error) }, "[ACCOUNT] An idea post could not be taken down.");
+				client.logger.debug({ err: toError(error) }, "[ACCOUNT] A post of theirs could not be taken down.");
 			}
 		}),
 	);

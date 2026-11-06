@@ -39,7 +39,26 @@ describe("the warnings page", () => {
 					{ action: "kick" },
 					{ action: "ban" },
 				],
+				expireAfterDays: null,
 			});
+		});
+	});
+
+	/** Choosing a window rewrites the stored setting, so the steps have to travel with it unchanged. */
+	it("keeps the steps when warnings are set to stop counting", async () => {
+		let body: unknown;
+		server.use(
+			http.put(`/api/guilds/${GUILD}/warnings/punishments`, async ({ request }) => {
+				body = await request.json();
+				return HttpResponse.json(body as object);
+			}),
+		);
+		renderPage();
+
+		await userEvent.selectOptions(await screen.findByLabelText(/^Warnings count for/), "30");
+
+		await waitFor(() => {
+			expect(body).toMatchObject({ steps: { length: 4 }, expireAfterDays: 30 });
 		});
 	});
 

@@ -35,7 +35,7 @@ async function getOrCreateUserLevel(guildId: string, userId: string): Promise<Us
 	).exec() as Promise<UserLevelRecord>;
 }
 
-export interface XpResult {
+interface XpResult {
 	record: UserLevelRecord;
 	levelledUp: boolean;
 	previousLevel: number;

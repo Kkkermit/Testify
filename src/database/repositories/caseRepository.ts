@@ -8,7 +8,7 @@ import {
 
 export type StoredCase = Omit<ModCaseRecord, "updatedAt">;
 
-export type CaseFields = Omit<ModCaseRecord, "guildId" | "number" | "createdAt" | "updatedAt">;
+type CaseFields = Omit<ModCaseRecord, "guildId" | "number" | "createdAt" | "updatedAt">;
 
 const CASE = "guildId number action userId username moderatorId moderatorName reason durationMs createdAt";
 

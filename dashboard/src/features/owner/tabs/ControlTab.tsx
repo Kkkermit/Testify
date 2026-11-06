@@ -3,7 +3,7 @@ import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
+import { Field, FIELD, Refusal, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, SegmentedControl, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
 import {
@@ -15,7 +15,6 @@ import {
 	useShutdown,
 } from "@/features/owner/useControl";
 import { type TranslationKey } from "@/i18n";
-import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
@@ -64,9 +63,7 @@ function MusicSourcesCard(): React.JSX.Element {
 				</div>
 			)}
 
-			{change.error !== null && (
-				<Warning>{change.error instanceof ApiError ? change.error.message : t("common.didNotWork")}</Warning>
-			)}
+			<Refusal error={change.error} fallback="common.didNotWork" />
 		</Card>
 	);
 }
@@ -135,9 +132,7 @@ export function ControlTab(): React.JSX.Element {
 					<SavingIndicator state={savingStateOf(gateway.isPending, gateway.isSuccess)} />
 				</div>
 
-				{gateway.error !== null && (
-					<Warning>{gateway.error instanceof ApiError ? gateway.error.message : t("common.didNotWork")}</Warning>
-				)}
+				<Refusal error={gateway.error} fallback="common.didNotWork" />
 			</Card>
 
 			<MusicSourcesCard />
@@ -173,9 +168,7 @@ export function ControlTab(): React.JSX.Element {
 					<p className="text-muted-foreground text-xs">{t("owner.renameLimit")}</p>
 				</Field>
 
-				{identity.error !== null && (
-					<Warning>{identity.error instanceof ApiError ? identity.error.message : t("common.discordRefused")}</Warning>
-				)}
+				<Refusal error={identity.error} fallback="common.discordRefused" />
 			</Card>
 
 			<Card className="border-destructive/40 flex flex-col gap-3">
@@ -220,9 +213,7 @@ export function ControlTab(): React.JSX.Element {
 				{shutdown.isSuccess && <Warning>{t("owner.stopping")}</Warning>}
 
 				{/* A refused shutdown otherwise looks exactly like a successful one: nothing on the page moves either way. */}
-				{shutdown.error !== null && (
-					<Warning>{shutdown.error instanceof ApiError ? shutdown.error.message : t("owner.couldNotShutDown")}</Warning>
-				)}
+				<Refusal error={shutdown.error} fallback="owner.couldNotShutDown" />
 			</Card>
 		</div>
 	);

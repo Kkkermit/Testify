@@ -4,7 +4,7 @@ import { channelLabel } from "@/lib/channels";
 import { weekdayDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 
-export interface WeekDay {
+interface WeekDay {
 	key: string;
 	heading: string;
 	events: WeekEvent[];

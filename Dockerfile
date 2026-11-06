@@ -65,4 +65,6 @@ COPY --from=build /app/dashboard/dist ./dashboard/dist
 # `dist/api` resolves the SPA at ../../dashboard/dist, so the two must keep this layout.
 USER node
 EXPOSE 3000
+# Asks the bot's own /api/health from inside the container; the start period covers connecting to Discord.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=2m --retries=3 CMD ["node", "dist/healthcheck.js"]
 CMD ["node", "dist/index.js"]

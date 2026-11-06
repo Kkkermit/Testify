@@ -31,7 +31,7 @@ export interface RankCardData {
 	multiplier?: number;
 }
 
-export interface RankCardText {
+interface RankCardText {
 	name: string;
 	level: string;
 	rank: string;
@@ -39,7 +39,7 @@ export interface RankCardText {
 	badge: string | null;
 }
 
-export function rankCardText(data: RankCardData): RankCardText {
+function rankCardText(data: RankCardData): RankCardText {
 	return {
 		name: data.displayName,
 		level: `LEVEL ${formatNumber(data.level)}`,

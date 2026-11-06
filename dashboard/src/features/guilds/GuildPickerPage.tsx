@@ -1,4 +1,4 @@
-import { Columns3, Search, ServerOff } from "lucide-react";
+import { Columns3, Scale, Search, ServerOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
@@ -148,6 +148,14 @@ export function GuildPickerPage(): React.JSX.Element {
 					);
 				})
 			)}
+
+			<Link
+				to="/appeals"
+				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}
+			>
+				<Scale size={16} aria-hidden="true" />
+				{t("guilds.appealLink")}
+			</Link>
 		</>
 	);
 }

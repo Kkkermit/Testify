@@ -37,5 +37,3 @@ export interface MusicSourceSetting {
 }
 
 export const musicSourcesPatch = z.object({ sources: z.enum(MUSIC_SOURCE_CHOICES) });
-
-export type MusicSourcesPatch = z.infer<typeof musicSourcesPatch>;

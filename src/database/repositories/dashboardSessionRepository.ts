@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { type DashboardSession, DashboardSessions } from "@database/models/dashboardSession.schema";
 import { type SecretBox } from "@lib/infra/infra.types";
 
@@ -14,7 +14,7 @@ export interface NewSession {
 	tokenExpiresAt: Date;
 }
 
-export interface IssuedSession {
+interface IssuedSession {
 	id: string;
 	csrfSecret: string;
 	expiresAt: Date;
@@ -63,7 +63,7 @@ export async function touchSession(id: string, ttlDays: number): Promise<void> {
 	).exec();
 }
 
-export interface SessionTokens {
+interface SessionTokens {
 	accessToken: string;
 	refreshToken: string;
 }
@@ -101,4 +101,49 @@ export async function deleteSession(id: string): Promise<void> {
 /** The panic button: every browser this person is signed in on loses access at once. */
 export async function deleteSessionsFor(userId: string): Promise<number> {
 	return (await DashboardSessions.deleteMany({ userId }).exec()).deletedCount;
+}
+
+/** A session's public name: a digest of the cookie, so a list of them hands out nothing that signs anybody in. */
+export function sessionHandleOf(id: string): string {
+	return createHash("sha256").update(id).digest("hex").slice(0, 24);
+}
+
+interface SessionSummary {
+	handle: string;
+	createdAt: Date;
+	lastSeenAt: Date;
+	expiresAt: Date;
+	current: boolean;
+}
+
+type SessionTimes = Pick<DashboardSession, "_id" | "createdAt" | "lastSeenAt" | "expiresAt">;
+
+/** Every browser one person is signed in on, most recently used first. */
+export async function sessionsFor(userId: string, currentId: string): Promise<SessionSummary[]> {
+	const rows = await DashboardSessions.find({ userId }, { createdAt: 1, lastSeenAt: 1, expiresAt: 1 })
+		.sort({ lastSeenAt: -1 })
+		.lean<SessionTimes[]>()
+		.exec();
+
+	return rows.map((row) => ({
+		handle: sessionHandleOf(row._id),
+		createdAt: row.createdAt,
+		lastSeenAt: row.lastSeenAt,
+		expiresAt: row.expiresAt,
+		current: row._id === currentId,
+	}));
+}
+
+/** Ends one of this person's other sessions by its handle; false for the one asking, or one that is not theirs. */
+export async function endSessionByHandle(userId: string, handle: string, currentId: string): Promise<boolean> {
+	const rows = await DashboardSessions.find({ userId }, { _id: 1 }).lean<Pick<DashboardSession, "_id">[]>().exec();
+	const match = rows.find((row) => row._id !== currentId && sessionHandleOf(row._id) === handle);
+	if (match === undefined) return false;
+
+	return (await DashboardSessions.deleteOne({ _id: match._id, userId }).exec()).deletedCount > 0;
+}
+
+/** Signs this person out of every browser but the one asking. */
+export async function endOtherSessions(userId: string, currentId: string): Promise<number> {
+	return (await DashboardSessions.deleteMany({ userId, _id: { $ne: currentId } }).exec()).deletedCount;
 }

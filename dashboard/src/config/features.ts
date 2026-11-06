@@ -14,6 +14,8 @@ import {
 	Lightbulb,
 	Link as LinkIcon,
 	ListChecks,
+	Mailbox,
+	Mails,
 	MessageSquareReply,
 	MessageSquareWarning,
 	MessagesSquare,
@@ -23,6 +25,7 @@ import {
 	Settings,
 	Shield,
 	ShieldCheck,
+	Scale,
 	Siren,
 	Smile,
 	Sparkles,
@@ -48,6 +51,21 @@ const LOOKS: Record<string, FeatureLook> = {
 		icon: Gauge,
 		tint: "text-hue-blue",
 		path: (guildId) => `/guilds/${guildId}/bot-stats`,
+	},
+	appeals: {
+		icon: Scale,
+		tint: "text-hue-red",
+		path: (guildId) => `/guilds/${guildId}/appeals`,
+	},
+	invites: {
+		icon: Mailbox,
+		tint: "text-hue-blue",
+		path: (guildId) => `/guilds/${guildId}/invites`,
+	},
+	modmail: {
+		icon: Mails,
+		tint: "text-hue-red",
+		path: (guildId) => `/guilds/${guildId}/modmail`,
 	},
 	ideas: {
 		icon: Lightbulb,

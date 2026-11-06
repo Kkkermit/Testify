@@ -3,7 +3,7 @@ id: reminders
 title: Setting a reminder
 topic: community
 keywords: remind, reminder, reminders, remind me, timer, alarm, later, cancel reminder, dm reminder, ping me
-questions: How do I set a reminder? | Can the bot remind me to do something later? | How do I cancel a reminder? | Can a reminder come by DM?
+questions: How do I set a reminder? | Can the bot remind me to do something later? | How do I cancel a reminder? | Can a reminder come by DM? | Can I change a reminder?
 commands: remind
 related: how-commands-work
 ---
@@ -12,6 +12,7 @@ related: how-commands-work
 - **By DM instead:** press **DM me instead** on the answer. A reminder set in a DM always arrives by DM.
 - **Cancel one:** press **Cancel it** on the answer, or run `/remind list`, which shows every reminder you have with a Cancel beside each.
 - **With the prefix:** `{prefix}remindme 2h check the oven` does the same.
+- **On the dashboard:** the Reminders tab of [your account](/account) lists every one you have, in every server, and changes its words, its time or how it arrives.
 
 A reminder can be from {fact:reminder.min} to {fact:reminder.max} away, and you can have {fact:reminder.maxActive} at once. They are kept in the database, so a restart does not lose one.
 

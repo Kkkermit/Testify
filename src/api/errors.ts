@@ -1,5 +1,6 @@
 import { type ContentfulStatusCode } from "hono/utils/http-status";
 import { botName } from "@core/brand";
+import { UserFacingError } from "@core/errors";
 import { type ApiErrorBody } from "@testify/shared";
 
 export interface ApiIssue {
@@ -78,3 +79,14 @@ export const tooManyRequests = (retryAfterSeconds: number): ApiProblem =>
 		[],
 		{ "Retry-After": String(retryAfterSeconds) },
 	);
+
+/**
+ * A refusal keeps its status and wording, a `UserFacingError` is a 400, and anything else is a bug the caller learns
+ * nothing about.
+ */
+export function asProblem(error: unknown): ApiProblem {
+	if (error instanceof ApiProblem) return error;
+	if (error instanceof UserFacingError) return badRequest(error.message);
+
+	return new ApiProblem(500, "internal", "Something went wrong on our side.");
+}

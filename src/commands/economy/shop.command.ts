@@ -1,8 +1,7 @@
-import { balancesOf } from "@buttons/shop";
 import { defineCommand, inGuild } from "@core/command";
 import { requireAccount } from "@database/repositories/economyRepository";
 import { reply } from "@lib/discord";
-import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/economy";
+import { balancesOf, isShopSection, rolesForSale, SHOP_SECTIONS, shopScreen } from "@lib/economy";
 
 export default defineCommand({
 	name: "shop",
@@ -24,10 +23,12 @@ export default defineCommand({
 		const guild = inGuild(interaction);
 		const section = interaction.options.getString("section") ?? "items";
 		const account = await requireAccount(guild.id, interaction.user.id);
+		const member = await guild.members.fetch(interaction.user.id).catch(() => null);
+		const balances = balancesOf(account, await rolesForSale(guild, member));
 
 		await reply(
 			interaction,
-			shopScreen({ section: isShopSection(section) ? section : "items" }, balancesOf(account), interaction.user.id),
+			shopScreen({ section: isShopSection(section) ? section : "items" }, balances, interaction.user.id),
 		);
 	},
 });

@@ -35,6 +35,7 @@ describe("the side-by-side page", () => {
 		expect(within(table).getByRole("columnheader", { name: /Test Server/ })).toBeInTheDocument();
 		expect(within(table).getByRole("columnheader", { name: /Gaming Hub/ })).toBeInTheDocument();
 		expect(within(table).getByRole("rowheader", { name: /Levelling/ })).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Back to your servers" })).toHaveAttribute("href", "/guilds");
 	});
 
 	/** Each column is that server's own overview, so losing access to one says so there and leaves the rest. */

@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type WelcomeConfigResponse, type WelcomePatch } from "@testify/shared";
+import { useOptimisticMutation } from "@/hooks/useOptimisticMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -27,27 +22,10 @@ export function useWelcome(guildId: string): UseQueryResult<WelcomeConfigRespons
 }
 
 export function useUpdateWelcome(guildId: string): UseMutationResult<WelcomeConfigResponse, Error, WelcomePatch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).welcome();
-
-	return useMutation({
-		mutationFn: (patch: WelcomePatch) => api.patch<WelcomeConfigResponse>(`/guilds/${guildId}/welcome`, patch),
-		onMutate: async (patch) => {
-			await client.cancelQueries({ queryKey: key });
-			const previous = client.getQueryData<WelcomeConfigResponse>(key);
-
-			if (previous !== undefined) client.setQueryData<WelcomeConfigResponse>(key, applyPatch(previous, patch));
-
-			return { previous };
-		},
-		onError: (_error, _patch, context) => {
-			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
-		},
-		onSuccess: (config) => {
-			client.setQueryData(key, config);
-		},
-		onSettled: () => {
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useOptimisticMutation(
+		keys.guild(guildId).welcome(),
+		(patch: WelcomePatch) => api.patch<WelcomeConfigResponse>(`/guilds/${guildId}/welcome`, patch),
+		applyPatch,
+		[keys.guild(guildId).overview()],
+	);
 }

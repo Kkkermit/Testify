@@ -3,6 +3,7 @@ import { type TestifyClient } from "@core/client";
 import { defineEvent } from "@core/event";
 import { forgetLeaver } from "@lib/birthdays";
 import { countMove } from "@lib/info";
+import { trackLeave } from "@lib/invites";
 import { writeAuditLog } from "@lib/moderation";
 import { syncVoiceCounters } from "@lib/settings";
 import { sendGoodbye } from "@lib/welcome";
@@ -25,6 +26,7 @@ export default defineEvent({
 
 		await sendGoodbye(client, member);
 		await forgetLeaver(member.guild.id, member.id);
+		await trackLeave(member);
 		await syncVoiceCounters(client, member.guild);
 	},
 });

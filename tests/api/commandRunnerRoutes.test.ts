@@ -1,9 +1,8 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { commandRunner } from "@api/routes/commandRunner";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { type Command } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -63,23 +62,9 @@ function clientFor(commands: Command[] = [pingCommand()]): TestifyClient {
 
 function app(client: TestifyClient, userId = OWNER): Hono<ApiBindings> {
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId, username: "someone" });
 	instance.route("/runner", commandRunner);
-	instance.onError((error) => {
-		const problem =
-			error instanceof ApiProblem
-				? error
-				: error instanceof UserFacingError
-					? new ApiProblem(400, "bad_request", error.message)
-					: new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

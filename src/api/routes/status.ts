@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
-import { requireAuth } from "@api/middleware/session";
 import { statusReport } from "@lib/bot";
 import { type StatusResponse } from "@testify/shared";
 
@@ -13,10 +12,8 @@ export function forgetStatus(): void {
 	cached = null;
 }
 
-/** Any signed-in person may read it: it names no server and no member, only how the bot itself is doing. */
+/** Public, on the website too: it names no server and no member, only how the bot itself is doing. */
 export const status = new Hono<ApiBindings>();
-
-status.use("*", requireAuth);
 
 status.get("/", async (context) => {
 	const client = context.get("client");

@@ -1,8 +1,8 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import {
 	isReady,
 	normaliseVerify,
@@ -41,14 +41,7 @@ export default recordsSettings(
 					roleTooHigh: roleTooHigh(guild, next.roleId),
 					...(note !== undefined ? { note } : {}),
 				};
-
-				if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-					const panel = verifyPanel(state, ownerId);
-					await interaction.reply({ ...panel, flags: panel.flags | MessageFlags.Ephemeral });
-					return;
-				}
-
-				await interaction.update(verifyPanel(state, ownerId));
+				await redrawPanel(interaction, verifyPanel(state, ownerId));
 			};
 
 			switch (context.action) {

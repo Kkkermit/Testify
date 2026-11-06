@@ -9,6 +9,11 @@ import { createMockClient } from "@tests/helpers/mocks";
 /** Every route in the real app, asked by somebody it should refuse; a route added without its gate fails here. */
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
+jest.mock("@database/repositories/blacklistRepository", () => ({
+	findBlacklistEntry: jest.fn((id: string) =>
+		Promise.resolve(id === "100000000000000006" ? { userId: id, reason: "spam", createdAt: new Date() } : null),
+	),
+}));
 jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	...jest.requireActual<object>("@database/repositories/dashboardSessionRepository"),
 	findSession: jest.fn(),
@@ -21,6 +26,7 @@ const MANAGER = "100000000000000002";
 const MEMBER = "100000000000000003";
 const OUTSIDER = "100000000000000004";
 const MANAGES_ONLY = "100000000000000005";
+const BLOCKED = "100000000000000006";
 
 /** Reachable without signing in, on purpose: each one is named so a new public route is a decision, not an accident. */
 const PUBLIC = new Set([
@@ -32,6 +38,7 @@ const PUBLIC = new Set([
 	"GET /api/support",
 	"GET /api/support/articles/:articleId",
 	"GET /api/site",
+	"GET /api/status",
 	"GET /api/site/repository",
 	"GET /api/site/traffic",
 	"GET /api/site/tree",
@@ -42,6 +49,8 @@ const GUILD_SCOPED = "/api/guilds/:guildId/";
 
 /** Each asks what its Discord command asks on top of Manage Server, so gaining or losing a gate is decided here. */
 const ASKS_MORE = new Set([
+	"GET /appeals",
+	"POST /appeals/:appealId/decision",
 	"GET /bans",
 	"POST /bans/:userId/unban",
 	"GET /cases",
@@ -62,11 +71,14 @@ const ASKS_MORE = new Set([
 	"PATCH /members/:userId/nickname",
 	"GET /members/:userId/roles",
 	"PUT /members/:userId/roles",
+	"POST /modmail/conversations/:conversationId/close",
 	"PATCH /raid-protection",
 	"POST /role-menus",
 	"PUT /role-menus/:menuId",
 	"POST /role-menus/:menuId/publish",
 	"DELETE /role-menus/:menuId",
+	"PUT /shop-roles/:roleId",
+	"DELETE /shop-roles/:roleId",
 	"PATCH /settings/nickname",
 	"PUT /settings/auto-roles",
 	"POST /temp-voice/lobby",
@@ -138,7 +150,7 @@ beforeEach(() => {
 	jest
 		.mocked(findSession)
 		.mockImplementation((id: string) =>
-			Promise.resolve([OWNER, MANAGER, MEMBER, OUTSIDER, MANAGES_ONLY].includes(id) ? sessionOf(id) : null),
+			Promise.resolve([OWNER, MANAGER, MEMBER, OUTSIDER, MANAGES_ONLY, BLOCKED].includes(id) ? sessionOf(id) : null),
 		);
 });
 
@@ -197,6 +209,26 @@ describe("walking every route in the dashboard's API", () => {
 			.map(({ route }) => `${route.method} ${route.pattern.slice(GUILD_SCOPED.length - 1)}`);
 
 		expect(refused.sort()).toEqual([...ASKS_MORE].sort());
+	});
+
+	/** As `/delete-my-data` still runs in Discord: a blocked account may see why, sign out and delete its data. */
+	it("refuses a blacklisted account on every route but seeing why, signing out and deleting its data", async () => {
+		const kept = new Set([
+			"GET /api/auth/me",
+			"POST /api/auth/logout",
+			"POST /api/auth/logout-all",
+			"POST /api/auth/erase",
+		]);
+		const closed = gated.filter((route) => !kept.has(`${route.method} ${route.pattern}`));
+		expect(await letThrough(closed, BLOCKED, { status: 403, code: "blacklisted" })).toEqual([]);
+
+		const app = createApi(clientFor(), API_ENV);
+		const open = all.filter(
+			(route) => kept.has(`${route.method} ${route.pattern}`) || PUBLIC.has(`${route.method} ${route.pattern}`),
+		);
+		const answers = await Promise.all(open.map(async (route) => ask(app, BLOCKED, route.method, route.path)));
+		expect(open.filter((_, index) => answers[index]?.code === "blacklisted").map((route) => route.pattern)).toEqual([]);
+		expect(open.length).toBe(PUBLIC.size + kept.size);
 	});
 
 	it("lets a manager past the gate, so the refusals above are the gate's and not a broken harness", async () => {

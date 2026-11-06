@@ -4,6 +4,7 @@ import { Collection } from "discord.js";
 import { CATEGORIES } from "@config/categories";
 import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, subcommandsOf } from "@core/command";
+import { buildContextMenu } from "@core/contextMenu";
 import { loadEverything, MAX_COMMANDS } from "@core/loader";
 import { createLogger } from "@core/logger";
 import { ALLOWED_IN_DASHBOARD } from "@lib/bot/commandRunner.util";
@@ -15,6 +16,7 @@ function fakeClient(): TestifyClient {
 		commands: new Collection(),
 		aliases: new Collection(),
 		buttons: new Collection(),
+		contextMenus: new Collection(),
 		messageHandlers: [],
 		logger: createLogger("fatal", false),
 		on: (name: string) => bound.push(name),
@@ -92,6 +94,31 @@ describe("every command", () => {
 
 	it("puts every command in the folder its category names", () => {
 		expect(commands.filter((command) => !(command.category in CATEGORIES))).toEqual([]);
+	});
+});
+
+describe("every right-click action", () => {
+	const menus = [...client.contextMenus.values()];
+
+	it("is found on disk", () => {
+		expect(counts.menus).toBe(menus.length);
+		expect(menus.map((menu) => menu.name).sort()).toEqual(["Add to starboard", "Report message", "Time out", "Warn"]);
+	});
+
+	/** Discord takes five of each kind, and a sixth would refuse every command in the same registration. */
+	it("stays within Discord's five of each kind", () => {
+		for (const type of ["user", "message"]) {
+			expect(menus.filter((menu) => menu.type === type).length).toBeLessThanOrEqual(5);
+		}
+	});
+
+	/** A switch naming no command could never be turned off, so the action would outlive the command it belongs to. */
+	it("is switched by a command that exists", () => {
+		expect(menus.filter((menu) => !client.commands.has(menu.switchedBy)).map((menu) => menu.name)).toEqual([]);
+	});
+
+	it("builds a payload Discord accepts, only for servers", () => {
+		for (const menu of menus) expect(buildContextMenu(menu).toJSON().contexts).toEqual([0]);
 	});
 });
 

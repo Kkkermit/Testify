@@ -6,7 +6,7 @@ import {
 	type StarPostRecord,
 } from "@database/models/starboard.schema";
 
-export type StoredStarboardSettings = Pick<StarboardSettingsRecord, "enabled" | "channelId" | "threshold" | "selfStar">;
+type StoredStarboardSettings = Pick<StarboardSettingsRecord, "enabled" | "channelId" | "threshold" | "selfStar">;
 
 export type StoredStarPost = Omit<StarPostRecord, "createdAt" | "updatedAt">;
 

@@ -139,6 +139,9 @@ function SiteFooter({
 					<Link to="/source-code" className={quiet}>
 						{t("site.source")}
 					</Link>
+					<Link to="/status" className={quiet}>
+						{t("nav.status")}
+					</Link>
 					<Link to="/appearance" className={quiet}>
 						{t("nav.appearance")}
 					</Link>

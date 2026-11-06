@@ -1,7 +1,6 @@
 import { type FeatureStatus } from "./api";
 
-export const PLACE_ROLES = ["posts", "logs", "panel", "lobby", "counter", "listens"] as const;
-export type PlaceRole = (typeof PLACE_ROLES)[number];
+export type PlaceRole = "posts" | "logs" | "panel" | "lobby" | "counter" | "listens";
 
 export interface Place {
 	channelId: string;
@@ -9,9 +8,9 @@ export interface Place {
 }
 
 /** "channel" works in one channel chosen for it, "many" in any number added one at a time, "everywhere" across the server. */
-export type PlaceReach = "channel" | "many" | "everywhere";
+type PlaceReach = "channel" | "many" | "everywhere";
 
-export interface PlaceRule {
+interface PlaceRule {
 	reach: PlaceReach;
 }
 
@@ -23,6 +22,9 @@ export const FEATURE_PLACES = {
 	birthdays: { reach: "channel" },
 	verification: { reach: "channel" },
 	cases: { reach: "everywhere" },
+	appeals: { reach: "channel" },
+	modmail: { reach: "channel" },
+	invites: { reach: "channel" },
 	"raid-protection": { reach: "everywhere" },
 	"anti-link": { reach: "everywhere" },
 	counting: { reach: "channel" },

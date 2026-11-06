@@ -20,8 +20,8 @@ import { HELP_HOME } from "@lib/info/info.constants";
 
 export type Surface = "slash" | "prefix";
 
-export const HELP_PAGE_SIZE = 6;
-export function visibleCommands(client: TestifyClient): Command[] {
+const HELP_PAGE_SIZE = 6;
+function visibleCommands(client: TestifyClient): Command[] {
 	return [...client.commands.values()].filter((command) => !HIDDEN_CATEGORIES.includes(command.category));
 }
 
@@ -31,7 +31,7 @@ function commandsInCategory(client: TestifyClient, category: Category): Command[
 		.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function populatedCategories(client: TestifyClient): Category[] {
+function populatedCategories(client: TestifyClient): Category[] {
 	const used = new Set(visibleCommands(client).map((command) => command.category));
 	return ALL_CATEGORIES.filter((category) => used.has(category));
 }

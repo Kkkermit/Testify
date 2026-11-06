@@ -1,6 +1,5 @@
 import {
 	type APIInteractionGuildMember,
-	type ChatInputCommandInteraction,
 	type AutocompleteInteraction,
 	type Client,
 	type EmbedBuilder,
@@ -43,6 +42,8 @@ export interface CommandInput {
 	readonly channel: TextBasedChannel | null;
 	readonly client: Client;
 	readonly commandName: string;
+	/** The reader's own Discord language, which only an interaction carries; a prefix command has none. */
+	readonly locale?: string;
 	readonly deferred: boolean;
 	readonly replied: boolean;
 
@@ -60,6 +61,26 @@ export interface CommandInput {
 	/** A message cannot be private, so a prefix command's version of one deletes itself instead. */
 	replyBriefly?(embed: EmbedBuilder): Promise<unknown>;
 	tidyAway?(): void;
+}
+
+/** Number parsing and the required check, worded the same for every surface that reads options from text. */
+export abstract class OptionReader {
+	protected abstract raw(name: string): string | number | boolean | undefined;
+
+	protected number(name: string, valid: (value: number) => boolean): number | null {
+		const raw = this.raw(name);
+		if (raw === undefined) return null;
+
+		const parsed = Number(raw);
+		if (!valid(parsed)) throw new UserFacingError(`\`${name}\` has to be a number.`);
+
+		return parsed;
+	}
+
+	protected require<T>(name: string, value: T | null, required: boolean | undefined): T {
+		if (value === null && required === true) throw new UserFacingError(`You need to give me \`${name}\`.`);
+		return value as T;
+	}
 }
 
 export interface CommandInputOptions {
@@ -142,11 +163,6 @@ export interface Command {
 	run?(interaction: CommandInput, client: TestifyClient): Promise<void>;
 	autocomplete?(interaction: AutocompleteInteraction, client: TestifyClient): Promise<void>;
 }
-
-/** Proof that a real slash interaction satisfies the contract. */
-const _slashSatisfiesCommandInput: (interaction: ChatInputCommandInteraction) => CommandInput = (interaction) =>
-	interaction;
-void _slashSatisfiesCommandInput;
 
 export function defineCommand(command: Command): Command {
 	return command;
@@ -291,10 +307,26 @@ export async function dispatch(interaction: CommandInput, command: Command, clie
 	await command.run(input, client);
 }
 
+/** Discord's localisation map for the string filed under a key, or undefined when nothing is translated. */
+type Localise = (key: string) => Record<string, string> | undefined;
+
+/** The key a description's translations are filed under: `warn`, `warn create` or `warn create --reason`. */
+export function stringKey(command: string, sub?: string, option?: string): string {
+	return [command, sub, option === undefined ? undefined : `--${option}`]
+		.filter((part) => part !== undefined)
+		.join(" ");
+}
+
+const untranslated: Localise = () => undefined;
+
 export function buildSlashCommand(
 	command: Command,
+	localise: Localise = untranslated,
 ): SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder {
-	const builder = new SlashCommandBuilder().setName(command.name).setDescription(command.description);
+	const builder = new SlashCommandBuilder()
+		.setName(command.name)
+		.setDescription(command.description)
+		.setDescriptionLocalizations(localise(command.name) ?? null);
 
 	builder.setContexts(
 		command.guildOnly
@@ -309,12 +341,18 @@ export function buildSlashCommand(
 		builder.setDefaultMemberPermissions(new PermissionsBitField(command.permissions).bitfield);
 	}
 
-	for (const option of command.options ?? []) addOption(builder, option);
+	for (const option of command.options ?? [])
+		addOption(builder, option, localise(stringKey(command.name, undefined, option.name)));
 
 	for (const sub of command.subcommands ?? []) {
+		const key = stringKey(command.name, sub.name);
 		builder.addSubcommand((subBuilder) => {
-			subBuilder.setName(sub.name).setDescription(sub.description);
-			for (const option of sub.options ?? []) addOption(subBuilder, option);
+			subBuilder
+				.setName(sub.name)
+				.setDescription(sub.description)
+				.setDescriptionLocalizations(localise(key) ?? null);
+			for (const option of sub.options ?? [])
+				addOption(subBuilder, option, localise(stringKey(command.name, sub.name, option.name)));
 			return subBuilder;
 		});
 	}
@@ -333,13 +371,18 @@ interface OptionHost {
 	addAttachmentOption(build: (option: SlashCommandAttachmentOption) => SlashCommandAttachmentOption): unknown;
 }
 
-function addOption(host: OptionHost, option: CommandOption): void {
+function addOption(host: OptionHost, option: CommandOption, translated: Record<string, string> | undefined): void {
 	const required = option.required ?? false;
+	const localised = translated ?? null;
 
 	switch (option.type) {
 		case "string":
 			host.addStringOption((builder) => {
-				builder.setName(option.name).setDescription(option.description).setRequired(required);
+				builder
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required);
 				if (option.maxLength !== undefined) builder.setMaxLength(option.maxLength);
 				if (option.autocomplete) builder.setAutocomplete(true);
 				else if (option.choices) {
@@ -351,7 +394,11 @@ function addOption(host: OptionHost, option: CommandOption): void {
 
 		case "integer":
 			host.addIntegerOption((builder) => {
-				builder.setName(option.name).setDescription(option.description).setRequired(required);
+				builder
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required);
 				if (option.min !== undefined) builder.setMinValue(option.min);
 				if (option.max !== undefined) builder.setMaxValue(option.max);
 				if (option.autocomplete) builder.setAutocomplete(true);
@@ -364,7 +411,11 @@ function addOption(host: OptionHost, option: CommandOption): void {
 
 		case "number":
 			host.addNumberOption((builder) => {
-				builder.setName(option.name).setDescription(option.description).setRequired(required);
+				builder
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required);
 				if (option.min !== undefined) builder.setMinValue(option.min);
 				if (option.max !== undefined) builder.setMaxValue(option.max);
 				return builder;
@@ -372,23 +423,53 @@ function addOption(host: OptionHost, option: CommandOption): void {
 			return;
 
 		case "boolean":
-			host.addBooleanOption((b) => b.setName(option.name).setDescription(option.description).setRequired(required));
+			host.addBooleanOption((b) =>
+				b
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required),
+			);
 			return;
 
 		case "user":
-			host.addUserOption((b) => b.setName(option.name).setDescription(option.description).setRequired(required));
+			host.addUserOption((b) =>
+				b
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required),
+			);
 			return;
 
 		case "channel":
-			host.addChannelOption((b) => b.setName(option.name).setDescription(option.description).setRequired(required));
+			host.addChannelOption((b) =>
+				b
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required),
+			);
 			return;
 
 		case "role":
-			host.addRoleOption((b) => b.setName(option.name).setDescription(option.description).setRequired(required));
+			host.addRoleOption((b) =>
+				b
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required),
+			);
 			return;
 
 		case "attachment":
-			host.addAttachmentOption((b) => b.setName(option.name).setDescription(option.description).setRequired(required));
+			host.addAttachmentOption((b) =>
+				b
+					.setName(option.name)
+					.setDescription(option.description)
+					.setDescriptionLocalizations(localised)
+					.setRequired(required),
+			);
 			return;
 	}
 }

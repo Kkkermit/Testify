@@ -7,7 +7,7 @@ import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { directory } from "@api/routes/memberDirectory";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
-import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
+import { changeLevel, changeMoney, readBoard, readMemberDetail } from "@lib/economy";
 import { problemText } from "@lib/format";
 import {
 	banUser,
@@ -17,6 +17,7 @@ import {
 	moderationProblem,
 	removeTimeout,
 	timeoutMember,
+	revokeSoftban,
 } from "@lib/moderation";
 import { memberRoles, setMemberRoles } from "@lib/roles";
 import {

@@ -3,6 +3,7 @@ import { type Env } from "@config/env";
 import { nameBot } from "@core/brand";
 import { type Button } from "@core/button";
 import { type Command } from "@core/command";
+import { type ContextMenu } from "@core/contextMenu";
 import { type Logger } from "@core/logger";
 import { type MessageHandler } from "@core/message";
 import { ErrorThrottle, reportSurvivable } from "@core/resilience";
@@ -12,6 +13,7 @@ const intents = [
 	GatewayIntentBits.GuildMembers,
 	GatewayIntentBits.GuildModeration,
 	GatewayIntentBits.GuildExpressions,
+	GatewayIntentBits.GuildInvites,
 	GatewayIntentBits.GuildVoiceStates,
 	GatewayIntentBits.GuildMessages,
 	GatewayIntentBits.GuildMessageReactions,
@@ -26,11 +28,13 @@ export class TestifyClient extends Client {
 	readonly commands = new Collection<string, Command>();
 	readonly aliases = new Collection<string, string>();
 	readonly buttons = new Collection<string, Button>();
+	readonly contextMenus = new Collection<string, ContextMenu>();
 	readonly messageHandlers: MessageHandler[] = [];
 
-	loaded: { commands: number; buttons: number; events: number; messageHandlers: number } = {
+	loaded: { commands: number; buttons: number; menus: number; events: number; messageHandlers: number } = {
 		commands: 0,
 		buttons: 0,
+		menus: 0,
 		events: 0,
 		messageHandlers: 0,
 	};
@@ -54,7 +58,7 @@ export class TestifyClient extends Client {
 	pausedAt: number | null = null;
 
 	constructor(env: Env, logger: Logger) {
-		super({ intents, partials });
+		super({ intents, partials, shards: "auto" });
 		this.env = env;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);

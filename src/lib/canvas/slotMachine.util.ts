@@ -7,8 +7,8 @@ import { SLOT_SYMBOLS, slotsReturn } from "@lib/casino/slots.util";
 
 /** A three-reel machine; every symbol is drawn as a shape, so it needs no emoji font on the host. */
 
-export const SLOTS_WIDTH = 440;
-export const SLOTS_HEIGHT = 250;
+const SLOTS_WIDTH = 440;
+const SLOTS_HEIGHT = 250;
 
 const WINDOW = { top: 40, height: 170, width: 120, gap: 16 } as const;
 const CELL = 84;

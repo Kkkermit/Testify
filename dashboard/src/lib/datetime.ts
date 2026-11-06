@@ -24,35 +24,35 @@ function made<T extends Intl.DateTimeFormat | Intl.RelativeTimeFormat>(key: stri
 	return fresh;
 }
 
-function parse(iso: string): Date | null {
+function parseIso(iso: string): Date | null {
 	const at = new Date(iso);
 	return Number.isNaN(at.getTime()) ? null : at;
 }
 
-function format(iso: string, name: string, options: Intl.DateTimeFormatOptions): string {
-	const at = parse(iso);
+function formatIso(iso: string, name: string, options: Intl.DateTimeFormatOptions): string {
+	const at = parseIso(iso);
 	return at === null ? iso : made(name, (locale) => new Intl.DateTimeFormat(locale, options)).format(at);
 }
 
 export function shortDate(iso: string): string {
-	return format(iso, "date", DATE);
+	return formatIso(iso, "date", DATE);
 }
 
 export function dateAndTime(iso: string): string {
-	return format(iso, "dateTime", DATE_TIME);
+	return formatIso(iso, "dateTime", DATE_TIME);
 }
 
 export function weekdayDate(iso: string): string {
-	return format(iso, "weekday", WEEKDAY);
+	return formatIso(iso, "weekday", WEEKDAY);
 }
 
 export function timeOfDay(iso: string): string {
-	return format(iso, "hourMinute", HOUR_MINUTE);
+	return formatIso(iso, "hourMinute", HOUR_MINUTE);
 }
 
 /** `1 Aug`, a calendar day by itself, read in UTC because it names a stored day rather than a moment. */
 export function dayAndMonth(iso: string): string {
-	return format(iso, "dayMonth", DAY_MONTH);
+	return formatIso(iso, "dayMonth", DAY_MONTH);
 }
 
 export function monthName(month: number): string {
@@ -60,11 +60,11 @@ export function monthName(month: number): string {
 }
 
 export function clockTime(iso: string): string {
-	return format(iso, "time", TIME);
+	return formatIso(iso, "time", TIME);
 }
 
 export function since(iso: string, now = Date.now()): string {
-	const at = parse(iso);
+	const at = parseIso(iso);
 	if (at === null) return iso;
 
 	const elapsed = now - at.getTime();

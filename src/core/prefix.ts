@@ -20,6 +20,7 @@ import {
 	type CommandInput,
 	type CommandInputOptions,
 	type CommandOption,
+	OptionReader,
 	subcommandsOf,
 } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -34,7 +35,7 @@ const ROLE_MENTION = /^<@&(\d+)>$/;
 const SNOWFLAKE = /^\d{17,20}$/;
 
 /** Splits on spaces, but keeps "quoted phrases" in one piece. */
-export function splitArgs(input: string): string[] {
+function splitArgs(input: string): string[] {
 	const args: string[] = [];
 	const pattern = /"([^"]*)"|'([^']*)'|(\S+)/g;
 
@@ -45,7 +46,7 @@ export function splitArgs(input: string): string[] {
 	return args;
 }
 
-export interface ParsedMessage {
+interface ParsedMessage {
 	name: string;
 	args: string[];
 	/** The prefix as it was typed, or null when the bot was mentioned instead. */
@@ -66,13 +67,14 @@ export function parseMessage(content: string, prefix: string, botId: string): Pa
 	return { name: name.toLowerCase(), args, prefix: mentioned === null ? used : null };
 }
 
-class PrefixOptions implements CommandInputOptions {
+class PrefixOptions extends OptionReader implements CommandInputOptions {
 	private readonly message: Message;
 	private readonly command: Command;
 	private readonly args: string[];
 	private parsed: { values: Map<string, string>; subcommand: string | null; declared: CommandOption[] } | null = null;
 
 	constructor(message: Message, command: Command, args: string[]) {
+		super();
 		this.message = message;
 		this.command = command;
 		this.args = args;
@@ -139,7 +141,7 @@ class PrefixOptions implements CommandInputOptions {
 		);
 	}
 
-	private raw(name: string): string | undefined {
+	protected raw(name: string): string | undefined {
 		return this.state.values.get(name);
 	}
 
@@ -241,21 +243,6 @@ class PrefixOptions implements CommandInputOptions {
 	/** Prefix commands have no autocomplete, so this is only here to complete the shape. */
 	getFocused(): string {
 		return "";
-	}
-
-	private number(name: string, valid: (value: number) => boolean): number | null {
-		const raw = this.raw(name);
-		if (raw === undefined) return null;
-
-		const parsed = Number(raw);
-		if (!valid(parsed)) throw new UserFacingError(`\`${name}\` has to be a number.`);
-
-		return parsed;
-	}
-
-	private require<T>(name: string, value: T | null, required: boolean | undefined): T {
-		if (value === null && required === true) throw new UserFacingError(`You need to give me \`${name}\`.`);
-		return value as T;
 	}
 }
 

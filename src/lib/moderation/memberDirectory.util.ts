@@ -15,7 +15,7 @@ import {
 
 /** Everybody in a server, read live from Discord a page at a time, so a server of 100,000 is never fetched whole. */
 
-export interface DirectoryReader {
+interface DirectoryReader {
 	/** Null for a bot owner who is not in the server, who can read the list but moderate nobody. */
 	moderator: GuildMember | null;
 	/** Undefined is a bot owner, held only to what the bot can give. */
@@ -34,7 +34,7 @@ interface Batch {
 type Source = (after: string | undefined) => Promise<Batch>;
 
 /** Snowflakes compared as the numbers they are, without a BigInt per comparison. */
-export function compareIds(a: string, b: string): number {
+function compareIds(a: string, b: string): number {
 	return a.length - b.length || (a < b ? -1 : a > b ? 1 : 0);
 }
 
@@ -96,7 +96,7 @@ async function sourceFor(
 	return { source: listing(guild), searchCut: false };
 }
 
-export function matchesFilters(
+function matchesFilters(
 	member: GuildMember,
 	query: DirectoryQuery,
 	warned: Map<string, number> | null,

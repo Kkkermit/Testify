@@ -7,7 +7,7 @@ import { roleValue, settingsScreen } from "@lib/settings/settingsScreen.util";
 
 /** Auto-roles, as a pre-ticked menu rather than `add` and `remove` subcommands. */
 
-export interface AutoRolePanelState {
+interface AutoRolePanelState {
 	roleIds: string[];
 	/** Roles the bot cannot actually assign, so the panel can say so. */
 	unusable?: string[];

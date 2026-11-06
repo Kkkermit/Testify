@@ -5,6 +5,7 @@ import { defineEvent } from "@core/event";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { countMove } from "@lib/info";
+import { trackJoin } from "@lib/invites";
 import { writeAuditLog } from "@lib/moderation";
 import { guardJoin } from "@lib/raid";
 import { syncVoiceCounters } from "@lib/settings";
@@ -14,6 +15,8 @@ export default defineEvent({
 	name: Events.GuildMemberAdd,
 	async run(client: TestifyClient, member: GuildMember) {
 		countMove(client, member, "join");
+		// First, so the invites are read before another join can move their counts on.
+		await trackJoin(client, member);
 		await guardJoin(client, member);
 
 		await writeAuditLog(client, member.guild, {
@@ -34,7 +37,7 @@ export default defineEvent({
 					member.roles.add(roleId, "Auto-role").catch((error: unknown) => {
 						client.logger.warn(
 							{ err: toError(error), roleId, guildId: member.guild.id },
-							"Could not apply an auto-role",
+							"[AUTO_ROLE] Could not give a role on join. Check the role sits below the bot's highest role.",
 						);
 					}),
 				),

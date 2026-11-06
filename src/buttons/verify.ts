@@ -1,11 +1,4 @@
-import {
-	ActionRowBuilder,
-	MessageFlags,
-	ModalBuilder,
-	type ModalActionRowComponentBuilder,
-	TextInputBuilder,
-	TextInputStyle,
-} from "discord.js";
+import { LabelBuilder, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { strings } from "@config/strings";
 import { customId, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
@@ -40,16 +33,17 @@ export default defineButton({
 			const modal = new ModalBuilder()
 				.setCustomId(customId("verify", "submit"))
 				.setTitle(`Verification code: ${code}`)
-				.addComponents(
-					new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-						new TextInputBuilder()
-							.setCustomId("code")
-							.setLabel("Type the code shown in the title")
-							.setStyle(TextInputStyle.Short)
-							.setMinLength(6)
-							.setMaxLength(6)
-							.setRequired(true),
-					),
+				.addLabelComponents(
+					new LabelBuilder()
+						.setLabel("Type the code shown in the title")
+						.setTextInputComponent(
+							new TextInputBuilder()
+								.setCustomId("code")
+								.setStyle(TextInputStyle.Short)
+								.setMinLength(6)
+								.setMaxLength(6)
+								.setRequired(true),
+						),
 				);
 
 			await interaction.showModal(modal);

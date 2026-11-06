@@ -2,13 +2,13 @@ import { fromHsl, type Hsl, luminance, type Rgb, toHex, toHsl } from "@/lib/colo
 
 export const CUSTOM_STARTING_POINT = "#8a2a6b";
 
-export interface AccentShades {
+interface AccentShades {
 	readonly primary: string;
 	readonly accent: string;
 	readonly wash: string;
 }
 
-export interface CustomAccent {
+interface CustomAccent {
 	readonly light: AccentShades;
 	readonly dark: AccentShades;
 }

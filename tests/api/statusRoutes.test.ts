@@ -1,6 +1,6 @@
 import { Hono } from "hono";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { forgetStatus, status } from "@api/routes/status";
 import { type TestifyClient } from "@core/client";
 import { statusReport } from "@lib/bot";
@@ -18,10 +18,7 @@ function appFor(signedIn: boolean): Hono<ApiBindings> {
 		await next();
 	});
 	app.route("/status", status);
-	app.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(app);
 
 	return app;
 }
@@ -33,9 +30,12 @@ beforeEach(() => {
 });
 
 describe("GET /status", () => {
-	it("refuses an anonymous caller", async () => {
-		expect((await appFor(false).request("/status")).status).toBe(401);
-		expect(statusReport).not.toHaveBeenCalled();
+	/** The status page is the website's, so somebody signed out, or on a host with no dashboard, can read it. */
+	it("answers somebody signed out", async () => {
+		const answer = await appFor(false).request("/status");
+
+		expect(answer.status).toBe(200);
+		expect(await answer.json()).toEqual(REPORT);
 	});
 
 	/** Every open tab polls, and each report pings the database. */

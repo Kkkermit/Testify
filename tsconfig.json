@@ -32,6 +32,7 @@
 			"@database": ["./src/database/index.ts"],
 			"@database/*": ["./src/database/*"],
 			"@jobs/*": ["./src/jobs/*"],
+			"@menus/*": ["./src/menus/*"],
 			"@root/*": ["./src/*"],
 			"@api/*": ["./src/api/*"],
 			"@tests/*": ["./tests/*"]

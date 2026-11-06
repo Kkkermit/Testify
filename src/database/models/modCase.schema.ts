@@ -16,7 +16,7 @@ export interface ModCaseRecord {
 }
 
 /** The last number given out, kept apart from the settings so leaving a server cannot reuse one. */
-export interface ModCaseCounterRecord {
+interface ModCaseCounterRecord {
 	guildId: string;
 	last: number;
 }

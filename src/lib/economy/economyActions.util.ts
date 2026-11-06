@@ -5,12 +5,14 @@ import {
 	getOrCreateAccount,
 	removeInventoryItem,
 } from "@database/repositories/economyRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { findShopItem } from "@lib/economy/shop.util";
 import { formatDuration, formatNumber } from "@lib/format/format.util";
+import { atRate } from "@testify/shared";
 
 /** Economy actions that more than one surface performs. */
 
-export interface DailyResult {
+interface DailyResult {
 	claimed: boolean;
 	/** Ready-to-show sentence, whether it succeeded or not. */
 	message: string;
@@ -34,7 +36,7 @@ export async function claimDaily(guildId: string, userId: string, now = Date.now
 	// A gap of more than two days breaks the streak.
 	const continues = lastDaily !== null && now - lastDaily.getTime() < ECONOMY_COOLDOWNS.daily * 2;
 	const streak = continues ? Math.min(account.dailyStreak + 1, ECONOMY.dailyStreakCap) : 1;
-	const reward = ECONOMY.dailyBase + streak * ECONOMY.dailyStreakBonus;
+	const reward = atRate(ECONOMY.dailyBase + streak * ECONOMY.dailyStreakBonus, (await getTuning(guildId)).payRate);
 
 	// The claim is taken before the money moves, so a second press that read the same day is the one refused.
 	if (!(await claimDailySlot(guildId, userId, lastDaily, new Date(now), streak))) {
@@ -60,7 +62,7 @@ export const USE_OUTCOMES: Record<string, { verb: string; min: number; max: numb
 	bank_upgrade: { verb: "You upgraded your bank and found some forgotten change inside", min: 0, max: 0 },
 };
 
-export interface UseResult {
+interface UseResult {
 	used: boolean;
 	message: string;
 	reward?: number;

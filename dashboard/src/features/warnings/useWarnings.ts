@@ -13,8 +13,8 @@ import {
 	type WarningAdd,
 	type WarningAdded,
 	type WarnLadder,
-	type WarnStep,
 } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -41,21 +41,10 @@ export function usePunishments(guildId: string): UseQueryResult<WarnLadder> {
 	});
 }
 
-export function useSavePunishments(guildId: string): UseMutationResult<WarnLadder, Error, WarnStep[]> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).punishments();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: (steps: WarnStep[]) => api.put<WarnLadder>(`/guilds/${guildId}/warnings/punishments`, { steps }),
-		onSuccess: (ladder) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, ladder);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-		},
-	});
+export function useSavePunishments(guildId: string): UseMutationResult<WarnLadder, Error, WarnLadder> {
+	return useDocumentMutation(keys.guild(guildId).punishments(), (ladder: WarnLadder) =>
+		api.put<WarnLadder>(`/guilds/${guildId}/warnings/punishments`, ladder),
+	);
 }
 
 export function useMemberSearch(guildId: string, query: string): UseQueryResult<MemberMatch[]> {

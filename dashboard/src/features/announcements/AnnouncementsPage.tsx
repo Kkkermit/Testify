@@ -10,6 +10,7 @@ import {
 	FieldGroup,
 	postableChannels,
 	RadioCard,
+	Refusal,
 	RowActions,
 	SELECT,
 	SettingRows,
@@ -33,7 +34,6 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { SendTest } from "@/features/test-post/SendTest";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
@@ -191,9 +191,7 @@ export function AnnouncementsPage(): React.JSX.Element {
 						</p>
 					)}
 				</RowActions>
-				{post.error !== null && (
-					<Warning>{post.error instanceof ApiError ? post.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={post.error} />
 			</SettingRows>
 		</>
 	);

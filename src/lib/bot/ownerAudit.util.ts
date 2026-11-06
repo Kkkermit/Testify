@@ -4,15 +4,7 @@ import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { chosenSubcommand, type Command, type CommandInput, givenOptions } from "@core/command";
 import { postToLogChannel } from "@lib/bot/logChannel.util";
-import {
-	logAuthor,
-	loggedChannel,
-	loggedChannelText,
-	loggedGuild,
-	loggedGuildText,
-	loggedUser,
-	loggedUserText,
-} from "@lib/bot/logFields.util";
+import { logAuthor, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
 import { embed } from "@lib/discord/embeds.util";
 import { truncate } from "@lib/format/format.util";
 
@@ -27,7 +19,7 @@ export const OWNER_AUDIT_LIMITS = {
 	inlineCode: 3_800,
 } as const;
 
-export function ownerLogChannel(client: TestifyClient): string | undefined {
+function ownerLogChannel(client: TestifyClient): string | undefined {
 	return client.env.CHANNEL_EVAL_LOG ?? client.env.CHANNEL_ERROR_LOG;
 }
 
@@ -65,18 +57,10 @@ function codeBlock(code: string, max: number): string {
 }
 
 function whoAndWhere(input: CommandInput): { name: string; value: string; inline: boolean }[] {
-	return [
-		{ name: "User", value: loggedUserText(loggedUser(input.user)), inline: true },
-		{ name: "Server", value: loggedGuildText(loggedGuild(input.guild)), inline: true },
-		{
-			name: "Channel",
-			value: loggedChannelText(input.guild === null ? null : loggedChannel(input.channel, null)),
-			inline: true,
-		},
-	];
+	return [{ name: "User", value: loggedUserText(loggedUser(input.user)), inline: true }, ...placeFields(input)];
 }
 
-export function ownerAttemptEmbed(input: CommandInput, command: Command, held: number): EmbedBuilder {
+function ownerAttemptEmbed(input: CommandInput, command: Command, held: number): EmbedBuilder {
 	const user = loggedUser(input.user);
 	const given = givenOptions(input, command);
 	const tried = given
@@ -128,7 +112,7 @@ export async function reportOwnerAttempt(
 	});
 }
 
-export interface EvalRecord {
+interface EvalRecord {
 	code: string;
 	/** Already redacted. */
 	output: string;

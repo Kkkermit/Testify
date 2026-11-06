@@ -48,7 +48,7 @@ export function placeholderColour(name: string): string {
 	return PLACEHOLDERS[hash % PLACEHOLDERS.length]!;
 }
 
-export interface BoardLayout {
+interface BoardLayout {
 	height: number;
 	rows: number[];
 	/** The top of the reader's own row, or of the note saying they are unranked; null when neither is drawn. */

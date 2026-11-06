@@ -1,9 +1,8 @@
 import { AuditLogEvent, ChannelType, Collection, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { guilds } from "@api/routes/guilds";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { auditPage, auditsSince, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
@@ -75,6 +74,16 @@ jest.mock("@database/repositories/insightsRepository", () => ({
 }));
 jest.mock("@database/repositories/ideaRepository", () => ({
 	getIdeaSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/appealRepository", () => ({
+	getAppealSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/inviteRepository", () => ({
+	getInviteSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/modmailRepository", () => ({
+	getModmailSettings: jest.fn(() => Promise.resolve(null)),
+	countOpenConversations: jest.fn(() => Promise.resolve(0)),
 }));
 jest.mock("@database/repositories/roleMenuRepository", () => ({
 	listRoleMenus: jest.fn(() => Promise.resolve([])),
@@ -179,7 +188,7 @@ function fakeGuild(options: Options = {}) {
 		id,
 		name,
 		position,
-		color: colour,
+		colors: { primaryColor: colour, secondaryColor: null, tertiaryColor: null },
 		managed,
 		permissions: new PermissionsBitField(name === "Admin" ? [PermissionFlagsBits.Administrator] : []),
 	});
@@ -240,18 +249,9 @@ function appFor(options: Options = {}, guild = fakeGuild(options)): Hono<ApiBind
 	const client = { guilds: { cache }, isOwner: (id: string) => id === OWNER } as unknown as TestifyClient;
 
 	const app = new Hono<ApiBindings>();
-	app.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: options.readerHolds === undefined ? OWNER : MANAGER } as never);
-		await next();
-	});
+	withSession(app, client, { userId: options.readerHolds === undefined ? OWNER : MANAGER });
 	app.route("/guilds", guilds);
-	app.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(app);
 
 	return app;
 }

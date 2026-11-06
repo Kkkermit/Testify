@@ -3,14 +3,21 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { RoleChecklist, SavingIndicator, savingStateOf, SettingRows, Toggle, Warning } from "@/components/form";
+import {
+	Refusal,
+	RoleChecklist,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Toggle,
+	Warning,
+} from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useRoles } from "@/features/levelling/useLevelling";
 import { accessOf, missingRoleIds } from "@/features/music/music.utils";
 import { useMusic, useSaveMusic } from "@/features/music/useMusic";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 
 export function MusicPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -31,9 +38,7 @@ export function MusicPage(): React.JSX.Element {
 	const access = accessOf(settings);
 	const stale = missingRoleIds(settings, roles.data ?? []);
 	const refusal = (from: typeof source): React.JSX.Element | null =>
-		save.error !== null && source === from ? (
-			<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-		) : null;
+		source === from ? <Refusal error={save.error} /> : null;
 
 	return (
 		<>

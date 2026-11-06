@@ -11,6 +11,7 @@ const client = {
 	commands: new Collection(),
 	aliases: new Collection(),
 	buttons: new Collection(),
+	contextMenus: new Collection(),
 	messageHandlers: [],
 	logger: createLogger("fatal", false),
 	on: () => undefined,
@@ -18,16 +19,16 @@ const client = {
 } as unknown as TestifyClient;
 loadEverything(client);
 
-const entries = [
+const names = [
 	...readFileSync(resolve(DASHBOARD, "features/commands/commands.utils.ts"), "utf8").matchAll(
-		/^\t"?([a-z-]+)"?: \{ path: \(guildId\) => `\/guilds\/\$\{guildId\}([^`]*)`/gm,
+		/^\t"?([a-z-]+)"?: \{ path: \((?:guildId)?\) =>/gm,
 	),
-].map(([, name = "", path = ""]) => ({ name, path: `/guilds/:guildId${path}` }));
+].map(([, name = ""]) => name);
 
 describe("the commands the dashboard says it has a screen for", () => {
 	/** The sticky screen was keyed `sticky` while the command is `sticky-message`, so the page called it Discord-only. */
 	it("names only commands the bot has", () => {
-		const missing = entries.map((entry) => entry.name).filter((name) => !client.commands.has(name));
-		expect(missing).toEqual([]);
+		expect(names.length).toBeGreaterThan(40);
+		expect(names.filter((name) => !client.commands.has(name))).toEqual([]);
 	});
 });

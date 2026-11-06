@@ -16,7 +16,7 @@ export interface House {
 	purchasedAt: Date;
 }
 
-export interface Business {
+interface Business {
 	businessId: string;
 	name: string;
 	emoji: string;

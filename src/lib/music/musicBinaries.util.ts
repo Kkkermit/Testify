@@ -5,13 +5,13 @@ import { type MusicBinaries } from "@lib/music/music.types";
 
 /** Finding the two executables the player spawns, and saying plainly when one is missing. */
 
-export type Probe = (path: string, args: string[]) => boolean;
+type Probe = (path: string, args: string[]) => boolean;
 
 /** The first line a binary prints for its version, or null when it would not run. */
-export type VersionProbe = (path: string) => string | null;
+type VersionProbe = (path: string) => string | null;
 
 /** YouTube changes often enough that an extractor older than this is the likeliest cause of a 403. */
-export const STALE_AFTER_DAYS = 30;
+const STALE_AFTER_DAYS = 30;
 
 /** The flags differ: `ffmpeg --version` exits 8 and `yt-dlp -version` exits 2. */
 const VERSION_FLAG: Record<string, string> = { "yt-dlp": "--version", ffmpeg: "-version" };

@@ -1,7 +1,7 @@
 import { extname } from "node:path";
 import { z } from "zod";
 import { DAY_MS, MINUTE_MS } from "@config/constants";
-import { ServiceError } from "@core/errors";
+import { ServiceError, toError } from "@core/errors";
 import { type Logger } from "@core/logger";
 import { keepTrafficDays, readTrafficDays } from "@database/repositories/githubTrafficRepository";
 import { fetchJson, fetchRaw } from "@lib/infra/http.util";
@@ -58,6 +58,10 @@ export class TimedCache<T> {
 			this.#entries.delete(oldest);
 		}
 		return value;
+	}
+
+	clear(): void {
+		this.#entries.clear();
 	}
 }
 
@@ -141,11 +145,11 @@ export function trafficDays(
 }
 
 /** A day this many days before `now`, as GitHub dates its traffic. */
-export function daysBefore(now: number, days: number): string {
+function daysBefore(now: number, days: number): string {
 	return new Date(now - days * DAY_MS).toISOString().slice(0, 10);
 }
 
-export interface GitHubReaderOptions {
+interface GitHubReaderOptions {
 	repository: string;
 	version: string;
 	logger: Logger;
@@ -295,7 +299,7 @@ export class GitHubReader {
 			return await readTrafficDays(daysBefore(now, SITE_LIMITS.trafficDaysShown));
 		} catch (error) {
 			this.#options.logger.warn(
-				{ err: error },
+				{ err: toError(error) },
 				"[SITE] Could not keep the repository's traffic. Showing GitHub's last 14 days instead.",
 			);
 			return fresh;

@@ -29,7 +29,7 @@ import {
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
-import { ApiError } from "@/lib/api";
+import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 
 const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
@@ -61,7 +61,7 @@ export function IdeasPage(): React.JSX.Element {
 	if (settings.isPending) return <Skeleton className="h-96 w-full" />;
 
 	const message = (error: Error | null, fallback: string): string | null =>
-		error === null ? null : error instanceof ApiError ? error.message : fallback;
+		error === null ? null : refusalText(error, fallback);
 	const busy = decide.isPending || remove.isPending;
 	const postable = postableChannels(channels.data ?? []);
 	const channel = channelLabel(postable, settings.data.channelId, t);
@@ -70,7 +70,7 @@ export function IdeasPage(): React.JSX.Element {
 	const countOf = (value: IdeaFilter): number =>
 		value === "all" ? counts.open + counts.accepted + counts.declined : counts[value];
 
-	function go(next: { status?: IdeaFilter; page?: number }): void {
+	function showIdeas(next: { status?: IdeaFilter; page?: number }): void {
 		const query = new URLSearchParams(params);
 		if (next.status !== undefined) {
 			query.set("status", next.status);
@@ -117,7 +117,7 @@ export function IdeasPage(): React.JSX.Element {
 							label: t(FILTER_LABEL[value], { count: countOf(value) }),
 						}))}
 						onChange={(status) => {
-							go({ status });
+							showIdeas({ status });
 						}}
 					/>
 				</div>
@@ -163,7 +163,7 @@ export function IdeasPage(): React.JSX.Element {
 						page={list.data.page}
 						pages={pageCount(list.data.total, list.data.perPage)}
 						onChange={(next) => {
-							go({ page: next });
+							showIdeas({ page: next });
 						}}
 					/>
 				)}

@@ -1,5 +1,6 @@
 import { type Guild } from "discord.js";
 import { getAntiLink } from "@database/repositories/antiLinkRepository";
+import { getAppealSettings } from "@database/repositories/appealRepository";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
@@ -9,7 +10,9 @@ import { getCaseSettings } from "@database/repositories/caseRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
+import { getInviteSettings } from "@database/repositories/inviteRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { getModmailSettings } from "@database/repositories/modmailRepository";
 import { getRaidSettings } from "@database/repositories/raidRepository";
 import { listRoleMenus } from "@database/repositories/roleMenuRepository";
 import { listSchedules } from "@database/repositories/scheduledMessageRepository";
@@ -202,6 +205,45 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 				enabled: menus.length > 0,
 				detail: menus.length === 0 ? null : counted("menus", menus.length),
 				places: at("panel", ...menus.map((menu) => menu.channelId)),
+			};
+		},
+	},
+	{
+		key: "appeals",
+		label: "Ban appeals",
+		async read(guild) {
+			const appeals = await getAppealSettings(guild.id);
+			const on = appeals?.enabled === true;
+			return {
+				enabled: on,
+				detail: on && appeals.channelId !== null ? posting(appeals.channelId) : null,
+				places: at("posts", appeals?.channelId),
+			};
+		},
+	},
+	{
+		key: "invites",
+		label: "Invite tracking",
+		async read(guild) {
+			const invites = await getInviteSettings(guild.id);
+			const on = invites?.enabled === true;
+			return {
+				enabled: on,
+				detail: on && invites.logChannelId !== null ? posting(invites.logChannelId) : null,
+				places: at("logs", invites?.logChannelId),
+			};
+		},
+	},
+	{
+		key: "modmail",
+		label: "Mod mail",
+		async read(guild) {
+			const modmail = await getModmailSettings(guild.id);
+			const on = modmail?.enabled === true;
+			return {
+				enabled: on,
+				detail: on && modmail.channelId !== null ? posting(modmail.channelId) : null,
+				places: at("posts", modmail?.channelId),
 			};
 		},
 	},

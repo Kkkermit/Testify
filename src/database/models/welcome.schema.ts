@@ -4,7 +4,7 @@ import { model, Schema } from "mongoose";
 export type WelcomeStyle = "text" | "embed" | "card";
 
 /** The guild's background image, stored as bytes rather than a URL. */
-export interface WelcomeBackground {
+interface WelcomeBackground {
 	data: Buffer;
 	contentType: string;
 	name: string;

@@ -1,4 +1,5 @@
 import { defineMessageHandler } from "@core/message";
+import { openConversationOf } from "@database/repositories/modmailRepository";
 import { logDirectMessage } from "@database/repositories/profileRepository";
 import { dmLogMessage, loggedUser } from "@lib/bot";
 
@@ -10,6 +11,9 @@ export default defineMessageHandler({
 
 		const channelId = client.env.CHANNEL_DM_LOG;
 		if (channelId === undefined) return;
+
+		// A message in an open mod mail conversation is for that server's staff, not the operator.
+		if ((await openConversationOf(message.author.id)) !== null) return;
 
 		const channel = await client.channels.fetch(channelId).catch(() => null);
 		if (!channel?.isTextBased() || !channel.isSendable()) return;

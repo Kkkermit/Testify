@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type BirthdayOverview, type BirthdayPatch } from "@testify/shared";
+import { useOptimisticMutation } from "@/hooks/useOptimisticMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -26,27 +21,10 @@ export function useBirthdays(guildId: string): UseQueryResult<BirthdayOverview> 
 }
 
 export function useUpdateBirthdays(guildId: string): UseMutationResult<BirthdayOverview, Error, BirthdayPatch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).birthdays();
-
-	return useMutation({
-		mutationFn: (patch: BirthdayPatch) => api.patch<BirthdayOverview>(`/guilds/${guildId}/birthdays`, patch),
-		onMutate: async (patch) => {
-			await client.cancelQueries({ queryKey: key });
-			const previous = client.getQueryData<BirthdayOverview>(key);
-
-			if (previous !== undefined) client.setQueryData<BirthdayOverview>(key, applyPatch(previous, patch));
-
-			return { previous };
-		},
-		onError: (_error, _patch, context) => {
-			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
-		},
-		onSuccess: (overview) => {
-			client.setQueryData(key, overview);
-		},
-		onSettled: () => {
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useOptimisticMutation(
+		keys.guild(guildId).birthdays(),
+		(patch: BirthdayPatch) => api.patch<BirthdayOverview>(`/guilds/${guildId}/birthdays`, patch),
+		applyPatch,
+		[keys.guild(guildId).overview()],
+	);
 }

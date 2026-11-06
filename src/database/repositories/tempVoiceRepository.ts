@@ -11,7 +11,7 @@ export type StoredTempVoiceSettings = Pick<
 	"enabled" | "lobbyChannelId" | "categoryId" | "nameTemplate" | "userLimit"
 >;
 
-export type StoredTempChannel = Pick<TempChannelRecord, "guildId" | "channelId" | "ownerId">;
+type StoredTempChannel = Pick<TempChannelRecord, "guildId" | "channelId" | "ownerId">;
 
 type Lean = TempChannelRecord & { _id: Types.ObjectId };
 

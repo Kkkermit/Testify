@@ -66,7 +66,7 @@ export class ErrorThrottle {
 }
 
 /** The name and message, so the same fault from the same place collapses while a different one still speaks. */
-export function signatureOf(error: Error, scope: string): string {
+function signatureOf(error: Error, scope: string): string {
 	return `${scope}:${error.name}:${error.message}`;
 }
 

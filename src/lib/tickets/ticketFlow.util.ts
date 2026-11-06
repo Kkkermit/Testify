@@ -21,7 +21,7 @@ import { TICKET_ID } from "@lib/tickets/tickets.constants";
 
 /** A ticket from opening to closing: its channel, its permissions, its record and its transcript. */
 
-export function ticketControls() {
+function ticketControls() {
 	return row(
 		button({
 			id: customId(TICKET_ID, "close"),

@@ -16,6 +16,11 @@ import { channelTools } from "@api/routes/channelTools";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { giveaways } from "@api/routes/giveaways";
 import { goodbye } from "@api/routes/goodbye";
+import { guildAppeals } from "@api/routes/guildAppeals";
+import { guildInvites } from "@api/routes/guildInvites";
+import { guildModmail } from "@api/routes/guildModmail";
+import { guildShopRoles } from "@api/routes/guildShopRoles";
+import { guildTuning } from "@api/routes/guildTuning";
 import { ideas } from "@api/routes/ideas";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
@@ -101,6 +106,11 @@ guilds.route("/:guildId/role-menus", roleMenus);
 guilds.route("/:guildId/bot-stats", botStats);
 guilds.route("/:guildId/member-count", memberCount);
 guilds.route("/:guildId/warnings", warnings);
+guilds.route("/:guildId/appeals", guildAppeals);
+guilds.route("/:guildId/modmail", guildModmail);
+guilds.route("/:guildId/invites", guildInvites);
+guilds.route("/:guildId/tuning", guildTuning);
+guilds.route("/:guildId/shop-roles", guildShopRoles);
 guilds.route("/:guildId/starboard", starboard);
 guilds.route("/:guildId/temp-voice", tempVoice);
 guilds.route("/:guildId/setup", setup);
@@ -239,5 +249,6 @@ function kindOf(channel: GuildBasedChannel): ChannelKind {
 }
 
 function colourOf(role: Role): string | null {
-	return role.color === 0 ? null : `#${role.color.toString(16).padStart(6, "0")}`;
+	const { primaryColor } = role.colors;
+	return primaryColor === 0 ? null : `#${primaryColor.toString(16).padStart(6, "0")}`;
 }

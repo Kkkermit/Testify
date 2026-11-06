@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type ServerSettings } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -21,20 +16,9 @@ export function useSaveSection<Patch>(
 	section: string,
 	method: "patch" | "put" = "patch",
 ): UseMutationResult<ServerSettings, Error, Patch> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).settings();
-	const alone = (): boolean => client.isMutating({ mutationKey: key }) === 1;
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: (patch: Patch) => api[method]<ServerSettings>(`/guilds/${guildId}/settings/${section}`, patch),
-		onSuccess: (settings) => {
-			if (alone()) client.setQueryData(key, settings);
-		},
-		onSettled: () => {
-			if (!alone()) return;
-			void client.invalidateQueries({ queryKey: key });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useDocumentMutation(
+		keys.guild(guildId).settings(),
+		(patch: Patch) => api[method]<ServerSettings>(`/guilds/${guildId}/settings/${section}`, patch),
+		[keys.guild(guildId).overview()],
+	);
 }

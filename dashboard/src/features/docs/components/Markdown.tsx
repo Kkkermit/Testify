@@ -26,7 +26,7 @@ import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { highlighted } from "@/lib/highlight";
 
-export interface DocHeading {
+interface DocHeading {
 	id: string;
 	text: string;
 	level: number;
@@ -38,7 +38,7 @@ export interface MarkdownSource {
 	dropTitle?: boolean;
 }
 
-export interface PreparedDoc {
+interface PreparedDoc {
 	blocks: { file: string; tokens: Token[] }[];
 	headings: DocHeading[];
 	ids: WeakMap<Token, string>;

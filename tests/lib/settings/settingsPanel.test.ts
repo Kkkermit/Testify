@@ -81,10 +81,10 @@ describe("modalForm", () => {
 		],
 	});
 
-	/** The modal row union needs narrowing before a text input can be read out. */
+	/** Each field is a label holding one text input, and the union needs narrowing before the input can be read. */
 	const inputAt = (index: number): { value?: string; style?: number; required?: boolean } => {
-		const row = modal.toJSON().components[index] as unknown as { components: unknown[] };
-		return row.components[0] as { value?: string; style?: number; required?: boolean };
+		const label = modal.toJSON().components[index] as unknown as { component: unknown };
+		return label.component as { value?: string; style?: number; required?: boolean };
 	};
 
 	it("carries its own state in the custom ID", () => {

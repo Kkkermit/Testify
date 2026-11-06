@@ -35,9 +35,11 @@ describe("the step list", () => {
 describe("warningsSummary", () => {
 	/** A fifth warning on a four-step list repeats the last step, so the sentence has to say so. */
 	it("says how many steps there are and what repeats after them", () => {
-		expect(warningsSummary([], t)).toBe("A warning is only recorded, and nothing escalates.");
-		expect(warningsSummary([{ action: "warn" }, { action: "kick" }], t)).toBe(
-			"Warnings escalate over 2 steps, and every one after them repeats the last: Kick.",
+		expect(warningsSummary({ steps: [], expireAfterDays: null }, t)).toBe(
+			"A warning is only recorded, and nothing escalates.",
+		);
+		expect(warningsSummary({ steps: [{ action: "warn" }, { action: "kick" }], expireAfterDays: 30 }, t)).toBe(
+			"Warnings escalate over 2 steps, and every one after them repeats the last: Kick. Each warning counts for 30 days.",
 		);
 	});
 });

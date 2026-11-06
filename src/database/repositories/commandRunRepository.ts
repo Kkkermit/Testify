@@ -89,7 +89,7 @@ export async function activeMembers(guildId: string, days: number, now?: Date): 
 	return (await CommandRuns.distinct("userId", { guildId, at: { $gte: windowStart(days, now) } }).exec()).length;
 }
 
-export interface SlowTally {
+interface SlowTally {
 	command: string;
 	runs: number;
 	typicalMs: number;
@@ -120,7 +120,7 @@ export async function slowestCommands(days: number, limit: number, now?: Date): 
 	}));
 }
 
-export interface RunFilter {
+interface RunFilter {
 	userId?: string;
 	command?: string;
 }

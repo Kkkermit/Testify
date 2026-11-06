@@ -17,6 +17,11 @@ export class ApiError extends Error {
 	}
 }
 
+/** The server's own words for a refusal, or the fallback when it gave none. */
+export function refusalText(error: unknown, fallback: string): string {
+	return error instanceof ApiError ? error.message : fallback;
+}
+
 export function isRefusal(error: unknown): boolean {
 	return error instanceof ApiError && [401, 403, 404].includes(error.status);
 }

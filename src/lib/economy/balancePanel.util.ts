@@ -9,7 +9,7 @@ import { formatNumber } from "@lib/format/format.util";
 
 /** The wallet, and the things you would do next. */
 
-export interface BalanceView {
+interface BalanceView {
 	wallet: number;
 	bank: number;
 	username: string;

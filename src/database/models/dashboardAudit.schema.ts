@@ -28,6 +28,8 @@ const auditSchema = new Schema<DashboardAudit>({
 
 // `_id` is in the key because every read sorts by it to break ties.
 auditSchema.index({ guildId: 1, at: -1, _id: -1 });
+// A person's own history, across every server they changed something in.
+auditSchema.index({ actorId: 1, at: -1, _id: -1 });
 // Ninety days, so a busy bot cannot grow this collection without bound.
 auditSchema.index({ at: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
 

@@ -271,3 +271,56 @@ export async function handleStarredDelete(guild: Guild, messageId: string): Prom
 	const repost = await findStarPostByBoardMessage(guild.id, messageId);
 	if (repost !== null) await markStarPostRemoved(guild.id, repost.messageId);
 }
+
+/** Puts a message on the board on a moderator's word, however many stars it has; one already there is refused. */
+export async function addToStarboard(message: Message<true>): Promise<{ channelId: string; messageId: string }> {
+	const guild = message.guild;
+	const settings = await getStarboardSettings(guild.id);
+	if (settings?.enabled !== true || settings.channelId === null) {
+		throw new UserFacingError("The starboard is off in this server. Turn it on with `/starboard`.");
+	}
+	if (message.channelId === settings.channelId) throw new UserFacingError("That message is on the board already.");
+	if (message.system) throw new UserFacingError("Discord's own messages cannot go on the board.");
+
+	const board = await guild.channels.fetch(settings.channelId).catch(() => null);
+	if (board?.isSendable() !== true) {
+		throw new UserFacingError("The board's channel is gone. Pick another with `/starboard`.");
+	}
+	const sourceNsfw = "nsfw" in message.channel && message.channel.nsfw;
+	if (sourceNsfw && !("nsfw" in board && board.nsfw)) {
+		throw new UserFacingError("A message from an age-restricted channel cannot go on a board that is not one.");
+	}
+
+	const existing = await findStarPost(guild.id, message.id);
+	if (existing?.removed === true) {
+		// A moderator asking is the word a repost that was taken down has been waiting for.
+		await deleteStarPost(guild.id, message.id);
+	} else if (existing !== null) {
+		const stale =
+			existing.boardMessageId === null &&
+			(await releaseStaleClaim(guild.id, message.id, new Date(Date.now() - STALE_CLAIM_MS)));
+		if (!stale) throw new UserFacingError("That message is on the board already.");
+	}
+
+	const stars = message.reactions.cache.get(STARBOARD_EMOJI)?.count ?? 0;
+	const { created } = await claimStarPost({
+		guildId: guild.id,
+		messageId: message.id,
+		channelId: message.channelId,
+		authorId: message.author.id,
+		stars,
+	});
+	if (!created) throw new UserFacingError("That message is on the board already.");
+
+	const sent = await board.send(starboardPost(starred(message), stars)).catch(async (error: unknown) => {
+		await deleteStarPost(guild.id, message.id);
+		if (lacksAccess(error)) {
+			throw new UserFacingError(
+				"I cannot post on the board. Give me View Channel, Send Messages and Embed Links there.",
+			);
+		}
+		throw error;
+	});
+	await setBoardMessage(guild.id, message.id, { channelId: board.id, messageId: sent.id });
+	return { channelId: board.id, messageId: sent.id };
+}

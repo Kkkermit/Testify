@@ -391,23 +391,15 @@ export const keys = {
 
 ### The write-race guard — copy this exactly
 
-Every mutation writing a shared cache key declares the **same `mutationKey`** and guards `setQueryData`:
+Every mutation writing a shared cache key goes through **`useDocumentMutation`** in `src/hooks/`, which declares the
+key as its `mutationKey` and guards `setQueryData` with `client.isMutating({ mutationKey: key }) === 1`:
 
 ```ts
-return useMutation({
-	mutationKey: key,
-	mutationFn: send,
-	onSuccess: (settings) => {
-		// A whole-document answer is only trusted while it is the only write in flight.
-		if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
-	},
-	onSettled: () => {
-		if (client.isMutating({ mutationKey: key }) !== 1) return;
-		void client.invalidateQueries({ queryKey: key });
-		void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-	},
-});
+return useDocumentMutation(keys.guild(guildId).treasure(), send, [keys.guild(guildId).overview()]);
 ```
+
+The third argument is every other key the write makes stale. A write that shows its change before the answer lands
+is `useOptimisticMutation(key, send, applyPatch, stale)` instead.
 
 **Why.** Every write answers with the whole document. The order those answers arrive says nothing about the
 order the server applied them — a slow one carries a snapshot taken _before_ a later click and would put that
@@ -447,19 +439,19 @@ Three files with their own segmented control is three places to fix an `aria-pre
 
 ### Primitives
 
-| Component                                                    | Notes                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>`  |
-| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`           |
-| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                   |
-| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`              |
-| `PageHeader`                                                 | `title`, `subtitle`, `action`, `server` — a breadcrumb, on guild screens |
-| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                     |
-| `Skeleton`                                                   | What `isPending` returns                                                 |
-| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike       |
-| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page     |
-| `Summary`                                                    | The one sentence under a page's header saying what the feature does now  |
-| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                          |
+| Component                                                    | Notes                                                                      |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>`    |
+| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`             |
+| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                     |
+| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`                |
+| `PageHeader`                                                 | `title`, `subtitle`, `action`, `server` — a breadcrumb, `back` — a link up |
+| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                       |
+| `Skeleton`                                                   | What `isPending` returns                                                   |
+| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike         |
+| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page       |
+| `Summary`                                                    | The one sentence under a page's header saying what the feature does now    |
+| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                            |
 
 ### Form
 
@@ -779,7 +771,7 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
-| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
+| `/account`                        | The reader's own: profile, changes, reminders, sign-ins and Delete my data                  |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
@@ -879,8 +871,7 @@ Names are **roles, not colours**. `--color-destructive` is red today; the name s
 makes it orange. Renaming a token to its hue is how a palette stops being swappable.
 
 Every value is `light-dark(light, dark)`, so one line carries both themes and neither can be edited without the
-other in view. The values come from the channels design in [`ui-uplift.md`](ui-uplift.md): a graphite dark theme
-and a cool grey light one, with plum as the accent.
+other in view. The palette is a graphite dark theme and a cool grey light one, with plum as the accent.
 
 | Token                        | Dark                                                                         | Light                                                                        | What it is for                                                                     |
 | ---------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -1274,11 +1265,16 @@ a setting.
 
 **Who:** anybody signed in, manager or not. The one journey that needs no server.
 
-1. The sidebar's footer links **Your data** (`/account`), beside Appearance.
+1. Their picture, at the foot of the sidebar or in the phone's header, opens **Your account**; the **Your data** tab
+   is the last of five (`/account?tab=data`).
 2. The page lists what goes and what stays before it offers anything to press.
 3. **Delete my data** opens a warning that it is immediate and cannot be undone, and a field for their username or
    Discord ID. Delete everything stays disabled until it matches.
 4. On success the query cache is emptied and the reader lands on `/` signed out, with a notice saying it is done.
+
+A blacklisted account signs in to `BlockedPage` whatever address it opens: the reason, since when, the owners to
+contact, Sign out and these same steps, and that deleting the data does not lift the block. Every other route
+refuses it on the server (`refuseBlacklisted`).
 
 ### 20.7 The owner journeys
 
@@ -1454,7 +1450,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | 26  | Pair fonts wisely               | Held    | Two: Rubik and Fira Mono, each with one job                                                                                                                                                                                                                                                             |
 | 27  | Limit font and style variations | Held    | §19.4 — four sizes carry 96% of the app                                                                                                                                                                                                                                                                 |
 | 28  | Line spacing, kerning, height   | Held    | Body is 1.55, headings 1.2, card headings `leading-tight` on `CARD_HEADING` because a size utility beats both `@theme` and the base layer. Measured, not assumed                                                                                                                                        |
-| 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `src/test/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette                                                                     |
+| 29  | Contrast is key                 | Held    | **Closed.** Every pair is measured: `src/test/contrast.test.ts` reads the tokens out of `index.css`, so the table cannot drift from the palette                                                                                                                                                         |
 | 30  | Consistent palette              | Held    | §19.2, and no component may write a colour                                                                                                                                                                                                                                                              |
 | 31  | The 60–30–10 rule               | Held    | **Measured** across six screens: 67% ground, 33% surface, 0.2% accent by area. The first two are the rule; the third is deliberately far below 10%, because accent _area_ on an admin tool would be a toy. It appears on every screen — 10 to 26 elements each, as text, borders, icons and small fills |
 | 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                                                                                                                                                                 |
@@ -1478,7 +1474,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | --- | ------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | 41  | Originality and uniqueness           | Apply   | A palette and type chosen for the subject, Discord's own type and a plum accent, rather than a template. Still the reader's call |
 | 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19                                                                                                  |
-| 43  | Most advanced, yet acceptable        | Held    | The channels design in `ui-uplift.md` is the risk taken; the look around it stays quiet                                          |
+| 43  | Most advanced, yet acceptable        | Held    | The channel pages, drawing posts as Discord draws them, are the risk taken; the look around them stays quiet                     |
 | 44  | Inspiration from other industries    | Held    | The channel map takes its shape from Discord's own channel list rather than from other dashboards                                |
 | 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                                               |
 | 46  | Novelty must enhance, not complicate | Held    | Nothing decorative is left to keep out of the reader's way                                                                       |

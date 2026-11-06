@@ -1,4 +1,4 @@
-import { type Guild, type GuildMember, type User } from "discord.js";
+import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
 import { theme } from "@config/theme";
 import { type WarnEntry, type WarnLadderRecord } from "@database/models/moderation.schema";
 import {
@@ -10,20 +10,26 @@ import {
 	setWarningCase,
 	setWarningStep,
 } from "@database/repositories/moderationRepository";
+import { embed } from "@lib/discord/embeds.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 import {
+	countsSince,
+	expiryOf,
 	type GuildWarning,
 	type GuildWarningsPage,
+	type MemberWarning,
 	stepFor,
 	storedStep,
 	stepValue,
 	WARN_LIMITS,
+	type WarnExpiry,
 	type WarnLadder,
 	type WarnOutcome,
 	type WarnProblem,
 	type WarnStep,
+	warningExpired,
 	warningMatches,
 	warnStep,
 } from "@testify/shared";
@@ -31,7 +37,7 @@ import {
 /** Issuing a warning and carrying out the step it lands on, for `/warn`, the dashboard and the link filter alike. */
 
 /** A step stored by an older build, or edited by hand, is dropped rather than trusted. */
-export function ladderOf(record: Pick<WarnLadderRecord, "steps"> | null): WarnLadder {
+export function ladderOf(record: Pick<WarnLadderRecord, "steps" | "expireAfterDays"> | null): WarnLadder {
 	const steps = (record?.steps ?? []).flatMap((stored) => {
 		const parsed = warnStep.safeParse(
 			stored.minutes === undefined || stored.minutes === null ? { action: stored.action } : stored,
@@ -39,15 +45,27 @@ export function ladderOf(record: Pick<WarnLadderRecord, "steps"> | null): WarnLa
 		return parsed.success ? [parsed.data] : [];
 	});
 
-	return { steps: steps.slice(0, WARN_LIMITS.maxSteps) };
+	return { steps: steps.slice(0, WARN_LIMITS.maxSteps), expireAfterDays: expiryOf(record?.expireAfterDays) };
 }
 
 export async function readWarnLadder(guildId: string): Promise<WarnLadder> {
 	return ladderOf(await getWarnLadder(guildId));
 }
 
-export async function writeWarnLadder(guildId: string, steps: WarnStep[], userId: string): Promise<WarnLadder> {
-	return ladderOf(await saveWarnLadder(guildId, steps.slice(0, WARN_LIMITS.maxSteps), userId));
+/** Leaving `expireAfterDays` undefined keeps the window already stored. */
+export async function writeWarnLadder(
+	guildId: string,
+	steps: WarnStep[],
+	userId: string,
+	expireAfterDays?: WarnExpiry | null,
+): Promise<WarnLadder> {
+	return ladderOf(await saveWarnLadder(guildId, steps.slice(0, WARN_LIMITS.maxSteps), userId, expireAfterDays));
+}
+
+export function expiryLabel(expireAfterDays: WarnExpiry | null): string {
+	return expireAfterDays === null
+		? "Warnings count for ever"
+		: `Warnings stop counting after ${String(expireAfterDays)} days`;
 }
 
 export function stepLabel(step: WarnStep): string {
@@ -125,6 +143,30 @@ export interface Issued {
 	notified: boolean;
 }
 
+function consequenceLine(outcome: WarnOutcome): string {
+	if (outcome.step === null) return "No punishment is set for warnings here. `/warn punishments` sets them up.";
+	if (outcome.problem !== null) {
+		return `${stepLabel(outcome.step)} was due, but ${warnProblemText(outcome.problem, outcome.step)}`;
+	}
+
+	return outcome.step.action === "warn" ? "Warning only." : `${stepLabel(outcome.step)}: done.`;
+}
+
+/** What `/warn create` and the Warn action answer with, so the two cannot describe one warning differently. */
+export function warnedEmbed(target: User, reason: string, { entry, outcome, notified }: Issued): EmbedBuilder {
+	return embed({
+		category: "moderation",
+		title: `${theme.emoji.warning} Member warned`,
+		fields: [
+			{ name: "User", value: `${target}`, inline: true },
+			{ name: "Warning ID", value: `\`${entry.warnId}\``, inline: true },
+			{ name: "Notified", value: notified ? "Yes" : "No", inline: true },
+			{ name: "Reason", value: reason },
+			{ name: `Warning ${String(outcome.count)}`, value: consequenceLine(outcome) },
+		],
+	});
+}
+
 export async function issueWarning(options: {
 	guild: Guild;
 	user: User;
@@ -143,7 +185,8 @@ export async function issueWarning(options: {
 		await setWarningCase(guild.id, user.id, entry.warnId, recorded.number);
 		entry.caseNumber = recorded.number;
 	}
-	const [count, ladder] = await Promise.all([countWarnings(guild.id, user.id), readWarnLadder(guild.id)]);
+	const ladder = await readWarnLadder(guild.id);
+	const count = await countWarnings(guild.id, user.id, countsSince(ladder.expireAfterDays));
 	const step = stepFor(ladder.steps, count);
 
 	// Sent before the step, because a member who has been kicked or banned can no longer be reached.
@@ -160,7 +203,14 @@ export async function issueWarning(options: {
 						reason,
 						extra: [
 							{ name: "Warning ID", value: `\`${entry.warnId}\``, inline: true },
-							{ name: "Warnings so far", value: String(count), inline: true },
+							{
+								name:
+									ladder.expireAfterDays === null
+										? "Warnings so far"
+										: `Warnings in the last ${String(ladder.expireAfterDays)} days`,
+								value: String(count),
+								inline: true,
+							},
 							...(step === null || step.action === "warn"
 								? []
 								: [{ name: "Consequence", value: stepLabel(step), inline: true }]),
@@ -202,11 +252,13 @@ export async function readGuildWarnings(
 	page: number,
 	options: { perPage?: number; query?: string } = {},
 ): Promise<GuildWarningsPage> {
-	const records = await listGuildWarnings(guildId);
+	const [records, { expireAfterDays }] = await Promise.all([listGuildWarnings(guildId), readWarnLadder(guildId)]);
 	const query = options.query?.trim() ?? "";
 	const all = records
 		.filter((record) => query === "" || warningMatches({ userId: record.userId, username: record.userTag }, query))
-		.flatMap((record) => record.warnings.map((warning) => toGuildWarning(record.userId, record.userTag, warning)))
+		.flatMap((record) =>
+			record.warnings.map((warning) => toGuildWarning(record.userId, record.userTag, warning, expireAfterDays)),
+		)
 		.sort((a, b) => b.at.localeCompare(a.at));
 
 	const perPage = options.perPage ?? WARN_LIMITS.perPage;
@@ -221,16 +273,32 @@ export async function readGuildWarnings(
 	};
 }
 
-export function toGuildWarning(userId: string, username: string, warning: WarnEntry): GuildWarning {
+export function memberWarningOf(
+	warning: Pick<
+		WarnEntry,
+		"warnId" | "reason" | "executorId" | "executorTag" | "timestamp" | "step" | "stepProblem"
+	> & {
+		edits?: unknown[];
+	},
+	expireAfterDays: WarnExpiry | null,
+): MemberWarning {
 	return {
 		id: warning.warnId,
-		userId,
-		username,
 		reason: warning.reason,
 		byId: warning.executorId,
 		byTag: warning.executorTag,
 		at: new Date(warning.timestamp).toISOString(),
-		edited: warning.edits.length > 0,
+		edited: (warning.edits ?? []).length > 0,
 		...storedStep(warning.step, warning.stepProblem),
+		expired: warningExpired(warning.timestamp, expireAfterDays),
 	};
+}
+
+export function toGuildWarning(
+	userId: string,
+	username: string,
+	warning: WarnEntry,
+	expireAfterDays: WarnExpiry | null,
+): GuildWarning {
+	return { ...memberWarningOf(warning, expireAfterDays), userId, username };
 }

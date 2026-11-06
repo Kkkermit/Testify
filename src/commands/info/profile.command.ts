@@ -1,12 +1,16 @@
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { deleteProfile, getProfile, saveProfile } from "@database/repositories/profileRepository";
+import { deleteProfile, getProfile } from "@database/repositories/profileRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { discordTime } from "@lib/format";
-import { containsProfanity } from "@lib/moderation";
+import { type ProfileProblem, profileProblem, saveOwnProfile } from "@lib/info";
+import { PROFILE_LIMITS, profileBody } from "@testify/shared";
 
-const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const PROBLEM_TEXT: Record<ProfileProblem, string> = {
+	profanity: strings.generic.profanity,
+	birthday: "Write the birthday as a real date, `YYYY-MM-DD`, no later than today.",
+};
 
 export default defineCommand({
 	name: "profile",
@@ -50,37 +54,43 @@ export default defineCommand({
 			name: "set",
 			description: "Create or update your profile.",
 			options: [
-				{ name: "about", description: "A short bio.", type: "string", required: true, maxLength: 500 },
-				{ name: "favourite-song", description: "Your favourite song.", type: "string", required: true, maxLength: 100 },
-				{ name: "favourite-game", description: "Your favourite game.", type: "string", maxLength: 100 },
-				{ name: "hobbies", description: "What you do for fun.", type: "string", maxLength: 200 },
+				{
+					name: "about",
+					description: "A short bio.",
+					type: "string",
+					required: true,
+					maxLength: PROFILE_LIMITS.about,
+				},
+				{
+					name: "favourite-song",
+					description: "Your favourite song.",
+					type: "string",
+					required: true,
+					maxLength: PROFILE_LIMITS.favouriteSong,
+				},
+				{
+					name: "favourite-game",
+					description: "Your favourite game.",
+					type: "string",
+					maxLength: PROFILE_LIMITS.favouriteGame,
+				},
+				{ name: "hobbies", description: "What you do for fun.", type: "string", maxLength: PROFILE_LIMITS.hobbies },
 				{ name: "birthday", description: "Your birthday, as YYYY-MM-DD.", type: "string" },
 			],
 			async run(interaction) {
-				const about = interaction.options.getString("about", true);
-				const song = interaction.options.getString("favourite-song", true);
-				const game = interaction.options.getString("favourite-game");
-				const hobbies = interaction.options.getString("hobbies");
-				const rawBirthday = interaction.options.getString("birthday");
-
-				for (const value of [about, song, game, hobbies]) {
-					if (value !== null && containsProfanity(value)) throw new UserFacingError(strings.generic.profanity);
-				}
-
-				let birthday: Date | null = null;
-				if (rawBirthday !== null) {
-					if (!DATE_PATTERN.test(rawBirthday)) throw new UserFacingError("Write the birthday as `YYYY-MM-DD`.");
-					birthday = new Date(`${rawBirthday}T00:00:00Z`);
-					if (Number.isNaN(birthday.getTime())) throw new UserFacingError("That is not a real date.");
-				}
-
-				await saveProfile(interaction.user.id, {
-					about,
-					favouriteSong: song,
-					favouriteGame: game,
-					hobbies,
-					birthday,
+				const parsed = profileBody.safeParse({
+					about: interaction.options.getString("about", true),
+					favouriteSong: interaction.options.getString("favourite-song", true),
+					favouriteGame: interaction.options.getString("favourite-game"),
+					hobbies: interaction.options.getString("hobbies"),
+					birthday: interaction.options.getString("birthday"),
 				});
+				if (!parsed.success) throw new UserFacingError("Write a bio and a favourite song, each within its limit.");
+
+				const problem = profileProblem(parsed.data);
+				if (problem !== null) throw new UserFacingError(PROBLEM_TEXT[problem]);
+
+				await saveOwnProfile(interaction.user.id, parsed.data);
 
 				await reply(interaction, {
 					embeds: [successEmbed("Your profile has been saved.")],

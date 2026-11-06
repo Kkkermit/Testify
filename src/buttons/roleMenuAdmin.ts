@@ -1,4 +1,4 @@
-import { type Guild, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type ComponentInteraction, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import {
@@ -9,7 +9,7 @@ import {
 	listRoleMenus,
 	type StoredRoleMenu,
 } from "@database/repositories/roleMenuRepository";
-import { type ContainerMessage, modalForm, pickedChannelId } from "@lib/discord";
+import { type ContainerMessage, modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import {
 	changeRoleMenu,
 	offerProblem,
@@ -21,15 +21,6 @@ import {
 	takeDownRoleMenu,
 } from "@lib/roles";
 import { ROLE_MENU_LIMITS, roleMenuBody } from "@testify/shared";
-
-async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately.
-	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
-	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
-		await interaction.update(panel);
-	}
-}
 
 function wordingFrom(interaction: ComponentInteraction): { title: string; description: string } {
 	if (!interaction.isModalSubmit()) throw new UserFacingError("Open the form again and fill it in.");
@@ -96,7 +87,7 @@ export default defineButton({
 
 		switch (context.action) {
 			case "hub": {
-				await show(interaction, roleMenuHub(await listRoleMenus(guild.id), ownerId));
+				await redrawPanel(interaction, roleMenuHub(await listRoleMenus(guild.id), ownerId));
 				return;
 			}
 
@@ -120,13 +111,13 @@ export default defineButton({
 				if (channelId === null) throw new UserFacingError("Open `/role-menu` from a text channel.");
 
 				const menu = await createRoleMenu(guild.id, { ...wording, channelId, roleIds: [], mode: "many" }, ownerId);
-				await show(interaction, editor(menu, { note: "Made. Pick the roles to offer, then post it." }));
+				await redrawPanel(interaction, editor(menu, { note: "Made. Pick the roles to offer, then post it." }));
 				return;
 			}
 
 			case "edit":
 			case "delete-no": {
-				await show(interaction, editor(await menuOf(guild, menuId)));
+				await redrawPanel(interaction, editor(await menuOf(guild, menuId)));
 				return;
 			}
 
@@ -139,7 +130,7 @@ export default defineButton({
 			case "text-save": {
 				const wording = wordingFrom(interaction);
 				const result = await changeRoleMenu(guild, await menuOf(guild, menuId), wording, ownerId);
-				await show(interaction, editor(result.menu, withNote(result.note ?? "Wording saved.")));
+				await redrawPanel(interaction, editor(result.menu, withNote(result.note ?? "Wording saved.")));
 				return;
 			}
 
@@ -147,7 +138,7 @@ export default defineButton({
 				const menu = await menuOf(guild, menuId);
 				const mode = menu.mode === "one" ? "many" : "one";
 				const result = await changeRoleMenu(guild, menu, { mode }, ownerId);
-				await show(interaction, editor(result.menu, withNote(result.note)));
+				await redrawPanel(interaction, editor(result.menu, withNote(result.note)));
 				return;
 			}
 
@@ -159,7 +150,7 @@ export default defineButton({
 
 				const { kept, refused } = splitOffer(interaction.values, (roleId) => offerProblem(member, roleId, guild));
 				const result = await changeRoleMenu(guild, await menuOf(guild, menuId), { roleIds: kept }, ownerId);
-				await show(interaction, editor(result.menu, { ...withNote(result.note), refused }));
+				await redrawPanel(interaction, editor(result.menu, { ...withNote(result.note), refused }));
 				return;
 			}
 
@@ -168,19 +159,22 @@ export default defineButton({
 				if (channelId === null) return;
 
 				const result = await changeRoleMenu(guild, await menuOf(guild, menuId), { channelId }, ownerId);
-				await show(interaction, editor(result.menu, withNote(result.note)));
+				await redrawPanel(interaction, editor(result.menu, withNote(result.note)));
 				return;
 			}
 
 			case "post": {
 				const menu = await menuOf(guild, menuId);
 				const messageId = await publishRoleMenu(guild, menu);
-				await show(interaction, editor({ ...menu, messageId }, { note: `Posted in <#${menu.channelId}>.` }));
+				await redrawPanel(interaction, editor({ ...menu, messageId }, { note: `Posted in <#${menu.channelId}>.` }));
 				return;
 			}
 
 			case "delete": {
-				await show(interaction, roleMenuEditor({ menu: await menuOf(guild, menuId), confirmingDelete: true }, ownerId));
+				await redrawPanel(
+					interaction,
+					roleMenuEditor({ menu: await menuOf(guild, menuId), confirmingDelete: true }, ownerId),
+				);
 				return;
 			}
 
@@ -188,7 +182,7 @@ export default defineButton({
 				const menu = await menuOf(guild, menuId);
 				await takeDownRoleMenu(guild, menu);
 				await deleteRoleMenu(guild.id, menu.id);
-				await show(interaction, roleMenuHub(await listRoleMenus(guild.id), ownerId, `Deleted ${menu.title}.`));
+				await redrawPanel(interaction, roleMenuHub(await listRoleMenus(guild.id), ownerId, `Deleted ${menu.title}.`));
 				return;
 			}
 

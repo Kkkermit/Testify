@@ -1,11 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
 import { strings } from "@config/strings";
-import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { formatDurationLong, parseDuration } from "@lib/format";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, moderatorOf, timeoutMember } from "@lib/moderation";
+import { parseDuration } from "@lib/format";
+import { assertModeratable, DEFAULT_REASON, moderatorOf, timedOutEmbed, timeoutMember } from "@lib/moderation";
 
 export default defineCommand({
 	name: "mute",
@@ -42,23 +41,8 @@ export default defineCommand({
 			durationMs,
 			reason,
 		);
-		const readable = formatDurationLong(durationMs);
-
 		await reply(interaction, {
-			embeds: [
-				actionEmbed({
-					action: "Member timed out",
-					emoji: theme.emoji.moderation,
-					guild,
-					target,
-					moderator: interaction.user,
-					reason,
-					extra: [
-						{ name: "Duration", value: readable, inline: true },
-						{ name: "Notified", value: delivered ? "Yes" : "No", inline: true },
-					],
-				}),
-			],
+			embeds: [timedOutEmbed({ guild, target, moderator: interaction.user, reason, durationMs, notified: delivered })],
 		});
 	},
 });

@@ -62,7 +62,7 @@ function drawHand(ctx: SKRSContext2D, cards: readonly (Card | null)[], y: number
 	});
 }
 
-export interface BlackjackTable {
+interface BlackjackTable {
 	dealer: readonly Card[];
 	player: readonly Card[];
 	/** While the player is still deciding, the dealer's second card stays face down. */
@@ -74,7 +74,7 @@ export interface BlackjackTable {
 
 // The dealer sits across the table from the player, so their label is at the top and the player's at the bottom.
 const BLACKJACK = { height: 440, dealerLabel: 34, dealerCards: 58, middle: 222, playerCards: 258, playerLabel: 410 };
-export const BLACKJACK_RULES = "BLACKJACK PAYS 3 TO 2 · DEALER STANDS ON 17";
+const BLACKJACK_RULES = "BLACKJACK PAYS 3 TO 2 · DEALER STANDS ON 17";
 
 export function blackjackTable(table: BlackjackTable): Buffer {
 	const { canvas, ctx } = blankCanvas(TABLE_WIDTH, BLACKJACK.height);
@@ -104,7 +104,7 @@ export function blackjackTable(table: BlackjackTable): Buffer {
 	return canvas.toBuffer("image/png");
 }
 
-export interface HiLoTable {
+interface HiLoTable {
 	current: Card;
 	history: readonly Card[];
 	multiplier: number;
@@ -112,7 +112,7 @@ export interface HiLoTable {
 }
 
 /** How many earlier cards fit along the bottom of the hi-lo table. */
-export const HILO_HISTORY_SHOWN = 7;
+const HILO_HISTORY_SHOWN = 7;
 
 export function hiloTable(table: HiLoTable): Buffer {
 	const height = 330;

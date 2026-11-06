@@ -93,22 +93,30 @@ export async function warningCounts(guildId: string): Promise<Map<string, number
 	return new Map(rows.map((row) => [row._id, row.count]));
 }
 
-export async function countWarnings(guildId: string, userId: string): Promise<number> {
-	return (await getWarnings(guildId, userId))?.warnings.length ?? 0;
+/** Counts only warnings given at or after `since` when it is set. */
+export async function countWarnings(guildId: string, userId: string, since: Date | null = null): Promise<number> {
+	const warnings = (await getWarnings(guildId, userId))?.warnings ?? [];
+
+	return since === null ? warnings.length : warnings.filter((warning) => warning.timestamp >= since).length;
 }
 
 export async function getWarnLadder(guildId: string): Promise<WarnLadderRecord | null> {
 	return WarnLadderConfig.findOne({ guildId }).lean<WarnLadderRecord>().exec();
 }
 
+/** Leaving `expireAfterDays` undefined keeps what is stored. */
 export async function saveWarnLadder(
 	guildId: string,
 	steps: WarnLadderRecord["steps"],
 	userId: string,
+	expireAfterDays?: number | null,
 ): Promise<WarnLadderRecord> {
 	return WarnLadderConfig.findOneAndUpdate(
 		{ guildId },
-		{ $set: { steps, lastModifiedBy: userId }, $setOnInsert: { guildId } },
+		{
+			$set: { steps, lastModifiedBy: userId, ...(expireAfterDays === undefined ? {} : { expireAfterDays }) },
+			$setOnInsert: { guildId },
+		},
 		{ upsert: true, new: true, lean: true },
 	).exec() as Promise<WarnLadderRecord>;
 }

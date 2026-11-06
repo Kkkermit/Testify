@@ -1,10 +1,11 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { Collection, PermissionsBitField } from "discord.js";
+import { Collection, type PermissionResolvable, PermissionsBitField } from "discord.js";
 import { format, resolveConfig } from "prettier";
 import { ALL_CATEGORIES, categoryEmoji, categoryLabel, HIDDEN_CATEGORIES } from "@config/categories";
 import { type TestifyClient } from "@core/client";
 import { type Command, subcommandsOf } from "@core/command";
+import { type ContextMenu } from "@core/contextMenu";
 import { loadEverything } from "@core/loader";
 import { createLogger } from "@core/logger";
 import { humanisePermission } from "@lib/format/format.util";
@@ -15,6 +16,7 @@ const client = {
 	commands: new Collection<string, Command>(),
 	aliases: new Collection<string, string>(),
 	buttons: new Collection(),
+	contextMenus: new Collection<string, ContextMenu>(),
 	messageHandlers: [],
 	logger: createLogger("fatal", false),
 	on: () => undefined,
@@ -36,13 +38,16 @@ const aliasCount = listed.reduce((total, command) => total + aliasesOf(command).
 const badge = (label: string, value: number, colour: string): string =>
 	`![${label}: ${value}](https://img.shields.io/badge/${encodeURIComponent(label)}-${value}-${colour}?style=for-the-badge)`;
 
-function needs(command: Command): string {
-	const flags = [command.permissions ?? [], ...subcommandsOf(command).map((sub) => sub.permissions ?? [])].flat();
+function needs(flags: PermissionResolvable[]): string {
 	const names = [...new Set(new PermissionsBitField(flags).toArray())].map((name) => {
 		const words = humanisePermission(name);
 		return words.charAt(0).toUpperCase() + words.slice(1);
 	});
 	return names.length === 0 ? "—" : names.join(", ");
+}
+
+function permissionsOf(command: Command): PermissionResolvable[] {
+	return [command.permissions ?? [], ...subcommandsOf(command).map((sub) => sub.permissions ?? [])].flat();
 }
 
 /** GitHub's heading anchor: symbols go, a variation selector and the space after an emoji stay. */
@@ -103,10 +108,28 @@ for (const category of shown) {
 			.join(", ");
 
 		lines.push(
-			`| \`/${command.name}\` | ${command.description} | ${subcommands || "—"} | ${aliases || "—"} | ${needs(command)} |`,
+			`| \`/${command.name}\` | ${command.description} | ${subcommands || "—"} | ${aliases || "—"} | ${needs(permissionsOf(command))} |`,
 		);
 	}
 
+	lines.push("");
+}
+
+const menus = [...client.contextMenus.values()].sort((a, b) => a.name.localeCompare(b.name));
+if (menus.length > 0) {
+	lines.push(
+		"## 🖱️ Right-click actions",
+		"",
+		"In a server, right-click a member or a message (or long-press it on a phone) and open **Apps**.",
+		"",
+		"| Action | On | What it does | Needs |",
+		"| --- | --- | --- | --- |",
+	);
+	for (const menu of menus) {
+		lines.push(
+			`| **${menu.name}** | ${menu.type === "user" ? "A member" : "A message"} | ${menu.description} | ${needs(menu.permissions ?? [])} |`,
+		);
+	}
 	lines.push("");
 }
 

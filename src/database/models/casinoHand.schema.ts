@@ -6,7 +6,6 @@ export interface CasinoHandRecord {
 	guildId: string;
 	userId: string;
 	game: "blackjack" | "hilo";
-	/** The opening bet. */
 	bet: number;
 	/** Everything taken for this hand so far, which a double down raises. */
 	staked: number;

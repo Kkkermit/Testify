@@ -27,7 +27,7 @@ export function headingName(text: string): string {
 		.trim();
 }
 
-export function anchorName(anchor: string): string {
+function anchorName(anchor: string): string {
 	return headingName(anchor.replace(/-/g, " "));
 }
 
@@ -75,11 +75,6 @@ export function sectionsOf(markdown: string, names: readonly string[]): (string 
 	});
 }
 
-export function anchorsOf(markdown: string): string[] {
-	const slugger = new Slugger();
-	return headingsOf(markdown.split("\n")).map((heading) => slugger.slug(inlineText(heading.text)));
-}
-
 export function inlineText(markdown: string): string {
 	return markdown
 		.replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -95,7 +90,7 @@ export function withoutMarkup(markdown: string): string {
 		.replace(/^\s*<\/?details>\s*$/gm, "");
 }
 
-export type Destination =
+type Destination =
 	| { kind: "route"; to: string }
 	| { kind: "external"; href: string }
 	| { kind: "anchor"; id: string }
@@ -152,7 +147,7 @@ export function destinationOf(href: string, context: LinkContext): Destination {
 	return { kind: "route", to: `/source-code/${path}` };
 }
 
-export interface EnvVariable {
+interface EnvVariable {
 	name: string;
 	description: string;
 	example: string;
@@ -214,8 +209,7 @@ export function decodeEntities(text: string): string {
 	});
 }
 
-export const ALERTS = ["note", "tip", "important", "warning", "caution"] as const;
-export type Alert = (typeof ALERTS)[number];
+export type Alert = "note" | "tip" | "important" | "warning" | "caution";
 
 export function alertOf(quote: string): { kind: Alert; body: string } | null {
 	const match = /^\s*\[!(note|tip|important|warning|caution)\]\s*\n?/i.exec(quote);

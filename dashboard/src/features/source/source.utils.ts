@@ -6,7 +6,7 @@ export interface TreeIndex {
 	byPath: ReadonlyMap<string, SourceEntry>;
 }
 
-export function parentOf(path: string): string {
+function parentOf(path: string): string {
 	return path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 }
 

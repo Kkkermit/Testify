@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 5 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 6 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -129,6 +129,9 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/only the bot’s owners can add or lift a block/);
 		expect(text).toMatch(/Warnings, cases, softbans and blocks against you are kept/);
 		expect(text).toMatch(/stays with your name taken off/);
+		// `directMessageLog` skips a sender with a conversation open, which `modmail.test.ts` proves.
+		expect(botSource("src/events/message/directMessageLog.event.ts")).toContain("openConversationOf");
+		expect(text).toMatch(/is not forwarded to the operator/);
 		// `purgeGuild` keeps member records, so the notice must not promise they go with the bot.
 		expect(text).toMatch(/every member record .* kept after the bot is removed/);
 	});
@@ -149,6 +152,15 @@ describe("the legal pages", () => {
 		const readers = /readerDays: (\d+)/.exec(botSource("shared/src/notices.ts"))?.[1];
 		expect(text).toContain(`When you last read the notifications: ${String(readers)} days`);
 		expect(text).toContain(`deleted ${String(readers)} days after you last read the notifications`);
+
+		const appeals = /keepDays: (\d+)/.exec(botSource("shared/src/appeals.ts"))?.[1];
+		expect(text).toContain(`Ban appeals: ${String(appeals)} days after staff decide`);
+
+		const modmail = /keepDays: (\d+)/.exec(botSource("shared/src/modmail.ts"))?.[1];
+		expect(text).toContain(`Mod mail conversations: ${String(modmail)} days after they close`);
+
+		const invites = /keepDays: (\d+)/.exec(botSource("shared/src/invites.ts"))?.[1];
+		expect(text).toContain(`Invite tracking: ${String(invites)} days after each join`);
 
 		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
 		expect(text).toContain(`Who ran a command: ${String(runs)} days`);

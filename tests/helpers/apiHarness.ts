@@ -1,6 +1,10 @@
+import { type Env as HonoEnv, type Hono } from "hono";
+import { type ApiBindings } from "@api/context";
 import { CSRF_COOKIE, SESSION_COOKIE } from "@api/cookies";
+import { asProblem, problemBody } from "@api/errors";
 import { type createApi } from "@api/server";
 import { type Env } from "@config/env";
+import { type TestifyClient } from "@core/client";
 
 /** The real app signed the way the page signs, for tests that need `createApi` rather than one router. */
 
@@ -57,4 +61,27 @@ export async function askRaw(
 	});
 	const parsed = (await response.json().catch(() => ({}))) as { error?: { code?: string; message?: string } };
 	return { status: response.status, code: parsed.error?.code, message: parsed.error?.message };
+}
+
+/** The real boundary's mapping, so a route mounted on its own answers a refusal exactly as the app would. */
+export function answerLikeTheApp<Bindings extends HonoEnv>(app: Hono<Bindings>): void {
+	app.onError((error) => {
+		const problem = asProblem(error);
+		return Response.json(problemBody(problem), { status: problem.status });
+	});
+}
+
+/** What the real app's middleware sets before a route runs, for a route mounted on its own. */
+export function withSession(
+	app: Hono<ApiBindings>,
+	client: TestifyClient,
+	session: { userId: string; username?: string },
+): void {
+	app.use("*", async (context, next) => {
+		context.set("client", client);
+		context.set("env", {} as Env);
+		context.set("oauth", null);
+		context.set("session", { _id: "s", ...session } as never);
+		await next();
+	});
 }

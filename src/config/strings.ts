@@ -1,11 +1,5 @@
 export const strings = {
 	generic: {
-		failureTitle: "That did not work",
-		failure: (what: string | null, reference: string): string =>
-			`Something broke on our side while ${what === null ? "doing that" : `running ${what}`} — nothing you did caused it. ` +
-			`It has been reported, so try again in a moment.\n-# Still happening? Use \`/bug-report\` and quote **${reference}**.`,
-		serviceDown: (service: string): string =>
-			`${service} is not answering right now, so that could not finish. Try again in a minute or two.`,
 		unknownCommand: (prefix: string): string =>
 			`That command does not exist. Use \`${prefix}help\` to see everything I can do.`,
 		guildOnly: "This command can only be used inside a server.",

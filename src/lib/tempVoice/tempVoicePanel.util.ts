@@ -2,7 +2,7 @@ import { ButtonStyle, ChannelType } from "discord.js";
 import { customId } from "@core/button";
 import { channelSelect, row } from "@lib/discord/components.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
-import { channelValue, settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
+import { channelValue, settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { TEMP_VOICE_SETTINGS_ID } from "@lib/tempVoice/tempVoice.constants";
 import { TEMP_VOICE_LOBBY_NAME, type TempVoiceSettings } from "@testify/shared";
 
@@ -74,12 +74,7 @@ export function tempVoiceSettingsPanel(settings: TempVoiceSettings, ownerId: str
 			},
 		],
 		actions: [
-			{
-				action: "toggle",
-				label: settings.enabled ? "Turn off" : "Turn on",
-				style: settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
-				disabled: !settings.enabled && settings.lobbyChannelId === null,
-			},
+			switchAction(settings.enabled, settings.lobbyChannelId !== null),
 			{
 				action: "make-lobby",
 				label: `Make a "${TEMP_VOICE_LOBBY_NAME}" lobby`,

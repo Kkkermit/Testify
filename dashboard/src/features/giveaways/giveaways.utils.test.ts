@@ -1,12 +1,5 @@
 import { type GiveawayRow } from "@testify/shared";
-import {
-	canReroll,
-	durationMsOf,
-	giveawayPost,
-	nextDraw,
-	ordered,
-	statusOf,
-} from "@/features/giveaways/giveaways.utils";
+import { canReroll, durationMsOf, giveawayPost, nextDraw, ordered } from "@/features/giveaways/giveaways.utils";
 
 function row(overrides: Partial<GiveawayRow> = {}): GiveawayRow {
 	return {
@@ -39,13 +32,6 @@ describe("ordered", () => {
 		];
 
 		expect(ordered(rows).map((entry) => entry.messageId)).toEqual(["running", "old-ended"]);
-	});
-});
-
-describe("statusOf and runningCount", () => {
-	it("reads the status off the record", () => {
-		expect(statusOf(row())).toBe("running");
-		expect(statusOf(row({ ended: true }))).toBe("ended");
 	});
 });
 

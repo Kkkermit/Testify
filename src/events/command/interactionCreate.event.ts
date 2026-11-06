@@ -1,11 +1,40 @@
-import { DiscordAPIError, Events, type Interaction, MessageFlags, RESTJSONErrorCodes } from "discord.js";
+import {
+	type ContextMenuCommandInteraction,
+	DiscordAPIError,
+	Events,
+	type Interaction,
+	MessageFlags,
+	RESTJSONErrorCodes,
+} from "discord.js";
 import { parseCustomId } from "@core/button";
-import { runChecks } from "@core/checks";
+import { checkContextMenu, runChecks } from "@core/checks";
+import { type TestifyClient } from "@core/client";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
+
+async function runContextMenu(client: TestifyClient, interaction: ContextMenuCommandInteraction): Promise<void> {
+	const menu = client.contextMenus.get(interaction.commandName);
+	if (!menu || !interaction.inCachedGuild()) return;
+
+	const refusal = await checkContextMenu(client, interaction, menu);
+	if (refusal !== null) {
+		await interaction.reply({ embeds: [refusalEmbed(refusal)], flags: MessageFlags.Ephemeral });
+		return;
+	}
+
+	await runButton(
+		interaction,
+		async () => {
+			if (menu.type === "user" && interaction.isUserContextMenuCommand()) await menu.run(interaction, client);
+			if (menu.type === "message" && interaction.isMessageContextMenuCommand()) await menu.run(interaction, client);
+		},
+		client,
+		menu.name,
+	);
+}
 
 /** The only `interactionCreate` listener. */
 export default defineEvent({
@@ -23,9 +52,9 @@ export default defineEvent({
 				// Discord drops a keystroke's interaction when the next one arrives, so an answer crossing it is routine.
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownInteraction) {
 					const ageMs = Date.now() - interaction.createdTimestamp;
-					client.logger.trace({ command, ageMs }, "Autocomplete answered an interaction that had already expired");
+					client.logger.trace({ command, ageMs }, "[AUTOCOMPLETE] Answered an interaction that had already expired.");
 				} else {
-					client.logger.error({ err: toError(error), command }, "Autocomplete failed");
+					client.logger.error({ err: toError(error), command }, "[AUTOCOMPLETE_ERROR] An autocomplete failed.");
 				}
 			}
 			return;
@@ -34,7 +63,10 @@ export default defineEvent({
 		if (interaction.isChatInputCommand()) {
 			const command = client.commands.get(interaction.commandName);
 			if (!command) {
-				client.logger.warn({ command: interaction.commandName }, "Unknown slash command");
+				client.logger.warn(
+					{ command: interaction.commandName },
+					"[COMMAND] Received a slash command the bot does not have. Reload Discord if it was removed.",
+				);
 				return;
 			}
 
@@ -54,6 +86,11 @@ export default defineEvent({
 			mentionNoticesAfterCommand(interaction.user.id, client.logger, (unread) =>
 				interaction.followUp({ embeds: [noticeHint(unread, `/${NOTICE_COMMAND}`)], flags: MessageFlags.Ephemeral }),
 			);
+			return;
+		}
+
+		if (interaction.isContextMenuCommand()) {
+			await runContextMenu(client, interaction);
 			return;
 		}
 

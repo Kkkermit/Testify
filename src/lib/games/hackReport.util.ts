@@ -15,7 +15,7 @@ const hackDataSchema = z.object({
 	searches: z.array(z.string().min(1)).min(1),
 });
 
-export type HackData = z.infer<typeof hackDataSchema>;
+type HackData = z.infer<typeof hackDataSchema>;
 
 let cached: HackData | undefined;
 
@@ -41,7 +41,7 @@ function pick<T>(values: readonly T[], roll: Roll): T {
 	return values[roll(values.length)]!;
 }
 
-export interface HackField {
+interface HackField {
 	name: string;
 	value: string;
 	inline?: boolean;

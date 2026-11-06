@@ -12,7 +12,7 @@ import { formatNumber } from "@lib/format/format.util";
 
 const INVENTORY_PAGE = 5;
 
-export interface InventoryEntry {
+interface InventoryEntry {
 	itemId: string;
 	name: string;
 	emoji: string;

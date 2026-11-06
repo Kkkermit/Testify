@@ -1,7 +1,9 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import economy from "@commands/economy/create.command";
 import lottery from "@commands/economy/lottery.command";
 import {
 	checkCasinoPlay,
+	checkContextMenu,
 	checkMusicControl,
 	clearCooldowns,
 	OWNER_ONLY_REFUSAL,
@@ -101,9 +103,33 @@ describe("runChecks", () => {
 		expect(built.description).toContain("any other");
 		expect(byName.Reason).toBe("Spamming");
 		expect(byName["Blocked since"]).toBe("<t:1700000000:D> (<t:1700000000:R>)");
-		expect(byName["Think this is a mistake?"]).toContain("owner");
+		expect(byName["Think this is a mistake?"]).toContain("only way to have the block lifted");
+		expect(built.description).toContain("/delete-my-data");
+		expect(built.description).toContain("does not lift the block");
 		expect(built.color).toBe(refusalEmbed("x").toJSON().color);
 		expect(refusalText(refusal!)).toContain("**Reason:** Spamming");
+	});
+
+	/** Somebody blocked by mistake has nobody to ask unless the refusal names the owners. */
+	it("names every owner Discord can find as the people to ask", async () => {
+		findBlacklistEntry.mockResolvedValue({ reason: "Spamming", createdAt: new Date() });
+		const client = createMockClient({
+			env: { DISCORD_OWNER_IDS: ["100000000000000001", "100000000000000002", "100000000000000003"] },
+			users: {
+				fetch: jest.fn((id: string) =>
+					id === "100000000000000003"
+						? Promise.reject(new Error("Unknown User"))
+						: Promise.resolve({ username: `owner${id.slice(-1)}` }),
+				),
+			},
+		} as never);
+
+		const refusal = await runChecks(createMockInteraction(), plain, client);
+		const fields = refusalEmbed(refusal!).toJSON().fields ?? [];
+
+		expect(fields.find((field) => field.name === "Think this is a mistake?")?.value).toContain(
+			"Contact **owner1** or **owner2**, the bot's owners.",
+		);
 	});
 
 	/** Deleting your own data is the one thing the blacklist does not take away, and no server can switch it off. */
@@ -354,6 +380,27 @@ describe("the lottery", () => {
 	});
 });
 
+/** Selling a role hands it out, so Manage Server alone may not choose what the shop sells. */
+describe("the shop's roles", () => {
+	it("refuses shop-role to somebody who can manage the server but not its roles", async () => {
+		const interaction = createMockInteraction({
+			subcommand: "shop-role",
+			overrides: memberWith(PermissionFlagsBits.ManageGuild),
+		});
+
+		expect(await runChecks(interaction, economy, createMockClient())).toContain("manage roles");
+	});
+
+	it("lets somebody with Manage Roles through", async () => {
+		const interaction = createMockInteraction({
+			subcommand: "shop-role",
+			overrides: memberWith(PermissionFlagsBits.ManageRoles),
+		});
+
+		expect(await runChecks(interaction, economy, createMockClient())).toBeNull();
+	});
+});
+
 /** The Add to queue button can be pressed by anybody, so it has to pass what `/play` itself would have to. */
 describe("checkMusicControl", () => {
 	const guildId = "300000000000000001";
@@ -486,5 +533,88 @@ describe("the casino's switches", () => {
 			casinoSettings.mockResolvedValue({ ...closed, enabled: true, disabledGames: ["slots"] });
 			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/Slots is switched off/);
 		});
+	});
+});
+
+describe("checkContextMenu", () => {
+	beforeEach(() => {
+		findBlacklistEntry.mockResolvedValue(null);
+		offGlobally.mockResolvedValue([]);
+		offInGuild.mockResolvedValue([]);
+	});
+
+	const pressing = (member: bigint, bot: bigint) => ({
+		user: { id: USER_ID },
+		guildId: "400000000000000004",
+		memberPermissions: new PermissionsBitField(member),
+		appPermissions: new PermissionsBitField(bot),
+	});
+	const warn = { switchedBy: "warn", permissions: [PermissionFlagsBits.ModerateMembers] };
+	const timeout = { ...warn, switchedBy: "mute", botPermissions: [PermissionFlagsBits.ModerateMembers] };
+
+	/** A server can hand a right-click action to anybody in its own settings, so the permission is asked here too. */
+	it("asks the person for the action's permissions, and the bot for its own", async () => {
+		const client = createMockClient();
+		const moderator = PermissionFlagsBits.ModerateMembers;
+
+		await expect(checkContextMenu(client, pressing(0n, moderator), warn)).resolves.toMatch(
+			/You need.*moderate members/,
+		);
+		await expect(checkContextMenu(client, pressing(moderator, 0n), timeout)).resolves.toMatch(
+			/I need.*moderate members/,
+		);
+		await expect(checkContextMenu(client, pressing(moderator, moderator), timeout)).resolves.toBeNull();
+	});
+
+	/** Turning `/warn` off has to take the Warn action with it, or the switch only hides half of the feature. */
+	it("is off wherever the command it belongs to is off", async () => {
+		offInGuild.mockResolvedValue(["warn"]);
+
+		const refusal = await checkContextMenu(createMockClient(), pressing(PermissionFlagsBits.ModerateMembers, 0n), warn);
+
+		expect(refusal).toMatch(/switched off in this server/);
+	});
+});
+
+describe("refusals in the reader's language", () => {
+	beforeEach(() => {
+		clearCooldowns();
+		findBlacklistEntry.mockResolvedValue(null);
+		offGlobally.mockResolvedValue([]);
+		offInGuild.mockResolvedValue(["ping"]);
+	});
+
+	/** Discord already knows which language the reader uses, so a refusal in English to a German reader is a choice. */
+	it("refuses a slash command in the reader's own language", async () => {
+		const interaction = createMockInteraction({ overrides: { locale: "de" } as never });
+
+		expect(await runChecks(interaction, plain, createMockClient())).toBe(
+			"Dieser Befehl ist auf diesem Server ausgeschaltet. Jeder mit „Server verwalten“ kann ihn wieder einschalten.",
+		);
+	});
+
+	/** The permission and the wait are filled into the sentence, so they have to be in its language too. */
+	it("names the missing permission and the wait in the reader's language", async () => {
+		const german = createMockInteraction({
+			subcommand: "shop-role",
+			overrides: { locale: "de", ...memberWith(PermissionFlagsBits.ManageGuild) } as never,
+		});
+		const command = { ...plain, cooldown: 90_000 };
+		const french = createMockInteraction({ overrides: { locale: "fr" } as never });
+		offInGuild.mockResolvedValue([]);
+		await runChecks(french, command, createMockClient());
+
+		expect(await runChecks(german, economy, createMockClient())).toBe(
+			"Dir fehlen diese Berechtigungen: `Rollen verwalten`",
+		);
+		expect(await runChecks(french, command, createMockClient())).toMatch(/^Doucement.*1\sminute et 30\ssecondes/);
+	});
+
+	it("falls back to the server's language, then to English", async () => {
+		const inGerman = createMockInteraction({ overrides: { guild: { preferredLocale: "de", id: "1" } } as never });
+		const unknown = createMockInteraction({ overrides: { locale: "pt-BR" } as never });
+
+		expect(await runChecks(inGerman, plain, createMockClient())).toMatch(/^Dieser Befehl/);
+		expect(await runChecks(unknown, plain, createMockClient())).toMatch(/^That command is switched off/);
 	});
 });

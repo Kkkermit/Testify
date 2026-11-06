@@ -1,9 +1,8 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { blacklist } from "@api/routes/blacklist";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import {
 	addToBlacklist,
@@ -45,18 +44,9 @@ function clientFor(cachedUser: unknown = null, fetch = jest.fn(() => Promise.rej
 
 function app(client: TestifyClient, userId = OWNER): Hono<ApiBindings> {
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId, username: "someone" });
 	instance.route("/blacklist", blacklist);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

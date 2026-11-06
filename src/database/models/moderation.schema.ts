@@ -17,7 +17,7 @@ const blacklistSchema = new Schema<BlacklistEntry>(
 
 export const Blacklist = model<BlacklistEntry>("blacklist", blacklistSchema);
 
-export interface WarnEdit {
+interface WarnEdit {
 	editedById: string;
 	editedByTag: string;
 	oldReason: string;
@@ -93,6 +93,8 @@ export const Warnings = model<WarnRecord>("warnTutorial", warnRecordSchema);
 export interface WarnLadderRecord {
 	guildId: string;
 	steps: { action: string; minutes?: number | null }[];
+	/** Absent on records from before warnings could expire, which count every warning. */
+	expireAfterDays?: number | null;
 	lastModifiedBy: string;
 	createdAt: Date;
 	updatedAt: Date;
@@ -106,6 +108,7 @@ const warnLadderSchema = new Schema<WarnLadderRecord>(
 			required: true,
 			default: [],
 		},
+		expireAfterDays: { type: Number, default: null },
 		lastModifiedBy: { type: String, required: true },
 	},
 	{ timestamps: true },
@@ -143,7 +146,7 @@ softbanSchema.index({ isActive: 1, expiresAt: 1 });
 
 export const Softban = model<SoftbanEntry>("SoftbanEntry", softbanSchema);
 
-export interface DmLogEntry {
+interface DmLogEntry {
 	messageId: string;
 	authorId: string;
 	content: string;

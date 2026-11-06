@@ -1,5 +1,4 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
@@ -9,12 +8,11 @@ import {
 	assertModeratable,
 	issueWarning,
 	readWarnLadder,
-	stepLabel,
 	warnLadderPanel,
+	warnedEmbed,
 	warningActionText,
-	warnProblemText,
 } from "@lib/moderation";
-import { type WarnOutcome } from "@testify/shared";
+import { warningExpired } from "@testify/shared";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
 const WARN_ID_OPTION = {
@@ -24,15 +22,6 @@ const WARN_ID_OPTION = {
 	required: true,
 	autocomplete: true,
 } as const;
-
-function consequenceLine(outcome: WarnOutcome): string {
-	if (outcome.step === null) return "No punishment is set for warnings here. `/warn punishments` sets them up.";
-	if (outcome.problem !== null) {
-		return `${stepLabel(outcome.step)} was due, but ${warnProblemText(outcome.problem, outcome.step)}`;
-	}
-
-	return outcome.step.action === "warn" ? "Warning only." : `${stepLabel(outcome.step)}: done.`;
-}
 
 export default defineCommand({
 	name: "warn",
@@ -58,7 +47,7 @@ export default defineCommand({
 				const member = await guild.members.fetch(target.id).catch(() => null);
 				if (member) assertModeratable(interaction, member);
 
-				const { entry, outcome, notified } = await issueWarning({
+				const issued = await issueWarning({
 					guild,
 					user: target,
 					member,
@@ -66,21 +55,7 @@ export default defineCommand({
 					reason,
 				});
 
-				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "moderation",
-							title: `${theme.emoji.warning} Member warned`,
-							fields: [
-								{ name: "User", value: `${target}`, inline: true },
-								{ name: "Warning ID", value: `\`${entry.warnId}\``, inline: true },
-								{ name: "Notified", value: notified ? "Yes" : "No", inline: true },
-								{ name: "Reason", value: reason },
-								{ name: `Warning ${String(outcome.count)}`, value: consequenceLine(outcome) },
-							],
-						}),
-					],
-				});
+				await reply(interaction, { embeds: [warnedEmbed(target, reason, issued)] });
 			},
 		},
 		{
@@ -101,24 +76,32 @@ export default defineCommand({
 			async run(interaction) {
 				const guild = inGuild(interaction);
 				const target = interaction.options.getUser("user") ?? interaction.user;
-				const record = await getWarnings(guild.id, target.id);
+				const [record, { expireAfterDays }] = await Promise.all([
+					getWarnings(guild.id, target.id),
+					readWarnLadder(guild.id),
+				]);
 
 				if (!record || record.warnings.length === 0) {
 					await reply(interaction, { embeds: [successEmbed(`${target} has no warnings.`)] });
 					return;
 				}
 
+				const expired = (warning: { timestamp: Date }): boolean => warningExpired(warning.timestamp, expireAfterDays);
+				const counting = record.warnings.filter((warning) => !expired(warning)).length;
+				const total = String(record.warnings.length);
+
 				await reply(interaction, {
 					embeds: [
 						embed({
 							category: "moderation",
-							title: `Warnings for ${target.username} (${record.warnings.length})`,
+							title: `Warnings for ${target.username} (${counting === record.warnings.length ? total : `${total}, ${String(counting)} still counting`})`,
 							description: record.warnings
 								.slice(-15)
 								.map(
 									(warning) =>
 										`\`${warning.warnId}\` — ${truncate(warning.reason, 80)}\n` +
-										`> by ${mentionOf(warning.executorId)} ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}`,
+										`> by ${mentionOf(warning.executorId)} ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}` +
+										(expired(warning) ? " · no longer counts" : ""),
 								)
 								.join("\n\n"),
 							thumbnail: target.displayAvatarURL(),
@@ -136,7 +119,10 @@ export default defineCommand({
 				const target = interaction.options.getUser("user", true);
 				const warnId = interaction.options.getString("warn-id", true);
 
-				const record = await getWarnings(guild.id, target.id);
+				const [record, { expireAfterDays }] = await Promise.all([
+					getWarnings(guild.id, target.id),
+					readWarnLadder(guild.id),
+				]);
 				const warning = record?.warnings.find((candidate) => candidate.warnId === warnId);
 				if (!warning) throw new UserFacingError(`No warning with ID \`${warnId}\` for ${target}.`);
 
@@ -150,6 +136,9 @@ export default defineCommand({
 								{ name: "Moderator", value: mentionOf(warning.executorId), inline: true },
 								{ name: "Issued", value: discordTime(warning.timestamp, "F"), inline: true },
 								{ name: "Action", value: warningActionText(warning), inline: true },
+								...(warningExpired(warning.timestamp, expireAfterDays)
+									? [{ name: "Counts", value: `No, it is older than ${String(expireAfterDays)} days`, inline: true }]
+									: []),
 								{ name: "Reason", value: warning.reason },
 								{
 									name: `Edits (${warning.edits.length})`,

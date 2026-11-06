@@ -30,9 +30,11 @@ import {
 	starboardSettings,
 	welcomeConfig,
 } from "@/test/fixtures/community";
-import { casinoSettings, lotterySettings, treasureSettings } from "@/test/fixtures/economy";
+import { casinoSettings, lotterySettings, shopRoles, treasureSettings, tuning } from "@/test/fixtures/economy";
 import { giveawayList, musicSettings } from "@/test/fixtures/entertainment";
 import {
+	appealPage,
+	appealSettings,
 	auditLogConfig,
 	automodRules,
 	banPage,
@@ -41,6 +43,7 @@ import {
 	channelTools,
 	raidOverview,
 	guildWarnings,
+	inviteOverview,
 	memberDetail,
 	memberMatches,
 	memberRoles,
@@ -48,6 +51,9 @@ import {
 	warnLadder,
 	warningAdded,
 	memberDirectory,
+	modmailConversations,
+	modmailSettings,
+	ownAppeals,
 } from "@/test/fixtures/moderation";
 import {
 	blacklistRows,
@@ -77,7 +83,17 @@ import {
 	quietWeek,
 	noRoleUses,
 } from "@/test/fixtures/server";
-import { aGuild, botProfile, configured, healthy, me } from "@/test/fixtures/session";
+import {
+	accountHistory,
+	accountProfile,
+	accountReminders,
+	accountSessions,
+	aGuild,
+	botProfile,
+	configured,
+	healthy,
+	me,
+} from "@/test/fixtures/session";
 import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fixtures/site";
 
 export const handlers = [
@@ -104,6 +120,10 @@ export const handlers = [
 	http.get("/api/bot", () => HttpResponse.json(botProfile)),
 	http.get("/api/commands", () => HttpResponse.json(catalogue)),
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
+	http.get("/api/account/history", () => HttpResponse.json(accountHistory)),
+	http.get("/api/account/reminders", () => HttpResponse.json(accountReminders)),
+	http.get("/api/account/sessions", () => HttpResponse.json(accountSessions)),
+	http.get("/api/account/profile", () => HttpResponse.json({ profile: accountProfile })),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(setupDone)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
@@ -114,6 +134,20 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/cases", () => HttpResponse.json(casePage)),
 	http.get("/api/guilds/:guildId/raid-protection", () => HttpResponse.json(raidOverview)),
 	http.get("/api/guilds/:guildId/bans", () => HttpResponse.json(banPage)),
+	http.get("/api/guilds/:guildId/appeals/settings", () => HttpResponse.json(appealSettings)),
+	http.patch("/api/guilds/:guildId/appeals/settings", () => HttpResponse.json(appealSettings)),
+	http.get("/api/guilds/:guildId/appeals", () => HttpResponse.json(appealPage)),
+	http.post("/api/guilds/:guildId/appeals/:appealId/decision", () => HttpResponse.json(appealPage.items[0])),
+	http.get("/api/guilds/:guildId/invites", () => HttpResponse.json(inviteOverview)),
+	http.patch("/api/guilds/:guildId/invites", () => HttpResponse.json(inviteOverview.settings)),
+	http.get("/api/guilds/:guildId/modmail/settings", () => HttpResponse.json(modmailSettings)),
+	http.patch("/api/guilds/:guildId/modmail/settings", () => HttpResponse.json(modmailSettings)),
+	http.get("/api/guilds/:guildId/modmail/conversations", () => HttpResponse.json(modmailConversations)),
+	http.post("/api/guilds/:guildId/modmail/conversations/:conversationId/close", () =>
+		HttpResponse.json(modmailConversations.items[0]),
+	),
+	http.get("/api/appeals", () => HttpResponse.json(ownAppeals)),
+	http.post("/api/appeals/:guildId", () => HttpResponse.json(ownAppeals.appeals[0], { status: 201 })),
 	http.get("/api/guilds/:guildId/channel-tools", () => HttpResponse.json(channelTools)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
@@ -139,6 +173,11 @@ export const handlers = [
 	http.post("/api/guilds/:guildId/giveaways/:messageId/reroll", () => HttpResponse.json(giveawayList)),
 	http.delete("/api/guilds/:guildId/giveaways/:messageId", () => HttpResponse.json({ giveaways: [] })),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.get("/api/guilds/:guildId/tuning", () => HttpResponse.json(tuning)),
+	http.patch("/api/guilds/:guildId/tuning", () => HttpResponse.json(tuning)),
+	http.get("/api/guilds/:guildId/shop-roles", () => HttpResponse.json(shopRoles)),
+	http.put("/api/guilds/:guildId/shop-roles/:roleId", () => HttpResponse.json(shopRoles)),
+	http.delete("/api/guilds/:guildId/shop-roles/:roleId", () => HttpResponse.json({ ...shopRoles, roles: [] })),
 	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
 	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),

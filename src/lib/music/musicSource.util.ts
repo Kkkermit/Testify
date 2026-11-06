@@ -177,7 +177,7 @@ const NOTHING_PLAYABLE: DownloadProblem = {
 };
 
 /** A result with no formats is one the service would not hand over: DRM-protected, or blocked where the bot runs. */
-export function isPlayable(info: TrackInfo): boolean {
+function isPlayable(info: TrackInfo): boolean {
 	return Array.isArray(info.formats) && info.formats.length > 0;
 }
 
@@ -274,7 +274,7 @@ export async function describeTrack(url: string, binaries: MusicBinaries, now = 
 	return info;
 }
 
-export interface StreamOptions {
+interface StreamOptions {
 	/** A percentage of the track's own level; only the transcoding path can change it. */
 	volume?: number;
 	/** Where in the track to start, which is how a setting changed mid-track picks up where it was. */

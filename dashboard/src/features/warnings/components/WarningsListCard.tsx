@@ -2,14 +2,13 @@ import { WARN_LIMITS } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, Warning } from "@/components/form";
+import { Field, Refusal } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Card, CARD_HEADING, DividedList, Pager, Skeleton } from "@/components/primitives";
 import { WarningRow } from "@/features/warnings/components/WarningRow";
 import { useEditWarning, useGuildWarnings, useRemoveWarning } from "@/features/warnings/useWarnings";
 import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
-import { ApiError } from "@/lib/api";
 
 export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.Element | null {
 	const { t } = useTranslation();
@@ -60,9 +59,7 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 				/>
 			</Field>
 
-			{failure !== null && (
-				<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={failure} />
 
 			{items.length === 0 ? (
 				<p className="text-sm">{t("warnings.searchNone")}</p>

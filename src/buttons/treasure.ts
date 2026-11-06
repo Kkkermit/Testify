@@ -8,7 +8,7 @@ import { formatDuration, formatNumber } from "@lib/format";
 import { parseRange, parseWholeNumber, settingsPanel, statusValue, recordsSettings } from "@lib/settings";
 import { TREASURE_DEFAULTS, TREASURE_LIMITS, type TreasureSettings } from "@testify/shared";
 
-export const TREASURE_PANEL_ID = "treasure";
+const TREASURE_PANEL_ID = "treasure";
 
 type Settings = TreasureSettings;
 

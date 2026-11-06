@@ -37,7 +37,7 @@ const CODES = {
 	onMagenta: [45, 49],
 } as const;
 
-export type StyleName = keyof typeof CODES;
+type StyleName = keyof typeof CODES;
 export type Paint = Record<StyleName, (text: string) => string>;
 
 /** Every style as a function, which returns its input untouched when colour is off. */

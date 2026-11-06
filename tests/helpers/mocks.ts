@@ -153,6 +153,7 @@ export function createMockClient(overrides: Overrides<TestifyClient> = {}): Test
 			commands: new Collection(),
 			aliases: new Collection(),
 			buttons: new Collection(),
+			contextMenus: new Collection(),
 			messageHandlers: [],
 			logger: createLogger("fatal", false),
 			env: { DISCORD_OWNER_IDS: [OWNER_ID] },

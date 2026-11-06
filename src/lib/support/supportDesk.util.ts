@@ -49,7 +49,7 @@ export class HourlyBudget {
 	}
 }
 
-export interface DeskOptions {
+interface DeskOptions {
 	entries: readonly SupportEntry[];
 	picker: SupportPicker | null;
 	secrets: readonly string[];

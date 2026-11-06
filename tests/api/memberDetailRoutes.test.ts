@@ -1,11 +1,9 @@
 import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, problemBody } from "@api/errors";
 import { members } from "@api/routes/members";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
 import { addXp, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
@@ -30,8 +28,12 @@ jest.mock("@database/repositories/levelRepository", () => ({
 	setLevel: jest.fn(() => Promise.resolve({ level: 10, xp: 5_000 })),
 	addXp: jest.fn(() => Promise.resolve({ level: 3, xp: 400 })),
 }));
+jest.mock("@database/repositories/inviteRepository", () => ({
+	latestJoinOf: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnings: jest.fn(() => Promise.resolve(null)),
+	getWarnLadder: jest.fn(() => Promise.resolve(null)),
 	getActiveSoftban: jest.fn(() => Promise.resolve(null)),
 	deactivateSoftban: jest.fn(() => Promise.resolve(true)),
 }));
@@ -187,24 +189,9 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: ACTOR, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId: ACTOR, username: "someone" });
 	instance.route("/guilds/:guildId/members", members);
-	instance.onError((error) => {
-		// The same mapping the real app's boundary makes in `server.ts`.
-		const problem =
-			error instanceof ApiProblem
-				? error
-				: error instanceof UserFacingError
-					? badRequest(error.message)
-					: new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

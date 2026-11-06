@@ -2,14 +2,17 @@ import { type Guild, type GuildMember, type User } from "discord.js";
 import { DAY_MS } from "@config/constants";
 import { strings } from "@config/strings";
 import { theme } from "@config/theme";
+import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
+import { deactivateSoftban, getActiveSoftban } from "@database/repositories/moderationRepository";
+import { appealLink } from "@lib/appeals/appealLink.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 
 /** Kicking, banning and timing out, shared by the commands and the dashboard so each checks, notifies and records the same way. */
 
-export interface Sanctioned {
+interface Sanctioned {
 	notified: boolean;
 }
 
@@ -23,7 +26,7 @@ export function moderatorOf(user: { id: string; username: string }): Moderator {
 }
 
 /** Discord's ceiling on a timeout. */
-export const MAX_TIMEOUT_MS = 28 * DAY_MS;
+const MAX_TIMEOUT_MS = 28 * DAY_MS;
 
 /** The DM goes first, because once they are out of the server the bot can no longer reach them. */
 export async function kickMember(
@@ -65,6 +68,7 @@ export async function banUser(
 	const existing = await guild.bans.fetch(user.id).catch(() => null);
 	if (existing !== null) throw new UserFacingError(`${user.username} is already banned.`);
 
+	const appeal = member === null ? null : await appealLink(guild.client as TestifyClient, guild.id);
 	const notified =
 		member === null
 			? false
@@ -76,6 +80,9 @@ export async function banUser(
 						guild,
 						moderator: { username: moderator.name },
 						reason,
+						...(appeal === null
+							? {}
+							: { extra: [{ name: "Appeal", value: `Sign in at ${appeal} to ask for the ban to be lifted.` }] }),
 					}),
 				);
 
@@ -153,4 +160,17 @@ export async function removeTimeout(
 	await recordCase(guild, { action: "untimeout", user: member.user, moderator, reason });
 
 	return { notified };
+}
+
+/** Lifts a softban early: the Discord ban first, because the record is what the sweep job reads. */
+export async function revokeSoftban(guild: Guild, userId: string, by: Moderator): Promise<boolean> {
+	if ((await getActiveSoftban(guild.id, userId)) === null) return false;
+
+	const ban = await guild.bans.fetch(userId).catch(() => null);
+	await guild.bans.remove(userId, `Softban lifted early by ${by.name}`).catch(() => null);
+	const lifted = await deactivateSoftban(guild.id, userId);
+
+	if (ban !== null)
+		await recordCase(guild, { action: "unban", user: ban.user, moderator: by, reason: "Softban lifted early" });
+	return lifted;
 }

@@ -13,7 +13,7 @@ const DEFAULT_DESCRIPTION = "Press the button below and we will be with you shor
 const DEFAULT_LABEL = "Create ticket";
 
 /** `messageId` was added after the first records were written, so it is absent rather than null on those. */
-export type StoredTicketSetup = Omit<TicketSetupRecord, "messageId"> & { messageId?: string | null };
+type StoredTicketSetup = Omit<TicketSetupRecord, "messageId"> & { messageId?: string | null };
 
 /** Older records store an unset destination as an empty string, which would otherwise count as chosen. */
 const chosen = (id: string | undefined): string | null => (id === undefined || id === "" ? null : id);

@@ -1,9 +1,8 @@
 import { Collection, type Guild, type GuildMember } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { warnings } from "@api/routes/warnings";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import {
 	addWarning,
@@ -98,18 +97,9 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
-	instance.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: ACTOR, username: "someone" } as never);
-		await next();
-	});
+	withSession(instance, client, { userId: ACTOR, username: "someone" });
 	instance.route("/guilds/:guildId/warnings", warnings);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }
@@ -254,8 +244,14 @@ describe("DELETE /warnings/:userId", () => {
 });
 
 describe("the punishments", () => {
-	it("reads an empty list for a server that never set one", async () => {
-		expect(await (await send("GET", "/punishments")).json()).toEqual({ steps: [] });
+	it("reads an empty list for a server that never set one, counting every warning", async () => {
+		expect(await (await send("GET", "/punishments")).json()).toEqual({ steps: [], expireAfterDays: null });
+	});
+
+	/** A client that only edits the steps must not clear the window somebody chose in Discord. */
+	it("keeps the stored window when a write leaves it out", async () => {
+		expect((await send("PUT", "/punishments", { steps: [] })).status).toBe(200);
+		expect(savedLadder).toHaveBeenCalledWith(GUILD, [], expect.any(String), undefined);
 	});
 
 	it("refuses a timeout length nobody offered", async () => {

@@ -4,7 +4,7 @@ import { GuildPrefix, type PrefixSettings } from "@database/models/prefix.schema
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
 /** Prefixes are read on every single message, so they are cached. */
-export interface PrefixConfig {
+interface PrefixConfig {
 	prefix: string;
 	isEnabled: boolean;
 }

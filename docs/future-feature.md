@@ -58,6 +58,9 @@ server, and each should be before it is relied on.
 - **Settings changed in Discord:** a panel press showing on the Changes page as a command change, and Put back on it.
 - **The member directory:** paging through a server of thousands, a role filter on members the bot has never cached, and
   a bulk kick of several with one refused by Discord.
+- **Your account:** a profile and a reminder edited on the web and read back with `/profile view` and `/remind list`, and
+  one browser signed out from another.
+- **A blocked account:** signing in to the blocked page, deleting its data there, and the block surviving the delete.
 
 ---
 

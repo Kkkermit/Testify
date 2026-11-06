@@ -1,5 +1,6 @@
 import { purgeAfk } from "@database/repositories/afkRepository";
 import { purgeAntiLink } from "@database/repositories/antiLinkRepository";
+import { purgeAppeals } from "@database/repositories/appealRepository";
 import { purgeAuditLog } from "@database/repositories/auditLogRepository";
 import { purgeAutoResponders } from "@database/repositories/autoResponderRepository";
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
@@ -12,17 +13,21 @@ import { purgeCommandToggles } from "@database/repositories/commandToggleReposit
 import { purgeCounting } from "@database/repositories/countingRepository";
 import { purgeGoodbye } from "@database/repositories/goodbyeRepository";
 import { purgeIdeas } from "@database/repositories/ideaRepository";
+import { purgeInvites } from "@database/repositories/inviteRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
+import { purgeModmail } from "@database/repositories/modmailRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { purgePrefix } from "@database/repositories/prefixRepository";
 import { purgeRaidSettings } from "@database/repositories/raidRepository";
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
 import { purgeSchedules } from "@database/repositories/scheduledMessageRepository";
+import { purgeShopRoles } from "@database/repositories/shopRoleRepository";
 import { purgeStarboard } from "@database/repositories/starboardRepository";
 import { purgeSticky } from "@database/repositories/stickyRepository";
 import { purgeTempVoice } from "@database/repositories/tempVoiceRepository";
 import { purgeTreasure } from "@database/repositories/treasureRepository";
+import { purgeTuning } from "@database/repositories/tuningRepository";
 import { purgeVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { purgeWelcome } from "@database/repositories/welcomeRepository";
 
@@ -30,6 +35,11 @@ import { purgeWelcome } from "@database/repositories/welcomeRepository";
 export async function purgeGuild(guildId: string): Promise<void> {
 	await Promise.all([
 		purgeAfk(guildId),
+		purgeAppeals(guildId),
+		purgeModmail(guildId),
+		purgeInvites(guildId),
+		purgeTuning(guildId),
+		purgeShopRoles(guildId),
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
 		purgeBirthdays(guildId),

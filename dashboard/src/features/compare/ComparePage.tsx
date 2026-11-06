@@ -44,17 +44,12 @@ export function ComparePage(): React.JSX.Element {
 	if (candidates.length < 2) {
 		return (
 			<>
-				<PageHeader title={t("compare.title")} subtitle={t("compare.subtitle")} />
-				<EmptyState
-					icon={<Columns3 size={28} />}
-					title={t("compare.needTwoTitle")}
-					body={t("compare.needTwoBody")}
-					action={
-						<Link to="/guilds" className="text-accent underline">
-							{t("compare.toServers")}
-						</Link>
-					}
+				<PageHeader
+					title={t("compare.title")}
+					subtitle={t("compare.subtitle")}
+					back={{ to: "/guilds", label: t("compare.toServers") }}
 				/>
+				<EmptyState icon={<Columns3 size={28} />} title={t("compare.needTwoTitle")} body={t("compare.needTwoBody")} />
 			</>
 		);
 	}
@@ -65,7 +60,11 @@ export function ComparePage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title={t("compare.title")} subtitle={t("compare.subtitle")} />
+			<PageHeader
+				title={t("compare.title")}
+				subtitle={t("compare.subtitle")}
+				back={{ to: "/guilds", label: t("compare.toServers") }}
+			/>
 
 			<Card className="flex flex-col gap-4">
 				<CheckList

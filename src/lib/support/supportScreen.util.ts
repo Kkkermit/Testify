@@ -54,7 +54,7 @@ export function discordMarkdown(body: string, dashboard: string | null): string 
 	});
 }
 
-export interface SupportScreenOptions {
+interface SupportScreenOptions {
 	bot: string;
 	ownerId: string;
 	dashboard: string | null;

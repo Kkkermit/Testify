@@ -9,6 +9,7 @@ import {
 	Field,
 	FIELD,
 	postableChannels,
+	Refusal,
 	SavingIndicator,
 	savingStateOf,
 	SELECT,
@@ -32,7 +33,6 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
@@ -87,9 +87,7 @@ function LogCard({ guildId }: { guildId: string }): React.JSX.Element {
 					}}
 				/>
 				{settings.data.logChannelId !== null && !settings.data.canSend && <Warning>{t("cases.cannotSend")}</Warning>}
-				{update.error !== null && (
-					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={update.error} />
 			</SettingRows>
 		</>
 	);

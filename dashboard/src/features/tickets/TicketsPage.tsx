@@ -10,11 +10,12 @@ import {
 	ChannelPicker,
 	Field,
 	FIELD,
-	SavingIndicator,
-	savingStateOf,
 	FieldGroup,
 	postableChannels,
+	Refusal,
 	RowActions,
+	SavingIndicator,
+	savingStateOf,
 	SELECT,
 	SettingRows,
 	Warning,
@@ -34,7 +35,6 @@ import {
 import { useDisableTickets, useSaveTickets, useTickets } from "@/features/tickets/useTickets";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
@@ -197,9 +197,7 @@ export function TicketsPage(): React.JSX.Element {
 
 				{markupWarning(draft.description) !== null && <Warning>{markupWarning(draft.description)}</Warning>}
 				{blocked && <Warning>{problems.join(" ")}</Warning>}
-				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-				)}
+				<Refusal error={save.error} />
 
 				<RowActions>
 					<Button
@@ -239,9 +237,7 @@ export function TicketsPage(): React.JSX.Element {
 				</SettingRows>
 			)}
 
-			{disable.error !== null && (
-				<Warning>{disable.error instanceof ApiError ? disable.error.message : t("common.couldNotSave")}</Warning>
-			)}
+			<Refusal error={disable.error} />
 		</>
 	);
 }

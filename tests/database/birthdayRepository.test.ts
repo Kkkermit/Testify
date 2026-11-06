@@ -3,7 +3,6 @@ import { BirthdaySettingsConfig, SharedBirthday } from "@database/models/birthda
 import {
 	birthdaysDue,
 	claimBirthday,
-	findBirthday,
 	forgetBirthday,
 	getBirthdaySettings,
 	purgeBirthdays,
@@ -18,12 +17,16 @@ const SAM = "100000000000000001";
 const KIT = "100000000000000002";
 const TODAY = [{ day: 25, month: 10 }];
 
+async function stored(guildId: string, userId: string): Promise<{ day: number; month: number } | null> {
+	return SharedBirthday.findOne({ guildId, userId }).lean().exec();
+}
+
 describeWithMongo("birthdayRepository", () => {
 	it("keeps one birthday per member per server, the newest", async () => {
 		await shareBirthday(GUILD, SAM, "sam", 1, 1);
 		await shareBirthday(GUILD, SAM, "sam", 25, 10);
 
-		expect(await findBirthday(GUILD, SAM)).toEqual(expect.objectContaining({ day: 25, month: 10 }));
+		expect(await stored(GUILD, SAM)).toEqual(expect.objectContaining({ day: 25, month: 10 }));
 		expect(await SharedBirthday.countDocuments({ guildId: GUILD })).toBe(1);
 	});
 
@@ -31,7 +34,7 @@ describeWithMongo("birthdayRepository", () => {
 	it("keeps each server's birthdays apart", async () => {
 		await shareBirthday(GUILD, SAM, "sam", 25, 10);
 
-		expect(await findBirthday(OTHER, SAM)).toBeNull();
+		expect(await stored(OTHER, SAM)).toBeNull();
 		expect(await forgetBirthday(OTHER, SAM)).toBe(false);
 	});
 
@@ -86,7 +89,7 @@ describeWithMongo("birthdayRepository", () => {
 		await purgeBirthdays(GUILD);
 
 		expect(await BirthdaySettingsConfig.countDocuments({ guildId: GUILD })).toBe(0);
-		expect(await findBirthday(GUILD, SAM)).toBeNull();
-		expect(await findBirthday(OTHER, SAM)).not.toBeNull();
+		expect(await stored(GUILD, SAM)).toBeNull();
+		expect(await stored(OTHER, SAM)).not.toBeNull();
 	});
 });

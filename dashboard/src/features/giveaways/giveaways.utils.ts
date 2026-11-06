@@ -16,12 +16,6 @@ export function durationMsOf(amount: number, unit: DurationUnit): number {
 	return found === undefined ? 0 : Math.round(amount * found.ms);
 }
 
-type GiveawayStatus = "running" | "ended";
-
-export function statusOf(row: GiveawayRow): GiveawayStatus {
-	return row.ended ? "ended" : "running";
-}
-
 export function ordered(rows: GiveawayRow[]): GiveawayRow[] {
 	return [...rows].sort((a, b) => {
 		if (a.ended !== b.ended) return a.ended ? 1 : -1;
@@ -44,7 +38,7 @@ export function nextDraw(rows: GiveawayRow[]): string | null {
 	return ends.length === 0 ? null : ends.reduce((soonest, at) => (Date.parse(at) < Date.parse(soonest) ? at : soonest));
 }
 
-export interface GiveawayPost {
+interface GiveawayPost {
 	content: string;
 	lines: string[];
 	footer: string;

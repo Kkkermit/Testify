@@ -3,7 +3,7 @@ import { snowflake } from "./schemas";
 
 /** Running an owner command from the browser; embed-based owner commands only, never the panel commands. */
 
-export const RUN_LIMITS = { maxStringArg: 2_000, maxArgs: 25 } as const;
+const RUN_LIMITS = { maxStringArg: 2_000, maxArgs: 25 } as const;
 
 export type DroppedOutput = "panel" | "buttons" | "attachment";
 

@@ -2,6 +2,7 @@ import { confirmsName, type MemberDetail, type MemberWarning } from "@testify/sh
 import { type TFunction } from "i18next";
 import { dateAndTime, shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
+import { personName } from "@/lib/people";
 
 export function memberSummary(detail: MemberDetail, t: TFunction, now = Date.now()): string {
 	if (softbanActive(detail, now) && detail.softban !== null) {
@@ -18,6 +19,19 @@ export function memberSummary(detail: MemberDetail, t: TFunction, now = Date.now
 	return warned === 0
 		? t("members.summaryJoined", { date })
 		: t("members.summaryJoinedWarned", { date, count: warned });
+}
+
+/** How they joined, said only when invite tracking recorded it. */
+export function inviteLine(detail: Pick<MemberDetail, "invite">, t: TFunction): string | null {
+	const invite = detail.invite;
+	if (invite === null) return null;
+	if (invite.vanity) return t("members.joinedVanity");
+	if (invite.inviterId === null) return t("members.joinedUnknownInvite");
+
+	return t("members.joinedWith", {
+		name: personName(invite.inviterName ?? t("common.unknownAccount"), t),
+		code: invite.code ?? "",
+	});
 }
 
 /** A lapsed softban the job has not swept yet is history, not a live restriction. */

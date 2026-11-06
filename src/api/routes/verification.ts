@@ -37,7 +37,7 @@ verification.patch("/", async (context) => {
 
 	if (patch.enabled === false) {
 		await deleteVerifyConfig(guild.id);
-		return await answer(context, guild, patch, before);
+		return answer(context, guild, patch, before);
 	}
 
 	const stored = normaliseVerify(await getVerifyConfig(guild.id));
@@ -69,7 +69,7 @@ verification.patch("/", async (context) => {
 		messageId: next.messageId,
 	});
 
-	return await answer(context, guild, patch, before);
+	return answer(context, guild, patch, before);
 });
 
 async function answer(

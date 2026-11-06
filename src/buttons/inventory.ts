@@ -1,10 +1,10 @@
 import { randomInt } from "node:crypto";
-import { balancesOf } from "@buttons/shop";
 import { defineButton } from "@core/button";
 import { requireAccount } from "@database/repositories/economyRepository";
 import {
 	BALANCE_PANEL_ID,
 	balancePanel,
+	balancesOf,
 	dailyReady,
 	INVENTORY_PANEL_ID,
 	inventoryScreen,

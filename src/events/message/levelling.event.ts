@@ -3,7 +3,9 @@ import { LEVELLING } from "@config/constants";
 import { theme } from "@config/theme";
 import { defineMessageHandler } from "@core/message";
 import { awardXp, getLevelSettings } from "@database/repositories/levelRepository";
+import { getTuning } from "@database/repositories/tuningRepository";
 import { applyLevelRewards, earnsXp, multiplierFor, normaliseSettings } from "@lib/levelling";
+import { atRate } from "@testify/shared";
 
 const CONGRATULATIONS = [
 	"Congratulations {user}, you reached level **{level}**!",
@@ -22,8 +24,10 @@ export default defineMessageHandler({
 		const roleIds = [...message.member.roles.cache.keys()];
 		if (!earnsXp(config, message.channelId, roleIds)) return;
 
-		const amount = randomInt(LEVELLING.xpPerMessageMin, LEVELLING.xpPerMessageMax + 1) * multiplierFor(config, roleIds);
-		const result = await awardXp(message.guild.id, message.author.id, amount);
+		const tuning = await getTuning(message.guild.id);
+		const base = randomInt(LEVELLING.xpPerMessageMin, LEVELLING.xpPerMessageMax + 1) * multiplierFor(config, roleIds);
+		const amount = atRate(base, tuning.xpRate);
+		const result = await awardXp(message.guild.id, message.author.id, amount, tuning.xpCooldownSeconds * 1_000);
 		if (!result?.levelledUp) return;
 
 		const level = result.record.level;

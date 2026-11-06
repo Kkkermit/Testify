@@ -1,3 +1,4 @@
+import { type Guild } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { type EconomyAccount } from "@database/models/economy.schema";
@@ -10,6 +11,8 @@ import {
 } from "@database/repositories/economyRepository";
 import {
 	type Balances,
+	balancesOf,
+	buyShopRole,
 	decodeShopState,
 	findBusiness,
 	findEntry,
@@ -21,23 +24,19 @@ import {
 	SHOP_ID,
 	shopScreen,
 	type ShopState,
+	rolesForSale,
 } from "@lib/economy";
 import { formatNumber } from "@lib/format";
 
-export function balancesOf(account: EconomyAccount): Balances {
-	return {
-		wallet: account.wallet,
-		ownsHouse: account.house !== null,
-		...(account.house !== null ? { houseId: account.house.houseId } : {}),
-		ownedBusinessIds: account.businesses.map((business) => business.businessId),
-		ownedItemIds: account.inventory.filter((entry) => entry.quantity > 0).map((entry) => entry.itemId),
-		job: account.job,
-		hasPet: account.pet !== null,
-	};
+/** The roles on sale are read with every screen, since a role can be moved or deleted while the shop is open. */
+async function balancesFor(guild: Guild, userId: string, account: EconomyAccount): Promise<Balances> {
+	const member = await guild.members.fetch(userId).catch(() => null);
+	return balancesOf(account, await rolesForSale(guild, member));
 }
 
-async function purchase(state: ShopState, guildId: string, userId: string, account: EconomyAccount): Promise<string> {
+async function purchase(state: ShopState, guild: Guild, userId: string, account: EconomyAccount): Promise<string> {
 	const id = state.selectedId ?? "";
+	const guildId = guild.id;
 
 	switch (state.section) {
 		case "houses": {
@@ -146,6 +145,12 @@ async function purchase(state: ShopState, guildId: string, userId: string, accou
 
 			return `Bought ${item.emoji} **${item.name}** for **${formatNumber(item.price)}**.`;
 		}
+
+		case "roles": {
+			const member = await guild.members.fetch(userId).catch(() => null);
+			if (member === null) throw new UserFacingError("You are no longer in this server.");
+			return buyShopRole(guild, member, id);
+		}
 	}
 }
 
@@ -154,9 +159,10 @@ export default defineButton({
 	ownerOnly: true,
 
 	async run(interaction, context) {
-		if (interaction.guild === null) return;
+		const guild = interaction.guild;
+		if (guild === null) return;
 
-		const guildId = interaction.guild.id;
+		const guildId = guild.id;
 		const userId = interaction.user.id;
 		const state = decodeShopState(context.args);
 
@@ -165,7 +171,7 @@ export default defineButton({
 			await interaction.update(
 				shopScreen(
 					{ ...state, ...(picked !== undefined ? { selectedId: picked } : {}) },
-					balancesOf(await requireAccount(guildId, userId)),
+					await balancesFor(guild, userId, await requireAccount(guildId, userId)),
 					userId,
 				),
 			);
@@ -176,7 +182,9 @@ export default defineButton({
 
 		if (context.action === "nav" || context.action === "page") {
 			const { selectedId: _cleared, ...withoutSelection } = state;
-			await interaction.update(shopScreen(withoutSelection, balancesOf(await requireAccount(guildId, userId)), userId));
+			await interaction.update(
+				shopScreen(withoutSelection, await balancesFor(guild, userId, await requireAccount(guildId, userId)), userId),
+			);
 			return;
 		}
 
@@ -184,7 +192,7 @@ export default defineButton({
 			const account = await requireAccount(guildId, userId);
 			if (account.house === null) throw new UserFacingError("You do not own a house.");
 
-			const balances = balancesOf(account);
+			const balances = await balancesFor(guild, userId, account);
 			const entry = findEntry({ section: "houses" }, balances, state.selectedId ?? "");
 			if (!entry) throw new UserFacingError("That is not something you own.");
 
@@ -196,7 +204,7 @@ export default defineButton({
 			await interaction.update(
 				shopScreen(
 					{ section: "houses", ...(state.from ? { from: state.from } : {}) },
-					balancesOf(await requireAccount(guildId, userId)),
+					await balancesFor(guild, userId, await requireAccount(guildId, userId)),
 					userId,
 				),
 			);
@@ -217,7 +225,7 @@ export default defineButton({
 			await interaction.update(
 				shopScreen(
 					{ section: "houses", ...(state.from ? { from: state.from } : {}) },
-					balancesOf(updated),
+					await balancesFor(guild, userId, updated),
 					userId,
 					`Sold **${name}** for **${formatNumber(refund)}**.`,
 				),
@@ -230,16 +238,16 @@ export default defineButton({
 		const account = await requireAccount(guildId, userId);
 
 		// Re-checked, since the money may have been spent after the screen rendered.
-		const entry = findEntry(state, balancesOf(account), state.selectedId ?? "");
+		const entry = findEntry(state, await balancesFor(guild, userId, account), state.selectedId ?? "");
 		if (entry?.blocked !== undefined) throw new UserFacingError(entry.blocked);
 
-		const message = await purchase(state, guildId, userId, account);
+		const message = await purchase(state, guild, userId, account);
 		const updated = await requireAccount(guildId, userId);
 
 		await interaction.update(
 			shopScreen(
 				{ section: state.section, ...(state.from ? { from: state.from } : {}) },
-				balancesOf(updated),
+				await balancesFor(guild, userId, updated),
 				userId,
 				message,
 			),

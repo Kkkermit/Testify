@@ -20,45 +20,39 @@ export const CHANGE_SOURCES = ["all", "dashboard", "command", "discord"] as cons
 export type ChangeSource = (typeof CHANGE_SOURCES)[number];
 
 /** What a change was made to; `settings` is the bot's own record, which is always of its own configuration. */
-export const CHANGE_KINDS = [
-	"settings",
-	"server",
-	"channel",
-	"role",
-	"member",
-	"invite",
-	"webhook",
-	"emoji",
-	"sticker",
-	"message",
-	"integration",
-	"event",
-	"thread",
-	"automod",
-	"other",
-] as const;
+export type ChangeKind =
+	| "settings"
+	| "server"
+	| "channel"
+	| "role"
+	| "member"
+	| "invite"
+	| "webhook"
+	| "emoji"
+	| "sticker"
+	| "message"
+	| "integration"
+	| "event"
+	| "thread"
+	| "automod"
+	| "other";
 
-export type ChangeKind = (typeof CHANGE_KINDS)[number];
-
-export const CHANGE_VERBS = [
-	"created",
-	"updated",
-	"deleted",
-	"kicked",
-	"banned",
-	"unbanned",
-	"timedOut",
-	"rolesChanged",
-	"moved",
-	"disconnected",
-	"pruned",
-	"pinned",
-	"unpinned",
-	"botAdded",
-	"other",
-] as const;
-
-export type ChangeVerb = (typeof CHANGE_VERBS)[number];
+export type ChangeVerb =
+	| "created"
+	| "updated"
+	| "deleted"
+	| "kicked"
+	| "banned"
+	| "unbanned"
+	| "timedOut"
+	| "rolesChanged"
+	| "moved"
+	| "disconnected"
+	| "pruned"
+	| "pinned"
+	| "unpinned"
+	| "botAdded"
+	| "other";
 
 export interface ServerChange {
 	id: string;

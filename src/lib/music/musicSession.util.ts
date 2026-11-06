@@ -51,7 +51,7 @@ const LEAVE_AFTER_IDLE_MS = 120_000;
 export const PANEL_REFRESH_MS = 5_000;
 
 /** How long a "skipped because…" line stays on the panel, which is long enough to be read after the next refresh. */
-export const NOTICE_MS = 60_000;
+const NOTICE_MS = 60_000;
 
 const STREAM_TYPES: Record<StreamShape, StreamType> = {
 	"webm-opus": StreamType.WebmOpus,
@@ -65,10 +65,10 @@ export type SessionEvent =
 	| { kind: "failed"; track: Track; reason: string }
 	| { kind: "retrying"; track: Track; attempt: number };
 
-export type SessionListener = (event: SessionEvent) => void;
+type SessionListener = (event: SessionEvent) => void;
 
 /** The message the live panel rewrites, narrowed to the one call it makes so a test needs no Discord. */
-export interface PanelTarget {
+interface PanelTarget {
 	userId: string;
 	page: number;
 	/** Resolves to the edited message, which is where an uploaded card's address is read from. */
@@ -76,7 +76,7 @@ export interface PanelTarget {
 }
 
 /** A panel to send, and the track whose card it uploads, so the sender can say where Discord put it. */
-export interface PanelMessage {
+interface PanelMessage {
 	payload: ContainerMessageWithFiles;
 	cardFor: string | null;
 }
@@ -157,7 +157,7 @@ export class MusicSession {
 			try {
 				listener(event);
 			} catch (error) {
-				this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A session listener threw.");
+				this.#logger.warn({ err: toError(error), guildId: this.guildId }, "[MUSIC] A session listener threw.");
 			}
 		}
 	}
@@ -377,7 +377,10 @@ export class MusicSession {
 			return known.advice;
 		}
 
-		this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A track could not be opened. Moving on.");
+		this.#logger.warn(
+			{ err: toError(error), guildId: this.guildId },
+			"[MUSIC] A track could not be opened. Moving on.",
+		);
 		return "it could not be opened.";
 	}
 
@@ -462,7 +465,7 @@ export class MusicSession {
 	 */
 	#playSoon(index: number, options: { seekMs?: number } = {}): void {
 		void this.play(index, options).catch((error: unknown) => {
-			this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] Could not start a track.");
+			this.#logger.warn({ err: toError(error), guildId: this.guildId }, "[MUSIC] Could not start a track.");
 		});
 	}
 
@@ -480,7 +483,10 @@ export class MusicSession {
 			return await renderMusicCard(track, await fetchArtwork(track.thumbnail));
 		} catch (error) {
 			// Without a card the panel falls back to the thumbnail beside the title, which is still a working player.
-			this.#logger.debug({ err: error, guildId: this.guildId }, "[MUSIC] Could not draw the now-playing card.");
+			this.#logger.debug(
+				{ err: toError(error), guildId: this.guildId },
+				"[MUSIC] Could not draw the now-playing card.",
+			);
 			return null;
 		}
 	}
@@ -539,7 +545,10 @@ export class MusicSession {
 			this.rememberCard(cardFor, await panel.edit(payload));
 		} catch (error) {
 			// A deleted or unreachable message is the ordinary end of a panel, not something to keep retrying.
-			this.#logger.debug({ err: error, guildId: this.guildId }, "[MUSIC] Dropped a panel that could not be edited.");
+			this.#logger.debug(
+				{ err: toError(error), guildId: this.guildId },
+				"[MUSIC] Dropped a panel that could not be edited.",
+			);
 			this.#panel = null;
 			this.#stopTicker();
 		}

@@ -34,7 +34,7 @@ export interface BoardState {
 	scope: BoardScope;
 }
 
-export function boardTitle(state: BoardState): string {
+function boardTitle(state: BoardState): string {
 	if (state.kind === "levels") return "Top levels";
 	return state.sort === "total" ? "Richest members" : MONEY_SORT_LABELS[state.sort].heading;
 }
@@ -51,13 +51,13 @@ export function emptyMessage(kind: BoardKind, scope: BoardScope = "server"): str
 	return scope === "global" ? "Nobody has an account anywhere yet." : "Nobody has an account here yet.";
 }
 
-export function unrankedMessage(kind: BoardKind): string {
+function unrankedMessage(kind: BoardKind): string {
 	return kind === "levels"
 		? "You are not on this board yet. Chat here to earn XP."
 		: "You are not on this board yet. Open an account with /economy create.";
 }
 
-export function footerText(kind: BoardKind, scope: BoardScope, total: number): string {
+function footerText(kind: BoardKind, scope: BoardScope, total: number): string {
 	if (kind === "levels") return `${formatNumber(total)} ${total === 1 ? "member" : "members"} ranked`;
 	if (scope === "global")
 		return `${formatNumber(total)} ${total === 1 ? "person" : "people"} ranked across every server`;
@@ -115,7 +115,7 @@ export function boardControls(state: BoardState, userId: string): ActionRowBuild
 	];
 }
 
-export interface BoardMessage {
+interface BoardMessage {
 	files: AttachmentBuilder[];
 	components: ActionRowBuilder<MessageActionRowComponentBuilder>[];
 }

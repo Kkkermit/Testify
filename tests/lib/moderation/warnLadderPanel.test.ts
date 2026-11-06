@@ -33,12 +33,14 @@ describe("warnLadderPanel", () => {
 	it("fits Discord's component limit at the most steps a server can set", () => {
 		const full = Array.from({ length: WARN_LIMITS.maxSteps }, (): WarnStep => ({ action: "kick" }));
 
-		expect(componentCount(warnLadderPanel({ steps: full }, OWNER, "A note."))).toBeLessThanOrEqual(40);
+		expect(componentCount(warnLadderPanel({ steps: full, expireAfterDays: 30 }, OWNER, "A note."))).toBeLessThanOrEqual(
+			40,
+		);
 	});
 
 	/** The router compares the last argument with whoever pressed, so every control must end with the owner. */
 	it("ends every custom ID with the person who opened it, and repeats none", () => {
-		const rendered = warnLadderPanel({ steps: EXAMPLE }, OWNER);
+		const rendered = warnLadderPanel({ steps: EXAMPLE, expireAfterDays: null }, OWNER);
 
 		for (const id of idsOf(rendered)) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
 		expect(duplicateIds(rendered)).toEqual([]);
@@ -46,8 +48,8 @@ describe("warnLadderPanel", () => {
 
 	it("stops adding at the limit and stops removing at none", () => {
 		const full = Array.from({ length: WARN_LIMITS.maxSteps }, (): WarnStep => ({ action: "warn" }));
-		const [addFull] = buttonsOf(warnLadderPanel({ steps: full }, OWNER));
-		const [, popEmpty] = buttonsOf(warnLadderPanel({ steps: [] }, OWNER));
+		const [addFull] = buttonsOf(warnLadderPanel({ steps: full, expireAfterDays: null }, OWNER));
+		const [, popEmpty] = buttonsOf(warnLadderPanel({ steps: [], expireAfterDays: null }, OWNER));
 
 		expect(addFull?.disabled).toBe(true);
 		expect(popEmpty?.disabled).toBe(true);

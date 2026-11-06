@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 88](https://img.shields.io/badge/commands-88-8b5cf6?style=for-the-badge) ![subcommands: 142](https://img.shields.io/badge/subcommands-142-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
+![commands: 91](https://img.shields.io/badge/commands-91-8b5cf6?style=for-the-badge) ![subcommands: 150](https://img.shields.io/badge/subcommands-150-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
 
 </div>
 
@@ -14,14 +14,14 @@
 
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
-| [👥 Community](#-community)   |    10    |     14      |
-| [💰 Economy](#-economy)       |    20    |     25      |
+| [👥 Community](#-community)   |    11    |     17      |
+| [💰 Economy](#-economy)       |    20    |     27      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
 | [🎯 Games](#-games)           |    1     |      6      |
 | [📚 Info](#-info)             |    14    |      8      |
 | [📈 Levelling](#-levelling)   |    2     |      6      |
-| [🛡️ Moderation](#️-moderation) |    18    |     19      |
+| [🛡️ Moderation](#️-moderation) |    20    |     22      |
 | [🎵 Music](#-music)           |    2     |     14      |
 | [⚙️ Settings](#️-settings)     |    14    |     18      |
 | [🎫 Tickets](#-tickets)       |    1     |      3      |
@@ -37,6 +37,7 @@
 | `/calculate`   | Evaluates a mathematical expression.                                    | —                                                                 | —                                                                                             | —               |
 | `/idea`        | Posts an idea for this server, for members to vote on.                  | `submit`, `settings`                                              | —                                                                                             | Manage guild    |
 | `/impersonate` | Sends a message through a webhook that looks like another member.       | —                                                                 | —                                                                                             | Manage webhooks |
+| `/invites`     | Shows whose invites brought members in, and turns invite tracking on.   | `view`, `top`, `settings`                                         | —                                                                                             | Manage guild    |
 | `/lookup`      | Looks something up for you.                                             | `advice`, `animal-fact`, `meme`, `minecraft`, `translate`, `wiki` | `t?advice`, `t?animal-fact`, `t?animalfact`, `t?meme`, `t?minecraft`, `t?translate`, `t?wiki` | —               |
 | `/poll`        | Posts a poll people vote on.                                            | —                                                                 | —                                                                                             | Send polls      |
 | `/remind`      | Reminds you of something later.                                         | `me`, `list`                                                      | `t?remindme`, `t?reminders`                                                                   | —               |
@@ -45,28 +46,28 @@
 
 ## 💰 Economy
 
-| Command         | Description                                       | Subcommands                                        | Prefix aliases              | Needs         |
-| --------------- | ------------------------------------------------- | -------------------------------------------------- | --------------------------- | ------------- |
-| `/balance`      | Shows a wallet and bank balance.                  | —                                                  | `t?bal`, `t?money`          | —             |
-| `/beg`          | Asks strangers for spare change.                  | —                                                  | —                           | —             |
-| `/cooldowns`    | Shows your active economy cooldowns.              | —                                                  | —                           | —             |
-| `/daily`        | Claims your daily reward.                         | —                                                  | —                           | —             |
-| `/deposit`      | Moves money from your wallet into the bank.       | —                                                  | `t?dep`                     | —             |
-| `/economy`      | Manages your economy account.                     | `create`, `delete`, `status`                       | —                           | —             |
-| `/economy-info` | Detailed economy information.                     | `account`, `server`                                | —                           | —             |
-| `/give`         | Grants currency or XP to a member.                | `currency`, `xp`                                   | —                           | Administrator |
-| `/heist`        | Starts a group heist that other members can join. | —                                                  | —                           | —             |
-| `/inventory`    | Shows what you own, and uses it.                  | —                                                  | `t?inv`, `t?use`, `t?items` | —             |
-| `/leaderboard`  | Shows the top ten, by money or by level.          | `economy`, `levels`                                | `t?lb`, `t?top`             | —             |
-| `/lottery`      | Runs and enters the server lottery.               | `info`, `enter`, `setup`, `freeze`, `delete`       | —                           | Manage guild  |
-| `/pet`          | Looks after your pet. Adopt one from the shop.    | `shop`, `rename`, `rehome`, `view`, `feed`, `walk` | `t?rehome`                  | —             |
-| `/reset`        | Resets economy or level data.                     | `user`, `server`, `levels`                         | —                           | Administrator |
-| `/rob`          | Tries to rob another member's wallet.             | —                                                  | —                           | —             |
-| `/shop`         | Browses and buys from the shop.                   | —                                                  | `t?store`, `t?buy`          | —             |
-| `/transfer`     | Sends money from your wallet to someone else.     | —                                                  | —                           | —             |
-| `/treasure`     | Configures random money drops in chat.            | `configure`, `status`                              | —                           | Manage guild  |
-| `/withdraw`     | Moves money from the bank into your wallet.       | —                                                  | `t?with`                    | —             |
-| `/work`         | Works a shift for money.                          | —                                                  | —                           | —             |
+| Command         | Description                                       | Subcommands                                           | Prefix aliases              | Needs                      |
+| --------------- | ------------------------------------------------- | ----------------------------------------------------- | --------------------------- | -------------------------- |
+| `/balance`      | Shows a wallet and bank balance.                  | —                                                     | `t?bal`, `t?money`          | —                          |
+| `/beg`          | Asks strangers for spare change.                  | —                                                     | —                           | —                          |
+| `/cooldowns`    | Shows your active economy cooldowns.              | —                                                     | —                           | —                          |
+| `/daily`        | Claims your daily reward.                         | —                                                     | —                           | —                          |
+| `/deposit`      | Moves money from your wallet into the bank.       | —                                                     | `t?dep`                     | —                          |
+| `/economy`      | Manages your economy account.                     | `create`, `delete`, `settings`, `shop-role`, `status` | —                           | Manage guild, Manage roles |
+| `/economy-info` | Detailed economy information.                     | `account`, `server`                                   | —                           | —                          |
+| `/give`         | Grants currency or XP to a member.                | `currency`, `xp`                                      | —                           | Administrator              |
+| `/heist`        | Starts a group heist that other members can join. | —                                                     | —                           | —                          |
+| `/inventory`    | Shows what you own, and uses it.                  | —                                                     | `t?inv`, `t?use`, `t?items` | —                          |
+| `/leaderboard`  | Shows the top ten, by money or by level.          | `economy`, `levels`                                   | `t?lb`, `t?top`             | —                          |
+| `/lottery`      | Runs and enters the server lottery.               | `info`, `enter`, `setup`, `freeze`, `delete`          | —                           | Manage guild               |
+| `/pet`          | Looks after your pet. Adopt one from the shop.    | `shop`, `rename`, `rehome`, `view`, `feed`, `walk`    | `t?rehome`                  | —                          |
+| `/reset`        | Resets economy or level data.                     | `user`, `server`, `levels`                            | —                           | Administrator              |
+| `/rob`          | Tries to rob another member's wallet.             | —                                                     | —                           | —                          |
+| `/shop`         | Browses and buys from the shop.                   | —                                                     | `t?store`, `t?buy`          | —                          |
+| `/transfer`     | Sends money from your wallet to someone else.     | —                                                     | —                           | —                          |
+| `/treasure`     | Configures random money drops in chat.            | `configure`, `status`                                 | —                           | Manage guild               |
+| `/withdraw`     | Moves money from the bank into your wallet.       | —                                                     | `t?with`                    | —                          |
+| `/work`         | Works a shift for money.                          | —                                                     | —                           | —                          |
 
 ## 🎰 Casino
 
@@ -115,26 +116,28 @@
 
 ## 🛡️ Moderation
 
-| Command     | Description                                                   | Subcommands                                                        | Prefix aliases       | Needs                                                |
-| ----------- | ------------------------------------------------------------- | ------------------------------------------------------------------ | -------------------- | ---------------------------------------------------- |
-| `/add`      | Adds an emoji or sticker to the server.                       | `emoji`, `sticker`                                                 | —                    | Manage emojis and stickers, Manage guild expressions |
-| `/announce` | Posts an announcement embed in a channel.                     | —                                                                  | —                    | Manage guild                                         |
-| `/ban`      | Bans a user from the server.                                  | —                                                                  | —                    | Ban members                                          |
-| `/case`     | Looks up moderation cases, and chooses where they are logged. | `view`, `list`, `log`                                              | `t?cases`            | Manage guild, Moderate members                       |
-| `/clear`    | Bulk deletes recent messages in this channel.                 | —                                                                  | `t?purge`, `t?prune` | Manage messages                                      |
-| `/create`   | Creates embeds and threads.                                   | `embed`, `thread`                                                  | —                    | Manage messages                                      |
-| `/kick`     | Kicks a member from the server.                               | —                                                                  | —                    | Kick members                                         |
-| `/lock`     | Stops everyone from sending messages in a channel.            | —                                                                  | —                    | Manage channels                                      |
-| `/mute`     | Times a member out.                                           | —                                                                  | `t?timeout`          | Moderate members                                     |
-| `/nickname` | Changes or clears a member's nickname.                        | —                                                                  | —                    | Manage nicknames                                     |
-| `/role`     | Adds or removes a role from a member.                         | `add`, `remove`                                                    | —                    | Manage roles                                         |
-| `/say`      | Sends a message through the bot.                              | —                                                                  | —                    | Manage guild                                         |
-| `/slowmode` | Sets the slowmode for a channel.                              | —                                                                  | —                    | Manage channels                                      |
-| `/softban`  | Temporarily bans a user, lifting the ban automatically.       | `add`, `remove`, `list`                                            | —                    | Ban members                                          |
-| `/unban`    | Unbans a user by ID.                                          | —                                                                  | —                    | Ban members                                          |
-| `/unlock`   | Lets everyone send messages in a channel again.               | —                                                                  | —                    | Manage channels                                      |
-| `/unmute`   | Removes a member's timeout.                                   | —                                                                  | —                    | Moderate members                                     |
-| `/warn`     | Issues and manages warnings.                                  | `create`, `punishments`, `list`, `info`, `edit`, `remove`, `clear` | —                    | Manage guild, Moderate members                       |
+| Command     | Description                                                                         | Subcommands                                                        | Prefix aliases       | Needs                                                |
+| ----------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------------------- | ---------------------------------------------------- |
+| `/add`      | Adds an emoji or sticker to the server.                                             | `emoji`, `sticker`                                                 | —                    | Manage emojis and stickers, Manage guild expressions |
+| `/announce` | Posts an announcement embed in a channel.                                           | —                                                                  | —                    | Manage guild                                         |
+| `/appeals`  | Lets banned members appeal on the dashboard, and picks where staff see the appeals. | —                                                                  | —                    | Manage guild                                         |
+| `/ban`      | Bans a user from the server.                                                        | —                                                                  | —                    | Ban members                                          |
+| `/case`     | Looks up moderation cases, and chooses where they are logged.                       | `view`, `list`, `log`                                              | `t?cases`            | Manage guild, Moderate members                       |
+| `/clear`    | Bulk deletes recent messages in this channel.                                       | —                                                                  | `t?purge`, `t?prune` | Manage messages                                      |
+| `/create`   | Creates embeds and threads.                                                         | `embed`, `thread`                                                  | —                    | Manage messages                                      |
+| `/kick`     | Kicks a member from the server.                                                     | —                                                                  | —                    | Kick members                                         |
+| `/lock`     | Stops everyone from sending messages in a channel.                                  | —                                                                  | —                    | Manage channels                                      |
+| `/modmail`  | Lets members write privately to the server's staff, in threads only staff can see.  | `open`, `close`, `settings`                                        | —                    | Manage guild, Manage messages                        |
+| `/mute`     | Times a member out.                                                                 | —                                                                  | `t?timeout`          | Moderate members                                     |
+| `/nickname` | Changes or clears a member's nickname.                                              | —                                                                  | —                    | Manage nicknames                                     |
+| `/role`     | Adds or removes a role from a member.                                               | `add`, `remove`                                                    | —                    | Manage roles                                         |
+| `/say`      | Sends a message through the bot.                                                    | —                                                                  | —                    | Manage guild                                         |
+| `/slowmode` | Sets the slowmode for a channel.                                                    | —                                                                  | —                    | Manage channels                                      |
+| `/softban`  | Temporarily bans a user, lifting the ban automatically.                             | `add`, `remove`, `list`                                            | —                    | Ban members                                          |
+| `/unban`    | Unbans a user by ID.                                                                | —                                                                  | —                    | Ban members                                          |
+| `/unlock`   | Lets everyone send messages in a channel again.                                     | —                                                                  | —                    | Manage channels                                      |
+| `/unmute`   | Removes a member's timeout.                                                         | —                                                                  | —                    | Moderate members                                     |
+| `/warn`     | Issues and manages warnings.                                                        | `create`, `punishments`, `list`, `info`, `edit`, `remove`, `clear` | —                    | Manage guild, Moderate members                       |
 
 ## 🎵 Music
 
@@ -180,3 +183,14 @@
 | ------------- | ------------------------------------- | ----------- | -------------- | ----- |
 | `/bug-report` | Reports a bug to the developers.      | —           | —              | —     |
 | `/suggest`    | Sends a suggestion to the developers. | —           | —              | —     |
+
+## 🖱️ Right-click actions
+
+In a server, right-click a member or a message (or long-press it on a phone) and open **Apps**.
+
+| Action               | On        | What it does                                                                     | Needs            |
+| -------------------- | --------- | -------------------------------------------------------------------------------- | ---------------- |
+| **Add to starboard** | A message | Puts a message on the starboard however many stars it has.                       | Manage messages  |
+| **Report message**   | A message | Sends a message, and what is wrong with it, to the server's mod mail channel.    | —                |
+| **Time out**         | A member  | Times a member out for as long as is typed in a form, exactly as `/mute` does.   | Moderate members |
+| **Warn**             | A member  | Warns a member, with the reason typed in a form, exactly as `/warn create` does. | Moderate members |

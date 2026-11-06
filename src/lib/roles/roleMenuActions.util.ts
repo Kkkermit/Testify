@@ -112,7 +112,7 @@ export function offeredRoles(guild: Guild, menu: StoredRoleMenu, member: GuildMe
 	});
 }
 
-export interface PickOutcome {
+interface PickOutcome {
 	added: string[];
 	removed: string[];
 	refused: string[];

@@ -17,7 +17,7 @@ export function chosenFrom(param: string | null, candidates: readonly Manageable
 	return [...new Set(param.split(","))].filter((id) => known.has(id)).slice(0, COMPARE_LIMITS.maxServers);
 }
 
-export interface CompareRow {
+interface CompareRow {
 	key: string;
 	label: string;
 	cells: (FeatureStatus | null | undefined)[];

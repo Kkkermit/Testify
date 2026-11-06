@@ -9,7 +9,7 @@ import { discordTime, escapeMarkdown, truncate } from "@lib/format/format.util";
 
 export const DM_LOG_ID = "dmlog";
 
-export interface LoggedDirectMessage {
+interface LoggedDirectMessage {
 	content: string;
 	sentAt: Date;
 	attachmentUrls: readonly string[];
@@ -26,7 +26,7 @@ function isImage(url: string): boolean {
 }
 
 /** Where the reader is: the message itself, or the sender's details. */
-export type DmLogView = "message" | "user";
+type DmLogView = "message" | "user";
 
 export function dmLogRow(authorId: string, view: DmLogView): ReturnType<typeof row>[] {
 	return [

@@ -5,7 +5,9 @@ import { isCategory } from "@config/categories";
 import { type Button } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, type Command, subcommandsOf } from "@core/command";
-import { SetupError } from "@core/errors";
+import { localiserFor, readCommandTranslations } from "@core/commandLocales";
+import { buildContextMenu, type ContextMenu } from "@core/contextMenu";
+import { SetupError, toError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
 import { MESSAGE_HANDLER, type MessageHandler } from "@core/message";
 
@@ -39,10 +41,11 @@ function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
 }
 
-export interface LoadCounts {
+interface LoadCounts {
 	commands: number;
 	events: number;
 	buttons: number;
+	menus: number;
 	messageHandlers: number;
 }
 
@@ -50,6 +53,7 @@ export function loadEverything(client: TestifyClient): LoadCounts {
 	const counts = {
 		commands: loadCommands(client),
 		buttons: loadButtons(client),
+		menus: loadContextMenus(client),
 		messageHandlers: loadMessageHandlers(client),
 		events: loadEvents(client),
 	};
@@ -73,9 +77,9 @@ function loadCommands(client: TestifyClient): number {
 		}
 		if (client.commands.has(command.name)) fail(file, `uses the command name "${command.name}" twice`);
 
-		client.commands.set(command.name, command as unknown as Command);
-
 		const loadedCommand = command as unknown as Command;
+		client.commands.set(loadedCommand.name, loadedCommand);
+
 		const named: [string, string][] = [
 			...(loadedCommand.aliases ?? []).map((alias): [string, string] => [alias, loadedCommand.name]),
 			// Only aliases a subcommand asks for; registering every subcommand name would collide.
@@ -107,6 +111,24 @@ function loadButtons(client: TestifyClient): number {
 	}
 
 	return client.buttons.size;
+}
+
+function loadContextMenus(client: TestifyClient): number {
+	for (const file of find("menus/*.menu.{js,ts}")) {
+		const menu = importFile(file);
+
+		if (!isObject(menu)) fail(file, "should `export default defineContextMenu({ … })`");
+		if (typeof menu.name !== "string" || !menu.name) fail(file, "is missing `name`");
+		if (typeof menu.description !== "string" || !menu.description) fail(file, "is missing `description`");
+		if (menu.type !== "user" && menu.type !== "message") fail(file, "needs a `type` of user or message");
+		if (typeof menu.switchedBy !== "string" || !menu.switchedBy) fail(file, "is missing `switchedBy`");
+		if (typeof menu.run !== "function") fail(file, "is missing `run`");
+		if (client.contextMenus.has(menu.name)) fail(file, `uses the menu name "${menu.name}" twice`);
+
+		client.contextMenus.set(menu.name, menu as unknown as ContextMenu);
+	}
+
+	return client.contextMenus.size;
 }
 
 function loadMessageHandlers(client: TestifyClient): number {
@@ -145,7 +167,7 @@ function loadEvents(client: TestifyClient): number {
 			void Promise.resolve(
 				(handler.run as (client: TestifyClient, ...rest: unknown[]) => Promise<void> | void)(client, ...args),
 			).catch((error: unknown) => {
-				client.logger.error({ err: error, event: handler.name }, "Event handler failed");
+				client.logger.error({ err: toError(error), event: handler.name }, "[EVENT_ERROR] An event handler failed.");
 			});
 		};
 
@@ -175,7 +197,12 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 		);
 	}
 
-	const body = [...client.commands.values()].map((command) => buildSlashCommand(command).toJSON());
+	// Right-click actions have their own limit of five of each kind, apart from the hundred slash commands.
+	const localise = localiserFor(readCommandTranslations());
+	const body = [
+		...[...client.commands.values()].map((command) => buildSlashCommand(command, localise).toJSON()),
+		...[...client.contextMenus.values()].map((menu) => buildContextMenu(menu, localise).toJSON()),
+	];
 	const rest = new REST({ version: "10" }).setToken(client.env.DISCORD_TOKEN);
 
 	const guildId = client.env.DISCORD_DEV_GUILD_ID;
@@ -185,7 +212,7 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 
 	await rest.put(route, { body });
 
-	client.logger.debug({ count: body.length, guildId: guildId ?? null }, "Published commands");
+	client.logger.debug({ count: body.length, guildId: guildId ?? null }, "[COMMANDS] Published the commands.");
 
 	return body.length;
 }

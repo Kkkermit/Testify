@@ -1,7 +1,7 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { commands as commandRoutes } from "@api/routes/commands";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -37,10 +37,7 @@ function app(session: { userId: string } | null): Hono<ApiBindings> {
 		await next();
 	});
 	instance.route("/commands", commandRoutes);
-	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(instance);
 
 	return instance;
 }

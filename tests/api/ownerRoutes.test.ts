@@ -1,9 +1,8 @@
 import { Collection } from "discord.js";
 import { Hono } from "hono";
+import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
 import { owner } from "@api/routes/owner";
-import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { databaseConnected } from "@database/connection";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
@@ -67,18 +66,9 @@ function appFor(size: number | Collection<string, unknown>, userId = OWNER): Hon
 	} as unknown as TestifyClient;
 
 	const app = new Hono<ApiBindings>();
-	app.use("*", async (context, next) => {
-		context.set("client", client);
-		context.set("env", {} as Env);
-		context.set("oauth", null);
-		context.set("session", { _id: "s", userId } as never);
-		await next();
-	});
+	withSession(app, client, { userId });
 	app.route("/owner", owner);
-	app.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
-		return Response.json(problemBody(problem), { status: problem.status });
-	});
+	answerLikeTheApp(app);
 
 	return app;
 }

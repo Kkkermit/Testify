@@ -28,5 +28,5 @@ export async function payPassiveIncome(client: TestifyClient): Promise<void> {
 		total += income;
 	}
 
-	if (paid > 0) client.logger.debug({ accounts: paid, total }, "Paid passive income");
+	if (paid > 0) client.logger.debug({ accounts: paid, total }, "[INCOME] Paid passive income.");
 }

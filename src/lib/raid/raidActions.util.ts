@@ -10,7 +10,7 @@ import { accountAgeDays, DEFAULT_RAID, type RaidOverview, type RaidPatch, type R
 
 /** A server's raid protection: its settings, the hold on a young account, and what staff are told. */
 
-export function normaliseRaid(stored: StoredRaidSettings | null): RaidSettings {
+function normaliseRaid(stored: StoredRaidSettings | null): RaidSettings {
 	return {
 		enabled: stored?.enabled ?? DEFAULT_RAID.enabled,
 		alertChannelId: stored?.alertChannelId ?? null,
@@ -76,13 +76,13 @@ export async function applyRaidSettings(
 	return readRaidOverview(guild);
 }
 
-export type HoldOutcome =
+type HoldOutcome =
 	{ held: true; until: number } | { held: false; reason: "permission" | "outranked" | "refused" } | null;
 
 const days = (count: number): string => `${String(count)} ${count === 1 ? "day" : "days"}`;
 
 /** The note a held member is sent, since a timeout on its own does not say why. */
-export function heldNotice(guildName: string, minAccountAgeDays: number, until: number): string {
+function heldNotice(guildName: string, minAccountAgeDays: number, until: number): string {
 	return [
 		`**${guildName}** holds back accounts newer than ${days(minAccountAgeDays)}, so you can read there but not talk until ${discordTime(until)} (${discordTime(until, "R")}).`,
 		"It lifts on its own, and nothing else is needed. A moderator can lift it sooner.",
@@ -129,7 +129,7 @@ function joinLine(join: WatchedJoin, now: number): string {
 }
 
 /** One young account, told to staff when no spike is already being reported. */
-export function holdPost(member: GuildMember, outcome: Exclude<HoldOutcome, null>, now: number): MessageCreateOptions {
+function holdPost(member: GuildMember, outcome: Exclude<HoldOutcome, null>, now: number): MessageCreateOptions {
 	const age = days(accountAgeDays(member.user.createdTimestamp, now));
 
 	return {

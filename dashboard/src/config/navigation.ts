@@ -1,5 +1,6 @@
 import {
 	Activity,
+	ArchiveRestore,
 	Ban,
 	Bell,
 	BookOpen,
@@ -12,6 +13,7 @@ import {
 	ScrollText,
 	Shield,
 	ShieldAlert,
+	Scale,
 	Siren,
 	Server,
 	ShieldCheck,
@@ -34,6 +36,8 @@ import {
 	Lightbulb,
 	ListChecks,
 	Lock,
+	Mailbox,
+	Mails,
 	Ticket,
 	type LucideIcon,
 	Gauge,
@@ -46,6 +50,7 @@ import {
 	Sparkles,
 	Star,
 	Volume2,
+	Wallet,
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
@@ -116,6 +121,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
 				{ to: at("/roles"), labelKey: "nav.roles", icon: Shield, hintKey: "nav.rolesHint", exact: false },
 				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
+				{ to: at("/backup"), labelKey: "nav.backup", icon: ArchiveRestore, hintKey: "nav.backupHint" },
 			],
 			sections: [
 				{
@@ -165,6 +171,8 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 						{ to: at("/warnings"), labelKey: "nav.warnings", icon: TriangleAlert, hintKey: "nav.warningsHint" },
 						{ to: at("/cases"), labelKey: "nav.cases", icon: Gavel, hintKey: "nav.casesHint" },
 						{ to: at("/bans"), labelKey: "nav.bans", icon: Ban, hintKey: "nav.bansHint" },
+						{ to: at("/appeals"), labelKey: "nav.appeals", icon: Scale, hintKey: "nav.appealsHint" },
+						{ to: at("/modmail"), labelKey: "nav.modmail", icon: Mails, hintKey: "nav.modmailHint" },
 						{ to: at("/channel-tools"), labelKey: "nav.channelTools", icon: Lock, hintKey: "nav.channelToolsHint" },
 						{ to: at("/tickets"), labelKey: "nav.tickets", icon: LifeBuoy, hintKey: "nav.ticketsHint" },
 						{ to: at("/audit-log"), labelKey: "nav.auditLog", icon: ScrollText, hintKey: "nav.auditLogHint" },
@@ -176,6 +184,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					icon: ChartPie,
 					items: [
 						{ to: at("/insights"), labelKey: "nav.insights", icon: ChartLine, hintKey: "nav.insightsHint" },
+						{ to: at("/invites"), labelKey: "nav.invites", icon: Mailbox, hintKey: "nav.invitesHint" },
 						{
 							to: at("/member-count"),
 							labelKey: "nav.memberCount",
@@ -189,6 +198,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					labelKey: "nav.economy",
 					icon: Coins,
 					items: [
+						{ to: at("/economy"), labelKey: "nav.economyRates", icon: Wallet, hintKey: "nav.economyRatesHint" },
 						{ to: at("/treasure"), labelKey: "nav.treasure", icon: Gem, hintKey: "nav.treasureHint" },
 						{ to: at("/lottery"), labelKey: "nav.lottery", icon: Ticket, hintKey: "nav.lotteryHint" },
 						{ to: at("/casino"), labelKey: "nav.casino", icon: Dices, hintKey: "nav.casinoHint" },

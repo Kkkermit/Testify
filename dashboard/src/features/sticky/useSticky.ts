@@ -1,11 +1,6 @@
-import {
-	useMutation,
-	useQuery,
-	useQueryClient,
-	type UseMutationResult,
-	type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query";
 import { type StickyList, type StickyPut } from "@testify/shared";
+import { useDocumentMutation } from "@/hooks/useDocumentMutation";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -28,19 +23,5 @@ function useListMutation<Body>(
 	guildId: string,
 	send: (body: Body) => Promise<StickyList>,
 ): UseMutationResult<StickyList, Error, Body> {
-	const client = useQueryClient();
-	const key = keys.guild(guildId).sticky();
-
-	return useMutation({
-		mutationKey: key,
-		mutationFn: send,
-		onSuccess: (list) => {
-			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, list);
-		},
-		onSettled: () => {
-			if (client.isMutating({ mutationKey: key }) !== 1) return;
-			void client.invalidateQueries({ queryKey: key });
-			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
-		},
-	});
+	return useDocumentMutation(keys.guild(guildId).sticky(), send, [keys.guild(guildId).overview()]);
 }

@@ -24,7 +24,7 @@ function inWindow(days: number, now?: Date, guildId?: string): Record<string, un
 	return { day: { $gte: since(days, now) }, ...(guildId === undefined ? {} : { guildId }) };
 }
 
-export interface UseRecord {
+interface UseRecord {
 	command: string;
 	guildId: string | null;
 	surface: Surface;
@@ -42,7 +42,7 @@ export async function recordCommandUse(use: UseRecord, now: Date = new Date()): 
 	).exec();
 }
 
-export interface UsageTotals {
+interface UsageTotals {
 	runs: number;
 	failures: number;
 	/** Servers that ran at least one command in the window, which is activity rather than fleet size. */
@@ -96,7 +96,7 @@ export async function commandTallies(days: number, limit = 0, now?: Date, guildI
 	]).exec();
 }
 
-export interface GuildTally {
+interface GuildTally {
 	guildId: string;
 	count: number;
 }
@@ -178,7 +178,7 @@ export async function recordDashboardView(guildId: string, now: Date = new Date(
 	).exec();
 }
 
-export interface DashboardTally {
+interface DashboardTally {
 	guildId: string;
 	count: number;
 	/** `YYYY-MM-DD`, the most recent day a screen was opened there. */
