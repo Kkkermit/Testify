@@ -37,6 +37,18 @@ describe("loadEnv", () => {
 		expect(env.LOG_LEVEL).toBe("info");
 	});
 
+	/** A misspelt name would switch nothing off, so every unknown one is refused beside the real names. */
+	it("reads the features to switch off in any case, and refuses a name the bot does not have", () => {
+		setEnv({ ...VALID, DISABLED_FEATURES: " Music, casino ," });
+		expect(loadEnv().DISABLED_FEATURES).toEqual(["music", "casino"]);
+
+		setEnv({ ...VALID, DISABLED_FEATURES: "musik,casino" });
+		expect(() => loadEnv()).toThrow(/DISABLED_FEATURES names musik, which this bot does not have[\s\S]*music, economy/);
+
+		setEnv({ ...VALID, DISABLED_FEATURES: "" });
+		expect(loadEnv().DISABLED_FEATURES).toEqual([]);
+	});
+
 	it("splits several owner IDs", () => {
 		setEnv({ ...VALID, DISCORD_OWNER_IDS: "111111111111111111, 222222222222222222" });
 		expect(loadEnv().DISCORD_OWNER_IDS).toEqual(["111111111111111111", "222222222222222222"]);

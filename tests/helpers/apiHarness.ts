@@ -77,8 +77,10 @@ export function withSession(
 	client: TestifyClient,
 	session: { userId: string; username?: string },
 ): void {
+	// A fake client says nothing about features, which on the real one means every feature is on.
+	const full = "featuresOff" in client ? client : Object.assign(client, { featuresOff: new Set() });
 	app.use("*", async (context, next) => {
-		context.set("client", client);
+		context.set("client", full);
 		context.set("env", {} as Env);
 		context.set("oauth", null);
 		context.set("session", { _id: "s", ...session } as never);

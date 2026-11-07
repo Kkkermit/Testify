@@ -2,6 +2,7 @@ import {
 	BOARD_SCOPES,
 	type BoardPage,
 	type BoardScope,
+	type BotFeature,
 	MEMBER_BOARDS,
 	type MemberBoard,
 	MONEY_SORTS,
@@ -11,8 +12,13 @@ import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 import { oneOf } from "@/lib/oneOf";
 
-export function boardFrom(value: string | null): MemberBoard {
-	return oneOf(MEMBER_BOARDS, value, "economy");
+/** The boards whose feature is on, in the order the switch lists them. */
+export function boardsOn(featuresOff: ReadonlySet<BotFeature>): MemberBoard[] {
+	return MEMBER_BOARDS.filter((board) => !featuresOff.has(board === "economy" ? "economy" : "levelling"));
+}
+
+export function boardFrom(value: string | null, boards: readonly MemberBoard[] = MEMBER_BOARDS): MemberBoard {
+	return oneOf(boards, value, boards[0] ?? "economy");
 }
 
 export function sortFrom(value: string | null): MoneySort {

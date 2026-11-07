@@ -28,7 +28,7 @@ export default defineEvent({
 		await sendGoodbye(client, member);
 		await forgetLeaver(member.guild.id, member.id);
 		await removeAccess(member.guild.id, member.id);
-		await trackLeave(member);
+		if (!client.featuresOff.has("invites")) await trackLeave(member);
 		await syncVoiceCounters(client, member.guild);
 	},
 });

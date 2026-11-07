@@ -6,7 +6,7 @@ import { theme } from "@config/theme";
 import { ServiceError } from "@core/errors";
 import { botVersion } from "@lib/bot";
 import { type GitHubReader, SiteProblem, type SiteRefusal } from "@lib/site";
-import { type SiteInfo, sourceFileQuery } from "@testify/shared";
+import { BOT_FEATURE_KEYS, type SiteInfo, sourceFileQuery } from "@testify/shared";
 
 const REFUSALS: Record<SiteRefusal, () => ApiProblem> = {
 	no_repository: () => notFound("no_repository", "This bot's code is not in a GitHub repository this page can read."),
@@ -55,6 +55,7 @@ export function siteRoutes(github: GitHubReader): Hono<ApiBindings> {
 				dashboard: context.get("env").DASHBOARD_ENABLED,
 				repository: theme.repository,
 				version: botVersion(),
+				featuresOff: BOT_FEATURE_KEYS.filter((key) => context.get("client").featuresOff.has(key)),
 			};
 			return context.json(body);
 		})

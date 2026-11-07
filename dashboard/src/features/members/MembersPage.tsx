@@ -6,6 +6,8 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { BoardsTab } from "@/features/members/components/BoardsTab";
 import { DirectoryTab } from "@/features/members/components/DirectoryTab";
 import { type MemberTab, tabFrom } from "@/features/members/directory.utils";
+import { boardsOn } from "@/features/members/members.utils";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 const TABS: readonly TabDefinition<MemberTab>[] = [
@@ -17,7 +19,10 @@ export function MembersPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const [params, setParams] = useSearchParams();
-	const tab = tabFrom(params.get("tab"), params.get("board"));
+	const boards = boardsOn(useFeaturesOff());
+	// With economy and levelling both switched off there is no board to show.
+	const tabs = boards.length === 0 ? TABS.filter((entry) => entry.key !== "boards") : TABS;
+	const tab = boards.length === 0 ? "directory" : tabFrom(params.get("tab"), params.get("board"));
 	const overview = useGuildOverview(guildId);
 
 	usePageTitle(t("members.title"), overview.data?.name);
@@ -28,7 +33,7 @@ export function MembersPage(): React.JSX.Element {
 
 			<TabBar
 				label={t("directory.tabsLabel")}
-				tabs={TABS}
+				tabs={tabs}
 				active={tab}
 				onSelect={(next) => {
 					// Each tab's own filters belong to it, so the address keeps only the tab.
@@ -37,7 +42,7 @@ export function MembersPage(): React.JSX.Element {
 			/>
 
 			<TabContent label={t("directory.tabsLabel")} active={tab}>
-				{tab === "directory" ? <DirectoryTab guildId={guildId} /> : <BoardsTab guildId={guildId} />}
+				{tab === "directory" ? <DirectoryTab guildId={guildId} /> : <BoardsTab guildId={guildId} boards={boards} />}
 			</TabContent>
 		</>
 	);

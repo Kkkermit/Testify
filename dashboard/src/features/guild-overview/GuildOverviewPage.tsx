@@ -12,6 +12,7 @@ import { MissingPermissions } from "@/features/guild-overview/components/Missing
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
 import { SetupChecklist } from "@/features/guild-overview/components/SetupChecklist";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
@@ -79,8 +80,9 @@ const ROW = "hover:bg-muted/60 group flex items-center gap-3 px-4 py-3 transitio
 /** Somebody given part of the server gets its figures and the way into each screen they were given. */
 function GrantedOverview({ guild, areas }: { guild: GuildOverview; areas: AccessArea[] }): React.JSX.Element {
 	const { t } = useTranslation();
-	const screens = allNavItems(navigationFor({ guild: { ...guild, areas }, isOwner: false })).filter((item) =>
-		item.to.startsWith(`/guilds/${guild.id}/`),
+	const featuresOff = useFeaturesOff();
+	const screens = allNavItems(navigationFor({ guild: { ...guild, areas }, isOwner: false, featuresOff })).filter(
+		(item) => item.to.startsWith(`/guilds/${guild.id}/`),
 	);
 
 	return (

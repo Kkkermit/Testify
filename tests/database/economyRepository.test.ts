@@ -23,6 +23,16 @@ const GUILD = "111111111111111111";
 const ALICE = "222222222222222222";
 const BOB = "333333333333333333";
 
+/** `t?lottery enter -1000` once reached a debit of minus a thousand fees, which the `$inc` paid out as a credit. */
+describe("a negative debit", () => {
+	it("is refused before the database is asked, on every way money leaves a balance", async () => {
+		await expect(debitWallet(GUILD, ALICE, -5)).rejects.toThrow(/never negative/);
+		await expect(deposit(GUILD, ALICE, -5)).rejects.toThrow(/never negative/);
+		await expect(withdraw(GUILD, ALICE, -5)).rejects.toThrow(/never negative/);
+		await expect(debitWallet(GUILD, ALICE, Number.NaN)).rejects.toThrow(/never negative/);
+	});
+});
+
 describeWithMongo("economyRepository", () => {
 	it("creates an account on first use and reuses it after", async () => {
 		const first = await getOrCreateAccount(GUILD, ALICE);

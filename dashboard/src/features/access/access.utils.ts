@@ -1,4 +1,4 @@
-import { ACCESS_AREAS, type AccessArea, isAccessArea } from "@testify/shared";
+import { ACCESS_AREAS, type AccessArea, type BotFeature, isAccessArea } from "@testify/shared";
 import { type LucideIcon } from "lucide-react";
 import { type NavItem, navigationFor } from "@/config/navigation";
 import { type TranslationKey } from "@/i18n";
@@ -25,8 +25,8 @@ function choicesIn(items: readonly NavItem[]): AreaChoice[] {
 }
 
 /** The screens grouped as the sidebar groups them, so choosing them reads like the dashboard itself. */
-export function areaGroups(): AreaGroup[] {
-	const groups = navigationFor({ guild: ANY_GUILD, isOwner: false });
+export function areaGroups(featuresOff?: ReadonlySet<BotFeature>): AreaGroup[] {
+	const groups = navigationFor({ guild: ANY_GUILD, isOwner: false, featuresOff });
 	const server = groups.find((group) => group.guildId === ANY_GUILD.id);
 	// The server's command switches sit with the bot-wide links, so they are gathered in with its own screens.
 	const top = groups.filter((group) => group !== server).flatMap((group) => group.items);

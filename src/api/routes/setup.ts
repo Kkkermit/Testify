@@ -29,14 +29,14 @@ const SUMMARY: Record<SetupStep, string> = {
 
 setup.get("/", async (context) => {
 	const { guild, actor } = scopeOf(context);
-	return context.json(await readSetupChecklist(guild, actor));
+	return context.json(await readSetupChecklist(guild, actor, context.get("client").featuresOff));
 });
 
 setup.post("/:step", async (context) => {
 	const { guild, actor } = scopeOf(context);
 	const { step } = parseParams(context, setupStepParams);
 
-	const { checklist, channelId } = await runSetupStep(guild, actor, step);
+	const { checklist, channelId } = await runSetupStep(guild, actor, step, context.get("client").featuresOff);
 	await auditChange(context, {
 		action: `setup.${step}`,
 		summary: SUMMARY[step],

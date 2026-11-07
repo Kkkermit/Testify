@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 import { overview } from "@/test/fixtures/server";
 import { aGuild } from "@/test/fixtures/session";
+import { siteInfo } from "@/test/fixtures/site";
 import { server } from "@/test/setup";
 
 const GUILD = aGuild.id;
@@ -41,13 +42,13 @@ function Landing(): React.JSX.Element {
 	return <p>Landed with {state?.notice ?? "no notice"}</p>;
 }
 
-function visit(): { router: ReturnType<typeof createMemoryRouter> } {
+function visit(screen = "settings"): { router: ReturnType<typeof createMemoryRouter> } {
 	const router = createMemoryRouter(
 		[
-			{ element: <RequireGuild />, children: [{ path: "/guilds/:guildId/settings", element: <Screen /> }] },
+			{ element: <RequireGuild />, children: [{ path: `/guilds/:guildId/${screen}`, element: <Screen /> }] },
 			{ path: "/guilds", element: <Landing /> },
 		],
-		{ initialEntries: [`/guilds/${GUILD}/settings`] },
+		{ initialEntries: [`/guilds/${GUILD}/${screen}`] },
 	);
 	render(
 		<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -123,6 +124,23 @@ describe("reaching a server's screens", () => {
 		expect(await screen.findByText(/your access to this server doesn’t include this screen/i)).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 1, name: "Settings" })).toBeInTheDocument();
 		expect(screen.queryByRole("heading", { name: "Server settings" })).toBeNull();
+		expect(asked).toEqual([]);
+	});
+
+	/** An address typed or bookmarked still reaches a screen whose feature the host has since switched off. */
+	it("says a switched-off feature's screen is off, and asks the API nothing for it", async () => {
+		const asked: string[] = [];
+		server.use(
+			http.get("/api/site", () => HttpResponse.json({ ...siteInfo, featuresOff: ["music"] })),
+			http.get(`/api/guilds/${GUILD}/settings`, () => {
+				asked.push("settings");
+				return HttpResponse.json({});
+			}),
+		);
+		visit("music");
+
+		expect(await screen.findByText(/switched this part of the bot off/i)).toBeInTheDocument();
+		expect(screen.getByRole("heading", { level: 1, name: "Music" })).toBeInTheDocument();
 		expect(asked).toEqual([]);
 	});
 

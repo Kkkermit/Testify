@@ -1,23 +1,44 @@
 import {
+	type ChatInputCommandInteraction,
 	type ContextMenuCommandInteraction,
 	DiscordAPIError,
 	Events,
 	type Interaction,
+	type MessageComponentInteraction,
 	MessageFlags,
+	type ModalSubmitInteraction,
 	RESTJSONErrorCodes,
 } from "discord.js";
+import { botName } from "@core/brand";
 import { parseCustomId } from "@core/button";
 import { checkContextMenu, runChecks } from "@core/checks";
 import { type TestifyClient } from "@core/client";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
+import { readerLanguage, say } from "@core/language";
 import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
+import { commandIsOff, partIsOff } from "@testify/shared";
+
+type Answerable =
+	ChatInputCommandInteraction | ContextMenuCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction;
+
+/** A switched-off feature's button, command or action can still arrive from an old message or Discord's cached menu. */
+async function refuseSwitchedOff(interaction: Answerable): Promise<void> {
+	await interaction.reply({
+		embeds: [refusalEmbed(say(readerLanguage(interaction), "featureOff", { bot: botName() }))],
+		flags: MessageFlags.Ephemeral,
+	});
+}
 
 async function runContextMenu(client: TestifyClient, interaction: ContextMenuCommandInteraction): Promise<void> {
 	const menu = client.contextMenus.get(interaction.commandName);
-	if (!menu || !interaction.inCachedGuild()) return;
+	if (!menu) {
+		if (partIsOff(client.featuresOff, "menus", interaction.commandName)) await refuseSwitchedOff(interaction);
+		return;
+	}
+	if (!interaction.inCachedGuild()) return;
 
 	const refusal = await checkContextMenu(client, interaction, menu);
 	if (refusal !== null) {
@@ -62,6 +83,11 @@ export default defineEvent({
 
 		if (interaction.isChatInputCommand()) {
 			const command = client.commands.get(interaction.commandName);
+			const subcommand = interaction.options.getSubcommand(false);
+			if (commandIsOff(client.featuresOff, interaction.commandName, subcommand)) {
+				await refuseSwitchedOff(interaction);
+				return;
+			}
 			if (!command) {
 				client.logger.warn(
 					{ command: interaction.commandName },
@@ -98,7 +124,10 @@ export default defineEvent({
 
 		const { id, action, args } = parseCustomId(interaction.customId);
 		const button = client.buttons.get(id);
-		if (!button) return;
+		if (!button) {
+			if (partIsOff(client.featuresOff, "buttons", id)) await refuseSwitchedOff(interaction);
+			return;
+		}
 
 		if (button.ownerOnly === true && args.at(-1) !== undefined && args.at(-1) !== interaction.user.id) {
 			await interaction.reply({

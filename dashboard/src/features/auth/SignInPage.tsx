@@ -1,3 +1,4 @@
+import { returnTo as returnToSchema } from "@testify/shared";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
@@ -19,7 +20,9 @@ export function SignInPage(): React.JSX.Element {
 	const setup = useSetup();
 	const bot = useBotLook();
 	const site = useSite();
-	const returnTo = params.get("returnTo") ?? "/guilds";
+	// The server refuses any other address, which would end the sign-in on an error rather than on a page.
+	const asked = params.get("returnTo");
+	const returnTo = asked !== null && returnToSchema.safeParse(asked).success ? asked : "/guilds";
 	const name = bot.name;
 
 	if (site.data?.dashboard === false) return <DashboardOff />;

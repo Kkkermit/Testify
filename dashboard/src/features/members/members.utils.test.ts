@@ -1,6 +1,7 @@
 import { type BoardPage } from "@testify/shared";
 import {
 	boardFrom,
+	boardsOn,
 	columnsFor,
 	emptyMessage,
 	jumpTarget,
@@ -30,6 +31,15 @@ describe("boardFrom", () => {
 	it.each([null, "", "warnings"])("falls back to economy for %p", (value) => {
 		expect(boardFrom(value)).toBe("economy");
 	});
+});
+
+/** A link to the money board on a bot without an economy would draw a board its route refuses. */
+it("offers only the boards whose feature is on, and falls back to one of those", () => {
+	const levelsOnly = boardsOn(new Set(["economy"]));
+
+	expect(levelsOnly).toEqual(["levels"]);
+	expect(boardFrom("economy", levelsOnly)).toBe("levels");
+	expect(boardsOn(new Set(["economy", "levelling"]))).toEqual([]);
 });
 
 describe("sortFrom and scopeFrom", () => {

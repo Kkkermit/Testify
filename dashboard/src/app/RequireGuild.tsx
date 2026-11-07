@@ -1,4 +1,4 @@
-import { type GuildOverview } from "@testify/shared";
+import { type GuildOverview, screenIsOff } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Navigate, Outlet, useLocation, useParams } from "react-router";
 import { useRecheckOnRefusal } from "@/app/useRecheckOnRefusal";
@@ -6,6 +6,8 @@ import { Warning } from "@/components/form";
 import { PageHeader, Skeleton } from "@/components/primitives";
 import { allNavItems, mayOpen, navigationFor } from "@/config/navigation";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
+import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { keys } from "@/lib/queries";
@@ -24,22 +26,35 @@ export function RequireGuild(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 	const { pathname } = useLocation();
 	const overview = useGuildOverview(guildId);
+	const site = useSite();
+	const featuresOff = useFeaturesOff();
 	useRecheckOnRefusal(
 		(key) => (key[0] === "guild" || key[0] === "command-toggles") && key[1] === guildId,
 		keys.guild(guildId).overview(),
 	);
 
-	if (overview.isPending) return <Skeleton className="h-64 w-full" />;
+	if (overview.isPending || site.isPending) return <Skeleton className="h-64 w-full" />;
 	if (deniesAccess(overview.error)) return <Navigate to="/guilds" replace state={{ notice: GUILD_REFUSED_NOTICE }} />;
+	if (overview.data !== undefined && screenIsOff(featuresOff, pathname) !== null) {
+		return <Withheld guild={overview.data} pathname={pathname} why="switchedOff" />;
+	}
 	if (overview.data !== undefined && !mayOpen(pathname, guildId, overview.data.yourAreas)) {
-		return <NotGranted guild={overview.data} pathname={pathname} />;
+		return <Withheld guild={overview.data} pathname={pathname} why="notGranted" />;
 	}
 
 	return <Outlet />;
 }
 
-/** Somebody given part of a server who follows a link elsewhere in it is told so, and nothing behind it is asked for. */
-function NotGranted({ guild, pathname }: { guild: GuildOverview; pathname: string }): React.JSX.Element {
+/** A switched-off screen, or one a partial grant leaves out, says so and asks the API for nothing behind it. */
+function Withheld({
+	guild,
+	pathname,
+	why,
+}: {
+	guild: GuildOverview;
+	pathname: string;
+	why: "switchedOff" | "notGranted";
+}): React.JSX.Element {
 	const { t } = useTranslation();
 	const screen = allNavItems(navigationFor({ guild, isOwner: false }))
 		.filter((item) => item.to !== `/guilds/${guild.id}` && (pathname === item.to || pathname.startsWith(`${item.to}/`)))
@@ -51,7 +66,7 @@ function NotGranted({ guild, pathname }: { guild: GuildOverview; pathname: strin
 	return (
 		<>
 			<PageHeader server={guild} title={title} />
-			<Warning>{t("guilds.notGranted")}</Warning>
+			<Warning>{why === "switchedOff" ? t("guilds.switchedOff") : t("guilds.notGranted")}</Warning>
 		</>
 	);
 }

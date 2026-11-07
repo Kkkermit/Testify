@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { dataPath } from "@core/paths";
 
-/** One profanity check, so every filter matches words the same way. */
+/** What the message filters look for, so every filter matches profanity and links the same way. */
 
 const filterFileSchema = z.object({ words: z.array(z.string()) });
 
@@ -48,4 +48,11 @@ function tokenise(text: string): string[] {
 export function containsProfanity(text: string): boolean {
 	const list = words();
 	return tokenise(text).some((token) => list.has(token));
+}
+
+/** A letter or digit right before the domain keeps the scan to one pass, so a long message cannot stall the bot. */
+const LINK = /https?:\/\/|www\.|discord\.gg\/|[a-z0-9]-*\.(?:com|net|org|io|gg|xyz|co)\b/i;
+
+export function containsLink(text: string): boolean {
+	return LINK.test(text);
 }

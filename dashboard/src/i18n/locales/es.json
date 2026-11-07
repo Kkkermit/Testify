@@ -482,7 +482,8 @@
 		"grantedTitle": "Compartidos contigo",
 		"grantedBody": "Sus administradores te dieron algunas pantallas, así que solo se abren esas.",
 		"notGrantedTitle": "Fuera de tu acceso",
-		"notGranted": "Tu acceso a este servidor no incluye esta pantalla. Pídesela a uno de sus administradores si la necesitas."
+		"notGranted": "Tu acceso a este servidor no incluye esta pantalla. Pídesela a uno de sus administradores si la necesitas.",
+		"switchedOff": "El propietario de {{bot}} ha desactivado esta parte del bot, así que aquí no hay nada que configurar."
 	},
 	"compare": {
 		"title": "Lado a lado",
@@ -2661,6 +2662,8 @@
 			"setupSummary": "La aplicación de Discord, su token e intents, y cómo invitar al bot.",
 			"configuration": "Configuración",
 			"configurationSummary": "Cada variable de entorno, qué hace y cuáles son obligatorias.",
+			"features": "Desactivar funciones",
+			"featuresSummary": "Ejecuta el bot sin música, sin casino o sin cualquier otra cosa que no quieras.",
 			"docker": "Docker",
 			"dockerSummary": "El bot y su base de datos con Docker Compose, y dónde más puede ejecutarse.",
 			"dashboard": "El sitio web y el panel",

@@ -80,4 +80,16 @@ describe("readWeek", () => {
 
 		expect(week.events.map((event) => event.kind)).toEqual(["giveaway", "lottery", "scheduled", "birthday"]);
 	});
+
+	/** Listing giveaways starts their manager, so a switched-off feature is not even asked. */
+	it("leaves out, and never reads, what a switched-off feature would have done", async () => {
+		jest.mocked(listGiveaways).mockClear();
+		jest.mocked(readLottery).mockResolvedValue({ enabled: true, frozen: false, nextDrawAt: hours(4) } as never);
+		jest.mocked(readBirthdaySettings).mockResolvedValue({ enabled: true } as never);
+
+		const week = await readWeek({} as TestifyClient, guild, NOW, new Set(["giveaways", "lottery", "birthdays"]));
+
+		expect(week.events.map((event) => event.kind)).toEqual(["scheduled"]);
+		expect(listGiveaways).not.toHaveBeenCalled();
+	});
 });

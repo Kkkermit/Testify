@@ -12,6 +12,7 @@ import { FlagIcon } from "@/components/brand/FlagIcon";
 import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
 import { shortcutLabel } from "@/features/search/quickSearch.utils";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
 import { api } from "@/lib/api";
 import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
@@ -51,6 +52,7 @@ export function Sidebar({
 	const { t, i18n } = useTranslation();
 	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
 	const queryClient = useQueryClient();
+	const featuresOff = useFeaturesOff();
 	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
 
 	async function signOut(): Promise<void> {
@@ -80,7 +82,7 @@ export function Sidebar({
 
 			{onSearch !== undefined && <SearchRow onSearch={onSearch} expanded={expanded} label={label} />}
 
-			{navigationFor({ guild, isOwner, mayGrant }).map((group, index) => {
+			{navigationFor({ guild, isOwner, mayGrant, featuresOff }).map((group, index) => {
 				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
 
 				return (

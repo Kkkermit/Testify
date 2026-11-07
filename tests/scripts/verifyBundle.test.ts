@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+	evalProbeProblem,
 	filesUnder,
 	missingFrom,
 	ownerChunkProblem,
@@ -128,6 +129,23 @@ describe("ownerChunkProblem", () => {
 	it("fails when the console has no chunk of its own, or more than one", () => {
 		expect(ownerChunkProblem({ "index-1.js": lazy })).toMatch(/found 0/);
 		expect(ownerChunkProblem({ "OwnerPage-a.js": "", "OwnerPage-b.js": "" })).toMatch(/found 2/);
+	});
+});
+
+describe("evalProbeProblem", () => {
+	const probe =
+		"var S=o(()=>{if(Me.jitless||typeof navigator<`u`)return!1;try{return Function(``),!0}catch{return!1}});";
+
+	/** The probe raised a CSP violation on every page load until the setting moved into the chunk that holds zod. */
+	it("passes when the chunk holding zod's probe also switches it off", () => {
+		expect(evalProbeProblem({ "vendor-1.js": `${probe}Ce({jitless:!0});` })).toBeNull();
+		expect(evalProbeProblem({ "index-1.js": "nothing of zod here" })).toBeNull();
+	});
+
+	it("fails when the setting sits in a chunk that loads after the schemas are built", () => {
+		expect(evalProbeProblem({ "vendor-1.js": probe, "index-2.js": "Ce({jitless:!0});" })).toMatch(
+			/vendor-1\.js lets zod probe for eval/,
+		);
 	});
 });
 

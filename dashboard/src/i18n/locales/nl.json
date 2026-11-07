@@ -475,7 +475,8 @@
 		"grantedTitle": "Met jou gedeeld",
 		"grantedBody": "Hun beheerders gaven je een paar schermen, dus alleen die gaan open.",
 		"notGrantedTitle": "Niet in je toegang",
-		"notGranted": "Je toegang tot deze server omvat dit scherm niet. Vraag het een van de beheerders als je het nodig hebt."
+		"notGranted": "Je toegang tot deze server omvat dit scherm niet. Vraag het een van de beheerders als je het nodig hebt.",
+		"switchedOff": "De eigenaar van {{bot}} heeft dit deel van de bot uitgezet, dus hier valt niets in te stellen."
 	},
 	"compare": {
 		"title": "Naast elkaar",
@@ -2591,6 +2592,8 @@
 			"setupSummary": "De Discord-applicatie, de token en intents, en de bot uitnodigen.",
 			"configuration": "Configuratie",
 			"configurationSummary": "Elke omgevingsvariabele, wat ze doet en welke verplicht zijn.",
+			"features": "Functies uitzetten",
+			"featuresSummary": "Draai de bot zonder muziek, casino of iets anders dat je niet wilt.",
 			"docker": "Docker",
 			"dockerSummary": "De bot en zijn database met Docker Compose, en waar hij verder kan draaien.",
 			"dashboard": "De website en het dashboard",

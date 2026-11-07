@@ -72,7 +72,9 @@ import {
 	guildIdParam,
 	type Paged,
 	pagination,
+	RESTORABLE,
 	type RoleSummary,
+	routeIsOff,
 } from "@testify/shared";
 
 export const guilds = new Hono<ApiBindings>();
@@ -158,7 +160,7 @@ guilds.get("/:guildId/week", async (context) => {
 });
 
 guilds.get("/:guildId/role-uses", async (context) => {
-	const body: GuildRoleUses = await readRoleUses(guildOf(context).id);
+	const body: GuildRoleUses = await readRoleUses(guildOf(context).id, context.get("client").featuresOff);
 	return context.json(body);
 });
 
@@ -223,13 +225,19 @@ guilds.get("/:guildId/audit", async (context) => {
 
 guilds.get("/:guildId/changes", async (context) => {
 	const query = parseQuery(context, changesQuery);
+	const changes = await readServerChanges(guildOf(context), query, {
+		...audienceOf(context),
+		auditLog: holdsPermission(context, PermissionFlagsBits.ViewAuditLog),
+	});
 
-	return context.json(
-		await readServerChanges(guildOf(context), query, {
-			...audienceOf(context),
-			auditLog: holdsPermission(context, PermissionFlagsBits.ViewAuditLog),
-		}),
+	// A switched-off feature's route answers 404, so a change to it is listed but cannot be put back.
+	const off = context.get("client").featuresOff;
+	const items = changes.items.map((change) =>
+		change.restore !== null && routeIsOff(off, `/guilds/:guildId${RESTORABLE[change.restore.action].path}`) !== null
+			? { ...change, restore: null }
+			: change,
 	);
+	return context.json({ ...changes, items });
 });
 
 guilds.get("/:guildId/insights", async (context) => {

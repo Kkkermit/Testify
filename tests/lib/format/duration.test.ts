@@ -22,4 +22,14 @@ describe("parseDuration", () => {
 			expect(parseDuration(input)).toBeNull();
 		}
 	});
+
+	/** Reading time grows with the square of the length, so a pasted wall of digits took eleven seconds. */
+	it("refuses a length longer than any real one without reading it", () => {
+		const started = performance.now();
+
+		expect(parseDuration("1m ".repeat(40))).toBeNull();
+		expect(parseDuration(`${"0".repeat(100_000)}\t0A`)).toBeNull();
+		expect(performance.now() - started).toBeLessThan(500);
+		expect(parseDuration("1w 6d 23h 59m 59s")).toBe(1_209_599_000);
+	});
 });

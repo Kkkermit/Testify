@@ -21,6 +21,7 @@ import { BACKUP_SECTION_LABELS } from "@/features/backup/backup.labels";
 import { backupFileName, saveFile } from "@/features/backup/backup.utils";
 import {
 	readServerSettings,
+	sectionOn,
 	type ServerSettings,
 	type StepResult,
 	useApplyBackup,
@@ -28,6 +29,7 @@ import {
 } from "@/features/backup/useBackup";
 import { comparable } from "@/features/compare/compare.utils";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -50,6 +52,7 @@ export function BackupPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
 	const me = useMe();
+	const featuresOff = useFeaturesOff();
 	const apply = useApplyBackup(guildId);
 	const reportProgram = useReportProgram(guildId);
 	const [busy, setBusy] = useState(false);
@@ -77,7 +80,7 @@ export function BackupPage(): React.JSX.Element {
 
 	const download = (): Promise<void> =>
 		run(async () => {
-			const setup = await readServerSettings(guildId);
+			const setup = await readServerSettings(guildId, featuresOff);
 			const document = buildBackup(name, setup.reads, setup);
 			saveFile(backupFileName(name), `${JSON.stringify(document, null, "\t")}\n`);
 			setLeftOut(setup.refused);
@@ -86,7 +89,7 @@ export function BackupPage(): React.JSX.Element {
 	const bringIn = (document: BackupDocument): Promise<void> =>
 		run(async () => {
 			apply.reset();
-			setIncoming({ document, here: await readServerSettings(guildId) });
+			setIncoming({ document, here: await readServerSettings(guildId, featuresOff) });
 		});
 
 	return (
@@ -179,7 +182,7 @@ export function BackupPage(): React.JSX.Element {
 								onClick={() =>
 									void run(async () => {
 										const source = others.find((guild) => guild.id === sourceId);
-										const setup = await readServerSettings(sourceId);
+										const setup = await readServerSettings(sourceId, featuresOff);
 										await bringIn(buildBackup(source?.name ?? "", setup.reads, setup));
 									})
 								}
@@ -232,7 +235,9 @@ function Preview({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const { document, here } = incoming;
-	const plan = planBackup(document, here, here.reads);
+	const featuresOff = useFeaturesOff();
+	const full = planBackup(document, here, here.reads);
+	const plan = { ...full, steps: full.steps.filter((step) => sectionOn(step.action, featuresOff)) };
 	const [skipped, setSkipped] = useState<ReadonlySet<RestorableAction>>(
 		() => new Set(plan.steps.filter((step) => step.unchanged).map((step) => step.action)),
 	);

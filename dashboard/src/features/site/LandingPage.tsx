@@ -9,9 +9,11 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { withoutSwitchedOff } from "@/features/docs/commandList.utils";
 import { Composer } from "@/features/site/components/Composer";
 import { paletteFrom } from "@/features/site/composer.utils";
 import { FEATURES, SELF_HOST_STEPS } from "@/features/site/landing.content";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { rememberedBotName } from "@/lib/brand";
@@ -35,7 +37,9 @@ export function LandingPage(): React.JSX.Element {
 	usePageTitle(t("landing.pageTitle"));
 	const site = useSite();
 	const bot = useBot();
-	const palette = useMemo(() => paletteFrom(commandList), []);
+	const featuresOff = useFeaturesOff();
+	const palette = useMemo(() => paletteFrom(withoutSwitchedOff(commandList, featuresOff)), [featuresOff]);
+	const features = FEATURES.filter((card) => card.feature === undefined || !featuresOff.has(card.feature));
 	const name = bot.data?.name ?? rememberedBotName() ?? "";
 	const invite = bot.data === undefined ? null : inviteUrl(bot.data.id);
 	const erased = (useLocation().state as { erased?: boolean } | null)?.erased === true;
@@ -79,7 +83,7 @@ export function LandingPage(): React.JSX.Element {
 					)}
 				</div>
 
-				<Composer palette={palette} />
+				<Composer palette={palette} featuresOff={featuresOff} />
 			</section>
 
 			<section aria-labelledby="landing-features" className="flex flex-col gap-6 py-10">
@@ -87,7 +91,7 @@ export function LandingPage(): React.JSX.Element {
 					{t("landing.featuresTitle")}
 				</h2>
 				<ul className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3 [&>li]:min-w-0">
-					{FEATURES.map((feature) => {
+					{features.map((feature) => {
 						const look = featureLook(feature.look);
 						const Icon = look.icon;
 						return (

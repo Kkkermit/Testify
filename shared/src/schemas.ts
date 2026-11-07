@@ -6,8 +6,8 @@ export const snowflake = z.string().regex(/^\d{17,20}$/, "must be a Discord ID")
 const MAX_RETURN_TO = 512;
 
 const RETURN_PATH = /^\/[a-zA-Z0-9/_-]*$/;
-/** `%` for percent-encoding, `.` for a decimal, `+` for a space — everything a `URLSearchParams` can emit. */
-const RETURN_QUERY = /^[a-zA-Z0-9=&%+.,_~-]*$/;
+/** `%` for percent-encoding, `.` for a decimal, `+` for a space and `*`, which it never encodes: all it can emit. */
+const RETURN_QUERY = /^[a-zA-Z0-9=&%+.,_~*-]*$/;
 
 /**
  * A relative path on this origin with an optional query, and nothing else. `//host` and backslashes are refused because

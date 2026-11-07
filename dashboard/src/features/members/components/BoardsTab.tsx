@@ -1,4 +1,4 @@
-import { BOARD_SCOPES, MEMBER_BOARDS, MONEY_SORTS } from "@testify/shared";
+import { BOARD_SCOPES, type MemberBoard, MONEY_SORTS } from "@testify/shared";
 import { Crosshair } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
@@ -20,11 +20,11 @@ import {
 import { useBoard } from "@/features/members/useMembers";
 import { pageFrom } from "@/lib/paging";
 
-export function BoardsTab({ guildId }: { guildId: string }): React.JSX.Element {
+export function BoardsTab({ guildId, boards }: { guildId: string; boards: readonly MemberBoard[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [params, setParams] = useSearchParams();
 
-	const board = boardFrom(params.get("board"));
+	const board = boardFrom(params.get("board"), boards);
 	const page = pageFrom(params.get("page"));
 	const sort = board === "economy" ? sortFrom(params.get("sort")) : "total";
 	const scope = board === "economy" ? scopeFrom(params.get("scope")) : "server";
@@ -53,14 +53,16 @@ export function BoardsTab({ guildId }: { guildId: string }): React.JSX.Element {
 
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div className="flex flex-wrap items-center gap-3">
-					<SegmentedControl
-						label={t("members.leaderboard")}
-						value={board}
-						segments={MEMBER_BOARDS.map((kind) => ({ value: kind, label: t(BOARD_NAMES[kind]) }))}
-						onChange={(next) => {
-							put({ board: next, page: "1" });
-						}}
-					/>
+					{boards.length > 1 && (
+						<SegmentedControl
+							label={t("members.leaderboard")}
+							value={board}
+							segments={boards.map((kind) => ({ value: kind, label: t(BOARD_NAMES[kind]) }))}
+							onChange={(next) => {
+								put({ board: next, page: "1" });
+							}}
+						/>
+					)}
 
 					{board === "economy" && (
 						<>

@@ -1,4 +1,4 @@
-import { DEFAULT_PREFIX } from "@testify/shared";
+import { type BotFeature, commandIsOff, DEFAULT_PREFIX } from "@testify/shared";
 import { Hash, PlusCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,20 +15,29 @@ import { useDocumentVisible } from "@/hooks/useDocumentVisible";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/cn";
 
-export function Composer({ palette }: { palette: readonly PaletteCommand[] }): React.JSX.Element | null {
+export function Composer({
+	palette,
+	featuresOff,
+}: {
+	palette: readonly PaletteCommand[];
+	featuresOff: ReadonlySet<BotFeature>;
+}): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const reduced = usePrefersReducedMotion();
 	const visible = useDocumentVisible();
 	const scenes = useMemo<ComposerScene[]>(
 		() =>
-			SCENES.map((scene) => ({
+			SCENES.filter((scene) => {
+				const [command = "", subcommand] = scene.command.split(" ");
+				return !commandIsOff(featuresOff, command, subcommand);
+			}).map((scene) => ({
 				...scene,
 				options: scene.options.map((option) => ({
 					name: option.name,
 					value: "valueKey" in option ? t(option.valueKey) : option.value,
 				})),
 			})),
-		[t],
+		[t, featuresOff],
 	);
 	const [position, setPosition] = useState({ scene: 0, frame: 0 });
 	const scene = scenes[position.scene % scenes.length] ?? scenes[0];

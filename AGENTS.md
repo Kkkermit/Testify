@@ -69,7 +69,8 @@ numbers, which drift):
 | `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 53 / 52                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,190 across 564 suites           |
+| Switchable features  | 17                                |
+| Tests                | 4,230 across 569 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -90,9 +91,10 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 `.env` (or `.env.development.example` to `.env.development`) and fill it in.
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
-**Optional:** `NODE_ENV`, `LOG_LEVEL`,
-`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report,
-suggestion and eval — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
+**Optional:** `NODE_ENV`, `LOG_LEVEL`, `DISABLED_FEATURES` (what the bot runs without — see
+[§21](#a-host-switches-a-feature-off-with-one-setting-and-each-feature-is-declared-once)), `DISCORD_DEV_GUILD_ID`,
+the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report, suggestion and eval — see
+[§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
 `SITE_ENABLED` and `SITE_GITHUB_TOKEN` (the website, on unless switched off — see
 [§24](#the-website-is-on-by-default-and-the-dashboard-is-a-part-of-it)), and the `DASHBOARD_*` block — off unless
@@ -271,6 +273,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | I want to…                                 | Go to                                                                               |
 | ------------------------------------------ | ----------------------------------------------------------------------------------- |
 | Add or change a command                    | `src/commands/<category>/*.command.ts`                                              |
+| Let a host switch a feature off            | `shared/src/botFeatures.ts` — one declaration per feature, see §21                  |
 | Add or change a right-click action         | `src/menus/*.menu.ts` — see [§21](#right-click-actions-ask-what-their-command-asks) |
 | Change how commands are found              | `src/core/loader.ts` (the globs)                                                    |
 | Change a permission or cooldown gate       | `src/core/checks.ts`                                                                |
@@ -356,7 +359,7 @@ async function main(): Promise<void> {
 	const client = new TestifyClient(env, logger);
 	handleProcessSignals(client); // registered exactly once
 	await connectDatabase({ uri: env.MONGODB_URI, logger });
-	const counts = loadEverything(client); // globs the tree, registers everything
+	const counts = loadEverything(client, client.featuresOff); // registers all but what a switched-off feature owns
 	await publishCommands(client); // AWAITED, before login
 	await client.login(env.DISCORD_TOKEN);
 }
@@ -524,6 +527,15 @@ Rules:
    to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
 8. Run `npm run docs:commands` afterwards, and `npm run i18n:commands`, then add the new strings to each file in
    `assets/locales/commands/`. The suite names every one missing.
+9. **If it belongs to a feature a host can switch off, name it under that feature in `shared/src/botFeatures.ts`**,
+   with its buttons, jobs and help articles. A command, button or event that imports a switchable feature's own
+   `src/lib` folder without being declared under it fails `botFeatures.test.ts`.
+
+**A bounded option is held on every surface.** Discord refuses a slash command's value outside its `min`, `max`,
+`choices` or `maxLength`, but the prefix and the dashboard's runner read text, so `OptionReader` refuses it there
+instead, and a choice typed in any case reads as the declared value. Nothing held the prefix to `min: 1` once, so
+`t?lottery enter -1000` cost minus a thousand fees and paid the buyer. `prefix.test.ts` walks every bounded option
+in the registry, just past its bound and on it, so a new command is covered with no edit.
 
 **`private: true` is how a command answers only the person who ran it**, set on the command or on one
 subcommand and applied by `dispatch` — never a hand-written `MessageFlags.Ephemeral`. On a slash command every
@@ -579,7 +591,8 @@ Group it into `ready/`, `command/`, `community/`, `create/`, `logging/` or `mess
 event about messages that is not one — the starboard's reactions and deletes — goes in `community/`.
 
 `once: true` for start-up work. Never register a handler both in a file and by hand elsewhere — the original
-did, so every signal fired twice.
+did, so every signal fired twice. An event that belongs to a feature a host can switch off is declared under it by its
+file name, without `.event.ts`.
 
 ---
 
@@ -739,7 +752,8 @@ Rules:
 Rules:
 
 1. **Money is atomic.** `$inc`, `findOneAndUpdate`, and `debitWallet()` returning a boolean you must check.
-   Never read-modify-`save()` a balance — the original could duplicate money that way.
+   Never read-modify-`save()` a balance — the original could duplicate money that way. A debit below zero would be
+   a credit, so `debitWallet` and the bank's debit throw on a negative or non-finite amount before the query.
 2. **Debit before you deliver.** Every purchase branch takes payment first and only writes the goods on success,
    so a failed payment can never hand out the item.
 3. **`getOrCreate*` never returns null.** Use it when absence should mean "start them off"; use `find*` when
@@ -1067,6 +1081,9 @@ only — warnings never fail the build.**
   nothing. A loop that runs in order says why.
 - **Every repeating timer goes through `TimerRegistry`** on the client, so shutdown can clear it, a job cannot
   overlap its own previous run, and a failure is reported under `JOB_<NAME>`.
+- **A regex that reads what people type runs in one pass.** The link filter reads every message the bot sees, in
+  every server, and its old pattern took five seconds over one long run of `a-`. `containsLink` needs one letter
+  before the domain rather than a run of them, and `parseDuration` refuses anything longer than a real length.
 
 ### Comments
 
@@ -2171,6 +2188,45 @@ Three things about it are load-bearing:
 - **A block made mid-session shows on the next click.** `createQueryClient` asks `/auth/me` again whenever any
   query or write is refused as `blacklisted`, so the page turns into `BlockedPage` rather than a screen of errors.
 
+### A host switches a feature off with one setting, and each feature is declared once
+
+`DISABLED_FEATURES=music,casino` runs the bot without them. `BOT_FEATURES` in `shared/src/botFeatures.ts` is the one
+place that says what each of the seventeen owns: its commands (or `command subcommand`, for `/leaderboard`, `/give`
+and `/reset`, which two features share), buttons, right-click actions, message handlers, events by file name, jobs by
+timer name, API routes, dashboard screens, help articles and overview rows. Six things about it are load-bearing:
+
+- **Off is gone, not refused.** `loadEverything(client, off)` never registers what an off feature owns, so
+  `publishCommands` hands Discord a list without it, and `/help`, the prefix and the help desk never see it. A command
+  left with no subcommand goes too, since its own `run` is only the prefix's fallback. The scripts load with nothing
+  off, so `docs/commands.md` and `en.json` always list everything. A command toggle is a different thing: a switch at
+  runtime that refuses a command Discord still lists.
+- **What arrives anyway is answered.** A button on an old message, or a command Discord's client had cached, gets
+  `featureOff` in the reader's language from `interactionCreate` and the prefix handler, rather than silence.
+- **The jobs, routes and shared events ask too.** `scheduleJobs` skips an off feature's timers by name;
+  `refuseSwitchedOff` answers 404 `feature_off` for every route it declares, whoever asks; `guildMemberAdd` and
+  `guildMemberRemove` ask `client.featuresOff` before tracking invites, as `takesAppeals` does before a ban's appeal
+  link. The overview, inbox, week, setup checklist, roles page and member page leave out what an off feature would
+  show, and the Changes page offers no Put back that its route would refuse.
+- **The page learns it from `/api/site`.** `useFeaturesOff` reads `featuresOff` there, and `navigationFor` — so the
+  sidebar, quick search, the help page and the access picker — `RequireGuild`, which draws a notice for an off screen
+  and asks the API nothing, backups, the boards, the owner console's music card, the landing page and the docs'
+  command list (`withoutSwitchedOff`) all follow it.
+- **A feature that needs another goes with it.** Casino, lottery and treasure take their money from the economy, so
+  `switchedOff` adds them and the start-up log names each. An unknown name fails start-up with the list of real ones.
+  The setting names what is off rather than what is on, so a feature added in a later release is on for an install
+  that never mentioned it.
+- **Nothing is deleted.** Every record an off feature wrote stays, so turning it back on finds the setup where it was,
+  and `purgeGuild` and Delete my data still reach every collection.
+
+`tests/core/botFeatures.test.ts` holds the declaration to the bot: every part it names exists, nothing has two owners,
+an article only about one feature is listed under it, a part that imports a feature's own `src/lib` folder is declared
+under it, switching each feature off removes exactly its parts and nothing else, and every declared route answers 404.
+`navigation.test.ts` does the same for screens. Each was proved to go red.
+
+**The giveaways manager starts with the bot.** `discord-giveaways` only ends a giveaway on a timer its manager starts
+when something creates it, and only `/giveaway` and its route did, so a giveaway running across a restart never ended
+until somebody touched one. The `giveaways` job creates it five seconds after start-up.
+
 ### Global by design
 
 The blacklist, the user profile, reminders and the notifications' read state are intentionally not guild-scoped. See
@@ -2433,7 +2489,9 @@ Rules that are easy to break and silent when broken:
   **path and the query are checked separately**, because `RequireAuth` carries `pathname + search` through the
   sign-in and a single pattern that refused `?` made signing in impossible from every tabbed page. A `//` inside
   a query _value_ is data — the browser still resolves the path to this origin — and the one place a value
-  becomes a redirect target is `returnTo` itself, which is parsed by the same schema on the way through.
+  becomes a redirect target is `returnTo` itself, which is parsed by the same schema on the way through. The query
+  allows `*`, which `URLSearchParams` never encodes, and the sign-in page checks the address with the same schema
+  and falls back to `/guilds`, because a character typed raw into the address bar ended the sign-in on a 400.
 - **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
   `http://localhost` install, which is the most common self-hosting trip-up there is.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
@@ -2713,7 +2771,8 @@ it rather than starting from a page.
 5. `dashboard/src/routes.tsx` and `config/navigation.ts` — one lazy import and one nav entry.
 6. `src/lib/settings/featureStatus.util.ts`, `config/features.ts` and `features/commands/commands.utils.ts` — one
    entry in `FEATURE_SOURCES` says what the overview shows for it, the tile links to it, and the command it
-   replaces stops counting as Discord-only.
+   replaces stops counting as Discord-only. If a host can switch the feature off, its route and screen go under it in
+   `shared/src/botFeatures.ts` too.
 
 Step 3 is the one that fails silently: an unmounted sub-app falls through to the SPA catch-all and lands the
 browser back on the guild picker. A request cannot tell that apart from a refusal, because `requireGuild`
@@ -2786,6 +2845,10 @@ the same way and neither can be reasoned around:
   screen after signing in. `[&>li]:min-w-0` on the `<ul>` is the fix, and `FeatureGrid` already had it.
   Measured in a real browser at 320px and 390px across all seventeen routes, because nothing in jsdom can see
   a layout.
+- **A name with no spaces wraps rather than pushing the page sideways.** `body` has `overflow-wrap: break-word`,
+  which wraps a long word without changing how anything is sized, so a flex item holding a name still needs
+  `min-w-0` with `wrap-anywhere` or `truncate`. A 32-character bot name, which Discord allows, pushed the phone
+  header's menu and account buttons off every page until `MobileNav`, `PageHeader` and the site header had both.
 
 **The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
 with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
@@ -3765,6 +3828,11 @@ file or a `sourceMappingURL` comment (proved both ways), and `serveDashboard` re
 judged on the resolved file like the owner chunk. The repository is public, so this is tidiness rather than
 secrecy — nothing the browser holds is secret, and the boundary stays server-side in `requireGuild`, `requireOwner`
 and `reach.ts`.
+
+**Zod is told not to probe for `eval`.** The first schema it builds tries `new Function`, which `script-src` refuses
+with a violation on every page load. `src/lib/withoutEval.ts` sets `jitless`, and `manualChunks` puts it in the vendor
+chunk beside Zod, because the shared schemas are built in a chunk that loads before the entry's own body runs;
+`verify:bundle` fails if the setting leaves that chunk, and was proved to.
 
 **The console greets, then warns.** `greetTheConsole` in `lib/consoleGreeting.ts` prints a welcome naming the bot, a
 pointer to `/bug-report`, and a self-XSS warning: code pasted into DevTools runs with the reader's session and can

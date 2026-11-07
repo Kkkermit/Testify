@@ -2,7 +2,13 @@ import { ChannelType, Collection, DiscordAPIError, PermissionFlagsBits, RESTJSON
 import { UserFacingError } from "@core/errors";
 import { setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
-import { privateLogChannel, runSetupStep, type SetupActor, welcomeChannel } from "@lib/settings/setupChecklist.util";
+import {
+	privateLogChannel,
+	readSetupChecklist,
+	runSetupStep,
+	type SetupActor,
+	welcomeChannel,
+} from "@lib/settings/setupChecklist.util";
 
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelSettings: jest.fn(() => Promise.resolve(null)),
@@ -102,6 +108,13 @@ describe("privateLogChannel", () => {
 		expect(privateLogChannel(guild as never, member())?.id).toBe("2");
 		expect(privateLogChannel(guildWith([channel("1", "mod-log", 0)]) as never, member())).toBeNull();
 	});
+});
+
+/** Starting a feature the host switched off would turn on something the bot then never does. */
+it("offers no step for a switched-off feature", async () => {
+	const steps = (await readSetupChecklist(guildWith([]) as never, member(), new Set(["levelling"]))).steps;
+
+	expect(steps.map((entry) => entry.step)).toEqual(["welcome", "audit-log"]);
 });
 
 describe("runSetupStep", () => {

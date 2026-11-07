@@ -132,3 +132,60 @@ describe("a right-click action", () => {
 		expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: 64 }));
 	});
 });
+
+/** An old message's button, or the menu Discord cached, can still reach a feature switched off since. */
+describe("a switched-off feature", () => {
+	const client = () =>
+		({
+			commands: new Collection(),
+			buttons: new Collection(),
+			contextMenus: new Collection(),
+			featuresOff: new Set(["music", "economy"]),
+			logger,
+		}) as unknown as TestifyClient;
+
+	function arriving(kind: "button" | "command" | "menu", name: string, subcommand: string | null = null) {
+		return {
+			isAutocomplete: () => false,
+			isChatInputCommand: () => kind === "command",
+			isContextMenuCommand: () => kind === "menu",
+			isMessageComponent: () => kind === "button",
+			isModalSubmit: () => false,
+			commandName: name,
+			customId: name,
+			options: { getSubcommand: () => subcommand },
+			locale: "en-GB",
+			reply: jest.fn(() => Promise.resolve()),
+		};
+	}
+
+	const said = (interaction: ReturnType<typeof arriving>): string | undefined => {
+		const [options] = interaction.reply.mock.calls[0] as unknown as [{ embeds: { data: { description?: string } }[] }];
+		return options.embeds[0]?.data.description;
+	};
+
+	it("answers its buttons, commands and subcommands privately instead of saying nothing", async () => {
+		const arrivals = [
+			arriving("button", "music:pause:200000000000000002"),
+			arriving("command", "play"),
+			arriving("command", "leaderboard", "economy"),
+		];
+
+		for (const interaction of arrivals) {
+			await interactionCreate.run(client(), interaction as unknown as Interaction);
+		}
+
+		expect(arrivals.map((interaction) => interaction.reply.mock.calls.length)).toEqual([1, 1, 1]);
+		expect(arrivals.filter((interaction) => !said(interaction)?.includes("switched this part of the bot off"))).toEqual(
+			[],
+		);
+	});
+
+	it("still says nothing to a button no feature owns", async () => {
+		const interaction = arriving("button", "nobody:press");
+
+		await interactionCreate.run(client(), interaction as unknown as Interaction);
+
+		expect(interaction.reply).not.toHaveBeenCalled();
+	});
+});

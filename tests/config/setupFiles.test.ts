@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ENV_KEYS } from "@config/env";
+import { BOT_FEATURE_KEYS } from "@testify/shared";
 
 const ROOT = resolve(__dirname, "../..");
 const read = (file: string): string => readFileSync(resolve(ROOT, file), "utf8");
@@ -14,6 +15,14 @@ describe("the files a new install starts from", () => {
 		const listed = new Set([...read(file).matchAll(/^([A-Z_]+)=/gm)].map((match) => match[1]));
 
 		expect(ENV_KEYS.filter((key) => !NOT_IN_TEMPLATES.includes(key) && !listed.has(key))).toEqual([]);
+	});
+
+	/** The comment above DISABLED_FEATURES is where a host learns what may go in it, so it names every feature. */
+	it.each([".env.example", ".env.development.example"])("%s names every feature that can be switched off", (file) => {
+		const comment = /((?:^#.*\n)+)DISABLED_FEATURES=/m.exec(read(file))?.[1] ?? "";
+		const words = new Set(comment.split(/[^a-z-]+/));
+
+		expect(BOT_FEATURE_KEYS.filter((key) => !words.has(key))).toEqual([]);
 	});
 
 	/** The support key was set in .env and silently ignored by `docker compose up`. */

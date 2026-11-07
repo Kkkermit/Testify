@@ -24,7 +24,7 @@ export function PageHeader({
 
 	return (
 		<header className="flex flex-wrap items-start justify-between gap-4">
-			<div className="flex flex-col gap-2">
+			<div className="flex min-w-0 flex-col gap-2 wrap-anywhere">
 				{server !== undefined && (
 					<nav aria-label={t("nav.breadcrumb")} className="text-muted-foreground text-sm">
 						<Link

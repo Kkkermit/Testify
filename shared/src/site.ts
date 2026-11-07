@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type BotFeature } from "./botFeatures";
 
 export const SITE_LIMITS = {
 	/** GitHub is asked at most this often for one answer, and only because somebody opened a page that shows it. */
@@ -16,6 +17,8 @@ export interface SiteInfo {
 	dashboard: boolean;
 	repository: string;
 	version: string;
+	/** What `DISABLED_FEATURES` switched off, so the pages leave out what the bot no longer does. */
+	featuresOff: BotFeature[];
 }
 
 interface LatestRelease {

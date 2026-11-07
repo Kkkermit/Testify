@@ -28,7 +28,11 @@ export function SendTest({ test }: { test: TestPost }): React.JSX.Element {
 				<Send size={15} aria-hidden="true" />
 				{t("testPost.send")}
 			</Button>
-			<p id={statusId} role="status" className={cn("text-sm", send.isError ? "text-warning" : "text-muted-foreground")}>
+			<p
+				id={statusId}
+				role="status"
+				className={cn("min-w-0 text-sm wrap-anywhere", send.isError ? "text-warning" : "text-muted-foreground")}
+			>
 				{sendTestStatus(send.status, send.error, t)}
 			</p>
 		</div>

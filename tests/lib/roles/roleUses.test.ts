@@ -39,6 +39,11 @@ describe("readRoleUses", () => {
 			{ kind: "roleMenu", menuId: "m1", title: "Pronouns" },
 		]);
 		expect(Object.keys(uses).sort()).toEqual(["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"]);
+
+		// A switched-off feature stops nothing when the role goes, so its uses are not listed as if it would.
+		const trimmed = (await readRoleUses("900000000000000001", new Set(["levelling", "music", "tickets"]))).uses;
+		expect(Object.keys(trimmed).sort()).toEqual(["r1", "r4", "r5", "r8"]);
+		expect(trimmed.r1).toEqual([{ kind: "roleMenu", menuId: "m1", title: "Pronouns" }]);
 	});
 
 	it("reads an unconfigured server as using no role at all", async () => {

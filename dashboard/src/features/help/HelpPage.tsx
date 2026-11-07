@@ -7,6 +7,7 @@ import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { AskCard } from "@/features/help/components/AskCard";
 import { helpAreas } from "@/features/help/help.utils";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
@@ -19,7 +20,7 @@ export function HelpPage(): React.JSX.Element {
 
 	const me = useMe();
 	const bot = useBot();
-	const areas = helpAreas(me.data?.isOwner === true);
+	const areas = helpAreas(me.data?.isOwner === true, useFeaturesOff());
 	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
 
 	return (
