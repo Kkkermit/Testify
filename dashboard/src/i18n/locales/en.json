@@ -605,6 +605,8 @@
 		"needsPermission": "Grant {{bot}} the Manage Server permission to see this server’s rules.",
 		"nothingToShow": "Nothing to show",
 		"refusedRule": "Discord refused that rule.",
+		"discordRefusedChange": "Discord wouldn’t let {{bot}} change that rule. Change it in Discord under Server Settings → AutoMod instead.",
+		"discordRefusedRemove": "Discord wouldn’t let {{bot}} remove that rule. Remove it in Discord under Server Settings → AutoMod instead.",
 		"rules": "Rules",
 		"somethingElse": "Does something else",
 		"spam": "Spam",

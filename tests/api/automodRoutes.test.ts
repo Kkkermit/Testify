@@ -1,9 +1,16 @@
-import { AutoModerationActionType, AutoModerationRuleTriggerType, Collection, PermissionFlagsBits } from "discord.js";
+import {
+	AutoModerationActionType,
+	AutoModerationRuleTriggerType,
+	Collection,
+	DiscordAPIError,
+	PermissionFlagsBits,
+} from "discord.js";
 import { Hono } from "hono";
 import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { automod } from "@api/routes/automod";
 import { type TestifyClient } from "@core/client";
+import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { type AutomodRules } from "@testify/shared";
 
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
@@ -17,6 +24,19 @@ const created = jest.fn();
 const fetched = jest.fn();
 const setEnabled = jest.fn();
 const removed = jest.fn();
+const warned = jest.fn();
+
+/** What discord.js throws when Discord answers a request with an error. */
+function discordSays(status: number, code: number, message: string): DiscordAPIError {
+	return new DiscordAPIError(
+		{ code, message },
+		code,
+		status,
+		"DELETE",
+		`/guilds/${GUILD}/auto-moderation/rules/${RULE}`,
+		{},
+	);
+}
 
 function ruleDoc(overrides: Record<string, unknown> = {}): Record<string, unknown> {
 	return {
@@ -43,7 +63,7 @@ function app(canManage = true): Hono<ApiBindings> {
 		user: { id: BOT },
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
 		isOwner: (id: string) => id === OWNER,
-		logger: { error: jest.fn() },
+		logger: { error: jest.fn(), warn: warned },
 	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
@@ -166,5 +186,53 @@ describe("DELETE /automod/:ruleId", () => {
 	it("refuses without Manage Server", async () => {
 		expect((await send("DELETE", `/${RULE}`, undefined, false)).status).toBe(400);
 		expect(removed).not.toHaveBeenCalled();
+	});
+
+	/** A rule another app made answered "Something went wrong on our side", because Discord's refusal was never read. */
+	it("says Discord refused a rule another app made, logs Discord's code, and records nothing", async () => {
+		holding(ruleDoc({ creatorId: "300000000000000003", guild: { id: GUILD } }));
+		removed.mockRejectedValueOnce(discordSays(403, 50013, "Missing Permissions"));
+
+		const response = await send("DELETE", `/${RULE}`);
+		const { error } = (await response.json()) as { error: { code: string; message: string } };
+
+		expect([response.status, error.code]).toEqual([409, "automod_refused"]);
+		expect(error.message).toMatch(/Server Settings → AutoMod/);
+		expect(warned).toHaveBeenCalledWith(
+			expect.objectContaining({ code: 50013, status: 403, creatorId: "300000000000000003", ruleId: RULE }),
+			expect.stringContaining("[AUTOMOD]"),
+		);
+		expect(recordAudit).not.toHaveBeenCalled();
+	});
+
+	it("treats a rule Discord no longer has as removed, and a Discord outage as one", async () => {
+		holding(ruleDoc({ guild: { id: GUILD } }));
+		removed.mockRejectedValueOnce(discordSays(404, 10066, "Unknown auto moderation rule"));
+		const gone = await send("DELETE", `/${RULE}`);
+		removed.mockRejectedValueOnce(discordSays(503, 0, "Service Unavailable"));
+		const down = await send("DELETE", `/${RULE}`);
+
+		expect([gone.status, down.status]).toEqual([200, 502]);
+		expect(recordAudit).not.toHaveBeenCalled();
+	});
+
+	it("still removes a rule Discord lets go, and records it", async () => {
+		removed.mockResolvedValueOnce(undefined);
+
+		expect((await send("DELETE", `/${RULE}`)).status).toBe(200);
+		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "automod.delete" }));
+	});
+});
+
+describe("PATCH /automod/:ruleId, when Discord refuses", () => {
+	it("says so rather than failing, and a rule gone since is a 404", async () => {
+		holding(ruleDoc({ creatorId: "300000000000000003", guild: { id: GUILD } }));
+		setEnabled.mockRejectedValueOnce(discordSays(403, 50013, "Missing Permissions"));
+		const refused = await send("PATCH", `/${RULE}`, { enabled: false });
+		setEnabled.mockRejectedValueOnce(discordSays(404, 10066, "Unknown auto moderation rule"));
+		const gone = await send("PATCH", `/${RULE}`, { enabled: false });
+
+		expect([refused.status, gone.status]).toEqual([409, 404]);
+		expect(((await refused.json()) as { error: { code: string } }).error.code).toBe("automod_refused");
 	});
 });

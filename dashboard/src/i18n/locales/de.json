@@ -605,6 +605,8 @@
 		"needsPermission": "Gib {{bot}} die Berechtigung Server verwalten, damit er die Regeln dieses Servers sehen kann.",
 		"nothingToShow": "Nichts zu zeigen",
 		"refusedRule": "Discord hat diese Regel abgelehnt.",
+		"discordRefusedChange": "Discord hat {{bot}} diese Regel nicht ändern lassen. Ändere sie stattdessen in Discord unter Servereinstellungen → AutoMod.",
+		"discordRefusedRemove": "Discord hat {{bot}} diese Regel nicht entfernen lassen. Entferne sie stattdessen in Discord unter Servereinstellungen → AutoMod.",
 		"rules": "Regeln",
 		"somethingElse": "Tut etwas anderes",
 		"spam": "Spam",

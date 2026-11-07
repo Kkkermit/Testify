@@ -605,6 +605,8 @@
 		"needsPermission": "Geef {{bot}} de machtiging Server beheren om de regels van deze server te zien.",
 		"nothingToShow": "Niets te tonen",
 		"refusedRule": "Discord weigerde die regel.",
+		"discordRefusedChange": "Discord liet {{bot}} die regel niet wijzigen. Wijzig hem in plaats daarvan in Discord onder Serverinstellingen → AutoMod.",
+		"discordRefusedRemove": "Discord liet {{bot}} die regel niet verwijderen. Verwijder hem in plaats daarvan in Discord onder Serverinstellingen → AutoMod.",
 		"rules": "Regels",
 		"somethingElse": "Doet iets anders",
 		"spam": "Spam",

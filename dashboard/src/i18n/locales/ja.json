@@ -584,6 +584,8 @@
 		"needsPermission": "このサーバーのルールを見るには、{{bot}} に「サーバー管理」の権限を与えてください。",
 		"nothingToShow": "表示するものはありません",
 		"refusedRule": "Discord がそのルールを拒否しました。",
+		"discordRefusedChange": "Discord が {{bot}} によるこのルールの変更を許可しませんでした。Discord の「サーバー設定」→「AutoMod」で変更してください。",
+		"discordRefusedRemove": "Discord が {{bot}} によるこのルールの削除を許可しませんでした。Discord の「サーバー設定」→「AutoMod」で削除してください。",
 		"rules": "ルール",
 		"somethingElse": "その他の動作",
 		"spam": "スパム",

@@ -647,6 +647,8 @@
 		"needsPermission": "Выдайте {{bot}} право «Управление сервером», чтобы он видел правила этого сервера.",
 		"nothingToShow": "Нечего показать",
 		"refusedRule": "Discord отклонил это правило.",
+		"discordRefusedChange": "Discord не дал {{bot}} изменить это правило. Измените его в Discord: Настройки сервера → AutoMod.",
+		"discordRefusedRemove": "Discord не дал {{bot}} удалить это правило. Удалите его в Discord: Настройки сервера → AutoMod.",
 		"rules": "Правила",
 		"somethingElse": "Делает что-то ещё",
 		"spam": "Спам",

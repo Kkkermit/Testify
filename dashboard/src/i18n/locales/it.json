@@ -626,6 +626,8 @@
 		"needsPermission": "Concedi a {{bot}} il permesso Gestire il server per vedere le regole di questo server.",
 		"nothingToShow": "Niente da mostrare",
 		"refusedRule": "Discord ha rifiutato quella regola.",
+		"discordRefusedChange": "Discord non ha permesso a {{bot}} di modificare quella regola. Modificala invece su Discord, in Impostazioni server → AutoMod.",
+		"discordRefusedRemove": "Discord non ha permesso a {{bot}} di rimuovere quella regola. Rimuovila invece su Discord, in Impostazioni server → AutoMod.",
 		"rules": "Regole",
 		"somethingElse": "Fa qualcos’altro",
 		"spam": "Spam",
