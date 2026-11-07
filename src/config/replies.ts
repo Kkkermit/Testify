@@ -9,6 +9,7 @@ const en = {
 	iNeed: "I need these permissions: {permissions}",
 	paused: "{bot} is paused right now. The bot owner can resume it from the dashboard.",
 	offHere: "That command is switched off in this server. Anybody with Manage Server can turn it back on.",
+	featureOff: "{bot}'s owner has switched this part of the bot off, so it does not work in any server.",
 	maintenanceTitle: "This command is under maintenance",
 	maintenance:
 		"The bot's owner has switched `/{name}` off for now. It may come back in the future, so try again later.",
@@ -48,6 +49,8 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		paused: "{bot} ist gerade pausiert. Der Bot-Betreiber kann ihn im Dashboard fortsetzen.",
 		offHere:
 			"Dieser Befehl ist auf diesem Server ausgeschaltet. Jeder mit „Server verwalten“ kann ihn wieder einschalten.",
+		featureOff:
+			"Der Besitzer von {bot} hat diesen Teil des Bots abgeschaltet, deshalb funktioniert er auf keinem Server.",
 		maintenanceTitle: "Dieser Befehl wird gerade gewartet",
 		maintenance:
 			"Der Betreiber des Bots hat `/{name}` vorerst ausgeschaltet. Er kommt vielleicht wieder, also versuch es später noch einmal.",
@@ -82,6 +85,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		paused: "{bot} está en pausa ahora mismo. El dueño del bot puede reanudarlo desde el panel.",
 		offHere:
 			"Ese comando está desactivado en este servidor. Cualquiera con Gestionar servidor puede volver a activarlo.",
+		featureOff: "El propietario de {bot} ha desactivado esta parte del bot, así que no funciona en ningún servidor.",
 		maintenanceTitle: "Este comando está en mantenimiento",
 		maintenance:
 			"El dueño del bot ha desactivado `/{name}` por ahora. Puede que vuelva más adelante, así que inténtalo de nuevo más tarde.",
@@ -116,6 +120,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		iNeed: "Il me faut ces permissions : {permissions}",
 		paused: "{bot} est en pause pour le moment. Le propriétaire du bot peut le relancer depuis le tableau de bord.",
 		offHere: "Cette commande est désactivée sur ce serveur. Toute personne ayant Gérer le serveur peut la réactiver.",
+		featureOff: "Le propriétaire de {bot} a désactivé cette partie du bot, elle ne fonctionne donc sur aucun serveur.",
 		maintenanceTitle: "Cette commande est en maintenance",
 		maintenance:
 			"Le propriétaire du bot a désactivé `/{name}` pour l’instant. Elle reviendra peut-être, alors réessayez plus tard.",
@@ -150,6 +155,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		iNeed: "Mi servono questi permessi: {permissions}",
 		paused: "{bot} è in pausa al momento. Il proprietario del bot può riprenderlo dalla dashboard.",
 		offHere: "Quel comando è disattivato in questo server. Chiunque abbia Gestisci server può riattivarlo.",
+		featureOff: "Il proprietario di {bot} ha disattivato questa parte del bot, quindi non funziona in nessun server.",
 		maintenanceTitle: "Questo comando è in manutenzione",
 		maintenance:
 			"Il proprietario del bot ha disattivato `/{name}` per ora. Potrebbe tornare in futuro, quindi riprova più tardi.",
@@ -184,6 +190,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		iNeed: "Мне нужны эти права: {permissions}",
 		paused: "{bot} сейчас на паузе. Владелец бота может возобновить его в панели.",
 		offHere: "Эта команда выключена на этом сервере. Любой с правом «Управлять сервером» может включить её снова.",
+		featureOff: "Владелец {bot} выключил эту часть бота, поэтому она не работает ни на одном сервере.",
 		maintenanceTitle: "Эта команда на обслуживании",
 		maintenance: "Владелец бота пока выключил `/{name}`. Возможно, она вернётся, так что попробуйте позже.",
 		cooldown: "Не так быстро — попробуйте снова через {time}.",
@@ -215,6 +222,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		iNeed: "Ik heb deze rechten nodig: {permissions}",
 		paused: "{bot} is nu gepauzeerd. De eigenaar van de bot kan hem in het dashboard hervatten.",
 		offHere: "Die opdracht staat uit in deze server. Iedereen met Server beheren kan hem weer aanzetten.",
+		featureOff: "De eigenaar van {bot} heeft dit deel van de bot uitgezet, dus het werkt in geen enkele server.",
 		maintenanceTitle: "Aan deze opdracht wordt gewerkt",
 		maintenance:
 			"De eigenaar van de bot heeft `/{name}` voorlopig uitgezet. Hij komt misschien terug, dus probeer het later opnieuw.",
@@ -248,6 +256,7 @@ export const REPLIES: Record<BotLanguage, Record<ReplyKey, string>> = {
 		iNeed: "ボットに次の権限が必要です：{permissions}",
 		paused: "{bot} は現在一時停止中です。ボットのオーナーがダッシュボードから再開できます。",
 		offHere: "このコマンドはこのサーバーでオフになっています。「サーバー管理」の権限があれば誰でもオンに戻せます。",
+		featureOff: "{bot}のオーナーがボットのこの機能をオフにしているため、どのサーバーでも使えません。",
 		maintenanceTitle: "このコマンドはメンテナンス中です",
 		maintenance:
 			"ボットのオーナーが `/{name}` をしばらくオフにしています。今後戻る可能性があるので、後でもう一度お試しください。",

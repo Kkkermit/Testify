@@ -1,4 +1,4 @@
-import { type AccessArea, isAccessArea } from "@testify/shared";
+import { type AccessArea, type BotFeature, isAccessArea, screenIsOff } from "@testify/shared";
 import {
 	Activity,
 	ArchiveRestore,
@@ -85,6 +85,8 @@ export interface NavAudience {
 	isOwner: boolean;
 	/** The server's owner, its admins and the bot's owners, who decide who else may use its dashboard. */
 	mayGrant?: boolean | undefined;
+	/** Their screens are left out, since the bot does none of what they set up. */
+	featuresOff?: ReadonlySet<BotFeature> | undefined;
 }
 
 /** Whether somebody given only `areas` may open this path; their overview always, and a granted screen's pages. */
@@ -98,7 +100,7 @@ export function mayOpen(pathname: string, guildId: string, areas: readonly Acces
 	return isAccessArea(screen) && areas.includes(screen);
 }
 
-export function navigationFor({ guild, isOwner, mayGrant = false }: NavAudience): NavGroup[] {
+export function navigationFor({ guild, isOwner, mayGrant = false, featuresOff }: NavAudience): NavGroup[] {
 	const guildCommands = guild !== undefined && mayOpen(`/guilds/${guild.id}/commands`, guild.id, guild.areas);
 	const groups: NavGroup[] = [
 		{
@@ -249,6 +251,16 @@ export function navigationFor({ guild, isOwner, mayGrant = false }: NavAudience)
 			group.items = group.items.filter(open);
 			group.sections = (group.sections ?? [])
 				.map((section) => ({ ...section, items: section.items.filter(open) }))
+				.filter((section) => section.items.length > 0);
+		}
+	}
+
+	if (featuresOff !== undefined && featuresOff.size > 0) {
+		const on = (item: NavItem): boolean => screenIsOff(featuresOff, item.to) === null;
+		for (const group of groups) {
+			group.items = group.items.filter(on);
+			group.sections = (group.sections ?? [])
+				.map((section) => ({ ...section, items: section.items.filter(on) }))
 				.filter((section) => section.items.length > 0);
 		}
 	}

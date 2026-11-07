@@ -64,6 +64,6 @@ export default defineCommand({
 	],
 
 	async run(interaction, client) {
-		await show(interaction, client, "economy");
+		await show(interaction, client, client.featuresOff.has("economy") ? "levels" : "economy");
 	},
 });

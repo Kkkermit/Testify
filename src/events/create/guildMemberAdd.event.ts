@@ -16,7 +16,7 @@ export default defineEvent({
 	async run(client: TestifyClient, member: GuildMember) {
 		countMove(client, member, "join");
 		// First, so the invites are read before another join can move their counts on.
-		await trackJoin(client, member);
+		if (!client.featuresOff.has("invites")) await trackJoin(client, member);
 		await guardJoin(client, member);
 
 		await writeAuditLog(client, member.guild, {

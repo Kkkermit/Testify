@@ -7,6 +7,8 @@ import {
 	BACKUP_LIMITS,
 	BACKUP_SECTIONS,
 	type BackupStep,
+	type BotFeature,
+	routeIsOff,
 } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
@@ -24,9 +26,18 @@ const readPath = (action: RestorableAction): string => {
 	return "read" in entry ? entry.read : entry.path;
 };
 
+/** Whether a section's route is served, since a switched-off feature's settings cannot be read or written. */
+export function sectionOn(action: RestorableAction, featuresOff: ReadonlySet<BotFeature>): boolean {
+	return routeIsOff(featuresOff, `/guilds/:guildId${RESTORABLE[action].path}`) === null;
+}
+
 /** Every setting the reader may read, each from the route its own screen reads it from. */
-export async function readServerSettings(guildId: string): Promise<ServerSettings> {
-	const paths = [...new Set(BACKUP_SECTIONS.map(readPath))];
+export async function readServerSettings(
+	guildId: string,
+	featuresOff: ReadonlySet<BotFeature> = new Set(),
+): Promise<ServerSettings> {
+	const sections = BACKUP_SECTIONS.filter((action) => sectionOn(action, featuresOff));
+	const paths = [...new Set(sections.map(readPath))];
 	const [answers, channels, roles] = await Promise.all([
 		Promise.allSettled(paths.map(async (path) => [path, await api.get<unknown>(`/guilds/${guildId}${path}`)] as const)),
 		api.get<ChannelSummary[]>(`/guilds/${guildId}/channels`),
@@ -36,7 +47,7 @@ export async function readServerSettings(guildId: string): Promise<ServerSetting
 
 	const reads: ServerSettings["reads"] = {};
 	const refused: RestorableAction[] = [];
-	for (const action of BACKUP_SECTIONS) {
+	for (const action of sections) {
 		const path = readPath(action);
 		if (read.has(path)) reads[action] = read.get(path);
 		else refused.push(action);

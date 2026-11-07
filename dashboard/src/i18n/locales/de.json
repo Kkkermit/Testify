@@ -475,7 +475,8 @@
 		"grantedTitle": "Mit dir geteilt",
 		"grantedBody": "Ihre Admins haben dir einige Seiten freigegeben, nur diese öffnen sich.",
 		"notGrantedTitle": "Nicht Teil deines Zugangs",
-		"notGranted": "Dein Zugang zu diesem Server umfasst diese Seite nicht. Frag einen seiner Admins, wenn du sie brauchst."
+		"notGranted": "Dein Zugang zu diesem Server umfasst diese Seite nicht. Frag einen seiner Admins, wenn du sie brauchst.",
+		"switchedOff": "Der Besitzer von {{bot}} hat diesen Teil des Bots abgeschaltet, deshalb gibt es hier nichts einzurichten."
 	},
 	"compare": {
 		"title": "Nebeneinander",
@@ -2591,6 +2592,8 @@
 			"setupSummary": "Die Discord-Anwendung, ihr Token und ihre Intents und das Einladen des Bots.",
 			"configuration": "Konfiguration",
 			"configurationSummary": "Jede Umgebungsvariable, was sie tut und welche Pflicht sind.",
+			"features": "Funktionen abschalten",
+			"featuresSummary": "Betreibe den Bot ohne Musik, Casino oder anderes, das du nicht brauchst.",
 			"docker": "Docker",
 			"dockerSummary": "Bot und Datenbank mit Docker Compose, und wo sie sonst laufen können.",
 			"dashboard": "Website und Dashboard",

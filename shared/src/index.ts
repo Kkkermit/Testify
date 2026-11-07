@@ -11,6 +11,7 @@ export * from "./backup";
 export * from "./bans";
 export * from "./birthdays";
 export * from "./blacklist";
+export * from "./botFeatures";
 export * from "./botStats";
 export * from "./changes";
 export * from "./channelTools";

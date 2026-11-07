@@ -12,11 +12,13 @@ import {
 	botVersion,
 	describeDatabase,
 	exitOnFatalClose,
+	featuresLine,
 	MINIMUM_NODE,
 	nodeTooOld,
 	printStartupFailure,
 	websiteLine,
 } from "@lib/bot";
+import { BOT_FEATURE_KEYS, BOT_FEATURES, switchedOff } from "@testify/shared";
 
 async function main(): Promise<void> {
 	const env = loadEnv();
@@ -43,6 +45,17 @@ async function main(): Promise<void> {
 	}
 	report.note("done", "Settings", `read from ${envFile().name}`);
 
+	const { pulled } = switchedOff(env.DISABLED_FEATURES);
+	if (client.featuresOff.size > 0) {
+		report.note("skipped", "Features", featuresLine(BOT_FEATURE_KEYS.filter((key) => client.featuresOff.has(key))));
+	}
+	for (const { feature, because } of pulled) {
+		logger.info(
+			{ feature, because },
+			`[FEATURES] ${BOT_FEATURES[feature].label} is off too, because it needs ${BOT_FEATURES[because].label}.`,
+		);
+	}
+
 	await report.step(
 		"Database",
 		() => connectDatabase({ uri: env.MONGODB_URI, logger }),
@@ -51,7 +64,7 @@ async function main(): Promise<void> {
 
 	await report.step(
 		"Modules",
-		() => loadEverything(client),
+		() => loadEverything(client, client.featuresOff),
 		(counts) =>
 			`${String(counts.commands)} commands · ${String(counts.menus)} right-click · ${String(counts.buttons)} buttons · ${String(counts.events)} events`,
 	);

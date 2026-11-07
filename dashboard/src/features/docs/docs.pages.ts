@@ -89,6 +89,14 @@ export const DOC_PAGES: readonly DocPage[] = [
 		summaryKey: "docs.pages.configurationSummary",
 	},
 	{
+		slug: "features",
+		group: "run",
+		kind: "markdown",
+		titleKey: "docs.pages.features",
+		summaryKey: "docs.pages.featuresSummary",
+		sources: [{ file: "README.md", sections: ["Switching features off"] }],
+	},
+	{
 		slug: "docker",
 		group: "run",
 		kind: "markdown",

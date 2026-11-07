@@ -2,7 +2,7 @@ import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "d
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { actorOf, type ApiBindings, guildOf, opensArea, readerOf } from "@api/context";
-import { badRequest, forbidden, notFound } from "@api/errors";
+import { badRequest, featureOff, forbidden, notFound } from "@api/errors";
 import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { directory } from "@api/routes/memberDirectory";
@@ -47,6 +47,7 @@ members.route("/", directory);
 
 members.get("/leaderboard", async (context) => {
 	const { board, page, sort, scope } = parseQuery(context, boardQuery);
+	if (context.get("client").featuresOff.has(board === "economy" ? "economy" : "levelling")) throw featureOff();
 	const guildIds = [...context.get("client").guilds.cache.keys()];
 
 	return context.json(
@@ -83,8 +84,12 @@ async function detail(context: Context<ApiBindings>, fresh = false): Promise<Mem
 
 	// `/warn list` asks Moderate Members and a softban is Ban Members' to see, so a manager without them sees neither.
 	// Warnings are the Warnings screen's, so access that does not include it leaves them out here too.
+	const off = context.get("client").featuresOff;
 	return {
 		...found,
+		economy: off.has("economy") ? null : found.economy,
+		levels: off.has("levelling") ? null : found.levels,
+		invite: off.has("invites") ? null : found.invite,
 		warnings:
 			holdsPermission(context, PermissionFlagsBits.ModerateMembers) && opensArea(context, "warnings")
 				? found.warnings

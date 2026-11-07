@@ -359,6 +359,7 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `MONGODB_URI`                |    ✅    | The connection string from step 4                                                                |
 | `DISCORD_DEV_GUILD_ID`       |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
 | `LOG_LEVEL`                  |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
+| `DISABLED_FEATURES`          |    —     | Features to run without, such as `music,casino`. [Which ones](#-switching-features-off)          |
 | `CHANNEL_ERROR_LOG`          |    —     | Where command failures are reported, each with a reference the user is also given                |
 | `CHANNEL_GUILD_LOG`          |    —     | Where server joins and leaves are reported                                                       |
 | `CHANNEL_DM_LOG`             |    —     | Where DMs to the bot are logged, with a button to reply as the bot                               |
@@ -504,6 +505,49 @@ generated list.
 
 Some categories look small but hold a lot: `/casino`, `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.
+
+## 🔌 Switching features off
+
+Not every server wants a casino. Set `DISABLED_FEATURES` to the features you want to run without, separated by
+commas, and restart:
+
+```ini
+DISABLED_FEATURES=music,casino
+```
+
+An off feature is gone everywhere, not just refused. Its commands leave Discord's slash menu, `/help`, the prefix and
+the help articles. Its buttons, events and scheduled jobs are never registered. Its dashboard screens leave the sidebar,
+quick search and the access picker, and its API routes answer 404. The docs' command list and the landing page leave
+it out too. A button on an old message, or a command Discord's app still had cached, gets a short note saying the
+feature is off.
+
+| Feature      | What goes                                                         |
+| ------------ | ----------------------------------------------------------------- |
+| `music`      | `/play`, `/music` and their panel                                 |
+| `economy`    | Wallets, work, the shop, pets, heists and the money leaderboard   |
+| `casino`     | `/casino` and its six games                                       |
+| `lottery`    | `/lottery` and its draws                                          |
+| `treasure`   | Random money drops in chat                                        |
+| `levelling`  | XP, `/rank`, level rewards and the levels leaderboard             |
+| `tickets`    | `/ticket` and the support panel                                   |
+| `giveaways`  | `/giveaway`                                                       |
+| `games`      | `/game`                                                           |
+| `fun`        | `/fun` and `/how`                                                 |
+| `modmail`    | `/modmail`, its direct messages and the **Report message** action |
+| `appeals`    | `/appeals` and the ban appeal page                                |
+| `starboard`  | `/starboard` and the **Add to starboard** action                  |
+| `ideas`      | `/idea`                                                           |
+| `temp-voice` | Join-to-create voice channels                                     |
+| `birthdays`  | `/birthday` and its posts                                         |
+| `invites`    | Invite tracking                                                   |
+
+Casino, lottery and treasure take their money from the economy, so switching `economy` off switches them off as well,
+and the start-up log says so. A misspelt name stops the bot at start-up with the list of real ones. Nothing is
+deleted: what a server set up is still in the database when the feature comes back on.
+
+Each feature is declared once, in [`shared/src/botFeatures.ts`](shared/src/botFeatures.ts), with every command,
+button, event, job, route, screen and help article it owns. The test suite checks that declaration against the bot, so
+a new part that belongs to a feature has to be listed there.
 
 ## 🛠️ Adding your own command
 
@@ -794,6 +838,15 @@ Your `.env` and your database are untouched.
 Reset it straight away: **Developer Portal → your application → Bot → Reset Token**, then update your `.env`.
 If a MongoDB password leaked, change it under **Atlas → Database Access → Edit**. Deleting the commit is not
 enough — treat anything ever pushed to GitHub as public forever.
+
+</details>
+
+<details>
+<summary><strong>Can I run it without music, the casino or the economy?</strong></summary>
+
+Yes. Name them in `DISABLED_FEATURES`, for example `DISABLED_FEATURES=music,casino`, and restart. They vanish from
+Discord's menu, `/help`, the dashboard and the docs. [Switching features off](#-switching-features-off) lists every
+feature that can go.
 
 </details>
 

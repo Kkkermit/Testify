@@ -8,6 +8,7 @@ import { type NavAudience } from "@/config/navigation";
 import { useCommands } from "@/features/commands/useCommands";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { type SearchEntry, type SearchKind, searchEntries, searchFor } from "@/features/search/quickSearch.utils";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
@@ -31,6 +32,7 @@ export function QuickSearch({
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const commands = useCommands();
+	const featuresOff = useFeaturesOff();
 	const channels = useChannels(guild?.id ?? null);
 	const listId = useId();
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -45,10 +47,11 @@ export function QuickSearch({
 				guilds,
 				isOwner,
 				mayGrant,
+				featuresOff,
 				commands: commands.data?.commands ?? [],
 				channels: channels.data ?? [],
 			}),
-		[t, guild, guilds, isOwner, mayGrant, commands.data, channels.data],
+		[t, guild, guilds, isOwner, mayGrant, featuresOff, commands.data, channels.data],
 	);
 	const results = useMemo(() => searchFor(entries, query), [entries, query]);
 	const current = results[Math.min(active, results.length - 1)];

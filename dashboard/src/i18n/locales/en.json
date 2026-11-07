@@ -475,7 +475,8 @@
 		"grantedTitle": "Shared with you",
 		"grantedBody": "Their admins gave you some of the screens, so only those open.",
 		"notGrantedTitle": "Not part of your access",
-		"notGranted": "Your access to this server doesn’t include this screen. Ask one of its admins if you need it."
+		"notGranted": "Your access to this server doesn’t include this screen. Ask one of its admins if you need it.",
+		"switchedOff": "{{bot}}’s owner has switched this part of the bot off, so there is nothing to set up here."
 	},
 	"compare": {
 		"title": "Side by side",
@@ -2591,6 +2592,8 @@
 			"setupSummary": "The Discord application, its token and intents, and inviting the bot.",
 			"configuration": "Configuration",
 			"configurationSummary": "Every environment variable, what it does and which ones are required.",
+			"features": "Switching features off",
+			"featuresSummary": "Run the bot without music, the casino or anything else you do not want.",
 			"docker": "Docker",
 			"dockerSummary": "The bot and its database with Docker Compose, and where else it can run.",
 			"dashboard": "The website and dashboard",

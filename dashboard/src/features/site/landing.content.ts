@@ -1,3 +1,4 @@
+import { type BotFeature } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
 export const SCENES: readonly {
@@ -24,12 +25,27 @@ export const SCENES: readonly {
 	},
 ];
 
-export const FEATURES: readonly { look: string; titleKey: TranslationKey; bodyKey: TranslationKey }[] = [
+export const FEATURES: readonly {
+	look: string;
+	titleKey: TranslationKey;
+	bodyKey: TranslationKey;
+	feature?: BotFeature;
+}[] = [
 	{ look: "moderation", titleKey: "landing.features.moderation", bodyKey: "landing.features.moderationBody" },
-	{ look: "levelling", titleKey: "landing.features.levelling", bodyKey: "landing.features.levellingBody" },
-	{ look: "music", titleKey: "landing.features.music", bodyKey: "landing.features.musicBody" },
-	{ look: "casino", titleKey: "landing.features.casino", bodyKey: "landing.features.casinoBody" },
-	{ look: "tickets", titleKey: "landing.features.tickets", bodyKey: "landing.features.ticketsBody" },
+	{
+		look: "levelling",
+		titleKey: "landing.features.levelling",
+		bodyKey: "landing.features.levellingBody",
+		feature: "levelling",
+	},
+	{ look: "music", titleKey: "landing.features.music", bodyKey: "landing.features.musicBody", feature: "music" },
+	{ look: "casino", titleKey: "landing.features.casino", bodyKey: "landing.features.casinoBody", feature: "casino" },
+	{
+		look: "tickets",
+		titleKey: "landing.features.tickets",
+		bodyKey: "landing.features.ticketsBody",
+		feature: "tickets",
+	},
 	{ look: "community", titleKey: "landing.features.community", bodyKey: "landing.features.communityBody" },
 ];
 

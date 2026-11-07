@@ -7,10 +7,20 @@ import { listShopRoles } from "@database/repositories/shopRoleRepository";
 import { getTicketSetup } from "@database/repositories/ticketRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
-import { type GuildRoleUses, type RoleUse } from "@testify/shared";
+import { type BotFeature, type GuildRoleUses, type RoleUse } from "@testify/shared";
 
 /** What gives or reads each role in a server, one read per feature through the repositories its panels use. */
-export async function readRoleUses(guildId: string): Promise<GuildRoleUses> {
+/** The feature behind each use, so a use a switched-off feature makes is not listed as one deleting the role would stop. */
+const USED_BY: Partial<Record<RoleUse["kind"], BotFeature>> = {
+	levelReward: "levelling",
+	levelBoost: "levelling",
+	levelIgnored: "levelling",
+	dj: "music",
+	ticketStaff: "tickets",
+	shop: "economy",
+};
+
+export async function readRoleUses(guildId: string, off: ReadonlySet<BotFeature> = new Set()): Promise<GuildRoleUses> {
 	const [level, autoRoles, menus, music, tickets, raid, verify, shop] = await Promise.all([
 		getLevelSettings(guildId),
 		getAutoRoles(guildId),
@@ -48,6 +58,9 @@ export async function readRoleUses(guildId: string): Promise<GuildRoleUses> {
 	];
 
 	const uses: Record<string, RoleUse[]> = {};
-	for (const [roleId, use] of pairs) (uses[roleId] ??= []).push(use);
+	for (const [roleId, use] of pairs) {
+		const feature = USED_BY[use.kind];
+		if (feature === undefined || !off.has(feature)) (uses[roleId] ??= []).push(use);
+	}
 	return { uses };
 }

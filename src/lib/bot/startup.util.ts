@@ -318,3 +318,19 @@ export function nodeTooOld(version: string, minimum: string = MINIMUM_NODE): boo
 	}
 	return false;
 }
+
+const FEATURES_WIDTH = 52;
+
+/** The Features line: the off features by name, as many as fit, and how many more. */
+export function featuresLine(off: readonly string[]): string {
+	const shown: string[] = [];
+	for (const name of off) {
+		const left = off.length - shown.length - 1;
+		const tail = left > 0 ? ` and ${String(left)} more` : "";
+		if ([...shown, name].join(", ").length + tail.length > FEATURES_WIDTH && shown.length > 0) break;
+		shown.push(name);
+	}
+
+	const rest = off.length - shown.length;
+	return `switched off: ${shown.join(", ")}${rest > 0 ? ` and ${String(rest)} more` : ""}`;
+}

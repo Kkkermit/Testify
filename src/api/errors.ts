@@ -77,6 +77,9 @@ export const forbidden = (code: string, message: string): ApiProblem => new ApiP
 export const notFound = (code = "not_found", message = "No such endpoint."): ApiProblem =>
 	new ApiProblem(404, code, message);
 
+/** A switched-off feature's routes answer as missing rather than as refused, whoever asks. */
+export const featureOff = (): ApiProblem => notFound("feature_off", "That part of the bot is switched off.");
+
 export const notInGuild = (): ApiProblem => notFound("guild_not_found", `${botName()} is not in that server.`);
 
 export const tooManyRequests = (retryAfterSeconds: number): ApiProblem =>

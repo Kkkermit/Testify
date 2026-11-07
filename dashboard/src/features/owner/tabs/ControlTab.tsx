@@ -14,6 +14,7 @@ import {
 	useSetMusicSources,
 	useShutdown,
 } from "@/features/owner/useControl";
+import { useFeatureOn } from "@/features/site/useFeaturesOff";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
@@ -75,6 +76,7 @@ export function ControlTab(): React.JSX.Element {
 	const shutdown = useShutdown();
 	const bot = useBot();
 	const identity = useBotIdentity();
+	const musicOn = useFeatureOn("music");
 
 	const [name, setName] = useState<string | null>(null);
 	const [confirm, setConfirm] = useState("");
@@ -135,7 +137,7 @@ export function ControlTab(): React.JSX.Element {
 				<Refusal error={gateway.error} fallback="common.didNotWork" />
 			</Card>
 
-			<MusicSourcesCard />
+			{musicOn === true && <MusicSourcesCard />}
 
 			<Card className="flex flex-col gap-4">
 				<div>
