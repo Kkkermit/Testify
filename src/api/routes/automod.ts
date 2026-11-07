@@ -2,11 +2,11 @@ import { type AutoModerationRule, type Guild } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
-import { badRequest, notFound } from "@api/errors";
+import { ApiProblem, badRequest, notFound, UpstreamProblem } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { botName } from "@core/brand";
-import { canManageAutomod, createAutomodRule, listAutomodRules } from "@lib/moderation";
+import { canManageAutomod, changeRule, createAutomodRule, listAutomodRules, type RuleChange } from "@lib/moderation";
 import { type AutomodRules, automodCreate, automodPatch, automodRuleParam } from "@testify/shared";
 
 export const automod = new Hono<ApiBindings>();
@@ -45,7 +45,10 @@ automod.patch("/:ruleId", async (context) => {
 	const { enabled } = await parseBody(context, automodPatch);
 
 	const rule = await ruleIn(guild, ruleId, botName());
-	await rule.setEnabled(enabled, "Changed from the dashboard");
+	const change = await changeRule(() => rule.setEnabled(enabled, "Changed from the dashboard"));
+	if (change.outcome === "gone") throw ruleGone();
+	answerFor(context, rule, change, "change");
+
 	await auditChange(context, {
 		action: "automod.update",
 		summary: `${enabled ? "Enabled" : "Disabled"} the AutoMod rule ${rule.name}`,
@@ -59,13 +62,47 @@ automod.delete("/:ruleId", async (context) => {
 	const { ruleId } = parseParams(context, automodRuleParam);
 
 	const rule = await ruleIn(guild, ruleId, botName());
-	const name = rule.name;
+	const change = await changeRule(() => rule.delete("Removed from the dashboard"));
+	answerFor(context, rule, change, "remove");
 
-	await rule.delete("Removed from the dashboard");
-	await auditChange(context, { action: "automod.delete", summary: `Removed the AutoMod rule ${name}` });
+	// A rule already gone is what removing it asked for, so the fresh list is the answer either way.
+	if (change.outcome === "done") {
+		await auditChange(context, { action: "automod.delete", summary: `Removed the AutoMod rule ${rule.name}` });
+	}
 
 	return context.json(await rulesFor(guild, botIdOf(context)));
 });
+
+const ruleGone = (): ApiProblem => notFound("rule_not_found", "There is no AutoMod rule with that id in this server.");
+
+/** A refusal keeps Discord's code in the log, where the host can read it, and tells the reader where else to try. */
+function answerFor(
+	context: Context<ApiBindings>,
+	rule: AutoModerationRule,
+	change: RuleChange,
+	verb: "change" | "remove",
+): void {
+	if (change.outcome === "unavailable")
+		throw new UpstreamProblem(change.status, "Discord did not answer. Try again shortly.");
+	if (change.outcome !== "refused") return;
+
+	context.get("client").logger.warn(
+		{
+			discordMessage: change.message,
+			guildId: rule.guild.id,
+			ruleId: rule.id,
+			creatorId: rule.creatorId,
+			status: change.status,
+			code: change.code,
+		},
+		`[AUTOMOD] Discord refused to ${verb} an AutoMod rule. Its code says why; the rule can still be changed in Discord.`,
+	);
+	throw new ApiProblem(
+		409,
+		"automod_refused",
+		`Discord would not let ${botName()} ${verb} that rule. ${verb === "remove" ? "Remove" : "Change"} it in Discord under Server Settings → AutoMod instead.`,
+	);
+}
 
 async function ruleIn(guild: Guild, ruleId: string, bot: string): Promise<AutoModerationRule> {
 	if (!canManageAutomod(guild)) throw badRequest(`${bot} needs the Manage Server permission to change a rule.`);

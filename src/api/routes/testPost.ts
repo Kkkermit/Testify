@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
+import { actorOf, type ApiBindings, areasOf, guildOf, readerOf } from "@api/context";
 import { forbidden, tooManyRequests } from "@api/errors";
 import { RateLimiter } from "@api/middleware/rateLimit";
 import { requireGuild } from "@api/middleware/session";
@@ -8,11 +8,20 @@ import { parseBody } from "@api/validate";
 import { MINUTE_MS } from "@config/constants";
 import { strings } from "@config/strings";
 import { sendTestPost } from "@lib/settings";
-import { TEST_POST_LIMITS, testPostBody } from "@testify/shared";
+import { type AccessArea, TEST_POST_LIMITS, type TestPost, testPostBody } from "@testify/shared";
 
 export const testPost = new Hono<ApiBindings>();
 
 testPost.use("*", requireGuild);
+
+/** The screens each kind of test is sent from, so somebody given one screen cannot draft another's post. */
+const TEST_POST_AREAS: Record<TestPost["kind"], readonly AccessArea[]> = {
+	greeting: ["welcome"],
+	goodbye: ["welcome"],
+	birthday: ["birthdays"],
+	announcement: ["announcements"],
+	plain: ["sticky", "scheduled-messages", "auto-responders"],
+};
 
 /** Keyed by server and person, so a test in one server never holds up one in another. */
 export const testPostLimiter = new RateLimiter({ limit: TEST_POST_LIMITS.perMinute, windowMs: MINUTE_MS });
@@ -21,6 +30,10 @@ export const testPostLimiter = new RateLimiter({ limit: TEST_POST_LIMITS.perMinu
 testPost.post("/", async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, testPostBody);
+	const areas = areasOf(context);
+	if (areas !== null && !TEST_POST_AREAS[body.kind].some((area) => areas.includes(area))) {
+		throw forbidden("not_granted", "Your access to that server does not include this.");
+	}
 
 	// An owner skips the member fetch in `requireGuild`, but may still be in the server.
 	const reader = readerOf(context) ?? (await guild.members.fetch(actorOf(context).id).catch(() => null));

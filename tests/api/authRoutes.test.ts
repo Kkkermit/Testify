@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
@@ -10,9 +11,16 @@ import { auth } from "@api/routes/auth";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
+import { accessFor } from "@database/repositories/dashboardAccessRepository";
 import { createSession, deleteSession, deleteSessionsFor } from "@database/repositories/dashboardSessionRepository";
 import { eraseAccount } from "@lib/account";
 import { type SetupStatus } from "@testify/shared";
+
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+	markAccessSeen: jest.fn(() => Promise.resolve()),
+	accessFor: jest.fn(() => Promise.resolve([])),
+}));
 
 jest.mock("@api/discord", () => {
 	const actual = jest.requireActual<typeof discord>("@api/discord");
@@ -62,11 +70,15 @@ function envFor(overrides: Partial<Env> = {}): Env {
 	} as Env;
 }
 
-function app(env: Env = envFor(), session: object | undefined = undefined): Hono<ApiBindings> {
+function app(
+	env: Env = envFor(),
+	session: object | undefined = undefined,
+	botIn = new Map<string, { memberCount: number }>(),
+): Hono<ApiBindings> {
 	const client = {
 		isOwner: (id: string) => id === OWNER,
 		logger: { error: jest.fn() },
-		guilds: { cache: new Map() },
+		guilds: { cache: botIn },
 		env: { DISCORD_OWNER_IDS: [OWNER] },
 		users: { fetch: jest.fn(() => Promise.resolve({ username: "the-owner" })) },
 	} as unknown as TestifyClient;
@@ -349,6 +361,39 @@ describe("GET /auth/me", () => {
 		});
 		expect(body.guilds).toEqual([]);
 		expect(guildsFetched).not.toHaveBeenCalled();
+	});
+
+	/** Ban Members alone lists nothing; access its admins gave does, and only where the bot is to use it. */
+	it("lists the servers somebody manages, and those with the bot where they were given access, and nothing else", async () => {
+		const at = (id: string, permissions: bigint) => ({ id, name: id, icon: null, permissions: String(permissions) });
+		guildsFetched.mockResolvedValueOnce([
+			at("900000000000000001", PermissionFlagsBits.ManageGuild),
+			at("900000000000000002", PermissionFlagsBits.Administrator),
+			at("900000000000000003", PermissionFlagsBits.BanMembers),
+			at("900000000000000004", 0n),
+			at("900000000000000005", PermissionFlagsBits.ManageChannels),
+			at("900000000000000006", 0n),
+		]);
+		jest.mocked(accessFor).mockResolvedValueOnce([
+			{ guildId: "900000000000000004", areas: ["bans"] },
+			{ guildId: "900000000000000006", areas: ["warnings", "cases"] },
+		]);
+		const botIn = new Map(
+			["900000000000000001", "900000000000000003", "900000000000000005", "900000000000000006"].map((id) => [
+				id,
+				{ memberCount: 10 },
+			]),
+		);
+
+		const body = (await (await app(envFor(), signedIn("100000000000000014"), botIn).request("/auth/me")).json()) as {
+			guilds: { id: string; areas: string[] | null; canInvite: boolean }[];
+		};
+
+		expect(body.guilds.map(({ id, areas, canInvite }) => [id.slice(-1), areas, canInvite])).toEqual([
+			["1", null, true],
+			["6", ["warnings", "cases"], false],
+			["2", null, true],
+		]);
 	});
 
 	/** Discord limits the guild list tightly, and a page that asks twice in a breath was refused the second time. */

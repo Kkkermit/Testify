@@ -29,7 +29,9 @@ import {
 } from "@/components/primitives";
 import { ACTION_LABELS, ACTION_ORDER, durationText, isCaseAction } from "@/features/cases/cases.utils";
 import { useCases, useCaseSettings, useUpdateCaseSettings } from "@/features/cases/useCases";
+import { NeedsPermissionPanel } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -43,6 +45,8 @@ export function CasesPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
+	const lacks = useLacks(guildId);
+	const holds = useHolds(guildId);
 
 	usePageTitle(t("cases.title"), overview.data?.name);
 
@@ -50,7 +54,13 @@ export function CasesPage(): React.JSX.Element {
 		<>
 			<PageHeader server={overview.data} title={t("cases.title")} subtitle={t("cases.subtitle")} />
 			<LogCard guildId={guildId} />
-			<CaseList guildId={guildId} />
+			{lacks("ModerateMembers") ? (
+				<NeedsPermissionPanel title={t("cases.list")} permission="ModerateMembers" />
+			) : holds("ModerateMembers") ? (
+				<CaseList guildId={guildId} />
+			) : (
+				<Skeleton className="h-48 w-full" />
+			)}
 		</>
 	);
 }

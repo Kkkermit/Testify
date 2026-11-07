@@ -67,9 +67,9 @@ numbers, which drift):
 | Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
 | `src/lib` helpers    | 236, in 34 domain folders         |
-| Schemas/repositories | 52 / 51                           |
+| Schemas/repositories | 53 / 52                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,113 across 554 suites           |
+| Tests                | 4,180 across 563 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -244,8 +244,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           52 Mongoose schemas, one file per feature
-│   └── repositories/     51 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           53 Mongoose schemas, one file per feature
+│   └── repositories/     52 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -1945,7 +1945,11 @@ things about them are load-bearing:
 
 - **A hold is a Discord timeout until the account is old enough**, from the snowflake's own timestamp and nothing
   else (`holdUntil`). Discord lifts it on its own, so there is no job and nothing about the member is stored, and the
-  minimum is capped at 28 days because that is Discord's longest timeout. Bots are never held, and the member is told
+  minimum is capped at 28 days because that is Discord's longest timeout. It is kept in minutes
+  (`minAccountAgeMinutes`), picked in minutes, hours or days on the dashboard and typed as `30m`, `12h` or `7d` on the
+  panel (`ageFromText`, which refuses a bare number, since the parser would read it as seconds). A record written while
+  it was kept in days is read as days × 1,440 by `ageOnDisk`, the one place that knows, and loses its days on its next
+  save. Bots are never held, and the member is told
   why in a DM.
 - **A hold is not a moderation case**, because no moderator decided it. Its reason is in Discord's audit log, which
   the Changes page reads, and the alert channel names who was held.
@@ -2339,6 +2343,7 @@ four tabs, three shared components and two testable modules.
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
 | `/guilds/:id/backup`              | Download the settings, or bring a backup or another server's in, matched by name            |
+| `/guilds/:id/access`              | Who else may use the dashboard and which screens; one person's page shows what they did     |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/status`                         | Online or not, uptime, speed and outside services, 30 days back. Public                     |
@@ -2439,7 +2444,7 @@ Rules that are easy to break and silent when broken:
 
 ### `requireGuild` is the security boundary
 
-Everything behind it assumes it ran, so five things in it are load-bearing:
+Everything behind it assumes it ran, so six things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, and is shape-checked before it is used to look anything
    up. A handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, never a guild id from a body. This is the most likely way one
@@ -2453,13 +2458,19 @@ Everything behind it assumes it ran, so five things in it are load-bearing:
    rather than 403, so a manager never learns the owner console is there.
 5. **`.catch(() => null)` on the fetch.** An unknown member throws, and an unhandled throw would be a 500 that
    looks like a bug rather than a 403 that looks like a denial.
+6. **Somebody without Manage Server gets in only by being given screens.** `findAccess` is read on every request, so
+   access taken away is gone on the next click, and `accessOpens` in `src/api/middleware/access.ts` admits them only to
+   their screens' routes and the reads every screen shares; anything else answers `not_granted`. It is an allowlist,
+   so a route added later is closed to them until a screen lists it, and each listed route still asks its own
+   permission.
 
 `serveDashboard()` is registered in `startApi`, **after** every route, because it is a catch-all — anything
 registered behind it silently never runs.
 
 ### Nothing on the web reaches further than Discord would
 
-Manage Server is what opens a server's screens, and it is not what Discord asks for most of what those screens do.
+Manage Server is what opens a server's screens, or a grant from its admins one screen at a time, and neither is what
+Discord asks for most of what those screens do.
 The dashboard once let a Manage Server manager kick, ban, warn and hand out roles, because the bot has those rights
 and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and five things about it are load-bearing:
 
@@ -2490,9 +2501,19 @@ and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and fiv
   Manage Roles rule does, unless they own the server — and never above the bot, never managed, never `@everyone`,
   even for the bot's owner. Boost roles, ignore lists and DJ roles are never handed out, so they only need to exist.
 
+- **The page says so before the server has to.** The overview carries `yourPermissions`, which of
+  `READER_PERMISSIONS` its reader holds, from the same `holdsPermission` the routes ask, so the two cannot disagree.
+  A screen asks `useLacks` and draws `NeedsPermission` — "You need the Ban Members permission in this server to use
+  this." — where the control would be, and a read that asks a permission waits on `useHolds`, so nothing is sent only
+  to be refused. The member directory names each action it leaves out and the permission it needs
+  (`withheldActions`), and the server picker says which servers are listed and why. The routes are still the boundary;
+  this is the page telling the reader first.
+
 A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each rule and
 `tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody in the
-server without Manage Server and somebody not in it; a route added without its gate fails the build. It also asks
+server who can neither manage nor moderate it and somebody not in it; a route added without its gate fails the build.
+Somebody given two screens must reach exactly the routes in `GRANTED`, so widening what a screen opens is a line in
+that list. It also asks
 every server route as a manager holding Manage Server and nothing else, and the routes that refuse them must be
 exactly `ASKS_MORE`, so gaining or losing a gate is a line in that list. Every write is sent a body nested ten
 thousand deep and one aimed at `Object.prototype`, and none may crash or pollute anything. The gate list and the
@@ -2509,6 +2530,47 @@ Narrowing those is a change to the commands as well, not to the dashboard alone.
 Manage Server sends the reader to `/guilds` with a notice, and any refusal later re-asks, so losing the role
 mid-session ejects. A refusal about one action — `missing_permission` — re-asks and finds access intact, so a
 manager without Kick Members stays where they are. `useRecheckOnRefusal` is the one mechanism both gates share.
+
+### Anybody else is given screens, one at a time, by the server's admins
+
+Manage Server, Administrator, the server's owner and the bot's owners see every screen. The owner, the admins and the
+bot's owners give anybody else some of them by user ID on **Dashboard access** (`/guilds/:id/access`), where they also
+change them, take them away and see what each person did. Seven things about it are load-bearing:
+
+- **A grant stands in for Manage Server on its screens and nothing more.** The routes each screen calls are
+  `AREA_ROUTES` in `src/api/middleware/access.ts`, plus `SHARED` (the overview, the channel and role lists, and Send me
+  a test, which checks the kind of post against the screens), and every one of them still asks its own permission, so
+  a grantee given Bans still needs Ban Members to ban. `under` refuses a `.` or `..` segment even though the URL
+  parser would have resolved one. Inbox, This week, Backup and the access screen itself are never given.
+- **Only Administrator hands screens out.** Every `/access` route asks it, which the owner holds in discord.js and
+  `holdsPermission` grants the bot's owners; Manage Server sees every screen but cannot widen anybody's reach, and
+  `ASKS_MORE` lists all five routes. Nobody who already sees everything, no bot and nobody outside the server can be
+  given access, and a server holds at most `ACCESS_LIMITS.maxPeople` (50). The panel's pages draw `NeedsPermission`
+  for anybody else and ask the API nothing (`mayGrant`), which `accessGate.test.tsx` pins.
+- **`ACCESS_AREAS` in `@testify/shared` names a screen by its path**, and the dashboard's `mayOpen` in
+  `config/navigation.ts` reads the same names off the sidebar, so the sidebar, quick search, the switcher and
+  `RequireGuild` agree with the API. `access.utils.test.ts` fails if the picker and the list drift, which is what
+  caught Commands living in the sidebar's top group. A screen that is not theirs draws `NotGranted` and asks the API
+  nothing.
+- **A part that needs another screen says so, and the server leaves it out too.** A member's warnings and the
+  directory's Warn need Warnings; a channel's welcome, goodbye and birthday posts are edited there only with those
+  screens; `NotGiven` names the screen, as `NeedsPermission` names a permission. A page hiding a part is a courtesy, so
+  the routes ask `opensArea` as well: a member's warnings, the directory's warning counts and its warned filter are
+  withheld from a grantee without Warnings, whatever Discord lets them see.
+- **A stored grant is data, never trusted.** `requireGuild` drops any screen `isAccessArea` does not know before it
+  judges a request, `accessOpens` reads `AREA_ROUTES` by own property only, so a hand-edited `constructor` or
+  `__proto__` opens nothing and crashes nothing, and `changeAccess` runs the schema's validators, which an update
+  otherwise skips. `tests/api/accessPentest.test.ts` attacks all of it as raw HTTP to the real server: every caller on
+  every panel route, 27 spellings of its address under four methods, rewrite and override headers, hostile bodies and
+  path ids, another server's admin, CSRF, a grant changed mid-session and a stored screen nobody knows. The router and
+  the gate read the same decoded `context.req.path`, which is what keeps a spelling from judging as one route and
+  running as another. Each of its twelve defences was removed in turn to watch it fail.
+- **The record is `dashboardaccess`**, one per person per server: the screens, who gave them and when, and when the
+  person last opened the overview, at most once every ten minutes (`markAccessSeen`). Leaving the server deletes it
+  (`guildMemberRemove`), so does `purgeGuild`, and Delete my data deletes theirs and takes their name off the ones they
+  gave. The privacy notice says so (`legal.storedL19`, `legal.retentionL21`).
+- **What a grantee did is the audit record everybody's changes go into**, read per person with `auditsBy` and
+  counted with `changesBy`; the panel's own changes are `access.grant`, `access.update` and `access.revoke`.
 
 ### The moderation screens ask what Discord would
 

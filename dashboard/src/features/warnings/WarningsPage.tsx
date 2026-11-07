@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
-import { PageHeader, Summary } from "@/components/primitives";
+import { PageHeader, Skeleton, Summary } from "@/components/primitives";
+import { NeedsPermissionPanel } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { PunishmentsCard } from "@/features/warnings/components/PunishmentsCard";
 import { WarningsListCard } from "@/features/warnings/components/WarningsListCard";
 import { WarnMemberCard } from "@/features/warnings/components/WarnMemberCard";
@@ -14,6 +16,8 @@ export function WarningsPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
 	const punishments = usePunishments(guildId);
+	const blocked = useLacks(guildId)("ModerateMembers");
+	const mayModerate = useHolds(guildId)("ModerateMembers");
 
 	usePageTitle(t("warnings.title"), overview.data?.name);
 
@@ -22,8 +26,19 @@ export function WarningsPage(): React.JSX.Element {
 			<PageHeader server={overview.data} title={t("warnings.title")} subtitle={t("warnings.subtitle")} />
 			{punishments.data !== undefined && <Summary>{warningsSummary(punishments.data, t)}</Summary>}
 			<PunishmentsCard guildId={guildId} />
-			<WarnMemberCard guildId={guildId} />
-			<WarningsListCard guildId={guildId} />
+			{blocked ? (
+				<>
+					<NeedsPermissionPanel title={t("warnings.warnTitle")} permission="ModerateMembers" />
+					<NeedsPermissionPanel title={t("warnings.recentTitle")} permission="ModerateMembers" />
+				</>
+			) : mayModerate ? (
+				<>
+					<WarnMemberCard guildId={guildId} />
+					<WarningsListCard guildId={guildId} />
+				</>
+			) : (
+				<Skeleton className="h-48 w-full" />
+			)}
 		</>
 	);
 }

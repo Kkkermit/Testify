@@ -7,6 +7,8 @@ import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { UndoProvider } from "@/app/UndoProvider";
 import { useBotLook } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { mayGrant } from "@/features/guild-overview/useLacks";
 import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
 import { QuickSearch } from "@/features/search/QuickSearch";
 import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
@@ -36,8 +38,16 @@ export function AppShell(): React.JSX.Element {
 		}, []),
 	);
 
-	const guild = me.data?.guilds.find((candidate) => candidate.id === guildId);
-	const audience = { guild, guilds: me.data?.guilds ?? [], isOwner: me.data?.isOwner === true };
+	const overview = useGuildOverview(guildId ?? null).data;
+	const listed = me.data?.guilds.find((candidate) => candidate.id === guildId);
+	// The overview is read live, so access taken away or narrowed shows on the next click.
+	const guild = listed === undefined || overview === undefined ? listed : { ...listed, areas: overview.yourAreas };
+	const audience = {
+		guild,
+		guilds: me.data?.guilds ?? [],
+		isOwner: me.data?.isOwner === true,
+		mayGrant: mayGrant(overview),
+	};
 	const user = me.data?.user ?? null;
 
 	useEffect(() => {

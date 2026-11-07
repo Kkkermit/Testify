@@ -1,10 +1,11 @@
-import { type MemberDetail, WARN_LIMITS, WARNING_LIMITS, warningProblem } from "@testify/shared";
+import { type MemberDetail, type ReaderPermission, WARN_LIMITS, WARNING_LIMITS, warningProblem } from "@testify/shared";
 import { Ban, DoorOpen } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfirmField, Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD, SELECT } from "@/components/form/fieldStyles";
 import { Button } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { clearConfirmed } from "@/features/members/memberDetail.utils";
 import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
@@ -19,9 +20,12 @@ export function SanctionCard({
 	busy,
 	onKick,
 	onBan,
+	missing,
 }: {
 	detail: MemberDetail;
 	busy: boolean;
+	/** The reader's own permissions this card asks for and they do not hold. */
+	missing: ReaderPermission[];
 	onKick: (reason: string, confirm: string) => void;
 	onBan: (reason: string, confirm: string, deleteDays: number) => void;
 }): React.JSX.Element {
@@ -32,6 +36,8 @@ export function SanctionCard({
 	const [deleteDays, setDeleteDays] = useState(0);
 
 	const canKick = detail.moderationProblem === null;
+	const mayKick = canKick && !missing.includes("KickMembers");
+	const mayBan = !missing.includes("BanMembers");
 	const problem = problemText(warningProblem(reason), t);
 	const ready = problem === null && clearConfirmed(typed, detail) && !busy;
 
@@ -48,28 +54,36 @@ export function SanctionCard({
 			description={canKick ? t("members.sanctionBody") : t("members.sanctionBanOnly")}
 		>
 			{chosen === null ? (
-				<RowActions>
-					{canKick && (
-						<Button
-							variant="secondary"
-							disabled={busy}
-							onClick={() => {
-								setChosen("kick");
-							}}
-						>
-							<DoorOpen size={16} aria-hidden="true" /> {t("members.kick")}
-						</Button>
+				<>
+					{(mayKick || mayBan) && (
+						<RowActions>
+							{mayKick && (
+								<Button
+									variant="secondary"
+									disabled={busy}
+									onClick={() => {
+										setChosen("kick");
+									}}
+								>
+									<DoorOpen size={16} aria-hidden="true" /> {t("members.kick")}
+								</Button>
+							)}
+							{mayBan && (
+								<Button
+									variant="destructive"
+									disabled={busy}
+									onClick={() => {
+										setChosen("ban");
+									}}
+								>
+									<Ban size={16} aria-hidden="true" /> {t("members.ban")}
+								</Button>
+							)}
+						</RowActions>
 					)}
-					<Button
-						variant="destructive"
-						disabled={busy}
-						onClick={() => {
-							setChosen("ban");
-						}}
-					>
-						<Ban size={16} aria-hidden="true" /> {t("members.ban")}
-					</Button>
-				</RowActions>
+					{canKick && missing.includes("KickMembers") && <NeedsPermission permission="KickMembers" />}
+					{missing.includes("BanMembers") && <NeedsPermission permission="BanMembers" />}
+				</>
 			) : (
 				<>
 					<Field label={t("members.sanctionReason")} htmlFor="sanction-reason">

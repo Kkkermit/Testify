@@ -28,6 +28,7 @@ import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { oneOf } from "@/lib/oneOf";
 import { problemText } from "@/lib/problemText";
@@ -175,8 +176,21 @@ export function AutomodPage(): React.JSX.Element {
 				</SettingRows>
 			)}
 
-			<Refusal error={toggle.error} fallback="common.couldNotChange" />
-			<Refusal error={remove.error} fallback="common.couldNotRemove" />
+			{refusedByDiscord(toggle.error) ? (
+				<Warning>{t("automod.discordRefusedChange")}</Warning>
+			) : (
+				<Refusal error={toggle.error} fallback="common.couldNotChange" />
+			)}
+			{refusedByDiscord(remove.error) ? (
+				<Warning>{t("automod.discordRefusedRemove")}</Warning>
+			) : (
+				<Refusal error={remove.error} fallback="common.couldNotRemove" />
+			)}
 		</>
 	);
+}
+
+/** Discord's own refusal, worded in the reader's language rather than the server's English. */
+function refusedByDiscord(error: unknown): boolean {
+	return error instanceof ApiError && error.code === "automod_refused";
 }

@@ -68,7 +68,7 @@ export const RESTORABLE = {
 	"raid.update": {
 		path: "/raid-protection",
 		method: "PATCH",
-		fields: ["enabled", "alertChannelId", "pingRoleId", "minAccountAgeDays", "spikeJoins", "spikeMinutes"],
+		fields: ["enabled", "alertChannelId", "pingRoleId", "minAccountAgeMinutes", "spikeJoins", "spikeMinutes"],
 		schema: raidPatch,
 	},
 	"cases.settings": { path: "/cases/settings", method: "PUT", fields: ["logChannelId"], schema: casePatch },

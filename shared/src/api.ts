@@ -1,3 +1,5 @@
+import { type AccessArea, type AccessPerson } from "./access";
+
 export interface ApiErrorBody {
 	error: {
 		code: string;
@@ -39,6 +41,8 @@ export interface ManageableGuild {
 	memberCount: number | null;
 	botPresent: boolean;
 	canInvite: boolean;
+	/** Null for somebody who manages the server and sees every screen; otherwise the screens they were given. */
+	areas: AccessArea[] | null;
 }
 
 /** Everything the bot asks for on the invite, as one bitfield, rather than Administrator. */
@@ -97,7 +101,7 @@ export type FeatureDetail =
 	| { kind: "posting"; channelId: string }
 	| { kind: "count"; what: FeatureCount; count: number }
 	| { kind: "levelling"; rewards: number; boosts: number }
-	| { kind: "holding"; days: number }
+	| { kind: "holding"; minutes: number }
 	| { kind: "watching" }
 	| { kind: "bypass"; permission: string }
 	| { kind: "countingAt"; count: number }
@@ -124,6 +128,23 @@ export const WATCHED_PERMISSIONS = [
 
 export type WatchedPermission = (typeof WATCHED_PERMISSIONS)[number];
 
+/** What a screen can ask of its reader, as Discord names each permission. */
+export const READER_PERMISSIONS = [
+	"ManageGuild",
+	"Administrator",
+	"BanMembers",
+	"KickMembers",
+	"ModerateMembers",
+	"ManageRoles",
+	"ManageNicknames",
+	"ManageChannels",
+	"ManageMessages",
+	"ViewAuditLog",
+	"MentionEveryone",
+] as const;
+
+export type ReaderPermission = (typeof READER_PERMISSIONS)[number];
+
 export interface AuditEntrySummary {
 	actorTag: string;
 	action: string;
@@ -140,6 +161,11 @@ export interface GuildOverview {
 	roleCount: number;
 	features: FeatureStatus[];
 	missingPermissions: WatchedPermission[];
+	/** Which of `READER_PERMISSIONS` the person reading holds here; every one, for a bot owner. */
+	yourPermissions: ReaderPermission[];
+	/** Null for somebody who manages the server; otherwise the screens its admins gave them. */
+	yourAreas: AccessArea[] | null;
+	/** Empty, like `features`, for a reader without Manage Server, since both describe the server's settings. */
 	recentChanges: AuditEntrySummary[];
 }
 
@@ -194,4 +220,10 @@ export interface Paged<T> {
 	total: number;
 	page: number;
 	perPage: number;
+}
+
+/** One person given part of a server's dashboard, and what they did there lately. */
+export interface AccessActivity {
+	person: AccessPerson;
+	items: AuditEntrySummary[];
 }

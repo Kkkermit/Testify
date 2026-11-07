@@ -1,5 +1,5 @@
 import { DAY_MS, MINUTE_MS } from "@config/constants";
-import { holdUntil, JoinWatch, type WatchedJoin, wholeNumber } from "@lib/raid/raid.util";
+import { ageFromText, holdUntil, JoinWatch, type WatchedJoin, wholeNumber } from "@lib/raid/raid.util";
 import { RAID_LIMITS } from "@testify/shared";
 
 const NOW = Date.UTC(2026, 9, 25, 12);
@@ -17,8 +17,43 @@ const join = (n: number, at: number, held?: boolean): WatchedJoin => ({
 describe("holdUntil", () => {
 	/** The longest minimum is Discord's longest timeout, so a brand new account is never held past it. */
 	it("never holds for longer than Discord's longest timeout", () => {
-		const until = holdUntil(NOW, RAID_LIMITS.maxAccountAgeDays, NOW);
+		const until = holdUntil(NOW, RAID_LIMITS.maxAccountAgeMinutes, NOW);
 		expect(until).toBe(NOW + 28 * DAY_MS);
+	});
+
+	it("holds an account by the minute, and lets it go the minute it is old enough", () => {
+		expect(holdUntil(NOW - 29 * MINUTE_MS, 30, NOW)).toBe(NOW + MINUTE_MS);
+		expect(holdUntil(NOW - 30 * MINUTE_MS, 30, NOW)).toBeNull();
+	});
+});
+
+describe("ageFromText", () => {
+	/** A bare number is seconds to the parser, and nobody setting an account age means seconds. */
+	it("reads a length in whole minutes up to Discord's longest timeout, and 0 as none", () => {
+		const read = Object.fromEntries(
+			["0", "30m", "12h", "7d", "1d 6h", "1.5h", "28d", " 2h ", "7", "29d", "90s", "0m", "", "soon", "-1h", "2h x"].map(
+				(text) => [text, ageFromText(text)],
+			),
+		);
+
+		expect(read).toEqual({
+			"0": 0,
+			"30m": 30,
+			"12h": 720,
+			"7d": 10_080,
+			"1d 6h": 1_800,
+			"1.5h": 90,
+			"28d": 40_320,
+			" 2h ": 120,
+			"7": null,
+			"29d": null,
+			"90s": null,
+			"0m": null,
+			"": null,
+			soon: null,
+			"-1h": null,
+			"2h x": null,
+		});
 	});
 });
 

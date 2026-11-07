@@ -19,6 +19,23 @@ describe("the guild picker", () => {
 		expect(screen.getByRole("heading", { name: /needs somebody else/i })).toBeInTheDocument();
 	});
 
+	/** A server whose admins gave the reader some screens is listed apart, so they know only some will open. */
+	it("lists a server shared with the reader apart from those they manage", async () => {
+		const shared = {
+			...aGuild,
+			id: "900000000000000007",
+			name: "Mod Squad",
+			canInvite: false,
+			areas: ["bans" as const],
+		};
+		server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, guilds: [aGuild, shared] })));
+		renderWithProviders(<GuildPickerPage />);
+
+		const group = (await screen.findByRole("heading", { name: /shared with you/i })).closest("section");
+		expect(within(group!).getByRole("link", { name: /mod squad/i })).toHaveAttribute("href", `/guilds/${shared.id}`);
+		expect(within(group!).getByText(/only those open/i)).toBeVisible();
+	});
+
 	/** Discord would refuse the invite, so offering the button would be a lie rather than a shortcut. */
 	it("offers no invite where the viewer lacks Manage Server", async () => {
 		renderWithProviders(<GuildPickerPage />);

@@ -11,6 +11,7 @@ import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
 import { purgeCounting } from "@database/repositories/countingRepository";
+import { purgeDashboardAccess } from "@database/repositories/dashboardAccessRepository";
 import { purgeGoodbye } from "@database/repositories/goodbyeRepository";
 import { purgeIdeas } from "@database/repositories/ideaRepository";
 import { purgeInvites } from "@database/repositories/inviteRepository";
@@ -66,5 +67,6 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeCasinoStats(guildId),
 		purgeRounds(guildId),
 		purgeWarnLadder(guildId),
+		purgeDashboardAccess(guildId),
 	]);
 }

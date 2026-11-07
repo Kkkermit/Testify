@@ -9,6 +9,7 @@ import { EmptyState, SectionHeading, PageHeader, Pager, Skeleton } from "@/compo
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { comparable } from "@/features/compare/compare.utils";
 import { GuildCard } from "@/features/guilds/GuildCard";
 import {
@@ -38,6 +39,7 @@ export function GuildPickerPage(): React.JSX.Element {
 		if (notice !== null) void navigate(".", { replace: true, state: null });
 	}, [notice, navigate]);
 
+	const manage = { manage: permissionLabel("ManageGuild", t) };
 	const groups = useMemo(() => groupGuilds(filterGuilds(me.data?.guilds ?? [], search)), [me.data, search]);
 	const found = groups.reduce((total, group) => total + group.guilds.length, 0);
 
@@ -69,7 +71,7 @@ export function GuildPickerPage(): React.JSX.Element {
 		<>
 			<PageHeader title={t("guilds.title")} subtitle={t("guilds.subtitle")} />
 			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
-			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused")}</Warning>}
+			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused", manage)}</Warning>}
 
 			<label className="relative block">
 				<span className="sr-only">{t("guilds.search")}</span>
@@ -147,6 +149,12 @@ export function GuildPickerPage(): React.JSX.Element {
 						</section>
 					);
 				})
+			)}
+
+			{found > 0 && (
+				<p className="text-muted-foreground text-sm">
+					{t("guilds.whoIsListed", { ...manage, channels: permissionLabel("ManageChannels", t) })}
+				</p>
 			)}
 
 			<Link

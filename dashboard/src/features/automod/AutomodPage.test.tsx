@@ -150,4 +150,21 @@ describe("removing an automod rule", () => {
 
 		expect(await screen.findByText(/already gone/i)).toBeInTheDocument();
 	});
+
+	/** Discord's refusal is worded on the page, in the reader's language, with where the rule can still be removed. */
+	it("says where to remove a rule Discord would not let the bot remove", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.delete(`/api/guilds/${GUILD}/automod/:ruleId`, () =>
+				HttpResponse.json({ error: { code: "automod_refused", message: "English from the server" } }, { status: 409 }),
+			),
+		);
+		renderPage();
+		await screen.findByRole("heading", { name: "Block spam" });
+
+		await user.click(screen.getByRole("button", { name: /remove block spam/i }));
+
+		expect(await screen.findByText(/remove it in discord under server settings → automod/i)).toBeInTheDocument();
+		expect(screen.queryByText(/something went wrong/i)).toBeNull();
+	});
 });

@@ -27,19 +27,30 @@ import {
 } from "@/components/primitives";
 import { restricted, slowmodeChoices, slowmodeText } from "@/features/channel-tools/channelTools.utils";
 import { useChannelTools, useUpdateChannel } from "@/features/channel-tools/useChannelTools";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function ChannelToolsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
-	const tools = useChannelTools(guildId);
+	const blocked = useLacks(guildId)("ManageChannels");
+	const tools = useChannelTools(guildId, useHolds(guildId)("ManageChannels"));
 	const update = useUpdateChannel(guildId);
 	const [chosenId, setChosenId] = useState<string | null>(null);
 
 	usePageTitle(t("channelTools.title"), overview.data?.name);
 
+	if (blocked) {
+		return (
+			<>
+				<PageHeader server={overview.data} title={t("channelTools.title")} subtitle={t("channelTools.subtitle")} />
+				<NeedsPermission permission="ManageChannels" />
+			</>
+		);
+	}
 	if (tools.isError) return <ErrorState error={tools.error} onRetry={() => void tools.refetch()} />;
 	if (tools.isPending) return <Skeleton className="h-96 w-full" />;
 

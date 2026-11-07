@@ -1,8 +1,8 @@
 import { type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
-import { badRequest } from "@api/errors";
+import { actorOf, type ApiBindings, guildOf, opensArea, readerOf } from "@api/context";
+import { badRequest, forbidden } from "@api/errors";
 import { demandPermission, holdsPermission, requireGrantable, requirePermission } from "@api/middleware/reach";
 import { parseBody, parseQuery } from "@api/validate";
 import { actOnEach, banUser, type BulkActor, kickMember, readDirectory, timeoutMember } from "@lib/moderation";
@@ -30,8 +30,12 @@ async function moderatorOf(context: Context<ApiBindings>, guild: Guild): Promise
 
 directory.get("/", async (context) => {
 	const query = parseQuery(context, directoryQuery);
-	// Who has warnings is what `/warn list` shows, so filtering by it asks the same.
-	if (query.warned) demandPermission(context, PermissionFlagsBits.ModerateMembers);
+	// Who has warnings is what `/warn list` shows, so filtering by it asks the same, and the Warnings screen.
+	const warnings = opensArea(context, "warnings");
+	if (query.warned) {
+		demandPermission(context, PermissionFlagsBits.ModerateMembers);
+		if (!warnings) throw forbidden("not_granted", "Your access to that server does not include its warnings.");
+	}
 	const guild = guildOf(context);
 
 	return context.json(
@@ -42,7 +46,7 @@ directory.get("/", async (context) => {
 			can: {
 				roles: holdsPermission(context, PermissionFlagsBits.ManageRoles),
 				timeout: holdsPermission(context, PermissionFlagsBits.ModerateMembers),
-				warn: holdsPermission(context, PermissionFlagsBits.ModerateMembers),
+				warn: warnings && holdsPermission(context, PermissionFlagsBits.ModerateMembers),
 				kick: holdsPermission(context, PermissionFlagsBits.KickMembers),
 				ban: holdsPermission(context, PermissionFlagsBits.BanMembers),
 			},

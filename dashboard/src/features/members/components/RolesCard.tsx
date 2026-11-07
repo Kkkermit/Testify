@@ -4,21 +4,23 @@ import { useTranslation } from "react-i18next";
 import { CheckList, Refusal, RowActions, SettingRows, Warning } from "@/components/form";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
 import { Button, Skeleton } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
+import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { useMemberRoles, useSetMemberRoles } from "@/features/members/useMemberDetail";
 import { ApiError } from "@/lib/api";
 
 export function RolesCard({ guildId, userId }: { guildId: string; userId: string }): React.JSX.Element {
 	const { t } = useTranslation();
-	const roles = useMemberRoles(guildId, userId, true);
+	const blocked = useLacks(guildId)("ManageRoles");
+	const roles = useMemberRoles(guildId, userId, useHolds(guildId)("ManageRoles"));
+	const refused = roles.error instanceof ApiError && roles.error.code === "missing_permission";
 
 	return (
 		<SettingRows title={t("members.rolesTitle")} description={t("members.rolesBody")}>
-			{roles.isError ? (
-				<Warning>
-					{roles.error instanceof ApiError && roles.error.code === "missing_permission"
-						? t("members.rolesNeedPermission")
-						: t("members.rolesUnreadable")}
-				</Warning>
+			{blocked || refused ? (
+				<NeedsPermission permission="ManageRoles" />
+			) : roles.isError ? (
+				<Warning>{t("members.rolesUnreadable")}</Warning>
 			) : roles.data === undefined ? (
 				<Skeleton className="h-32 w-full" />
 			) : (

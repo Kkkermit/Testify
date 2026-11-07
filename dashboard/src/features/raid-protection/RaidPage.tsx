@@ -17,8 +17,11 @@ import {
 	Warning,
 } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
+import { AgeField } from "@/features/raid-protection/components/AgeField";
 import { hasWork, numberIn, raidSummary } from "@/features/raid-protection/raid.utils";
 import { useRaid, useUpdateRaid } from "@/features/raid-protection/useRaid";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -34,6 +37,7 @@ export function RaidPage(): React.JSX.Element {
 	const roles = useRoles(guildId);
 	const overview = useGuildOverview(guildId);
 	const save = useUpdateRaid(guildId);
+	const blocked = useLacks(guildId)("ModerateMembers");
 
 	usePageTitle(t("raid.title"), overview.data?.name);
 
@@ -59,93 +63,95 @@ export function RaidPage(): React.JSX.Element {
 
 			<Summary>{raidSummary(settings, channel, t)}</Summary>
 
-			<SettingRows description={t("raid.neverKicks")}>
-				<Toggle
-					label={t("raid.enabled")}
-					hint={hasWork(settings) ? t("raid.enabledHint") : t("raid.enabledHintNothing")}
-					checked={settings.enabled}
-					disabled={save.isPending || (!settings.enabled && !hasWork(settings))}
-					onChange={(enabled) => {
-						write({ enabled });
-					}}
-				/>
-			</SettingRows>
+			{/* A hold is a timeout, so changing it asks what `/mute` asks; what is set stays readable above. */}
+			{blocked ? (
+				<NeedsPermission permission="ModerateMembers" />
+			) : (
+				<>
+					<SettingRows description={t("raid.neverKicks")}>
+						<Toggle
+							label={t("raid.enabled")}
+							hint={hasWork(settings) ? t("raid.enabledHint") : t("raid.enabledHintNothing")}
+							checked={settings.enabled}
+							disabled={save.isPending || (!settings.enabled && !hasWork(settings))}
+							onChange={(enabled) => {
+								write({ enabled });
+							}}
+						/>
+					</SettingRows>
 
-			<SettingRows title={t("raid.hold")} description={t("raid.holdBody")}>
-				<NumberField
-					key={`age-${String(settings.minAccountAgeDays)}`}
-					id="raid-age"
-					label={t("raid.minAge")}
-					hint={t("raid.minAgeHint", { max: RAID_LIMITS.maxAccountAgeDays })}
-					stored={settings.minAccountAgeDays}
-					min={0}
-					max={RAID_LIMITS.maxAccountAgeDays}
-					onSave={(minAccountAgeDays) => {
-						write({ minAccountAgeDays });
-					}}
-				/>
-				{settings.minAccountAgeDays > 0 && !settings.canHold && <Warning>{t("raid.cannotHold")}</Warning>}
-			</SettingRows>
+					<SettingRows title={t("raid.hold")} description={t("raid.holdBody")}>
+						<AgeField
+							key={`age-${String(settings.minAccountAgeMinutes)}`}
+							stored={settings.minAccountAgeMinutes}
+							onSave={(minAccountAgeMinutes) => {
+								write({ minAccountAgeMinutes });
+							}}
+						/>
+						{settings.minAccountAgeMinutes > 0 && !settings.canHold && <Warning>{t("raid.cannotHold")}</Warning>}
+					</SettingRows>
 
-			<SettingRows title={t("raid.alerts")} description={t("raid.alertsBody")}>
-				<ChannelPicker
-					label={t("raid.channel")}
-					hint={t("raid.channelHint")}
-					channels={postable}
-					value={settings.alertChannelId}
-					noneLabel={t("raid.noAlerts")}
-					onChange={(alertChannelId) => {
-						write({ alertChannelId });
-					}}
-				/>
-				{settings.alertChannelId !== null && !settings.canSend && (
-					<Warning>{t("common.cannotPostIn", { channel })}</Warning>
-				)}
+					<SettingRows title={t("raid.alerts")} description={t("raid.alertsBody")}>
+						<ChannelPicker
+							label={t("raid.channel")}
+							hint={t("raid.channelHint")}
+							channels={postable}
+							value={settings.alertChannelId}
+							noneLabel={t("raid.noAlerts")}
+							onChange={(alertChannelId) => {
+								write({ alertChannelId });
+							}}
+						/>
+						{settings.alertChannelId !== null && !settings.canSend && (
+							<Warning>{t("common.cannotPostIn", { channel })}</Warning>
+						)}
 
-				<Field label={t("raid.ping")} hint={t("raid.pingHint")}>
-					<select
-						className={SELECT}
-						value={settings.pingRoleId ?? ""}
-						disabled={settings.alertChannelId === null}
-						onChange={(event) => {
-							write({ pingRoleId: event.target.value === "" ? null : event.target.value });
-						}}
-					>
-						<option value="">{t("raid.pingNobody")}</option>
-						{pingable.map((role) => (
-							<option key={role.id} value={role.id}>
-								{role.name}
-							</option>
-						))}
-					</select>
-				</Field>
-				{!settings.canPing && <Warning>{t("raid.cannotPing")}</Warning>}
+						<Field label={t("raid.ping")} hint={t("raid.pingHint")}>
+							<select
+								className={SELECT}
+								value={settings.pingRoleId ?? ""}
+								disabled={settings.alertChannelId === null}
+								onChange={(event) => {
+									write({ pingRoleId: event.target.value === "" ? null : event.target.value });
+								}}
+							>
+								<option value="">{t("raid.pingNobody")}</option>
+								{pingable.map((role) => (
+									<option key={role.id} value={role.id}>
+										{role.name}
+									</option>
+								))}
+							</select>
+						</Field>
+						{!settings.canPing && <Warning>{t("raid.cannotPing")}</Warning>}
 
-				<NumberField
-					key={`joins-${String(settings.spikeJoins)}`}
-					id="raid-joins"
-					label={t("raid.joins")}
-					hint={t("raid.range", { min: RAID_LIMITS.minSpikeJoins, max: RAID_LIMITS.maxSpikeJoins })}
-					stored={settings.spikeJoins}
-					min={RAID_LIMITS.minSpikeJoins}
-					max={RAID_LIMITS.maxSpikeJoins}
-					onSave={(spikeJoins) => {
-						write({ spikeJoins });
-					}}
-				/>
-				<NumberField
-					key={`minutes-${String(settings.spikeMinutes)}`}
-					id="raid-minutes"
-					label={t("raid.minutes")}
-					hint={t("raid.range", { min: RAID_LIMITS.minSpikeMinutes, max: RAID_LIMITS.maxSpikeMinutes })}
-					stored={settings.spikeMinutes}
-					min={RAID_LIMITS.minSpikeMinutes}
-					max={RAID_LIMITS.maxSpikeMinutes}
-					onSave={(spikeMinutes) => {
-						write({ spikeMinutes });
-					}}
-				/>
-			</SettingRows>
+						<NumberField
+							key={`joins-${String(settings.spikeJoins)}`}
+							id="raid-joins"
+							label={t("raid.joins")}
+							hint={t("raid.range", { min: RAID_LIMITS.minSpikeJoins, max: RAID_LIMITS.maxSpikeJoins })}
+							stored={settings.spikeJoins}
+							min={RAID_LIMITS.minSpikeJoins}
+							max={RAID_LIMITS.maxSpikeJoins}
+							onSave={(spikeJoins) => {
+								write({ spikeJoins });
+							}}
+						/>
+						<NumberField
+							key={`minutes-${String(settings.spikeMinutes)}`}
+							id="raid-minutes"
+							label={t("raid.minutes")}
+							hint={t("raid.range", { min: RAID_LIMITS.minSpikeMinutes, max: RAID_LIMITS.maxSpikeMinutes })}
+							stored={settings.spikeMinutes}
+							min={RAID_LIMITS.minSpikeMinutes}
+							max={RAID_LIMITS.maxSpikeMinutes}
+							onSave={(spikeMinutes) => {
+								write({ spikeMinutes });
+							}}
+						/>
+					</SettingRows>
+				</>
+			)}
 
 			<Refusal error={save.error} />
 			<p className="text-muted-foreground text-sm">{t("raid.memory", { minutes: RAID_LIMITS.alertEveryMinutes })}</p>

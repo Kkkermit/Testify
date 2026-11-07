@@ -5,6 +5,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { MemberDetailPage } from "@/features/members/MemberDetailPage";
 import { expectNoViolations } from "@/test/axe";
 import { memberDetail } from "@/test/fixtures/moderation";
+import { overview } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -243,18 +244,36 @@ describe("timeouts, nicknames and roles", () => {
 		});
 	});
 
-	it("says a reader without Manage Roles cannot change them", async () => {
+	/** A manager without Kick Members was offered Kick and Change roles, and learnt otherwise only from the refusal. */
+	it("names each permission the reader lacks beside what it would open, and asks nothing it cannot", async () => {
+		const asked: string[] = [];
 		server.use(
-			http.get(`/api/guilds/${GUILD}/members/${USER}/roles`, () =>
-				HttpResponse.json(
-					{ error: { code: "missing_permission", message: "You need the Manage Roles permission." } },
-					{ status: 403 },
-				),
+			http.get(`/api/guilds/${GUILD}/overview`, () =>
+				HttpResponse.json({ ...overview, yourPermissions: ["BanMembers"] }),
 			),
+			http.get(`/api/guilds/${GUILD}/members/${USER}/roles`, ({ request }) => {
+				asked.push(request.url);
+				return HttpResponse.json({ error: { code: "missing_permission", message: "No." } }, { status: 403 });
+			}),
 		);
 		renderPage();
 
-		expect(await screen.findByText(/you need the manage roles permission to change roles/i)).toBeInTheDocument();
+		expect(await screen.findByRole("button", { name: "Ban" })).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Kick" })).not.toBeInTheDocument();
+		const notices = screen
+			.getAllByText(/^You need the .+ permission in this server to use this\.$/)
+			.map((notice) => notice.textContent);
+		expect(notices).toEqual(
+			expect.arrayContaining([
+				expect.stringContaining("Administrator"),
+				expect.stringContaining("Manage Nicknames"),
+				expect.stringContaining("Manage Roles"),
+				expect.stringContaining("Timeout Members"),
+				expect.stringContaining("Kick Members"),
+			]),
+		);
+		expect(notices.some((notice) => notice.includes("Ban Members"))).toBe(false);
+		expect(asked).toEqual([]);
 	});
 
 	/** Somebody who outranks the reader can still have roles below the reader handed to them, as in Discord. */

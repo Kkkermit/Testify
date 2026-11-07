@@ -1,6 +1,7 @@
 import { Events, type GuildMember, type PartialGuildMember } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { defineEvent } from "@core/event";
+import { removeAccess } from "@database/repositories/dashboardAccessRepository";
 import { forgetLeaver } from "@lib/birthdays";
 import { countMove } from "@lib/info";
 import { trackLeave } from "@lib/invites";
@@ -26,6 +27,7 @@ export default defineEvent({
 
 		await sendGoodbye(client, member);
 		await forgetLeaver(member.guild.id, member.id);
+		await removeAccess(member.guild.id, member.id);
 		await trackLeave(member);
 		await syncVoiceCounters(client, member.guild);
 	},

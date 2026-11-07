@@ -1,6 +1,7 @@
 import { type FeatureCount, type FeatureDetail, type WatchedPermission } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { permissionLabel } from "@/features/commands/permissions.labels";
+import { ageText } from "@/features/raid-protection/raid.utils";
 import { type TranslationKey } from "@/i18n";
 import { formatNumber } from "@/lib/intl";
 
@@ -72,7 +73,7 @@ export function describeDetail(detail: FeatureDetail, t: TFunction, channel: (id
 				t("overview.countBoosts", { count: detail.boosts }),
 			].join(t("common.listSeparator"));
 		case "holding":
-			return t("overview.detailHolding", { count: detail.days });
+			return t("overview.detailHolding", { age: ageText(detail.minutes) });
 		case "watching":
 			return t("overview.detailWatching");
 		case "bypass":

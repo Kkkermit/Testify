@@ -17,6 +17,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["can you put it on my discord server", ["add-the-bot"]],
 	["my server doesn't show up on the dashboard", ["server-missing"]],
 	["why can't I see my server in the list", ["server-missing"]],
+	["let my mods use the dashboard without manage server", ["dashboard-access"]],
 	["how do I log in to the website", ["sign-in"]],
 	["how do i sign out", ["sign-in"]],
 	["slash commands aren't showing", ["commands-missing"]],

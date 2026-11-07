@@ -7,6 +7,7 @@ import { GUILD_REFUSED_NOTICE, RequireGuild } from "@/app/RequireGuild";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
+import { overview } from "@/test/fixtures/server";
 import { aGuild } from "@/test/fixtures/session";
 import { server } from "@/test/setup";
 
@@ -107,6 +108,24 @@ describe("reaching a server's screens", () => {
 		});
 	});
 
+	/** Somebody given part of a server who follows a link to another part is told so, and it is never asked for. */
+	it("tells somebody given other screens that this one is not theirs, and asks the API nothing for it", async () => {
+		const asked: string[] = [];
+		overviewAnswers(() => HttpResponse.json({ ...overview, yourAreas: ["bans", "cases"] }));
+		server.use(
+			http.get(`/api/guilds/${GUILD}/settings`, () => {
+				asked.push("settings");
+				return HttpResponse.json({});
+			}),
+		);
+		visit();
+
+		expect(await screen.findByText(/your access to this server doesn’t include this screen/i)).toBeInTheDocument();
+		expect(screen.getByRole("heading", { level: 1, name: "Settings" })).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { name: "Server settings" })).toBeNull();
+		expect(asked).toEqual([]);
+	});
+
 	/** Lacking Kick Members is about one action, not about the server, so the manager stays where they are. */
 	it("keeps a manager in place when only one action is refused", async () => {
 		const user = userEvent.setup();
@@ -132,6 +151,8 @@ describe("the server list after being sent back from a server", () => {
 			</QueryClientProvider>,
 		);
 
-		expect(await screen.findByText(/you don’t have permission to manage that server/i)).toBeInTheDocument();
+		expect(
+			await screen.findByText(/you need the manage server permission there, or access from its admins/i),
+		).toBeInTheDocument();
 	});
 });

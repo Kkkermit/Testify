@@ -4,17 +4,23 @@ import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { guilds } from "@api/routes/guilds";
 import { type TestifyClient } from "@core/client";
+import { findAccess, markAccessSeen } from "@database/repositories/dashboardAccessRepository";
 import { auditPage, auditsSince, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import {
 	type ChannelSummary,
 	type GuildOverview,
 	type GuildPlaces,
+	READER_PERMISSIONS,
 	type RoleSummary,
 	type ServerChangesPage,
 } from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+	markAccessSeen: jest.fn(() => Promise.resolve()),
+}));
 jest.mock("@database/repositories/casinoRepository", () => ({
 	getCasinoSettings: jest.fn(() => Promise.resolve(null)),
 }));
@@ -270,6 +276,28 @@ describe("the guild overview", () => {
 		const body = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 
 		expect(body.missingPermissions).toEqual([]);
+	});
+
+	/** A manager without Ban Members was offered Ban and Unban, and only learnt otherwise from the refusal. */
+	it("tells the page which permissions its reader holds, by the same rule the routes ask", async () => {
+		const manager = appFor({ readerHolds: [PermissionFlagsBits.ManageGuild, PermissionFlagsBits.BanMembers] });
+		const managed = (await (await manager.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+		const owned = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+
+		expect(managed.yourPermissions).toEqual(["ManageGuild", "BanMembers"]);
+		expect(owned.yourPermissions).toEqual([...READER_PERMISSIONS]);
+	});
+
+	/** Somebody given two screens finds their way from the overview, and the server's settings are not theirs to read. */
+	it("tells somebody given access which screens they have, leaves the settings out, and notes they were here", async () => {
+		jest.mocked(findAccess).mockResolvedValueOnce({ areas: ["bans", "cases"] } as never);
+		const given = appFor({ readerHolds: [PermissionFlagsBits.BanMembers] });
+		const body = (await (await given.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+		const managed = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
+
+		expect([body.yourAreas, body.features, body.recentChanges]).toEqual([["bans", "cases"], [], []]);
+		expect(markAccessSeen).toHaveBeenCalledTimes(1);
+		expect([managed.yourAreas, managed.features.length > 0]).toEqual([null, true]);
 	});
 
 	/** The bot's own member is missing while the cache is still filling; that is not a permission problem. */

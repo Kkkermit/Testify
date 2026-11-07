@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { Section } from "@/features/settings/components/Section";
 import { currentBotName } from "@/i18n";
 import { api } from "@/lib/api";
@@ -36,8 +38,9 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 		setDraft(current.data?.nickname ?? "");
 	}, [current.data?.nickname]);
 
+	const blocked = useLacks(guildId)("ManageNicknames");
 	const saved = current.data?.nickname ?? "";
-	const allowed = current.data?.canChange ?? false;
+	const allowed = (current.data?.canChange ?? false) && !blocked;
 	const dirty = draft !== saved;
 
 	return (
@@ -82,7 +85,8 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 				</div>
 			</Field>
 
-			{!allowed && current.data !== undefined && <Warning>{t("settings.nickNeedsPermission")}</Warning>}
+			{current.data?.canChange === false && <Warning>{t("settings.nickNeedsPermission")}</Warning>}
+			{blocked && <NeedsPermission permission="ManageNicknames" />}
 		</Section>
 	);
 }

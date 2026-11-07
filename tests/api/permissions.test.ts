@@ -6,6 +6,12 @@ import { requireGuild, requireOwner } from "@api/middleware/session";
 import { type Env } from "@config/env";
 import { TestifyClient } from "@core/client";
 
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+	markAccessSeen: jest.fn(() => Promise.resolve()),
+	accessFor: jest.fn(() => Promise.resolve([])),
+}));
+
 const OWNER = "100000000000000001";
 const MANAGER = "100000000000000002";
 const MEMBER = "100000000000000003";

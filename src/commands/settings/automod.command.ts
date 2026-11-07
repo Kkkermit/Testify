@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply, successEmbed } from "@lib/discord";
-import { createAutomodRule, listAutomodRules } from "@lib/moderation";
+import { changeRule, createAutomodRule, listAutomodRules } from "@lib/moderation";
 import { AUTOMOD_LIMITS } from "@testify/shared";
 
 export default defineCommand({
@@ -111,14 +111,24 @@ export default defineCommand({
 			name: "delete",
 			description: "Delete an AutoMod rule by id.",
 			options: [{ name: "rule-id", description: "The rule id from `/automod list`.", type: "string", required: true }],
-			async run(interaction) {
+			async run(interaction, client) {
 				const guild = inGuild(interaction);
 				const ruleId = interaction.options.getString("rule-id", true).trim();
 
 				const rule = await guild.autoModerationRules.fetch(ruleId).catch(() => null);
 				if (!rule) throw new UserFacingError("No AutoMod rule with that id exists here.");
 
-				await rule.delete(`Removed by ${interaction.user.username}`);
+				const change = await changeRule(() => rule.delete(`Removed by ${interaction.user.username}`));
+				if (change.outcome === "refused") {
+					client.logger.warn(
+						{ guildId: guild.id, ruleId, creatorId: rule.creatorId, code: change.code, discordMessage: change.message },
+						"[AUTOMOD] Discord refused to remove an AutoMod rule. Its code says why; the rule can still be removed in Discord.",
+					);
+					throw new UserFacingError(
+						`Discord would not let me remove **${rule.name}**. Remove it under **Server Settings → AutoMod** instead.`,
+					);
+				}
+				if (change.outcome === "unavailable") throw new UserFacingError("Discord did not answer. Try again shortly.");
 				await reply(interaction, { embeds: [successEmbed(`Deleted AutoMod rule **${rule.name}**.`)] });
 			},
 		},

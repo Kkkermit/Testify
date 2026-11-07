@@ -41,7 +41,7 @@ export const RESTORE_FIELD_LABELS: {
 		enabled: "raid.enabled",
 		alertChannelId: "raid.channel",
 		pingRoleId: "raid.ping",
-		minAccountAgeDays: "raid.minAge",
+		minAccountAgeMinutes: "raid.minAge",
 		spikeJoins: "raid.joins",
 		spikeMinutes: "raid.minutes",
 	},

@@ -26,7 +26,9 @@ import {
 	Skeleton,
 	Summary,
 } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { modmailSummary } from "@/features/modmail/modmail.utils";
 import {
@@ -138,6 +140,7 @@ function Conversations({ guildId }: { guildId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const conversations = useModmailConversations(guildId);
 	const close = useCloseConversation(guildId);
+	const mayClose = !useLacks(guildId)("ManageMessages");
 
 	return (
 		<section aria-labelledby="modmail-open" className="flex flex-col gap-3">
@@ -162,6 +165,7 @@ function Conversations({ guildId }: { guildId: string }): React.JSX.Element {
 							<ConversationRow
 								key={conversation.id}
 								conversation={conversation}
+								mayClose={mayClose}
 								busy={close.isPending && close.variables === conversation.id}
 								onClose={() => {
 									close.mutate(conversation.id);
@@ -171,6 +175,9 @@ function Conversations({ guildId }: { guildId: string }): React.JSX.Element {
 					</DividedList>
 				</Card>
 			)}
+			{!mayClose && conversations.data?.visible === true && conversations.data.items.length > 0 && (
+				<NeedsPermission permission="ManageMessages" action={t("modmail.close")} />
+			)}
 			<Refusal error={close.error} />
 		</section>
 	);
@@ -178,10 +185,12 @@ function Conversations({ guildId }: { guildId: string }): React.JSX.Element {
 
 function ConversationRow({
 	conversation,
+	mayClose,
 	busy,
 	onClose,
 }: {
 	conversation: ModmailConversation;
+	mayClose: boolean;
 	busy: boolean;
 	onClose: () => void;
 }): React.JSX.Element {
@@ -210,9 +219,11 @@ function ConversationRow({
 					{t("modmail.openThread")}
 				</a>
 			)}
-			<Button variant="secondary" disabled={busy} onClick={onClose} aria-label={t("modmail.closeWith", { name })}>
-				{t("modmail.close")}
-			</Button>
+			{mayClose && (
+				<Button variant="secondary" disabled={busy} onClick={onClose} aria-label={t("modmail.closeWith", { name })}>
+					{t("modmail.close")}
+				</Button>
+			)}
 		</li>
 	);
 }

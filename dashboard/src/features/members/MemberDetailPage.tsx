@@ -4,7 +4,9 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Refusal, SavingIndicator, savingStateOf } from "@/components/form";
 import { PageHeader, Skeleton, Summary } from "@/components/primitives";
+import { NeedsPermissionPanel, NotGivenPanel } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useLacks, useMayOpen } from "@/features/guild-overview/useLacks";
 import { LevelCard } from "@/features/members/components/LevelCard";
 import { MemberIdentity, MemberStanding } from "@/features/members/components/MemberIdentity";
 import { MoneyCard } from "@/features/members/components/MoneyCard";
@@ -24,6 +26,8 @@ export function MemberDetailPage(): React.JSX.Element {
 	const { guildId = "", userId = "" } = useParams();
 
 	const overview = useGuildOverview(guildId);
+	const lacks = useLacks(guildId);
+	const mayOpen = useMayOpen(guildId);
 	const actions = useMemberActions(guildId, userId);
 	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = actions;
 	const [result, setResult] = useState<string | null>(null);
@@ -65,69 +69,88 @@ export function MemberDetailPage(): React.JSX.Element {
 				/>
 			)}
 
-			{canModerate && (
-				<>
-					<MoneyCard
-						detail={detail}
-						busy={busy}
-						onChange={(purse, delta) => {
-							money.mutate({ purse, delta });
-						}}
-					/>
-					<LevelCard
-						detail={detail}
-						busy={busy}
-						onChange={(body) => {
-							level.mutate(body);
-						}}
-					/>
-				</>
-			)}
+			{canModerate &&
+				(lacks("Administrator") ? (
+					<>
+						<NeedsPermissionPanel title={t("members.money")} permission="Administrator" />
+						<NeedsPermissionPanel title={t("members.levelAndXp")} permission="Administrator" />
+					</>
+				) : (
+					<>
+						<MoneyCard
+							detail={detail}
+							busy={busy}
+							onChange={(purse, delta) => {
+								money.mutate({ purse, delta });
+							}}
+						/>
+						<LevelCard
+							detail={detail}
+							busy={busy}
+							onChange={(body) => {
+								level.mutate(body);
+							}}
+						/>
+					</>
+				))}
 
 			{/* Roles are judged role by role rather than by who outranks whom, so they stay when the rest cannot. */}
 			{canModerate ? (
 				<>
-					<NicknameCard
-						key={detail.nickname ?? ""}
-						detail={detail}
-						busy={busy}
-						onSave={(nickname) => {
-							actions.rename.mutate({ nickname });
-						}}
-					/>
+					{lacks("ManageNicknames") ? (
+						<NeedsPermissionPanel title={t("members.nicknameTitle")} permission="ManageNicknames" />
+					) : (
+						<NicknameCard
+							key={detail.nickname ?? ""}
+							detail={detail}
+							busy={busy}
+							onSave={(nickname) => {
+								actions.rename.mutate({ nickname });
+							}}
+						/>
+					)}
 					<RolesCard guildId={guildId} userId={userId} />
 				</>
 			) : (
 				detail.inGuild && <RolesCard guildId={guildId} userId={userId} />
 			)}
 
-			<WarningsCard
-				detail={detail}
-				busy={busy}
-				result={result}
-				onWarn={(reason, done) => {
-					warn.mutate(
-						{ userId, reason },
-						{
-							onSuccess: (added) => {
-								setResult(outcomeText(added.outcome, t));
-								done();
+			{lacks("ModerateMembers") ? (
+				<NeedsPermissionPanel title={t("members.warnings")} permission="ModerateMembers" />
+			) : !mayOpen("warnings") ? (
+				<NotGivenPanel title={t("members.warnings")} screen={t("nav.warnings")} />
+			) : (
+				<WarningsCard
+					detail={detail}
+					busy={busy}
+					result={result}
+					onWarn={(reason, done) => {
+						warn.mutate(
+							{ userId, reason },
+							{
+								onSuccess: (added) => {
+									setResult(outcomeText(added.outcome, t));
+									done();
+								},
 							},
-						},
-					);
-				}}
-				onEdit={(warnId, reason, done) => {
-					edit.mutate({ userId, warnId, reason }, { onSuccess: done });
-				}}
-				onRemove={(warnId) => {
-					remove.mutate({ userId, warnId });
-				}}
-				onClear={(done) => {
-					clear.mutate({ userId }, { onSuccess: done });
-				}}
-			/>
+						);
+					}}
+					onEdit={(warnId, reason, done) => {
+						edit.mutate({ userId, warnId, reason }, { onSuccess: done });
+					}}
+					onRemove={(warnId) => {
+						remove.mutate({ userId, warnId });
+					}}
+					onClear={(done) => {
+						clear.mutate({ userId }, { onSuccess: done });
+					}}
+				/>
+			)}
 
-			{canModerate && (
+			{canModerate && lacks("ModerateMembers") && (
+				<NeedsPermissionPanel title={t("members.timeoutTitle")} permission="ModerateMembers" />
+			)}
+			{canModerate && !lacks("ModerateMembers") && (
 				<TimeoutCard
 					detail={detail}
 					busy={busy}
@@ -144,6 +167,7 @@ export function MemberDetailPage(): React.JSX.Element {
 				<SanctionCard
 					detail={detail}
 					busy={busy}
+					missing={(["KickMembers", "BanMembers"] as const).filter(lacks)}
 					onKick={(reason, confirm) => {
 						kick.mutate({ reason, confirm });
 					}}

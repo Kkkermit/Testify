@@ -16,6 +16,26 @@ describe("navigationFor", () => {
 		expect(pathsFor({ guild, isOwner: false })).toEqual(expect.arrayContaining(inSections));
 	});
 
+	/** Every other screen refuses somebody given part of a server, so the sidebar offers only what opens for them. */
+	it("shows somebody given access their screens alone, the bot-wide command list, and no Access panel", () => {
+		const paths = pathsFor({ guild: { ...guild, areas: ["members", "bans", "giveaways"] }, isOwner: false });
+		const prefix = `/guilds/${guild.id}`;
+
+		expect(paths.filter((path) => path.startsWith(prefix)).map((path) => path.slice(prefix.length) || "/")).toEqual([
+			"/",
+			"/members",
+			"/bans",
+			"/giveaways",
+		]);
+		expect(paths).toContain("/commands");
+	});
+
+	/** Handing out screens is the admins' to do, so nobody else is even shown the way to it. */
+	it("offers the Access panel only to somebody who may hand screens out", () => {
+		expect(pathsFor({ guild, isOwner: false, mayGrant: true })).toContain(`/guilds/${guild.id}/access`);
+		expect(pathsFor({ guild, isOwner: false })).not.toContain(`/guilds/${guild.id}/access`);
+	});
+
 	/** The console 404s for anyone else, so offering the link would only be a dead end. */
 	it("shows the owner console to an owner and nobody else", () => {
 		expect(pathsFor({ guild: undefined, isOwner: true })).toContain("/owner");

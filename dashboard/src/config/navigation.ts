@@ -1,3 +1,4 @@
+import { type AccessArea, isAccessArea } from "@testify/shared";
 import {
 	Activity,
 	ArchiveRestore,
@@ -45,6 +46,7 @@ import {
 	Gavel,
 	History,
 	Inbox,
+	KeyRound,
 	Gift,
 	Gem,
 	Sparkles,
@@ -78,20 +80,35 @@ export interface NavGroup {
 }
 
 export interface NavAudience {
-	guild: { id: string; name: string } | undefined;
+	/** `areas` is null, or absent, for somebody who sees every screen of the server. */
+	guild: { id: string; name: string; areas?: readonly AccessArea[] | null } | undefined;
 	isOwner: boolean;
+	/** The server's owner, its admins and the bot's owners, who decide who else may use its dashboard. */
+	mayGrant?: boolean | undefined;
 }
 
-export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
+/** Whether somebody given only `areas` may open this path; their overview always, and a granted screen's pages. */
+export function mayOpen(pathname: string, guildId: string, areas: readonly AccessArea[] | null | undefined): boolean {
+	const base = `/guilds/${guildId}`;
+	if (areas === null || areas === undefined) return pathname === base || pathname.startsWith(`${base}/`);
+	if (pathname === base || pathname === `${base}/`) return true;
+	if (!pathname.startsWith(`${base}/`)) return false;
+
+	const screen = pathname.slice(base.length + 1).split("/")[0] ?? "";
+	return isAccessArea(screen) && areas.includes(screen);
+}
+
+export function navigationFor({ guild, isOwner, mayGrant = false }: NavAudience): NavGroup[] {
+	const guildCommands = guild !== undefined && mayOpen(`/guilds/${guild.id}/commands`, guild.id, guild.areas);
 	const groups: NavGroup[] = [
 		{
 			items: [
 				{ to: "/guilds", labelKey: "nav.servers", icon: LayoutGrid, hintKey: "nav.serversHint" },
 				{
-					to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
+					to: guildCommands ? `/guilds/${guild.id}/commands` : "/commands",
 					labelKey: "nav.commands",
 					icon: Terminal,
-					hintKey: guild === undefined ? "nav.commandsHintAll" : "nav.commandsHintGuild",
+					hintKey: guildCommands ? "nav.commandsHintGuild" : "nav.commandsHintAll",
 				},
 				{ to: "/status", labelKey: "nav.status", icon: Activity, hintKey: "nav.statusHint" },
 				{ to: "/notifications", labelKey: "nav.notifications", icon: Bell, hintKey: "nav.notificationsHint" },
@@ -214,6 +231,26 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				},
 			],
 		});
+	}
+
+	const own = groups.find((group) => guild !== undefined && group.guildId === guild.id);
+	if (guild !== undefined && own !== undefined && mayGrant) {
+		own.items.push({
+			to: `/guilds/${guild.id}/access`,
+			labelKey: "nav.access",
+			icon: KeyRound,
+			hintKey: "nav.accessHint",
+		});
+	}
+
+	if (guild?.areas !== null && guild?.areas !== undefined) {
+		const open = (item: NavItem): boolean => mayOpen(item.to, guild.id, guild.areas);
+		for (const group of groups.filter((candidate) => candidate.guildId === guild.id)) {
+			group.items = group.items.filter(open);
+			group.sections = (group.sections ?? [])
+				.map((section) => ({ ...section, items: section.items.filter(open) }))
+				.filter((section) => section.items.length > 0);
+		}
 	}
 
 	if (isOwner) {

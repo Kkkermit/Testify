@@ -30,8 +30,8 @@ describe("describeChange", () => {
 		expect(
 			describeChange(
 				"raid.update",
-				{ enabled: false, minAccountAgeDays: 0, spikeJoins: 5 },
-				{ enabled: true, minAccountAgeDays: 3, spikeJoins: 8 },
+				{ enabled: false, minAccountAgeMinutes: 0, spikeJoins: 5 },
+				{ enabled: true, minAccountAgeMinutes: 4320, spikeJoins: 8 },
 			),
 		).toBe("Turned raid protection on, changed the minimum account age and joins for a spike for raid protection");
 		expect(describeChange("starboard.update", { threshold: 3 }, { threshold: 3 })).toBeNull();

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, RowLayout, savingStateOf, SELECT, Warning, Refusal } from "@/components/form";
 import { Button, DividedList } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
 import { roleNameOf } from "@/features/levelling/levelling.utils";
@@ -16,6 +18,7 @@ export function RewardsTab({
 }: Pick<TabProps, "guildId" | "roles"> & { rewards: LevelRewardInput[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const update = useUpdateRewards(guildId);
+	const blocked = useLacks(guildId)("ManageRoles");
 	const [level, setLevel] = useState(5);
 	const [roleId, setRoleId] = useState("");
 
@@ -42,66 +45,72 @@ export function RewardsTab({
 									{t("levelling.levelN", { level: reward.level })}
 								</span>
 								<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId)}</span>
-								<Button
-									variant="ghost"
-									aria-label={t("levelling.removeReward", { level: reward.level })}
-									onClick={() => {
-										update.mutate(rewards.filter((candidate) => candidate.level !== reward.level));
-									}}
-								>
-									<Trash2 size={16} aria-hidden="true" />
-								</Button>
+								{!blocked && (
+									<Button
+										variant="ghost"
+										aria-label={t("levelling.removeReward", { level: reward.level })}
+										onClick={() => {
+											update.mutate(rewards.filter((candidate) => candidate.level !== reward.level));
+										}}
+									>
+										<Trash2 size={16} aria-hidden="true" />
+									</Button>
+								)}
 							</li>
 						))}
 					</DividedList>
 				</div>
 			)}
 
-			{/* The new reward's two boxes and its button read as one line, so they keep the stacked field layout. */}
-			<RowLayout.Provider value={false}>
-				<div className="flex flex-wrap items-end gap-3">
-					<Field label={t("levelling.level")} className="w-24">
-						<input
-							type="number"
-							inputMode="numeric"
-							min={1}
-							max={LEVEL_LIMITS.maxRewardLevel}
-							value={level}
-							onChange={(event) => {
-								setLevel(Number(event.target.value));
+			{blocked ? (
+				<NeedsPermission permission="ManageRoles" />
+			) : (
+				/* The new reward's two boxes and its button read as one line, so they keep the stacked field layout. */
+				<RowLayout.Provider value={false}>
+					<div className="flex flex-wrap items-end gap-3">
+						<Field label={t("levelling.level")} className="w-24">
+							<input
+								type="number"
+								inputMode="numeric"
+								min={1}
+								max={LEVEL_LIMITS.maxRewardLevel}
+								value={level}
+								onChange={(event) => {
+									setLevel(Number(event.target.value));
+								}}
+								className={FIELD}
+							/>
+						</Field>
+						<Field label={t("levelling.role")} className="min-w-48 flex-1">
+							<select
+								value={roleId}
+								onChange={(event) => {
+									setRoleId(event.target.value);
+								}}
+								className={SELECT}
+							>
+								<option value="">{t("levelling.chooseRole")}</option>
+								{assignable.map((role) => (
+									<option key={role.id} value={role.id}>
+										{role.name}
+									</option>
+								))}
+							</select>
+						</Field>
+						<Button
+							disabled={roleId === "" || full || taken}
+							onClick={() => {
+								update.mutate([...rewards, { level, roleId }]);
+								setRoleId("");
 							}}
-							className={FIELD}
-						/>
-					</Field>
-					<Field label={t("levelling.role")} className="min-w-48 flex-1">
-						<select
-							value={roleId}
-							onChange={(event) => {
-								setRoleId(event.target.value);
-							}}
-							className={SELECT}
 						>
-							<option value="">{t("levelling.chooseRole")}</option>
-							{assignable.map((role) => (
-								<option key={role.id} value={role.id}>
-									{role.name}
-								</option>
-							))}
-						</select>
-					</Field>
-					<Button
-						disabled={roleId === "" || full || taken}
-						onClick={() => {
-							update.mutate([...rewards, { level, roleId }]);
-							setRoleId("");
-						}}
-					>
-						<Plus size={16} aria-hidden="true" /> {t("levelling.add")}
-					</Button>
-				</div>
-			</RowLayout.Provider>
+							<Plus size={16} aria-hidden="true" /> {t("levelling.add")}
+						</Button>
+					</div>
+				</RowLayout.Provider>
+			)}
 
-			{full && <Warning>{t("levelling.rewardsFull")}</Warning>}
+			{!blocked && full && <Warning>{t("levelling.rewardsFull")}</Warning>}
 			{taken && <Warning>{t("levelling.levelTaken", { level })}</Warning>}
 			{assignable.length < roles.length && <Warning>{t("levelling.hierarchyNote")}</Warning>}
 			<Refusal error={update.error} />

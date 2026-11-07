@@ -148,7 +148,7 @@ export const FACTS: Readonly<Record<string, string>> = {
 
 	"birthday.maxMessage": formatNumber(BIRTHDAY_LIMITS.maxMessage),
 
-	"raid.maxAccountAge": formatDurationLong(RAID_LIMITS.maxAccountAgeDays * DAY_MS),
+	"raid.maxAccountAge": formatDurationLong(RAID_LIMITS.maxAccountAgeMinutes * MINUTE_MS),
 	"raid.alertEvery": formatDurationLong(RAID_LIMITS.alertEveryMinutes * MINUTE_MS),
 
 	"directory.maxBatch": formatNumber(DIRECTORY_LIMITS.maxBatch),

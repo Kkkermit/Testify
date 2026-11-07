@@ -4,8 +4,11 @@ import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
 import { readCookie, SESSION_COOKIE } from "@api/cookies";
 import { forbidden, notFound, notInGuild, unauthorised } from "@api/errors";
+import { accessOpens } from "@api/middleware/access";
 import { requireOauth } from "@api/oauth";
+import { findAccess } from "@database/repositories/dashboardAccessRepository";
 import { findSession, touchSession } from "@database/repositories/dashboardSessionRepository";
+import { isAccessArea } from "@testify/shared";
 
 /** Attaches the session when there is one; `requireAuth` is what refuses. */
 export const loadSession = createMiddleware<ApiBindings>(async (context, next) => {
@@ -49,7 +52,17 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 		if (member === null) throw forbidden("not_a_member", "You are not in that server.");
 
 		if (!member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-			throw forbidden("missing_manage_guild", "You need Manage Server in that server.");
+			// Read on every request, so access taken away is gone on the next click.
+			const access = await findAccess(guildId, session.userId);
+			if (access === null) {
+				throw forbidden("missing_manage_guild", "You need Manage Server in that server, or access from its admins.");
+			}
+			// The record is read as data, so a screen this build does not know is dropped rather than trusted.
+			const areas = access.areas.filter(isAccessArea);
+			if (!accessOpens(areas, context.req.method, context.req.path, guildId)) {
+				throw forbidden("not_granted", "Your access to that server does not include this.");
+			}
+			context.set("areas", areas);
 		}
 
 		context.set("member", member);

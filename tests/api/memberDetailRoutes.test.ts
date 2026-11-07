@@ -4,6 +4,7 @@ import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { members } from "@api/routes/members";
 import { type TestifyClient } from "@core/client";
+import { findAccess } from "@database/repositories/dashboardAccessRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
 import { addXp, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
@@ -27,6 +28,9 @@ jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelSettings: jest.fn(() => Promise.resolve(null)),
 	setLevel: jest.fn(() => Promise.resolve({ level: 10, xp: 5_000 })),
 	addXp: jest.fn(() => Promise.resolve({ level: 3, xp: 400 })),
+}));
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/inviteRepository", () => ({
 	latestJoinOf: jest.fn(() => Promise.resolve(null)),
@@ -265,6 +269,22 @@ describe("GET /members/:userId", () => {
 		expect(body).toMatchObject({ warnings: null, softban: null });
 		expect(partial.warnings).toHaveLength(2);
 		expect(partial.softban).toBeNull();
+	});
+
+	/** Warnings are the Warnings screen's, so a grantee given Members alone does not read them here either. */
+	it("leaves a grantee's warnings out unless the Warnings screen is part of their access", async () => {
+		withWarnings(2);
+		const actorHolds = [PermissionFlagsBits.ModerateMembers, PermissionFlagsBits.BanMembers];
+		const given = (areas: string[]) =>
+			jest.mocked(findAccess).mockResolvedValueOnce({ guildId: GUILD, userId: ACTOR, areas } as never);
+
+		given(["members"]);
+		const members = (await (await request("GET", "", undefined, { actorHolds })).json()) as MemberDetail;
+		given(["members", "warnings"]);
+		const both = (await (await request("GET", "", undefined, { actorHolds })).json()) as MemberDetail;
+
+		expect(members.warnings).toBeNull();
+		expect(both.warnings).toHaveLength(2);
 	});
 
 	/** A balance and a warning record outlive the membership, so leaving must not turn the page into a 404. */

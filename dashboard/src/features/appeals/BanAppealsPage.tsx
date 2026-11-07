@@ -23,7 +23,9 @@ import {
 	useDecideAppeal,
 	useSaveAppealSettings,
 } from "@/features/appeals/useAppeals";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
@@ -43,7 +45,8 @@ export function BanAppealsPage(): React.JSX.Element {
 	const page = pageFrom(params.get("page"));
 
 	const settings = useAppealSettings(guildId);
-	const list = useAppealList(guildId, filter, page);
+	const blocked = useLacks(guildId)("BanMembers");
+	const list = useAppealList(guildId, filter, page, useHolds(guildId)("BanMembers"));
 	const results = currentData(list);
 	const channels = useChannels(guildId);
 	const overview = useGuildOverview(guildId);
@@ -97,17 +100,21 @@ export function BanAppealsPage(): React.JSX.Element {
 					<SectionHeading as="h2" id="appeals-heading">
 						{t("appeals.listTitle")}
 					</SectionHeading>
-					<SegmentedControl
-						label={t("appeals.filter")}
-						value={filter}
-						segments={FILTERS.map((value) => ({ value, label: t(FILTER_LABEL[value]) }))}
-						onChange={(status) => {
-							showAppeals({ status });
-						}}
-					/>
+					{!blocked && (
+						<SegmentedControl
+							label={t("appeals.filter")}
+							value={filter}
+							segments={FILTERS.map((value) => ({ value, label: t(FILTER_LABEL[value]) }))}
+							onChange={(status) => {
+								showAppeals({ status });
+							}}
+						/>
+					)}
 				</div>
 
-				{list.isError ? (
+				{blocked ? (
+					<NeedsPermission permission="BanMembers" />
+				) : list.isError ? (
 					<ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />
 				) : results === undefined ? (
 					<Skeleton className="h-48 w-full" />
@@ -130,7 +137,7 @@ export function BanAppealsPage(): React.JSX.Element {
 					</ul>
 				)}
 
-				{list.data !== undefined && (
+				{!blocked && list.data !== undefined && (
 					<Pager
 						page={list.data.page}
 						pages={pageCount(list.data.total, list.data.perPage)}

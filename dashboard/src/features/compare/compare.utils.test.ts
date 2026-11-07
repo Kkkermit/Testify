@@ -15,6 +15,7 @@ const guild = (id: string, overrides: Partial<ManageableGuild> = {}): Manageable
 	memberCount: 10,
 	botPresent: true,
 	canInvite: true,
+	areas: null,
 	...overrides,
 });
 const feature = (key: string, overrides: Partial<FeatureStatus> = {}): FeatureStatus => ({

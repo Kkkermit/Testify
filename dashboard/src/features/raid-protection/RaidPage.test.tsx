@@ -33,8 +33,45 @@ describe("the raid protection page", () => {
 
 		expect(await screen.findByRole("switch", { name: /watch new joins/i })).toBeChecked();
 		expect(screen.getByLabelText(/minimum account age/i)).toHaveValue("7");
+		expect(screen.getByRole("combobox", { name: "Unit" })).toHaveValue("days");
 		expect(screen.getByText(/kicking and banning stay a moderator’s decision/i)).toBeInTheDocument();
 		await expectNoViolations(container);
+	});
+
+	/** A minimum in days alone held back nobody for less than a day, which is most of what a raid needs. */
+	it("saves an age in minutes or hours once the number and its unit are both chosen", async () => {
+		const user = userEvent.setup();
+		const captured = capturePatch();
+		renderPage();
+
+		const age = await screen.findByLabelText(/minimum account age/i);
+		await user.selectOptions(screen.getByRole("combobox", { name: "Unit" }), "minutes");
+		await user.clear(age);
+		await user.type(age, "30");
+		// Moving on to the unit is still choosing, so only leaving both saves.
+		await user.tab();
+		expect(captured.body).toBeUndefined();
+		await user.tab();
+
+		await waitFor(() => {
+			expect(captured.body).toEqual({ minAccountAgeMinutes: 30 });
+		});
+	});
+
+	it("refuses an age past 28 days in any unit, and saves nothing", async () => {
+		const user = userEvent.setup();
+		const captured = capturePatch();
+		renderPage();
+
+		const age = await screen.findByLabelText(/minimum account age/i);
+		await user.selectOptions(screen.getByRole("combobox", { name: "Unit" }), "hours");
+		await user.clear(age);
+		await user.type(age, "673");
+		await user.tab();
+		await user.tab();
+
+		expect(screen.getByText(/choose a whole number, up to 28 days in all/i)).toBeInTheDocument();
+		expect(captured.body).toBeUndefined();
 	});
 
 	it("chooses who an alert pings, and nobody by default", async () => {
@@ -55,7 +92,7 @@ describe("the raid protection page", () => {
 	it("cannot be switched on with nothing to do, and says what to set first", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/raid-protection", () =>
-				HttpResponse.json({ ...raidOverview, enabled: false, minAccountAgeDays: 0, alertChannelId: null }),
+				HttpResponse.json({ ...raidOverview, enabled: false, minAccountAgeMinutes: 0, alertChannelId: null }),
 			),
 		);
 		renderPage();
