@@ -79,6 +79,8 @@ export default defineConfig(({ command, mode }) => {
 				output: {
 					manualChunks: (id) => {
 						if (/node_modules\/(?:marked|lowlight|highlight\.js|devlop|dequal)\//.test(id)) return "markdown";
+						// Beside zod, so it runs before the chunk that builds the shared schemas rather than after it.
+						if (id.endsWith("/src/lib/withoutEval.ts")) return "vendor";
 						if (id.includes("node_modules")) return "vendor";
 						return undefined;
 					},

@@ -1,3 +1,5 @@
+// First, so zod is told before any schema is built.
+import "@/lib/withoutEval";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
