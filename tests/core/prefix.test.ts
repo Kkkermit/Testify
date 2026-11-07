@@ -1,7 +1,9 @@
 import { type Message } from "discord.js";
-import { defineCommand } from "@core/command";
+import { defineCommand, subcommandsOf } from "@core/command";
 import { UserFacingError } from "@core/errors";
+import { loadEverything } from "@core/loader";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
+import { createMockClient } from "@tests/helpers/mocks";
 
 const BOT = "111111111111111111";
 const ALICE = "222222222222222222";
@@ -270,5 +272,67 @@ describe("replying to a message", () => {
 
 		expect(input.deferred).toBe(true);
 		expect((message.channel as unknown as { sendTyping: jest.Mock }).sendTyping).toHaveBeenCalled();
+	});
+});
+
+describe("a value outside what the command declares", () => {
+	const client = createMockClient();
+	loadEverything(client);
+
+	/** Nothing held the prefix to `min: 1`, so `t?lottery enter -1000` cost minus a thousand fees and paid the buyer. */
+	it("refuses a negative ticket count before any money moves", () => {
+		const lottery = client.commands.get("lottery")!;
+		const input = new PrefixInteraction(fakeMessage(), lottery, ["enter", "-1000"]);
+
+		expect(() => input.options.getInteger("tickets")).toThrow(/at least 1/);
+		expect(new PrefixInteraction(fakeMessage(), lottery, ["enter", "3"]).options.getInteger("tickets")).toBe(3);
+	});
+
+	/** Discord holds a slash command to its declaration; every bounded option of every command is held here too. */
+	it("refuses each bounded option just past its bound, and takes the bound itself", () => {
+		const leaks: string[] = [];
+		let checked = 0;
+
+		for (const command of client.commands.values()) {
+			const runs =
+				subcommandsOf(command).length > 0
+					? subcommandsOf(command).map((sub) => ({
+							lead: [sub.name],
+							options: sub.options ?? [],
+							label: `${command.name} ${sub.name}`,
+						}))
+					: [{ lead: [], options: command.options ?? [], label: command.name }];
+
+			for (const { lead, options, label } of runs) {
+				options.forEach((option, index) => {
+					const cases: [string, boolean][] = [];
+					if (option.choices?.length) cases.push(["not-a-choice", false], [String(option.choices[0]!.value), true]);
+					else if (option.type === "integer" || option.type === "number") {
+						if (option.min !== undefined) cases.push([String(option.min - 1), false], [String(option.min), true]);
+						if (option.max !== undefined) cases.push([String(option.max + 1), false], [String(option.max), true]);
+					} else if (option.type === "string" && option.maxLength !== undefined) {
+						cases.push(["a".repeat(option.maxLength + 1), false], ["a".repeat(option.maxLength), true]);
+					}
+
+					for (const [value, allowed] of cases) {
+						checked++;
+						const args = [...lead, ...options.slice(0, index).map(() => "x"), value];
+						const { options: read } = new PrefixInteraction(fakeMessage(), command, args);
+						const get = () => (option.type === "string" ? read.getString(option.name) : read.getNumber(option.name));
+						let refused = false;
+						try {
+							get();
+						} catch (error) {
+							refused = error instanceof UserFacingError;
+						}
+						if (refused === allowed)
+							leaks.push(`${label} --${option.name}=${value.slice(0, 12)} ${allowed ? "refused" : "taken"}`);
+					}
+				});
+			}
+		}
+
+		expect(leaks).toEqual([]);
+		expect(checked).toBeGreaterThan(60);
 	});
 });

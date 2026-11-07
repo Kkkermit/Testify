@@ -66,6 +66,7 @@ export interface CommandInput {
 /** Number parsing and the required check, worded the same for every surface that reads options from text. */
 export abstract class OptionReader {
 	protected abstract raw(name: string): string | number | boolean | undefined;
+	protected abstract declaration(name: string): CommandOption | undefined;
 
 	protected number(name: string, valid: (value: number) => boolean): number | null {
 		const raw = this.raw(name);
@@ -74,7 +75,43 @@ export abstract class OptionReader {
 		const parsed = Number(raw);
 		if (!valid(parsed)) throw new UserFacingError(`\`${name}\` has to be a number.`);
 
-		return parsed;
+		return this.withinDeclaration(name, parsed);
+	}
+
+	protected text(name: string): string | null {
+		const raw = this.raw(name);
+		return raw === undefined ? null : this.withinDeclaration(name, String(raw));
+	}
+
+	/** Discord refuses a slash command's value outside its declaration; nothing else does, so this does. */
+	private withinDeclaration<T extends string | number>(name: string, value: T): T {
+		const option = this.declaration(name);
+		if (option === undefined) return value;
+
+		if (option.choices !== undefined && option.choices.length > 0) {
+			const typed = typeof value === "string" ? value.toLowerCase() : value;
+			const choice = option.choices.find((one) =>
+				typeof one.value === "string" ? one.value.toLowerCase() === typed : one.value === typed,
+			);
+			if (choice === undefined) {
+				const listed = option.choices.map((one) => `\`${String(one.value)}\``).join(", ");
+				throw new UserFacingError(`\`${name}\` has to be one of ${listed}.`);
+			}
+			return choice.value as T;
+		}
+
+		if (typeof value === "number") {
+			if (option.min !== undefined && value < option.min) {
+				throw new UserFacingError(`\`${name}\` has to be at least ${String(option.min)}.`);
+			}
+			if (option.max !== undefined && value > option.max) {
+				throw new UserFacingError(`\`${name}\` has to be ${String(option.max)} or less.`);
+			}
+		} else if (option.maxLength !== undefined && value.length > option.maxLength) {
+			throw new UserFacingError(`\`${name}\` can be ${String(option.maxLength)} characters at most.`);
+		}
+
+		return value;
 	}
 
 	protected require<T>(name: string, value: T | null, required: boolean | undefined): T {

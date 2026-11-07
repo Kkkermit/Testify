@@ -79,6 +79,10 @@ export class DashboardOptions extends OptionReader implements CommandInputOption
 		return this.values.get(name);
 	}
 
+	protected declaration(name: string): CommandOption | undefined {
+		return this.declared.find((option) => option.name === name);
+	}
+
 	getSubcommand(required = true): string {
 		if (this.subcommand === null && required) throw new UserFacingError("Pick which part of this command to run.");
 		return this.subcommand ?? "";
@@ -87,10 +91,7 @@ export class DashboardOptions extends OptionReader implements CommandInputOption
 	getString(name: string, required: true): string;
 	getString(name: string, required?: boolean): string | null;
 	getString(name: string, required?: boolean): string | null {
-		const raw = this.values.get(name);
-		if (raw === undefined) return this.require(name, null, required);
-
-		return this.require(name, String(raw), required);
+		return this.require(name, this.text(name), required);
 	}
 
 	getInteger(name: string, required: true): number;
