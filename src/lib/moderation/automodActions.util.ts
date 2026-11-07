@@ -4,6 +4,7 @@ import {
 	AutoModerationRuleEventType,
 	AutoModerationRuleKeywordPresetType,
 	AutoModerationRuleTriggerType,
+	DiscordAPIError,
 	type Guild,
 	PermissionFlagsBits,
 } from "discord.js";
@@ -46,6 +47,26 @@ export function toRuleSummary(rule: AutoModerationRule, botId: string): AutomodR
 		actions: [...new Set(rule.actions.map((action) => ACTION[action.type] ?? "other"))],
 		fromBot: rule.creatorId === botId,
 	};
+}
+
+/** What Discord made of a change to a rule: done, already gone, refused with its own code, or not answering. */
+export type RuleChange =
+	| { outcome: "done" }
+	| { outcome: "gone" }
+	| { outcome: "refused"; status: number; code: number | string; message: string }
+	| { outcome: "unavailable"; status: number };
+
+/** Discord may refuse to change a rule another app made, so its answer is read here rather than thrown at the caller. */
+export async function changeRule(write: () => Promise<unknown>): Promise<RuleChange> {
+	try {
+		await write();
+		return { outcome: "done" };
+	} catch (error) {
+		if (!(error instanceof DiscordAPIError)) throw error;
+		if (error.status === 404) return { outcome: "gone" };
+		if (error.status >= 500) return { outcome: "unavailable", status: error.status };
+		return { outcome: "refused", status: error.status, code: error.code, message: error.message };
+	}
 }
 
 export async function listAutomodRules(guild: Guild, botId: string): Promise<AutomodRuleSummary[]> {

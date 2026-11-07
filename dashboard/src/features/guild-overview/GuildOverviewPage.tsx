@@ -1,9 +1,11 @@
+import { type AccessArea, type GuildOverview } from "@testify/shared";
 import { Hash, Shield, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { SectionHeading, PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import { DividedList, HoverChevron, SectionHeading, PageHeader, Skeleton, StatTile } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { allNavItems, navigationFor } from "@/config/navigation";
 import { FeatureGrid } from "@/features/guild-overview/components/FeatureGrid";
 import { InboxLine } from "@/features/guild-overview/components/InboxLine";
 import { MissingPermissions } from "@/features/guild-overview/components/MissingPermissions";
@@ -24,6 +26,7 @@ export function GuildOverviewPage(): React.JSX.Element {
 	if (overview.isError) return <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />;
 
 	const guild = overview.data;
+	if (guild.yourAreas !== null) return <GrantedOverview guild={guild} areas={guild.yourAreas} />;
 
 	return (
 		<>
@@ -66,6 +69,51 @@ export function GuildOverviewPage(): React.JSX.Element {
 					</Link>
 				</div>
 				<RecentChanges changes={guild.recentChanges} />
+			</section>
+		</>
+	);
+}
+
+const ROW = "hover:bg-muted/60 group flex items-center gap-3 px-4 py-3 transition-colors duration-150";
+
+/** Somebody given part of the server gets its figures and the way into each screen they were given. */
+function GrantedOverview({ guild, areas }: { guild: GuildOverview; areas: AccessArea[] }): React.JSX.Element {
+	const { t } = useTranslation();
+	const screens = allNavItems(navigationFor({ guild: { ...guild, areas }, isOwner: false })).filter((item) =>
+		item.to.startsWith(`/guilds/${guild.id}/`),
+	);
+
+	return (
+		<>
+			<PageHeader title={guild.name} subtitle={t("overview.grantedSubtitle")} />
+
+			<section aria-label={t("overview.glance")} className="grid gap-4 sm:grid-cols-3">
+				<StatTile label={t("overview.members")} value={guild.memberCount} icon={Users} tint="text-hue-green" />
+				<StatTile label={t("overview.channels")} value={guild.channelCount} icon={Hash} tint="text-hue-blue" />
+				<StatTile label={t("overview.roles")} value={guild.roleCount} icon={Shield} tint="text-hue-violet" />
+			</section>
+
+			<MissingPermissions permissions={guild.missingPermissions} />
+
+			<section aria-labelledby="granted-heading" className="flex flex-col gap-3">
+				<SectionHeading as="h2" id="granted-heading">
+					{t("overview.grantedScreens")}
+				</SectionHeading>
+				<DividedList className="bg-card">
+					{screens.map(({ to, labelKey, hintKey, icon: Icon }) => (
+						<li key={to}>
+							<Link to={to} className={ROW}>
+								<Icon size={18} aria-hidden="true" className="text-muted-foreground shrink-0" />
+								<span className="min-w-0 flex-1">
+									<span className="block font-medium">{t(labelKey)}</span>
+									{hintKey !== undefined && <span className="text-muted-foreground block text-sm">{t(hintKey)}</span>}
+								</span>
+								<HoverChevron />
+							</Link>
+						</li>
+					))}
+				</DividedList>
+				<p className="text-muted-foreground text-sm">{t("overview.grantedMore")}</p>
 			</section>
 		</>
 	);

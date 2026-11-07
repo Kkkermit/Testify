@@ -86,6 +86,22 @@ export async function auditsBy(
 	return { items, total };
 }
 
+export interface ChangeTally {
+	count: number;
+	last: Date;
+}
+
+/** How many changes each of these people made in one server, and when the latest was, in one query. */
+export async function changesBy(guildId: string, actorIds: readonly string[]): Promise<Map<string, ChangeTally>> {
+	if (actorIds.length === 0) return new Map();
+
+	const rows = await DashboardAudits.aggregate<{ _id: string; count: number; last: Date }>([
+		{ $match: { guildId, actorId: { $in: [...actorIds] } } },
+		{ $group: { _id: "$actorId", count: { $sum: 1 }, last: { $max: "$at" } } },
+	]).exec();
+	return new Map(rows.map((row) => [row._id, { count: row.count, last: row.last }]));
+}
+
 /** Every server one person has a record in; null is the owner console. */
 export async function auditServersOf(actorId: string): Promise<(string | null)[]> {
 	return DashboardAudits.distinct("guildId", { actorId }).exec();

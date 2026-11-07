@@ -51,7 +51,7 @@ const WORDS: { [Action in RestorableAction]: { noun: string; fields: Record<Labe
 		fields: {
 			alertChannelId: "alert channel",
 			pingRoleId: "role pinged",
-			minAccountAgeDays: "minimum account age",
+			minAccountAgeMinutes: "minimum account age",
 			spikeJoins: "joins for a spike",
 			spikeMinutes: "minutes for a spike",
 		},

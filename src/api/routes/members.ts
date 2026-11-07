@@ -1,7 +1,7 @@
 import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
+import { actorOf, type ApiBindings, guildOf, opensArea, readerOf } from "@api/context";
 import { badRequest, forbidden, notFound } from "@api/errors";
 import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -82,9 +82,13 @@ async function detail(context: Context<ApiBindings>, fresh = false): Promise<Mem
 	const found = await readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
 
 	// `/warn list` asks Moderate Members and a softban is Ban Members' to see, so a manager without them sees neither.
+	// Warnings are the Warnings screen's, so access that does not include it leaves them out here too.
 	return {
 		...found,
-		warnings: holdsPermission(context, PermissionFlagsBits.ModerateMembers) ? found.warnings : null,
+		warnings:
+			holdsPermission(context, PermissionFlagsBits.ModerateMembers) && opensArea(context, "warnings")
+				? found.warnings
+				: null,
 		softban: holdsPermission(context, PermissionFlagsBits.BanMembers) ? found.softban : null,
 	};
 }

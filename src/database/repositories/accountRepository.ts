@@ -10,6 +10,7 @@ import { CasinoStats } from "@database/models/casinoStats.schema";
 import { CommandRuns } from "@database/models/commandRuns.schema";
 import { CommandToggleConfig } from "@database/models/commandToggles.schema";
 import { Counting } from "@database/models/counting.schema";
+import { DashboardAccess } from "@database/models/dashboardAccess.schema";
 import { DashboardAudits } from "@database/models/dashboardAudit.schema";
 import { DashboardSessions } from "@database/models/dashboardSession.schema";
 import { Economy } from "@database/models/economy.schema";
@@ -63,6 +64,7 @@ export const ERASURE = {
 	commandrun: { userId: "delete" },
 	commandtoggles: { updatedBy: "anonymise" },
 	countingSchema: { lastUserId: "anonymise" },
+	dashboardaccess: { userId: "delete", addedBy: "anonymise" },
 	dashboardaudit: { actorId: "anonymise" },
 	dashboardsession: { userId: "delete" },
 	DmLogger: { authorId: "delete" },
@@ -133,6 +135,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		SharedBirthday.deleteMany({ userId }).exec(),
 		CasinoHand.deleteMany({ userId }).exec(),
 		CasinoStats.deleteMany({ userId }).exec(),
+		DashboardAccess.deleteMany({ userId }).exec(),
 		CommandRuns.deleteMany({ userId }).exec(),
 		DashboardSessions.deleteMany({ userId }).exec(),
 		DmLog.deleteMany({ authorId: userId }).exec(),
@@ -182,6 +185,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		ModCaseEntry.updateMany({ moderatorId: userId }, { $set: { moderatorId: gone, moderatorName: name } }).exec(),
 		Softban.updateMany({ moderatorId: userId }, { $set: { moderatorId: gone } }).exec(),
 		DashboardAudits.updateMany({ actorId: userId }, { $set: { actorId: gone, actorTag: name } }).exec(),
+		DashboardAccess.updateMany({ addedBy: userId }, { $set: { addedBy: gone, addedByName: name } }).exec(),
 		BotNotice.updateMany({ authorId: userId }, { $set: { authorId: gone } }).exec(),
 		FixedStats.updateMany({ userId }, { $set: { userId: gone } }).exec(),
 		StarPost.updateMany({ authorId: userId }, { $set: { authorId: gone } }).exec(),

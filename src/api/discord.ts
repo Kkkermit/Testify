@@ -1,4 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { PermissionFlagsBits } from "discord.js";
 import { ApiProblem, UpstreamProblem } from "@api/errors";
 import { type DashboardUser } from "@testify/shared";
 
@@ -177,12 +178,13 @@ export function guildIconUrl(guildId: string, icon: string | null): string | nul
 	return icon === null ? null : `https://cdn.discordapp.com/icons/${guildId}/${icon}.png?size=128`;
 }
 
-const MANAGE_GUILD = 1n << 5n;
+const MANAGES = [PermissionFlagsBits.Administrator, PermissionFlagsBits.ManageGuild];
 
 /** A login-time snapshot, good enough for what to show; `requireGuild` checks live before any write. */
 export function canManage(permissions: string): boolean {
 	try {
-		return (BigInt(permissions) & MANAGE_GUILD) === MANAGE_GUILD;
+		const held = BigInt(permissions);
+		return MANAGES.some((flag) => (held & flag) === flag);
 	} catch {
 		return false;
 	}

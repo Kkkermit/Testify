@@ -162,7 +162,7 @@ describe("an action that needs more than Manage Server", () => {
 		["choosing the verified role", "PATCH", "/verification", { roleId: BELOW_YOU }],
 		["renaming the bot", "PATCH", "/settings/nickname", { nickname: "Robo" }],
 		["making a role menu", "POST", "/role-menus", { ...MENU, roleIds: [BELOW_YOU] }],
-		["changing raid protection", "PATCH", "/raid-protection", { minAccountAgeDays: 7 }],
+		["changing raid protection", "PATCH", "/raid-protection", { minAccountAgeMinutes: 10080 }],
 		["lifting a ban", "POST", `/bans/${TARGET}/unban`, {}],
 		["timing a member out", "POST", `/members/${TARGET}/timeout`, { minutes: 60, reason: "spam", confirm: "x" }],
 		["lifting a timeout", "DELETE", `/members/${TARGET}/timeout`, {}],

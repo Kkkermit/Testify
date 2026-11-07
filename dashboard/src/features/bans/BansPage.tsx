@@ -19,7 +19,9 @@ import {
 	Summary,
 } from "@/components/primitives";
 import { useBans, useUnban } from "@/features/bans/useBans";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useHolds, useLacks } from "@/features/guild-overview/useLacks";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { dateAndTime } from "@/lib/datetime";
@@ -31,13 +33,15 @@ export function BansPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
+	const blocked = useLacks(guildId)("BanMembers");
+	const mayRead = useHolds(guildId)("BanMembers");
 
 	const [query, setQuery] = useState("");
 	const [page, setPage] = useState(1);
 	const searched = useDebounced(query).trim();
-	const list = useBans(guildId, { page, query: searched });
+	const list = useBans(guildId, { page, query: searched }, mayRead);
 	const results = currentData(list);
-	const all = useBans(guildId, { page: 1, query: "" });
+	const all = useBans(guildId, { page: 1, query: "" }, mayRead);
 
 	usePageTitle(t("bans.title"), overview.data?.name);
 
@@ -54,6 +58,7 @@ export function BansPage(): React.JSX.Element {
 						<h2 id="bans-heading" className={CARD_HEADING}>
 							{t("bans.list")}
 						</h2>
+						{blocked && <NeedsPermission permission="BanMembers" />}
 						{results?.readable === true && (
 							<p className="text-muted-foreground text-sm" aria-live="polite">
 								{t("bans.count", { count: results.total })}
@@ -61,22 +66,24 @@ export function BansPage(): React.JSX.Element {
 						)}
 					</div>
 
-					<Field label={t("bans.search")} hint={t("bans.searchHint")} htmlFor="bans-search">
-						<input
-							id="bans-search"
-							type="search"
-							className={FIELD}
-							value={query}
-							maxLength={BAN_LIMITS.maxQuery}
-							autoComplete="off"
-							onChange={(event) => {
-								setQuery(event.target.value);
-								setPage(1);
-							}}
-						/>
-					</Field>
+					{!blocked && (
+						<Field label={t("bans.search")} hint={t("bans.searchHint")} htmlFor="bans-search">
+							<input
+								id="bans-search"
+								type="search"
+								className={FIELD}
+								value={query}
+								maxLength={BAN_LIMITS.maxQuery}
+								autoComplete="off"
+								onChange={(event) => {
+									setQuery(event.target.value);
+									setPage(1);
+								}}
+							/>
+						</Field>
+					)}
 
-					{list.isError ? (
+					{blocked ? null : list.isError ? (
 						<ErrorState as="h2" error={list.error} onRetry={() => void list.refetch()} />
 					) : results === undefined ? (
 						<Skeleton className="h-48 w-full" />

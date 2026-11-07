@@ -1,8 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { modalForm, pickedChannelId } from "@lib/discord";
-import { applyRaidSettings, RAID_PANEL_ID, raidPanel, readRaidOverview, wholeNumber } from "@lib/raid";
+import { formatDuration } from "@lib/format";
+import { ageFromText, applyRaidSettings, RAID_PANEL_ID, raidPanel, readRaidOverview, wholeNumber } from "@lib/raid";
 import { recordsSettings } from "@lib/settings";
 import { RAID_LIMITS, type RaidPatch } from "@testify/shared";
 
@@ -36,10 +38,11 @@ export default recordsSettings(
 						title: "Minimum account age",
 						fields: [
 							{
-								id: "days",
-								label: `Days, from 0 (off) to ${String(RAID_LIMITS.maxAccountAgeDays)}`,
-								value: String(current.minAccountAgeDays),
-								maxLength: 2,
+								id: "age",
+								label: "A length such as 30m, 12h or 7d; 0 for off",
+								value:
+									current.minAccountAgeMinutes === 0 ? "0" : formatDuration(current.minAccountAgeMinutes * MINUTE_MS),
+								maxLength: 20,
 							},
 						],
 					}),
@@ -77,18 +80,14 @@ export default recordsSettings(
 			let note: string;
 
 			if (interaction.isModalSubmit() && context.action === "save-age") {
-				const minAccountAgeDays = wholeNumber(
-					interaction.fields.getTextInputValue("days"),
-					0,
-					RAID_LIMITS.maxAccountAgeDays,
-				);
-				if (minAccountAgeDays === null) {
+				const minAccountAgeMinutes = ageFromText(interaction.fields.getTextInputValue("age"));
+				if (minAccountAgeMinutes === null) {
 					throw new UserFacingError(
-						`Give a whole number of days from 0 to ${String(RAID_LIMITS.maxAccountAgeDays)}, Discord's longest timeout.`,
+						"Give a length in whole minutes, such as `30m`, `12h` or `7d`, up to `28d`, Discord's longest timeout. `0` holds nobody back.",
 					);
 				}
-				patch = { minAccountAgeDays };
-				note = minAccountAgeDays === 0 ? "Nobody is held back now." : "The minimum account age is saved.";
+				patch = { minAccountAgeMinutes };
+				note = minAccountAgeMinutes === 0 ? "Nobody is held back now." : "The minimum account age is saved.";
 			} else if (interaction.isModalSubmit() && context.action === "save-spike") {
 				const spikeJoins = wholeNumber(
 					interaction.fields.getTextInputValue("joins"),

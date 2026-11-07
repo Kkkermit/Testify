@@ -44,10 +44,24 @@ describe("greetingLines", () => {
 });
 
 describe("greetTheConsole", () => {
-	it("prints the greeting once the dictionary has loaded", () => {
-		greetTheConsole();
+	it("prints the greeting once the dictionary has loaded, with where the code lives", async () => {
+		await greetTheConsole(Promise.resolve("https://github.com/example/bot"));
 
-		expect(log).toHaveBeenCalledTimes(greetingLines(t, PALETTE).length);
-		expect(String(log.mock.calls[0]?.[0])).toContain(t("devConsole.title"));
+		const printed = log.mock.calls.map((call) => String(call[0]));
+		expect(printed).toHaveLength(greetingLines(t, PALETTE, "the repository").length);
+		expect(printed[0]).toContain(t("devConsole.title"));
+		expect(printed.some((line) => line.includes("https://github.com/example/bot"))).toBe(true);
+	});
+
+	/** The greeting is a courtesy, so a site that will not answer, or answers with something odd, still gets the warning. */
+	it("still warns, and prints no link, when the repository cannot be read or is not a web address", async () => {
+		for (const repository of [null, "JaVaScRiPt:alert(1)", "https://x y"]) {
+			log.mockClear();
+			await greetTheConsole(Promise.resolve(repository));
+
+			const printed = log.mock.calls.map((call) => String(call[0]));
+			expect(printed.some((line) => line.includes(t("devConsole.stopTitle")))).toBe(true);
+			expect(printed.some((line) => line.includes(t("devConsole.codeLead")))).toBe(false);
+		}
 	});
 });

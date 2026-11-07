@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, RowActions, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveVerification, useVerification } from "@/features/settings/useVerification";
 import { cn } from "@/lib/cn";
@@ -20,6 +22,7 @@ export function VerificationSection({
 	const { t } = useTranslation();
 	const config = useVerification(guildId);
 	const save = useSaveVerification(guildId);
+	const mayGiveRoles = !useLacks(guildId)("ManageRoles");
 	const [draft, setDraft] = useState("");
 
 	useEffect(() => {
@@ -66,6 +69,7 @@ export function VerificationSection({
 						<select
 							className={SELECT}
 							value={value.roleId ?? ""}
+							disabled={!mayGiveRoles}
 							onChange={(event) => {
 								save.mutate({ roleId: event.target.value === "" ? null : event.target.value });
 							}}
@@ -79,6 +83,7 @@ export function VerificationSection({
 							))}
 						</select>
 					</Field>
+					{!mayGiveRoles && <NeedsPermission permission="ManageRoles" />}
 
 					<Field label={t("settings.verifyPanel")} htmlFor="verify-message">
 						<textarea

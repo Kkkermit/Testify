@@ -14,6 +14,16 @@ jest.mock("@database/repositories/blacklistRepository", () => ({
 		Promise.resolve(id === "100000000000000006" ? { userId: id, reason: "spam", createdAt: new Date() } : null),
 	),
 }));
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn((guildId: string, userId: string) =>
+		Promise.resolve(
+			["100000000000000007", "100000000000000008"].includes(userId)
+				? { guildId, userId, areas: ["warnings", "bans"] }
+				: null,
+		),
+	),
+	markAccessSeen: jest.fn(() => Promise.resolve()),
+}));
 jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	...jest.requireActual<object>("@database/repositories/dashboardSessionRepository"),
 	findSession: jest.fn(),
@@ -27,6 +37,8 @@ const MEMBER = "100000000000000003";
 const OUTSIDER = "100000000000000004";
 const MANAGES_ONLY = "100000000000000005";
 const BLOCKED = "100000000000000006";
+const GRANTEE = "100000000000000007";
+const BANS_ONLY = "100000000000000008";
 
 /** Reachable without signing in, on purpose: each one is named so a new public route is a decision, not an accident. */
 const PUBLIC = new Set([
@@ -46,6 +58,24 @@ const PUBLIC = new Set([
 ]);
 const OWNER_ONLY = ["/api/owner/", "/api/analytics/", "/api/control/"];
 const GUILD_SCOPED = "/api/guilds/:guildId/";
+
+/** What somebody given only Warnings and Bans may reach, so widening what a screen opens is decided here. */
+const GRANTED = new Set([
+	"GET /overview",
+	"GET /channels",
+	"GET /roles",
+	"POST /test-post",
+	"GET /members/search",
+	"GET /warnings",
+	"POST /warnings",
+	"GET /warnings/punishments",
+	"PUT /warnings/punishments",
+	"PATCH /warnings/:userId/:warnId",
+	"DELETE /warnings/:userId/:warnId",
+	"DELETE /warnings/:userId",
+	"GET /bans",
+	"POST /bans/:userId/unban",
+]);
 
 /** Each asks what its Discord command asks on top of Manage Server, so gaining or losing a gate is decided here. */
 const ASKS_MORE = new Set([
@@ -87,25 +117,32 @@ const ASKS_MORE = new Set([
 	"PATCH /warnings/:userId/:warnId",
 	"DELETE /warnings/:userId/:warnId",
 	"DELETE /warnings/:userId",
+	"GET /access",
+	"POST /access",
+	"GET /access/:userId",
+	"PUT /access/:userId",
+	"DELETE /access/:userId",
 ]);
 
 function clientFor(): TestifyClient {
-	const member = (manages: boolean) => ({
-		permissions: { has: (flag: bigint) => manages || flag !== PermissionFlagsBits.ManageGuild },
+	const holding = (allowed: (flag: bigint) => boolean) => ({
+		permissions: { has: (flags: bigint | bigint[]) => [flags].flat().every(allowed) },
 	});
+	const { Administrator, BanMembers, ManageChannels, ManageGuild } = PermissionFlagsBits;
+	const members = new Map([
+		[MANAGER, holding(() => true)],
+		[MEMBER, holding((flag) => flag === ManageChannels)],
+		[MANAGES_ONLY, holding((flag) => flag === ManageGuild)],
+		[GRANTEE, holding((flag) => flag !== ManageGuild && flag !== Administrator)],
+		[BANS_ONLY, holding((flag) => flag === BanMembers)],
+	]);
 	const guild = {
 		id: GUILD,
 		name: "Test Server",
 		members: {
 			fetch: (id: string) => {
-				if (id === MANAGER) return Promise.resolve(member(true));
-				if (id === MEMBER) return Promise.resolve(member(false));
-				if (id === MANAGES_ONLY) {
-					const has = (flags: bigint | bigint[]) =>
-						[flags].flat().every((flag) => flag === PermissionFlagsBits.ManageGuild);
-					return Promise.resolve({ permissions: { has } });
-				}
-				return Promise.reject(new Error("Unknown Member"));
+				const member = members.get(id);
+				return member === undefined ? Promise.reject(new Error("Unknown Member")) : Promise.resolve(member);
 			},
 		},
 	};
@@ -150,7 +187,11 @@ beforeEach(() => {
 	jest
 		.mocked(findSession)
 		.mockImplementation((id: string) =>
-			Promise.resolve([OWNER, MANAGER, MEMBER, OUTSIDER, MANAGES_ONLY, BLOCKED].includes(id) ? sessionOf(id) : null),
+			Promise.resolve(
+				[OWNER, MANAGER, MEMBER, OUTSIDER, MANAGES_ONLY, BLOCKED, GRANTEE, BANS_ONLY].includes(id)
+					? sessionOf(id)
+					: null,
+			),
 		);
 });
 
@@ -186,7 +227,7 @@ describe("walking every route in the dashboard's API", () => {
 		expect(await letThrough(gated, null, { status: 401 })).toEqual([]);
 	});
 
-	it("refuses a member without Manage Server on every server route", async () => {
+	it("refuses a member without Manage Server or access from its admins on every server route", async () => {
 		expect(await letThrough(guildScoped, MEMBER, { status: 403, code: "missing_manage_guild" })).toEqual([]);
 	});
 
@@ -196,6 +237,29 @@ describe("walking every route in the dashboard's API", () => {
 
 	it("refuses a server manager on every one of the owner's routes", async () => {
 		expect(await letThrough(ownerOnly, MANAGER, { status: 404, code: "not_found" })).toEqual([]);
+	});
+
+	/** Somebody given two screens reaches those screens' routes and what every screen reads, and no setting. */
+	it("refuses somebody given access everywhere but the screens they were given", async () => {
+		const app = createApi(clientFor(), API_ENV);
+		const answers = await Promise.all(
+			guildScoped.map(async (route) => ({ route, answer: await ask(app, GRANTEE, route.method, route.path) })),
+		);
+		const reached = answers
+			.filter(({ answer }) => !(answer.status === 403 && answer.code === "not_granted"))
+			.map(({ route }) => `${route.method} ${route.pattern.slice(GUILD_SCOPED.length - 1)}`);
+
+		expect(reached.sort()).toEqual([...GRANTED].sort());
+	});
+
+	/** A grant stands in for Manage Server; Ban Members and the rest are still Discord's to give. */
+	it("still asks each granted route's own permission", async () => {
+		const app = createApi(clientFor(), API_ENV);
+		const warnings = await ask(app, BANS_ONLY, "GET", `/api/guilds/${GUILD}/warnings`);
+		const bans = await ask(app, BANS_ONLY, "GET", `/api/guilds/${GUILD}/bans`);
+
+		expect([warnings.status, warnings.code]).toEqual([403, "missing_permission"]);
+		expect([401, 403]).not.toContain(bans.status);
 	});
 
 	/** A Manage Server manager once kicked, banned, warned and read every warning from the web, as Discord would not. */

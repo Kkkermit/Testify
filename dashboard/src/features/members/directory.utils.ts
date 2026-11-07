@@ -7,6 +7,7 @@ import {
 	type DirectoryKind,
 	type DirectoryPage,
 	type DirectoryRow,
+	type ReaderPermission,
 } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 import { oneOf } from "@/lib/oneOf";
@@ -103,9 +104,10 @@ function allowed(action: MemberAction, page: DirectoryPage): boolean {
 }
 
 /** What a row offers: roles to anybody but the untouchable three, the rest only to somebody the reader outranks. */
-export function rowActions(row: DirectoryRow, page: DirectoryPage): MemberAction[] {
+export function rowActions(row: DirectoryRow, page: DirectoryPage, mayWarn = true): MemberAction[] {
 	return (["give", "take", "timeout", "warn", "kick", "ban"] as const).filter((action) => {
 		if (!allowed(action, page)) return false;
+		if (action === "warn" && !mayWarn) return false;
 		if (action === "give" || action === "take") return !untouchable(row);
 		if (action === "warn" && row.isBot) return false;
 		return row.block === null;
@@ -114,6 +116,25 @@ export function rowActions(row: DirectoryRow, page: DirectoryPage): MemberAction
 
 export function bulkActions(page: DirectoryPage): MemberAction[] {
 	return BULK_ACTIONS.filter((action) => allowed(action, page));
+}
+
+/** Each permission the directory asks, the flag the server answers it with, and the actions it opens. */
+const ACTION_PERMISSIONS = [
+	{ permission: "ManageRoles", can: "roles", actions: ["give", "take"] },
+	{ permission: "ModerateMembers", can: "timeout", actions: ["timeout", "warn"] },
+	{ permission: "KickMembers", can: "kick", actions: ["kick"] },
+	{ permission: "BanMembers", can: "ban", actions: ["ban"] },
+] as const satisfies readonly {
+	permission: ReaderPermission;
+	can: keyof DirectoryPage["can"];
+	actions: readonly MemberAction[];
+}[];
+
+/** The actions the reader may not take anywhere on this page, with the permission each needs. */
+export function withheldActions(
+	page: DirectoryPage,
+): { permission: ReaderPermission; actions: readonly MemberAction[] }[] {
+	return ACTION_PERMISSIONS.filter(({ can }) => !page.can[can]);
 }
 
 /** Whether anything on the page can be acted on several at a time, which is what the tick boxes are for. */

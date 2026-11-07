@@ -36,6 +36,7 @@ export function Sidebar({
 	guild,
 	guilds = [],
 	isOwner,
+	mayGrant = false,
 	expanded = false,
 	onNavigate,
 	onSearch,
@@ -79,7 +80,7 @@ export function Sidebar({
 
 			{onSearch !== undefined && <SearchRow onSearch={onSearch} expanded={expanded} label={label} />}
 
-			{navigationFor({ guild, isOwner }).map((group, index) => {
+			{navigationFor({ guild, isOwner, mayGrant }).map((group, index) => {
 				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
 
 				return (

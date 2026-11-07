@@ -94,6 +94,8 @@ export const keys = {
 		directory: (search: string) => ["guild", id, "directory", search] as const,
 		directoryAll: () => ["guild", id, "directory"] as const,
 		member: (userId: string) => ["guild", id, "member", userId] as const,
+		access: () => ["guild", id, "access"] as const,
+		accessPerson: (userId: string) => ["guild", id, "access", userId] as const,
 		memberRoles: (userId: string) => ["guild", id, "member-roles", userId] as const,
 	}),
 	owner: {

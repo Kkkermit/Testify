@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Avatar, Badge } from "@/components/primitives";
+import { type NavAudience } from "@/config/navigation";
 import { useCommands } from "@/features/commands/useCommands";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { type SearchEntry, type SearchKind, searchEntries, searchFor } from "@/features/search/quickSearch.utils";
@@ -21,11 +22,10 @@ export function QuickSearch({
 	guild,
 	guilds,
 	isOwner,
+	mayGrant = false,
 	onClose,
-}: {
-	guild: { id: string; name: string } | undefined;
+}: NavAudience & {
 	guilds: readonly ManageableGuild[];
-	isOwner: boolean;
 	onClose: () => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -44,10 +44,11 @@ export function QuickSearch({
 				guild,
 				guilds,
 				isOwner,
+				mayGrant,
 				commands: commands.data?.commands ?? [],
 				channels: channels.data ?? [],
 			}),
-		[t, guild, guilds, isOwner, commands.data, channels.data],
+		[t, guild, guilds, isOwner, mayGrant, commands.data, channels.data],
 	);
 	const results = useMemo(() => searchFor(entries, query), [entries, query]);
 	const current = results[Math.min(active, results.length - 1)];

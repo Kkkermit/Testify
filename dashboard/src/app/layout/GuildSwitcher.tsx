@@ -77,7 +77,7 @@ export function GuildSwitcher({
 						{others.map((other) => (
 							<li key={other.id}>
 								<Tooltip label={other.name} placement="right">
-									<Link to={switchedPath(location, other.id)} className={OPTION}>
+									<Link to={switchedPath(location, other)} className={OPTION}>
 										<span aria-hidden="true" className={ICON_SLOT}>
 											<Avatar name={other.name} url={other.iconUrl} size={20} seed={other.id} />
 										</span>

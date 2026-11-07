@@ -10,7 +10,7 @@ import "@/i18n";
 import "@/index.css";
 
 applyStoredPreferences();
-greetTheConsole();
+void greetTheConsole();
 
 const queryClient = createQueryClient();
 

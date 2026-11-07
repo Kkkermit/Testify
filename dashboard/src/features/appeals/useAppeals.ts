@@ -35,12 +35,18 @@ export function useSaveAppealSettings(guildId: string): UseMutationResult<Appeal
 	);
 }
 
-/** Reading appeals asks Ban Members, so a manager without it gets a refusal the page words rather than an empty list. */
-export function useAppealList(guildId: string, status: AppealFilter, page: number): UseQueryResult<Paged<AppealRow>> {
+/** Reading appeals asks Ban Members, so the page asks it first rather than sending a request that will be refused. */
+export function useAppealList(
+	guildId: string,
+	status: AppealFilter,
+	page: number,
+	enabled = true,
+): UseQueryResult<Paged<AppealRow>> {
 	return useQuery({
 		queryKey: keys.guild(guildId).appealList(status, page),
 		queryFn: () => api.get<Paged<AppealRow>>(`/guilds/${guildId}/appeals?status=${status}&page=${String(page)}`),
 		placeholderData: keepPreviousData,
+		enabled,
 	});
 }
 

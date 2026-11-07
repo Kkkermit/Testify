@@ -15,6 +15,7 @@ export function MobileNav({
 	guild,
 	guilds,
 	isOwner,
+	mayGrant = false,
 	open,
 	onOpenChange,
 	onSearch,
@@ -102,6 +103,7 @@ export function MobileNav({
 							guild={guild}
 							guilds={guilds}
 							isOwner={isOwner}
+							mayGrant={mayGrant}
 							expanded
 							onNavigate={close}
 							onSearch={onSearch}

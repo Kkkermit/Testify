@@ -48,6 +48,8 @@ const ModmailPage = page(async () => import("@/features/modmail/ModmailPage"), "
 const InvitesPage = page(async () => import("@/features/invites/InvitesPage"), "InvitesPage");
 const EconomyPage = page(async () => import("@/features/economy/EconomyPage"), "EconomyPage");
 const BackupPage = page(async () => import("@/features/backup/BackupPage"), "BackupPage");
+const AccessPage = page(async () => import("@/features/access/AccessPage"), "AccessPage");
+const AccessPersonPage = page(async () => import("@/features/access/AccessPersonPage"), "AccessPersonPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
 const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
 const InboxPage = page(async () => import("@/features/inbox/InboxPage"), "InboxPage");
@@ -166,6 +168,8 @@ export const routes = [
 									{ path: "/guilds/:guildId/temp-voice", element: lazily(<TempVoicePage />) },
 									{ path: "/guilds/:guildId/economy", element: lazily(<EconomyPage />) },
 									{ path: "/guilds/:guildId/backup", element: lazily(<BackupPage />) },
+									{ path: "/guilds/:guildId/access", element: lazily(<AccessPage />) },
+									{ path: "/guilds/:guildId/access/:userId", element: lazily(<AccessPersonPage />) },
 									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 									{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
 									{ path: "/guilds/:guildId/casino", element: lazily(<CasinoPage />) },

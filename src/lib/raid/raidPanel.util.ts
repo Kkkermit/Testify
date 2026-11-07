@@ -3,16 +3,15 @@ import { channelSelect, roleSelect, row } from "@lib/discord/components.util";
 import { withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { RAID_PANEL_ID } from "@lib/raid/raid.constants";
-import { hasWork } from "@lib/raid/raidActions.util";
+import { ageWords, hasWork } from "@lib/raid/raidActions.util";
 import { type ScreenRow, settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type RaidOverview } from "@testify/shared";
 
-const days = (count: number): string => `${String(count)} ${count === 1 ? "day" : "days"}`;
 const minutes = (count: number): string => (count === 1 ? "minute" : `${String(count)} minutes`);
 
 function warnings(raid: RaidOverview): ScreenRow[] {
 	const rows: ScreenRow[] = [];
-	if (raid.minAccountAgeDays > 0 && !raid.canHold) {
+	if (raid.minAccountAgeMinutes > 0 && !raid.canHold) {
 		rows.push({ label: "⚠️ I cannot hold anybody back", value: "Give me the Moderate Members permission." });
 	}
 	if (raid.alertChannelId !== null && !raid.canSend) {
@@ -53,9 +52,9 @@ export function raidPanel(
 				{
 					label: "Minimum account age",
 					value:
-						raid.minAccountAgeDays === 0
+						raid.minAccountAgeMinutes === 0
 							? "Off — nobody is held back."
-							: `Accounts newer than **${days(raid.minAccountAgeDays)}** are timed out until they are old enough, and told why.`,
+							: `Accounts newer than **${ageWords(raid.minAccountAgeMinutes)}** are timed out until they are old enough, and told why.`,
 					action: { action: "age", label: "Edit" },
 				},
 				{

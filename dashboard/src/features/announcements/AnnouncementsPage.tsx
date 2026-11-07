@@ -30,7 +30,9 @@ import {
 } from "@/features/announcements/announcements.utils";
 import { usePostAnnouncement } from "@/features/announcements/useAnnouncements";
 import { useBotLook } from "@/features/auth/useBot";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { SendTest } from "@/features/test-post/SendTest";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -45,6 +47,7 @@ export function AnnouncementsPage(): React.JSX.Element {
 	const overview = useGuildOverview(guildId);
 	const channels = useChannels(guildId);
 	const post = usePostAnnouncement(guildId);
+	const mayPing = !useLacks(guildId)("MentionEveryone");
 	const [draft, setDraft] = useState<AnnouncementDraft>(EMPTY_DRAFT);
 
 	usePageTitle(t("announcements.title"), overview.data?.name);
@@ -150,11 +153,13 @@ export function AnnouncementsPage(): React.JSX.Element {
 							label={t(MENTION_LABELS[mentions].label)}
 							description={t(MENTION_LABELS[mentions].describes)}
 							checked={draft.mentions === mentions}
+							disabled={mentions !== "none" && !mayPing}
 							onChange={() => {
 								change({ mentions });
 							}}
 						/>
 					))}
+					{!mayPing && <NeedsPermission permission="MentionEveryone" />}
 				</FieldGroup>
 
 				<FieldGroup label={t("common.preview")} hint={t("announcements.previewNote")}>

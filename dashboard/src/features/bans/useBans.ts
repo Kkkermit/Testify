@@ -10,7 +10,11 @@ import { type BanPage, type UnbanBody } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export function useBans(guildId: string, options: { page: number; query: string }): UseQueryResult<BanPage> {
+export function useBans(
+	guildId: string,
+	options: { page: number; query: string },
+	enabled = true,
+): UseQueryResult<BanPage> {
 	const search = new URLSearchParams({
 		page: String(options.page),
 		...(options.query === "" ? {} : { q: options.query }),
@@ -20,6 +24,7 @@ export function useBans(guildId: string, options: { page: number; query: string 
 		queryKey: keys.guild(guildId).banPage(options.page, options.query),
 		queryFn: () => api.get<BanPage>(`/guilds/${guildId}/bans?${search.toString()}`),
 		placeholderData: keepPreviousData,
+		enabled,
 	});
 }
 

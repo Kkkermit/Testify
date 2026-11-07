@@ -65,7 +65,7 @@ export function ShopRolesSection({ guildId }: { guildId: string }): React.JSX.El
 			)}
 
 			{shop.data === undefined ? null : !canManage ? (
-				<p className="text-muted-foreground text-sm">{t("economy.shopRolesNeedManageRoles")}</p>
+				<Warning>{t("economy.shopRolesNeedManageRoles")}</Warning>
 			) : full ? (
 				<Warning>{t("economy.shopRolesFull", { max: SHOP_ROLE_LIMITS.max })}</Warning>
 			) : (

@@ -1,8 +1,9 @@
 import { ChannelType, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
 import { type Context, Hono } from "hono";
-import { type ApiBindings, guildOf, readerOf } from "@api/context";
+import { type ApiBindings, areasOf, guildOf, readerOf } from "@api/context";
 import { holdsPermission, requireReach } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
+import { access } from "@api/routes/access";
 import { announcements } from "@api/routes/announcements";
 import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
@@ -43,6 +44,7 @@ import { verification } from "@api/routes/verification";
 import { warnings } from "@api/routes/warnings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
+import { markAccessSeen } from "@database/repositories/dashboardAccessRepository";
 import {
 	auditPage,
 	type AuditAudience,
@@ -60,6 +62,7 @@ import {
 	changesQuery,
 	insightsQuery,
 	type InsightWindow,
+	READER_PERMISSIONS,
 	type ChannelSummary,
 	type GuildOverview,
 	type GuildInbox,
@@ -117,10 +120,15 @@ guilds.route("/:guildId/starboard", starboard);
 guilds.route("/:guildId/temp-voice", tempVoice);
 guilds.route("/:guildId/setup", setup);
 guilds.route("/:guildId/test-post", testPost);
+guilds.route("/:guildId/access", access);
 
 guilds.get("/:guildId/overview", async (context) => {
 	const guild = guildOf(context);
-	const [features, recent] = await Promise.all([featuresOf(guild), recentAudits(guild.id, 8, audienceOf(context))]);
+	const areas = areasOf(context);
+	const [features, recent] =
+		areas === null ? await Promise.all([featuresOf(guild), recentAudits(guild.id, 8, audienceOf(context))]) : [[], []];
+	// Every screen loads the overview first, so this is when somebody given access was last here.
+	if (areas !== null) await markAccessSeen(guild.id, context.get("session")?.userId ?? "");
 
 	const body: GuildOverview = {
 		id: guild.id,
@@ -131,6 +139,8 @@ guilds.get("/:guildId/overview", async (context) => {
 		roleCount: guild.roles.cache.size,
 		features,
 		missingPermissions: missingPermissions(guild),
+		yourPermissions: READER_PERMISSIONS.filter((name) => holdsPermission(context, PermissionFlagsBits[name])),
+		yourAreas: areas === null ? null : [...areas],
 		recentChanges: recent.map(toAuditSummary),
 	};
 

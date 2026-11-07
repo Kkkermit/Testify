@@ -326,7 +326,7 @@ writing it once. Every piece has a test proven able to fail.
 
 ### `requireGuild` is the security boundary
 
-Five things in it are load-bearing:
+Six things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, shape-checked before it is used to look anything up. A
    handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, **never** a guild id from a body. This is the most likely way one guild's
@@ -339,6 +339,9 @@ Five things in it are load-bearing:
    learns the owner console exists.
 5. **`.catch(() => null)` on the fetch.** An unknown member throws, and an unhandled throw would be a 500 that
    looks like a bug rather than a 403 that looks like a denial.
+6. **Somebody given screens passes only `accessOpens`** in `src/api/middleware/access.ts`, an allowlist of each
+   screen's routes. A new screen that can be given is a name in `ACCESS_AREAS`, a line in `AREA_ROUTES` and its
+   sidebar entry; nothing else opens it to them.
 
 `serveDashboard()` is registered in `startApi` **after** every route, because it is a catch-all — anything
 registered behind it silently never runs.
@@ -465,7 +468,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Warning`                    | Every refusal and hierarchy warning                                                                           |
 | `SettingRows`                | One panel of rows divided by hairlines; `title`, `description`, `action`, and `onSubmit` to make it a form    |
 | `FieldGroup`                 | A row's name over several controls; `named={false}` when the control inside already carries the name          |
-| `RowActions`                 | A panel's buttons, lined up under the controls rather than under the names                                    |
+| `RowActions`                 | A panel's buttons, under the controls; centred when nothing sits above them but the heading                   |
 | `fieldStyles.ts`             | `FIELD` `LABEL` `SELECT` `FIELD_GROUP` `CHECK_ROW` `SCROLL_LIST`                                              |
 
 > [!WARNING]

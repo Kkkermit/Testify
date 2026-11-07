@@ -6,6 +6,7 @@ import { ErrorState } from "@/app/ErrorState";
 import { Badge, Card, CARD_HEADING, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
+import { mayOpen } from "@/config/navigation";
 import { useBirthdays, useUpdateBirthdays } from "@/features/birthdays/useBirthdays";
 import { EditablePost } from "@/features/channels/components/EditablePost";
 import { ROLE_LABELS } from "@/features/channels/place.labels";
@@ -40,6 +41,9 @@ function ChannelBlock({ feature, channelId, channels, guildId }: BlockProps): Re
 	const { t } = useTranslation();
 	const headingId = useId();
 	const { path } = featureLook(feature.key);
+	const areas = useGuildOverview(guildId).data?.yourAreas;
+	const page = path?.(guildId);
+	const reachable = page !== undefined && mayOpen(page, guildId, areas);
 	const name = featureLabel(feature.key, feature.label, t);
 	const roles = feature.places
 		.filter((place) => place.channelId === channelId)
@@ -58,9 +62,9 @@ function ChannelBlock({ feature, channelId, channels, guildId }: BlockProps): Re
 					</Badge>
 					<span className="text-muted-foreground text-sm">{roles}</span>
 					<div className="ml-auto flex flex-wrap items-center gap-3">
-						{path !== undefined && (
+						{reachable && (
 							<Link
-								to={path(guildId)}
+								to={page}
 								aria-label={t("channel.openPageLabel", { feature: name })}
 								className={cn(INLINE_TARGET, "text-accent text-sm underline-offset-4 hover:underline")}
 							>
@@ -70,32 +74,33 @@ function ChannelBlock({ feature, channelId, channels, guildId }: BlockProps): Re
 					</div>
 				</div>
 				<div className="p-6">
-					<BlockBody feature={feature} channels={channels} guildId={guildId} />
+					<BlockBody feature={feature} channels={channels} guildId={guildId} editable={reachable} />
 				</div>
 			</section>
 		</Card>
 	);
 }
 
-function BlockBody({ feature, channels, guildId }: Omit<BlockProps, "channelId">): React.JSX.Element {
+/** A post is edited where it is shown only by somebody who may open its own screen. */
+function BlockBody({
+	feature,
+	channels,
+	guildId,
+	editable,
+}: Omit<BlockProps, "channelId"> & { editable: boolean }): React.JSX.Element {
 	const { t } = useTranslation();
 
-	switch (feature.key) {
-		case "welcome":
-			return <WelcomePost guildId={guildId} />;
-		case "goodbye":
-			return <GoodbyePost guildId={guildId} />;
-		case "birthdays":
-			return <BirthdayPost guildId={guildId} />;
-		default:
-			return (
-				<p className="text-muted-foreground text-sm">
-					{feature.detail === null
-						? t("overview.notSetUp")
-						: describeDetail(feature.detail, t, (id) => channelLabel(channels, id, t))}
-				</p>
-			);
-	}
+	if (editable && feature.key === "welcome") return <WelcomePost guildId={guildId} />;
+	if (editable && feature.key === "goodbye") return <GoodbyePost guildId={guildId} />;
+	if (editable && feature.key === "birthdays") return <BirthdayPost guildId={guildId} />;
+
+	return (
+		<p className="text-muted-foreground text-sm">
+			{feature.detail === null
+				? t("overview.notSetUp")
+				: describeDetail(feature.detail, t, (id) => channelLabel(channels, id, t))}
+		</p>
+	);
 }
 
 function WelcomePost({ guildId }: { guildId: string }): React.JSX.Element {

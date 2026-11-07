@@ -24,6 +24,8 @@ import {
 	Skeleton,
 	Summary,
 } from "@/components/primitives";
+import { NeedsPermission, NotGiven } from "@/features/guild-overview/components/NeedsPermission";
+import { useMayOpen } from "@/features/guild-overview/useLacks";
 import { ActionForm } from "@/features/members/components/ActionForm";
 import {
 	ACTION_LABELS,
@@ -34,6 +36,7 @@ import {
 	JOINED_LABELS,
 	KIND_LABELS,
 	type MemberAction,
+	withheldActions,
 	rowActions,
 	selectable,
 	SKIP_LABELS,
@@ -53,6 +56,7 @@ interface Acting {
 }
 
 export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Element {
+	const mayWarn = useMayOpen(guildId)("warnings");
 	const { t } = useTranslation();
 	const [params, setParams] = useSearchParams();
 	const filters = filtersFrom(params);
@@ -173,6 +177,21 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 					)}
 				</div>
 			</Card>
+
+			{page !== undefined && page.can.timeout && !mayWarn && (
+				<NotGiven action={t(ACTION_LABELS.warn)} screen={t("nav.warnings")} />
+			)}
+			{page !== undefined && withheldActions(page).length > 0 && (
+				<div className="flex flex-col gap-1">
+					{withheldActions(page).map(({ permission, actions }) => (
+						<NeedsPermission
+							key={permission}
+							permission={permission}
+							action={actions.map((action) => t(ACTION_LABELS[action])).join(t("common.listSeparator"))}
+						/>
+					))}
+				</div>
+			)}
 
 			{results !== undefined && (
 				<div aria-live="polite" className="flex flex-col gap-1">
@@ -347,7 +366,7 @@ function MemberRow({
 	onClose: () => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const actions = rowActions(row, page);
+	const actions = rowActions(row, page, useMayOpen(guildId)("warnings"));
 	const shown = row.roleIds.slice(0, 3).flatMap((id) => page.roles.filter((role) => role.id === id));
 	const panel = `member-actions-${row.userId}`;
 

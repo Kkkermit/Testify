@@ -1,29 +1,37 @@
 import { type Guild, type GuildMember, type MessageCreateOptions, PermissionFlagsBits } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
-import { getRaidSettings, saveRaidSettings, type StoredRaidSettings } from "@database/repositories/raidRepository";
+import { getRaidSettings, type RaidSettingsOnDisk, saveRaidSettings } from "@database/repositories/raidRepository";
 import { canPostIn } from "@lib/discord/channels.util";
 import { embed } from "@lib/discord/embeds.util";
-import { discordTime } from "@lib/format/format.util";
+import { discordTime, formatDurationLong } from "@lib/format/format.util";
 import { holdUntil, joinWatch, type JoinWatch, type Spike, type WatchedJoin } from "@lib/raid/raid.util";
-import { accountAgeDays, DEFAULT_RAID, type RaidOverview, type RaidPatch, type RaidSettings } from "@testify/shared";
+import { accountAgeMinutes, DEFAULT_RAID, type RaidOverview, type RaidPatch, type RaidSettings } from "@testify/shared";
 
 /** A server's raid protection: its settings, the hold on a young account, and what staff are told. */
 
-function normaliseRaid(stored: StoredRaidSettings | null): RaidSettings {
+/** A record written before minutes keeps its age in days, which is read here and nowhere else. */
+export function ageOnDisk(stored: RaidSettingsOnDisk | null): number {
+	if (stored?.minAccountAgeMinutes !== undefined) return stored.minAccountAgeMinutes;
+	if (stored?.minAccountAgeDays !== undefined) return stored.minAccountAgeDays * 1_440;
+	return DEFAULT_RAID.minAccountAgeMinutes;
+}
+
+export function normaliseRaid(stored: RaidSettingsOnDisk | null): RaidSettings {
 	return {
 		enabled: stored?.enabled ?? DEFAULT_RAID.enabled,
 		alertChannelId: stored?.alertChannelId ?? null,
 		pingRoleId: stored?.pingRoleId ?? null,
-		minAccountAgeDays: stored?.minAccountAgeDays ?? DEFAULT_RAID.minAccountAgeDays,
+		minAccountAgeMinutes: ageOnDisk(stored),
 		spikeJoins: stored?.spikeJoins ?? DEFAULT_RAID.spikeJoins,
 		spikeMinutes: stored?.spikeMinutes ?? DEFAULT_RAID.spikeMinutes,
 	};
 }
 
 /** Raid protection with neither a minimum age nor an alert channel would be on and do nothing. */
-export function hasWork(settings: Pick<RaidSettings, "minAccountAgeDays" | "alertChannelId">): boolean {
-	return settings.minAccountAgeDays > 0 || settings.alertChannelId !== null;
+export function hasWork(settings: Pick<RaidSettings, "minAccountAgeMinutes" | "alertChannelId">): boolean {
+	return settings.minAccountAgeMinutes > 0 || settings.alertChannelId !== null;
 }
 
 export function overviewOf(guild: Guild, settings: RaidSettings): RaidOverview {
@@ -56,7 +64,7 @@ export async function applyRaidSettings(
 		enabled: patch.enabled ?? current.enabled,
 		alertChannelId: patch.alertChannelId === undefined ? current.alertChannelId : patch.alertChannelId,
 		pingRoleId: patch.pingRoleId === undefined ? current.pingRoleId : patch.pingRoleId,
-		minAccountAgeDays: patch.minAccountAgeDays ?? current.minAccountAgeDays,
+		minAccountAgeMinutes: patch.minAccountAgeMinutes ?? current.minAccountAgeMinutes,
 		spikeJoins: patch.spikeJoins ?? current.spikeJoins,
 		spikeMinutes: patch.spikeMinutes ?? current.spikeMinutes,
 	};
@@ -79,12 +87,15 @@ export async function applyRaidSettings(
 type HoldOutcome =
 	{ held: true; until: number } | { held: false; reason: "permission" | "outranked" | "refused" } | null;
 
-const days = (count: number): string => `${String(count)} ${count === 1 ? "day" : "days"}`;
+/** A length of whole minutes, in words: "12 hours", "1 day, 6 hours", "30 minutes". */
+export function ageWords(minutes: number): string {
+	return minutes < 1 ? "less than a minute" : formatDurationLong(minutes * MINUTE_MS);
+}
 
 /** The note a held member is sent, since a timeout on its own does not say why. */
-function heldNotice(guildName: string, minAccountAgeDays: number, until: number): string {
+function heldNotice(guildName: string, minAccountAgeMinutes: number, until: number): string {
 	return [
-		`**${guildName}** holds back accounts newer than ${days(minAccountAgeDays)}, so you can read there but not talk until ${discordTime(until)} (${discordTime(until, "R")}).`,
+		`**${guildName}** holds back accounts newer than ${ageWords(minAccountAgeMinutes)}, so you can read there but not talk until ${discordTime(until)} (${discordTime(until, "R")}).`,
 		"It lifts on its own, and nothing else is needed. A moderator can lift it sooner.",
 	].join("\n");
 }
@@ -92,12 +103,12 @@ function heldNotice(guildName: string, minAccountAgeDays: number, until: number)
 /** Times out an account younger than the server's minimum until it is old enough; null when nothing applies. */
 export async function holdNewAccount(
 	member: GuildMember,
-	settings: Pick<RaidSettings, "minAccountAgeDays">,
+	settings: Pick<RaidSettings, "minAccountAgeMinutes">,
 	now: number = Date.now(),
 ): Promise<HoldOutcome> {
 	if (member.user.bot) return null;
 
-	const until = holdUntil(member.user.createdTimestamp, settings.minAccountAgeDays, now);
+	const until = holdUntil(member.user.createdTimestamp, settings.minAccountAgeMinutes, now);
 	if (until === null) return null;
 
 	if (member.guild.members.me?.permissions.has(PermissionFlagsBits.ModerateMembers) !== true) {
@@ -105,15 +116,15 @@ export async function holdNewAccount(
 	}
 	if (!member.moderatable) return { held: false, reason: "outranked" };
 
-	const age = accountAgeDays(member.user.createdTimestamp, now);
-	const reason = `Raid protection: the account is ${days(age)} old, and this server asks for ${days(settings.minAccountAgeDays)}.`;
+	const age = accountAgeMinutes(member.user.createdTimestamp, now);
+	const reason = `Raid protection: the account is ${ageWords(age)} old, and this server asks for ${ageWords(settings.minAccountAgeMinutes)}.`;
 	const held = await member.timeout(until - now, reason).then(
 		() => true,
 		() => false,
 	);
 	if (!held) return { held: false, reason: "refused" };
 
-	await member.send(heldNotice(member.guild.name, settings.minAccountAgeDays, until)).catch(() => undefined);
+	await member.send(heldNotice(member.guild.name, settings.minAccountAgeMinutes, until)).catch(() => undefined);
 	return { held: true, until };
 }
 
@@ -125,12 +136,12 @@ const WHY_NOT: Record<Exclude<HoldOutcome, null | { held: true }>["reason"], str
 
 function joinLine(join: WatchedJoin, now: number): string {
 	const mark = join.held === true ? " · **held**" : join.held === false ? " · too new, not held" : "";
-	return `<@${join.userId}> · ${join.username} · account ${days(accountAgeDays(join.createdAt, now))} old${mark}`;
+	return `<@${join.userId}> · ${join.username} · account ${ageWords(accountAgeMinutes(join.createdAt, now))} old${mark}`;
 }
 
 /** One young account, told to staff when no spike is already being reported. */
 function holdPost(member: GuildMember, outcome: Exclude<HoldOutcome, null>, now: number): MessageCreateOptions {
-	const age = days(accountAgeDays(member.user.createdTimestamp, now));
+	const age = ageWords(accountAgeMinutes(member.user.createdTimestamp, now));
 
 	return {
 		embeds: [

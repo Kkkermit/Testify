@@ -7,7 +7,9 @@ import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { RoleMenuForm } from "@/features/role-menus/components/RoleMenuForm";
 import { RoleMenuRow } from "@/features/role-menus/components/RoleMenuRow";
@@ -34,6 +36,7 @@ export function RoleMenusPage(): React.JSX.Element {
 	const update = useUpdateRoleMenu(guildId);
 	const publish = usePublishRoleMenu(guildId);
 	const remove = useRemoveRoleMenu(guildId);
+	const blocked = useLacks(guildId)("ManageRoles");
 	const undo = useUndo();
 	const [editing, setEditing] = useState<string | null>(null);
 	const [made, setMade] = useState(0);
@@ -112,6 +115,7 @@ export function RoleMenusPage(): React.JSX.Element {
 								channels={channels.data ?? []}
 								roles={roleList}
 								busy={busy}
+								readOnly={blocked}
 								onEdit={() => {
 									setEditing(menu.id);
 								}}
@@ -134,7 +138,9 @@ export function RoleMenusPage(): React.JSX.Element {
 				{actionError !== null && <Warning>{actionError}</Warning>}
 			</section>
 
-			{editingMenu === null && full ? (
+			{blocked ? (
+				<NeedsPermission permission="ManageRoles" />
+			) : editingMenu === null && full ? (
 				<Warning>{t("roleMenus.full")}</Warning>
 			) : (
 				<RoleMenuForm

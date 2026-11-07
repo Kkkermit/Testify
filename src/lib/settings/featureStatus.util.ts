@@ -26,6 +26,7 @@ import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
 import { readTreasure } from "@lib/economy/treasureActions.util";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
+import { ageOnDisk } from "@lib/raid/raidActions.util";
 import { readTickets } from "@lib/tickets/ticketActions.util";
 import {
 	CASINO_GAMES,
@@ -152,10 +153,10 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		async read(guild) {
 			const raid = await getRaidSettings(guild.id);
 			const on = raid?.enabled === true;
-			const age = raid?.minAccountAgeDays ?? 0;
+			const age = ageOnDisk(raid);
 			return {
 				enabled: on,
-				detail: on ? (age > 0 ? { kind: "holding", days: age } : { kind: "watching" }) : null,
+				detail: on ? (age > 0 ? { kind: "holding", minutes: age } : { kind: "watching" }) : null,
 				places: at("logs", raid?.alertChannelId),
 			};
 		},

@@ -7,7 +7,9 @@ export interface RaidSettingsRecord {
 	enabled: boolean;
 	alertChannelId: string | null;
 	pingRoleId: string | null;
-	minAccountAgeDays: number;
+	minAccountAgeMinutes: number;
+	/** How the age was kept before minutes; read once by `normaliseRaid` and unset on the record's next save. */
+	minAccountAgeDays?: number;
 	spikeJoins: number;
 	spikeMinutes: number;
 	updatedBy: string | null;
@@ -21,12 +23,14 @@ const raidSettingsSchema = new Schema<RaidSettingsRecord>(
 		enabled: { type: Boolean, default: DEFAULT_RAID.enabled },
 		alertChannelId: { type: String, default: null },
 		pingRoleId: { type: String, default: null },
-		minAccountAgeDays: {
+		minAccountAgeMinutes: {
 			type: Number,
-			default: DEFAULT_RAID.minAccountAgeDays,
+			default: DEFAULT_RAID.minAccountAgeMinutes,
 			min: 0,
-			max: RAID_LIMITS.maxAccountAgeDays,
+			max: RAID_LIMITS.maxAccountAgeMinutes,
 		},
+		// Declared so an update may unset it; strict mode drops an operator on a path the schema does not name.
+		minAccountAgeDays: { type: Number },
 		spikeJoins: { type: Number, default: DEFAULT_RAID.spikeJoins },
 		spikeMinutes: { type: Number, default: DEFAULT_RAID.spikeMinutes },
 		updatedBy: { type: String, default: null },

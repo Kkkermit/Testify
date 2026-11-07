@@ -8,6 +8,7 @@ import {
 	type GuildRoleUses,
 	type GuildWeek,
 	type InsightsReport,
+	READER_PERMISSIONS,
 	type RoleSummary,
 	type ServerSettings,
 	type SetupChecklist,
@@ -27,6 +28,8 @@ export const overview: GuildOverview = {
 		{ key: "welcome", label: "Welcome messages", enabled: false, detail: null },
 	],
 	missingPermissions: [],
+	yourPermissions: [...READER_PERMISSIONS],
+	yourAreas: null,
 	recentChanges: [],
 };
 

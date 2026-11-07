@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { BansPage } from "@/features/bans/BansPage";
 import { expectNoViolations } from "@/test/axe";
 import { banPage } from "@/test/fixtures/moderation";
+import { overview } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -14,6 +15,25 @@ function renderPage(): ReturnType<typeof renderWithProviders> {
 }
 
 describe("the bans page", () => {
+	/** Reading bans asks Ban Members, so a manager without it is told so and no request is made to be refused. */
+	it("says a reader without Ban Members needs it, and asks the API for nothing", async () => {
+		let asked = false;
+		server.use(
+			http.get(`/api/guilds/${GUILD}/overview`, () => HttpResponse.json({ ...overview, yourPermissions: [] })),
+			http.get("/api/guilds/:guildId/bans", () => {
+				asked = true;
+				return HttpResponse.json(banPage);
+			}),
+		);
+		renderPage();
+
+		expect(
+			await screen.findByText("You need the Ban Members permission in this server to use this."),
+		).toBeInTheDocument();
+		expect(screen.queryByLabelText(/Search/)).not.toBeInTheDocument();
+		expect(asked).toBe(false);
+	});
+
 	it("lists everybody banned, with a softban's end", async () => {
 		const { container } = renderPage();
 

@@ -4,14 +4,18 @@ import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { testPost, testPostLimiter } from "@api/routes/testPost";
 import { type TestifyClient } from "@core/client";
+import { findAccess } from "@database/repositories/dashboardAccessRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+}));
 
 const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
 
-function app(inServer = true, delivered = true) {
+function app(inServer = true, delivered = true, given?: string[]) {
 	const closed = new DiscordAPIError(
 		{ code: RESTJSONErrorCodes.CannotSendMessagesToThisUser, message: "Cannot send messages to this user" },
 		RESTJSONErrorCodes.CannotSendMessagesToThisUser,
@@ -24,7 +28,15 @@ function app(inServer = true, delivered = true) {
 		delivered ? Promise.resolve({}) : Promise.reject(closed),
 	);
 	const guild = { id: GUILD, name: "Test Server", memberCount: 10 };
-	const member = { id: OWNER, user: { username: "owner" }, displayName: "Owner", guild, send };
+	const member = {
+		id: OWNER,
+		user: { username: "owner" },
+		displayName: "Owner",
+		guild,
+		send,
+		permissions: { has: () => given === undefined },
+	};
+	if (given !== undefined) jest.mocked(findAccess).mockResolvedValue({ areas: given } as never);
 	Object.assign(guild, {
 		members: {
 			fetch: jest.fn(() => (inServer ? Promise.resolve(member) : Promise.reject(new Error("Unknown Member")))),
@@ -32,7 +44,7 @@ function app(inServer = true, delivered = true) {
 	});
 	const client = {
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
-		isOwner: (id: string) => id === OWNER,
+		isOwner: (id: string) => id === OWNER && given === undefined,
 		logger: { error: jest.fn() },
 	} as unknown as TestifyClient;
 
@@ -66,6 +78,17 @@ describe("the test-post route", () => {
 		expect(send).toHaveBeenCalledTimes(2);
 		expect(send.mock.calls[1]?.[0]).toEqual({ content: "@everyone movie night", allowedMentions: { parse: [] } });
 		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "test.send" }));
+	});
+
+	/** Somebody given Birthdays alone could otherwise draft and receive any screen's post. */
+	it("sends somebody given access only the kinds their screens send", async () => {
+		const { instance, send } = app(true, true, ["birthdays"]);
+
+		const birthday = await post(instance, { kind: "birthday", message: "Happy birthday {user}" });
+		const sticky = await post(instance, { kind: "plain", message: "Read the rules" });
+
+		expect([birthday.status, sticky.status]).toEqual([204, 403]);
+		expect(send).toHaveBeenCalledTimes(2);
 	});
 
 	/** The privacy notice promises a test is recorded by its kind and never by its words. */

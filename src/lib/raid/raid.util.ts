@@ -1,12 +1,13 @@
-import { DAY_MS, MINUTE_MS } from "@config/constants";
+import { MINUTE_MS } from "@config/constants";
+import { parseDuration } from "@lib/format/duration.util";
 import { RAID_LIMITS, type RaidSettings } from "@testify/shared";
 
 /** The rules of raid protection, with the clock passed in: when an account is held, and when joins are a spike. */
 
 /** When a hold on this account would lift, or null when it is old enough or nobody is held back. */
-export function holdUntil(createdAt: number, minAccountAgeDays: number, now: number): number | null {
-	if (minAccountAgeDays <= 0) return null;
-	const until = createdAt + minAccountAgeDays * DAY_MS;
+export function holdUntil(createdAt: number, minAccountAgeMinutes: number, now: number): number | null {
+	if (minAccountAgeMinutes <= 0) return null;
+	const until = createdAt + minAccountAgeMinutes * MINUTE_MS;
 	return until > now ? until : null;
 }
 
@@ -82,6 +83,19 @@ export class JoinWatch {
 }
 
 export const joinWatch = new JoinWatch();
+
+/** A typed length such as `30m`, `12h` or `1d 6h` in whole minutes up to Discord's longest timeout, `0` for none. */
+export function ageFromText(text: string): number | null {
+	const trimmed = text.trim();
+	if (trimmed === "0") return 0;
+
+	// Only lengths and nothing between them; a bare number would be read as seconds, which nobody here means.
+	const ms = /^(?:\d+(?:\.\d+)?\s*[a-z]+\s*)+$/i.test(trimmed) ? parseDuration(trimmed) : null;
+	if (ms === null || ms <= 0 || ms % MINUTE_MS !== 0) return null;
+
+	const minutes = ms / MINUTE_MS;
+	return minutes <= RAID_LIMITS.maxAccountAgeMinutes ? minutes : null;
+}
 
 /** A typed whole number inside the bounds, or null for anything else. */
 export function wholeNumber(text: string, min: number, max: number): number | null {
