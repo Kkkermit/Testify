@@ -9,8 +9,10 @@ import { Avatar, Button, DataList, PageHeader, SectionHeading, Skeleton } from "
 import { areaLabel, sameAreas } from "@/features/access/access.utils";
 import { AreaPicker } from "@/features/access/components/AreaPicker";
 import { useAccessPerson, useChangeAccess, useRemoveAccess } from "@/features/access/useAccess";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { mayGrant } from "@/features/guild-overview/useLacks";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { dateAndTime } from "@/lib/datetime";
 
@@ -18,11 +20,24 @@ export function AccessPersonPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "", userId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
-	const person = useAccessPerson(guildId, userId);
+	const allowed = mayGrant(overview.data);
+	const person = useAccessPerson(guildId, userId, allowed);
 
 	usePageTitle(person.data?.person.username ?? t("access.title"), overview.data?.name);
 
 	const back = { to: `/guilds/${guildId}/access`, label: t("access.back") };
+	if (!allowed) {
+		return (
+			<>
+				<PageHeader server={overview.data} title={t("access.title")} back={back} />
+				{overview.data === undefined ? (
+					<Skeleton className="h-96 w-full" />
+				) : (
+					<NeedsPermission permission="Administrator" />
+				)}
+			</>
+		);
+	}
 	if (person.isError) {
 		return (
 			<>

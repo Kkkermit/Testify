@@ -2531,7 +2531,7 @@ manager without Kick Members stays where they are. `useRecheckOnRefusal` is the 
 
 Manage Server, Administrator, the server's owner and the bot's owners see every screen. The owner, the admins and the
 bot's owners give anybody else some of them by user ID on **Dashboard access** (`/guilds/:id/access`), where they also
-change them, take them away and see what each person did. Six things about it are load-bearing:
+change them, take them away and see what each person did. Seven things about it are load-bearing:
 
 - **A grant stands in for Manage Server on its screens and nothing more.** The routes each screen calls are
   `AREA_ROUTES` in `src/api/middleware/access.ts`, plus `SHARED` (the overview, the channel and role lists, and Send me
@@ -2541,15 +2541,26 @@ change them, take them away and see what each person did. Six things about it ar
 - **Only Administrator hands screens out.** Every `/access` route asks it, which the owner holds in discord.js and
   `holdsPermission` grants the bot's owners; Manage Server sees every screen but cannot widen anybody's reach, and
   `ASKS_MORE` lists all five routes. Nobody who already sees everything, no bot and nobody outside the server can be
-  given access, and a server holds at most `ACCESS_LIMITS.maxPeople` (50).
+  given access, and a server holds at most `ACCESS_LIMITS.maxPeople` (50). The panel's pages draw `NeedsPermission`
+  for anybody else and ask the API nothing (`mayGrant`), which `accessGate.test.tsx` pins.
 - **`ACCESS_AREAS` in `@testify/shared` names a screen by its path**, and the dashboard's `mayOpen` in
   `config/navigation.ts` reads the same names off the sidebar, so the sidebar, quick search, the switcher and
   `RequireGuild` agree with the API. `access.utils.test.ts` fails if the picker and the list drift, which is what
   caught Commands living in the sidebar's top group. A screen that is not theirs draws `NotGranted` and asks the API
   nothing.
-- **A part that needs another screen says so.** A member's warnings and the directory's Warn need Warnings; a
-  channel's welcome, goodbye and birthday posts are edited there only with those screens; `NotGiven` names the screen,
-  as `NeedsPermission` names a permission.
+- **A part that needs another screen says so, and the server leaves it out too.** A member's warnings and the
+  directory's Warn need Warnings; a channel's welcome, goodbye and birthday posts are edited there only with those
+  screens; `NotGiven` names the screen, as `NeedsPermission` names a permission. A page hiding a part is a courtesy, so
+  the routes ask `opensArea` as well: a member's warnings, the directory's warning counts and its warned filter are
+  withheld from a grantee without Warnings, whatever Discord lets them see.
+- **A stored grant is data, never trusted.** `requireGuild` drops any screen `isAccessArea` does not know before it
+  judges a request, `accessOpens` reads `AREA_ROUTES` by own property only, so a hand-edited `constructor` or
+  `__proto__` opens nothing and crashes nothing, and `changeAccess` runs the schema's validators, which an update
+  otherwise skips. `tests/api/accessPentest.test.ts` attacks all of it as raw HTTP to the real server: every caller on
+  every panel route, 27 spellings of its address under four methods, rewrite and override headers, hostile bodies and
+  path ids, another server's admin, CSRF, a grant changed mid-session and a stored screen nobody knows. The router and
+  the gate read the same decoded `context.req.path`, which is what keeps a spelling from judging as one route and
+  running as another. Each of its twelve defences was removed in turn to watch it fail.
 - **The record is `dashboardaccess`**, one per person per server: the screens, who gave them and when, and when the
   person last opened the overview, at most once every ten minutes (`markAccessSeen`). Leaving the server deletes it
   (`guildMemberRemove`), so does `purgeGuild`, and Delete my data deletes theirs and takes their name off the ones they

@@ -58,7 +58,7 @@ export function accessOpens(areas: readonly AccessArea[], method: string, path: 
 	if (at === -1) return false;
 
 	const rest = path.slice(at + `/guilds/${guildId}`.length);
-	return [...SHARED, ...areas.flatMap((area) => AREA_ROUTES[area])].some(
-		(route) => (route.methods ?? [method]).includes(method) && route.path.test(rest),
-	);
+	// A stored area is read as data, so one the map does not own — `constructor`, say — opens nothing.
+	const given = areas.flatMap((area) => (Object.hasOwn(AREA_ROUTES, area) ? AREA_ROUTES[area] : []));
+	return [...SHARED, ...given].some((route) => (route.methods ?? [method]).includes(method) && route.path.test(rest));
 }

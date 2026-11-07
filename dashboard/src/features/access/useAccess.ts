@@ -15,17 +15,20 @@ import {
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export function useAccessList(guildId: string): UseQueryResult<AccessList> {
+/** Asked only once the overview says the reader may hand screens out, so nobody else's browser asks at all. */
+export function useAccessList(guildId: string, enabled: boolean): UseQueryResult<AccessList> {
 	return useQuery({
 		queryKey: keys.guild(guildId).access(),
 		queryFn: () => api.get<AccessList>(`/guilds/${guildId}/access`),
+		enabled,
 	});
 }
 
-export function useAccessPerson(guildId: string, userId: string): UseQueryResult<AccessActivity> {
+export function useAccessPerson(guildId: string, userId: string, enabled: boolean): UseQueryResult<AccessActivity> {
 	return useQuery({
 		queryKey: keys.guild(guildId).accessPerson(userId),
 		queryFn: () => api.get<AccessActivity>(`/guilds/${guildId}/access/${userId}`),
+		enabled,
 	});
 }
 

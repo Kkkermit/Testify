@@ -48,7 +48,8 @@ export async function addAccess(
 }
 
 export async function changeAccess(guildId: string, userId: string, areas: AccessArea[]): Promise<StoredAccess | null> {
-	return DashboardAccess.findOneAndUpdate({ guildId, userId }, { $set: { areas } }, { new: true })
+	// An update skips the schema's list of screens unless told to run it, and the list is what a grant may hold.
+	return DashboardAccess.findOneAndUpdate({ guildId, userId }, { $set: { areas } }, { new: true, runValidators: true })
 		.select(FIELDS)
 		.lean<StoredAccess>()
 		.exec();

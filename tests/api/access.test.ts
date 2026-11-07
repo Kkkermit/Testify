@@ -26,6 +26,8 @@ describe("accessOpens", () => {
 			"a read-only screen written to": [["changes"], "POST", at("/changes"), false],
 			"another server's path": [["bans"], "GET", "/api/guilds/900000000000000002/bans", false],
 			"nothing granted": [[], "GET", at("/bans"), false],
+			"a stored name the map does not own": [["constructor", "toString", "__proto__"], "GET", at("/bans"), false],
+			"a stored name beside a real one": [["hasOwnProperty", "bans"], "GET", at("/bans"), true],
 		};
 
 		const judged = Object.fromEntries(

@@ -46,6 +46,12 @@ export function areasOf(context: Context<ApiBindings>): readonly AccessArea[] | 
 	return context.get("areas") ?? null;
 }
 
+/** Whether the reader may see a part that belongs to this screen, wherever the part is drawn. */
+export function opensArea(context: Context<ApiBindings>, area: AccessArea): boolean {
+	const areas = areasOf(context);
+	return areas === null || areas.includes(area);
+}
+
 export function actorOf(context: Context<ApiBindings>): { id: string; name: string } {
 	const session = context.get("session");
 	return { id: session?.userId ?? "", name: session?.username ?? "a server manager" };

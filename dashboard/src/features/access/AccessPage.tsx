@@ -22,7 +22,9 @@ import {
 import { refusalKey } from "@/features/access/access.utils";
 import { AreaPicker } from "@/features/access/components/AreaPicker";
 import { useAccessList, useGrantAccess } from "@/features/access/useAccess";
+import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { mayGrant } from "@/features/guild-overview/useLacks";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { dateAndTime, shortDate, since } from "@/lib/datetime";
 import { sanitiseInput } from "@/lib/sanitise";
@@ -33,7 +35,8 @@ export function AccessPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const overview = useGuildOverview(guildId);
-	const list = useAccessList(guildId);
+	const allowed = mayGrant(overview.data);
+	const list = useAccessList(guildId, allowed);
 	const grant = useGrantAccess(guildId);
 	const [typed, setTyped] = useState("");
 	const [areas, setAreas] = useState<AccessArea[]>([]);
@@ -45,6 +48,19 @@ export function AccessPage(): React.JSX.Element {
 	const userId = idFromQuery(typed);
 	const full = (list.data?.people.length ?? 0) >= ACCESS_LIMITS.maxPeople;
 	const known = refusalKey(grant.error);
+
+	if (!allowed) {
+		return (
+			<>
+				<PageHeader server={overview.data} title={t("access.title")} subtitle={t("access.subtitle")} />
+				{overview.data === undefined ? (
+					<Skeleton className="h-40 w-full" />
+				) : (
+					<NeedsPermission permission="Administrator" />
+				)}
+			</>
+		);
+	}
 
 	return (
 		<>

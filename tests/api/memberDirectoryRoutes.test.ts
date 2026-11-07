@@ -4,12 +4,16 @@ import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { members } from "@api/routes/members";
 import { type TestifyClient } from "@core/client";
+import { findAccess } from "@database/repositories/dashboardAccessRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { warningCounts } from "@database/repositories/moderationRepository";
 import { recordCase } from "@lib/moderation/caseActions.util";
 import { type BulkResult, DIRECTORY_LIMITS, type DirectoryPage } from "@testify/shared";
 
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
+jest.mock("@database/repositories/dashboardAccessRepository", () => ({
+	findAccess: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/moderationRepository", () => ({
 	warningCounts: jest.fn(() => Promise.resolve(new Map())),
 }));
@@ -204,6 +208,31 @@ describe("GET /members", () => {
 		expect(plain.rows.every((row) => row.warnings === null)).toBe(true);
 		expect(plain.can).toEqual({ roles: false, timeout: false, warn: false, kick: false, ban: false });
 		expect((await ask("GET", "?warned=1", undefined, { holds })).status).toBe(403);
+	});
+
+	/** Warnings are the Warnings screen's, so access to Members alone shows none of them, whatever Discord allows. */
+	it("shows a grantee warnings only when the Warnings screen is part of their access", async () => {
+		jest.mocked(warningCounts).mockResolvedValue(new Map([[LOW[2]!, 3]]));
+		const { ManageGuild, Administrator } = PermissionFlagsBits;
+		const holds = Object.values(PermissionFlagsBits).filter((flag) => flag !== ManageGuild && flag !== Administrator);
+		const given = (areas: string[]) =>
+			jest.mocked(findAccess).mockResolvedValue({ guildId: GUILD, userId: ACTOR, areas } as never);
+
+		given(["members"]);
+		const members = (await (await ask("GET", "", undefined, { holds })).json()) as DirectoryPage;
+		const filtered = await ask("GET", "?warned=1", undefined, { holds });
+		given(["members", "warnings"]);
+		const both = (await (await ask("GET", "?warned=1", undefined, { holds })).json()) as DirectoryPage;
+
+		expect(members.rows.every((row) => row.warnings === null)).toBe(true);
+		expect(members.can).toMatchObject({ warn: false, kick: true, ban: true });
+		expect([filtered.status, ((await filtered.json()) as { error: { code: string } }).error.code]).toEqual([
+			403,
+			"not_granted",
+		]);
+		expect(both.rows.map((row) => [row.userId, row.warnings])).toEqual([[LOW[2], 3]]);
+		expect(both.can.warn).toBe(true);
+		jest.mocked(warningCounts).mockResolvedValue(new Map());
 	});
 });
 
