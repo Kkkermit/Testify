@@ -114,7 +114,9 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 		if (error instanceof UpstreamProblem) {
 			client.logger.warn(
 				{ service: error.service, status: error.upstreamStatus, path: context.req.path, method: context.req.method },
-				`[API] ${error.service} did not answer a request. The page offers a retry; nothing in the bot failed.`,
+				error.advice === null
+					? `[API] ${error.service} did not answer a request. The page offers a retry; nothing in the bot failed.`
+					: `[API] ${error.service} refused a request. ${error.advice}`,
 			);
 		} else if (problem.status >= 500) {
 			client.logger.error(

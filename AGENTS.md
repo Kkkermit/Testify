@@ -3680,8 +3680,9 @@ listener. Five things about it are load-bearing:
   (`release/v<version>`, then `v<version>` or the bare version), and the default branch only without one. A file
   is served only if the tree lists it, and a private repository is refused outright, because a host's token could
   otherwise read it out to anybody. Without `SITE_GITHUB_TOKEN` that is GitHub's 60 requests an hour per address,
-  which the cache keeps clear of. The token is never sent anywhere but `api.github.com`, and `findLeak` treats it
-  as a secret.
+  and on a shared host other customers spend the same 60, so the page can be refused before it asks once: the 502's
+  log line then names the token (`gitHubAdvice`), as it does when GitHub refuses a token that has expired. The token
+  is never sent anywhere but `api.github.com`, and `findLeak` treats it as a secret.
 - **Traffic needs the token and is kept, the numbers do not.** GitHub holds 14 days of views and clones and wants
   Administration read for them; `githubtraffic` keeps a row per day for `SITE_LIMITS.trafficDaysKept` (365) under a
   TTL, written whenever the page reads them, so the chart reaches past a fortnight. Without a token, or with one
