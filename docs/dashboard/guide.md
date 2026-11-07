@@ -468,7 +468,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Warning`                    | Every refusal and hierarchy warning                                                                           |
 | `SettingRows`                | One panel of rows divided by hairlines; `title`, `description`, `action`, and `onSubmit` to make it a form    |
 | `FieldGroup`                 | A row's name over several controls; `named={false}` when the control inside already carries the name          |
-| `RowActions`                 | A panel's buttons, lined up under the controls rather than under the names                                    |
+| `RowActions`                 | A panel's buttons, under the controls; centred when nothing sits above them but the heading                   |
 | `fieldStyles.ts`             | `FIELD` `LABEL` `SELECT` `FIELD_GROUP` `CHECK_ROW` `SCROLL_LIST`                                              |
 
 > [!WARNING]
