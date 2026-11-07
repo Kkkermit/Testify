@@ -291,8 +291,10 @@
 		--color-ring: light-dark(var(--custom-primary-light, #8a2a6b), var(--custom-accent-dark, #e08ac4));
 	}
 
+	/* A name with no spaces in it wraps at the edge of its box rather than pushing the page sideways. */
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
+		overflow-wrap: break-word;
 	}
 
 	/* Japanese has no spaces to wrap at, so lines break between phrases and never start with ー or a small kana. */

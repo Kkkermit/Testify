@@ -145,6 +145,10 @@ class PrefixOptions extends OptionReader implements CommandInputOptions {
 		return this.state.values.get(name);
 	}
 
+	protected declaration(name: string): CommandOption | undefined {
+		return this.state.declared.find((option) => option.name === name);
+	}
+
 	getSubcommand(required?: boolean): string {
 		const { subcommand } = this.state;
 		if (subcommand === null && required !== false) throw new UserFacingError("That command needs a subcommand.");
@@ -154,7 +158,7 @@ class PrefixOptions extends OptionReader implements CommandInputOptions {
 	getString(name: string, required: true): string;
 	getString(name: string, required?: boolean): string | null;
 	getString(name: string, required?: boolean): string | null {
-		return this.require(name, this.raw(name) ?? null, required);
+		return this.require(name, this.text(name), required);
 	}
 
 	getInteger(name: string, required: true): number;

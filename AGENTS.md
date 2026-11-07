@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 53 / 52                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,190 across 564 suites           |
+| Tests                | 4,200 across 565 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -525,6 +525,12 @@ Rules:
 8. Run `npm run docs:commands` afterwards, and `npm run i18n:commands`, then add the new strings to each file in
    `assets/locales/commands/`. The suite names every one missing.
 
+**A bounded option is held on every surface.** Discord refuses a slash command's value outside its `min`, `max`,
+`choices` or `maxLength`, but the prefix and the dashboard's runner read text, so `OptionReader` refuses it there
+instead, and a choice typed in any case reads as the declared value. Nothing held the prefix to `min: 1` once, so
+`t?lottery enter -1000` cost minus a thousand fees and paid the buyer. `prefix.test.ts` walks every bounded option
+in the registry, just past its bound and on it, so a new command is covered with no edit.
+
 **`private: true` is how a command answers only the person who ran it**, set on the command or on one
 subcommand and applied by `dispatch` — never a hand-written `MessageFlags.Ephemeral`. On a slash command every
 reply, deferral and follow-up goes out ephemeral. A message cannot be private, so a prefix run instead deletes its
@@ -739,7 +745,8 @@ Rules:
 Rules:
 
 1. **Money is atomic.** `$inc`, `findOneAndUpdate`, and `debitWallet()` returning a boolean you must check.
-   Never read-modify-`save()` a balance — the original could duplicate money that way.
+   Never read-modify-`save()` a balance — the original could duplicate money that way. A debit below zero would be
+   a credit, so `debitWallet` and the bank's debit throw on a negative or non-finite amount before the query.
 2. **Debit before you deliver.** Every purchase branch takes payment first and only writes the goods on success,
    so a failed payment can never hand out the item.
 3. **`getOrCreate*` never returns null.** Use it when absence should mean "start them off"; use `find*` when
@@ -1067,6 +1074,9 @@ only — warnings never fail the build.**
   nothing. A loop that runs in order says why.
 - **Every repeating timer goes through `TimerRegistry`** on the client, so shutdown can clear it, a job cannot
   overlap its own previous run, and a failure is reported under `JOB_<NAME>`.
+- **A regex that reads what people type runs in one pass.** The link filter reads every message the bot sees, in
+  every server, and its old pattern took five seconds over one long run of `a-`. `containsLink` needs one letter
+  before the domain rather than a run of them, and `parseDuration` refuses anything longer than a real length.
 
 ### Comments
 
@@ -2433,7 +2443,9 @@ Rules that are easy to break and silent when broken:
   **path and the query are checked separately**, because `RequireAuth` carries `pathname + search` through the
   sign-in and a single pattern that refused `?` made signing in impossible from every tabbed page. A `//` inside
   a query _value_ is data — the browser still resolves the path to this origin — and the one place a value
-  becomes a redirect target is `returnTo` itself, which is parsed by the same schema on the way through.
+  becomes a redirect target is `returnTo` itself, which is parsed by the same schema on the way through. The query
+  allows `*`, which `URLSearchParams` never encodes, and the sign-in page checks the address with the same schema
+  and falls back to `/guilds`, because a character typed raw into the address bar ended the sign-in on a 400.
 - **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
   `http://localhost` install, which is the most common self-hosting trip-up there is.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
@@ -2786,6 +2798,10 @@ the same way and neither can be reasoned around:
   screen after signing in. `[&>li]:min-w-0` on the `<ul>` is the fix, and `FeatureGrid` already had it.
   Measured in a real browser at 320px and 390px across all seventeen routes, because nothing in jsdom can see
   a layout.
+- **A name with no spaces wraps rather than pushing the page sideways.** `body` has `overflow-wrap: break-word`,
+  which wraps a long word without changing how anything is sized, so a flex item holding a name still needs
+  `min-w-0` with `wrap-anywhere` or `truncate`. A 32-character bot name, which Discord allows, pushed the phone
+  header's menu and account buttons off every page until `MobileNav`, `PageHeader` and the site header had both.
 
 **The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
 with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
@@ -3765,6 +3781,11 @@ file or a `sourceMappingURL` comment (proved both ways), and `serveDashboard` re
 judged on the resolved file like the owner chunk. The repository is public, so this is tidiness rather than
 secrecy — nothing the browser holds is secret, and the boundary stays server-side in `requireGuild`, `requireOwner`
 and `reach.ts`.
+
+**Zod is told not to probe for `eval`.** The first schema it builds tries `new Function`, which `script-src` refuses
+with a violation on every page load. `src/lib/withoutEval.ts` sets `jitless`, and `manualChunks` puts it in the vendor
+chunk beside Zod, because the shared schemas are built in a chunk that loads before the entry's own body runs;
+`verify:bundle` fails if the setting leaves that chunk, and was proved to.
 
 **The console greets, then warns.** `greetTheConsole` in `lib/consoleGreeting.ts` prints a welcome naming the bot, a
 pointer to `/bug-report`, and a self-XSS warning: code pasted into DevTools runs with the reader's session and can

@@ -75,6 +75,20 @@ export function sourceMapProblem(files: Record<string, string>): string | null {
 	return pointer === undefined ? null : `${pointer[0]} points the browser at a source map.`;
 }
 
+/** Zod's check for whether `eval` works, which the page's CSP refuses with a violation every time it runs. */
+const EVAL_PROBE = ".jitless||";
+const TOLD_JITLESS = /jitless\s*:\s*(?:!0|true)\b/;
+
+export function evalProbeProblem(files: Record<string, string>): string | null {
+	const chunk = Object.entries(files).find(([name, code]) => name.endsWith(".js") && code.includes(EVAL_PROBE));
+	if (chunk === undefined) return null;
+
+	// The chunk that holds zod loads before any that builds a schema, so the setting has to be in it.
+	return TOLD_JITLESS.test(chunk[1])
+		? null
+		: `${chunk[0]} lets zod probe for eval, which the CSP refuses on every load.`;
+}
+
 function assetsMatching(extension: string): string {
 	return readdirSync(ASSETS)
 		.filter((file) => file.endsWith(extension))
@@ -118,6 +132,20 @@ function main(): void {
 		process.exit(1);
 	}
 
+	const probe = evalProbeProblem(
+		Object.fromEntries(
+			readdirSync(ASSETS)
+				.filter((file) => file.endsWith(".js"))
+				.map((file) => [file, readFileSync(join(ASSETS, file), "utf8")]),
+		),
+	);
+
+	if (probe !== null) {
+		console.error(probe);
+		console.error("Check that dashboard/src/lib/withoutEval.ts is put in the vendor chunk by manualChunks.");
+		process.exit(1);
+	}
+
 	const maps = sourceMapProblem(
 		Object.fromEntries(
 			filesUnder(DIST).map((file) => [file, /\.(?:js|css)$/.test(file) ? readFileSync(join(DIST, file), "utf8") : ""]),
@@ -144,6 +172,7 @@ function main(): void {
 	console.log(`All ${String(publicFiles.length)} files from dashboard/public are in the build.`);
 	console.log("The owner console is its own chunk, loaded only on demand.");
 	console.log("No source maps: the browser gets only the minified bundle.");
+	console.log("Zod is told not to probe for eval, so the CSP raises nothing on load.");
 }
 
 if (require.main === module) main();

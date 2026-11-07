@@ -73,7 +73,7 @@ export function MobileNav({
 					<span className="sr-only">{t("nav.menu")}</span>
 				</button>
 				<BotMark src={bot?.avatarUrl} name={bot?.name ?? null} size={20} />
-				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
+				<span className="font-display min-w-0 truncate text-[0.9375rem] leading-tight font-bold tracking-tight">
 					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>
 				<button

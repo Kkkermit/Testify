@@ -61,13 +61,21 @@ export async function adjustBank(guildId: string, userId: string, delta: number)
 }
 
 /** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
+/** A negative debit would be a credit, so one is a bug however it arrived, and nothing moves. */
+function refuseNegative(amount: number): void {
+	if (!Number.isFinite(amount) || amount < 0)
+		throw new Error(`Refused to debit ${String(amount)}: a debit is never negative.`);
+}
+
 export async function debitWallet(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, wallet: { $gte: amount } }, { $inc: { wallet: -amount } }, LEAN)
 		.lean<EconomyAccount>()
 		.exec();
 }
 
 async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, bank: { $gte: amount } }, { $inc: { bank: -amount } }, LEAN)
 		.lean<EconomyAccount>()
 		.exec();

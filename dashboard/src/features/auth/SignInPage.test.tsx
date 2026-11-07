@@ -35,6 +35,28 @@ describe("the sign-in page", () => {
 		expect(assign).toHaveBeenCalledWith("/api/auth/login?returnTo=%2Fguilds%2F1");
 	});
 
+	/** A search typed into the address bar keeps `'` raw, and carrying it on made the server end the sign-in on a 400. */
+	it("signs in to the server list when the page asked for an address the server would refuse", async () => {
+		const user = userEvent.setup();
+		const route = `/sign-in?returnTo=${encodeURIComponent("/guilds/1/members?q=o'brien")}`;
+		renderWithProviders(<SignInPage />, { path: "/sign-in", route });
+
+		await user.click(await screen.findByRole("button", { name: /sign in with discord/i }));
+
+		expect(assign).toHaveBeenCalledWith("/api/auth/login?returnTo=%2Fguilds");
+	});
+
+	/** `URLSearchParams` never encodes `*`, so a member search for `a*` came back from sign-in as a refusal. */
+	it("keeps a search with a star in it through the sign-in", async () => {
+		const user = userEvent.setup();
+		const search = `/guilds/1/members?${new URLSearchParams({ q: "a*" }).toString()}`;
+		renderWithProviders(<SignInPage />, { path: "/sign-in", route: `/sign-in?returnTo=${encodeURIComponent(search)}` });
+
+		await user.click(await screen.findByRole("button", { name: /sign in with discord/i }));
+
+		expect(assign).toHaveBeenCalledWith(`/api/auth/login?returnTo=${encodeURIComponent(search)}`);
+	});
+
 	/** Pressing Cancel on Discord's consent screen is not an error, and must not look like one. */
 	it("says plainly when the Discord sign-in was cancelled", async () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in", route: "/sign-in?denied=1" });
