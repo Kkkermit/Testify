@@ -84,6 +84,31 @@ describe("serveDashboard", () => {
 		return app;
 	}
 
+	/** Discord reads the page a pasted link points at and runs none of its script, so the page carries the card. */
+	it("fills a page with its link preview, and serves it plain when the preview cannot be read", async () => {
+		writeFileSync(join(root, "index.html"), "<!doctype html><head><title>Dashboard</title></head><div id=root></div>");
+		const filled = new Hono<ApiBindings>();
+		serveDashboard(filled, root, (path) =>
+			Promise.resolve({
+				name: "Helper",
+				description: "Hi.",
+				imageUrl: null,
+				wide: false,
+				url: `https://bot.example${path}`,
+			}),
+		);
+		const failing = new Hono<ApiBindings>();
+		serveDashboard(failing, root, () => Promise.reject(new Error("Discord is down")));
+
+		const page = await (await filled.request("/docs")).text();
+		const plain = await (await failing.request("/")).text();
+
+		expect(page).toContain('<meta property="og:url" content="https://bot.example/docs" />');
+		expect(page).toContain("<title>Helper</title>");
+		expect(plain).toContain("<title>Dashboard</title>");
+		expect(plain).not.toContain("og:title");
+	});
+
 	/** An admin panel has nothing worth indexing, and a crawler that finds one page finds the sign-in gate. */
 	it("serves robots.txt as readable text rather than a download", async () => {
 		const response = await appFor().request("/robots.txt");

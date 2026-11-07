@@ -25,13 +25,13 @@ import { screens } from "@api/routes/screens";
 import { siteRoutes } from "@api/routes/site";
 import { status } from "@api/routes/status";
 import { supportArticles, supportQuestions } from "@api/routes/support";
-import { serveDashboard } from "@api/static";
+import { dashboardRoot, serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { botVersion, siteUrl } from "@lib/bot";
-import { GitHubReader } from "@lib/site";
+import { GitHubReader, readLinkPreview } from "@lib/site";
 import { APPEAL_LIMITS } from "@testify/shared";
 
 /** Config patches, not uploads. Anything larger than this is a mistake or an attempt. */
@@ -208,7 +208,7 @@ export function startApi(client: TestifyClient, env: Env, options: ListenOptions
 	const app = createApi(client, env);
 
 	// After the API and nowhere else: it is a catch-all, so anything registered behind it never runs.
-	serveDashboard(app);
+	serveDashboard(app, dashboardRoot(), (path) => readLinkPreview(client, env, path));
 
 	let listening: (port: number) => void = () => undefined;
 	let failed: (error: Error) => void = () => undefined;

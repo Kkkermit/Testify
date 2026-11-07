@@ -103,4 +103,10 @@ export const strings = {
 		wrongCode: "That code is not correct. Try again.",
 		success: "You have been verified.",
 	},
+
+	site: {
+		/** The landing page's own sentence, which a pasted link to the website unfurls with. */
+		preview: (bot: string): string =>
+			`${bot} brings moderation, levels, music, tickets and a casino to Discord. Type a command, or set the same things up in your browser.`,
+	},
 } as const;
