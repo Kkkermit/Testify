@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { actorOf, type ApiBindings, areasOf, guildOf, readerOf } from "@api/context";
-import { forbidden, tooManyRequests } from "@api/errors";
+import { featureOff, forbidden, tooManyRequests } from "@api/errors";
 import { RateLimiter } from "@api/middleware/rateLimit";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { MINUTE_MS } from "@config/constants";
 import { strings } from "@config/strings";
 import { sendTestPost } from "@lib/settings";
-import { type AccessArea, TEST_POST_LIMITS, type TestPost, testPostBody } from "@testify/shared";
+import { type AccessArea, screenIsOff, TEST_POST_LIMITS, type TestPost, testPostBody } from "@testify/shared";
 
 export const testPost = new Hono<ApiBindings>();
 
@@ -31,6 +31,11 @@ testPost.post("/", async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, testPostBody);
 	const areas = areasOf(context);
+	// A kind of post only a switched-off feature makes is one the bot no longer sends.
+	const off = context.get("client").featuresOff;
+	if (TEST_POST_AREAS[body.kind].every((area) => screenIsOff(off, `/guilds/${guild.id}/${area}`) !== null)) {
+		throw featureOff();
+	}
 	if (areas !== null && !TEST_POST_AREAS[body.kind].some((area) => areas.includes(area))) {
 		throw forbidden("not_granted", "Your access to that server does not include this.");
 	}

@@ -1,4 +1,4 @@
-import { resolve, sep } from "node:path";
+import { basename, resolve, sep } from "node:path";
 import { REST, Routes } from "discord.js";
 import { globSync } from "glob";
 import { isCategory } from "@config/categories";
@@ -10,6 +10,7 @@ import { buildContextMenu, type ContextMenu } from "@core/contextMenu";
 import { SetupError, toError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
 import { MESSAGE_HANDLER, type MessageHandler } from "@core/message";
+import { type BotFeature, partIsOff } from "@testify/shared";
 
 /** `__dirname` is `src/core` while developing and `dist/core` after a build, and both trees have the same shape. */
 const ROOT = resolve(__dirname, "..");
@@ -49,20 +50,34 @@ interface LoadCounts {
 	messageHandlers: number;
 }
 
-export function loadEverything(client: TestifyClient): LoadCounts {
+/** Registers everything on disk except what a feature in `off` owns; the scripts leave `off` empty to see every part. */
+export function loadEverything(client: TestifyClient, off: ReadonlySet<BotFeature> = new Set()): LoadCounts {
 	const counts = {
-		commands: loadCommands(client),
-		buttons: loadButtons(client),
-		menus: loadContextMenus(client),
-		messageHandlers: loadMessageHandlers(client),
-		events: loadEvents(client),
+		commands: loadCommands(client, off),
+		buttons: loadButtons(client, off),
+		menus: loadContextMenus(client, off),
+		messageHandlers: loadMessageHandlers(client, off),
+		events: loadEvents(client, off),
 	};
 
 	client.loaded = counts;
 	return counts;
 }
 
-function loadCommands(client: TestifyClient): number {
+/** The command without the subcommands an off feature owns, or null when none of them is left. */
+function withoutOffParts(command: Command, off: ReadonlySet<BotFeature>): Command | null {
+	if (partIsOff(off, "commands", command.name)) return null;
+
+	const subcommands = subcommandsOf(command);
+	const kept = subcommands.filter((sub) => !partIsOff(off, "commands", `${command.name} ${sub.name}`));
+	if (kept.length === subcommands.length) return command;
+	// A command's own `run` is only what a prefix run naming no subcommand gets, so it goes with the last of them.
+	if (kept.length === 0) return null;
+
+	return { ...command, subcommands: kept };
+}
+
+function loadCommands(client: TestifyClient, off: ReadonlySet<BotFeature>): number {
 	for (const file of find("commands/*/*.command.{js,ts}")) {
 		const command = importFile(file);
 
@@ -77,7 +92,8 @@ function loadCommands(client: TestifyClient): number {
 		}
 		if (client.commands.has(command.name)) fail(file, `uses the command name "${command.name}" twice`);
 
-		const loadedCommand = command as unknown as Command;
+		const loadedCommand = withoutOffParts(command as unknown as Command, off);
+		if (loadedCommand === null) continue;
 		client.commands.set(loadedCommand.name, loadedCommand);
 
 		const named: [string, string][] = [
@@ -98,7 +114,7 @@ function loadCommands(client: TestifyClient): number {
 	return client.commands.size;
 }
 
-function loadButtons(client: TestifyClient): number {
+function loadButtons(client: TestifyClient, off: ReadonlySet<BotFeature>): number {
 	for (const file of find("buttons/**/*.{js,ts}")) {
 		const button = importFile(file);
 
@@ -106,6 +122,7 @@ function loadButtons(client: TestifyClient): number {
 		if (typeof button.id !== "string" || !button.id) fail(file, "is missing `id`");
 		if (typeof button.run !== "function") fail(file, "is missing `run`");
 		if (client.buttons.has(button.id)) fail(file, `uses the button id "${button.id}" twice`);
+		if (partIsOff(off, "buttons", button.id)) continue;
 
 		client.buttons.set(button.id, button as unknown as Button);
 	}
@@ -113,7 +130,7 @@ function loadButtons(client: TestifyClient): number {
 	return client.buttons.size;
 }
 
-function loadContextMenus(client: TestifyClient): number {
+function loadContextMenus(client: TestifyClient, off: ReadonlySet<BotFeature>): number {
 	for (const file of find("menus/*.menu.{js,ts}")) {
 		const menu = importFile(file);
 
@@ -124,6 +141,7 @@ function loadContextMenus(client: TestifyClient): number {
 		if (typeof menu.switchedBy !== "string" || !menu.switchedBy) fail(file, "is missing `switchedBy`");
 		if (typeof menu.run !== "function") fail(file, "is missing `run`");
 		if (client.contextMenus.has(menu.name)) fail(file, `uses the menu name "${menu.name}" twice`);
+		if (partIsOff(off, "menus", menu.name)) continue;
 
 		client.contextMenus.set(menu.name, menu as unknown as ContextMenu);
 	}
@@ -131,13 +149,14 @@ function loadContextMenus(client: TestifyClient): number {
 	return client.contextMenus.size;
 }
 
-function loadMessageHandlers(client: TestifyClient): number {
+function loadMessageHandlers(client: TestifyClient, off: ReadonlySet<BotFeature>): number {
 	for (const file of find("events/message/**/*.event.{js,ts}")) {
 		const handler = importFile(file);
 
 		if (!isObject(handler)) fail(file, "should `export default defineMessageHandler({ … })`");
 		if (typeof handler.name !== "string" || !handler.name) fail(file, "is missing `name`");
 		if (typeof handler.run !== "function") fail(file, "is missing `run`");
+		if (partIsOff(off, "messageHandlers", handler.name)) continue;
 
 		client.messageHandlers.push(handler as unknown as MessageHandler);
 	}
@@ -146,7 +165,7 @@ function loadMessageHandlers(client: TestifyClient): number {
 	return client.messageHandlers.length;
 }
 
-function loadEvents(client: TestifyClient): number {
+function loadEvents(client: TestifyClient, off: ReadonlySet<BotFeature>): number {
 	// The trailing separator stops a sibling whose name starts with `message` being excluded too.
 	const messageFolder = resolve(ROOT, "events", "message") + sep;
 	const files = find("events/**/*.event.{js,ts}").filter((file) => !file.startsWith(messageFolder));
@@ -161,6 +180,7 @@ function loadEvents(client: TestifyClient): number {
 		}
 		if (typeof event.name !== "string" || !event.name) fail(file, "is missing `name`");
 		if (typeof event.run !== "function") fail(file, "is missing `run`");
+		if (partIsOff(off, "events", basename(file).replace(/\.event\.(js|ts)$/, ""))) continue;
 
 		const handler = event as unknown as AnyEvent;
 		const invoke = (...args: unknown[]): void => {

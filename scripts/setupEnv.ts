@@ -3,6 +3,7 @@ import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import prompts from "prompts";
 import { box, painter } from "@core/terminal";
+import { BOT_FEATURE_KEYS, isBotFeature } from "@testify/shared";
 
 /** Asks for the settings the bot needs and writes `.env`, or `.env.development` with `--dev`. */
 
@@ -21,6 +22,14 @@ const ID = /^\d{17,20}$/;
 
 const discordId = (value: string): string | null =>
 	ID.test(value) ? null : "A Discord ID is 17 to 20 digits. Turn on Developer Mode, then right-click → Copy ID.";
+
+const featureList = (value: string): string | null => {
+	const unknown = value
+		.split(",")
+		.map((part) => part.trim().toLowerCase())
+		.filter((part) => part !== "" && !isBotFeature(part));
+	return unknown.length === 0 ? null : `Not a feature: ${unknown.join(", ")}.`;
+};
 
 const discordIds = (value: string): string | null =>
 	value
@@ -76,6 +85,13 @@ export function fields(isDev: boolean): Field[] {
 			initial: isDev ? "debug" : "",
 			check: (value) =>
 				["trace", "debug", "info", "warn", "error", "fatal"].includes(value) ? null : "Pick one of the six levels.",
+		},
+		{
+			key: "DISABLED_FEATURES",
+			message: "Features to switch off",
+			hint: `Comma-separated, or blank for all of them: ${BOT_FEATURE_KEYS.join(", ")}`,
+			required: false,
+			check: featureList,
 		},
 		{ key: "CHANNEL_ERROR_LOG", message: "Channel ID for command errors", required: false, check: discordId },
 		{ key: "CHANNEL_GUILD_LOG", message: "Channel ID for servers joined and left", required: false, check: discordId },

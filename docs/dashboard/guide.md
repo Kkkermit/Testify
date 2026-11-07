@@ -275,7 +275,9 @@ Add the query key to `src/lib/queries.ts`.
 
 **6. The registries** — `src/routes.tsx` (one lazy import, one route), `config/navigation.ts` (one entry, in a
 section), `config/features.ts` (the overview tile's path), and
-`features/commands/commands.utils.ts` (so the command stops counting as Discord-only on `/commands`).
+`features/commands/commands.utils.ts` (so the command stops counting as Discord-only on `/commands`). If a host can
+switch the feature off, the screen's path and its routes go under it in `shared/src/botFeatures.ts`, and the sidebar,
+quick search and the route gate follow.
 
 Then: a fixture in `src/test/fixtures/`, its MSW handler in `src/test/handlers.ts`, a `.utils.test.ts`, a page
 test, and the API route test.

@@ -468,7 +468,8 @@
 		"grantedTitle": "共有されたサーバー",
 		"grantedBody": "管理者があなたに一部の画面を与えたため、その画面だけが開きます。",
 		"notGrantedTitle": "アクセスの範囲外",
-		"notGranted": "このサーバーへのあなたのアクセスにはこの画面が含まれていません。必要なら管理者に頼んでください。"
+		"notGranted": "このサーバーへのあなたのアクセスにはこの画面が含まれていません。必要なら管理者に頼んでください。",
+		"switchedOff": "{{bot}}のオーナーがボットのこの機能をオフにしているため、ここで設定できることはありません。"
 	},
 	"compare": {
 		"title": "並べて比較",
@@ -2521,6 +2522,8 @@
 			"setupSummary": "Discord アプリケーション、トークンとインテント、ボットの招待。",
 			"configuration": "設定",
 			"configurationSummary": "すべての環境変数と、その働き、必須かどうか。",
+			"features": "機能をオフにする",
+			"featuresSummary": "音楽やカジノなど、使わない機能を外してボットを動かします。",
 			"docker": "Docker",
 			"dockerSummary": "Docker Compose でボットとデータベースを動かす方法と、その他の実行場所。",
 			"dashboard": "ウェブサイトとダッシュボード",

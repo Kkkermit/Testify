@@ -31,6 +31,7 @@ export function searchEntries({
 	guilds,
 	isOwner,
 	mayGrant,
+	featuresOff,
 	commands,
 	channels = [],
 }: NavAudience & {
@@ -39,17 +40,18 @@ export function searchEntries({
 	commands: readonly CommandSummary[];
 	channels?: readonly ChannelSummary[];
 }): SearchEntry[] {
-	const screens = [...allNavItems(navigationFor({ guild, isOwner, mayGrant })), ...EXTRA_PAGES].map<SearchEntry>(
-		(item) => ({
-			id: `screen:${item.to}`,
-			kind: "screen",
-			label: t(item.labelKey),
-			detail: item.hintKey === undefined ? "" : t(item.hintKey),
-			to: item.to,
-			icon: item.icon,
-			terms: [],
-		}),
-	);
+	const screens = [
+		...allNavItems(navigationFor({ guild, isOwner, mayGrant, featuresOff })),
+		...EXTRA_PAGES,
+	].map<SearchEntry>((item) => ({
+		id: `screen:${item.to}`,
+		kind: "screen",
+		label: t(item.labelKey),
+		detail: item.hintKey === undefined ? "" : t(item.hintKey),
+		to: item.to,
+		icon: item.icon,
+		terms: [],
+	}));
 
 	const channelEntries =
 		guild === undefined || !mayOpen(`/guilds/${guild.id}/channels`, guild.id, guild.areas)

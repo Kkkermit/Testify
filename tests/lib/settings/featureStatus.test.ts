@@ -159,6 +159,15 @@ describe("placesOf", () => {
 		expect(FEATURE_SOURCES.map((source) => source.key).sort()).toEqual(Object.keys(FEATURE_PLACES).sort());
 	});
 
+	/** The overview, the channel pages and the inbox all read this list, so a feature the bot no longer runs leaves all three. */
+	it("leaves out a feature the host has switched off for the whole bot", async () => {
+		const keys = (await placesOf(guild, new Set(["casino", "levelling"]))).map((feature) => feature.key);
+
+		expect(keys).not.toContain("casino");
+		expect(keys).not.toContain("levelling");
+		expect(keys).toContain("welcome");
+	});
+
 	it("leaves the overview's own shape alone", async () => {
 		expect(Object.keys((await featuresOf(guild))[0] ?? {}).sort()).toEqual(["detail", "enabled", "key", "label"]);
 	});

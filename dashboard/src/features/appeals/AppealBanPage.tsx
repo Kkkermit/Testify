@@ -18,6 +18,7 @@ import {
 } from "@/components/primitives";
 import { APPEAL_STATUS_LABEL, APPEAL_STATUS_TONE } from "@/features/appeals/components/AppealItem";
 import { useOwnAppeals, useSendAppeal } from "@/features/appeals/useAppeals";
+import { useFeatureOn } from "@/features/site/useFeaturesOff";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { dateAndTime, shortDate } from "@/lib/datetime";
@@ -25,22 +26,30 @@ import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function AppealBanPage(): React.JSX.Element {
 	const { t } = useTranslation();
-	const appeals = useOwnAppeals();
+	const on = useFeatureOn("appeals");
 
 	usePageTitle(t("appeals.ownTitle"));
 
 	return (
 		<>
 			<PageHeader title={t("appeals.ownTitle")} subtitle={t("appeals.ownSubtitle")} />
-			{appeals.isError ? (
-				<ErrorState as="h2" error={appeals.error} onRetry={() => void appeals.refetch()} />
-			) : appeals.isPending ? (
+			{on === undefined ? (
 				<Skeleton className="h-64 w-full" />
+			) : on ? (
+				<OwnAppeals />
 			) : (
-				<AppealLists appeals={appeals.data} />
+				<Warning>{t("guilds.switchedOff")}</Warning>
 			)}
 		</>
 	);
+}
+
+function OwnAppeals(): React.JSX.Element {
+	const appeals = useOwnAppeals();
+
+	if (appeals.isError) return <ErrorState as="h2" error={appeals.error} onRetry={() => void appeals.refetch()} />;
+	if (appeals.isPending) return <Skeleton className="h-64 w-full" />;
+	return <AppealLists appeals={appeals.data} />;
 }
 
 function AppealLists({ appeals }: { appeals: OwnAppeals }): React.JSX.Element {

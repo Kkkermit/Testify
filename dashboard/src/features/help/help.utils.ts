@@ -1,4 +1,5 @@
 import {
+	type BotFeature,
 	isSuggested,
 	type SupportCatalogueEntry,
 	SUPPORT_TOPICS,
@@ -17,8 +18,8 @@ interface HelpArea {
 
 const UNUSED_GUILD = { id: "0", name: "" };
 
-export function helpAreas(isOwner: boolean): HelpArea[] {
-	const groups: NavGroup[] = navigationFor({ guild: UNUSED_GUILD, isOwner });
+export function helpAreas(isOwner: boolean, featuresOff?: ReadonlySet<BotFeature>): HelpArea[] {
+	const groups: NavGroup[] = navigationFor({ guild: UNUSED_GUILD, isOwner, featuresOff });
 
 	return allNavItems(groups).map((item) => ({
 		labelKey: item.labelKey,

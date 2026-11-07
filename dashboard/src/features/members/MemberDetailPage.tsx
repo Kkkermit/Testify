@@ -18,6 +18,7 @@ import { TimeoutCard } from "@/features/members/components/TimeoutCard";
 import { WarningsCard } from "@/features/members/components/WarningsCard";
 import { inviteLine, memberSummary, softbanActive } from "@/features/members/memberDetail.utils";
 import { useMemberActions } from "@/features/members/useMemberActions";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { outcomeText } from "@/features/warnings/warnings.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
@@ -28,6 +29,7 @@ export function MemberDetailPage(): React.JSX.Element {
 	const overview = useGuildOverview(guildId);
 	const lacks = useLacks(guildId);
 	const mayOpen = useMayOpen(guildId);
+	const featuresOff = useFeaturesOff();
 	const actions = useMemberActions(guildId, userId);
 	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = actions;
 	const [result, setResult] = useState<string | null>(null);
@@ -70,28 +72,30 @@ export function MemberDetailPage(): React.JSX.Element {
 			)}
 
 			{canModerate &&
+				!featuresOff.has("economy") &&
 				(lacks("Administrator") ? (
-					<>
-						<NeedsPermissionPanel title={t("members.money")} permission="Administrator" />
-						<NeedsPermissionPanel title={t("members.levelAndXp")} permission="Administrator" />
-					</>
+					<NeedsPermissionPanel title={t("members.money")} permission="Administrator" />
 				) : (
-					<>
-						<MoneyCard
-							detail={detail}
-							busy={busy}
-							onChange={(purse, delta) => {
-								money.mutate({ purse, delta });
-							}}
-						/>
-						<LevelCard
-							detail={detail}
-							busy={busy}
-							onChange={(body) => {
-								level.mutate(body);
-							}}
-						/>
-					</>
+					<MoneyCard
+						detail={detail}
+						busy={busy}
+						onChange={(purse, delta) => {
+							money.mutate({ purse, delta });
+						}}
+					/>
+				))}
+			{canModerate &&
+				!featuresOff.has("levelling") &&
+				(lacks("Administrator") ? (
+					<NeedsPermissionPanel title={t("members.levelAndXp")} permission="Administrator" />
+				) : (
+					<LevelCard
+						detail={detail}
+						busy={busy}
+						onChange={(body) => {
+							level.mutate(body);
+						}}
+					/>
 				))}
 
 			{/* Roles are judged role by role rather than by who outranks whom, so they stay when the rest cannot. */}

@@ -3,7 +3,7 @@ import { getAppealSettings } from "@database/repositories/appealRepository";
 
 /** Appeals are only ever written on the dashboard, so a bot without one cannot take them. */
 export function takesAppeals(client: TestifyClient): boolean {
-	return client.env.DASHBOARD_ENABLED;
+	return client.env.DASHBOARD_ENABLED && !client.featuresOff.has("appeals");
 }
 
 /** Where a member banned from this server can appeal, or null when it takes none; added to the ban's direct message. */

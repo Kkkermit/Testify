@@ -88,4 +88,16 @@ describe("readInbox", () => {
 		expect(inbox.ideas.items[0]).toMatchObject({ number: 4, up: 2, down: 1 });
 		expect(inboxCount(inbox)).toBe(8);
 	});
+
+	it("waits on nothing from a switched-off feature", async () => {
+		jest.mocked(placesOf).mockResolvedValue([]);
+		jest.mocked(listOpenTickets).mockClear();
+		jest.mocked(listIdeas).mockClear();
+
+		const inbox = await readInbox({} as TestifyClient, guild, new Set(["tickets", "ideas"]));
+
+		expect(inboxCount(inbox)).toBe(0);
+		expect(listOpenTickets).not.toHaveBeenCalled();
+		expect(listIdeas).not.toHaveBeenCalled();
+	});
 });

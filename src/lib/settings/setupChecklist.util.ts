@@ -17,8 +17,10 @@ import { normaliseSettings } from "@lib/levelling/levelling.util";
 import {
 	AUDIT_EVENTS,
 	AUDIT_LOG_CHANNEL_NAME,
+	type BotFeature,
 	collapseEnabled,
 	DEFAULT_WELCOME_MESSAGE,
+	NONE_OFF,
 	type SetupChecklist,
 	type SetupStep,
 	type SetupStepState,
@@ -86,7 +88,11 @@ function state(step: SetupStep, done: boolean, rest: Partial<SetupStepState> = {
 	return { step, done, channelId: null, channelName: null, createsChannel: false, blocker: null, ...rest };
 }
 
-export async function readSetupChecklist(guild: Guild, actor: SetupActor): Promise<SetupChecklist> {
+export async function readSetupChecklist(
+	guild: Guild,
+	actor: SetupActor,
+	off: ReadonlySet<BotFeature> = NONE_OFF,
+): Promise<SetupChecklist> {
 	const [levels, welcome, audit] = await Promise.all([
 		getLevelSettings(guild.id),
 		getWelcome(guild.id),
@@ -99,7 +105,7 @@ export async function readSetupChecklist(guild: Guild, actor: SetupActor): Promi
 
 	return {
 		steps: [
-			state("levelling", normaliseSettings(levels).enabled),
+			...(off.has("levelling") ? [] : [state("levelling", normaliseSettings(levels).enabled)]),
 			state("welcome", (welcome?.channelId ?? null) !== null, {
 				channelId: greeting?.id ?? null,
 				channelName: greeting?.name ?? null,
@@ -162,8 +168,9 @@ export async function runSetupStep(
 	guild: Guild,
 	actor: SetupActor,
 	step: SetupStep,
+	off: ReadonlySet<BotFeature> = NONE_OFF,
 ): Promise<{ checklist: SetupChecklist; channelId: string | null }> {
-	const before = (await readSetupChecklist(guild, actor)).steps.find((candidate) => candidate.step === step);
+	const before = (await readSetupChecklist(guild, actor, off)).steps.find((candidate) => candidate.step === step);
 	if (before === undefined || before.done) throw new UserFacingError("That is already set up.");
 	if (before.blocker !== null) throw new UserFacingError(BLOCKED[before.blocker]);
 
@@ -180,5 +187,5 @@ export async function runSetupStep(
 		await setAuditLogConfig(guild.id, channelId, collapseEnabled([...AUDIT_EVENTS]));
 	}
 
-	return { checklist: await readSetupChecklist(guild, actor), channelId };
+	return { checklist: await readSetupChecklist(guild, actor, off), channelId };
 }

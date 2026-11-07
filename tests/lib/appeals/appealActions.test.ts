@@ -86,6 +86,7 @@ function world(options: { banned?: boolean; sendFails?: boolean; dashboard?: boo
 	const send = jest.fn(() => Promise.resolve());
 	const client = {
 		env: { DASHBOARD_ENABLED: options.dashboard ?? true, DASHBOARD_BASE_URL: "https://bot.example" },
+		featuresOff: new Set(),
 		guilds: { cache: new Map([[GUILD, guild]]) },
 		users: { fetch: jest.fn(() => Promise.resolve({ send })) },
 		logger: { debug: jest.fn() },

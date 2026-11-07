@@ -37,8 +37,9 @@ export default defineCommand({
 			}
 
 			const category = resolveCategory(query);
-			if (category) {
-				const pages = pagesOf(client, category);
+			// A category whose every command is switched off on this bot is nothing to browse.
+			const pages = category === null ? [] : pagesOf(client, category).filter((page) => page.length > 0);
+			if (category !== null && pages.length > 0) {
 				await reply(interaction, {
 					embeds: [categoryPage(client, category, 0, surface, prefix)],
 					components: [

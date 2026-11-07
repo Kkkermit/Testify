@@ -7,6 +7,7 @@ import { type ContextMenu } from "@core/contextMenu";
 import { type Logger } from "@core/logger";
 import { type MessageHandler } from "@core/message";
 import { ErrorThrottle, reportSurvivable } from "@core/resilience";
+import { type BotFeature, switchedOff } from "@testify/shared";
 
 const intents = [
 	GatewayIntentBits.Guilds,
@@ -40,6 +41,8 @@ export class TestifyClient extends Client {
 	};
 
 	readonly env: Env;
+	/** `DISABLED_FEATURES` and everything that needs one of them; nothing an off feature owns is loaded. */
+	readonly featuresOff: ReadonlySet<BotFeature>;
 	readonly logger: Logger;
 	readonly timers: TimerRegistry;
 	readonly startedAt = Date.now();
@@ -60,6 +63,7 @@ export class TestifyClient extends Client {
 	constructor(env: Env, logger: Logger) {
 		super({ intents, partials, shards: "auto" });
 		this.env = env;
+		this.featuresOff = switchedOff(env.DISABLED_FEATURES).off;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);
 		nameBot(() => this.user?.username ?? this.restName);

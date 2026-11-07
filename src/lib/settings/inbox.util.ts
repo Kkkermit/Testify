@@ -6,9 +6,11 @@ import { canPostInChannel } from "@lib/discord/channels.util";
 import { placesOf } from "@lib/settings/featureStatus.util";
 import { nameOf } from "@lib/tickets/openTickets.util";
 import {
+	type BotFeature,
 	type FeaturePlaces,
 	type GuildInbox,
 	INBOX_LIMITS,
+	NONE_OFF,
 	type InboxChannelProblem,
 	type PlaceRole,
 	WATCHED_PERMISSIONS,
@@ -44,11 +46,15 @@ export function channelProblems(guild: Guild, features: FeaturePlaces[]): InboxC
 		});
 }
 
-export async function readInbox(client: TestifyClient, guild: Guild): Promise<GuildInbox> {
+export async function readInbox(
+	client: TestifyClient,
+	guild: Guild,
+	off: ReadonlySet<BotFeature> = NONE_OFF,
+): Promise<GuildInbox> {
 	const [features, open, ideas] = await Promise.all([
-		placesOf(guild),
-		listOpenTickets(guild.id),
-		listIdeas(guild.id, "open", { skip: 0, limit: INBOX_LIMITS.shown }),
+		placesOf(guild, off),
+		off.has("tickets") ? [] : listOpenTickets(guild.id),
+		off.has("ideas") ? { total: 0, items: [] } : listIdeas(guild.id, "open", { skip: 0, limit: INBOX_LIMITS.shown }),
 	]);
 	const waiting = open.filter((ticket) => ticket.claimedById === null);
 

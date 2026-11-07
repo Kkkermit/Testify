@@ -29,6 +29,7 @@ import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { ageOnDisk } from "@lib/raid/raidActions.util";
 import { readTickets } from "@lib/tickets/ticketActions.util";
 import {
+	type BotFeature,
 	CASINO_GAMES,
 	FEATURE_PLACES,
 	type FeatureCount,
@@ -36,6 +37,8 @@ import {
 	type FeatureKey,
 	type FeaturePlaces,
 	type FeatureStatus,
+	NONE_OFF,
+	overviewIsOff,
 	type Place,
 	type PlaceRole,
 } from "@testify/shared";
@@ -413,9 +416,9 @@ function distinct(places: Place[]): Place[] {
 }
 
 /** Every feature read at once, in the order the overview lists them, with where each one works. */
-export async function placesOf(guild: Guild): Promise<FeaturePlaces[]> {
+export async function placesOf(guild: Guild, off: ReadonlySet<BotFeature> = NONE_OFF): Promise<FeaturePlaces[]> {
 	return Promise.all(
-		FEATURE_SOURCES.map(async (source) => {
+		FEATURE_SOURCES.filter((source) => !overviewIsOff(off, source.key)).map(async (source) => {
 			const { places, ...reading } = await source.read(guild);
 			return {
 				key: source.key,
@@ -429,6 +432,6 @@ export async function placesOf(guild: Guild): Promise<FeaturePlaces[]> {
 }
 
 /** The overview's reading of every feature, without where each one works. */
-export async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	return (await placesOf(guild)).map(({ key, label, enabled, detail }) => ({ key, label, enabled, detail }));
+export async function featuresOf(guild: Guild, off: ReadonlySet<BotFeature> = NONE_OFF): Promise<FeatureStatus[]> {
+	return (await placesOf(guild, off)).map(({ key, label, enabled, detail }) => ({ key, label, enabled, detail }));
 }

@@ -10,6 +10,7 @@ export const siteInfo: SiteInfo = {
 	dashboard: true,
 	repository: "https://github.com/Kkkermit/Testify",
 	version: "2.0.9",
+	featuresOff: [],
 };
 
 export const standing: RepositoryStanding = {

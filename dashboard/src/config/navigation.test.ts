@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { BOT_FEATURE_KEYS, BOT_FEATURES, screenIsOff, switchedOff } from "@testify/shared";
 import { allNavItems, navigationFor, type NavAudience, sectionHolds } from "@/config/navigation";
 
 const guild = { id: "900000000000000001", name: "Testify HQ" };
@@ -171,5 +174,29 @@ describe("navigationFor", () => {
 		for (const item of allNavItems(navigationFor({ guild, isOwner: true }))) {
 			expect(item.labelKey.length).toBeGreaterThan(0);
 		}
+	});
+});
+
+describe("navigation with features switched off", () => {
+	const ROUTES = readFileSync(resolve(__dirname, "..", "routes.tsx"), "utf8");
+	const declared = BOT_FEATURE_KEYS.flatMap((feature) => BOT_FEATURES[feature].screens ?? []);
+
+	/** A screen named wrong in the declaration would stay in the sidebar of a bot that no longer does it. */
+	it("declares only screens the dashboard has", () => {
+		const routed = [...ROUTES.matchAll(/path: "([^"]+)"/g)].map((match) => match[1] ?? "");
+
+		expect(declared.filter((screen) => !routed.includes(screen))).toEqual([]);
+	});
+
+	it("leaves out exactly the screens of what is off, and nothing else", () => {
+		const off = switchedOff(["economy", "music"]).off;
+		const before = pathsFor({ guild, isOwner: false });
+		const after = pathsFor({ guild, isOwner: false, featuresOff: off });
+
+		expect(before.filter((path) => !after.includes(path))).toEqual(
+			before.filter((path) => screenIsOff(off, path) !== null),
+		);
+		expect(after).not.toContain(`/guilds/${guild.id}/casino`);
+		expect(after).toContain(`/guilds/${guild.id}/levelling`);
 	});
 });

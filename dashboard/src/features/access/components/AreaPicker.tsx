@@ -1,11 +1,10 @@
 import { type AccessArea } from "@testify/shared";
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { CHECK_ROW } from "@/components/form";
-import { type AreaGroup, areaGroups, inOrder } from "@/features/access/access.utils";
+import { areaGroups, inOrder } from "@/features/access/access.utils";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { cn } from "@/lib/cn";
-
-const GROUPS: AreaGroup[] = areaGroups();
 
 /** Every screen that can be given, under the sidebar's own headings, each heading ticking its whole section. */
 export function AreaPicker({
@@ -19,11 +18,13 @@ export function AreaPicker({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const id = useId();
+	const featuresOff = useFeaturesOff();
+	const groups = useMemo(() => areaGroups(featuresOff), [featuresOff]);
 	const chosen = new Set(value);
 
 	return (
 		<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-			{GROUPS.map((group) => {
+			{groups.map((group) => {
 				const areas = group.choices.map((choice) => choice.area);
 				const all = areas.every((area) => chosen.has(area));
 				const some = !all && areas.some((area) => chosen.has(area));

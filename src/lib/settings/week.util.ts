@@ -8,7 +8,7 @@ import { daysUntil } from "@lib/birthdays/birthdays.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
 import { listGiveaways } from "@lib/giveaways/giveawayActions.util";
 import { nextAfter } from "@lib/scheduledMessages/scheduledMessages.util";
-import { type GuildWeek, WEEK_LIMITS, type WeekEvent } from "@testify/shared";
+import { type BotFeature, type GuildWeek, NONE_OFF, WEEK_LIMITS, type WeekEvent } from "@testify/shared";
 
 /** The next seven days of what the bot will do in a server, read from what each feature already stores. */
 
@@ -32,16 +32,21 @@ export function birthdayAt(day: number, month: number, now: Date): Date | null {
 	return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) + wait * DAY_MS);
 }
 
-export async function readWeek(client: TestifyClient, guild: Guild, now: Date = new Date()): Promise<GuildWeek> {
+export async function readWeek(
+	client: TestifyClient,
+	guild: Guild,
+	now: Date = new Date(),
+	off: ReadonlySet<BotFeature> = NONE_OFF,
+): Promise<GuildWeek> {
 	const to = new Date(now.getTime() + WEEK_LIMITS.days * DAY_MS);
 	const within = (at: Date): boolean => at >= now && at < to;
 
 	const [schedules, lottery, giveaways, birthdaySettings, birthdays] = await Promise.all([
 		listSchedules(guild.id),
-		readLottery(guild.id),
-		listGiveaways(client, guild.id),
-		readBirthdaySettings(guild),
-		listBirthdays(guild.id),
+		off.has("lottery") ? null : readLottery(guild.id),
+		off.has("giveaways") ? [] : listGiveaways(client, guild.id),
+		off.has("birthdays") ? null : readBirthdaySettings(guild),
+		off.has("birthdays") ? [] : listBirthdays(guild.id),
 	]);
 
 	const events: WeekEvent[] = [
@@ -66,12 +71,17 @@ export async function readWeek(client: TestifyClient, guild: Guild, now: Date = 
 			})),
 	];
 
-	if (lottery.enabled && !lottery.frozen && lottery.nextDrawAt !== null && within(new Date(lottery.nextDrawAt))) {
+	if (
+		lottery?.enabled === true &&
+		!lottery.frozen &&
+		lottery.nextDrawAt !== null &&
+		within(new Date(lottery.nextDrawAt))
+	) {
 		events.push({ kind: "lottery", at: lottery.nextDrawAt, prizePool: lottery.prizePool });
 	}
 
 	// Only while birthday posts are on: a birthday the server will not mark is not something the bot will do.
-	if (birthdaySettings.enabled) {
+	if (birthdaySettings?.enabled === true) {
 		for (const entry of birthdays) {
 			const at = birthdayAt(entry.day, entry.month, now);
 			if (at === null) continue;

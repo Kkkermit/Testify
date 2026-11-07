@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { z } from "zod";
+import { BOT_FEATURE_KEYS, isBotFeature } from "@testify/shared";
 
 const id = z.string().regex(/^\d{17,20}$/, "should be a Discord ID (17-20 digits)");
 
@@ -35,6 +36,27 @@ const fields = z.object({
 	CHANNEL_BUG_REPORT_LOG: id.optional(),
 	CHANNEL_SUGGESTION_LOG: id.optional(),
 	CHANNEL_EVAL_LOG: id.optional(),
+
+	// Features this bot runs without, such as `music,casino`. Blank runs every one.
+	DISABLED_FEATURES: z
+		.string()
+		.transform((value) =>
+			value
+				.split(",")
+				.map((part) => part.trim().toLowerCase())
+				.filter(Boolean),
+		)
+		.superRefine((names, ctx) => {
+			const unknown = names.filter((name) => !isBotFeature(name));
+			if (unknown.length > 0) {
+				ctx.addIssue({
+					code: "custom",
+					message: `names ${unknown.join(", ")}, which this bot does not have. The features are: ${BOT_FEATURE_KEYS.join(", ")}`,
+				});
+			}
+		})
+		.transform((names) => names.filter(isBotFeature))
+		.default([]),
 
 	// The website: a landing page, the docs and the source browser. On by default, and needs no other setting.
 	SITE_ENABLED: flag.default(true),

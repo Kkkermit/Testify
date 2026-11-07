@@ -10,6 +10,7 @@ import { createClaudePicker } from "@lib/support/supportModel.util";
 import {
 	isConfident,
 	isRelated,
+	partIsOff,
 	isSuggested,
 	type SearchHit,
 	type SupportArticle,
@@ -210,8 +211,9 @@ export class SupportDesk {
 
 /** Every entry the desk may answer with, minus any that could leak before a single question is asked. */
 function buildEntries(client: TestifyClient, secrets: readonly string[]): SupportEntry[] {
+	const off = client.featuresOff;
 	const articles = loadArticles().flatMap((result) => {
-		if (result.ok) return [result.article];
+		if (result.ok) return partIsOff(off, "articles", result.article.entry.id) ? [] : [result.article];
 
 		client.logger.warn(
 			{ file: result.file, reason: result.reason },
@@ -221,7 +223,12 @@ function buildEntries(client: TestifyClient, secrets: readonly string[]): Suppor
 	});
 
 	const { entries, problems } = linkEntries(articles, commandEntries(client.commands.values()));
-	for (const problem of problems) {
+	// A link to a switched-off feature's article or command is left out without a warning, because it is meant.
+	const switchedOff = (target: string): boolean =>
+		target.startsWith("command-")
+			? partIsOff(off, "commands", target.slice("command-".length))
+			: partIsOff(off, "articles", target);
+	for (const problem of problems.filter((candidate) => !switchedOff(candidate.missing))) {
 		client.logger.warn(
 			problem,
 			"[SUPPORT] A help article links to something that does not exist. Fix its frontmatter.",

@@ -6,6 +6,7 @@ import { type ApiBindings } from "@api/context";
 import { type ApiProblem, asProblem, badRequest, notFound, problemBody, UpstreamProblem } from "@api/errors";
 import { refuseBlacklisted } from "@api/middleware/blacklist";
 import { verifyCsrf } from "@api/middleware/csrf";
+import { refuseSwitchedOff } from "@api/middleware/features";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
 import { loadSession } from "@api/middleware/session";
@@ -107,6 +108,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("/api/*", loadSession);
 	app.use("*", verifyCsrf);
 	app.use("/api/*", refuseBlacklisted);
+	app.use("/api/*", refuseSwitchedOff);
 
 	app.onError((error, context) => {
 		const problem = asProblem(error);

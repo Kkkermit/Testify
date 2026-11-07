@@ -6,6 +6,7 @@ import { Link, NavLink, useParams } from "react-router";
 import { Card, CARD_HEADING, SectionHeading, PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
+import { COMMAND_LIST, withoutSwitchedOff } from "@/features/docs/commandList.utils";
 import { ConfigurationTable } from "@/features/docs/components/ConfigurationTable";
 import { Guides } from "@/features/docs/components/Guides";
 import { Markdown, type MarkdownSource, prepareDoc } from "@/features/docs/components/Markdown";
@@ -23,6 +24,7 @@ import {
 import { sectionsOf } from "@/features/docs/markdown.utils";
 import { SiteError } from "@/features/site/components/SiteError";
 import { TrailBack } from "@/features/site/components/TrailBack";
+import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -188,8 +190,21 @@ function MarkdownDoc({ page }: { page: MarkdownPage }): React.JSX.Element {
 	const site = useSite();
 	const bot = useBot();
 	const repository = site.data?.repository ?? bot.data?.repositoryUrl ?? "";
+	const featuresOff = useFeaturesOff();
 	const sources = useQuery({ queryKey: keys.docs(page.slug), queryFn: () => sourcesOf(page), staleTime: Infinity });
-	const doc = useMemo(() => (sources.data === undefined ? null : prepareDoc(sources.data)), [sources.data]);
+	const doc = useMemo(
+		() =>
+			sources.data === undefined
+				? null
+				: prepareDoc(
+						sources.data.map((source) =>
+							source.file === COMMAND_LIST
+								? { ...source, markdown: withoutSwitchedOff(source.markdown, featuresOff) }
+								: source,
+						),
+					),
+		[sources.data, featuresOff],
+	);
 
 	if (sources.isError) {
 		return (

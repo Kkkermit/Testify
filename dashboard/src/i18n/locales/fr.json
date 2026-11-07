@@ -482,7 +482,8 @@
 		"grantedTitle": "Partagés avec vous",
 		"grantedBody": "Leurs administrateurs vous ont donné certains écrans, seuls ceux-là s’ouvrent.",
 		"notGrantedTitle": "Hors de votre accès",
-		"notGranted": "Votre accès à ce serveur n’inclut pas cet écran. Demandez-le à l’un de ses administrateurs si vous en avez besoin."
+		"notGranted": "Votre accès à ce serveur n’inclut pas cet écran. Demandez-le à l’un de ses administrateurs si vous en avez besoin.",
+		"switchedOff": "Le propriétaire de {{bot}} a désactivé cette partie du bot, il n’y a donc rien à configurer ici."
 	},
 	"compare": {
 		"title": "Côte à côte",
@@ -2661,6 +2662,8 @@
 			"setupSummary": "L’application Discord, son jeton et ses intents, et l’invitation du bot.",
 			"configuration": "Configuration",
 			"configurationSummary": "Chaque variable d’environnement, son rôle et celles qui sont obligatoires.",
+			"features": "Désactiver des fonctions",
+			"featuresSummary": "Faites tourner le bot sans musique, sans casino ou sans tout ce dont vous ne voulez pas.",
 			"docker": "Docker",
 			"dockerSummary": "Le bot et sa base de données avec Docker Compose, et où il peut tourner ailleurs.",
 			"dashboard": "Le site et le tableau de bord",
