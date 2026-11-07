@@ -148,7 +148,7 @@ it("declares every part that imports a feature's own folder under that feature",
 		["events/**/*.event.ts", "events", (file) => basename(file).replace(/\.event\.ts$/, "")],
 	];
 	const undeclared = parts.flatMap(([pattern, kind, nameOf]) =>
-		globSync(pattern, { cwd: SRC, ignore: kind === "events" ? ["events/message/**"] : [] })
+		globSync(pattern, { cwd: SRC, posix: true, ignore: kind === "events" ? ["events/message/**"] : [] })
 			.filter((file) => !SHARED.includes(file))
 			.flatMap((file) => {
 				const used = [...readFileSync(resolve(SRC, file), "utf8").matchAll(/@lib\/(\w+)/g)].flatMap(
