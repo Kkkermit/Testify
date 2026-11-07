@@ -30,10 +30,10 @@ export function SiteShell({ column = false }: { column?: boolean }): React.JSX.E
 				<Link
 					to="/"
 					aria-label={t("site.home")}
-					className={cn(INLINE_TARGET, "font-display mr-auto gap-2 text-lg font-bold tracking-tight")}
+					className={cn(INLINE_TARGET, "font-display mr-auto min-w-0 gap-2 text-lg font-bold tracking-tight")}
 				>
-					<BotMark src={look.avatarUrl} name={name} size={28} className="rounded-field" />
-					{name}
+					<BotMark src={look.avatarUrl} name={name} size={28} className="rounded-field shrink-0" />
+					<span className="truncate">{name}</span>
 				</Link>
 
 				{/* Under the name and the sign-in until there is room, so neither is pushed off the screen. */}
