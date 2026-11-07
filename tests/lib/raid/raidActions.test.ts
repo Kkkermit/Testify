@@ -3,7 +3,15 @@ import { DAY_MS } from "@config/constants";
 import { getRaidSettings, saveRaidSettings } from "@database/repositories/raidRepository";
 import { canPostIn } from "@lib/discord/channels.util";
 import { JoinWatch } from "@lib/raid/raid.util";
-import { applyRaidSettings, guardJoin, holdNewAccount, overviewOf, spikePost } from "@lib/raid/raidActions.util";
+import {
+	ageOnDisk,
+	applyRaidSettings,
+	guardJoin,
+	holdNewAccount,
+	overviewOf,
+	readRaidOverview,
+	spikePost,
+} from "@lib/raid/raidActions.util";
 import { type RaidSettings } from "@testify/shared";
 import { createMockClient } from "@tests/helpers/mocks";
 
@@ -22,7 +30,7 @@ const ON: RaidSettings = {
 	enabled: true,
 	alertChannelId: CHANNEL,
 	pingRoleId: null,
-	minAccountAgeDays: 7,
+	minAccountAgeMinutes: 10080,
 	spikeJoins: 3,
 	spikeMinutes: 1,
 };
@@ -88,13 +96,35 @@ describe("applyRaidSettings", () => {
 	it("turns itself off when the last thing it did is taken away", async () => {
 		jest.mocked(getRaidSettings).mockResolvedValue({ ...ON, alertChannelId: null });
 
-		await applyRaidSettings(guild, { minAccountAgeDays: 0 }, "100000000000000009");
+		await applyRaidSettings(guild, { minAccountAgeMinutes: 0 }, "100000000000000009");
 
 		expect(saveRaidSettings).toHaveBeenCalledWith(
 			GUILD,
-			expect.objectContaining({ enabled: false, minAccountAgeDays: 0 }),
+			expect.objectContaining({ enabled: false, minAccountAgeMinutes: 0 }),
 			"100000000000000009",
 		);
+	});
+});
+
+describe("a record kept in days", () => {
+	/** The age moved from days to minutes, so a server that set one before the move must keep it, not lose it. */
+	it("is read as minutes, kept on the next save, and gives way to minutes once there are any", async () => {
+		const before = { enabled: true, alertChannelId: CHANNEL, pingRoleId: null, spikeJoins: 3, spikeMinutes: 1 };
+		const inDays = { ...before, minAccountAgeDays: 3 };
+		jest.mocked(getRaidSettings).mockResolvedValue(inDays);
+
+		const read = (await readRaidOverview(guildWith() as unknown as Guild)).minAccountAgeMinutes;
+		await applyRaidSettings(guildWith() as unknown as Guild, { spikeJoins: 5 }, null);
+
+		expect(read).toBe(4_320);
+		expect(saveRaidSettings).toHaveBeenCalledWith(
+			GUILD,
+			expect.objectContaining({ minAccountAgeMinutes: 4_320 }),
+			null,
+		);
+		expect([ageOnDisk({ ...inDays, minAccountAgeMinutes: 90 }), ageOnDisk(before), ageOnDisk(null)]).toEqual([
+			90, 0, 0,
+		]);
 	});
 });
 
@@ -126,7 +156,7 @@ describe("holdNewAccount", () => {
 
 		expect(await holdNewAccount(old as unknown as GuildMember, ON, NOW)).toBeNull();
 		expect(await holdNewAccount(bot as unknown as GuildMember, ON, NOW)).toBeNull();
-		expect(await holdNewAccount(old as unknown as GuildMember, { minAccountAgeDays: 0 }, NOW)).toBeNull();
+		expect(await holdNewAccount(old as unknown as GuildMember, { minAccountAgeMinutes: 0 }, NOW)).toBeNull();
 		expect(old.timeout).not.toHaveBeenCalled();
 		expect(bot.timeout).not.toHaveBeenCalled();
 	});

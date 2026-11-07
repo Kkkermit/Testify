@@ -2,8 +2,8 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 
 export const RAID_LIMITS = {
-	/** Discord's longest timeout, so a hold always lasts until the account is old enough. */
-	maxAccountAgeDays: 28,
+	/** 28 days, Discord's longest timeout, so a hold always lasts until the account is old enough. */
+	maxAccountAgeMinutes: 28 * 24 * 60,
 	minSpikeJoins: 3,
 	maxSpikeJoins: 100,
 	minSpikeMinutes: 1,
@@ -17,7 +17,7 @@ export const DEFAULT_RAID = {
 	enabled: false,
 	alertChannelId: null,
 	pingRoleId: null,
-	minAccountAgeDays: 0,
+	minAccountAgeMinutes: 0,
 	spikeJoins: 10,
 	spikeMinutes: 1,
 } as const;
@@ -27,7 +27,7 @@ export interface RaidSettings {
 	alertChannelId: string | null;
 	pingRoleId: string | null;
 	/** 0 holds nobody back. */
-	minAccountAgeDays: number;
+	minAccountAgeMinutes: number;
 	spikeJoins: number;
 	spikeMinutes: number;
 }
@@ -45,7 +45,7 @@ export const raidPatch = z
 		enabled: z.boolean().optional(),
 		alertChannelId: snowflake.nullable().optional(),
 		pingRoleId: snowflake.nullable().optional(),
-		minAccountAgeDays: z.number().int().min(0).max(RAID_LIMITS.maxAccountAgeDays).optional(),
+		minAccountAgeMinutes: z.number().int().min(0).max(RAID_LIMITS.maxAccountAgeMinutes).optional(),
 		spikeJoins: z.number().int().min(RAID_LIMITS.minSpikeJoins).max(RAID_LIMITS.maxSpikeJoins).optional(),
 		spikeMinutes: z.number().int().min(RAID_LIMITS.minSpikeMinutes).max(RAID_LIMITS.maxSpikeMinutes).optional(),
 	})
@@ -53,7 +53,7 @@ export const raidPatch = z
 
 export type RaidPatch = z.infer<typeof raidPatch>;
 
-/** Whole days, rounded down, since a snowflake's timestamp. */
-export function accountAgeDays(createdAt: number, now: number): number {
-	return Math.max(0, Math.floor((now - createdAt) / 86_400_000));
+/** Whole minutes, rounded down, since a snowflake's timestamp. */
+export function accountAgeMinutes(createdAt: number, now: number): number {
+	return Math.max(0, Math.floor((now - createdAt) / 60_000));
 }

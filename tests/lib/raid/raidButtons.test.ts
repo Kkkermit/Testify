@@ -54,7 +54,7 @@ describe("the raid protection panel", () => {
 	it("cannot be turned on with nothing to do, and says when a hold cannot happen", () => {
 		expect(buttonsOf(raidPanel(CURRENT, OWNER)).find((button) => button.label === "Turn on")?.disabled).toBe(true);
 
-		const unable = raidPanel({ ...CURRENT, minAccountAgeDays: 7, canHold: false }, OWNER);
+		const unable = raidPanel({ ...CURRENT, minAccountAgeMinutes: 10080, canHold: false }, OWNER);
 		expect(buttonsOf(unable).find((button) => button.label === "Turn on")?.disabled).toBe(false);
 		expect(textOf(unable)).toContain("Moderate Members");
 		expect(unable.allowedMentions).toEqual({ parse: [] });
@@ -71,8 +71,10 @@ describe("the raid protection panel", () => {
 	});
 
 	it("saves a minimum age, a spike, a channel, a role, and clears both pickers", async () => {
-		await raidButton.run(pressed("modal", { typed: { days: "7" } }) as never, context("save-age"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { minAccountAgeDays: 7 }, OWNER);
+		await raidButton.run(pressed("modal", { typed: { age: "7d" } }) as never, context("save-age"));
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { minAccountAgeMinutes: 10080 }, OWNER);
+		await raidButton.run(pressed("modal", { typed: { age: "1h 30m" } }) as never, context("save-age"));
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { minAccountAgeMinutes: 90 }, OWNER);
 
 		await raidButton.run(pressed("modal", { typed: { joins: "15", minutes: "2" } }) as never, context("save-spike"));
 		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { spikeJoins: 15, spikeMinutes: 2 }, OWNER);
@@ -96,8 +98,8 @@ describe("the raid protection panel", () => {
 
 	it("refuses a minimum age past Discord's longest timeout and a spike out of range", async () => {
 		await expect(
-			raidButton.run(pressed("modal", { typed: { days: "30" } }) as never, context("save-age")),
-		).rejects.toThrow(/0 to 28/);
+			raidButton.run(pressed("modal", { typed: { age: "29d" } }) as never, context("save-age")),
+		).rejects.toThrow(/28d/);
 		await expect(
 			raidButton.run(pressed("modal", { typed: { joins: "1", minutes: "2" } }) as never, context("save-spike")),
 		).rejects.toThrow(UserFacingError);

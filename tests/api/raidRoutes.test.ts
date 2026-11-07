@@ -62,19 +62,19 @@ describe("the raid protection routes", () => {
 
 	/** Past 28 days a hold would lift before the account was old enough, because Discord caps a timeout there. */
 	it("refuses a minimum age past Discord's longest timeout, and a spike below its floor", async () => {
-		expect((await send("PATCH", { minAccountAgeDays: 29 })).status).toBe(400);
+		expect((await send("PATCH", { minAccountAgeMinutes: 41760 })).status).toBe(400);
 		expect((await send("PATCH", { spikeJoins: 2 })).status).toBe(400);
 		expect((await send("PATCH", {})).status).toBe(400);
 		expect(saveRaidSettings).not.toHaveBeenCalled();
 	});
 
 	it("saves a minimum age and writes it down", async () => {
-		const response = await send("PATCH", { minAccountAgeDays: 7, enabled: true });
+		const response = await send("PATCH", { minAccountAgeMinutes: 10080, enabled: true });
 
 		expect(response.status).toBe(200);
 		expect(saveRaidSettings).toHaveBeenCalledWith(
 			GUILD,
-			expect.objectContaining({ enabled: true, minAccountAgeDays: 7 }),
+			expect.objectContaining({ enabled: true, minAccountAgeMinutes: 10080 }),
 			OWNER,
 		);
 		expect(recordAudit).toHaveBeenCalledWith(

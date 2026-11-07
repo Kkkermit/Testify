@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 236, in 34 domain folders         |
 | Schemas/repositories | 53 / 52                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 4,165 across 562 suites           |
+| Tests                | 4,180 across 563 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -1945,7 +1945,11 @@ things about them are load-bearing:
 
 - **A hold is a Discord timeout until the account is old enough**, from the snowflake's own timestamp and nothing
   else (`holdUntil`). Discord lifts it on its own, so there is no job and nothing about the member is stored, and the
-  minimum is capped at 28 days because that is Discord's longest timeout. Bots are never held, and the member is told
+  minimum is capped at 28 days because that is Discord's longest timeout. It is kept in minutes
+  (`minAccountAgeMinutes`), picked in minutes, hours or days on the dashboard and typed as `30m`, `12h` or `7d` on the
+  panel (`ageFromText`, which refuses a bare number, since the parser would read it as seconds). A record written while
+  it was kept in days is read as days × 1,440 by `ageOnDisk`, the one place that knows, and loses its days on its next
+  save. Bots are never held, and the member is told
   why in a DM.
 - **A hold is not a moderation case**, because no moderator decided it. Its reason is in Discord's audit log, which
   the Changes page reads, and the alert channel names who was held.

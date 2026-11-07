@@ -227,7 +227,7 @@ export const raidOverview: RaidOverview = {
 	enabled: true,
 	alertChannelId: "400000000000000001",
 	pingRoleId: null,
-	minAccountAgeDays: 7,
+	minAccountAgeMinutes: 10080,
 	spikeJoins: 10,
 	spikeMinutes: 1,
 	canSend: true,

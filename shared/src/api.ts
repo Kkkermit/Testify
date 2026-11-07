@@ -101,7 +101,7 @@ export type FeatureDetail =
 	| { kind: "posting"; channelId: string }
 	| { kind: "count"; what: FeatureCount; count: number }
 	| { kind: "levelling"; rewards: number; boosts: number }
-	| { kind: "holding"; days: number }
+	| { kind: "holding"; minutes: number }
 	| { kind: "watching" }
 	| { kind: "bypass"; permission: string }
 	| { kind: "countingAt"; count: number }

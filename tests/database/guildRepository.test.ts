@@ -38,7 +38,7 @@ async function configure(guildId: string): Promise<void> {
 		createAutoResponder(guildId, { trigger: "rules", match: "word", reply: "Read #rules." }, ADMIN),
 		createSchedule(guildId, { channelId: CHANNEL, message: "Hello", repeat: "daily", nextAt: new Date() }, ADMIN),
 		saveBirthdaySettings(guildId, { enabled: true, channelId: CHANNEL }, ADMIN),
-		saveRaidSettings(guildId, { enabled: true, minAccountAgeDays: 7 }, ADMIN),
+		saveRaidSettings(guildId, { enabled: true, minAccountAgeMinutes: 10080 }, ADMIN),
 	]);
 }
 

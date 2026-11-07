@@ -16,7 +16,7 @@ function summarise(patch: RaidPatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined)
 		parts.push(patch.enabled ? "Turned raid protection on" : "Turned raid protection off");
-	if (patch.minAccountAgeDays !== undefined) parts.push("Changed the minimum account age");
+	if (patch.minAccountAgeMinutes !== undefined) parts.push("Changed the minimum account age");
 	if (patch.spikeJoins !== undefined || patch.spikeMinutes !== undefined) parts.push("Changed the spike alert");
 	if (patch.alertChannelId !== undefined) parts.push("Moved raid alerts");
 	if (patch.pingRoleId !== undefined) parts.push("Changed who a raid alert pings");

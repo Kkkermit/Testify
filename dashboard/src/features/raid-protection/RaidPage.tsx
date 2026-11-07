@@ -21,6 +21,7 @@ import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermi
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useLacks } from "@/features/guild-overview/useLacks";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
+import { AgeField } from "@/features/raid-protection/components/AgeField";
 import { hasWork, numberIn, raidSummary } from "@/features/raid-protection/raid.utils";
 import { useRaid, useUpdateRaid } from "@/features/raid-protection/useRaid";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -80,19 +81,14 @@ export function RaidPage(): React.JSX.Element {
 					</SettingRows>
 
 					<SettingRows title={t("raid.hold")} description={t("raid.holdBody")}>
-						<NumberField
-							key={`age-${String(settings.minAccountAgeDays)}`}
-							id="raid-age"
-							label={t("raid.minAge")}
-							hint={t("raid.minAgeHint", { max: RAID_LIMITS.maxAccountAgeDays })}
-							stored={settings.minAccountAgeDays}
-							min={0}
-							max={RAID_LIMITS.maxAccountAgeDays}
-							onSave={(minAccountAgeDays) => {
-								write({ minAccountAgeDays });
+						<AgeField
+							key={`age-${String(settings.minAccountAgeMinutes)}`}
+							stored={settings.minAccountAgeMinutes}
+							onSave={(minAccountAgeMinutes) => {
+								write({ minAccountAgeMinutes });
 							}}
 						/>
-						{settings.minAccountAgeDays > 0 && !settings.canHold && <Warning>{t("raid.cannotHold")}</Warning>}
+						{settings.minAccountAgeMinutes > 0 && !settings.canHold && <Warning>{t("raid.cannotHold")}</Warning>}
 					</SettingRows>
 
 					<SettingRows title={t("raid.alerts")} description={t("raid.alertsBody")}>
