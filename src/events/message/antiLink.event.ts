@@ -3,16 +3,14 @@ import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
 import { getAntiLink } from "@database/repositories/antiLinkRepository";
 import { cleanupFooter, embed, TIDY_AFTER_MS } from "@lib/discord";
-import { issueWarning } from "@lib/moderation";
-
-const LINK_PATTERN = /(https?:\/\/|www\.|discord\.gg\/|\b[a-z0-9-]+\.(com|net|org|io|gg|xyz|co)\b)/i;
+import { containsLink, issueWarning } from "@lib/moderation";
 
 export default defineMessageHandler({
 	name: "antiLink",
 	order: 25,
 	async run(message, client) {
 		if (!message.guild || !message.member) return;
-		if (!LINK_PATTERN.test(message.content)) return;
+		if (!containsLink(message.content)) return;
 
 		const settings = await getAntiLink(message.guild.id);
 		if (!settings) return;

@@ -26,10 +26,13 @@ const UNITS: Record<string, number> = {
 
 const PATTERN = /(\d+(?:\.\d+)?)\s*([a-z]+)/gi;
 
+/** Longer than any real length; reading a longer one costs time that grows with the square of its length. */
+const MAX_INPUT = 100;
+
 /** Parses "10m", "2h30m", "1d 12h" into milliseconds. */
 export function parseDuration(input: string): number | null {
 	const trimmed = input.trim().toLowerCase();
-	if (trimmed.length === 0) return null;
+	if (trimmed.length === 0 || trimmed.length > MAX_INPUT) return null;
 
 	if (/^\d+$/.test(trimmed)) return Number.parseInt(trimmed, 10) * SECOND_MS;
 
