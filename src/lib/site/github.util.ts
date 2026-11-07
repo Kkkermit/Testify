@@ -177,6 +177,10 @@ export class GitHubReader {
 		this.#files = new TimedCache(ttl, SITE_LIMITS.filesCached, options.now);
 	}
 
+	get signedIn(): boolean {
+		return this.#options.token !== undefined;
+	}
+
 	standing(): Promise<RepositoryStanding> {
 		return this.#cached("standing", async () => {
 			const [repo, release, source] = await Promise.all([

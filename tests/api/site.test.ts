@@ -1,3 +1,4 @@
+import { gitHubAdvice } from "@api/routes/site";
 import { createApi } from "@api/server";
 import { type Env } from "@config/env";
 import { theme } from "@config/theme";
@@ -110,5 +111,45 @@ describe("the source browser's routes", () => {
 
 		expect(await error(response)).toEqual({ status: 502, code: "github_unreachable" });
 		expect(warn).toHaveBeenCalledWith(expect.objectContaining({ service: "GitHub", status: 503 }), expect.any(String));
+	});
+
+	/** On a shared host other customers can spend GitHub's 60 an hour first, and only a token gets round that. */
+	it("names the token in the log when GitHub's limit for the address is spent", async () => {
+		const client = createMockClient();
+		const warn = jest.spyOn(client.logger, "warn");
+		github(new ServiceError("GitHub", new Error("HTTP 403"), 403));
+
+		const app = createApi(client, { DASHBOARD_PORT: 3_000, DASHBOARD_BIND: "127.0.0.1" } as Env);
+		const response = await app.request("/api/site/tree");
+
+		expect(await error(response)).toEqual({ status: 502, code: "github_unreachable" });
+		expect(warn).toHaveBeenCalledWith(
+			expect.objectContaining({ status: 403 }),
+			expect.stringContaining("SITE_GITHUB_TOKEN"),
+		);
+	});
+
+	it("advises the host only on what a token changes", () => {
+		const rows = {
+			limitedWithoutToken: gitHubAdvice(403, false),
+			tooManyWithoutToken: gitHubAdvice(429, false),
+			tokenRefused: gitHubAdvice(401, true),
+			limitedWithToken: gitHubAdvice(403, true),
+			outage: gitHubAdvice(503, false),
+		};
+
+		expect({
+			limitedWithoutToken: rows.limitedWithoutToken?.includes("60 requests an hour"),
+			tooManyWithoutToken: rows.tooManyWithoutToken?.includes("SITE_GITHUB_TOKEN"),
+			tokenRefused: rows.tokenRefused?.includes("refused SITE_GITHUB_TOKEN"),
+			limitedWithToken: rows.limitedWithToken,
+			outage: rows.outage,
+		}).toEqual({
+			limitedWithoutToken: true,
+			tooManyWithoutToken: true,
+			tokenRefused: true,
+			limitedWithToken: null,
+			outage: null,
+		});
 	});
 });

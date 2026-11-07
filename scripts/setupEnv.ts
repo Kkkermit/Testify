@@ -109,7 +109,7 @@ export function fields(isDev: boolean): Field[] {
 		{
 			key: "SITE_GITHUB_TOKEN",
 			message: "GitHub token for the source page's traffic",
-			hint: "Blank shows stars and forks without the traffic",
+			hint: "Blank works, but a token lifts GitHub's limit of 60 an hour and shows traffic",
 			required: false,
 		},
 	];

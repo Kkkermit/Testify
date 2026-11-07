@@ -39,12 +39,20 @@ export class UpstreamProblem extends ApiProblem {
 	/** What the service answered, so a log line can tell a rate limit from an outage; 0 when it did not answer. */
 	readonly upstreamStatus: number;
 	readonly service: "Discord" | "GitHub";
+	/** What the host can do about it, for the log only; the reader sees `message`. */
+	readonly advice: string | null;
 
-	constructor(upstreamStatus: number, message: string, service: "Discord" | "GitHub" = "Discord") {
+	constructor(
+		upstreamStatus: number,
+		message: string,
+		service: "Discord" | "GitHub" = "Discord",
+		advice: string | null = null,
+	) {
 		super(502, service === "Discord" ? "discord_unreachable" : "github_unreachable", message);
 		this.name = "UpstreamProblem";
 		this.upstreamStatus = upstreamStatus;
 		this.service = service;
+		this.advice = advice;
 	}
 }
 

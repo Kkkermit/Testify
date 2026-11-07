@@ -15,8 +15,19 @@ const REFUSALS: Record<SiteRefusal, () => ApiProblem> = {
 	unknown_file: () => notFound("unknown_file", "There is no such file in this release."),
 };
 
+/** What the host can change when GitHub refuses; null when waiting is all there is to do. */
+export function gitHubAdvice(status: number, signedIn: boolean): string | null {
+	if (status === 401 && signedIn) {
+		return "GitHub refused SITE_GITHUB_TOKEN, which may have expired or been revoked. Make a new one, or leave it blank.";
+	}
+	if ((status === 403 || status === 429) && !signedIn) {
+		return "Without SITE_GITHUB_TOKEN GitHub allows 60 requests an hour from this machine's address, and on a shared host other customers can spend them first. Set it, and the token's own allowance of 5,000 an hour is used instead.";
+	}
+	return null;
+}
+
 /** GitHub's answer becomes a refusal or a retry, never a 500 that reads like a bug in the bot. */
-async function fromGitHub<T>(task: () => Promise<T>): Promise<T> {
+async function fromGitHub<T>(github: GitHubReader, task: () => Promise<T>): Promise<T> {
 	try {
 		return await task();
 	} catch (error) {
@@ -30,6 +41,7 @@ async function fromGitHub<T>(task: () => Promise<T>): Promise<T> {
 					? "GitHub is limiting how often it is asked. Try again later."
 					: "GitHub did not answer. Try again in a moment.",
 				"GitHub",
+				gitHubAdvice(status, github.signedIn),
 			);
 		}
 		throw error;
@@ -46,11 +58,11 @@ export function siteRoutes(github: GitHubReader): Hono<ApiBindings> {
 			};
 			return context.json(body);
 		})
-		.get("/repository", async (context) => context.json(await fromGitHub(() => github.standing())))
-		.get("/traffic", async (context) => context.json(await fromGitHub(() => github.traffic())))
-		.get("/tree", async (context) => context.json(await fromGitHub(() => github.tree())))
+		.get("/repository", async (context) => context.json(await fromGitHub(github, () => github.standing())))
+		.get("/traffic", async (context) => context.json(await fromGitHub(github, () => github.traffic())))
+		.get("/tree", async (context) => context.json(await fromGitHub(github, () => github.tree())))
 		.get("/file", async (context) => {
 			const { path } = parseQuery(context, sourceFileQuery);
-			return context.json(await fromGitHub(() => github.file(path)));
+			return context.json(await fromGitHub(github, () => github.file(path)));
 		});
 }
