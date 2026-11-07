@@ -2502,6 +2502,8 @@
 		"welcome": "Willkommen im {{bot}}-Dashboard. Was suchst du denn hier?",
 		"bugsLead": "Einen Fehler gefunden, oder funktioniert etwas nicht so, wie es sollte?",
 		"bugsBody": "Melde ihn mit /bug-report in Discord – die Meldung geht direkt an die Leute hinter {{bot}}.",
+		"codeLead": "Neugierig, wie das alles funktioniert?",
+		"codeBody": "{{bot}} ist Open Source, und jede Zeile davon liegt auf GitHub: {{url}}",
 		"stopTitle": "Stopp!",
 		"stopLead": "Wenn dir jemand gesagt hat, du sollst hier etwas hineinkopieren, ist das Betrug.",
 		"stopBody": "Alles, was du in dieser Konsole ausführst, läuft unter deinem Konto. Es kann alles lesen, was du in diesem Dashboard siehst, und in deinem Namen die Einstellungen deiner Server ändern. Führe nur Code aus, den du vollständig verstehst."

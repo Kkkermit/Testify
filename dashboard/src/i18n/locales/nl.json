@@ -2502,6 +2502,8 @@
 		"welcome": "Welkom op het dashboard van {{bot}}. Wat brengt jou hier rondsnuffelen?",
 		"bugsLead": "Een bug gevonden, of iets dat niet werkt zoals het hoort?",
 		"bugsBody": "Meld het met /bug-report in Discord, en het gaat rechtstreeks naar de mensen die {{bot}} draaien.",
+		"codeLead": "Benieuwd hoe het allemaal werkt?",
+		"codeBody": "{{bot}} is open source, en elke regel staat op GitHub: {{url}}",
 		"stopTitle": "Stop!",
 		"stopLead": "Als iemand je zei hier iets te kopiëren en plakken, is het oplichting.",
 		"stopBody": "Alles wat je in deze console uitvoert, draait als jou. Het kan alles lezen wat je op dit dashboard kunt zien en de instellingen van je servers in jouw naam wijzigen. Voer alleen code uit die je volledig begrijpt."
