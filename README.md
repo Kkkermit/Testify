@@ -550,10 +550,10 @@ release it is running. It is **on by default** and needs nothing set. After `npm
 `http://localhost:3000`; while you work on it, `npm run dev:all` serves it at `http://localhost:5174`. It listens on
 `DASHBOARD_PORT` and `DASHBOARD_BIND`, so it stays on your own machine until you put a reverse proxy in front of it.
 
-| Variable            | What it is                                                                                 |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| `SITE_ENABLED`      | `false` to turn it off. With the dashboard off too, the bot then listens on no port at all |
-| `SITE_GITHUB_TOKEN` | Optional. Lets the source page show views, clones and referrers as well as stars and forks |
+| Variable            | What it is                                                                                                                               |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `SITE_ENABLED`      | `false` to turn it off. With the dashboard off too, the bot then listens on no port at all                                               |
+| `SITE_GITHUB_TOKEN` | Optional. Lifts GitHub's limit of 60 requests an hour per address, which a shared host can use up, and shows views, clones and referrers |
 
 Nothing on it is written twice. The docs are this README, `AGENTS.md` and `docs/`, bundled when the page is built,
 so they describe the version you run. The source browser and the repository's numbers come from GitHub, asked only

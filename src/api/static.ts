@@ -3,6 +3,7 @@ import { basename, dirname, extname, join, posix, relative, resolve, sep } from 
 import { type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { signedInOwner } from "@api/middleware/session";
+import { type LinkPreview, withPreview } from "@lib/site";
 
 const TYPES: Record<string, string> = {
 	".html": "text/html; charset=utf-8",
@@ -65,7 +66,25 @@ function isOwnerChunk(root: string, asset: string): boolean {
 	return relative(root, dirname(asset)) === "assets" && /^OwnerPage-[\w-]+\.(?:js|css)$/.test(basename(asset));
 }
 
-export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): void {
+/** A preview that cannot be read costs the link its card, never the page. */
+async function previewed(
+	index: string,
+	path: string,
+	preview: ((path: string) => Promise<LinkPreview>) | undefined,
+): Promise<string> {
+	if (preview === undefined) return index;
+	try {
+		return withPreview(index, await preview(path));
+	} catch {
+		return index;
+	}
+}
+
+export function serveDashboard(
+	app: Hono<ApiBindings>,
+	root = dashboardRoot(),
+	preview?: (path: string) => Promise<LinkPreview>,
+): void {
 	if (!dashboardBuilt(root)) return;
 
 	const index = readFileSync(join(root, "index.html"), "utf8");
@@ -105,6 +124,6 @@ export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): 
 		if (extname(context.req.path) !== "" && !context.req.path.startsWith("/source-code/")) return context.notFound();
 
 		context.header("Cache-Control", "no-cache");
-		return context.html(index);
+		return context.html(await previewed(index, context.req.path, preview));
 	});
 }
