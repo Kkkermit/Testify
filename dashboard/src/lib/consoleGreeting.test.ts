@@ -55,7 +55,7 @@ describe("greetTheConsole", () => {
 
 	/** The greeting is a courtesy, so a site that will not answer, or answers with something odd, still gets the warning. */
 	it("still warns, and prints no link, when the repository cannot be read or is not a web address", async () => {
-		for (const repository of [null, "javascript:alert(1)", "https://x y"]) {
+		for (const repository of [null, "JaVaScRiPt:alert(1)", "https://x y"]) {
 			log.mockClear();
 			await greetTheConsole(Promise.resolve(repository));
 
