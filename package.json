@@ -76,6 +76,9 @@
 		"discord-html-transcripts": {
 			"undici": "^6.29.1"
 		},
+		"discord-giveaways": {
+			"deepmerge-ts": "^8.0.1"
+		},
 		"@istanbuljs/load-nyc-config": {
 			"js-yaml": "^3.15.1"
 		}
