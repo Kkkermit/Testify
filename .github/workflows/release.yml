@@ -1,0 +1,130 @@
+name: Release
+
+# A push to main is a release: tag it, publish its notes, and publish the Docker image built from it.
+# A pull request into main builds the image without publishing it, so a broken Dockerfile is found before the merge.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag and release
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read the version
+        id: version
+        run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Tag the release and publish its notes
+        uses: actions/github-script@v9
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const version = process.env.VERSION;
+            const tag = `release/v${version}`;
+
+            try {
+              await github.rest.git.getRef({ owner, repo, ref: `tags/${tag}` });
+              core.notice(`${tag} already exists, so this push releases nothing new. Bump the version to release.`);
+              return;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+
+            // The release pull request's "## Release notes" section, up to the next level-two heading.
+            const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,
+              repo,
+              commit_sha: context.sha,
+            });
+            const pull = pulls.find((candidate) => candidate.base.ref === "main" && candidate.merged_at);
+            const body = (pull?.body ?? "").replace(/\r\n/g, "\n");
+            const notes = body.match(/^## Release notes[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m)?.[1]?.trim();
+
+            await github.rest.repos.createRelease({
+              owner,
+              repo,
+              tag_name: tag,
+              target_commitish: context.sha,
+              name: `v${version} Testify`,
+              body: notes ?? "",
+              generate_release_notes: !notes,
+              make_latest: "true",
+            });
+            core.notice(
+              notes
+                ? `Released ${tag} with the notes from #${pull.number}.`
+                : `Released ${tag} with GitHub's generated notes: no release pull request with a "Release notes" section was found.`,
+            );
+
+  image:
+    name: Docker image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      PUBLISH: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # A registry path must be lower case, and a fork publishes under its own name.
+      - name: Name the image
+        id: image
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+      # Only a published image is built for arm64, which runs emulated and takes several times as long.
+      - uses: docker/setup-qemu-action@v4
+        if: env.PUBLISH == 'true'
+        with:
+          platforms: arm64
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        if: env.PUBLISH == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tags and labels
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=raw,value=${{ steps.image.outputs.version }}
+            type=raw,value=latest
+            type=sha,format=short
+
+      - name: Build, and publish from main
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ env.PUBLISH == 'true' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          push: ${{ env.PUBLISH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

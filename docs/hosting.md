@@ -52,6 +52,25 @@ To update after pulling new code:
 docker compose build && docker compose up -d
 ```
 
+### Or run the published image
+
+Every release is built for `amd64` and `arm64` and published as
+[`ghcr.io/kkkermit/testify`](https://github.com/Kkkermit/Testify/pkgs/container/testify), so nothing has to be
+built on the server, which a Raspberry Pi or a small cloud machine will thank you for. With the two compose files
+and `.env` beside each other:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
+```
+
+It follows the newest release. `TESTIFY_TAG=2.3.5` in `.env` pins one, and updating is the same command after a
+`pull`:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.image.yml pull
+docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
+```
+
 Data lives in the `mongo-data` volume and survives `docker compose down`. `docker compose down -v` deletes it.
 
 ---
@@ -104,8 +123,11 @@ only what runs.
 - **FFmpeg and yt-dlp are installed by the image, not by npm.** They have to be: the skipped install scripts
   are exactly what the optional `ffmpeg-static` and `youtube-dl-exec` packages use to fetch their binaries, so
   in a container they would install and stay empty. FFmpeg comes from apt; yt-dlp is downloaded from its
-  releases because Debian's build is far too old to track YouTube, and the build runs `yt-dlp --version` so a
-  bad download fails the image rather than the first `/play`. This adds roughly 100 MB.
+  releases, the build for the image's own architecture, because Debian's build is far too old to track YouTube,
+  and the build runs `yt-dlp --version` so a bad download fails the image rather than the first `/play`. This adds
+  roughly 100 MB.
+- **The first stage runs on the builder's own platform.** Everything it hands on is JavaScript and CSS, so an
+  `arm64` image only emulates the second stage, which installs and builds nothing.
 - **It runs as the `node` user**, not root.
 - **Music writes only to the system's temporary folder, and only a little.** No song is ever saved as a file:
   yt-dlp streams it into memory, up to 16 MB for each server that is playing. A SoundCloud stream arrives in
@@ -202,5 +224,8 @@ Discord. Separately, in a Linux sandbox:
   `healthy` against a listener that answers like a ready bot, and fails it with nothing listening; with the website
   and the dashboard both off it passes.
 
-Still untested: the health check against a bot really connected to Discord, and the base image tag, which is not
-pinned to a digest.
+- **The release workflow passes `actionlint`**, and the architecture switch picks `yt-dlp_linux` for `amd64` and
+  `yt-dlp_linux_aarch64` for `arm64`, both of which yt-dlp publishes.
+
+Still untested: the health check against a bot really connected to Discord, the published `arm64` image on ARM
+hardware, and the base image tag, which is not pinned to a digest.

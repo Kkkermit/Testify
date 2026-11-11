@@ -451,6 +451,13 @@ docker compose logs -f bot
 lives in a named volume and survives a restart. FFmpeg and yt-dlp are installed by the image, so music works with
 nothing to configure — on Railway too.
 
+**Or skip the build.** Every release is published for `amd64` and `arm64` as
+[`ghcr.io/kkkermit/testify`](https://github.com/Kkkermit/Testify/pkgs/container/testify):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
+```
+
 **[`docs/hosting.md`](docs/hosting.md) is the full guide** — the dashboard behind a reverse proxy, what is in the
 image and what is deliberately left out, which hosts can and cannot run a gateway bot, and a troubleshooting
 table.
