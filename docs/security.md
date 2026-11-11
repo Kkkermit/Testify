@@ -134,9 +134,7 @@ entry missing any of them should be removed:
 
 `tests/config/suppressions.test.ts` reads both files and fails on an entry missing any of the three.
 
-| Advisory                                                                 | Package      | Reached through                                 | Why it is safe                                                                                                           | Expires       |
-| ------------------------------------------------------------------------ | ------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| [GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx) | deepmerge-ts | discord-giveaways, whose latest release pins v4 | Nothing here merges an object graph somebody else supplied. Excepted in both files, and in `.snyk` on that one path only | 20 March 2027 |
+Nothing is suppressed today. A fix that a pin in `overrides` can reach, below, is always preferred to a suppression.
 
 ### Version pins
 
@@ -153,3 +151,4 @@ here. Each one should be dropped the moment its parent updates — check when a 
 | `js-yaml: ^4.3.2`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.                                                                               |
 | `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.                                                                      |
 | `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible, and `^6.29.1` fixes GHSA-rfgv-xxqx-mfg5, GHSA-4qv8-2p9j-2685 and GHSA-xjj6-f33q-929c.                               |
+| `discord-giveaways` → `deepmerge-ts: ^8.0.1`       | Its latest release, 6.0.1, asks for `^4.2.1`. 8.0.0 fixes GHSA-ggr8-5vv4-36mx, and the `deepmerge` and `deepmergeCustom({ mergeArrays: false })` calls it makes give the same results on 8.      |
