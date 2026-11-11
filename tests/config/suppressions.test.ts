@@ -18,7 +18,9 @@ type SnykRule = Record<string, { reason?: string; expires?: string }>;
 
 const read = (file: string): string => readFileSync(resolve(__dirname, "../..", file), "utf8");
 
-const nsprc = Object.entries(JSON.parse(read(".nsprc")) as Record<string, NspEntry>)
+const raw = JSON.parse(read(".nsprc")) as Record<string, NspEntry>;
+
+const nsprc = Object.entries(raw)
 	.filter(([id, entry]) => entry.active === true && !id.startsWith("//"))
 	.map(([id, entry]): [string, Suppression] => [
 		`.nsprc ${id}`,
@@ -39,28 +41,39 @@ const snyk = Object.entries(policy.ignore ?? {}).flatMap(([id, rules]) =>
 
 const entries = [...nsprc, ...snyk];
 
+/** The ids of every suppression a rule fails, so one test names each entry that breaks it. */
+const breaking = (keeps: (entry: Suppression) => boolean): string[] =>
+	entries.filter(([, entry]) => !keeps(entry)).map(([id]) => id);
+
 describe("every active advisory suppression", () => {
-	it("is a real list, so a broken read cannot pass vacuously", () => {
-		expect(entries.length).toBeGreaterThan(0);
+	/** There may be no suppressions at all, so the template is what proves both files were read and filtered. */
+	it("is read from both files, so a broken read cannot pass vacuously", () => {
+		expect(raw["//example"]?.active).toBe(false);
 		expect(policy.version).toMatch(/^v\d/);
+		expect(policy.ignore).toBeInstanceOf(Object);
 	});
 
-	it.each(entries)("%s says why it cannot be fixed", (_id, entry) => {
-		expect(entry.notes).toMatch(/reached only through|cannot be upgraded|already the latest/i);
+	it("says why it cannot be fixed", () => {
+		expect(
+			breaking((entry) => /reached only through|cannot be upgraded|already the latest/i.test(entry.notes)),
+		).toEqual([]);
 	});
 
-	it.each(entries)("%s names the version that fixes it, or says there is none", (_id, entry) => {
-		expect(entry.notes).toMatch(/fixed in \S+@\d|no fixed release yet/i);
+	it("names the version that fixes it, or says there is none", () => {
+		expect(breaking((entry) => /fixed in \S+@\d|no fixed release yet/i.test(entry.notes))).toEqual([]);
 	});
 
 	/** An expiry in the past is a suppression nobody renewed, which is the blind spot this exists to prevent. */
-	it.each(entries)("%s has not expired", (_id, entry) => {
-		expect(entry.expiry).toBeGreaterThan(Date.now());
+	it("has not expired", () => {
+		expect(breaking((entry) => entry.expiry > Date.now())).toEqual([]);
 	});
 
-	/** One years away is the same blind spot with a longer fuse; with no fix to wait for, the fuse is shorter still. */
-	it.each(entries)("%s expires within a year, or 90 days when there is no fix yet", (_id, entry) => {
-		const days = /no fixed release yet/i.test(entry.notes) ? 90 : 366;
-		expect(entry.expiry).toBeLessThan(Date.now() + days * 24 * 60 * 60 * 1000);
+	/** A year away is the same blind spot with a longer fuse; with no fix to wait for, the fuse is shorter still. */
+	it("expires within a year, or 90 days when there is no fix yet", () => {
+		const within = (entry: Suppression): boolean => {
+			const days = /no fixed release yet/i.test(entry.notes) ? 90 : 366;
+			return entry.expiry < Date.now() + days * 24 * 60 * 60 * 1000;
+		};
+		expect(breaking(within)).toEqual([]);
 	});
 });

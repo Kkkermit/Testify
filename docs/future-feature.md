@@ -87,4 +87,5 @@ Each `overrides` pin in `package.json` exists because a parent asked for a versi
 is explained in [`security.md`](security.md); remove a pin once its parent asks for a fixed version by itself. On
 5 November 2026 none did: minimatch 10 still asks `brace-expansion` `^5.0.5` (only minimatch 11 asks `^5.0.12`),
 cosmiconfig 9 asks `js-yaml` `^4.1.0`, ajv asks `fast-uri` `^3.0.1`, `@istanbuljs/load-nyc-config` asks `js-yaml`
-`^3.13.1`, and `discord-html-transcripts` 3.2.0 still pins undici v5.
+`^3.13.1`, and `discord-html-transcripts` 3.2.0 still pins undici v5. On 10 November 2026 `discord-giveaways` 6.0.1
+still asked `deepmerge-ts` `^4.2.1`.

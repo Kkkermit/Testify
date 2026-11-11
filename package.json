@@ -76,6 +76,9 @@
 		"discord-html-transcripts": {
 			"undici": "^6.29.1"
 		},
+		"discord-giveaways": {
+			"deepmerge-ts": "^8.0.1"
+		},
 		"@istanbuljs/load-nyc-config": {
 			"js-yaml": "^3.15.1"
 		}
@@ -89,11 +92,11 @@
 		"discord-giveaways": "6.0.1",
 		"discord-html-transcripts": "3.2.0",
 		"discord.js": "14.28.1",
-		"dotenv": "18.0.9",
+		"dotenv": "18.0.10",
 		"figlet": "1.12.0",
 		"gifenc": "1.0.3",
 		"glob": "14.0.4",
-		"hono": "4.13.16",
+		"hono": "4.13.17",
 		"mathjs": "15.2.0",
 		"mongoose": "8.24.1",
 		"pino": "10.4.0",
@@ -119,7 +122,7 @@
 		"eslint": "10.14.0",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-import-resolver-typescript": "4.4.5",
-		"eslint-plugin-import-x": "4.18.0",
+		"eslint-plugin-import-x": "4.18.1",
 		"husky": "9.1.7",
 		"jest": "30.5.2",
 		"lint-staged": "17.6.0",
@@ -129,7 +132,7 @@
 		"tsup": "9.0.0",
 		"tsx": "4.23.15",
 		"typescript": "5.9.3",
-		"typescript-eslint": "8.72.1",
+		"typescript-eslint": "8.72.2",
 		"yaml": "2.9.1"
 	},
 	"workspaces": [
