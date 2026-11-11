@@ -98,7 +98,7 @@
 		"glob": "14.0.4",
 		"hono": "4.13.17",
 		"mathjs": "15.2.0",
-		"mongoose": "8.24.1",
+		"mongoose": "8.24.8",
 		"pino": "10.4.0",
 		"pino-pretty": "13.2.0",
 		"prompts": "2.4.2",
