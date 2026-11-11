@@ -1,0 +1,20 @@
+{
+  "name": "Testify Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:0-24",
+  "features": {
+    "ghcr.io/devcontainers/features/mongo:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  },
+  "postCreateCommands": [
+    "npm ci"
+  ],
+  "forwardPorts": [5174, 3000],
+  "postStartCommand": "npm run setup -- --dev && npm run dev:all"
+}

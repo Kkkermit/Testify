@@ -292,6 +292,12 @@ there is nothing to hand-edit and nothing to paste in the wrong place. Each answ
 Running it for real rather than developing it? Use `npm run setup` (which writes `.env`), then `npm run build`
 and `npm start`. No token or database yet? The next section walks through both from scratch.
 
+<div align="center">
+  <a href="https://codespaces.new/Kkkermit/Testify?quickstart=true">
+    <img src="https://img.shields.io/badge/Open%20in%20GitHub%20Codespaces-777777?style=for-the-badge&logo=githubcodespaces&logoColor=white" alt="Open in GitHub Codespaces">
+  </a>
+</div>
+
 ## 📖 Full setup guide
 
 <details open>
