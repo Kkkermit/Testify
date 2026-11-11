@@ -1981,7 +1981,7 @@
 		"whoRuns": "Wie dit draait",
 		"whoRunsP1": "{{bot}} wordt zelf gehost. Wie deze instantie heeft opgezet — de beheerder — bepaalt wat hij doet, wat hij bewaart en wie hem kan bereiken. Die is ervoor verantwoordelijk, niet de makers van het project.",
 		"whoRunsP2": "De software wordt geleverd zoals hij is, zonder enige garantie. Niemand belooft dat hij beschikbaar, correct of foutloos zal zijn.",
-		"whoRunsP3": "De code is gepubliceerd onder de Apache 2.0-licentie met de Commons Clause. Iedereen mag hem gebruiken, wijzigen en delen, maar niet verkopen, of een betaalde dienst die er vooral op gebouwd is, en de vermelding van de oorspronkelijke maker in het bestand NOTICE moet blijven staan.",
+		"whoRunsP3": "De code is gepubliceerd onder de MIT-licentie. Iedereen mag hem gebruiken, wijzigen, delen en verkopen, zolang de copyrightvermelding met de oorspronkelijke maker en de licentie zelf in elke kopie blijven staan.",
 		"usingBot": "De bot gebruiken",
 		"usingBotP1": "Waar je {{bot}} ook gebruikt — in een server of in een privébericht — je gaat akkoord met het volgende.",
 		"usingBotL1": "Volg de Servicevoorwaarden en Communityrichtlijnen van Discord. Die gelden bovenop deze voorwaarden, en niets hier gaat erboven.",

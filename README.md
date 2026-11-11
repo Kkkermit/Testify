@@ -853,13 +853,10 @@ feature that can go.
 <details>
 <summary><strong>Can I use this for my own bot, or rename it?</strong></summary>
 
-Yes, with two conditions. It is licensed under Apache 2.0 with the Commons Clause, so you can use it, change it,
-rebrand it and run it for your own servers, but:
-
-- **Keep the credit.** The [`NOTICE`](NOTICE) file names the original author, and it has to stay with any copy
-  or fork you share.
-- **Do not sell it.** You may not charge for the bot, or for hosting, support or a service whose value comes mainly
-  from it.
+Yes. It is released under the [MIT licence](LICENSE), so you can use it, change it, rebrand it, run it for your
+own servers and even sell it. The one condition is **keep the credit**: the copyright notice in
+[`LICENSE`](LICENSE), which names the original author, has to stay with every copy or fork you share. A link back
+to this repository is appreciated, though the licence does not require one.
 
 Rename it in the Discord Developer Portal and every surface follows — the bot reads its own name from Discord.
 The colours and links live in `src/config/theme.ts`.
@@ -934,8 +931,7 @@ useful to you, a [coffee](https://buymeacoffee.com/kkermit) keeps it going.
 
 ## ⚖️ License
 
-Copyright 2026 Kkermit (Kkermit on Discord, [Kkkermit](https://github.com/Kkkermit) on GitHub).
+Copyright (c) 2024-2026 Kkermit (Kkermit on Discord, [Kkkermit](https://github.com/Kkkermit) on GitHub).
 
-Released under the [Apache License 2.0](LICENSE) with the [Commons Clause](https://commonsclause.com) License
-Condition v1.0. You may use, modify and share it, but you may not sell it, and the attribution in
-[`NOTICE`](NOTICE) must be kept in every copy and derived work.
+Released under the [MIT licence](LICENSE). You may use, modify, share and sell it, as long as the copyright notice
+and the licence text in [`LICENSE`](LICENSE) are kept in every copy and derived work.

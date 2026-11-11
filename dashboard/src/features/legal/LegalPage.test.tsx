@@ -206,11 +206,10 @@ describe("the legal pages", () => {
 	it("names the licence the code is published under", () => {
 		const licence = botSource("LICENSE");
 
-		expect(licence).toContain('"Commons Clause" License Condition v1.0');
-		expect(licence).toContain("Apache License\n                           Version 2.0");
-		expect(prose(TERMS)).toMatch(/Apache 2\.0 licence with the Commons Clause/);
-		expect(prose(TERMS)).toMatch(/credit to its original author in the NOTICE file/);
-		expect(botSource("NOTICE")).toMatch(/Kkermit/);
+		expect(licence).toMatch(/^MIT License\n\nCopyright \(c\) [\d-]+ Kkermit/);
+		expect(licence).toContain("The above copyright notice and this permission notice shall be included in all");
+		expect(prose(TERMS)).toMatch(/published under the MIT licence/);
+		expect(prose(TERMS)).toMatch(/copyright notice naming its original author and the licence itself are kept/);
 	});
 
 	/** A paragraph that sums up a list has to come after it, or it reads as introducing the wrong thing. */
