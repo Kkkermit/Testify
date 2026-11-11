@@ -3,11 +3,13 @@
 # Testify — the bot, and the dashboard it serves from the same process.
 # Build:  docker build -t testify .
 # Run:    docker compose up -d      (see docker-compose.yml and docs/hosting.md)
+# Or skip the build: every release is published as ghcr.io/kkkermit/testify for amd64 and arm64.
 
 ARG NODE_VERSION=24-bookworm-slim
 
 # ── Build ───────────────────────────────────────────────────────────────────────
-FROM node:${NODE_VERSION} AS build
+# Everything this stage hands on is JavaScript and CSS, so it runs on the builder's own platform even for an arm64 image.
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION} AS build
 WORKDIR /app
 
 # `prepare` runs husky, which needs a .git this context does not carry — and an install
@@ -36,6 +38,7 @@ RUN npm run build:shared && npm run build:bot && npm run build:dashboard
 FROM node:${NODE_VERSION} AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
+ARG TARGETARCH
 
 # Three things the OS has to provide:
 #   fonts — the cards bring their own Latin and Cyrillic in assets/fonts, and fall back to these for anything else:
@@ -43,9 +46,14 @@ ENV NODE_ENV=production
 #   ffmpeg — only for sources that are not already Opus; most tracks are passed through untouched.
 #   yt-dlp — downloaded rather than installed from apt, whose build is far too old to track YouTube. The
 #     optional npm packages cannot help here: the installs below run with --ignore-scripts.
-RUN apt-get update \
+RUN case "${TARGETARCH:-amd64}" in \
+		amd64) ytdlp=yt-dlp_linux ;; \
+		arm64) ytdlp=yt-dlp_linux_aarch64 ;; \
+		*) echo "yt-dlp publishes no build for ${TARGETARCH}" >&2; exit 1 ;; \
+	esac \
+	&& apt-get update \
 	&& apt-get install --no-install-recommends -y fonts-dejavu-core fonts-noto-color-emoji fonts-wqy-zenhei ffmpeg ca-certificates curl \
-	&& curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp \
+	&& curl -fsSL "https://github.com/yt-dlp/yt-dlp/releases/latest/download/${ytdlp}" -o /usr/local/bin/yt-dlp \
 	&& chmod 0755 /usr/local/bin/yt-dlp \
 	&& /usr/local/bin/yt-dlp --version \
 	&& rm -rf /var/lib/apt/lists/*

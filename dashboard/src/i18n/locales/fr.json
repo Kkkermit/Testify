@@ -2043,7 +2043,7 @@
 		"whoRuns": "Qui gère ceci",
 		"whoRunsP1": "{{bot}} est auto-hébergé. Qui a déployé cette instance — l’exploitant — décide de ce qu’elle fait, de ce qu’elle stocke et de qui peut l’atteindre. La responsabilité lui incombe, pas aux auteurs du projet.",
 		"whoRunsP2": "Le logiciel est fourni tel quel, sans garantie d’aucune sorte. Personne ne promet qu’il sera disponible, correct ou exempt de défauts.",
-		"whoRunsP3": "Le code est publié sous licence Apache 2.0 avec la Commons Clause. Chacun peut l’utiliser, le modifier et le partager, mais pas le vendre, ni vendre un service payant reposant essentiellement sur lui, et la mention de son auteur d’origine dans le fichier NOTICE doit être conservée.",
+		"whoRunsP3": "Le code est publié sous licence MIT. Chacun peut l’utiliser, le modifier, le partager et le vendre, à condition de conserver dans chaque copie la mention de droit d’auteur qui nomme son auteur d’origine, ainsi que la licence elle-même.",
 		"usingBot": "Utiliser le bot",
 		"usingBotP1": "Où que vous utilisiez {{bot}} — sur un serveur ou en message privé —, vous acceptez ce qui suit.",
 		"usingBotL1": "Respectez les Conditions d’utilisation et les Lignes directrices de la communauté de Discord. Elles s’appliquent en plus de ces conditions, et rien ici ne les remplace.",
@@ -2651,9 +2651,18 @@
 		"groups": {
 			"run": "Héberger votre copie",
 			"use": "L’utiliser",
-			"change": "Le modifier"
+			"change": "Le modifier",
+			"learn": "Comment ça marche"
 		},
 		"pages": {
+			"oneCommand": "Une commande, deux surfaces",
+			"oneCommandSummary": "Comment chaque commande fonctionne en /ban et en t?ban à partir d’un seul fichier.",
+			"negativeNumber": "Le nombre négatif qui créait de l’argent",
+			"negativeNumberSummary": "Une commande à préfixe contournait une limite imposée par Discord, et ce qui la fait respecter partout désormais.",
+			"featureSwitch": "Désactiver une fonction entière",
+			"featureSwitchSummary": "Un réglage, une déclaration et les tests qui les gardent en accord.",
+			"threeSystems": "Tester sur trois systèmes d’exploitation",
+			"threeSystemsSummary": "Ignorer plutôt que réussir, des données de test datées et un séparateur de chemin qui a cassé Windows.",
 			"requirements": "Prérequis",
 			"requirementsSummary": "Node.js, MongoDB et les systèmes sur lesquels il est testé.",
 			"quickStart": "Démarrage rapide",

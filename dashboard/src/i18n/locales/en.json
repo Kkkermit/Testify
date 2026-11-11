@@ -1981,7 +1981,7 @@
 		"whoRuns": "Who runs this",
 		"whoRunsP1": "{{bot}} is self-hosted. Whoever deployed this instance — the operator — decides what it does, what it stores and who can reach it. They are responsible for it, not the project’s authors.",
 		"whoRunsP2": "The software is provided as-is, without warranty of any kind. Nobody promises it will be available, correct, or free of defects.",
-		"whoRunsP3": "The code is published under the Apache 2.0 licence with the Commons Clause. Anyone may use, change and share it, but not sell it or a paid service built mainly on it, and the credit to its original author in the NOTICE file must be kept.",
+		"whoRunsP3": "The code is published under the MIT licence. Anyone may use, change, share and sell it, as long as the copyright notice naming its original author and the licence itself are kept in every copy.",
 		"usingBot": "Using the bot",
 		"usingBotP1": "Wherever you use {{bot}} — in a server or in a direct message — you agree to the following.",
 		"usingBotL1": "Follow Discord’s Terms of Service and Community Guidelines. They apply on top of these terms, and nothing here overrides them.",
@@ -2581,9 +2581,18 @@
 		"groups": {
 			"run": "Run your own copy",
 			"use": "Use it",
-			"change": "Change it"
+			"change": "Change it",
+			"learn": "How it works"
 		},
 		"pages": {
+			"oneCommand": "One command, two surfaces",
+			"oneCommandSummary": "How every command runs as both /ban and t?ban from one file.",
+			"negativeNumber": "The negative number that minted money",
+			"negativeNumberSummary": "A prefix command skipped a bound Discord enforces, and what now holds it everywhere.",
+			"featureSwitch": "Switching off a whole feature",
+			"featureSwitchSummary": "One setting, one declaration, and the tests that keep the two in step.",
+			"threeSystems": "Testing on three operating systems",
+			"threeSystemsSummary": "Skipping instead of passing, fixture dates, and a path separator that broke Windows.",
 			"requirements": "Requirements",
 			"requirementsSummary": "Node.js, MongoDB and the systems it is tested on.",
 			"quickStart": "Quick start",

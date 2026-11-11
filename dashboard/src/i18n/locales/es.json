@@ -2043,7 +2043,7 @@
 		"whoRuns": "Quién lo gestiona",
 		"whoRunsP1": "{{bot}} es autoalojado. Quien haya desplegado esta instancia —el operador— decide qué hace, qué almacena y quién puede acceder. La responsabilidad es suya, no de los autores del proyecto.",
 		"whoRunsP2": "El software se entrega tal cual, sin garantía de ningún tipo. Nadie promete que esté disponible, que sea correcto ni que carezca de defectos.",
-		"whoRunsP3": "El código se publica bajo la licencia Apache 2.0 con la Commons Clause. Cualquiera puede usarlo, modificarlo y compartirlo, pero no venderlo ni vender un servicio de pago basado principalmente en él, y debe conservarse el crédito a su autor original que figura en el archivo NOTICE.",
+		"whoRunsP3": "El código se publica bajo la licencia MIT. Cualquiera puede usarlo, modificarlo, compartirlo y venderlo, siempre que se conserven en cada copia el aviso de copyright que nombra a su autor original y la propia licencia.",
 		"usingBot": "Uso del bot",
 		"usingBotP1": "Dondequiera que uses {{bot}} —en un servidor o en un mensaje directo—, aceptas lo siguiente.",
 		"usingBotL1": "Cumple los Términos de servicio y las Directrices de la comunidad de Discord. Se aplican además de estos términos, y nada de lo que hay aquí los anula.",
@@ -2651,9 +2651,18 @@
 		"groups": {
 			"run": "Ejecuta tu propia copia",
 			"use": "Úsalo",
-			"change": "Cámbialo"
+			"change": "Cámbialo",
+			"learn": "Cómo funciona"
 		},
 		"pages": {
+			"oneCommand": "Un comando, dos superficies",
+			"oneCommandSummary": "Cómo cada comando funciona como /ban y como t?ban desde un solo archivo.",
+			"negativeNumber": "El número negativo que creaba dinero",
+			"negativeNumberSummary": "Un comando de prefijo se saltaba un límite que Discord aplica, y lo que ahora lo mantiene en todas partes.",
+			"featureSwitch": "Desactivar una función entera",
+			"featureSwitchSummary": "Un ajuste, una declaración y las pruebas que mantienen ambos de acuerdo.",
+			"threeSystems": "Pruebas en tres sistemas operativos",
+			"threeSystemsSummary": "Omitir en lugar de aprobar, fechas en los datos de prueba y un separador de rutas que rompió Windows.",
 			"requirements": "Requisitos",
 			"requirementsSummary": "Node.js, MongoDB y los sistemas en los que se prueba.",
 			"quickStart": "Inicio rápido",

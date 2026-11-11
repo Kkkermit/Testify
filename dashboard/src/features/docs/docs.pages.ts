@@ -9,6 +9,10 @@ export const DOC_FILES = [
 	"docs/contributing.md",
 	"docs/security.md",
 	"docs/dashboard/guide.md",
+	"docs/articles/one-command-two-surfaces.md",
+	"docs/articles/a-negative-number-that-minted-money.md",
+	"docs/articles/switching-features-off.md",
+	"docs/articles/testing-on-three-operating-systems.md",
 	".env.example",
 ] as const;
 
@@ -22,16 +26,25 @@ export const LOADERS: Record<DocFile, () => Promise<string>> = {
 	"docs/contributing.md": async () => (await import("@repo/docs/contributing.md?raw")).default,
 	"docs/security.md": async () => (await import("@repo/docs/security.md?raw")).default,
 	"docs/dashboard/guide.md": async () => (await import("@repo/docs/dashboard/guide.md?raw")).default,
+	"docs/articles/one-command-two-surfaces.md": async () =>
+		(await import("@repo/docs/articles/one-command-two-surfaces.md?raw")).default,
+	"docs/articles/a-negative-number-that-minted-money.md": async () =>
+		(await import("@repo/docs/articles/a-negative-number-that-minted-money.md?raw")).default,
+	"docs/articles/switching-features-off.md": async () =>
+		(await import("@repo/docs/articles/switching-features-off.md?raw")).default,
+	"docs/articles/testing-on-three-operating-systems.md": async () =>
+		(await import("@repo/docs/articles/testing-on-three-operating-systems.md?raw")).default,
 	".env.example": async () => (await import("@repo/.env.example?raw")).default,
 };
 
-export const DOC_GROUPS = ["run", "use", "change"] as const;
+export const DOC_GROUPS = ["run", "use", "change", "learn"] as const;
 type DocGroup = (typeof DOC_GROUPS)[number];
 
 export const GROUP_LABELS: Record<DocGroup, TranslationKey> = {
 	run: "docs.groups.run",
 	use: "docs.groups.use",
 	change: "docs.groups.change",
+	learn: "docs.groups.learn",
 };
 
 interface PageBase {
@@ -230,6 +243,38 @@ export const DOC_PAGES: readonly DocPage[] = [
 		titleKey: "docs.pages.security",
 		summaryKey: "docs.pages.securitySummary",
 		sources: [{ file: "docs/security.md" }],
+	},
+	{
+		slug: "one-command-two-surfaces",
+		group: "learn",
+		kind: "markdown",
+		titleKey: "docs.pages.oneCommand",
+		summaryKey: "docs.pages.oneCommandSummary",
+		sources: [{ file: "docs/articles/one-command-two-surfaces.md" }],
+	},
+	{
+		slug: "a-negative-number-that-minted-money",
+		group: "learn",
+		kind: "markdown",
+		titleKey: "docs.pages.negativeNumber",
+		summaryKey: "docs.pages.negativeNumberSummary",
+		sources: [{ file: "docs/articles/a-negative-number-that-minted-money.md" }],
+	},
+	{
+		slug: "switching-features-off",
+		group: "learn",
+		kind: "markdown",
+		titleKey: "docs.pages.featureSwitch",
+		summaryKey: "docs.pages.featureSwitchSummary",
+		sources: [{ file: "docs/articles/switching-features-off.md" }],
+	},
+	{
+		slug: "testing-on-three-operating-systems",
+		group: "learn",
+		kind: "markdown",
+		titleKey: "docs.pages.threeSystems",
+		summaryKey: "docs.pages.threeSystemsSummary",
+		sources: [{ file: "docs/articles/testing-on-three-operating-systems.md" }],
 	},
 ];
 
