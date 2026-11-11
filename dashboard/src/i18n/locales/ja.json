@@ -2511,9 +2511,18 @@
 		"groups": {
 			"run": "自分で動かす",
 			"use": "使う",
-			"change": "改造する"
+			"change": "改造する",
+			"learn": "仕組み"
 		},
 		"pages": {
+			"oneCommand": "ひとつのコマンド、ふたつの入口",
+			"oneCommandSummary": "ひとつのファイルから、すべてのコマンドが /ban としても t?ban としても動く仕組み。",
+			"negativeNumber": "お金を生み出した負の数",
+			"negativeNumberSummary": "Discord が守る上限をプレフィックスコマンドがすり抜けていた件と、いまどこでもそれを守っているもの。",
+			"featureSwitch": "機能をまるごとオフにする",
+			"featureSwitchSummary": "ひとつの設定、ひとつの宣言、そして両者をそろえ続けるテスト。",
+			"threeSystems": "3 つの OS でのテスト",
+			"threeSystemsSummary": "成功ではなくスキップにすること、テストデータの日付、そして Windows を壊したパス区切り文字。",
 			"requirements": "動作要件",
 			"requirementsSummary": "Node.js、MongoDB、テスト済みの環境。",
 			"quickStart": "クイックスタート",

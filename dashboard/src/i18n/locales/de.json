@@ -2581,9 +2581,18 @@
 		"groups": {
 			"run": "Eigene Kopie betreiben",
 			"use": "Benutzen",
-			"change": "Ändern"
+			"change": "Ändern",
+			"learn": "So funktioniert es"
 		},
 		"pages": {
+			"oneCommand": "Ein Befehl, zwei Wege",
+			"oneCommandSummary": "Wie jeder Befehl aus einer Datei als /ban und als t?ban läuft.",
+			"negativeNumber": "Die negative Zahl, die Geld erschuf",
+			"negativeNumberSummary": "Ein Präfix-Befehl übersprang eine Grenze, die Discord durchsetzt, und was sie jetzt überall hält.",
+			"featureSwitch": "Eine ganze Funktion abschalten",
+			"featureSwitchSummary": "Eine Einstellung, eine Deklaration und die Tests, die beide in Einklang halten.",
+			"threeSystems": "Tests auf drei Betriebssystemen",
+			"threeSystemsSummary": "Überspringen statt bestehen, Testdaten mit Datum und ein Pfadtrenner, der Windows brach.",
 			"requirements": "Voraussetzungen",
 			"requirementsSummary": "Node.js, MongoDB und die Systeme, auf denen getestet wird.",
 			"quickStart": "Schnellstart",

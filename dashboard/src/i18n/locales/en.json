@@ -2581,9 +2581,18 @@
 		"groups": {
 			"run": "Run your own copy",
 			"use": "Use it",
-			"change": "Change it"
+			"change": "Change it",
+			"learn": "How it works"
 		},
 		"pages": {
+			"oneCommand": "One command, two surfaces",
+			"oneCommandSummary": "How every command runs as both /ban and t?ban from one file.",
+			"negativeNumber": "The negative number that minted money",
+			"negativeNumberSummary": "A prefix command skipped a bound Discord enforces, and what now holds it everywhere.",
+			"featureSwitch": "Switching off a whole feature",
+			"featureSwitchSummary": "One setting, one declaration, and the tests that keep the two in step.",
+			"threeSystems": "Testing on three operating systems",
+			"threeSystemsSummary": "Skipping instead of passing, fixture dates, and a path separator that broke Windows.",
 			"requirements": "Requirements",
 			"requirementsSummary": "Node.js, MongoDB and the systems it is tested on.",
 			"quickStart": "Quick start",

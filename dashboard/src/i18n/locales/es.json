@@ -2651,9 +2651,18 @@
 		"groups": {
 			"run": "Ejecuta tu propia copia",
 			"use": "Úsalo",
-			"change": "Cámbialo"
+			"change": "Cámbialo",
+			"learn": "Cómo funciona"
 		},
 		"pages": {
+			"oneCommand": "Un comando, dos superficies",
+			"oneCommandSummary": "Cómo cada comando funciona como /ban y como t?ban desde un solo archivo.",
+			"negativeNumber": "El número negativo que creaba dinero",
+			"negativeNumberSummary": "Un comando de prefijo se saltaba un límite que Discord aplica, y lo que ahora lo mantiene en todas partes.",
+			"featureSwitch": "Desactivar una función entera",
+			"featureSwitchSummary": "Un ajuste, una declaración y las pruebas que mantienen ambos de acuerdo.",
+			"threeSystems": "Pruebas en tres sistemas operativos",
+			"threeSystemsSummary": "Omitir en lugar de aprobar, fechas en los datos de prueba y un separador de rutas que rompió Windows.",
 			"requirements": "Requisitos",
 			"requirementsSummary": "Node.js, MongoDB y los sistemas en los que se prueba.",
 			"quickStart": "Inicio rápido",

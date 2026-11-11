@@ -2651,9 +2651,18 @@
 		"groups": {
 			"run": "Héberger votre copie",
 			"use": "L’utiliser",
-			"change": "Le modifier"
+			"change": "Le modifier",
+			"learn": "Comment ça marche"
 		},
 		"pages": {
+			"oneCommand": "Une commande, deux surfaces",
+			"oneCommandSummary": "Comment chaque commande fonctionne en /ban et en t?ban à partir d’un seul fichier.",
+			"negativeNumber": "Le nombre négatif qui créait de l’argent",
+			"negativeNumberSummary": "Une commande à préfixe contournait une limite imposée par Discord, et ce qui la fait respecter partout désormais.",
+			"featureSwitch": "Désactiver une fonction entière",
+			"featureSwitchSummary": "Un réglage, une déclaration et les tests qui les gardent en accord.",
+			"threeSystems": "Tester sur trois systèmes d’exploitation",
+			"threeSystemsSummary": "Ignorer plutôt que réussir, des données de test datées et un séparateur de chemin qui a cassé Windows.",
 			"requirements": "Prérequis",
 			"requirementsSummary": "Node.js, MongoDB et les systèmes sur lesquels il est testé.",
 			"quickStart": "Démarrage rapide",

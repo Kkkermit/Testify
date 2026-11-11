@@ -2581,9 +2581,18 @@
 		"groups": {
 			"run": "Draai je eigen kopie",
 			"use": "Gebruiken",
-			"change": "Aanpassen"
+			"change": "Aanpassen",
+			"learn": "Hoe het werkt"
 		},
 		"pages": {
+			"oneCommand": "Eén opdracht, twee ingangen",
+			"oneCommandSummary": "Hoe elke opdracht vanuit één bestand werkt als /ban én als t?ban.",
+			"negativeNumber": "Het negatieve getal dat geld maakte",
+			"negativeNumberSummary": "Een prefixopdracht sloeg een grens over die Discord afdwingt, en wat die nu overal bewaakt.",
+			"featureSwitch": "Een hele functie uitzetten",
+			"featureSwitchSummary": "Eén instelling, één declaratie en de tests die ze met elkaar in lijn houden.",
+			"threeSystems": "Testen op drie besturingssystemen",
+			"threeSystemsSummary": "Overslaan in plaats van slagen, data in testgegevens en een padscheidingsteken dat Windows brak.",
 			"requirements": "Vereisten",
 			"requirementsSummary": "Node.js, MongoDB en de systemen waarop het is getest.",
 			"quickStart": "Snelstart",

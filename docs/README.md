@@ -23,6 +23,7 @@
 | 🔒 Reporting a security problem              | [`security.md`](security.md) — the private route, and how data is handled               |
 | 🖥️ Working on the web dashboard              | [`dashboard/guide.md`](dashboard/guide.md)                                              |
 | 🤔 Wondering why the code is shaped this way | [`../AGENTS.md`](../AGENTS.md) §21 and §22 — the decisions, and the defects they answer |
+| 💡 After the story behind a part of it       | [`articles/`](articles/README.md) — how it is built and why, with the code              |
 
 > [!NOTE]
 > [`../AGENTS.md`](../AGENTS.md) stays in the repository root deliberately: it is the single set of conventions
