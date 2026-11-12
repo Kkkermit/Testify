@@ -1,6 +1,6 @@
 {
 	"name": "testify",
-	"version": "2.4.0",
+	"version": "2.4.1",
 	"description": "Self-hosted, all-in-one Discord bot in TypeScript: every command works as slash and prefix, with a web dashboard",
 	"main": "dist/index.js",
 	"license": "MIT",
