@@ -63,7 +63,7 @@ and `.env` beside each other:
 docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
 ```
 
-It follows the newest release. `TESTIFY_TAG=2.3.5` in `.env` pins one, and updating is the same command after a
+It follows the newest release. `TESTIFY_TAG=2.4.0` in `.env` pins one, and updating is the same command after a
 `pull`:
 
 ```bash

@@ -2,7 +2,7 @@
 #
 #   docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
 #
-# Set TESTIFY_TAG to pin a release, such as 2.3.5; it follows the newest release when unset.
+# Set TESTIFY_TAG to pin a release, such as 2.4.0; it follows the newest release when unset.
 
 services:
   bot:
