@@ -1213,6 +1213,22 @@ runs started two and a half hours late and then stopped arriving at all for thre
 showed as active: GitHub delays scheduled runs at the start of an hour, when its queue is busiest, and drops them
 under enough load. A schedule only takes effect from `main`, so a change to it waits for the next release.
 
+`.github/workflows/release.yml` — **a push to `main` is a release.** Two jobs, each with only the permission it
+needs:
+
+- **`release` tags and publishes it.** It reads the version from `package.json` and, when `release/v<version>` does
+  not exist yet, creates the tag and a GitHub Release named `v<version> Testify` on the pushed commit. The text is
+  the merged release pull request's `## Release notes` section, up to the next level-two heading, so a release pull
+  request is written with that section; without one GitHub's generated notes stand in. A push whose version is
+  already tagged releases nothing, so **bumping the version is what makes a release**, and the bump pull request is
+  what has to merge before the release pull request.
+- **`image` publishes `ghcr.io/kkkermit/testify`** for `linux/amd64` and `linux/arm64`, tagged with the version,
+  `latest` and `sha-<commit>`, with layers cached in GitHub's cache. A pull request into `main` builds the `amd64`
+  image without publishing it, so a broken `Dockerfile` fails the release pull request rather than the release. The
+  `Dockerfile`'s first stage runs on `$BUILDPLATFORM`, since everything it hands on is JavaScript and CSS, so only
+  the second stage is emulated for `arm64`; the second picks yt-dlp's build for `$TARGETARCH`.
+  `docker-compose.image.yml` runs the published image in place of a local build (`build: !reset null`).
+
 **Suppressions expire, and `tests/config/suppressions.test.ts` is what makes that true rather than a wish** —
 it fails on an active entry with no reason, no fixing version, a lapsed expiry, or one more than a year out.
 `.nsprc` and `.snyk` each require three things: a written reason, the version that

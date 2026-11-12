@@ -1,9 +1,9 @@
 {
 	"name": "@testify/shared",
-	"version": "2.3.5",
+	"version": "2.4.0",
 	"private": true,
 	"description": "Types and zod schemas shared by the bot's API and the dashboard.",
-	"license": "SEE LICENSE IN ../LICENSE",
+	"license": "MIT",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
 	"types": "src/index.ts",

@@ -9,33 +9,20 @@
 
 <p align="center">
   <a href="https://github.com/Kkkermit/Testify/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Kkkermit/Testify/ci.yml?style=for-the-badge&label=CI&logo=githubactions&logoColor=white"></a>
-  <a href="https://github.com/Kkkermit/Testify/actions/workflows/nightly.yml"><img alt="Nightly" src="https://img.shields.io/github/actions/workflow/status/Kkkermit/Testify/nightly.yml?style=for-the-badge&label=Nightly&logo=githubactions&logoColor=white"></a>
-  <a href="package.json"><img alt="Version" src="https://img.shields.io/github/package-json/v/Kkkermit/Testify?style=for-the-badge&color=8b5cf6"></a>
-  <a href="LICENSE"><img alt="License: Apache 2.0 with Commons Clause" src="https://img.shields.io/badge/license-Apache_2.0_%2B_Commons_Clause-blue?style=for-the-badge"></a>
-</p>
-
-<p align="center">
-  <a href="https://www.typescriptlang.org"><img alt="TypeScript, strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white"></a>
-  <a href="https://discord.js.org"><img alt="discord.js v14" src="https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
-  <a href=".nvmrc"><img alt="Node 24.11 or newer" src="https://img.shields.io/badge/node-%3E%3D24.11-5FA04E?style=for-the-badge&logo=node.js&logoColor=white"></a>
-  <a href="https://www.mongodb.com"><img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white"></a>
-  <a href="AGENTS.md#17-testing"><img alt="Coverage floor 75%" src="https://img.shields.io/badge/coverage_floor-75%25-success?style=for-the-badge&logo=jest&logoColor=white"></a>
-</p>
-
-<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/releases"><img alt="Latest release" src="https://img.shields.io/github/package-json/v/Kkkermit/Testify?style=for-the-badge&label=release&color=8b5cf6"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge"></a>
+  <a href="https://github.com/Kkkermit/Testify/pkgs/container/testify"><img alt="Docker image on ghcr.io" src="https://img.shields.io/badge/docker-ghcr.io-2496ED?style=for-the-badge&logo=docker&logoColor=white"></a>
   <a href="https://github.com/Kkkermit/Testify/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/Kkkermit/Testify?style=for-the-badge&logo=github"></a>
-  <a href="https://github.com/Kkkermit/Testify/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge&logo=github"></a>
-  <a href="https://github.com/Kkkermit/Testify/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge&logo=github"></a>
-  <a href="https://github.com/Kkkermit/Testify/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/Kkkermit/Testify?style=for-the-badge&logo=github"></a>
   <a href="https://discord.gg/xcMVwAVjSD"><img alt="Support server on Discord" src="https://img.shields.io/badge/support-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
 </p>
 
 <h3 align="center">An all-in-one Discord bot, written once for both slash <em>and</em> prefix commands.</h3>
 
 <p align="center">
-<strong>93 commands and 145 subcommands</strong> — moderation, economy, a casino, levelling, music, tickets, giveaways
-and games — plus an optional web dashboard. Every command works as <code>/ban</code> <strong>and</strong> as
-<code>t?ban</code>, because underneath it is one command, not two copies.
+<strong>91 commands and 150 subcommands</strong> — moderation, economy, a casino, levelling, music, tickets, giveaways
+and games — plus a web dashboard. Every command works as <code>/ban</code> <strong>and</strong> as
+<code>t?ban</code>, because underneath it is one command, not two copies. Self-hosted, MIT-licensed, and one
+<code>docker compose</code> command from running.
 </p>
 
 <p align="center">
@@ -44,6 +31,7 @@ and games — plus an optional web dashboard. Every command works as <code>/ban<
   <a href="#-see-it-in-discord"><strong>Screenshots</strong></a> ·
   <a href="#️-the-web-dashboard"><strong>Dashboard</strong></a> ·
   <a href="docs/README.md"><strong>Docs</strong></a> ·
+  <a href="docs/articles/README.md"><strong>How it works</strong></a> ·
   <a href="https://discord.gg/xcMVwAVjSD"><strong>Support</strong></a>
 </p>
 
@@ -52,10 +40,7 @@ and games — plus an optional web dashboard. Every command works as <code>/ban<
   <a href="https://buymeacoffee.com/kkermit"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy_me_a_coffee-support_the_project-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black"></a>
 </p>
 
-> [!CAUTION]
-> **Never share or commit your `.env` file or any of its values.** It holds your bot token and your MongoDB
-> password — anyone who gets them controls your bot and your data. `.gitignore` already covers `.env*`. If a
-> token ever reaches somewhere public, reset it immediately in the Developer Portal.
+<p align="center"><sub>⭐ If Testify saves you time, a star on GitHub is the easiest way to help other people find it.</sub></p>
 
 <details>
 <summary><strong>📑 Table of contents</strong></summary>
@@ -102,7 +87,7 @@ The whole thing was rebuilt around the problems the old codebase actually had.
 | **Start-up**       | Command registration raced the login                                                   | Each step awaited in order; a malformed file names itself and stops the boot |
 | **Errors**         | Stack traces could reach chat                                                          | One error boundary — users get a plain apology, you get the full context     |
 | **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
-| **Tests**          | A handful                                                                              | **About 3,900 tests** on Windows, Linux and macOS, with a 75% coverage floor |
+| **Tests**          | A handful                                                                              | **About 4,200 tests** on Windows, Linux and macOS, with a 75% coverage floor |
 | **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
 | **Web**            | None                                                                                   | Its own website with the docs and the source, and an optional dashboard      |
 
@@ -278,6 +263,11 @@ newly published vulnerabilities with npm audit and Snyk.
 
 Already have Node 24 and a MongoDB connection string? You are five commands away.
 
+> [!CAUTION]
+> **Never share or commit your `.env` file or any of its values.** It holds your bot token and your MongoDB
+> password — anyone who gets them controls your bot and your data. `.gitignore` already covers `.env*`. If a
+> token ever reaches somewhere public, reset it immediately in the Developer Portal.
+
 ```bash
 git clone https://github.com/Kkkermit/Testify.git
 cd Testify
@@ -450,6 +440,13 @@ docker compose logs -f bot
 `MONGODB_URI` defaults to the database in the compose file, so a fresh clone needs nothing else set up. Data
 lives in a named volume and survives a restart. FFmpeg and yt-dlp are installed by the image, so music works with
 nothing to configure — on Railway too.
+
+**Or skip the build.** Every release is published for `amd64` and `arm64` as
+[`ghcr.io/kkkermit/testify`](https://github.com/Kkkermit/Testify/pkgs/container/testify):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
+```
 
 **[`docs/hosting.md`](docs/hosting.md) is the full guide** — the dashboard behind a reverse proxy, what is in the
 image and what is deliberately left out, which hosts can and cannot run a gateway bot, and a troubleshooting
@@ -853,13 +850,10 @@ feature that can go.
 <details>
 <summary><strong>Can I use this for my own bot, or rename it?</strong></summary>
 
-Yes, with two conditions. It is licensed under Apache 2.0 with the Commons Clause, so you can use it, change it,
-rebrand it and run it for your own servers, but:
-
-- **Keep the credit.** The [`NOTICE`](NOTICE) file names the original author, and it has to stay with any copy
-  or fork you share.
-- **Do not sell it.** You may not charge for the bot, or for hosting, support or a service whose value comes mainly
-  from it.
+Yes. It is released under the [MIT licence](LICENSE), so you can use it, change it, rebrand it, run it for your
+own servers and even sell it. The one condition is **keep the credit**: the copyright notice in
+[`LICENSE`](LICENSE), which names the original author, has to stay with every copy or fork you share. A link back
+to this repository is appreciated, though the licence does not require one.
 
 Rename it in the Discord Developer Portal and every surface follows — the bot reads its own name from Discord.
 The colours and links live in `src/config/theme.ts`.
@@ -895,6 +889,7 @@ what you are doing.
 | 🔒 [`docs/security.md`](docs/security.md)               | Reporting a vulnerability, and how data is handled       |
 | 🖥️ [`docs/dashboard/guide.md`](docs/dashboard/guide.md) | Working on the web dashboard                             |
 | 🧭 [`AGENTS.md`](AGENTS.md)                             | The conventions every change here follows                |
+| 💡 [`docs/articles/`](docs/articles/README.md)          | How parts of it are built and why, with the code         |
 
 ## 🤝 Contributing
 
@@ -934,8 +929,7 @@ useful to you, a [coffee](https://buymeacoffee.com/kkermit) keeps it going.
 
 ## ⚖️ License
 
-Copyright 2026 Kkermit (Kkermit on Discord, [Kkkermit](https://github.com/Kkkermit) on GitHub).
+Copyright (c) 2024-2026 Kkermit (Kkermit on Discord, [Kkkermit](https://github.com/Kkkermit) on GitHub).
 
-Released under the [Apache License 2.0](LICENSE) with the [Commons Clause](https://commonsclause.com) License
-Condition v1.0. You may use, modify and share it, but you may not sell it, and the attribution in
-[`NOTICE`](NOTICE) must be kept in every copy and derived work.
+Released under the [MIT licence](LICENSE). You may use, modify, share and sell it, as long as the copyright notice
+and the licence text in [`LICENSE`](LICENSE) are kept in every copy and derived work.

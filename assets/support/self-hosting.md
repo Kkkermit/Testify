@@ -7,9 +7,8 @@ questions: Can I host my own version? | Is the bot open source? | Where is the s
 ---
 {bot} is open source, so you can run your own copy. The setup guide is in the [source repository]({repository}).
 
-The code is published under the Apache 2.0 licence with the Commons Clause:
-- You may use it, change it and share it.
-- You may not sell it, or a paid service built mainly on it.
-- The credit to its original author in the `NOTICE` file has to stay in every copy.
+The code is published under the MIT licence:
+- You may use it, change it, share it and sell it.
+- The copyright notice naming its original author, and the licence itself, have to stay in every copy.
 
 This assistant helps with using the bot and its dashboard, not with hosting it.
