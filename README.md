@@ -879,7 +879,8 @@ Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 ## 📚 Documentation
 
 Everything written down lives in [`docs/`](docs/README.md), which has an index pointing at the right file for
-what you are doing.
+what you are doing. The [wiki](https://github.com/Kkkermit/Testify/wiki) is a map of all of it: where to start, the
+dashboard's screens, and where each thing lives.
 
 | Document                                                | For                                                      |
 | ------------------------------------------------------- | -------------------------------------------------------- |
