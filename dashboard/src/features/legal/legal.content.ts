@@ -236,6 +236,7 @@ export const PRIVACY: LegalDocument = {
 				"legal.retentionL19",
 				"legal.retentionL20",
 				"legal.retentionL21",
+				"legal.retentionL22",
 			],
 		},
 		{

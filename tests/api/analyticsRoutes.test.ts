@@ -7,6 +7,7 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
 import { activeMembers, memberTallies, recentRuns, slowestCommands } from "@database/repositories/commandRunRepository";
+import { findLogRun, listLogRuns, readLogLines } from "@database/repositories/logRepository";
 import {
 	commandTallies,
 	dailyTallies,
@@ -19,6 +20,7 @@ import {
 	type CommandRunRow,
 	type GuildUsageReport,
 	type LogFeed,
+	type LogRuns,
 	type MemberUsageRow,
 	type Paged,
 	type RuntimeInfo,
@@ -33,6 +35,11 @@ jest.mock("@database/repositories/usageRepository", () => ({
 	surfaceTallies: jest.fn(() => Promise.resolve({ slash: 0, prefix: 0 })),
 	screenTallies: jest.fn(() => Promise.resolve([])),
 	dashboardTallies: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock("@database/repositories/logRepository", () => ({
+	findLogRun: jest.fn(() => Promise.resolve(null)),
+	listLogRuns: jest.fn(() => Promise.resolve([])),
+	readLogLines: jest.fn(() => Promise.resolve({ lines: [], matched: 0, held: 0 })),
 }));
 jest.mock("@database/repositories/commandRunRepository", () => ({
 	activeMembers: jest.fn(() => Promise.resolve(0)),
@@ -88,6 +95,7 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 		channels: { cache: new Collection<string, unknown>() },
 		ws: { ping: 42, shards: new Collection<string, unknown>() },
 		env: { NODE_ENV: "test", LOG_LEVEL: "warn" } as Env,
+		logger: { debug: jest.fn(), warn: jest.fn(), error: jest.fn() },
 	} as unknown as TestifyClient;
 
 	const app = new Hono<ApiBindings>();
@@ -323,6 +331,85 @@ describe("the log feed", () => {
 
 		expect(feed.lines).toHaveLength(2);
 		expect(feed.matched).toBe(3);
+	});
+
+	const PAST = "00000000-0000-4000-8000-000000000001";
+
+	/** A past run is read from the database, its stored context back to the object it was, its stack intact. */
+	it("reads a past run from the database, filtered as asked", async () => {
+		jest.mocked(findLogRun).mockResolvedValueOnce({
+			run: PAST,
+			startedAt: new Date(0),
+			endedAt: null,
+			lastAt: null,
+			version: "2.4.0",
+		});
+		jest.mocked(readLogLines).mockResolvedValueOnce({
+			lines: [
+				{
+					seq: 9,
+					at: new Date(0),
+					level: "error",
+					rank: 50,
+					message: "[COMMAND_ERROR] A command failed.",
+					context: '{"err":{"stack":"DiscordAPIError[50035]"}}',
+				},
+			],
+			matched: 1,
+			held: 40,
+		});
+
+		const feed = (await (await appFor().request(`/analytics/logs?run=${PAST}&level=error&q=clear`)).json()) as LogFeed;
+
+		expect(readLogLines).toHaveBeenCalledWith(PAST, { limit: 200, minRank: 50, search: "clear" });
+		expect(feed).toMatchObject({ run: PAST, current: false, buffered: 40, matched: 1 });
+		expect(feed.lines[0]?.context).toEqual({ err: { stack: "DiscordAPIError[50035]" } });
+	});
+
+	it("answers 404 for a run it does not hold, and 400 for an id that is not one", async () => {
+		expect((await appFor().request(`/analytics/logs?run=${PAST}`)).status).toBe(404);
+		expect((await appFor().request("/analytics/logs?run=..%2Fusers")).status).toBe(400);
+	});
+
+	/** The run in memory is always there, so the screen still works while the database is what is wrong. */
+	it("lists this run first, and only this one while the database cannot be read", async () => {
+		logRing.push({ at: Date.now(), level: "error", message: "boom", context: {} });
+		jest.mocked(listLogRuns).mockResolvedValueOnce([
+			{
+				run: PAST,
+				startedAt: new Date(0),
+				endedAt: null,
+				lastAt: null,
+				version: "2.4.0",
+				lines: 3,
+				errors: 1,
+				warnings: 0,
+				matched: null,
+			},
+		]);
+
+		const listed = (await (await appFor().request("/analytics/logs/runs")).json()) as LogRuns;
+		jest.mocked(listLogRuns).mockRejectedValueOnce(new Error("down"));
+		const alone = (await (await appFor().request("/analytics/logs/runs")).json()) as LogRuns;
+
+		expect(listed.runs.map((run) => [run.id, run.current])).toEqual([
+			[logRing.run.id, true],
+			[PAST, false],
+		]);
+		expect(listed.runs[0]?.errors).toBe(1);
+		expect(alone).toMatchObject({ pastUnavailable: true, runs: [{ id: logRing.run.id }] });
+	});
+
+	/** A reference from an old failure is in some run, and the list says which before anybody opens one. */
+	it("counts what a search finds in every run, at the level chosen", async () => {
+		logRing.push({ at: Date.now(), level: "error", message: "[COMMAND_ERROR] DXQV6Z", context: {} });
+		logRing.push({ at: Date.now(), level: "info", message: "ran DXQV6Z", context: {} });
+		jest.mocked(listLogRuns).mockResolvedValueOnce([]);
+
+		const runs = (await (await appFor().request("/analytics/logs/runs?level=error&q=dxqv6z")).json()) as LogRuns;
+
+		expect(listLogRuns).toHaveBeenCalledWith({ minRank: 50, text: "dxqv6z" });
+		expect(runs.runs[0]?.matched).toBe(1);
 	});
 });
 

@@ -1,8 +1,16 @@
-import { keepPreviousData, useQuery, type UseQueryResult } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	useMutation,
+	type UseMutationResult,
+	useQuery,
+	useQueryClient,
+	type UseQueryResult,
+} from "@tanstack/react-query";
 import {
 	type CommandRunRow,
 	type GuildUsageReport,
 	type LogFeed,
+	type LogRuns,
 	type MemberUsageRow,
 	type OwnerGuildFilter,
 	type OwnerGuildRow,
@@ -92,15 +100,50 @@ export function useGuildRuns(
 	});
 }
 
-export function useLogs(level: ReportedLogLevel, search: string, paused: boolean): UseQueryResult<LogFeed> {
+/** `run` is null for the run going now, which is the only one that still changes. */
+export function useLogs(
+	run: string | null,
+	level: ReportedLogLevel,
+	search: string,
+	paused: boolean,
+	enabled = true,
+): UseQueryResult<LogFeed> {
 	const query = new URLSearchParams({ level, limit: "300" });
+	if (search.trim() !== "") query.set("q", search.trim());
+	if (run !== null) query.set("run", run);
+
+	return useQuery({
+		queryKey: keys.owner.logs(run ?? "now", level, search.trim()),
+		queryFn: () => api.get<LogFeed>(`/analytics/logs?${query.toString()}`),
+		refetchInterval: run === null && !paused ? 5_000 : false,
+		staleTime: run === null ? 0 : 60_000,
+		enabled,
+	});
+}
+
+export function useLogRuns(level: ReportedLogLevel, search: string, paused: boolean): UseQueryResult<LogRuns> {
+	const query = new URLSearchParams({ level });
 	if (search.trim() !== "") query.set("q", search.trim());
 
 	return useQuery({
-		queryKey: keys.owner.logs(level, search),
-		queryFn: () => api.get<LogFeed>(`/analytics/logs?${query.toString()}`),
+		queryKey: keys.owner.logRuns(level, search.trim()),
+		queryFn: () => api.get<LogRuns>(`/analytics/logs/runs?${query.toString()}`),
 		refetchInterval: paused ? false : 5_000,
 		staleTime: 0,
+	});
+}
+
+/** Deletes a past run's logs, or empties the run going now. */
+export function useDeleteLogs(): UseMutationResult<void, Error, string> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: (runId) => api.delete<void>(`/control/logs/${runId}`),
+		onSettled: () =>
+			Promise.all([
+				client.invalidateQueries({ queryKey: ["owner", "logs"] }),
+				client.invalidateQueries({ queryKey: ["owner", "log-runs"] }),
+			]),
 	});
 }
 

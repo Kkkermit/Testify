@@ -2,16 +2,18 @@ import { type Guild, PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notInGuild } from "@api/errors";
+import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
 import { botName } from "@core/brand";
 import { toError } from "@core/errors";
+import { logRing } from "@core/logRing";
 import { shutdown } from "@core/shutdown";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
 import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
@@ -22,6 +24,7 @@ import {
 	gatewayAction,
 	guildIdParam,
 	leaveGuildRequest,
+	logRunParams,
 	musicSourcesPatch,
 	type OwnerGuildDetail,
 	shutdownRequest,
@@ -89,6 +92,26 @@ control.patch("/identity", async (context) => {
 
 	const identity = (await botIdentity(client))!;
 	return context.json(identity);
+});
+
+/** A run still going is emptied and goes on; a past one is gone, lines and all. */
+control.delete("/logs/:runId", async (context) => {
+	const { runId } = parseParams(context, logRunParams);
+
+	if (runId === logRing.run.id) {
+		logRing.clear();
+		await clearLogLines(runId);
+	} else if (!(await deleteLogRun(runId))) {
+		throw notFound("log_run_not_found", "There are no logs for that run.");
+	}
+
+	await auditChange(context, {
+		action: "logs.delete",
+		summary: runId === logRing.run.id ? "Cleared the logs of the run going now" : "Deleted the logs of a past run",
+		after: { run: runId },
+	});
+
+	return context.body(null, 204);
 });
 
 control.get("/music", async (context) => context.json(await readMusicSourceSetting()));

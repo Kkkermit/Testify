@@ -9,6 +9,7 @@ export * from "./dmLog.util";
 export * from "./errorTriage.util";
 export * from "./guildLifecycle.util";
 export * from "./healthProbe.util";
+export * from "./logArchive.util";
 export * from "./logChannel.util";
 export * from "./logFields.util";
 export * from "./ownerAudit.util";

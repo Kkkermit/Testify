@@ -109,7 +109,8 @@ export const keys = {
 			["owner", "guild-usage", id, days, "members", page, search] as const,
 		guildRuns: (id: string, days: number, page: number, userId: string | null, command: string | null) =>
 			["owner", "guild-usage", id, days, "runs", page, userId, command] as const,
-		logs: (level: string, search: string) => ["owner", "logs", level, search] as const,
+		logs: (run: string, level: string, search: string) => ["owner", "logs", run, level, search] as const,
+		logRuns: (level: string, search: string) => ["owner", "log-runs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,
 		control: () => ["owner", "control"] as const,
 		musicSources: () => ["owner", "musicSources"] as const,

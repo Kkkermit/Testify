@@ -94,8 +94,6 @@ export const ANALYTICS = {
 	retentionDays: 90,
 	defaultWindowDays: 30,
 	maxWindowDays: 90,
-	/** Log lines kept in memory for the owner console, at every level; roughly 200 kB at worst. */
-	logRingCapacity: 1_000,
 } as const;
 
 export const AFK = {

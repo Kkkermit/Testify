@@ -66,8 +66,8 @@ numbers, which drift):
 | Button handlers      | 53                                |
 | Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
-| `src/lib` helpers    | 236, in 34 domain folders         |
-| Schemas/repositories | 53 / 52                           |
+| `src/lib` helpers    | 238, in 34 domain folders         |
+| Schemas/repositories | 54 / 53                           |
 | Scheduled jobs       | 11                                |
 | Switchable features  | 17                                |
 | Tests                | 4,230 across 569 suites           |
@@ -232,7 +232,7 @@ src/
 ├── events/               36 handlers in command, community, create, logging, ready and message
 ├── buttons/              53 component handlers, keyed by custom-ID prefix
 ├── menus/                4 right-click actions, on a member or a message
-├── lib/                  234 helpers in 34 domain folders, each behind its own index.ts barrel
+├── lib/                  238 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -246,8 +246,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           53 Mongoose schemas, one file per feature
-│   └── repositories/     52 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           54 Mongoose schemas, one file per feature
+│   └── repositories/     53 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -3513,10 +3513,10 @@ reaps a row 90 days after it was created. Four things about it are load-bearing:
 - **`runCommand` returns a `RunOutcome`**, whether it succeeded and, for an unexpected failure, the reference it
   was logged under, so a failure can be counted without catching the error and breaking the guarantee that the
   user always gets an answer. The run log keeps that reference, and a failed run's badge links to the Logs tab
-  searching for it — the log ring holds only the last 1,000 lines and a restart clears it, so an old failure can
-  link to nothing, and the reference in the error channel post is the copy that lasts. `countCommandUse` is not
-  awaited and drops its own error after a debug line — the count is the least important thing that happened, and
-  nothing reads a result from it.
+  searching for it, where the list of runs says which of the six kept holds it. Past those six, or past a run's
+  2,000 lines, an old failure links to nothing, and the reference in the error channel post is the copy that
+  lasts. `countCommandUse` is not awaited and drops its own error after a debug line — the count is the least
+  important thing that happened, and nothing reads a result from it.
 
 **Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
 dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
@@ -3607,14 +3607,37 @@ stopped bot has nothing left to serve a start button. What exists instead:
 `PATCH /api/control/identity` is owner-only and application-wide, while `PATCH /guilds/:id/settings/nickname`
 is what a manager gets. Do not add a per-guild avatar control — it cannot work.
 
-**The log ring is in memory and redacts on the way in.** `src/core/logRing.ts` keeps the last 1,000 lines at
-**every** level, fed by a pino `logMethod` hook rather than a second transport — pino never calls the hook below
-its own level, so `LOG_LEVEL` still decides what exists at all, and the console says so rather than showing an
-empty list. Search matches the message _and_ the stringified context, so a guild id finds every line about it. A dashboard page is a much easier
-thing to read over someone's shoulder than a terminal, so any context key matching
-`token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is replaced before the record
-is stored — not before it is served. A restart clears the buffer, which is the trade for something that needs
-no collection, no retention policy and cannot fill a disk.
+**The logs are kept per run, six runs at a time, and redacted on the way in.** `src/core/logRing.ts` holds this
+run's lines at **every** level, fed by a pino `logMethod` hook rather than a second transport — pino never calls the
+hook below its own level, so `LOG_LEVEL` still decides what exists at all, and the console says so rather than
+showing an empty list. A dashboard page is a much easier thing to read over someone's shoulder than a terminal, so
+any context key matching `token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is
+replaced before the record is stored, not before it is served. An error keeps its name, message, whole stack, every
+field it carries and its `cause`, except `requestBody`: what a failed request was sending can be words somebody
+wrote. Five things about the history are load-bearing:
+
+- **Each start is a run, named by a UUID the ring makes.** `LogArchive` in `src/lib/bot/logArchive.util.ts` records
+  the run with `beginLogRun`, which deletes every run past `LOG_LIMITS.runsKept` (6) with its lines, so a seventh
+  start drops the oldest. It then hands the database the lines it has not had every five seconds, and once more at
+  shutdown with the time the run ended. A run with no end recorded is one that stopped without shutting down, and
+  the Logs tab says so in red.
+- **A line is written once whatever happens.** Each carries a `seq` that counts up within its run, and
+  `appendLogLines` upserts on `{ run, seq }`, so a batch sent again after a failed write is not stored twice. A batch
+  the database refuses goes back to the ring, which bounds what it waits to send by `linesPerRun` (2,000), and the
+  warning is said once per outage, because it is itself queued for the database that just refused it.
+- **The run going now is read from memory.** The Logs tab is the screen you open when something is wrong, and the
+  database may be the thing that is wrong, so `/analytics/logs` without a `run` reads the ring and
+  `/analytics/logs/runs` lists this run first whatever the database says, answering `pastUnavailable` when it
+  cannot read the rest. A history that could not be started costs the history, never the bot.
+- **Search is literal and spans every run.** The ring and `readLogLines` both match the message and the stringified
+  context, so a guild id or an error reference finds every line about it, and a search is escaped before it becomes
+  a pattern, so `(` or `.*` finds those characters. The runs list counts what the search finds in each run at the
+  level chosen (`matched`), which is how an old failure's reference is found without opening six runs.
+- **Deleting goes through `UndoProvider`, and Delete my data reaches every run.** `DELETE /control/logs/:runId`
+  deletes a past run whole and empties the run going now, and is audit-logged as `logs.delete`. `eraseAccount` drops
+  every line that mentions the person's id from the ring, from what it has not sent, and from every stored run
+  (`forgetInLogs`). The privacy notice says all of this (`legal.logConsoleP1`, `legal.retentionL22`) and
+  `LegalPage.test.tsx` pins both numbers to `LOG_LIMITS`.
 
 **Testify never phones home.** The runtime tab reports the version it is running and links the releases page; it
 does not check for a newer one. A self-hosted bot that contacts a server on a timer is not something to ship by

@@ -4,12 +4,14 @@ import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { control } from "@api/routes/control";
 import { type TestifyClient } from "@core/client";
+import { logRing } from "@core/logRing";
 import { shutdown } from "@core/shutdown";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getBotSettings, saveBotSettings } from "@database/repositories/botSettingsRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
 import { guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { type OwnerGuildDetail } from "@testify/shared";
@@ -33,6 +35,10 @@ jest.mock("@database/repositories/welcomeRepository", () => ({
 jest.mock("@database/repositories/usageRepository", () => ({
 	guildTallies: jest.fn(() => Promise.resolve([])),
 	dashboardTallies: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock("@database/repositories/logRepository", () => ({
+	clearLogLines: jest.fn(() => Promise.resolve()),
+	deleteLogRun: jest.fn(() => Promise.resolve(false)),
 }));
 jest.mock("@lib/bot/botIdentity.util", () => ({
 	botIdentity: jest.fn(() => Promise.resolve({ id: "1", username: "Renamed", avatarUrl: null, bannerUrl: null })),
@@ -113,10 +119,35 @@ describe("who can control the bot", () => {
 		["GET", `/guilds/${GUILD}`],
 		["GET", "/music"],
 		["PUT", "/music"],
+		["DELETE", `/logs/${logRing.run.id}`],
 	])("hides %s %s from a manager", async (method, path) => {
 		const response = await send(path, { method, userId: MANAGER, body: {} });
 
 		expect(response.status).toBe(404);
+	});
+});
+
+describe("deleting logs", () => {
+	const PAST = "00000000-0000-4000-8000-000000000001";
+
+	/** The run going now keeps its place and carries on logging; only what it held so far goes. */
+	it("empties the run going now, in memory and in the database", async () => {
+		logRing.push({ at: Date.now(), level: "info", message: "before", context: {} });
+
+		const response = await send(`/logs/${logRing.run.id}`, { method: "DELETE" });
+
+		expect(response.status).toBe(204);
+		expect(logRing.size).toBe(0);
+		expect(clearLogLines).toHaveBeenCalledWith(logRing.run.id);
+		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "logs.delete" }));
+	});
+
+	it("deletes a past run, and answers 404 for one it does not hold", async () => {
+		jest.mocked(deleteLogRun).mockResolvedValueOnce(true);
+
+		expect((await send(`/logs/${PAST}`, { method: "DELETE" })).status).toBe(204);
+		expect((await send(`/logs/${PAST}`, { method: "DELETE" })).status).toBe(404);
+		expect((await send("/logs/not-a-run", { method: "DELETE" })).status).toBe(400);
 	});
 });
 
