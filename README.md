@@ -36,7 +36,7 @@ and games — plus a web dashboard. Every command works as <code>/ban</code> <st
 </p>
 
 <p align="center">
-  <a href="https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot"><img alt="Invite Testify to your server" src="https://img.shields.io/badge/Invite_Testify-to_your_server-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
+  <a href="https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=1374821936374&scope=bot+applications.commands"><img alt="Invite Testify to your server" src="https://img.shields.io/badge/Invite_Testify-to_your_server-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
   <a href="https://buymeacoffee.com/kkermit"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy_me_a_coffee-support_the_project-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black"></a>
 </p>
 
