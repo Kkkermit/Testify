@@ -13,6 +13,7 @@ import {
 	describeDatabase,
 	exitOnFatalClose,
 	featuresLine,
+	logArchive,
 	MINIMUM_NODE,
 	nodeTooOld,
 	printStartupFailure,
@@ -61,6 +62,8 @@ async function main(): Promise<void> {
 		() => connectDatabase({ uri: env.MONGODB_URI, logger }),
 		() => describeDatabase(env.MONGODB_URI),
 	);
+	// Lines logged before the database answered are held in memory and written with the first batch.
+	await logArchive.start(client);
 
 	await report.step(
 		"Modules",

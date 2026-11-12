@@ -167,8 +167,15 @@ describe("the legal pages", () => {
 		expect(text).toContain(`logs and counts for ${String(retention)} days`);
 		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain(`${String(retention)} * 24 * 60 * 60`);
 
-		const ring = Number(/logRingCapacity: ([\d_]+)/.exec(constants)?.[1]?.replace("_", ""));
-		expect(text).toContain(`last ${ring.toLocaleString("en-GB")} lines`);
+		const analytics = botSource("shared/src/analytics.ts");
+		const starts = /runsKept: (\d+)/.exec(analytics)?.[1];
+		const perRun = Number(/linesPerRun: ([\d_]+)/.exec(analytics)?.[1]?.replace("_", ""));
+		expect(text).toContain(
+			`for its last ${String(starts)} starts, at most ${perRun.toLocaleString("en-GB")} lines each`,
+		);
+		expect(text).toContain(
+			`Log lines: the bot’s last ${String(starts)} starts, at most ${perRun.toLocaleString("en-GB")} lines`,
+		);
 
 		const seconds = Number(
 			/expireAfterSeconds: (\d+)/.exec(botSource("src/database/models/verification.schema.ts"))?.[1],

@@ -1,11 +1,11 @@
 import { type Guild } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
-import { notInGuild } from "@api/errors";
+import { notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
 import { parseParams, parseQuery } from "@api/validate";
-import { ANALYTICS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
 import { logRing } from "@core/logRing";
 import {
 	activeMembers,
@@ -14,6 +14,7 @@ import {
 	recentRuns,
 	slowestCommands,
 } from "@database/repositories/commandRunRepository";
+import { findLogRun, listLogRuns, readLogLines } from "@database/repositories/logRepository";
 import {
 	type CommandTally,
 	commandTallies,
@@ -25,7 +26,7 @@ import {
 	surfaceTallies,
 	usageTotals,
 } from "@database/repositories/usageRepository";
-import { runtimeInfo } from "@lib/bot";
+import { botVersion, runtimeInfo } from "@lib/bot";
 import {
 	analyticsQuery,
 	type CommandRunRow,
@@ -36,7 +37,12 @@ import {
 	type GuildUsageReport,
 	type GuildUsageRow,
 	type LogFeed,
+	LOG_LEVEL_RANK,
+	LOG_LIMITS,
 	logQuery,
+	logRunsQuery,
+	type LogRun,
+	type LogRuns,
 	type MemberUsageRow,
 	type Paged,
 	RUN_RETENTION_DAYS,
@@ -45,7 +51,7 @@ import {
 	warningMatches,
 } from "@testify/shared";
 
-/** The owner console's read-only analytics. Everything here is behind `requireOwner`. */
+/** The owner console's analytics and logs, read-only. Everything here is behind `requireOwner`. */
 
 export const analytics = new Hono<ApiBindings>();
 
@@ -175,26 +181,115 @@ analytics.get("/guilds/:guildId/runs", async (context) => {
 	return context.json(body);
 });
 
-analytics.get("/logs", (context) => {
-	const { limit, level, q } = parseQuery(context, logQuery);
-	const { lines, matched } = logRing.recent({ limit, minLevel: level, ...(q === undefined ? {} : { search: q }) });
+/** This run is read from memory, so the screen still works while the database is the thing that is wrong. */
+analytics.get("/logs", async (context) => {
+	const { limit, level, q, run } = parseQuery(context, logQuery);
+	const loggerLevel = context.get("env").LOG_LEVEL;
+	const capacity = LOG_LIMITS.linesPerRun;
 
+	if (run === undefined || run === logRing.run.id) {
+		const { lines, matched } = logRing.recent({ limit, minLevel: level, ...(q === undefined ? {} : { search: q }) });
+		const body: LogFeed = {
+			run: logRing.run.id,
+			current: true,
+			lines: lines.map((record) => ({
+				at: new Date(record.at).toISOString(),
+				level: record.level,
+				message: record.message,
+				context: record.context,
+			})),
+			buffered: logRing.size,
+			capacity,
+			// Nothing below this is ever written, so an empty list at `trace` means the bot is quiet rather than broken.
+			loggerLevel,
+			matched,
+		};
+		return context.json(body);
+	}
+
+	if ((await findLogRun(run)) === null) throw notFound("log_run_not_found", "There are no logs for that run.");
+
+	const stored = await readLogLines(run, {
+		limit,
+		minRank: LOG_LEVEL_RANK[level],
+		...(q === undefined ? {} : { search: q }),
+	});
 	const body: LogFeed = {
-		lines: lines.map((record) => ({
-			at: new Date(record.at).toISOString(),
-			level: record.level,
-			message: record.message,
-			context: record.context,
+		run,
+		current: false,
+		lines: stored.lines.map((line) => ({
+			at: line.at.toISOString(),
+			level: line.level,
+			message: line.message,
+			context: storedContext(line.context),
 		})),
-		buffered: logRing.size,
-		capacity: ANALYTICS.logRingCapacity,
-		// Nothing below this is ever written, so an empty list at `trace` means the bot is quiet rather than broken.
-		loggerLevel: context.get("env").LOG_LEVEL,
-		matched,
+		buffered: stored.held,
+		capacity,
+		loggerLevel,
+		matched: stored.matched,
 	};
-
 	return context.json(body);
 });
+
+/** The runs kept, newest first; this one is always listed, whatever the database says. */
+analytics.get("/logs/runs", async (context) => {
+	const { level, q } = parseQuery(context, logRunsQuery);
+	const search = q === undefined || q === "" ? undefined : { minRank: LOG_LEVEL_RANK[level], text: q };
+	const tally = logRing.tally();
+	const current: LogRun = {
+		id: logRing.run.id,
+		startedAt: new Date(logRing.run.startedAt).toISOString(),
+		endedAt: null,
+		lastAt: tally.lastAt === null ? null : new Date(tally.lastAt).toISOString(),
+		version: botVersion(),
+		current: true,
+		matched: search === undefined ? null : logRing.recent({ limit: 1, minLevel: level, search: search.text }).matched,
+		lines: logRing.size,
+		errors: tally.errors,
+		warnings: tally.warnings,
+	};
+
+	let past: LogRun[] = [];
+	let pastUnavailable = false;
+	try {
+		past = (await listLogRuns(search))
+			.filter((entry) => entry.run !== current.id)
+			.map((entry) => ({
+				id: entry.run,
+				startedAt: entry.startedAt.toISOString(),
+				endedAt: entry.endedAt?.toISOString() ?? null,
+				lastAt: entry.lastAt?.toISOString() ?? null,
+				version: entry.version,
+				current: false,
+				matched: entry.matched,
+				lines: entry.lines,
+				errors: entry.errors,
+				warnings: entry.warnings,
+			}));
+	} catch (error) {
+		context.get("client").logger.debug({ err: toError(error) }, "[LOGS] Past runs could not be read.");
+		pastUnavailable = true;
+	}
+
+	const body: LogRuns = {
+		runs: [current, ...past].slice(0, LOG_LIMITS.runsKept),
+		kept: LOG_LIMITS.runsKept,
+		pastUnavailable,
+	};
+	return context.json(body);
+});
+
+/** What was stored as JSON comes back as the object it was; anything else reads as an empty context. */
+function storedContext(text: string): Record<string, unknown> {
+	try {
+		const parsed: unknown = JSON.parse(text);
+		return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+			? (parsed as Record<string, unknown>)
+			: {};
+	} catch {
+		return {};
+	}
+}
 
 analytics.get("/runtime", (context) => context.json(runtimeInfo(context.get("client"))));
 

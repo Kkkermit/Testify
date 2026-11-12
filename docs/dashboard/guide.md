@@ -818,9 +818,11 @@ precisely the screen you want when something is wrong.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.
-- **The log ring is in memory and redacts on the way in** — any context key matching
+- **The logs are kept per run, six runs at a time, and redacted on the way in** — any context key matching
   `token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is replaced before the record
-  is stored. A restart clears it, which is the trade for something needing no retention policy.
+  is stored, and an error keeps its whole stack and its cause but never `requestBody`. The run going now is read
+  from memory, so the tab still works while the database is down; the five before it are read from the database,
+  and a seventh start deletes the oldest. AGENTS.md §24 has the rest.
 - **The blacklist is bot-wide, and one module owns the rule about who may be on it.** `blacklistActions.util.ts`
   holds `blacklistProblem`, which both `/blacklist add` and the route call — an owner able to block another owner
   could lock every one of them out of their own bot.

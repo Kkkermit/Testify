@@ -39,6 +39,31 @@ describe("redact", () => {
 		expect(cleaned.err["message"]).toBe("bad thing");
 		expect(cleaned.err["stack"]).toContain("bad thing");
 	});
+
+	/** A Discord error's reason sits in its own fields and several levels down, which a name and a stack lose. */
+	it("keeps every field of an error, deep enough to read Discord's reason, and what caused it", () => {
+		const error = Object.assign(new Error("Invalid Form Body", { cause: new Error("socket closed") }), {
+			code: 50035,
+			rawError: { errors: { message_reference: { _errors: [{ code: "MESSAGE_REFERENCE_UNKNOWN_MESSAGE" }] } } },
+		});
+
+		const cleaned = redact({ err: error }) as { err: Record<string, unknown> };
+
+		expect(cleaned.err).toMatchObject({ code: 50035, cause: { message: "socket closed" } });
+		expect(JSON.stringify(cleaned.err["rawError"])).toContain("MESSAGE_REFERENCE_UNKNOWN_MESSAGE");
+	});
+
+	/** What a failed request was sending can be somebody's own words, and logs are kept across restarts. */
+	it("leaves out what a failed request was sending", () => {
+		const error = Object.assign(new Error("Missing Access"), { requestBody: { json: { content: "my reminder" } } });
+
+		expect(JSON.stringify(redact({ err: error }))).not.toContain("my reminder");
+	});
+
+	/** `JSON.stringify` throws on a bigint, which would lose the line and every one written with it. */
+	it("writes a bigint as a string", () => {
+		expect(JSON.stringify(redact({ permissions: 8n }))).toBe('{"permissions":"8"}');
+	});
 });
 
 describe("the log ring", () => {
@@ -59,6 +84,48 @@ describe("the log ring", () => {
 
 		expect(lines.map((line) => line.message)).toEqual(["c", "b"]);
 		expect(matched).toBe(3);
+	});
+
+	/** The database is handed each line once, and a refused batch goes back ahead of anything newer. */
+	it("hands over new lines once, and takes refused ones back in order", () => {
+		const ring = new LogRing(10);
+		ring.push(record("info", "a"));
+		ring.push(record("info", "b"));
+
+		const taken = ring.takeUnsent();
+		ring.push(record("info", "c"));
+		ring.putBack(taken);
+
+		expect(taken.map((line) => line.seq)).toEqual([1, 2]);
+		expect(ring.takeUnsent().map((line) => line.message)).toEqual(["a", "b", "c"]);
+		expect(ring.takeUnsent()).toEqual([]);
+	});
+
+	/** A database that is away for hours must not turn the queue into a leak. */
+	it("bounds the lines waiting for the database", () => {
+		const ring = new LogRing(3);
+		for (const message of ["a", "b", "c", "d", "e"]) ring.push(record("info", message));
+
+		expect(ring.takeUnsent().map((line) => line.message)).toEqual(["c", "d", "e"]);
+	});
+
+	/** Delete my data reaches the logs in memory too, waiting lines included. */
+	it("forgets every line that mentions an id", () => {
+		const ring = new LogRing(10);
+		ring.push(record("error", "[COMMAND_ERROR] A command failed.", { user: "927917673344557108" }));
+		ring.push(record("info", "[READY] Online"));
+
+		ring.forget("927917673344557108");
+
+		expect(ring.recent().lines.map((line) => line.message)).toEqual(["[READY] Online"]);
+		expect(ring.takeUnsent().map((line) => line.message)).toEqual(["[READY] Online"]);
+	});
+
+	it("counts the errors and warnings it holds", () => {
+		const ring = new LogRing(10);
+		for (const level of ["error", "warn", "info", "error"] as const) ring.push(record(level));
+
+		expect(ring.tally()).toMatchObject({ errors: 2, warnings: 1 });
 	});
 
 	describe("searching", () => {

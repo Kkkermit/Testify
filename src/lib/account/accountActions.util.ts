@@ -1,7 +1,9 @@
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
+import { logRing } from "@core/logRing";
 import { eraseUserData } from "@database/repositories/accountRepository";
 import { clearAfkCache } from "@database/repositories/afkRepository";
+import { forgetInLogs } from "@database/repositories/logRepository";
 import { activity } from "@lib/info/activity.util";
 import { forgetNoticeHint } from "@lib/notices/noticeActions.util";
 
@@ -9,7 +11,8 @@ import { forgetNoticeHint } from "@lib/notices/noticeActions.util";
 export async function eraseAccount(client: TestifyClient, userId: string): Promise<void> {
 	activity.forget(userId);
 	forgetNoticeHint(userId);
-	const posts = await eraseUserData(userId);
+	logRing.forget(userId);
+	const [posts] = await Promise.all([eraseUserData(userId), forgetInLogs(userId)]);
 	clearAfkCache();
 
 	// An idea's or an appeal's post carries their words, and one Discord will not let go of is not worth failing over.

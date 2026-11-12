@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { PageHeader, TabBar, TabContent } from "@/components/primitives";
 import { CommandsPage } from "@/features/commands/CommandsPage";
+import { runFrom } from "@/features/owner/logs.utils";
 import { OWNER_TABS, ownerTabFrom } from "@/features/owner/owner.types";
 import { levelFrom, windowFrom } from "@/features/owner/owner.utils";
 import { BlacklistTab } from "@/features/owner/tabs/BlacklistTab";
@@ -22,11 +23,12 @@ export function OwnerPage(): React.JSX.Element {
 	const tab = ownerTabFrom(params.get("tab"));
 
 	/** `replace` is for a value that changes as it is typed — a history entry per keystroke makes Back useless. */
-	function put(key: string, value: string, replace = false): void {
+	function put(key: string, value: string | null, replace = false): void {
 		setParams(
 			(current) => {
 				const merged = new URLSearchParams(current);
-				merged.set(key, value);
+				if (value === null) merged.delete(key);
+				else merged.set(key, value);
 				return merged;
 			},
 			{ replace },
@@ -58,9 +60,13 @@ export function OwnerPage(): React.JSX.Element {
 				)}
 				{tab === "logs" && (
 					<LogsTab
+						run={runFrom(params.get("run"))}
 						level={levelFrom(params.get("level"))}
 						search={params.get("q") ?? ""}
 						paused={params.get("paused") === "1"}
+						onRun={(next) => {
+							put("run", next);
+						}}
 						onLevel={(level: ReportedLogLevel) => {
 							put("level", level);
 						}}
