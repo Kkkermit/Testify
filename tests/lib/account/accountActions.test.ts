@@ -1,5 +1,7 @@
 import { type TestifyClient } from "@core/client";
+import { logRing } from "@core/logRing";
 import { eraseUserData } from "@database/repositories/accountRepository";
+import { forgetInLogs } from "@database/repositories/logRepository";
 import { eraseAccount } from "@lib/account/accountActions.util";
 import { activity } from "@lib/info/activity.util";
 
@@ -11,6 +13,8 @@ jest.mock("@database/repositories/accountRepository", () => ({
 		]),
 	),
 }));
+
+jest.mock("@database/repositories/logRepository", () => ({ forgetInLogs: jest.fn(() => Promise.resolve()) }));
 
 const PERSON = "100000000000000001";
 
@@ -49,5 +53,20 @@ describe("eraseAccount", () => {
 		await eraseAccount(client, PERSON);
 
 		expect(activity.drain().members.map((member) => member.userId)).toEqual(["100000000000000002"]);
+	});
+
+	/** The owner console keeps six runs of logs, and a line naming them is about them like any other record. */
+	it("forgets the log lines that mention them, in memory and in every stored run", async () => {
+		logRing.clear();
+		logRing.push({ at: 0, level: "error", message: "[COMMAND_ERROR] A command failed.", context: { user: PERSON } });
+		logRing.push({ at: 1, level: "info", message: "[READY] Online", context: {} });
+
+		await eraseAccount(
+			clientWith(() => Promise.resolve(null)),
+			PERSON,
+		);
+
+		expect(jest.mocked(forgetInLogs)).toHaveBeenCalledWith(PERSON);
+		expect(logRing.recent().lines.map((line) => line.message)).toEqual(["[READY] Online"]);
 	});
 });

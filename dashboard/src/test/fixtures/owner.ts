@@ -6,6 +6,7 @@ import {
 	type CommandRunRow,
 	type GuildUsageReport,
 	type LogFeed,
+	type LogRuns,
 	type MemberUsageRow,
 	type OwnerGuildDetail,
 	type RuntimeInfo,
@@ -238,7 +239,12 @@ export const commandRuns: CommandRunRow[] = [
 	},
 ];
 
+const CURRENT_RUN = "6f0d7c1e-2a4b-4c8d-9e1f-0a2b3c4d5e6f";
+export const PAST_RUN = "1b2c3d4e-5f60-4718-8a9b-0c1d2e3f4a5b";
+
 export const logFeed: LogFeed = {
+	run: CURRENT_RUN,
+	current: true,
 	lines: [
 		{
 			at: "2026-08-01T12:00:00.000Z",
@@ -249,9 +255,67 @@ export const logFeed: LogFeed = {
 		{ at: "2026-08-01T11:59:00.000Z", level: "info", message: "[READY] Logged in", context: {} },
 	],
 	buffered: 2,
-	capacity: 1_000,
+	capacity: 2_000,
 	loggerLevel: "info",
 	matched: 2,
+};
+
+/** What a crash leaves: a past run with no shutdown, holding the error that ended it with its whole stack. */
+export const pastLogFeed: LogFeed = {
+	run: PAST_RUN,
+	current: false,
+	lines: [
+		{
+			at: "2026-07-30T09:15:00.000Z",
+			level: "error",
+			message: "[COMMAND_ERROR] A command failed.",
+			context: {
+				err: {
+					name: "DiscordAPIError[50035]",
+					message: "Invalid Form Body",
+					stack: "DiscordAPIError[50035]: Invalid Form Body\n    at handleErrors (rest.js:762:13)",
+					code: 50035,
+					cause: { name: "Error", message: "Unknown message", stack: "Error: Unknown message\n    at clear.js:61:5" },
+				},
+				command: "clear",
+			},
+		},
+	],
+	buffered: 140,
+	capacity: 2_000,
+	loggerLevel: "info",
+	matched: 1,
+};
+
+export const logRuns: LogRuns = {
+	runs: [
+		{
+			id: CURRENT_RUN,
+			startedAt: "2026-08-01T11:58:00.000Z",
+			endedAt: null,
+			lastAt: "2026-08-01T12:00:00.000Z",
+			version: "2.4.1",
+			current: true,
+			matched: null,
+			lines: 2,
+			errors: 1,
+			warnings: 0,
+		},
+		{
+			id: PAST_RUN,
+			startedAt: "2026-07-30T08:00:00.000Z",
+			endedAt: null,
+			lastAt: "2026-07-30T09:15:00.000Z",
+			version: "2.4.0",
+			current: false,
+			matched: null,
+			lines: 140,
+			errors: 1,
+			warnings: 3,
+		},
+	],
+	kept: 6,
+	pastUnavailable: false,
 };
 
 export const runtimeInfo: RuntimeInfo = {

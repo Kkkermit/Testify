@@ -1,10 +1,13 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { barWidth } from "@/components/primitives/UsageBars";
 import { levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
+import { logRuns, PAST_RUN } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
+import { server } from "@/test/setup";
 
 function renderTab(tab: string) {
 	return renderWithProviders(<OwnerPage />, { path: "/owner", route: `/owner?tab=${tab}` });
@@ -100,6 +103,102 @@ describe("the logs tab", () => {
 		renderTab("logs");
 
 		expect(await screen.findByText(/token, a password or a connection string was removed/i)).toBeInTheDocument();
+	});
+
+	/** Six starts are kept, and a run with no shutdown recorded is the one that crashed, so it reads as one. */
+	it("lists the runs kept, the one going now first, and marks one that never shut down", async () => {
+		renderTab("logs");
+
+		const runs = await screen.findByRole("group", { name: "Runs" });
+		const radios = within(runs).getAllByRole("radio");
+
+		expect(radios).toHaveLength(2);
+		expect(within(runs).getByRole("radio", { name: /Running now/ })).toBeChecked();
+		expect(within(runs).getByText(/No shutdown recorded, last line/)).toHaveClass("text-destructive-text");
+		expect(within(runs).getByText("3 warnings")).toBeInTheDocument();
+		expect(screen.getByText(/last 6 starts are kept/)).toBeInTheDocument();
+	});
+
+	/** A past run is read from the database: it cannot change, so nothing pauses it, and its error opens to its whole stack. */
+	it("opens a past run, its error's whole stack and what caused it", async () => {
+		const user = userEvent.setup();
+		const { search } = renderTab("logs");
+
+		await user.click(await screen.findByRole("radio", { name: /30 Jul 2026/ }));
+		const line = await screen.findByText("[COMMAND_ERROR] A command failed.");
+		await user.click(line);
+
+		expect(search()).toContain(`run=${PAST_RUN}`);
+		expect(screen.queryByRole("button", { name: "Pause" })).toBeNull();
+		expect(screen.getByText(/at handleErrors \(rest\.js:762:13\)/)).toBeVisible();
+		expect(screen.getByText("Caused by")).toBeVisible();
+		expect(screen.getByText(/at clear\.js:61:5/)).toBeVisible();
+		expect(screen.getByText(/"code": 50035/)).toBeVisible();
+		expect(screen.getByText(/"command": "clear"/)).toBeVisible();
+	});
+
+	/** A reference from an old failure is in one of six runs, and the list says which before anybody opens one. */
+	it("says how many lines a search finds in each run", async () => {
+		server.use(
+			http.get("/api/analytics/logs/runs", ({ request }) => {
+				const searched = new URL(request.url).searchParams.get("q") !== null;
+				return HttpResponse.json({
+					...logRuns,
+					runs: logRuns.runs.map((run) => ({ ...run, matched: searched ? (run.current ? 0 : 4) : null })),
+				});
+			}),
+		);
+		renderWithProviders(<OwnerPage />, { path: "/owner", route: "/owner?tab=logs&q=DXQV6Z" });
+
+		expect(await screen.findByText("4 matches")).toBeInTheDocument();
+		expect(screen.getByText("0 matches")).toBeInTheDocument();
+	});
+
+	/** An address naming a run that a seventh start has since deleted shows the run going now, not a 404. */
+	it("falls back to the run going now for a run it no longer keeps", async () => {
+		renderWithProviders(<OwnerPage />, {
+			path: "/owner",
+			route: "/owner?tab=logs&run=00000000-0000-4000-8000-000000000009",
+		});
+
+		expect(await screen.findByText("[READY] Logged in")).toBeInTheDocument();
+		expect(screen.getByRole("radio", { name: /Running now/ })).toBeChecked();
+	});
+
+	/** Deleting waits out the undo window, so a mistaken click costs nothing. */
+	it("deletes a past run only once the undo window has passed", async () => {
+		const deleted: string[] = [];
+		server.use(
+			http.delete("/api/control/logs/:runId", ({ params }) => {
+				deleted.push(String(params.runId));
+				return new HttpResponse(null, { status: 204 });
+			}),
+		);
+		const user = userEvent.setup();
+		const { search } = renderTab("logs");
+
+		await user.click(await screen.findByRole("radio", { name: /30 Jul 2026/ }));
+		await user.click(await screen.findByRole("button", { name: "Delete this run’s logs" }));
+
+		expect(screen.queryByRole("radio", { name: /30 Jul 2026/ })).toBeNull();
+		expect(search()).not.toContain("run=");
+		expect(screen.getByText(/Deleted the logs of the run started/)).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: "Undo" }));
+		expect(await screen.findByRole("radio", { name: /30 Jul 2026/ })).toBeInTheDocument();
+		expect(deleted).toEqual([]);
+	});
+
+	/** The run going now cannot be deleted from the list, only emptied, and its lines go at once. */
+	it("clears the run going now rather than deleting it", async () => {
+		const user = userEvent.setup();
+		renderTab("logs");
+
+		await screen.findByText("[READY] Logged in");
+		await user.click(screen.getByRole("button", { name: "Clear this run’s logs" }));
+
+		expect(screen.queryByText("[READY] Logged in")).toBeNull();
+		expect(screen.getByRole("radio", { name: /Running now/ })).toBeInTheDocument();
+		expect(screen.getByText(/Deleted the logs of the run going now/)).toBeInTheDocument();
 	});
 });
 

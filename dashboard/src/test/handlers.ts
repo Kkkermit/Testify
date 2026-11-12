@@ -63,6 +63,9 @@ import {
 	guildDetail,
 	guildUsage,
 	logFeed,
+	logRuns,
+	PAST_RUN,
+	pastLogFeed,
 	memberUsage,
 	runResult,
 	runnable,
@@ -271,7 +274,11 @@ export const handlers = [
 	http.get("/api/analytics/guilds/:guildId/runs", () =>
 		HttpResponse.json({ items: commandRuns, total: commandRuns.length, page: 1, perPage: 25 }),
 	),
-	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
+	http.get("/api/analytics/logs", ({ request }) =>
+		HttpResponse.json(new URL(request.url).searchParams.get("run") === PAST_RUN ? pastLogFeed : logFeed),
+	),
+	http.get("/api/analytics/logs/runs", () => HttpResponse.json(logRuns)),
+	http.delete("/api/control/logs/:runId", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 	http.get("/api/control", () => HttpResponse.json(botControl)),
 	http.get("/api/control/music", () => HttpResponse.json({ sources: "both", configured: false })),

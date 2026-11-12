@@ -17,6 +17,7 @@ const TABS: { tab: string; endpoint: string; query?: string }[] = [
 	{ tab: "usage", endpoint: "/api/analytics/guilds/:guildId/members", query: "&guild=900000000000000001" },
 	{ tab: "usage", endpoint: "/api/analytics/guilds/:guildId/runs", query: "&guild=900000000000000001" },
 	{ tab: "logs", endpoint: "/api/analytics/logs" },
+	{ tab: "logs", endpoint: "/api/analytics/logs/runs" },
 	{ tab: "run", endpoint: "/api/owner/runner" },
 	{ tab: "blacklist", endpoint: "/api/owner/blacklist" },
 	{ tab: "notifications", endpoint: "/api/owner/notices" },
