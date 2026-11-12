@@ -1229,6 +1229,15 @@ needs:
   the second stage is emulated for `arm64`; the second picks yt-dlp's build for `$TARGETARCH`.
   `docker-compose.image.yml` runs the published image in place of a local build (`build: !reset null`).
 
+`.github/workflows/wiki.yml` — **the GitHub wiki is `docs/wiki/`, published.** A push to `main` that touches the
+folder, or a manual run, copies it into the repository's wiki with the job's own token and commits only when a page
+changed, so a page edited on GitHub is overwritten by the next run. GitHub makes the wiki's repository only when its
+first page is saved in the browser; until then the job fails saying so. The wiki is a map that links into `docs/`, the
+README and the website rather than repeating them, and `tests/config/wiki.test.ts` holds it to the code: it fails on a
+link to a wiki page, section, repository file, help article, docs page or website route that does not exist, on a
+page missing from `_Sidebar.md`, and on an invite in the wiki or the README asking for other permissions than
+`INVITE_PERMISSIONS` — the README's once asked for Administrator. Each check was proved to go red.
+
 **Suppressions expire, and `tests/config/suppressions.test.ts` is what makes that true rather than a wish** —
 it fails on an active entry with no reason, no fixing version, a lapsed expiry, or one more than a year out.
 `.nsprc` and `.snyk` each require three things: a written reason, the version that

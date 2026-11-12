@@ -1,0 +1,52 @@
+name: Wiki
+
+# The wiki is docs/wiki, published from main; a page edited on GitHub is overwritten by the next run.
+on:
+  push:
+    branches: ["main"]
+    paths: ["docs/wiki/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wiki
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish the wiki
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Copy docs/wiki into the wiki
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          auth="Authorization: Basic $(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          wiki="https://github.com/${GITHUB_REPOSITORY}.wiki.git"
+
+          # GitHub creates the wiki's repository only when its first page is saved in the browser.
+          if ! git -c http.extraHeader="$auth" clone --depth 1 "$wiki" wiki; then
+            echo "::error::The wiki has no repository yet. Save any first page at https://github.com/${GITHUB_REPOSITORY}/wiki/_new, then run this workflow again."
+            exit 1
+          fi
+
+          find wiki -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R docs/wiki/. wiki/
+
+          cd wiki
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The wiki already matches docs/wiki."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "Published docs/wiki from ${GITHUB_SHA::7}"
+          git -c http.extraHeader="$auth" push origin HEAD
