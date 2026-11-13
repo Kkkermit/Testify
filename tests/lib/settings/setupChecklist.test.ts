@@ -44,6 +44,7 @@ function channel(id: string, name: string, rawPosition: number, options: Options
 		type,
 		memberCan: member,
 		isTextBased: () => true,
+		isThread: () => false,
 		permissionsFor: (who: unknown) => ({ has: () => (who === EVERYONE ? everyone : bot) }),
 	};
 }

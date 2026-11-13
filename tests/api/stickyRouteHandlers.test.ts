@@ -34,6 +34,7 @@ function app(): Hono<ApiBindings> {
 		id: CHANNEL,
 		type: ChannelType.GuildText,
 		isTextBased: () => true,
+		isThread: () => false,
 		permissionsFor: () => ({ has: () => true }),
 	};
 	const guild = {
