@@ -3637,7 +3637,10 @@ wrote. Five things about the history are load-bearing:
 - **The run going now is read from memory.** The Logs tab is the screen you open when something is wrong, and the
   database may be the thing that is wrong, so `/analytics/logs` without a `run` reads the ring and
   `/analytics/logs/runs` lists this run first whatever the database says, answering `pastUnavailable` when it
-  cannot read the rest. A history that could not be started costs the history, never the bot.
+  cannot read the rest. A history that could not be started costs the history, never the bot. **Refresh**
+  reads the run shown and the list again at once and says so; a read that fails, by hand or on the timer, says why
+  beside it while the lines already read stay on screen (`RefreshLogs`), since an error page in their place would hide
+  them exactly when they are wanted.
 - **Search is literal and spans every run.** The ring and `readLogLines` both match the message and the stringified
   context, so a guild id or an error reference finds every line about it, and a search is escaped before it becomes
   a pattern, so `(` or `.*` finds those characters. The runs list counts what the search finds in each run at the
