@@ -8,6 +8,7 @@ import { SearchField, Warning } from "@/components/form";
 import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
 import { LogLines } from "@/features/owner/components/LogLines";
 import { LogRunList } from "@/features/owner/components/LogRunList";
+import { RefreshLogs } from "@/features/owner/components/RefreshLogs";
 import { useDeleteLogs, useLogRuns, useLogs } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { type TranslationKey } from "@/i18n";
@@ -83,11 +84,13 @@ export function LogsTab({
 	}
 
 	const cleared = current !== undefined && !past && undo.isHidden(keyOf(current.id));
+	const failure = logs.isError ? logs.error : runs.isError ? runs.error : null;
+	const refetch = () => Promise.all(chosen === undefined ? [runs.refetch()] : [runs.refetch(), logs.refetch()]);
 
 	return (
 		<div className="flex flex-col gap-4">
 			<Card padding="compact" className="flex flex-col gap-3">
-				{runs.isError ? (
+				{runs.isError && listed === undefined ? (
 					<ErrorState as="h2" error={runs.error} onRetry={() => void runs.refetch()} />
 				) : listed === undefined ? (
 					<Skeleton className="h-40 w-full" />
@@ -123,7 +126,7 @@ export function LogsTab({
 					onChange={onLevel}
 				/>
 
-				<div className="flex flex-wrap gap-2">
+				<RefreshLogs refetch={refetch} failure={failure} readAt={logs.dataUpdatedAt}>
 					{!past && (
 						<Button
 							variant="ghost"
@@ -147,7 +150,7 @@ export function LogsTab({
 							{shownRun.current ? t("owner.logsClear") : t("owner.logsDelete")}
 						</Button>
 					)}
-				</div>
+				</RefreshLogs>
 			</Card>
 
 			<p className="text-muted-foreground text-sm" aria-live="polite">
@@ -164,12 +167,12 @@ export function LogsTab({
 				</Warning>
 			)}
 
-			{/* An unreadable feed must not render as an empty one — this is the screen you open when things are wrong. */}
-			{logs.isError ? (
+			{/* An unreadable feed must not render as an empty one; lines already read stay, and the failure is said above. */}
+			{logs.isError && logs.data === undefined ? (
 				<ErrorState as="h2" error={logs.error} onRetry={() => void logs.refetch()} />
 			) : (
 				<Card padding="compact" aria-busy={logs.isPending}>
-					{logs.isPending ? (
+					{logs.data === undefined ? (
 						<Skeleton className="h-64 w-full" />
 					) : (
 						<LogLines lines={cleared ? [] : logs.data.lines} past={past} />
