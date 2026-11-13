@@ -387,7 +387,8 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
 
 - Slash → `events/command/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
 - Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`. The prefix matches in
-  any case, so `T?help` — what a phone's auto-capitalisation types — runs `t?help`
+  any case, so `T?help` — what a phone's auto-capitalisation types — runs `t?help`. A prefix run naming no
+  subcommand the command has is refused by `runChecks` in the reader's language, before a cooldown starts
 - Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
   `button.run(interaction, { client, action, args })`
 - Right-click → the same listener → `client.contextMenus` by name → `checkContextMenu` → `menu.run(interaction, client)`

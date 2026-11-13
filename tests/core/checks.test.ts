@@ -11,8 +11,9 @@ import {
 	runChecks,
 } from "@core/checks";
 import { defineCommand } from "@core/command";
+import { PrefixInteraction } from "@core/prefix";
 import { refusalEmbed } from "@lib/discord/embeds.util";
-import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
+import { createMockClient, createMockInteraction, createMockMessage, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
 const findBlacklistEntry = jest.fn<Promise<{ reason: string; createdAt?: Date } | null>, []>(() =>
 	Promise.resolve(null),
@@ -347,6 +348,49 @@ describe("the music system's own switch", () => {
 		musicSettings.mockResolvedValue({ enabled: false, djRoleIds: [] });
 
 		expect(await runChecks(createMockInteraction(), plain, createMockClient())).toBeNull();
+	});
+});
+
+describe("a prefix run that names no subcommand the command has", () => {
+	const role = defineCommand({
+		name: "role",
+		description: "Roles.",
+		category: "moderation",
+		cooldown: 5_000,
+		subcommands: [
+			{ name: "add", description: "Adds.", run: jest.fn() },
+			{ name: "remove", description: "Removes.", run: jest.fn() },
+		],
+	});
+	const casino = defineCommand({
+		name: "casino",
+		description: "Games.",
+		category: "casino",
+		subcommands: [{ name: "roulette", description: "Spins.", run: jest.fn() }],
+	});
+	const typed = (command: typeof role, args: string[]) => new PrefixInteraction(createMockMessage(), command, args);
+
+	/** `t?role @someone` threw out of the checks, so nobody was answered and the handler logged an error. */
+	it("is refused with the subcommands to pick from, and costs no cooldown", async () => {
+		const client = createMockClient();
+
+		expect(await runChecks(typed(role, [`<@${USER_ID}>`]), role, client)).toBe(
+			"That command needs one of these after its name: `add` or `remove`.",
+		);
+		expect(await runChecks(typed(role, []), role, client)).toContain("`add` or `remove`");
+		expect(await runChecks(typed(role, ["add", `<@${USER_ID}>`]), role, client)).toBeNull();
+	});
+
+	/** The music and casino gates read the subcommand before the permissions do, and threw there first. */
+	it("is refused by the commands the music and casino gates look at too", async () => {
+		const refusals = await Promise.all(
+			[music, casino].map((command) => runChecks(typed(command, ["nonsense"]), command, createMockClient())),
+		);
+
+		expect(refusals).toEqual([
+			"That command needs one of these after its name: `skip` or `system`.",
+			"That command needs one of these after its name: `roulette`.",
+		]);
 	});
 });
 
