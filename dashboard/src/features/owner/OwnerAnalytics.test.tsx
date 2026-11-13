@@ -5,7 +5,7 @@ import { barWidth } from "@/components/primitives/UsageBars";
 import { levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { logRuns, PAST_RUN } from "@/test/fixtures/owner";
+import { logFeed, logRuns, PAST_RUN } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -199,6 +199,43 @@ describe("the logs tab", () => {
 		expect(screen.queryByText("[READY] Logged in")).toBeNull();
 		expect(screen.getByRole("radio", { name: /Running now/ })).toBeInTheDocument();
 		expect(screen.getByText(/Deleted the logs of the run going now/)).toBeInTheDocument();
+	});
+
+	/** A paused feed, or a past run, otherwise shows what it read until the tab is opened again. */
+	it("reads the logs again on demand and says that it has", async () => {
+		const user = userEvent.setup();
+		renderTab("logs");
+		await screen.findByText("[READY] Logged in");
+
+		const latest = { at: "2026-08-01T12:01:00.000Z", level: "info", message: "[HEARTBEAT] Still here", context: {} };
+		server.use(
+			http.get("/api/analytics/logs", () => HttpResponse.json({ ...logFeed, lines: [latest, ...logFeed.lines] })),
+		);
+		await user.click(screen.getByRole("button", { name: "Refresh" }));
+
+		expect(await screen.findByText("[HEARTBEAT] Still here")).toBeInTheDocument();
+		expect((await screen.findByText(/^Refreshed at /)).closest("[role=status]")).toHaveClass("text-success");
+	});
+
+	/** A failed refresh says why, and keeps the lines it already had rather than swapping them for an error page. */
+	it("says why a refresh failed, and keeps the lines it had", async () => {
+		const user = userEvent.setup();
+		renderTab("logs");
+		await screen.findByText("[READY] Logged in");
+
+		server.use(
+			http.get("/api/analytics/logs", () =>
+				HttpResponse.json({ error: { code: "internal", message: "The log store is busy." } }, { status: 500 }),
+			),
+		);
+		await user.click(screen.getByRole("button", { name: "Refresh" }));
+
+		const note = await screen.findByText(
+			/^Couldn’t refresh the logs\. The log store is busy\. The lines shown were read at /,
+		);
+		expect(note.closest("[role=status]")).toHaveClass("text-destructive-text");
+		expect(screen.getByText("[READY] Logged in")).toBeInTheDocument();
+		expect(screen.queryByText(/^Refreshed at /)).toBeNull();
 	});
 });
 
