@@ -80,7 +80,7 @@ class PrefixOptions extends OptionReader implements CommandInputOptions {
 		this.args = args;
 	}
 
-	/** Parsed on first use, so a missing subcommand fails inside the command's error boundary. */
+	/** Parsed on first use; a missing or unknown subcommand throws, which `runChecks` answers as a refusal. */
 	private get state(): { values: Map<string, string>; subcommand: string | null; declared: CommandOption[] } {
 		if (this.parsed !== null) return this.parsed;
 

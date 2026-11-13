@@ -3,7 +3,8 @@ import { type BotLanguage } from "@config/languages";
 import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
-import { type Command, type CommandInput, type Subcommand } from "@core/command";
+import { type Command, type CommandInput, type Subcommand, subcommandsOf } from "@core/command";
+import { UserFacingError } from "@core/errors";
 import { durationIn, eitherOf, permissionList, readerLanguage, say } from "@core/language";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
@@ -63,10 +64,16 @@ export async function runChecks(
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId, language);
 	if (switchedOff !== null) return switchedOff;
 
-	const musicOff = await checkMusicSystem(interaction, command);
+	const subcommand = chosenSubcommand(interaction, command);
+	if (subcommand === undefined) {
+		const names = subcommandsOf(command).map((sub) => `\`${sub.name}\``);
+		return say(language, "pickSubcommand", { subcommands: eitherOf(language, names) });
+	}
+
+	const musicOff = await checkMusicSystem(interaction, command, subcommand);
 	if (musicOff !== null) return musicOff;
 
-	const casinoClosed = await checkCasino(interaction, command);
+	const casinoClosed = await checkCasino(interaction, command, subcommand);
 	if (casinoClosed !== null) return casinoClosed;
 
 	if (command.guildOnly && !interaction.guild) {
@@ -80,7 +87,7 @@ export async function runChecks(
 	}
 
 	const member = interaction.member;
-	const needed = [...(command.permissions ?? []), ...(chosenSubcommand(interaction, command)?.permissions ?? [])];
+	const needed = [...(command.permissions ?? []), ...(subcommand?.permissions ?? [])];
 
 	if (needed.length > 0 && member !== null) {
 		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
@@ -234,11 +241,18 @@ async function checkSwitchedOff(name: string, guildId: string | null, language: 
 	return null;
 }
 
-/** Which subcommand was used, or null — a command with no subcommands answers null the contract cannot express. */
-function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null {
+/** Which subcommand was used: null for a command without them, undefined for a prefix run that named none it has. */
+function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null | undefined {
 	if (command.subcommands === undefined) return null;
 
-	const chosen: string | null = interaction.options.getSubcommand(false);
+	let chosen: string | null;
+	try {
+		chosen = interaction.options.getSubcommand(false);
+	} catch (error) {
+		// The prefix reader throws on its first read when the words typed name no subcommand.
+		if (error instanceof UserFacingError) return undefined;
+		throw error;
+	}
 
 	return command.subcommands.find((subcommand) => subcommand.name === chosen) ?? null;
 }
@@ -262,10 +276,14 @@ function roleIdsOf(member: CommandInput["member"]): string[] {
  * The music system's switch and DJ roles, gated here so no music command can forget them; `/music system` is the way
  * back in.
  */
-async function checkMusicSystem(interaction: CommandInput, command: Command): Promise<CheckFailure> {
+async function checkMusicSystem(
+	interaction: CommandInput,
+	command: Command,
+	subcommand: Subcommand | null,
+): Promise<CheckFailure> {
 	if (command.category !== "music" || interaction.guildId === null) return null;
 
-	if (chosenSubcommand(interaction, command)?.name === MUSIC_SYSTEM_SUBCOMMAND) return null;
+	if (subcommand?.name === MUSIC_SYSTEM_SUBCOMMAND) return null;
 
 	const settings = normaliseMusicSettings(await getMusicSettings(interaction.guildId));
 	const member = interaction.member;
@@ -277,10 +295,14 @@ async function checkMusicSystem(interaction: CommandInput, command: Command): Pr
 }
 
 /** The casino's switch and its per-game switches; settings and stats stay reachable while it is closed. */
-async function checkCasino(interaction: CommandInput, command: Command): Promise<CheckFailure> {
+async function checkCasino(
+	interaction: CommandInput,
+	command: Command,
+	subcommand: Subcommand | null,
+): Promise<CheckFailure> {
 	if (command.name !== CASINO_COMMAND || interaction.guildId === null) return null;
 
-	const chosen = chosenSubcommand(interaction, command)?.name ?? null;
+	const chosen = subcommand?.name ?? null;
 	if (chosen === CASINO_SETTINGS_SUBCOMMAND || chosen === CASINO_STATS_SUBCOMMAND) return null;
 
 	return casinoRefusal(
