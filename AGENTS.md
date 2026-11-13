@@ -279,7 +279,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Change a permission or cooldown gate       | `src/core/checks.ts`                                                                |
 | Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                          |
 | Build a button/select/modal                | `src/lib/discord/components.util.ts`                                                |
-| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"             |
+| Check the bot can post in a channel        | `src/lib/discord/channels.util.ts` — `missingToPost`, the one rule for it           |
 | Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                                |
 | Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)            |
 | Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it                   |
@@ -530,6 +530,14 @@ Rules:
 9. **If it belongs to a feature a host can switch off, name it under that feature in `shared/src/botFeatures.ts`**,
    with its buttons, jobs and help articles. A command, button or event that imports a switchable feature's own
    `src/lib` folder without being declared under it fails `botFeatures.test.ts`.
+
+**A command that posts where it is told checks the bot can post there first.** `botPermissions` is asked of the
+whole server and `isSendable()` only of the channel's type — `'send' in this`, read out of discord.js — so a channel
+the bot cannot see passed both and Discord refused the post with 50001, which reached the reader as an unexpected
+failure. `requirePostable(channel, readerLanguage(interaction), [what the post needs])` refuses first, naming the
+channel and each permission missing (`iNeedIn`). `missingToPost` is the one rule behind it and behind
+`canPostInChannel` and the panels' `pickedChannelId`: View Channel, then Send Messages, or Send Messages in Threads for
+a thread.
 
 **A bounded option is held on every surface.** Discord refuses a slash command's value outside its `min`, `max`,
 `choices` or `maxLength`, but the prefix and the dashboard's runner read text, so `OptionReader` refuses it there

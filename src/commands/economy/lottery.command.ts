@@ -2,6 +2,7 @@ import { PermissionFlagsBits, MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
+import { readerLanguage } from "@core/language";
 import { type LotteryFrequency } from "@database/models/lottery.schema";
 import { debitWallet, requireAccount } from "@database/repositories/economyRepository";
 import {
@@ -11,7 +12,7 @@ import {
 	intervalFor,
 	saveLottery,
 } from "@database/repositories/lotteryRepository";
-import { embed, reply, successEmbed } from "@lib/discord";
+import { embed, reply, requirePostable, successEmbed } from "@lib/discord";
 import { discordTime, formatNumber } from "@lib/format";
 import { recordsSettings } from "@lib/settings";
 
@@ -115,6 +116,7 @@ export default recordsSettings(
 					if (!channel?.isTextBased() || !channel.isSendable()) {
 						throw new UserFacingError("Pick a text channel I can post the results in.");
 					}
+					requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
 					const frequency = (interaction.options.getString("frequency") ?? "weekly") as LotteryFrequency;
 					const basePrizePool = interaction.options.getInteger("base-pool") ?? 0;

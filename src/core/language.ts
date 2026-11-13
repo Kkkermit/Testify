@@ -45,6 +45,11 @@ export function permissionName(language: BotLanguage, flag: string): string {
 	return PERMISSION_NAMES[language][current as PermissionsString] ?? humanisePermission(current);
 }
 
+/** Permission flags as a refusal lists them: each named in the reader's language, once, in code spans. */
+export function permissionList(language: BotLanguage, flags: readonly string[]): string {
+	return allOf(language, [...new Set(flags.map((flag) => `\`${permissionName(language, flag)}\``))]);
+}
+
 const UNITS = [
 	["day", DAY_MS],
 	["hour", HOUR_MS],

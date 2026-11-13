@@ -1,8 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
+import { readerLanguage } from "@core/language";
 import { listSticky, removeSticky, setSticky } from "@database/repositories/stickyRepository";
-import { embed, reply, successEmbed } from "@lib/discord";
+import { embed, reply, requirePostable, successEmbed } from "@lib/discord";
 import { truncate } from "@lib/format";
 
 export default defineCommand({
@@ -46,6 +47,7 @@ export default defineCommand({
 				if (!channel?.isTextBased() || !channel.isSendable()) {
 					throw new UserFacingError("Pick a text channel I can send messages in.");
 				}
+				requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
 				const message = interaction.options.getString("message", true);
 				await setSticky(guild.id, channel.id, message, interaction.options.getInteger("cap", true));

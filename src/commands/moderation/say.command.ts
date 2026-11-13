@@ -2,7 +2,8 @@ import { PermissionFlagsBits } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inTextChannel, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { embed, reply, successEmbed } from "@lib/discord";
+import { readerLanguage } from "@core/language";
+import { embed, reply, requirePostable, successEmbed } from "@lib/discord";
 import { containsProfanity } from "@lib/moderation";
 
 export default defineCommand({
@@ -29,6 +30,7 @@ export default defineCommand({
 		}
 
 		const asEmbed = interaction.options.getBoolean("as-embed") ?? false;
+		requirePostable(target, readerLanguage(interaction), asEmbed ? [PermissionFlagsBits.EmbedLinks] : []);
 
 		await target.send(
 			asEmbed

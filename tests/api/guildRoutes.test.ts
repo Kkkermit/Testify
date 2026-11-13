@@ -177,6 +177,7 @@ function fakeGuild(options: Options = {}) {
 		position,
 		parentId: type === ChannelType.GuildText ? "4" : null,
 		isTextBased: () => type === ChannelType.GuildText || type === ChannelType.GuildAnnouncement,
+		isThread: () => false,
 		permissionsFor: (who: unknown) => ({
 			has: () => (who === reader ? !options.hiddenFromReader?.has(id) : (options.canSendIn?.has(id) ?? true)),
 		}),
