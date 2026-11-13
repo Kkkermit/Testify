@@ -1,8 +1,9 @@
 import { ChannelType, PermissionFlagsBits } from "discord.js";
 import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
+import { readerLanguage } from "@core/language";
 import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
-import { embed, reply, successEmbed } from "@lib/discord";
+import { embed, reply, requirePostable, successEmbed } from "@lib/discord";
 import { normaliseTicketSetup, publishTicketPanel } from "@lib/tickets";
 
 export default defineCommand({
@@ -37,6 +38,8 @@ export default defineCommand({
 
 				const panelChannel = textChannelOption(interaction, "panel-channel");
 				if (!panelChannel) throw new UserFacingError("Pick a channel I can post the panel in.");
+				const language = readerLanguage(interaction);
+				requirePostable(panelChannel, language, [PermissionFlagsBits.EmbedLinks]);
 
 				const category = channelOption(interaction, "category");
 				if (category?.type !== ChannelType.GuildCategory) {
@@ -45,6 +48,7 @@ export default defineCommand({
 
 				const transcripts = textChannelOption(interaction, "transcripts");
 				if (!transcripts) throw new UserFacingError("Pick a channel I can send transcripts to.");
+				requirePostable(transcripts, language, [PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AttachFiles]);
 
 				const staffRole = roleOption(interaction, "staff-role", true);
 				if (!staffRole) throw new UserFacingError("Pick the role that should handle tickets.");

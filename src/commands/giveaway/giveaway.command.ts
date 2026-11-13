@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { reply, successEmbed } from "@lib/discord";
+import { readerLanguage } from "@core/language";
+import { reply, requirePostable, successEmbed } from "@lib/discord";
 import { formatDurationLong, parseDuration } from "@lib/format";
 import { deleteGiveaway, endGiveaway, rerollGiveaway, startGiveaway } from "@lib/giveaways";
 
@@ -39,6 +40,7 @@ export default defineCommand({
 				if (!channel?.isTextBased() || !("guild" in channel)) {
 					throw new UserFacingError("Pick a text channel in this server.");
 				}
+				requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
 				await startGiveaway(client, guild, {
 					channelId: channel.id,

@@ -1,5 +1,6 @@
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
+import { readerLanguage } from "@core/language";
 import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { requireSendable } from "@lib/discord";
 import {
@@ -53,7 +54,7 @@ export default defineButton({
 
 				const [channelId] = interaction.values;
 				if (channelId === undefined) return;
-				await requireSendable(guild, channelId);
+				await requireSendable(guild, channelId, readerLanguage(interaction));
 
 				const fresh = saved.channelId === null && saved.enabled.length === 0 && draft.events.length === 0;
 				await showEditor({ channelId, events: fresh ? [...AUDIT_EVENTS] : draft.events });
@@ -84,7 +85,7 @@ export default defineButton({
 
 			case "save": {
 				if (draft.channelId === null) throw new UserFacingError("Choose a log channel first.");
-				await requireSendable(guild, draft.channelId);
+				await requireSendable(guild, draft.channelId, readerLanguage(interaction));
 
 				const enabled = collapseEnabled(draft.events);
 				await setAuditLogConfig(guild.id, draft.channelId, enabled);

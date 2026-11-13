@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { COLOUR_CHOICES, reply, resolveColour, successEmbed } from "@lib/discord";
+import { readerLanguage } from "@core/language";
+import { COLOUR_CHOICES, reply, requirePostable, resolveColour, successEmbed } from "@lib/discord";
 import { announcementMessage, mentionProblem } from "@lib/moderation";
 
 export default defineCommand({
@@ -30,6 +31,7 @@ export default defineCommand({
 		if (!channel?.isTextBased() || !channel.isSendable()) {
 			throw new UserFacingError("Pick a text channel I can send messages in.");
 		}
+		requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
 		const mentions = (interaction.options.getBoolean("ping-everyone") ?? false) ? "everyone" : "none";
 		const problem = mentionProblem(channel, inGuild(interaction), asMember(interaction), mentions);

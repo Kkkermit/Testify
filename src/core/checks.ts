@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, type Subcommand } from "@core/command";
-import { allOf, durationIn, eitherOf, permissionName, readerLanguage, say } from "@core/language";
+import { durationIn, eitherOf, permissionList, readerLanguage, say } from "@core/language";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
@@ -100,9 +100,7 @@ export async function runChecks(
 }
 
 function lacking(language: BotLanguage, who: "youNeed" | "iNeed", missing: string[]): string {
-	return say(language, who, {
-		permissions: allOf(language, [...new Set(missing.map((flag) => `\`${permissionName(language, flag)}\``))]),
-	});
+	return say(language, who, { permissions: permissionList(language, missing) });
 }
 
 async function ownerNames(client: TestifyClient): Promise<string[]> {

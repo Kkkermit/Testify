@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { reply, successEmbed } from "@lib/discord";
+import { readerLanguage } from "@core/language";
+import { reply, requirePostable, successEmbed } from "@lib/discord";
 import { postBotStats, removeBotStats } from "@lib/info";
 
 export default defineCommand({
@@ -27,6 +28,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const channel = textChannelOption(interaction, "channel");
 				if (channel === null) throw new UserFacingError("Pick a text channel I can send messages in.");
+				requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
 				await postBotStats(client, inGuild(interaction), channel.id, interaction.user.id);
 
