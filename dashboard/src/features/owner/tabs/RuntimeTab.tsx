@@ -3,13 +3,24 @@ import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Card, CARD_HEADING, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { ShardlensCard } from "@/features/owner/components/ShardlensCard";
 import { useRuntime } from "@/features/owner/useOwner";
 import { currentBotName } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { formatUptime, dateAndTime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
 
+/** The analytics card reads on its own, so a runtime read that fails still leaves it on screen. */
 export function RuntimeTab(): React.JSX.Element {
+	return (
+		<div className="flex flex-col gap-4">
+			<RuntimeFacts />
+			<ShardlensCard />
+		</div>
+	);
+}
+
+function RuntimeFacts(): React.JSX.Element {
 	const { t } = useTranslation();
 	const runtime = useRuntime();
 
@@ -20,7 +31,7 @@ export function RuntimeTab(): React.JSX.Element {
 	const info = runtime.data;
 
 	return (
-		<div className="flex flex-col gap-4">
+		<>
 			<Card padding="none">
 				<DataList
 					mono
@@ -85,6 +96,6 @@ export function RuntimeTab(): React.JSX.Element {
 					<ExternalLink size={14} aria-hidden="true" />
 				</a>
 			</Card>
-		</div>
+		</>
 	);
 }

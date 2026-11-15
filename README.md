@@ -341,24 +341,27 @@ It asks for each value, checks it as you type, and writes the file for you. Requ
 will not let you skip them. Prefer doing it by hand? Copy `.env.development.example` to `.env.development` (or
 `.env.example` to `.env`) and fill it in.
 
-| Variable                     | Required | What it is                                                                                       |
-| ---------------------------- | :------: | ------------------------------------------------------------------------------------------------ |
-| `DISCORD_TOKEN`              |    ✅    | The token from step 2                                                                            |
-| `DISCORD_CLIENT_ID`          |    ✅    | **General Information → Application ID** in the Developer Portal                                 |
-| `DISCORD_OWNER_IDS`          |    ✅    | Your Discord user ID. Comma-separate for several owners                                          |
-| `MONGODB_URI`                |    ✅    | The connection string from step 4                                                                |
-| `DISCORD_DEV_GUILD_ID`       |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
-| `LOG_LEVEL`                  |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
-| `DISABLED_FEATURES`          |    —     | Features to run without, such as `music,casino`. [Which ones](#-switching-features-off)          |
-| `CHANNEL_ERROR_LOG`          |    —     | Where command failures are reported, each with a reference the user is also given                |
-| `CHANNEL_GUILD_LOG`          |    —     | Where server joins and leaves are reported                                                       |
-| `CHANNEL_DM_LOG`             |    —     | Where DMs to the bot are logged, with a button to reply as the bot                               |
-| `CHANNEL_SLASH_COMMAND_LOG`  |    —     | Where every slash command is logged: which one, by whom, where, and whether it worked            |
-| `CHANNEL_PREFIX_COMMAND_LOG` |    —     | The same for every prefix command                                                                |
-| `CHANNEL_BUG_REPORT_LOG`     |    —     | Where `/bug-report` lands                                                                        |
-| `CHANNEL_SUGGESTION_LOG`     |    —     | Where `/suggest` lands                                                                           |
-| `CHANNEL_EVAL_LOG`           |    —     | Every `/eval` run with its code, and anyone else trying an owner command. Else the error channel |
-| `SUPPORT_AI_API_KEY`         |    —     | Lets `/ask` use Claude to pick the right help article. Without it, search alone answers          |
+| Variable                     | Required | What it is                                                                                             |
+| ---------------------------- | :------: | ------------------------------------------------------------------------------------------------------ |
+| `DISCORD_TOKEN`              |    ✅    | The token from step 2                                                                                  |
+| `DISCORD_CLIENT_ID`          |    ✅    | **General Information → Application ID** in the Developer Portal                                       |
+| `DISCORD_OWNER_IDS`          |    ✅    | Your Discord user ID. Comma-separate for several owners                                                |
+| `MONGODB_URI`                |    ✅    | The connection string from step 4                                                                      |
+| `DISCORD_DEV_GUILD_ID`       |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server       |
+| `LOG_LEVEL`                  |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                         |
+| `DISABLED_FEATURES`          |    —     | Features to run without, such as `music,casino`. [Which ones](#-switching-features-off)                |
+| `CHANNEL_ERROR_LOG`          |    —     | Where command failures are reported, each with a reference the user is also given                      |
+| `CHANNEL_GUILD_LOG`          |    —     | Where server joins and leaves are reported                                                             |
+| `CHANNEL_DM_LOG`             |    —     | Where DMs to the bot are logged, with a button to reply as the bot                                     |
+| `CHANNEL_SLASH_COMMAND_LOG`  |    —     | Where every slash command is logged: which one, by whom, where, and whether it worked                  |
+| `CHANNEL_PREFIX_COMMAND_LOG` |    —     | The same for every prefix command                                                                      |
+| `CHANNEL_BUG_REPORT_LOG`     |    —     | Where `/bug-report` lands                                                                              |
+| `CHANNEL_SUGGESTION_LOG`     |    —     | Where `/suggest` lands                                                                                 |
+| `CHANNEL_EVAL_LOG`           |    —     | Every `/eval` run with its code, and anyone else trying an owner command. Else the error channel       |
+| `SUPPORT_AI_API_KEY`         |    —     | Lets `/ask` use Claude to pick the right help article. Without it, search alone answers                |
+| `SHARDLENS_URL`              |    —     | A [Shardlens](https://github.com/Kkkermit/Shardlens) collector you run, for analytics. Off while blank |
+| `SHARDLENS_INGEST_KEY`       |    —     | That collector's ingest key, `slk_ingest_…`. Needed with the address, and never its read key           |
+| `SHARDLENS_DRY_RUN`          |    —     | `true` writes what would be sent to the log instead, so you can see it before switching it on          |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks. The music and dashboard
 variables are covered in their own sections below.

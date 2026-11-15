@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import prompts from "prompts";
+import { isCollectorUrl } from "@config/env";
 import { box, painter } from "@core/terminal";
 import { BOT_FEATURE_KEYS, isBotFeature } from "@testify/shared";
 
@@ -127,6 +128,22 @@ export function fields(isDev: boolean): Field[] {
 			message: "GitHub token for the source page's traffic",
 			hint: "Blank works, but a token lifts GitHub's limit of 60 an hour and shows traffic",
 			required: false,
+		},
+		{
+			key: "SHARDLENS_URL",
+			message: "Shardlens collector address, for analytics",
+			hint: "Blank sends no analytics anywhere",
+			required: false,
+			check: (value) =>
+				isCollectorUrl(value) ? null : "It starts with https://, or http://localhost on this machine.",
+		},
+		{
+			key: "SHARDLENS_INGEST_KEY",
+			message: "Shardlens ingest key",
+			hint: "From the collector's .env; it starts slk_ingest_",
+			required: false,
+			check: (value) =>
+				/^slk_ingest_\S+$/.test(value) ? null : "The ingest key starts slk_ingest_. Never use the read key.",
 		},
 	];
 }

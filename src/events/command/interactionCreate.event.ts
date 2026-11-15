@@ -16,7 +16,7 @@ import { type TestifyClient } from "@core/client";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { readerLanguage, say } from "@core/language";
-import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
+import { countCommandUse, logCommandUse, measured, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff, partIsOff } from "@testify/shared";
@@ -66,7 +66,9 @@ export default defineEvent({
 			if (!command?.autocomplete) return;
 
 			try {
-				await command.autocomplete(interaction, client);
+				await measured(client, interaction, async () => {
+					await command.autocomplete?.(interaction, client);
+				});
 			} catch (error) {
 				const command = interaction.commandName;
 

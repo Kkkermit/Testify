@@ -254,6 +254,31 @@ export interface RuntimeInfo {
 	cachedChannels: number;
 }
 
+/** Shardlens's state: off unconfigured, printing to the log in a dry run, waiting for the collector, or sending. */
+export type ShardlensState = "off" | "dryRun" | "waiting" | "sending";
+
+/** How the bot's Shardlens analytics are doing, for the owner; it never carries the ingest key. */
+export interface ShardlensStatus {
+	state: ShardlensState;
+	/** The collector's origin, where its own dashboard opens, or null with no address set. */
+	collector: string | null;
+	/** Privacy unless the bot and the collector both chose audit, and null until the collector has answered. */
+	mode: "privacy" | "audit" | null;
+	queued: number;
+	waitingForResponse: number;
+	dropped: number;
+	failedSends: number;
+	/** The last problem the SDK reported, by its own short name such as `network`, never its message. */
+	lastProblem: { name: string; at: string } | null;
+}
+
+/** What Send now did: whether anything was waiting, and the problem the send hit, if it hit one. */
+export interface ShardlensFlush {
+	sent: number;
+	problem: string | null;
+	status: ShardlensStatus;
+}
+
 /** Screens opened, by route pattern and bot-wide; no guild or user id, since a server's managers are identifiable. */
 export interface ScreenTally {
 	route: string;

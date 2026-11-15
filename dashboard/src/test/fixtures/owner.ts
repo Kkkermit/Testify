@@ -10,6 +10,7 @@ import {
 	type MemberUsageRow,
 	type OwnerGuildDetail,
 	type RuntimeInfo,
+	type ShardlensStatus,
 	type UsageReport,
 } from "@testify/shared";
 import { aGuild } from "@/test/fixtures/session";
@@ -335,4 +336,15 @@ export const runtimeInfo: RuntimeInfo = {
 	shards: 1,
 	cachedUsers: 4200,
 	cachedChannels: 120,
+};
+
+export const shardlensStatus: ShardlensStatus = {
+	state: "sending",
+	collector: "https://stats.example.com",
+	mode: "privacy",
+	queued: 3,
+	waitingForResponse: 1,
+	dropped: 0,
+	failedSends: 2,
+	lastProblem: { name: "network", at: "2026-07-31T12:05:00.000Z" },
 };

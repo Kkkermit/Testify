@@ -70,6 +70,7 @@ import {
 	runResult,
 	runnable,
 	runtimeInfo,
+	shardlensStatus,
 	usageReport,
 } from "@/test/fixtures/owner";
 import {
@@ -282,6 +283,10 @@ export const handlers = [
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 	http.get("/api/control", () => HttpResponse.json(botControl)),
 	http.get("/api/control/music", () => HttpResponse.json({ sources: "both", configured: false })),
+	http.get("/api/control/shardlens", () => HttpResponse.json(shardlensStatus)),
+	http.post("/api/control/shardlens/send", () =>
+		HttpResponse.json({ sent: 3, problem: null, status: { ...shardlensStatus, queued: 0 } }),
+	),
 	http.get("/api/control/guilds/:guildId", () => HttpResponse.json(guildDetail)),
 	http.get("/api/owner/access", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/owner/stats", () =>

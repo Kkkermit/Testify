@@ -17,6 +17,8 @@ import {
 	MINIMUM_NODE,
 	nodeTooOld,
 	printStartupFailure,
+	shardlensLine,
+	startShardlens,
 	websiteLine,
 } from "@lib/bot";
 import { BOT_FEATURE_KEYS, BOT_FEATURES, switchedOff } from "@testify/shared";
@@ -84,6 +86,9 @@ async function main(): Promise<void> {
 	} else if (env.NODE_ENV !== "development" && !dashboardBuilt()) {
 		report.note("warning", "Website", "the API will run, but the pages are not built — run npm run build");
 	}
+
+	// Before login, so it sees the shards connect and every interaction from the first.
+	if (startShardlens(client) !== null) report.note("done", "Analytics", shardlensLine(env));
 
 	exitOnFatalClose(client);
 	report.note("working", "Discord", "logging in…");

@@ -108,6 +108,7 @@ describe("which commands answer privately", () => {
 				"role-info",
 				"say",
 				"server-info",
+				"shardlens",
 				"shop",
 				"softban list",
 				"starboard",

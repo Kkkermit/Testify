@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 6 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 14 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -110,6 +110,12 @@ describe("the legal pages", () => {
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);
+		// `startShardlens` never turns on audit mode or option values, and `eraseAccount` asks the collector to forget.
+		expect(botSource("src/lib/bot/shardlens.util.ts")).not.toMatch(/mode: "audit"|captureOptionValues/);
+		expect(botSource("src/lib/account/accountActions.util.ts")).toContain("shardlens?.forgetUser(userId)");
+		expect(text).toMatch(/the names of the options you filled in but never what you typed/);
+		expect(text).toMatch(/so the id itself is never sent/);
+		expect(text).toMatch(/also asks its collector to delete everything it holds under your hashed id/);
 		// `markNoticesSeen` and `markNoticeHinted` write two times against a user id, in a record tied to no server.
 		expect(text).toMatch(
 			/keeps when you last read them and when it last told you about one, against your user id and nothing else/,

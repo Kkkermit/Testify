@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { envFile, loadEnv, resetEnv } from "@config/env";
+import { envFile, isCollectorUrl, loadEnv, resetEnv } from "@config/env";
 
 const VALID = {
 	DISCORD_TOKEN: "a-token",
@@ -11,7 +11,7 @@ const VALID = {
 
 function setEnv(values: Record<string, string | undefined>): void {
 	for (const key of Object.keys(process.env)) {
-		const owned = ["DISCORD_", "CHANNEL_", "DASHBOARD_"].some((prefix) => key.startsWith(prefix));
+		const owned = ["DISCORD_", "CHANNEL_", "DASHBOARD_", "SHARDLENS_"].some((prefix) => key.startsWith(prefix));
 		if (owned || key === "MONGODB_URI") delete process.env[key];
 	}
 	for (const [key, value] of Object.entries(values)) {
@@ -171,6 +171,69 @@ describe("the dashboard settings", () => {
 		});
 
 		expect(loadEnv().DASHBOARD_ENABLED).toBe(true);
+	});
+});
+
+describe("the Shardlens settings", () => {
+	const original = { ...process.env };
+	const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
+
+	afterEach(() => {
+		process.env = { ...original };
+		resetEnv();
+	});
+
+	it("is off with nothing set", () => {
+		setEnv(VALID);
+		const env = loadEnv();
+
+		expect(env.SHARDLENS_URL).toBeUndefined();
+		expect(env.SHARDLENS_DRY_RUN).toBe(false);
+	});
+
+	/** The SDK sends to nothing else, so an address it would refuse is caught at start-up rather than silently ignored. */
+	it("takes HTTPS, or plain HTTP to this machine only, and never an address holding credentials", () => {
+		const cases: [string, boolean][] = [
+			["https://stats.example.com", true],
+			["http://localhost:8080", true],
+			["http://127.0.0.1:8080", true],
+			["http://[::1]:8080", true],
+			["http://stats.example.com", false],
+			["https://user:pass@stats.example.com", false],
+			["https://:slk_ingest_x@stats.example.com", false],
+			["ftp://stats.example.com", false],
+			["stats.example.com", false],
+		];
+
+		const wrong = cases.filter(([url, ok]) => isCollectorUrl(url) !== ok).map(([url]) => url);
+		expect(wrong).toEqual([]);
+	});
+
+	/** The read key opens the collector's dashboard, so the bot must never be handed it. */
+	it("refuses a key that is not an ingest key, without repeating it", () => {
+		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
+		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: read });
+
+		expect(() => loadEnv()).toThrow(/SHARDLENS_INGEST_KEY/);
+		expect(() => loadEnv()).not.toThrow(new RegExp(read));
+	});
+
+	it("names the other setting when only one is set", () => {
+		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com" });
+		expect(() => loadEnv()).toThrow(/SHARDLENS_INGEST_KEY is required when SHARDLENS_URL is set/);
+
+		setEnv({ ...VALID, SHARDLENS_INGEST_KEY: KEY });
+		expect(() => loadEnv()).toThrow(/SHARDLENS_URL is required when SHARDLENS_INGEST_KEY is set/);
+	});
+
+	it("runs a dry run with neither, since nothing is sent", () => {
+		setEnv({ ...VALID, SHARDLENS_DRY_RUN: "true" });
+		expect(loadEnv().SHARDLENS_DRY_RUN).toBe(true);
+	});
+
+	it("accepts a complete configuration", () => {
+		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: KEY });
+		expect(loadEnv().SHARDLENS_INGEST_KEY).toBe(KEY);
 	});
 });
 

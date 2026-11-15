@@ -16,7 +16,15 @@ import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
 import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
-import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
+import {
+	botIdentity,
+	controlState,
+	forgetBotIdentity,
+	pause,
+	resume,
+	sendShardlensNow,
+	shardlensStatus,
+} from "@lib/bot";
 import { normaliseSettings } from "@lib/levelling";
 import { applyMusicSources, readMusicSources, readMusicSourceSetting, sourcesName } from "@lib/music";
 import {
@@ -129,6 +137,22 @@ control.put("/music", async (context) => {
 	});
 
 	return context.json(setting);
+});
+
+control.get("/shardlens", (context) => context.json(shardlensStatus(context.get("client"))));
+
+/** Sends what Shardlens has queued now; a 404 while it is off, since there is nothing to send to. */
+control.post("/shardlens/send", async (context) => {
+	const flushed = await sendShardlensNow(context.get("client"));
+	if (flushed === null) throw notFound("shardlens_off", "Shardlens is off, so there is nothing to send.");
+
+	await auditChange(context, {
+		action: "bot.shardlensSend",
+		summary: "Sent the queued analytics to Shardlens",
+		after: { sent: flushed.sent, problem: flushed.problem },
+	});
+
+	return context.json(flushed);
 });
 
 control.get("/guilds/:guildId", async (context) => {

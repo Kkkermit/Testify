@@ -120,6 +120,8 @@ describe("who can control the bot", () => {
 		["GET", "/music"],
 		["PUT", "/music"],
 		["DELETE", `/logs/${logRing.run.id}`],
+		["GET", "/shardlens"],
+		["POST", "/shardlens/send"],
 	])("hides %s %s from a manager", async (method, path) => {
 		const response = await send(path, { method, userId: MANAGER, body: {} });
 
@@ -329,5 +331,65 @@ describe("music sources", () => {
 		await send("/music", { method: "PUT", userId: MANAGER, body: { sources: "youtube" } });
 
 		expect(saveBotSettings).not.toHaveBeenCalled();
+	});
+});
+
+describe("Shardlens", () => {
+	const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
+
+	function withLens(): { client: TestifyClient; flush: jest.Mock } {
+		let queued = 3;
+		const flush = jest.fn(() => {
+			queued = 0;
+			return Promise.resolve();
+		});
+		const lens = {
+			flush,
+			client: { idle: () => Promise.resolve() },
+			stats: () => ({
+				ready: true,
+				mode: "privacy",
+				queueDepth: queued,
+				pendingSalt: 0,
+				pendingInteractions: 0,
+				dropped: {},
+				failedFlushes: 0,
+			}),
+		};
+		const env = { SHARDLENS_URL: "https://stats.example.com/v1", SHARDLENS_INGEST_KEY: KEY, SHARDLENS_DRY_RUN: false };
+		return { client: clientFor({ shardlens: lens, env } as never), flush };
+	}
+
+	it("says it is off, and refuses to send to nothing", async () => {
+		const client = clientFor({ shardlens: null, env: { SHARDLENS_DRY_RUN: false } } as never);
+
+		const status = await send("/shardlens", { client });
+		expect(await status.json()).toMatchObject({ state: "off", collector: null });
+
+		const sent = await send("/shardlens/send", { method: "POST", client });
+		expect(sent.status).toBe(404);
+		expect(recordAudit).not.toHaveBeenCalled();
+	});
+
+	/** The owner's browser is shown where analytics go and never the key that lets anybody send there. */
+	it("reports the collector by its origin and never the key", async () => {
+		const { client } = withLens();
+
+		const response = await send("/shardlens", { client });
+		const text = await response.text();
+
+		expect(JSON.parse(text)).toMatchObject({ state: "sending", collector: "https://stats.example.com", queued: 3 });
+		expect(text).not.toContain("slk_");
+	});
+
+	it("sends what is waiting and records that it did", async () => {
+		const { client, flush } = withLens();
+
+		const response = await send("/shardlens/send", { method: "POST", client });
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ sent: 3, problem: null, status: { queued: 0 } });
+		expect(flush).toHaveBeenCalledTimes(1);
+		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "bot.shardlensSend" }));
 	});
 });

@@ -59,9 +59,9 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 96, across 14 categories          |
-| Command files        | 117 (incl. folded-in subcommands) |
-| Subcommands          | 145                               |
+| Commands             | 97, across 14 categories          |
+| Command files        | 118 (incl. folded-in subcommands) |
+| Subcommands          | 155                               |
 | Prefix aliases       | 107                               |
 | Button handlers      | 53                                |
 | Right-click actions  | 4                                 |
@@ -96,6 +96,8 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report, suggestion and eval — see
 [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
+`SHARDLENS_URL`, `SHARDLENS_INGEST_KEY` and `SHARDLENS_DRY_RUN` (analytics to a collector the owner runs — see
+[§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)),
 `SITE_ENABLED` and `SITE_GITHUB_TOKEN` (the website, on unless switched off — see
 [§24](#the-website-is-on-by-default-and-the-dashboard-is-a-part-of-it)), and the `DASHBOARD_*` block — off unless
 you want the web dashboard, and covered in [§24](#24-the-dashboard).
@@ -228,7 +230,7 @@ src/
 │   ├── replies.ts        The refusals and apology every command shares, in each language
 │   ├── permissionNames.ts What each language calls the permissions a refusal names
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  118 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
 ├── buttons/              53 component handlers, keyed by custom-ID prefix
 ├── menus/                4 right-click actions, on a member or a message
@@ -393,7 +395,8 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
   `button.run(interaction, { client, action, args })`
 - Right-click → the same listener → `client.contextMenus` by name → `checkContextMenu` → `menu.run(interaction, client)`
 
-There is **exactly one** `interactionCreate` listener. The original had 27.
+There is **exactly one** `interactionCreate` listener of the bot's own. The original had 27. Shardlens, when it is on,
+adds one of its own that only watches, and is not this rule's concern.
 
 ---
 
@@ -2260,6 +2263,35 @@ under it, switching each feature off removes exactly its parts and nothing else,
 **The giveaways manager starts with the bot.** `discord-giveaways` only ends a giveaway on a timer its manager starts
 when something creates it, and only `/giveaway` and its route did, so a giveaway running across a restart never ended
 until somebody touched one. The `giveaways` job creates it five seconds after start-up.
+
+### Analytics go to a Shardlens collector the owner runs, and only the owners see how it is doing
+
+`@shardlens/discordjs` is attached by `startShardlens` in `src/lib/bot/shardlens.util.ts`, before login, and only
+when `SHARDLENS_URL`, `SHARDLENS_INGEST_KEY` or `SHARDLENS_DRY_RUN` is set: an install that never asked gains no
+listener, no timer and no warning. Six things about it are load-bearing:
+
+- **The settings are checked at start-up, not left to the SDK.** `isCollectorUrl` in `env.ts` takes HTTPS, or plain
+  HTTP to this machine, and never an address with credentials in it; the key must start `slk_ingest_`, so the
+  collector's read key, which opens its dashboard, is refused; and one without the other names the missing one. A
+  dry run needs neither, since it sends nothing and writes each event to the log at `info` instead.
+- **Privacy mode stays on.** `mode` and `captureOptionValues` are never passed, so user ids are hashed inside the bot
+  with the collector's rotating salt and no option value leaves it. The privacy notice says exactly this
+  (`legal.outsideL5`, `legal.retentionL23`, `legal.removalP4`), and `LegalPage.test.tsx` and `shardlens.test.ts` pin
+  it to the code. Turning either on is a change to the notice first.
+- **The runners are wrapped, not the listener.** `measured` runs a handler through one `lens.wrap` kept per lens, inside
+  the `try` of `runCommand` and `runButton` and around autocomplete, so the SDK times the handler and sees it throw
+  while the bot's own error handling still answers. A prefix run is not an interaction, so `measured` just runs it,
+  and `recordPrefixRun` sends it as the `prefix_command` custom event — the command, the subcommand, `ok` or `error`
+  and the time, with the user id only in the context the SDK hashes, never in the properties.
+- **Nothing here is wrapped in a `try`.** The SDK never throws into the bot and counts its own failures; its lines go
+  to the logger tagged `[SHARDLENS]`.
+- **Shutdown flushes it before the archive closes and the client goes**, and Delete my data calls
+  `client.shardlens?.forgetUser`, which asks the collector to delete what it holds under the person's hashes.
+- **Only the owners see it, and never the key.** `GET /control/shardlens` and `POST /control/shardlens/send` sit
+  behind `requireOwner`, so `ownerGate.test.ts` covers them; the Runtime tab's card and the private, owner-only
+  `/shardlens status` and `/shardlens send` show the state, what is waiting, what was dropped or failed, the last
+  problem by the SDK's own short name, and the collector by its origin, which is where its own dashboard opens.
+  `findLeak` treats the key as a secret. Send now waits for events still being hashed before it flushes.
 
 ### Global by design
 

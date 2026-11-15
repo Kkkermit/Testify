@@ -87,6 +87,21 @@ describe("the prefix handler", () => {
 		expect(ping).toHaveBeenCalledTimes(1);
 	});
 
+	/** Shardlens sees slash commands through the gateway, so a prefix run reaches it only as this custom event. */
+	it("tells Shardlens about a prefix run, with the person only in the context it hashes", async () => {
+		const track = jest.fn();
+		const client = Object.assign(fakeClient(), { shardlens: { track }, env: {} });
+
+		await runMessageHandlers(fakeMessage("t?setwelcome"), client);
+
+		expect(track).toHaveBeenCalledWith(
+			"prefix_command",
+			{ command: "welcome", subcommand: "set", outcome: "ok", duration_ms: expect.any(Number) as number },
+			{ userId: "222", guildId: "444" },
+		);
+		expect(JSON.stringify(track.mock.calls[0]?.[1])).not.toContain("222");
+	});
+
 	/** `/help` declares autocomplete, and refusing those made `t?help` fail. */
 	it("runs a command that also offers autocomplete", async () => {
 		const autocompleting = jest.fn();

@@ -114,6 +114,7 @@ export const keys = {
 		runtime: () => ["owner", "runtime"] as const,
 		control: () => ["owner", "control"] as const,
 		musicSources: () => ["owner", "musicSources"] as const,
+		shardlens: () => ["owner", "shardlens"] as const,
 		guildDetail: (id: string) => ["owner", "guild", id] as const,
 		blacklist: () => ["owner", "blacklist"] as const,
 		runner: () => ["owner", "runner"] as const,

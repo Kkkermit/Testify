@@ -22,6 +22,8 @@ const TABS: { tab: string; endpoint: string; query?: string }[] = [
 	{ tab: "blacklist", endpoint: "/api/owner/blacklist" },
 	{ tab: "notifications", endpoint: "/api/owner/notices" },
 	{ tab: "runtime", endpoint: "/api/analytics/runtime" },
+	// The analytics card reads on its own, beside the runtime facts.
+	{ tab: "runtime", endpoint: "/api/control/shardlens" },
 	{ tab: "control", endpoint: "/api/control" },
 ];
 

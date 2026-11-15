@@ -7,6 +7,7 @@ import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptio
 import { readerLanguage, say } from "@core/language";
 import { triageRow } from "@lib/bot/errorTriage.util";
 import { logAuthor, loggedOptionsText, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
+import { measured } from "@lib/bot/shardlens.util";
 import { embed } from "@lib/discord/embeds.util";
 
 /** Anything the bot can answer privately: a command on either surface, a button or form, a right-click action. */
@@ -70,7 +71,7 @@ export async function runCommand(
 	client: TestifyClient,
 ): Promise<RunOutcome> {
 	try {
-		await dispatch(interaction, command, client);
+		await measured(client, interaction, () => dispatch(interaction, command, client));
 		return { ok: true, reference: null };
 	} catch (error) {
 		const reference = await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
@@ -85,7 +86,7 @@ export async function runButton(
 	label: string,
 ): Promise<void> {
 	try {
-		await handler();
+		await measured(client, interaction, handler);
 	} catch (error) {
 		await reportFailure(interaction, error, client, label, null);
 	}

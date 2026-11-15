@@ -1,12 +1,13 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { botName } from "@core/brand";
 import { runChecks } from "@core/checks";
+import { chosenSubcommand } from "@core/command";
 import { runCommand } from "@core/errors";
 import { readerLanguage, say } from "@core/language";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/prefixRepository";
-import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
+import { countCommandUse, logCommandUse, recordCommandTime, recordPrefixRun } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff } from "@testify/shared";
@@ -68,6 +69,14 @@ export default defineMessageHandler({
 		} as const;
 		countCommandUse(client, interaction, command, run);
 		logCommandUse(client, interaction, command, run);
+		recordPrefixRun(client, {
+			command: command.name,
+			subcommand: chosenSubcommand(interaction, command),
+			ok,
+			durationMs,
+			userId: message.author.id,
+			guildId: message.guild?.id ?? null,
+		});
 		// A message cannot be private, so the hint clears itself like a refusal.
 		mentionNoticesAfterCommand(message.author.id, client.logger, (unread) =>
 			replyTemporarily(client, message, noticeHint(unread, `${prefix}${NOTICE_COMMAND}`)),
