@@ -1,4 +1,5 @@
 import { type AccessArea, type AccessPerson } from "./access";
+import { type AnalyticsProblem } from "./analytics";
 
 export interface ApiErrorBody {
 	error: {
@@ -209,10 +210,15 @@ export interface OwnerGuildRow {
 	memberCount: number;
 	joinedAt: string | null;
 	configured: string[];
-	/** Commands run there in the last 30 days. */
-	commands: number;
-	/** Dashboard screens its managers opened in the last 30 days. */
-	dashboardViews: number;
+	/** Commands run there in the last 30 days; null while analytics cannot be read. */
+	commands: number | null;
+	/** Dashboard screens its managers opened in the last 30 days; null while analytics cannot be read. */
+	dashboardViews: number | null;
+}
+
+/** The owner's list of servers, saying why the counts are missing when Shardlens could not be read. */
+export interface OwnerGuildPage extends Paged<OwnerGuildRow> {
+	analytics: AnalyticsProblem | null;
 }
 
 export interface Paged<T> {

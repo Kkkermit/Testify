@@ -209,13 +209,36 @@ describe("the Shardlens settings", () => {
 		expect(wrong).toEqual([]);
 	});
 
-	/** The read key opens the collector's dashboard, so the bot must never be handed it. */
-	it("refuses a key that is not an ingest key, without repeating it", () => {
+	/** Each key does one job, so one in the other's place is caught at start-up, and never repeated in the error. */
+	it("refuses each key in the other's place, without repeating it", () => {
 		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
 		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: read });
-
 		expect(() => loadEnv()).toThrow(/SHARDLENS_INGEST_KEY/);
 		expect(() => loadEnv()).not.toThrow(new RegExp(read));
+
+		setEnv({
+			...VALID,
+			SHARDLENS_URL: "https://stats.example.com",
+			SHARDLENS_INGEST_KEY: KEY,
+			SHARDLENS_READ_KEY: KEY,
+		});
+		expect(() => loadEnv()).toThrow(/SHARDLENS_READ_KEY/);
+		expect(() => loadEnv()).not.toThrow(new RegExp(KEY));
+	});
+
+	/** Reading needs somewhere to read from; the console would otherwise say analytics are off with a key set. */
+	it("takes a read key beside the address, and names the address when it is missing", () => {
+		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
+		setEnv({
+			...VALID,
+			SHARDLENS_URL: "https://stats.example.com",
+			SHARDLENS_INGEST_KEY: KEY,
+			SHARDLENS_READ_KEY: read,
+		});
+		expect(loadEnv().SHARDLENS_READ_KEY).toBe(read);
+
+		setEnv({ ...VALID, SHARDLENS_READ_KEY: read });
+		expect(() => loadEnv()).toThrow(/SHARDLENS_URL is required when SHARDLENS_READ_KEY is set/);
 	});
 
 	it("names the other setting when only one is set", () => {

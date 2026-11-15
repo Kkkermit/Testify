@@ -7,6 +7,17 @@ import { type ShardlensFlush, type ShardlensState, type ShardlensStatus } from "
 
 /** Shardlens: analytics the bot sends to a collector its owner runs, attached only once it is configured. */
 
+/** The custom events the bot sends beside the interactions the SDK sees for itself, and the reader asks about. */
+export const LENS_EVENTS = {
+	prefix: "prefix_command",
+	prefixFailed: "prefix_command_failed",
+	screen: "dashboard_screen",
+	server: "dashboard_server",
+} as const;
+
+/** Custom events keep no dimensions, so a run's server is also its own property, which is what can be grouped. */
+export const serverKey = (guildId: string): string => `in_${guildId}`;
+
 type Runner = (interaction: Interaction, work: () => Promise<unknown>) => Promise<unknown>;
 
 interface Watch {
@@ -29,6 +40,8 @@ export function startShardlens(client: TestifyClient): Shardlens | null {
 		release: botVersion(),
 		environment: env.NODE_ENV,
 		dryRun: env.SHARDLENS_DRY_RUN,
+		// Who ran each interaction is sent only once the collector is in audit mode too; until then it is hashed.
+		mode: "audit",
 		logger: {
 			debug: (message) => client.logger.debug(said(message)),
 			info: (message) => client.logger.info(said(message)),
@@ -69,16 +82,34 @@ export interface PrefixRun {
 
 /** Slash commands are seen through the gateway, so only a prefix run needs telling; the user id is hashed in the SDK. */
 export function recordPrefixRun(client: TestifyClient, run: PrefixRun): void {
-	client.shardlens?.track(
-		"prefix_command",
+	const lens = client.shardlens;
+	if (lens === null) return;
+
+	const where = run.guildId === null ? {} : { server: run.guildId, [serverKey(run.guildId)]: run.command };
+	const context = { userId: run.userId, guildId: run.guildId };
+	lens.track(
+		LENS_EVENTS.prefix,
 		{
 			command: run.command,
 			subcommand: run.subcommand,
 			outcome: run.ok ? "ok" : "error",
 			duration_ms: Math.round(run.durationMs),
+			...where,
 		},
-		{ userId: run.userId, guildId: run.guildId },
+		context,
 	);
+	if (!run.ok) lens.track(LENS_EVENTS.prefixFailed, { command: run.command, ...where }, context);
+}
+
+/** A dashboard screen by its route pattern, and the server only when one of its managers opened it; never who. */
+export function recordScreenView(client: TestifyClient, route: string, managedGuildId: string | null): void {
+	const lens = client.shardlens;
+	if (lens === null) return;
+
+	lens.track(LENS_EVENTS.screen, { route });
+	if (managedGuildId !== null) {
+		lens.track(LENS_EVENTS.server, { server: managedGuildId, [serverKey(managedGuildId)]: route });
+	}
 }
 
 function stateOf(client: TestifyClient, lens: Shardlens): ShardlensState {

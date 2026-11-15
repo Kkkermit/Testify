@@ -3,11 +3,14 @@ import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { Warning } from "@/components/form";
 import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
+import { AnalyticsUnavailable, ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import {
+	analyticsProblemOf,
 	formatMs,
 	percent,
 	screenLabel,
@@ -49,7 +52,14 @@ function FleetUsage({
 	const usage = useUsage(days);
 
 	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
-	if (usage.isError) return <ErrorState as="h2" error={usage.error} onRetry={() => void usage.refetch()} />;
+	if (usage.isError) {
+		const problem = analyticsProblemOf(usage.error);
+		return problem === null ? (
+			<ErrorState as="h2" error={usage.error} onRetry={() => void usage.refetch()} />
+		) : (
+			<AnalyticsUnavailable problem={problem} onRetry={() => void usage.refetch()} />
+		);
+	}
 
 	const report = usage.data;
 
@@ -65,6 +75,8 @@ function FleetUsage({
 				</p>
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
+
+			{report.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: report.detailDays })}</Warning>}
 
 			<Card padding="none" className="divide-border divide-y">
 				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
@@ -107,7 +119,7 @@ function FleetUsage({
 					/>
 				</Panel>
 
-				<Panel title={t("owner.slowest")} hint={t("owner.slowestHint", { days: report.runDays })}>
+				<Panel title={t("owner.slowest")} hint={t("owner.slowestHint")}>
 					<UsageBars
 						tint="bg-destructive/15"
 						empty={t("owner.noSlowRuns")}
@@ -143,6 +155,8 @@ function FleetUsage({
 					/>
 				</Panel>
 			</div>
+
+			<ShardlensLinks collector={report.collector} />
 		</div>
 	);
 }

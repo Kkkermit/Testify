@@ -361,6 +361,7 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `SUPPORT_AI_API_KEY`         |    —     | Lets `/ask` use Claude to pick the right help article. Without it, search alone answers                |
 | `SHARDLENS_URL`              |    —     | A [Shardlens](https://github.com/Kkkermit/Shardlens) collector you run, for analytics. Off while blank |
 | `SHARDLENS_INGEST_KEY`       |    —     | That collector's ingest key, `slk_ingest_…`. Needed with the address, and never its read key           |
+| `SHARDLENS_READ_KEY`         |    —     | Its read key, `slk_read_…`, for the owner console's usage. Kept by the bot, never sent to a browser    |
 | `SHARDLENS_DRY_RUN`          |    —     | `true` writes what would be sent to the log instead, so you can see it before switching it on          |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks. The music and dashboard
@@ -652,7 +653,7 @@ Sign out and Delete my data.
 <td valign="top"><img alt="The appearance screen: theme, twelve accents and a colour of your own" src="docs/dashboard/screenshots/appearance.png"><br><sub><b>Appearance</b> — theme, an accent or your own colour, motion and language</sub></td>
 </tr>
 <tr>
-<td colspan="2" align="center"><img alt="The owner console's usage tab" src="docs/dashboard/screenshots/owner-console.png" width="80%"><br><sub><b>Owner console</b> — usage by command and server, and who ran what for 30 days; visible only to the bot's owners</sub></td>
+<td colspan="2" align="center"><img alt="The owner console's usage tab" src="docs/dashboard/screenshots/owner-console.png" width="80%"><br><sub><b>Owner console</b> — usage by command and server, read from Shardlens; visible only to the bot's owners</sub></td>
 </tr>
 </table>
 

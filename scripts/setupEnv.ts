@@ -145,6 +145,13 @@ export function fields(isDev: boolean): Field[] {
 			check: (value) =>
 				/^slk_ingest_\S+$/.test(value) ? null : "The ingest key starts slk_ingest_. Never use the read key.",
 		},
+		{
+			key: "SHARDLENS_READ_KEY",
+			message: "Shardlens read key, for the owner console's analytics",
+			hint: "From the collector's .env; it starts slk_read_",
+			required: false,
+			check: (value) => (/^slk_read_\S+$/.test(value) ? null : "The read key starts slk_read_."),
+		},
 	];
 }
 

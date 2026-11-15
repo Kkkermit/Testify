@@ -8,7 +8,8 @@ const STATES: Record<ShardlensState, string> = {
 	off: "Off. Nothing is attached and nothing is sent. Set `SHARDLENS_URL` and `SHARDLENS_INGEST_KEY` to send to a collector you run.",
 	dryRun: "A dry run. What would be sent is written to the bot's log instead, and nothing leaves the bot.",
 	waiting: "Waiting for the collector to answer. Events wait in memory and go once it does.",
-	sending: "Sending every five seconds. User IDs are hashed inside the bot before anything leaves it.",
+	sending:
+		"Sending every five seconds. Who ran each command is named only while the collector is in audit mode, and hashed otherwise.",
 };
 
 /** Never the key: the status carries none, and the collector is named by its origin. */

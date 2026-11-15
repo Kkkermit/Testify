@@ -70,7 +70,7 @@ describe("the usage tab", () => {
 		expect(screen.getByText("4.2s")).toBeInTheDocument();
 		expect(screen.getByText("40 runs · typically 850 ms")).toBeInTheDocument();
 		expect(screen.getByText("1,300 runs · typically 90 ms")).toBeInTheDocument();
-		expect(screen.getByText(/over the last 30 days in servers/)).toBeInTheDocument();
+		expect(screen.getByText(/how long Discord waited for the bot’s first reply/i)).toBeInTheDocument();
 	});
 
 	/** The bars are decoration; the numbers behind them have to be readable without them. */

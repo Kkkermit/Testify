@@ -90,11 +90,12 @@ export { DEFAULT_PREFIX, TREASURE_DEFAULTS } from "@testify/shared";
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 
 export const ANALYTICS = {
-	/** Long enough to see a month-on-month trend, short enough that the collection stays small. */
-	retentionDays: 90,
+	/** What the owner's list of servers counts commands and dashboard use over. */
 	defaultWindowDays: 30,
-	maxWindowDays: 90,
 } as const;
+
+/** How long the record of who changed what, on the dashboard or with a command, is kept. */
+export const AUDIT = { retentionDays: 90 } as const;
 
 export const AFK = {
 	maxNote: 100,

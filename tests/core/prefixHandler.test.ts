@@ -9,11 +9,6 @@ const prefixConfig = { prefix: "t?", isEnabled: true };
 jest.mock("@database/repositories/prefixRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
 }));
-// A run is counted without being awaited, and with no database its write would land after the suite ends.
-jest.mock("@database/repositories/usageRepository", () => ({ recordCommandUse: jest.fn(() => Promise.resolve()) }));
-jest.mock("@database/repositories/commandRunRepository", () => ({
-	recordCommandRun: jest.fn(() => Promise.resolve()),
-}));
 // Routing a message to the right command; the checks have their own tests.
 jest.mock("@core/checks", () => ({
 	runChecks: jest.fn(() => Promise.resolve(null)),
@@ -51,6 +46,7 @@ function fakeClient(): TestifyClient {
 		logger: createLogger("fatal", false),
 		user: { id: BOT },
 		isOwner: () => false,
+		shardlens: null,
 	} as unknown as TestifyClient;
 }
 
@@ -96,7 +92,14 @@ describe("the prefix handler", () => {
 
 		expect(track).toHaveBeenCalledWith(
 			"prefix_command",
-			{ command: "welcome", subcommand: "set", outcome: "ok", duration_ms: expect.any(Number) as number },
+			{
+				command: "welcome",
+				subcommand: "set",
+				outcome: "ok",
+				duration_ms: expect.any(Number) as number,
+				server: "444",
+				in_444: "welcome",
+			},
 			{ userId: "222", guildId: "444" },
 		);
 		expect(JSON.stringify(track.mock.calls[0]?.[1])).not.toContain("222");

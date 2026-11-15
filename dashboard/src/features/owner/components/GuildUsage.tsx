@@ -5,13 +5,12 @@ import { Link, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Warning } from "@/components/form";
 import { SegmentedControl, Skeleton } from "@/components/primitives";
-import { GuildMembers } from "@/features/owner/components/GuildMembers";
-import { GuildRuns } from "@/features/owner/components/GuildRuns";
+import { AnalyticsUnavailable, ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
 import { GuildUsageSummary } from "@/features/owner/components/GuildUsageSummary";
-import { searchWith, WINDOWS } from "@/features/owner/owner.utils";
+import { analyticsProblemOf, searchWith, WINDOWS } from "@/features/owner/owner.utils";
 import { useGuildUsage } from "@/features/owner/useOwner";
 
-const DRILL_DOWN = { guild: null, who: null, people: null, member: null, command: null, runs: null };
+const DRILL_DOWN = { guild: null };
 
 export function GuildUsage({
 	guildId,
@@ -40,19 +39,27 @@ export function GuildUsage({
 			</div>
 
 			{report.isError ? (
-				<ErrorState as="h2" error={report.error} onRetry={() => void report.refetch()} />
+				<Unread error={report.error} onRetry={() => void report.refetch()} />
 			) : report.isPending ? (
 				<Skeleton className="h-96 w-full" />
 			) : (
 				<>
-					<GuildUsageSummary report={report.data} />
-					{report.data.memberDays < days && (
-						<Warning>{t("owner.memberDaysNote", { days: report.data.memberDays })}</Warning>
+					{report.data.detailDays < days && (
+						<Warning>{t("owner.detailDaysNote", { days: report.data.detailDays })}</Warning>
 					)}
-					<GuildMembers guildId={guildId} report={report.data} />
-					<GuildRuns guildId={guildId} report={report.data} />
+					<GuildUsageSummary report={report.data} />
+					<ShardlensLinks collector={report.data.collector} guildId={guildId} />
 				</>
 			)}
 		</div>
+	);
+}
+
+function Unread({ error, onRetry }: { error: Error; onRetry: () => void }): React.JSX.Element {
+	const problem = analyticsProblemOf(error);
+	return problem === null ? (
+		<ErrorState as="h2" error={error} onRetry={onRetry} />
+	) : (
+		<AnalyticsUnavailable problem={problem} onRetry={onRetry} />
 	);
 }

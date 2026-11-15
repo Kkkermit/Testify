@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { FIELD, Field, Refusal, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
 import { permissionLabel } from "@/features/commands/permissions.labels";
+import { CountsUnavailable } from "@/features/owner/components/AnalyticsNotice";
 import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
@@ -35,9 +36,18 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			<dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 				<Figure size="md" label={t("owner.members")} value={formatNumber(guild.memberCount)} />
 				<Figure size="md" label={t("overview.channels")} value={String(guild.channelCount)} />
-				<Figure size="md" label={t("owner.commands30d")} value={formatNumber(guild.usage)} />
-				<Figure size="md" label={t("owner.dashboard30d")} value={formatNumber(guild.dashboardViews)} />
+				<Figure
+					size="md"
+					label={t("owner.commands30d")}
+					value={guild.usage === null ? "—" : formatNumber(guild.usage)}
+				/>
+				<Figure
+					size="md"
+					label={t("owner.dashboard30d")}
+					value={guild.dashboardViews === null ? "—" : formatNumber(guild.dashboardViews)}
+				/>
 			</dl>
+			{guild.analytics !== null && <CountsUnavailable problem={guild.analytics} />}
 
 			<DataList
 				dense

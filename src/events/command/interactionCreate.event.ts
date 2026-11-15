@@ -16,7 +16,7 @@ import { type TestifyClient } from "@core/client";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { readerLanguage, say } from "@core/language";
-import { countCommandUse, logCommandUse, measured, recordCommandTime } from "@lib/bot";
+import { logCommandUse, measured, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff, partIsOff } from "@testify/shared";
@@ -105,12 +105,15 @@ export default defineEvent({
 			}
 
 			const started = Date.now();
-			const { ok, reference } = await runCommand(interaction, command, client);
+			const { ok } = await runCommand(interaction, command, client);
 			const durationMs = Date.now() - started;
 			recordCommandTime(durationMs, ok);
-			const run = { surface: "slash", ok, reference, durationMs, channelId: interaction.channelId } as const;
-			countCommandUse(client, interaction, command, run);
-			logCommandUse(client, interaction, command, run);
+			logCommandUse(client, interaction, command, {
+				surface: "slash",
+				ok,
+				durationMs,
+				channelId: interaction.channelId,
+			});
 			mentionNoticesAfterCommand(interaction.user.id, client.logger, (unread) =>
 				interaction.followUp({ embeds: [noticeHint(unread, `/${NOTICE_COMMAND}`)], flags: MessageFlags.Ephemeral }),
 			);

@@ -811,10 +811,11 @@ precisely the screen you want when something is wrong.
 
 - **Ownership is `DISCORD_OWNER_IDS` and nothing else**, read from env on every request — so removing an ID
   revokes the console on that person's next click, and no flag on the session can grant it.
-- **Usage is counted, and who ran what is kept for a month.** One row per command per server per day per surface,
-  `$inc`-ed in place, TTL'd at 90 days, with no user id. Beside it `commandruns` holds each run in a server — who,
-  which command, where, whether it worked — for 30 days and never with an option value; it is what the usage tab's
-  drill-down into one server reads. Dashboard use per server is a count with no user id and no route.
+- **Usage is read from Shardlens, and nothing analytic is kept in MongoDB.** The Usage tab, its per-server
+  drill-down and the server list's command and dashboard counts are queries to the collector with
+  `SHARDLENS_READ_KEY`, which the bot holds and no browser sees. Without the key, or with the collector refusing or
+  away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_unreachable`) and the server list still
+  loads with its counts blank. Who ran what lives on the collector's own Activity page, which the tab links.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.

@@ -30,7 +30,7 @@ export interface GuildUsageRow {
 	count: number;
 }
 
-/** `typicalMs` is the median run in a server. */
+/** Answer times from Shardlens: how long Discord waited for the bot's first reply. Slash commands only. */
 interface SlowCommandRow {
 	command: string;
 	category: string;
@@ -47,6 +47,11 @@ export interface UsageDay {
 	failures: number;
 }
 
+/** Why the console cannot show analytics: no read key, a key the collector refuses, or a collector not answering. */
+export const ANALYTICS_PROBLEMS = ["off", "refused", "unreachable"] as const;
+
+export type AnalyticsProblem = (typeof ANALYTICS_PROBLEMS)[number];
+
 export interface UsageReport {
 	days: number;
 	runs: number;
@@ -62,71 +67,29 @@ export interface UsageReport {
 	leastUsed: CommandUsageRow[];
 	busiestGuilds: GuildUsageRow[];
 	dashboardGuilds: GuildUsageRow[];
-	/** Read from the run log, so it covers at most `RUN_RETENTION_DAYS`. */
-	runDays: number;
+	/** Prefix runs by name, by server and the dashboard's figures come from events the collector keeps this long. */
+	detailDays: number;
 	slowest: SlowCommandRow[];
 	screens: ScreenTally[];
+	/** The collector's origin, where its own dashboard opens. */
+	collector: string;
 }
-
-/** Who ran what is kept for fewer days than the counts, so the per-member figures can cover less than the window. */
-export const RUN_RETENTION_DAYS = 30;
 
 export interface GuildUsageReport {
 	guild: GuildUsageRow & { joinedAt: string | null };
 	days: number;
-	memberDays: number;
+	detailDays: number;
 	runs: number;
 	failures: number;
 	surfaces: { slash: number; prefix: number };
+	/** Slash commands and right-click actions; a prefix run carries no day the collector can group by server. */
 	daily: UsageDay[];
 	commands: CommandUsageRow[];
 	dashboardViews: number;
-	members: number;
+	/** People who used the bot there this month, as the collector counts them; null before it has. */
+	people: number | null;
+	collector: string;
 }
-
-export interface MemberUsageRow {
-	userId: string;
-	/** As it was on their latest run, so somebody who has left is still named. */
-	username: string;
-	avatarUrl: string | null;
-	runs: number;
-	failures: number;
-	prefix: number;
-	commandCount: number;
-	topCommands: { command: string; count: number }[];
-	lastAt: string;
-}
-
-export interface CommandRunRow {
-	at: string;
-	userId: string;
-	username: string;
-	command: string;
-	subcommand: string | null;
-	surface: "slash" | "prefix";
-	failed: boolean;
-	/** What an unexpected failure was logged under, which finds it on the Logs tab; null for a refusal. */
-	reference: string | null;
-	durationMs: number;
-	channelId: string | null;
-	/** Null when the channel has since gone, or it was never cached. */
-	channelName: string | null;
-}
-
-const MAX_MEMBER_SEARCH = 100;
-
-export const guildMembersQuery = analyticsQuery.extend(pagination.shape).extend({
-	/** A name, an ID or a pasted `<@mention>`. */
-	q: z.string().trim().max(MAX_MEMBER_SEARCH).optional(),
-});
-
-export const guildRunsQuery = analyticsQuery.extend(pagination.shape).extend({
-	userId: snowflake.optional(),
-	command: z
-		.string()
-		.regex(/^[\w-]{1,32}$/, "must be a command name")
-		.optional(),
-});
 
 export const OWNER_GUILD_SORTS = [
 	"members",

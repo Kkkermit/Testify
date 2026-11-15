@@ -99,6 +99,11 @@ const fields = z.object({
 		.string()
 		.regex(/^slk_ingest_\S+$/, "should be the collector's ingest key, starting slk_ingest_, never its read key")
 		.optional(),
+	// Read-only, for the owner console's analytics. Held by the bot and never sent to a browser.
+	SHARDLENS_READ_KEY: z
+		.string()
+		.regex(/^slk_read_\S+$/, "should be the collector's read key, starting slk_read_")
+		.optional(),
 	SHARDLENS_DRY_RUN: flag.default(false),
 });
 
@@ -117,6 +122,10 @@ const schema = fields.superRefine((env, ctx) => {
 				});
 			}
 		}
+	}
+
+	if (env.SHARDLENS_READ_KEY !== undefined && env.SHARDLENS_URL === undefined) {
+		ctx.addIssue({ code: "custom", path: ["SHARDLENS_URL"], message: "is required when SHARDLENS_READ_KEY is set" });
 	}
 
 	if (!env.DASHBOARD_ENABLED) return;

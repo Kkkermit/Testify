@@ -9,7 +9,6 @@ import { createMockClient, createMockInteraction, createMockMessage } from "@tes
 
 jest.mock("@core/checks", () => ({ runChecks: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@lib/bot", () => ({
-	countCommandUse: jest.fn(),
 	logCommandUse: jest.fn(),
 	recordCommandTime: jest.fn(),
 	recordPrefixRun: jest.fn(),

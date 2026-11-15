@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 14 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 15 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -72,16 +72,12 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/Messages in servers are never stored/);
 		// `directMessageLog.event.ts` writes a DM into the database, so the notice has to say so.
 		expect(text).toMatch(/Direct messages are the exception/);
-		expect(text).toMatch(/No user ids are stored/i);
 		expect(text).toMatch(/encrypted at rest/i);
-		// Screen counts carry neither, which is the whole reason they are safe to keep.
-		expect(text).toMatch(/no user id and no server id is stored/i);
+		// `recordScreenView` sends a route alone, and the server only beside one of its managers, never the person.
+		expect(botSource("src/lib/bot/shardlens.util.ts")).toMatch(/lens\.track\(LENS_EVENTS\.screen, \{ route \}\)/);
+		expect(text).toMatch(/with no user id and no server id/i);
 		expect(text).toMatch(/IP address is not stored/i);
-		// `commandruns` holds who ran what, never the options; `countCommandUse` skips a direct message.
-		expect(text).toMatch(/Who ran a command: .* Never the options you gave it/);
-		expect(text).toMatch(/Commands run in a direct message are not recorded this way/);
-		// `dashboardviews` is a server and a count a day, with no account and no route.
-		expect(text).toMatch(/Server counts: .* No user id is stored with these, and not which screens were opened/);
+		expect(text).toMatch(/Server counts: .* Shardlens is told the server and the screen, never who opened it/);
 		// `/remind me`'s `about` is `unlogged`, and `deliverDueReminders` deletes each one once it is sent.
 		expect(text).toMatch(/A reminder’s text is never posted to the operator’s command logs/);
 		expect(text).toMatch(/Reminders: deleted once delivered or cancelled/);
@@ -110,12 +106,16 @@ describe("the legal pages", () => {
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);
-		// `startShardlens` never turns on audit mode or option values, and `eraseAccount` asks the collector to forget.
-		expect(botSource("src/lib/bot/shardlens.util.ts")).not.toMatch(/mode: "audit"|captureOptionValues/);
+		// `startShardlens` asks for audit mode but never option values, and `eraseAccount` asks the collector to forget.
+		const lens = botSource("src/lib/bot/shardlens.util.ts");
+		expect(lens).toMatch(/mode: "audit"/);
+		expect(lens).not.toMatch(/captureOptionValues/);
 		expect(botSource("src/lib/account/accountActions.util.ts")).toContain("shardlens?.forgetUser(userId)");
 		expect(text).toMatch(/the names of the options you filled in but never what you typed/);
-		expect(text).toMatch(/so the id itself is never sent/);
-		expect(text).toMatch(/also asks its collector to delete everything it holds under your hashed id/);
+		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
+		// A prefix run is a custom event, which the SDK never sends with an actor.
+		expect(text).toMatch(/A prefix command is never named this way/);
+		expect(text).toMatch(/under your hashed id, and in audit mode under your user id as well/);
 		// `markNoticesSeen` and `markNoticeHinted` write two times against a user id, in a record tied to no server.
 		expect(text).toMatch(
 			/keeps when you last read them and when it last told you about one, against your user id and nothing else/,
@@ -147,8 +147,8 @@ describe("the legal pages", () => {
 		const text = prose(PRIVACY);
 		const constants = botSource("src/config/constants.ts");
 
-		const retention = /retentionDays: (\d+)/.exec(constants)?.[1];
-		expect(text).toContain(`Audit records, command usage, screen counts and server counts: ${String(retention)} days`);
+		const retention = /AUDIT = \{ retentionDays: (\d+) \}/.exec(constants)?.[1];
+		expect(text).toContain(`Audit records: ${String(retention)} days`);
 
 		const away = /keepDays: (\d+)/.exec(constants)?.[1];
 		expect(text).toContain(
@@ -168,10 +168,8 @@ describe("the legal pages", () => {
 		const invites = /keepDays: (\d+)/.exec(botSource("shared/src/invites.ts"))?.[1];
 		expect(text).toContain(`Invite tracking: ${String(invites)} days after each join`);
 
-		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
-		expect(text).toContain(`Who ran a command: ${String(runs)} days`);
-		expect(text).toContain(`logs and counts for ${String(retention)} days`);
-		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain(`${String(retention)} * 24 * 60 * 60`);
+		expect(text).toContain(`change records for ${String(retention)} days`);
+		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain("AUDIT.retentionDays * 24 * 60 * 60");
 
 		const analytics = botSource("shared/src/analytics.ts");
 		const starts = /runsKept: (\d+)/.exec(analytics)?.[1];

@@ -17,6 +17,7 @@ export * from "./owners.util";
 export * from "./performance.util";
 export * from "./runtime.util";
 export * from "./shardlens.util";
+export * from "./shardlensReader.util";
 export * from "./startup.util";
 export * from "./status.util";
-export * from "./usage.util";
+export * from "./usageReport.util";

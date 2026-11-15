@@ -12,8 +12,9 @@ import { getCounting } from "@database/repositories/countingRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
-import { guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
+import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
+import { oneGuildActivity } from "@lib/bot/usageReport.util";
 import { type OwnerGuildDetail } from "@testify/shared";
 
 jest.mock("@core/shutdown", () => ({ shutdown: jest.fn(() => Promise.resolve()) }));
@@ -32,9 +33,9 @@ jest.mock("@database/repositories/countingRepository", () => ({
 jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
-jest.mock("@database/repositories/usageRepository", () => ({
-	guildTallies: jest.fn(() => Promise.resolve([])),
-	dashboardTallies: jest.fn(() => Promise.resolve([])),
+jest.mock("@lib/bot/usageReport.util", () => ({
+	...jest.requireActual<object>("@lib/bot/usageReport.util"),
+	oneGuildActivity: jest.fn(),
 }));
 jest.mock("@database/repositories/logRepository", () => ({
 	clearLogLines: jest.fn(() => Promise.resolve()),
@@ -105,7 +106,7 @@ beforeEach(() => {
 	jest.mocked(getAuditLogConfig).mockResolvedValue(null);
 	jest.mocked(getCounting).mockResolvedValue(null);
 	jest.mocked(getWelcome).mockResolvedValue(null);
-	jest.mocked(guildTallies).mockResolvedValue([]);
+	jest.mocked(oneGuildActivity).mockResolvedValue({ commands: 12, dashboard: 3 });
 	jest.mocked(getBotSettings).mockResolvedValue(null);
 });
 
@@ -242,6 +243,27 @@ describe("a server's detail", () => {
 	/** An id straight out of a URL reaches a Mongo filter if nothing checks its shape first. */
 	it("rejects an id that is not a snowflake", async () => {
 		expect((await send("/guilds/nonsense")).status).toBe(400);
+	});
+
+	it("counts that server's use from Shardlens, and only that server's", async () => {
+		const detail = (await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail;
+
+		expect(jest.mocked(oneGuildActivity).mock.calls[0]?.[1]).toBe(GUILD);
+		expect(detail).toMatchObject({ usage: 12, dashboardViews: 3, analytics: null });
+	});
+
+	/** The page is how the owner leaves or inspects a server, so a missing collector costs only the two counts. */
+	it("still answers while Shardlens cannot be read, saying why", async () => {
+		jest.mocked(oneGuildActivity).mockRejectedValueOnce(new AnalyticsUnavailable("refused"));
+
+		const response = await send(`/guilds/${GUILD}`);
+
+		expect(response.status).toBe(200);
+		expect((await response.json()) as OwnerGuildDetail).toMatchObject({
+			usage: null,
+			dashboardViews: null,
+			analytics: "refused",
+		});
 	});
 });
 

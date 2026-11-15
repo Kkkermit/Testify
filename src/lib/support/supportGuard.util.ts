@@ -13,6 +13,7 @@ export function secretsOf(env: Env): string[] {
 		env.SUPPORT_AI_API_KEY,
 		env.SITE_GITHUB_TOKEN,
 		env.SHARDLENS_INGEST_KEY,
+		env.SHARDLENS_READ_KEY,
 		...credentialsIn(env.MONGODB_URI),
 	];
 

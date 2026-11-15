@@ -48,8 +48,6 @@ export interface CommandRun {
 	channelId: string | null;
 	prefix?: string;
 	typed?: string;
-	/** The reference an unexpected failure was logged under. */
-	reference?: string | null;
 }
 
 export const COMMAND_LOG_LIMITS = {

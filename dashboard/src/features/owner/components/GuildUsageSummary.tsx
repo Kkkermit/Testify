@@ -22,13 +22,18 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 				</div>
 
 				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
-					<Figure className="px-6 py-4" label={t("owner.activeMembers")} value={formatNumber(report.members)} />
+					<Figure
+						className="px-6 py-4"
+						label={t("owner.peopleThisMonth")}
+						value={report.people === null ? "—" : formatNumber(report.people)}
+					/>
 					<Figure
 						className="px-6 py-4"
 						label={t("owner.dashboardScreens")}
 						value={formatNumber(report.dashboardViews)}
 					/>
 				</RunFigures>
+				<p className="text-muted-foreground px-6 py-3 text-xs">{t("owner.serverChartNote")}</p>
 			</Card>
 
 			<div className="grid items-start gap-4 lg:grid-cols-2">

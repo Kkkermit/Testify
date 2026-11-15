@@ -2,8 +2,14 @@ import { ChannelType, type Guild, type GuildMember, GuildVerificationLevel } fro
 import { type Logger } from "pino";
 import { toError } from "@core/errors";
 import { type ServerDay } from "@database/models/insights.schema";
-import { readInsightRows, recentMoves, recordMove, saveActivity } from "@database/repositories/insightsRepository";
-import { dayKey, since } from "@database/repositories/usageRepository";
+import {
+	dayKey,
+	readInsightRows,
+	recentMoves,
+	recordMove,
+	saveActivity,
+	since,
+} from "@database/repositories/insightsRepository";
 import { readerSees } from "@lib/discord/channels.util";
 import { activity } from "@lib/info/activity.util";
 import { readMemberCounts } from "@lib/info/memberCount.util";

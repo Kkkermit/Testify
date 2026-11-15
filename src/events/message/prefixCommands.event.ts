@@ -7,7 +7,7 @@ import { readerLanguage, say } from "@core/language";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/prefixRepository";
-import { countCommandUse, logCommandUse, recordCommandTime, recordPrefixRun } from "@lib/bot";
+import { logCommandUse, recordCommandTime, recordPrefixRun } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff } from "@testify/shared";
@@ -55,20 +55,17 @@ export default defineMessageHandler({
 		}
 
 		const started = Date.now();
-		const { ok, reference } = await runCommand(interaction, command, client);
+		const { ok } = await runCommand(interaction, command, client);
 		const durationMs = Date.now() - started;
 		recordCommandTime(durationMs, ok);
-		const run = {
+		logCommandUse(client, interaction, command, {
 			surface: "prefix",
 			ok,
-			reference,
 			durationMs,
 			channelId: message.guild === null ? null : message.channelId,
 			prefix,
 			typed: `${parsed.prefix ?? `@${client.user?.username ?? "mention"} `}${parsed.name}`,
-		} as const;
-		countCommandUse(client, interaction, command, run);
-		logCommandUse(client, interaction, command, run);
+		});
 		recordPrefixRun(client, {
 			command: command.name,
 			subcommand: chosenSubcommand(interaction, command),

@@ -11,7 +11,6 @@ import { FixedStats } from "@database/models/botStats.schema";
 import { CasinoHand } from "@database/models/casinoHand.schema";
 import { CasinoSettingsConfig } from "@database/models/casinoSettings.schema";
 import { CasinoStats } from "@database/models/casinoStats.schema";
-import { CommandRuns } from "@database/models/commandRuns.schema";
 import { CommandToggleConfig } from "@database/models/commandToggles.schema";
 import { Counting } from "@database/models/counting.schema";
 import { DashboardAccess } from "@database/models/dashboardAccess.schema";
@@ -156,7 +155,6 @@ const THEIRS = [
 	SharedBirthday,
 	CasinoHand,
 	CasinoStats,
-	CommandRuns,
 	DashboardAccess,
 	DashboardSessions,
 	Economy,

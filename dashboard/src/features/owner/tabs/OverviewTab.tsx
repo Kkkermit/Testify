@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { LABEL, SearchField, SELECT } from "@/components/form";
 import { Card, SectionHeading, Pager, Skeleton, StatTile } from "@/components/primitives";
+import { CountsUnavailable } from "@/features/owner/components/AnalyticsNotice";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
 import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
@@ -138,6 +139,8 @@ export function OverviewTab(): React.JSX.Element {
 					/>
 				)}
 
+				{results?.analytics && <CountsUnavailable problem={results.analytics} />}
+
 				{guilds.isError ? (
 					<ErrorState as="h2" error={guilds.error} onRetry={() => void guilds.refetch()} />
 				) : results === undefined ? (
@@ -148,7 +151,13 @@ export function OverviewTab(): React.JSX.Element {
 						sort={sort}
 						filter={filter}
 						empty={
-							search.trim() !== "" ? t("owner.noServersMatch") : filter === "inactive" ? t("owner.noInactive") : null
+							search.trim() !== ""
+								? t("owner.noServersMatch")
+								: filter !== "inactive"
+									? null
+									: results.analytics === null
+										? t("owner.noInactive")
+										: t("owner.inactiveUnknown")
 						}
 						selected={selected}
 						onSelect={(guildId) => {

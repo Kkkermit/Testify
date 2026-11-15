@@ -57,6 +57,7 @@ services:
 
       SHARDLENS_URL: ${SHARDLENS_URL:-}
       SHARDLENS_INGEST_KEY: ${SHARDLENS_INGEST_KEY:-}
+      SHARDLENS_READ_KEY: ${SHARDLENS_READ_KEY:-}
       SHARDLENS_DRY_RUN: ${SHARDLENS_DRY_RUN:-false}
     ports:
       # Bound to the host's loopback: an admin panel reachable from the internet is not a default.

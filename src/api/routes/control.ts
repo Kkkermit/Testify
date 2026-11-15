@@ -14,12 +14,13 @@ import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
-import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import {
 	botIdentity,
 	controlState,
 	forgetBotIdentity,
+	oneGuildActivity,
+	orUnavailable,
 	pause,
 	resume,
 	sendShardlensNow,
@@ -162,10 +163,9 @@ control.get("/guilds/:guildId", async (context) => {
 
 	if (guild === undefined) throw notInGuild();
 
-	const [configured, tallies, dashboard] = await Promise.all([
+	const [configured, activity] = await Promise.all([
 		configuredIn(guild),
-		guildTallies(ANALYTICS.defaultWindowDays, 0),
-		dashboardTallies(ANALYTICS.defaultWindowDays, 0, undefined, guild.id),
+		orUnavailable(oneGuildActivity(client, guild.id, ANALYTICS.defaultWindowDays)),
 	]);
 
 	const me = guild.members.me;
@@ -183,8 +183,9 @@ control.get("/guilds/:guildId", async (context) => {
 		highestRole: me?.roles.highest.name ?? null,
 		missingPermissions: missingIn(guild),
 		configured,
-		usage: tallies.find((row) => row.guildId === guild.id)?.count ?? 0,
-		dashboardViews: dashboard[0]?.count ?? 0,
+		usage: activity.value?.commands ?? null,
+		dashboardViews: activity.value?.dashboard ?? null,
+		analytics: activity.problem,
 	};
 
 	return context.json(body);

@@ -59,14 +59,12 @@ import {
 import {
 	blacklistRows,
 	botControl,
-	commandRuns,
 	guildDetail,
 	guildUsage,
 	logFeed,
 	logRuns,
 	PAST_RUN,
 	pastLogFeed,
-	memberUsage,
 	runResult,
 	runnable,
 	runtimeInfo,
@@ -269,12 +267,6 @@ export const handlers = [
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
 	http.get("/api/analytics/guilds/:guildId", () => HttpResponse.json(guildUsage)),
-	http.get("/api/analytics/guilds/:guildId/members", () =>
-		HttpResponse.json({ items: memberUsage, total: memberUsage.length, page: 1, perPage: 25 }),
-	),
-	http.get("/api/analytics/guilds/:guildId/runs", () =>
-		HttpResponse.json({ items: commandRuns, total: commandRuns.length, page: 1, perPage: 25 }),
-	),
 	http.get("/api/analytics/logs", ({ request }) =>
 		HttpResponse.json(new URL(request.url).searchParams.get("run") === PAST_RUN ? pastLogFeed : logFeed),
 	),
@@ -299,7 +291,9 @@ export const handlers = [
 			database: "connected",
 		}),
 	),
-	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
+	http.get("/api/owner/guilds", () =>
+		HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25, analytics: null }),
+	),
 	http.get("/api/owner/blacklist", () => HttpResponse.json(blacklistRows)),
 	http.get("/api/owner/notices", () => HttpResponse.json([musicNotice])),
 	http.post("/api/owner/notices", () => HttpResponse.json(musicNotice, { status: 201 })),

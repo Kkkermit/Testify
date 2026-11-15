@@ -51,7 +51,7 @@ function press(client: TestifyClient): ButtonInteraction {
 		componentType: ComponentType.Button,
 		customId: "shop:open",
 		guildId: GUILD,
-		user: { id: USER },
+		user: { id: USER, username: "tester", avatar: null },
 		message: null,
 	});
 	return interaction;
@@ -102,15 +102,15 @@ describe("startShardlens", () => {
 });
 
 describe("what the SDK is started with", () => {
-	/** The privacy notice promises user ids are hashed and option values never leave, which these two would undo. */
-	it("stays in privacy mode and records no option values", () => {
+	/** Audit mode names who ran each command once the collector agrees; option values must still never leave. */
+	it("asks for audit mode and records no option values", () => {
 		const { client } = clientWith({ SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: KEY });
 		running.push(client);
 		startShardlens(client);
 
 		const options = jest.mocked(createShardlens).mock.calls.at(-1)?.[1];
 		expect(options).toMatchObject({ endpoint: "https://stats.example.com", apiKey: KEY, dryRun: false });
-		expect(options?.mode).toBeUndefined();
+		expect(options?.mode).toBe("audit");
 		expect(options?.captureOptionValues).toBeUndefined();
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
 	});
