@@ -2520,13 +2520,14 @@ four tabs, three shared components and two testable modules.
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
-| Command                 | What it does                                                  |
-| ----------------------- | ------------------------------------------------------------- |
-| `npm run dev:all`       | Bot and Vite together. The page is on :5174, the API on :3000 |
-| `npm run dashboard:dev` | Just Vite                                                     |
-| `npm run build`         | shared → bot → dashboard, in that order                       |
-| `npm run build:shared`  | Only needed by hand after editing `shared/src`                |
-| `npm run test:coverage` | Both projects, each against its own thresholds                |
+| Command                      | What it does                                                     |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `npm run dev:all`            | Bot and Vite together. The page is on :5174, the API on :3000    |
+| `npm run dashboard:dev`      | Just Vite                                                        |
+| `npm run dashboard:fixtures` | Vite on fixture data, signed in as an owner — see the guide's §3 |
+| `npm run build`              | shared → bot → dashboard, in that order                          |
+| `npm run build:shared`       | Only needed by hand after editing `shared/src`                   |
+| `npm run test:coverage`      | Both projects, each against its own thresholds                   |
 
 In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
 work with no CORS configuration at all. In production the API serves `dashboard/dist` from the same port.

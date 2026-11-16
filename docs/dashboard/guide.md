@@ -124,15 +124,23 @@ needing `npm run build:shared` by hand.
 
 ## 3. Running it
 
-| Command                 | What it does                                                  |
-| ----------------------- | ------------------------------------------------------------- |
-| `npm run dev:all`       | Bot and Vite together. The page is on :5174, the API on :3000 |
-| `npm run dashboard:dev` | Vite only — useful when the API is already up                 |
-| `npm run check`         | typecheck → lint → format:check → test, both projects         |
-| `npm run test:coverage` | Both projects, each against its own thresholds                |
+| Command                      | What it does                                                         |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `npm run dev:all`            | Bot and Vite together. The page is on :5174, the API on :3000        |
+| `npm run dashboard:dev`      | Vite only — useful when the API is already up                        |
+| `npm run dashboard:fixtures` | Vite on fixture data, signed in as an owner, with no bot or database |
+| `npm run check`              | typecheck → lint → format:check → test, both projects                |
+| `npm run test:coverage`      | Both projects, each against its own thresholds                       |
 
 In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
 work with **no CORS configuration at all**. In production the API serves `dashboard/dist` from the same port.
+
+**`dashboard:fixtures` is for looking, not for testing a change against the bot.** `dashboard/fixtures/server.ts`
+starts Vite with a plugin that answers every `/api` call itself: `showcase.ts` first, a made-up busy bot whose owner
+console figures follow the window and time zone asked for, then the test suite's own `handlers.ts` for every other
+screen. `/auth/me` answers as an owner, so there is no sign-in. Nothing is saved, and a route nothing answers is a 404
+named once in the terminal. The fixtures load through Vite, so an edit to one shows on the next request, and none of
+it is in the build.
 
 **`dev:all` is one supervisor process, and one Ctrl+C stops everything.** `scripts/devAll.ts` replaced
 `concurrently` for a reason worth knowing: concurrently spawns every command through a shell — `cmd.exe /s /c`
