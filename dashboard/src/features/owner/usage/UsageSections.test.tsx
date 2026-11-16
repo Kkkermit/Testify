@@ -13,6 +13,7 @@ import {
 } from "@/features/owner/usage/usage.utils";
 import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
+import { reliability } from "@/test/fixtures/usageSections";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -175,6 +176,32 @@ describe("the usage sections", () => {
 	});
 
 	/** Each section is read on its own, so one Shardlens cannot answer leaves the others working. */
+	/** A shard that disconnects and reconnects within the same instant once gave two list rows one React key. */
+	it("lists two events of one shard at the same moment as two rows", async () => {
+		const at = "2026-08-05T10:00:00.000Z";
+		server.use(
+			http.get("/api/analytics/reliability", () =>
+				HttpResponse.json({
+					...reliability,
+					shards: {
+						...reliability.shards,
+						events: [
+							{ at, shard: 0, state: "disconnected", closeCode: 1006 },
+							{ at, shard: 0, state: "reconnecting", closeCode: null },
+						],
+					},
+				}),
+			),
+		);
+		const warned = jest.spyOn(console, "error").mockImplementation(() => undefined);
+		renderView("reliability");
+
+		expect(await screen.findByText("disconnected")).toBeInTheDocument();
+		expect(screen.getByText("reconnecting")).toBeInTheDocument();
+		expect(warned.mock.calls.flat().join(" ")).not.toMatch(/same key/);
+		warned.mockRestore();
+	});
+
 	it("says a section cannot be read without taking the others with it", async () => {
 		refuse("panels");
 		const user = userEvent.setup();

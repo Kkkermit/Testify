@@ -122,7 +122,10 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 								) : (
 									<ol className="divide-border flex flex-col divide-y text-sm">
 										{report.shards.events.map((event) => (
-											<li key={`${event.at} ${String(event.shard)}`} className="flex flex-wrap gap-x-3 py-2">
+											<li
+												key={`${event.at} ${String(event.shard)} ${event.state}`}
+												className="flex flex-wrap gap-x-3 py-2"
+											>
 												<span className="tabular-nums">{dateAndTime(event.at)}</span>
 												<span>{t("owner.usageSections.shard", { shard: event.shard })}</span>
 												<code className="font-mono">{event.state}</code>
