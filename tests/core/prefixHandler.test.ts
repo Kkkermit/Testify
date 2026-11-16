@@ -1,4 +1,5 @@
 import { Collection, type Message } from "discord.js";
+import { checkCommand } from "@core/checks";
 import { type TestifyClient } from "@core/client";
 import { defineCommand } from "@core/command";
 import { createLogger } from "@core/logger";
@@ -11,7 +12,7 @@ jest.mock("@database/repositories/prefixRepository", () => ({
 }));
 // Routing a message to the right command; the checks have their own tests.
 jest.mock("@core/checks", () => ({
-	runChecks: jest.fn(() => Promise.resolve(null)),
+	checkCommand: jest.fn(() => Promise.resolve(null)),
 	clearCooldowns: jest.fn(),
 }));
 
@@ -115,6 +116,53 @@ describe("the prefix handler", () => {
 			failed: true,
 			error: failure,
 		});
+	});
+
+	/** Slash runs already send which options were filled in, so a prefix run sends the same names, never their values. */
+	it("names the options given and never what was given for them", async () => {
+		const trackMessageCommand = jest.fn();
+		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
+		client.commands.set(
+			"give",
+			defineCommand({
+				name: "give",
+				description: "Gives.",
+				category: "economy",
+				options: [
+					{ name: "amount", description: "How much.", type: "integer", required: true },
+					{ name: "note", description: "Why.", type: "string" },
+				],
+				run: jest.fn(),
+			}),
+		);
+
+		await runMessageHandlers(fakeMessage("t?give 500"), client);
+
+		const run = trackMessageCommand.mock.calls[0]?.[1] as Record<string, unknown>;
+		expect(run).toMatchObject({ command: "give", options: ["amount"] });
+		expect(JSON.stringify(run)).not.toContain("500");
+	});
+
+	/** A refused run is not a run, so it is counted apart, with its reason and the command's own name. */
+	it("counts a refusal by its reason and runs nothing", async () => {
+		const track = jest.fn();
+		const trackMessageCommand = jest.fn();
+		const client = Object.assign(fakeClient(), {
+			shardlens: { track, trackMessageCommand },
+			env: {},
+			timers: { after: jest.fn() },
+		});
+		jest.mocked(checkCommand).mockResolvedValueOnce({ failure: "Slow down.", reason: "cooldown" });
+
+		await runMessageHandlers(fakeMessage("t?ping"), client);
+
+		expect(ping).not.toHaveBeenCalled();
+		expect(trackMessageCommand).not.toHaveBeenCalled();
+		expect(track).toHaveBeenCalledWith(
+			"command_refused",
+			{ command: "ping", reason: "cooldown", surface: "prefix" },
+			{ guildId: "444" },
+		);
 	});
 
 	/** `/help` declares autocomplete, and refusing those made `t?help` fail. */

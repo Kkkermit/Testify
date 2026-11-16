@@ -1,6 +1,6 @@
 import { createLogger } from "@core/logger";
 import { type SupportEntry, type SupportPicker } from "@lib/support/support.types";
-import { HourlyBudget, SupportDesk } from "@lib/support/supportDesk.util";
+import { countAnswer, HourlyBudget, SupportDesk } from "@lib/support/supportDesk.util";
 import { secretsOf } from "@lib/support/supportGuard.util";
 import { FAKE_ENV, realEntries } from "@tests/helpers/support";
 
@@ -119,6 +119,40 @@ describe("SupportDesk, with a model", () => {
 		for (const question of ["one question", "two question", "three question"]) await help.ask(question, CONTEXT);
 
 		expect(model.pick).toHaveBeenCalledTimes(2);
+	});
+});
+
+describe("how an answer was chosen", () => {
+	/** The owners see whether the model is earning its keep, so each answer says which of the two chose it. */
+	it("says the model chose it, search did, or search stood in when the model failed, cached or not", async () => {
+		const model = picker(() => Promise.resolve({ kind: "none" }));
+		const failing = picker(() => Promise.reject(new Error("down")));
+
+		expect((await desk(model).answer("how do I set up levelling", CONTEXT)).by).toBe("model");
+		expect((await desk().answer("how do I set up levelling", CONTEXT)).by).toBe("search");
+		const standIn = desk(failing);
+		expect((await standIn.answer("how do I set up levelling", CONTEXT)).by).toBe("search");
+		expect((await standIn.answer("how do I set up levelling", CONTEXT)).by).toBe("search");
+	});
+
+	/** The question is somebody's words, so only whether it was answered, how and with which article is counted. */
+	it("counts an answer by its article and a refusal by how, and never the question", async () => {
+		const track = jest.fn();
+		const client = { shardlens: { track } } as never;
+		const { reply } = await desk().answer("how do I set up levelling", CONTEXT);
+
+		countAnswer(client, "discord", reply, "search", "900000000000000001");
+		countAnswer(client, "dashboard", { answer: null, related: [] }, "model");
+
+		expect(track.mock.calls).toEqual([
+			[
+				"support_answered",
+				{ surface: "discord", by: "search", article: reply.answer?.id },
+				{ guildId: "900000000000000001" },
+			],
+			["support_refused", { surface: "dashboard", by: "model" }, undefined],
+		]);
+		expect(JSON.stringify(track.mock.calls)).not.toContain("set up levelling");
 	});
 });
 

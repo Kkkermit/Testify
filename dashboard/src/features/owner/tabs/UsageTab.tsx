@@ -20,6 +20,13 @@ import {
 	commandBar,
 	surfaceBars,
 } from "@/features/owner/owner.utils";
+import { ActivityView } from "@/features/owner/usage/ActivityView";
+import { JourneysView } from "@/features/owner/usage/JourneysView";
+import { PanelsView } from "@/features/owner/usage/PanelsView";
+import { PeopleView } from "@/features/owner/usage/PeopleView";
+import { ReliabilityView } from "@/features/owner/usage/ReliabilityView";
+import { ServersView } from "@/features/owner/usage/ServersView";
+import { USAGE_VIEWS, viewFrom, VIEW_LABELS } from "@/features/owner/usage/usage.utils";
 import { useUsage } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
@@ -30,23 +37,39 @@ export function UsageTab({
 	days: AnalyticsWindow;
 	onWindow: (days: AnalyticsWindow) => void;
 }): React.JSX.Element {
-	const [params] = useSearchParams();
+	const { t } = useTranslation();
+	const [params, setParams] = useSearchParams();
 	const guildId = snowflakeFrom(params.get("guild"));
+	const view = viewFrom(params.get("view"));
 
-	return guildId === null ? (
-		<FleetUsage days={days} onWindow={onWindow} />
-	) : (
-		<GuildUsage guildId={guildId} days={days} onWindow={onWindow} />
+	if (guildId !== null) return <GuildUsage guildId={guildId} days={days} onWindow={onWindow} />;
+
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<SegmentedControl
+					label={t("owner.usageSections.views")}
+					segments={USAGE_VIEWS.map((value) => ({ value, label: t(VIEW_LABELS[value]) }))}
+					value={view}
+					onChange={(value) => {
+						setParams(searchWith(params, { view: value === "commands" ? null : value }), { replace: true });
+					}}
+				/>
+				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
+			</div>
+
+			{view === "commands" && <FleetUsage days={days} />}
+			{view === "people" && <PeopleView days={days} />}
+			{view === "servers" && <ServersView days={days} />}
+			{view === "panels" && <PanelsView days={days} />}
+			{view === "activity" && <ActivityView days={days} />}
+			{view === "reliability" && <ReliabilityView days={days} />}
+			{view === "journeys" && <JourneysView days={days} />}
+		</div>
 	);
 }
 
-function FleetUsage({
-	days,
-	onWindow,
-}: {
-	days: AnalyticsWindow;
-	onWindow: (days: AnalyticsWindow) => void;
-}): React.JSX.Element {
+function FleetUsage({ days }: { days: AnalyticsWindow }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [params] = useSearchParams();
 	const usage = useUsage(days);
@@ -65,16 +88,13 @@ function FleetUsage({
 
 	return (
 		<div className="flex flex-col gap-4">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<p className="text-muted-foreground text-sm">
-					{t("owner.usageSummary", {
-						count: report.runs,
-						days,
-						failing: percent(report.failures, report.runs),
-					})}
-				</p>
-				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
-			</div>
+			<p className="text-muted-foreground text-sm">
+				{t("owner.usageSummary", {
+					count: report.runs,
+					days,
+					failing: percent(report.failures, report.runs),
+				})}
+			</p>
 
 			{report.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: report.detailDays })}</Warning>}
 

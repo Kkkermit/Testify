@@ -2294,10 +2294,22 @@ owner console's Usage tab, its per-server drill-down and the server list's count
   (`runCommand` hands it back, and the SDK keeps only its class and Discord's code). **Never a custom event for a
   prefix run** — only the SDK's own message commands are counted with slash commands, by server and by day — and
   never the message's text, the name typed or an argument. A message that is no command, or one a check refuses, is
-  not a run. The dashboard's screen views are the only custom events: `dashboard_screen` by route pattern and
-  `dashboard_server` by server, the second only for one of that server's managers (`recordScreenView`, behind
+  not a run. A prefix run sends the names of the options given (`givenOptions`), as a slash run already does, and
+  never what was given for them. The dashboard's screen views are custom events: `dashboard_screen` by route pattern
+  and `dashboard_server` by server, the second only for one of that server's managers (`recordScreenView`, behind
   `managesGuild`), with the server also as an `in_<id>` property because a custom event keeps no dimensions, and
   neither names anybody.
+- **What the bot does is counted under the bot's own names, with the server and never a person.** `recordEvent` and
+  `recordAction` pass the server as context and no user, so none of these counts towards people or funnels: a command
+  refused before it ran (`command_refused`, with the reason `checkCommand` gives from `REFUSAL_REASONS`, because
+  Discord counts a refused slash command as answered), a track played, given up on or refused (`music_played`,
+  `music_skipped`, `music_refused`, with the service and its `MusicReason`), a help desk answer and how it was chosen
+  (`support_answered` with its article, `support_refused`, never the question), a dashboard change by screen and way
+  (`dashboard_change`, written beside the audit record in `api/audit.ts`), and the eight `AUTOMATIC_ACTIONS`, each
+  counted only once it has happened. One name per thing is what keeps its total in the collector's long rollups; a
+  breakdown by property reads raw events. A track counts as played on its first open only: a retry or a volume change
+  re-opens it with `resumed`, and `openSession` listens once, as a session opens. `refreshGuildCounts` keeps member
+  counts current at one server every two seconds of the bot's REST budget.
 - **Nothing here is wrapped in a `try`.** The SDK never throws into the bot and counts its own failures; its lines go
   to the logger tagged `[SHARDLENS]`.
 - **Shutdown flushes it before the archive closes and the client goes**, and Delete my data calls
@@ -3588,6 +3600,23 @@ about it are load-bearing:
 - **Who ran what is not in the console.** It is on the collector's own Activity page, encrypted there, behind the
   collector's own sign-in, and the console links it and the server's own page with `collectorPage`, which only ever
   builds a link from an `http`/`https` origin.
+
+**The Usage tab has seven sections, and each reads its own owner-only route**, so one the collector cannot answer
+leaves the rest working: Commands, People (`/analytics/audience`), Servers (`/growth`), Buttons and forms (`/panels`),
+Bot activity (`/activity`), Reliability (`/reliability`) and Journeys (`/funnel`, `/retention`), built by
+`usageSections.util.ts` and chosen with `?view=`. Four things about them are load-bearing:
+
+- **Hours, funnels and returns are read in the reader's own time zone.** The page sends `tz`, and the route takes only
+  an IANA zone the runtime knows (`analyticsZoneQuery`); every daily chart stays in UTC like the Commands section.
+- **A funnel or a return asks only about the bot's own commands.** The steps are names in the address, checked against
+  `client.commands` and refused as `unknown_command` otherwise, and sent as `{ type: "command" }` steps, so nothing
+  typed there becomes a custom event name. The page asks nothing until two steps are chosen.
+- **Buttons and forms are read only for the bot's own handlers**, by the first two parts of each custom ID, because the
+  rest is whatever a handler packed into it. The collector files a form opened from a button under the button's ID and
+  a submitted one under its own, so a handler's forms are summed on both sides.
+- **The way a dashboard change was made is the page's word for it.** Put back and Bring in send `x-testify-via`
+  (`CHANGE_WAY_HEADER`) as `put_back` or `backup`, setup steps are told by their action, and anything else reads as a
+  save. It is a label on a count and decides nothing.
 
 **Screen views are counted bot-wide by route pattern, and the server only for its own managers.** `routePattern` in
 `useScreenView.ts` puts every matched parameter back as its name, so no member id is ever sent and the pattern names no

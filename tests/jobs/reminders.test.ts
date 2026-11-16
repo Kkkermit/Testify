@@ -89,3 +89,18 @@ describe("delivering due reminders", () => {
 		expect(delivered).toHaveBeenCalledTimes(25);
 	});
 });
+
+describe("counting delivered reminders", () => {
+	/** Only a reminder that reached somebody is counted, and with its server, never its owner or its words. */
+	it("counts each one that reached somebody and none that reached nobody", async () => {
+		const track = jest.fn();
+		queue(due("a"), due("b"));
+		delivered.mockResolvedValueOnce("dm").mockResolvedValueOnce(null);
+
+		await deliverDueReminders(createMockClient({ shardlens: { track } } as never), NOW);
+
+		expect(track).toHaveBeenCalledTimes(1);
+		expect(track.mock.calls[0]?.[0]).toBe("reminder_sent");
+		expect(track.mock.calls[0]?.[1]).toEqual({});
+	});
+});

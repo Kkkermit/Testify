@@ -815,7 +815,9 @@ precisely the screen you want when something is wrong.
   drill-down and the server list's command and dashboard counts are queries to the collector with
   `SHARDLENS_READ_KEY`, which the bot holds and no browser sees. Without the key, or with the collector refusing or
   away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_unreachable`) and the server list still
-  loads with its counts blank. Who ran what lives on the collector's own Activity page, which the tab links.
+  loads with its counts blank. Who ran what lives on the collector's own Activity page, which the tab links. The
+  tab's seven sections — commands, people, servers, buttons and forms, bot activity, reliability and journeys — each
+  read their own route and fail on their own, through `SectionState` in `features/owner/usage/`.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.

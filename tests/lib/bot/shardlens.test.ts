@@ -7,6 +7,9 @@ import { runButton, runCommand } from "@core/errors";
 import { type Logger } from "@core/logger";
 import {
 	measured,
+	musicCause,
+	recordAction,
+	recordEvent,
 	recordPrefixRun,
 	sendShardlensNow,
 	shardlensLine,
@@ -125,6 +128,7 @@ describe("startShardlens", () => {
 		recordPrefixRun(client, prefixMessage(client), {
 			command: "help",
 			subcommand: null,
+			options: [],
 			durationMs: 1,
 			ok: true,
 			error: undefined,
@@ -150,6 +154,64 @@ describe("what the SDK is started with", () => {
 		expect(options?.captureOptionValues).toBeUndefined();
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
 	});
+
+	/** Member counts are otherwise read only at start-up and when the bot joins a server. */
+	it("keeps each server's member count current", () => {
+		const { client } = clientWith(CONFIGURED);
+		running.push(client);
+		startShardlens(client);
+
+		expect(jest.mocked(createShardlens).mock.calls.at(-1)?.[1]?.refreshGuildCounts).toBe(true);
+	});
+});
+
+describe("recordEvent and recordAction", () => {
+	/** A custom event may carry the server it happened in, never who did it and never anything they typed. */
+	it("sends the bot's own names with the server as context, and no person", async () => {
+		const { client, said } = clientWith(CONFIGURED);
+		running.push(client);
+		startShardlens(client);
+		await salted(client);
+
+		recordEvent(client, "command_refused", { command: "work", reason: "cooldown", surface: "slash" }, GUILD);
+		recordEvent(client, "music_refused", {
+			source: "youtube",
+			reason: "bot-check",
+			cause: musicCause("youtube", "bot-check"),
+		});
+		recordAction(client, "level_up", GUILD);
+		await sendShardlensNow(client);
+
+		const custom = said.info
+			.filter((line) => line.includes('"custom"'))
+			.map((line) => JSON.parse(line.slice(line.indexOf("{"))) as Record<string, unknown>);
+		expect(custom).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: "command_refused",
+					props: { command: "work", reason: "cooldown", surface: "slash" },
+					guild: GUILD,
+				}),
+				expect.objectContaining({
+					name: "music_refused",
+					props: expect.objectContaining({ cause: "youtube/bot-check" }),
+				}),
+				expect.objectContaining({ name: "level_up", guild: GUILD }),
+			]),
+		);
+		expect(custom.every((event) => event.user === undefined)).toBe(true);
+		expect(said.info.join("\n")).not.toContain(USER);
+	});
+
+	it("does nothing while Shardlens is off", async () => {
+		const { client } = clientWith({});
+
+		expect(() => {
+			recordEvent(client, "dashboard_change", { screen: "/guilds/:guildId/welcome", how: "save" });
+			recordAction(client, "raid_hold");
+		}).not.toThrow();
+		await client.destroy();
+	});
 });
 
 describe("recordPrefixRun", () => {
@@ -163,6 +225,7 @@ describe("recordPrefixRun", () => {
 		recordPrefixRun(client, prefixMessage(client), {
 			command: "balance",
 			subcommand: "view",
+			options: ["user"],
 			durationMs: 12.6,
 			ok: false,
 			error: new TypeError("the words somebody typed"),
@@ -176,6 +239,7 @@ describe("recordPrefixRun", () => {
 			type: "message_command",
 			command: "balance",
 			sub: "view",
+			options: ["user"],
 			outcome: "error",
 			errorClass: "TypeError",
 			handlerMs: 13,
@@ -196,6 +260,7 @@ describe("recordPrefixRun", () => {
 			recordPrefixRun(client, prefixMessage(client), {
 				command: "help",
 				subcommand: null,
+				options: [],
 				durationMs: 1,
 				ok: true,
 				error: undefined,
@@ -294,6 +359,7 @@ describe("shardlensStatus", () => {
 		recordPrefixRun(client, prefixMessage(client), {
 			command: "help",
 			subcommand: null,
+			options: [],
 			durationMs: 1,
 			ok: true,
 			error: undefined,

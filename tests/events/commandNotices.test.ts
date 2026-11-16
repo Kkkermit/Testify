@@ -7,7 +7,7 @@ import prefixCommands from "@events/message/prefixCommands.event";
 import { type Notice } from "@testify/shared";
 import { createMockClient, createMockInteraction, createMockMessage } from "@tests/helpers/mocks";
 
-jest.mock("@core/checks", () => ({ runChecks: jest.fn(() => Promise.resolve(null)) }));
+jest.mock("@core/checks", () => ({ checkCommand: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@lib/bot", () => ({
 	logCommandUse: jest.fn(),
 	recordCommandTime: jest.fn(),

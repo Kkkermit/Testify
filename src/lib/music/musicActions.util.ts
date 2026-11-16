@@ -2,13 +2,14 @@ import { type Guild, type GuildMember, type VoiceBasedChannel } from "discord.js
 import { type TestifyClient } from "@core/client";
 import { type CommandInput } from "@core/command";
 import { UserFacingError, toError } from "@core/errors";
+import { musicCause, recordEvent } from "@lib/bot/shardlens.util";
 import { reply } from "@lib/discord/reply.util";
 import { type MusicBinaries, type ProblemKind, type Query, type Track } from "@lib/music/music.types";
 import { findBinaries } from "@lib/music/musicBinaries.util";
 import { aboutTheTrack } from "@lib/music/musicProblem.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/music/musicQuery.util";
 import { addTracks } from "@lib/music/musicQueue.util";
-import { findSession, type MusicSession, sessionFor } from "@lib/music/musicSession.util";
+import { findSession, type MusicSession, type SessionEvent, sessionFor } from "@lib/music/musicSession.util";
 import { MusicProblemError, resolveTracks } from "@lib/music/musicSource.util";
 import { allowsSource, fallsBackToSoundCloud, readMusicSources, withinSources } from "@lib/music/musicSources.util";
 import { type MusicSourceChoice } from "@testify/shared";
@@ -82,6 +83,12 @@ function warnHost(request: TrackRequest, kind: ProblemKind): void {
 	if (advice !== null) request.client.logger.warn(advice);
 }
 
+/** A request a service refused, by the service asked and its reason, which is how a flagged host shows up. */
+function countRefusal(request: TrackRequest, asked: Query, reason: ProblemKind): void {
+	const cause = musicCause(asked.source, reason);
+	recordEvent(request.client, "music_refused", { source: asked.source, reason, cause }, request.guild.id);
+}
+
 /** Resolves the query, moving a plain search to SoundCloud when YouTube refuses the host and the owner allows both. */
 async function findTracks(
 	request: TrackRequest,
@@ -90,11 +97,17 @@ async function findTracks(
 ): Promise<{ found: Track[]; fellBack: boolean }> {
 	const binaries = musicBinaries(request.client);
 	// Only the first search result is played, so asking for more is requests YouTube can hold against the host.
-	const ask = (asked: Query): Promise<Track[]> =>
-		resolveTracks(asked, request.requestedBy, binaries, {
-			flat: asked.kind === "url" && isPlaylistUrl(asked.url),
-			...(asked.kind === "search" ? { results: 1 } : {}),
-		});
+	const ask = async (asked: Query): Promise<Track[]> => {
+		try {
+			return await resolveTracks(asked, request.requestedBy, binaries, {
+				flat: asked.kind === "url" && isPlaylistUrl(asked.url),
+				...(asked.kind === "search" ? { results: 1 } : {}),
+			});
+		} catch (error) {
+			if (error instanceof MusicProblemError) countRefusal(request, asked, error.problem.kind);
+			throw error;
+		}
+	};
 
 	try {
 		const found = await ask(query);
@@ -143,7 +156,21 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 }
 
 function openSession(guild: Guild, client: TestifyClient): MusicSession {
-	return sessionFor(guild, musicBinaries(client), client.logger);
+	const opening = findSession(guild.id) === null;
+	const session = sessionFor(guild, musicBinaries(client), client.logger);
+	if (opening) session.on((event) => countTrack(client, guild.id, event));
+	return session;
+}
+
+/** A track started from its beginning, or given up on with its reason; a retry or a volume change is neither. */
+function countTrack(client: TestifyClient, guildId: string, event: SessionEvent): void {
+	if (event.kind === "track" && !event.resumed) {
+		recordEvent(client, "music_played", { source: event.track.source }, guildId);
+	} else if (event.kind === "failed") {
+		const { source } = event.track;
+		const cause = musicCause(source, event.problem);
+		recordEvent(client, "music_skipped", { source, reason: event.problem, cause }, guildId);
+	}
 }
 
 export function requireSession(guild: Guild): MusicSession {

@@ -1,6 +1,7 @@
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { claimDueReminder, finishReminder } from "@database/repositories/reminderRepository";
+import { recordAction } from "@lib/bot";
 import { deliverReminder, REMINDER_LIMITS } from "@lib/reminders";
 
 /** Each due reminder is claimed for a lease and deleted only once it is sent, so a restart mid-send repeats it. */
@@ -11,6 +12,7 @@ export async function deliverDueReminders(client: TestifyClient, now: Date = new
 
 		try {
 			const where = await deliverReminder(client, reminder);
+			if (where !== null) recordAction(client, "reminder_sent", reminder.guildId);
 			if (where === null) {
 				client.logger.debug(
 					{ userId: reminder.userId },

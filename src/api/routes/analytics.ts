@@ -8,10 +8,26 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { logRing } from "@core/logRing";
 import { findLogRun, listLogRuns, readLogLines } from "@database/repositories/logRepository";
-import { AnalyticsUnavailable, botVersion, guildUsageReport, runtimeInfo, usageReport } from "@lib/bot";
+import {
+	AnalyticsUnavailable,
+	audienceReport,
+	botActivityReport,
+	botVersion,
+	funnelReport,
+	growthReport,
+	guildUsageReport,
+	panelsReport,
+	reliabilityReport,
+	retentionReport,
+	runtimeInfo,
+	usageReport,
+} from "@lib/bot";
 import {
 	type AnalyticsProblem,
 	analyticsQuery,
+	analyticsZoneQuery,
+	funnelQuery,
+	retentionQuery,
 	guildIdParam,
 	type LogFeed,
 	LOG_LEVEL_RANK,
@@ -49,6 +65,51 @@ async function fromShardlens<T>(work: () => Promise<T>): Promise<T> {
 analytics.get("/usage", async (context) => {
 	const { days } = parseQuery(context, analyticsQuery);
 	return context.json(await fromShardlens(() => usageReport(context.get("client"), days)));
+});
+
+analytics.get("/audience", async (context) => {
+	const { days, tz } = parseQuery(context, analyticsZoneQuery);
+	return context.json(await fromShardlens(() => audienceReport(context.get("client"), days, tz)));
+});
+
+analytics.get("/growth", async (context) => {
+	const { days } = parseQuery(context, analyticsQuery);
+	return context.json(await fromShardlens(() => growthReport(context.get("client"), days)));
+});
+
+analytics.get("/panels", async (context) => {
+	const { days } = parseQuery(context, analyticsQuery);
+	return context.json(await fromShardlens(() => panelsReport(context.get("client"), days)));
+});
+
+analytics.get("/activity", async (context) => {
+	const { days } = parseQuery(context, analyticsQuery);
+	return context.json(await fromShardlens(() => botActivityReport(context.get("client"), days)));
+});
+
+analytics.get("/reliability", async (context) => {
+	const { days } = parseQuery(context, analyticsQuery);
+	return context.json(await fromShardlens(() => reliabilityReport(context.get("client"), days)));
+});
+
+/** A funnel or a cohort is asked about the bot's own commands, so a name it does not have is refused before asking. */
+function knownCommands(client: TestifyClient, names: (string | undefined)[]): void {
+	const unknown = names.find((name) => name !== undefined && !client.commands.has(name));
+	if (unknown !== undefined) throw new ApiProblem(400, "unknown_command", "That is not one of the bot's commands.");
+}
+
+analytics.get("/funnel", async (context) => {
+	const query = parseQuery(context, funnelQuery);
+	const client = context.get("client");
+	knownCommands(client, query.steps);
+	return context.json(await fromShardlens(() => funnelReport(client, query)));
+});
+
+analytics.get("/retention", async (context) => {
+	const query = parseQuery(context, retentionQuery);
+	const client = context.get("client");
+	knownCommands(client, [query.start, query.back]);
+	return context.json(await fromShardlens(() => retentionReport(client, query)));
 });
 
 analytics.get("/guilds/:guildId", async (context) => {

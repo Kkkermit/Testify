@@ -104,6 +104,7 @@ export const keys = {
 		guilds: (page: number, sort: string, filter: string, search: string) =>
 			["owner", "guilds", page, sort, filter, search] as const,
 		usage: (days: number) => ["owner", "usage", days] as const,
+		usageSection: (section: string, query: string) => ["owner", "usage", section, query] as const,
 		guildUsage: (id: string, days: number) => ["owner", "guild-usage", id, days] as const,
 		logs: (run: string, level: string, search: string) => ["owner", "logs", run, level, search] as const,
 		logRuns: (level: string, search: string) => ["owner", "log-runs", level, search] as const,

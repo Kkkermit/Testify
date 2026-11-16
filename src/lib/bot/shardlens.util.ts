@@ -4,15 +4,67 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { botVersion } from "@lib/bot/runtime.util";
 import { collectorOrigin } from "@lib/bot/shardlensReader.util";
-import { type ShardlensFlush, type ShardlensState, type ShardlensStatus } from "@testify/shared";
+import {
+	type AutomaticAction,
+	type ChangeWay,
+	type MusicReason,
+	type RefusalReason,
+	type ShardlensFlush,
+	type ShardlensState,
+	type ShardlensStatus,
+	type SupportWay,
+} from "@testify/shared";
 
 /** Shardlens: analytics the bot sends to a collector its owner runs, attached only once it is configured. */
 
-/** The dashboard's own custom events; commands on both surfaces are the SDK's to record. */
+/** Custom events, one name for each thing counted so each keeps a total; commands on both surfaces are the SDK's. */
 export const LENS_EVENTS = {
 	screen: "dashboard_screen",
 	server: "dashboard_server",
+	musicPlayed: "music_played",
+	musicSkipped: "music_skipped",
+	musicRefused: "music_refused",
+	supportAnswered: "support_answered",
+	supportRefused: "support_refused",
+	commandRefused: "command_refused",
+	dashboardChange: "dashboard_change",
 } as const;
+
+type Surface = "discord" | "dashboard";
+
+/** What each event carries: names the bot chose, never an id, a username or anything somebody typed. */
+interface LensEventProps {
+	music_played: { source: string };
+	music_skipped: { source: string; reason: MusicReason; cause: string };
+	music_refused: { source: string; reason: MusicReason; cause: string };
+	support_answered: { surface: Surface; by: SupportWay; article: string };
+	support_refused: { surface: Surface; by: SupportWay };
+	command_refused: { command: string; reason: RefusalReason; surface: "slash" | "prefix" };
+	dashboard_change: { screen: string; how: ChangeWay };
+}
+
+const context = (guildId: string | null | undefined): { guildId: string } | undefined =>
+	guildId === null || guildId === undefined ? undefined : { guildId };
+
+/** Counts one event, with the server it happened in as context; never who, since no user is passed. */
+export function recordEvent<N extends keyof LensEventProps>(
+	client: TestifyClient,
+	name: N,
+	props: LensEventProps[N],
+	guildId?: string | null,
+): void {
+	const event: string = name;
+	const values: Record<string, string> = props;
+	client.shardlens?.track(event, values, context(guildId));
+}
+
+/** Something the bot did on its own, counted by its name alone. */
+export function recordAction(client: TestifyClient, action: AutomaticAction, guildId?: string | null): void {
+	client.shardlens?.track(action, {}, context(guildId));
+}
+
+/** A track's service and why it was given up on, as one value, so one read shows which service refused what. */
+export const musicCause = (source: string, reason: MusicReason): string => `${source}/${reason}`;
 
 /** Custom events keep no dimensions, so a view's server is also its own property, which is what can be grouped. */
 export const serverKey = (guildId: string): string => `in_${guildId}`;
@@ -38,6 +90,8 @@ export function startShardlens(client: TestifyClient): Shardlens | null {
 		apiKey: env.SHARDLENS_INGEST_KEY,
 		release: botVersion(),
 		environment: env.NODE_ENV,
+		// One server every two seconds, so member counts stay current rather than being read only at start-up.
+		refreshGuildCounts: true,
 		// Who ran each command is sent only once the collector is in audit mode too; until then it is hashed.
 		mode: "audit",
 		logger: {
@@ -73,6 +127,8 @@ export interface PrefixRun {
 	/** The command's own name, after aliases, never what was typed. */
 	command: string;
 	subcommand: string | null;
+	/** The names of the options given, which slash commands already send; never what was given for them. */
+	options: readonly string[];
 	durationMs: number;
 	ok: boolean;
 	/** What the command threw, of which the SDK keeps only the class and Discord's code. */
@@ -84,6 +140,7 @@ export function recordPrefixRun(client: TestifyClient, message: Message, run: Pr
 	client.shardlens?.trackMessageCommand(message, {
 		command: run.command,
 		...(run.subcommand === null ? {} : { sub: run.subcommand }),
+		...(run.options.length === 0 ? {} : { options: run.options }),
 		durationMs: run.durationMs,
 		failed: !run.ok,
 		...(run.error === undefined ? {} : { error: run.error }),

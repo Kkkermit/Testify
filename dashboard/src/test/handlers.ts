@@ -98,6 +98,7 @@ import {
 	me,
 } from "@/test/fixtures/session";
 import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fixtures/site";
+import { activity, audience, funnel, growth, panels, reliability, retention } from "@/test/fixtures/usageSections";
 
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
@@ -266,6 +267,13 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
+	http.get("/api/analytics/audience", () => HttpResponse.json(audience)),
+	http.get("/api/analytics/growth", () => HttpResponse.json(growth)),
+	http.get("/api/analytics/panels", () => HttpResponse.json(panels)),
+	http.get("/api/analytics/activity", () => HttpResponse.json(activity)),
+	http.get("/api/analytics/reliability", () => HttpResponse.json(reliability)),
+	http.get("/api/analytics/funnel", () => HttpResponse.json(funnel)),
+	http.get("/api/analytics/retention", () => HttpResponse.json(retention)),
 	http.get("/api/analytics/guilds/:guildId", () => HttpResponse.json(guildUsage)),
 	http.get("/api/analytics/logs", ({ request }) =>
 		HttpResponse.json(new URL(request.url).searchParams.get("run") === PAST_RUN ? pastLogFeed : logFeed),

@@ -1,13 +1,13 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { botName } from "@core/brand";
-import { runChecks } from "@core/checks";
-import { chosenSubcommand } from "@core/command";
+import { checkCommand } from "@core/checks";
+import { chosenSubcommand, givenOptions } from "@core/command";
 import { runCommand } from "@core/errors";
 import { readerLanguage, say } from "@core/language";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/prefixRepository";
-import { logCommandUse, recordCommandTime, recordPrefixRun } from "@lib/bot";
+import { logCommandUse, recordCommandTime, recordEvent, recordPrefixRun } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff } from "@testify/shared";
@@ -34,6 +34,14 @@ export default defineMessageHandler({
 		const args = subcommand === undefined ? parsed.args : [subcommand, ...parsed.args];
 
 		if (commandIsOff(client.featuresOff, name.toLowerCase(), args[0]?.toLowerCase())) {
+			// Only a name the feature declares is off, so what is counted is never what was typed.
+			const declared = name.toLowerCase();
+			recordEvent(
+				client,
+				"command_refused",
+				{ command: declared, reason: "feature_off", surface: "prefix" },
+				message.guildId,
+			);
 			const refusal = say(readerLanguage({ guild: message.guild }), "featureOff", { bot: botName() });
 			await replyTemporarily(client, message, refusalEmbed(refusal));
 			return true;
@@ -47,10 +55,16 @@ export default defineMessageHandler({
 		const interaction = new PrefixInteraction(message, command, args);
 		await interaction.options.prepare();
 
-		const refusal = await runChecks(interaction, command, client);
+		const refusal = await checkCommand(interaction, command, client);
 		if (refusal !== null) {
+			recordEvent(
+				client,
+				"command_refused",
+				{ command: command.name, reason: refusal.reason, surface: "prefix" },
+				message.guildId,
+			);
 			// A message cannot be private, so the refusal clears itself rather than staying in the channel.
-			await replyTemporarily(client, message, refusalEmbed(refusal));
+			await replyTemporarily(client, message, refusalEmbed(refusal.failure));
 			return true;
 		}
 
@@ -69,6 +83,7 @@ export default defineMessageHandler({
 		recordPrefixRun(client, message, {
 			command: command.name,
 			subcommand: chosenSubcommand(interaction, command),
+			options: givenOptions(interaction, command).map((option) => option.name),
 			durationMs,
 			ok,
 			error,

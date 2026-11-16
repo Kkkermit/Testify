@@ -118,6 +118,15 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);
 		expect(text).not.toMatch(/prefix command is never named/i);
 		expect(text).toMatch(/under your hashed id, and in audit mode under your user id as well/);
+		// `recordPrefixRun` sends option names only, and `recordEvent` passes the server as context and never a user.
+		expect(lens).toMatch(/\{ options: run\.options \}/);
+		expect(text).toMatch(/the names of the options you gave it but never what you typed/);
+		expect(lens).toMatch(/track\(event, values, context\(guildId\)\)/);
+		expect(lens).not.toMatch(/userId/);
+		expect(text).toMatch(/counts what the bot does with nobody named: .* but never the question/);
+		expect(text).toMatch(/Each of those carries the server it happened in and never who/);
+		expect(lens).toMatch(/refreshGuildCounts: true/);
+		expect(text).toMatch(/member count, kept current while the bot runs/);
 		// `markNoticesSeen` and `markNoticeHinted` write two times against a user id, in a record tied to no server.
 		expect(text).toMatch(
 			/keeps when you last read them and when it last told you about one, against your user id and nothing else/,

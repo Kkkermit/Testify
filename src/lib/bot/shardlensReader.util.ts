@@ -68,6 +68,64 @@ export const serverAnswer = z.object({ found: z.boolean(), uniqueUsersThisPeriod
 
 export const metaAnswer = z.object({ rawRetentionDays: z.number(), mode: z.string() });
 
+const maybe = z
+	.number()
+	.nullable()
+	.optional()
+	.transform((value) => value ?? null);
+
+export const heatmapAnswer = z.object({
+	cells: z.array(z.object({ weekday: z.number(), hour: z.number(), value: count })),
+});
+
+const bucketRows = z.array(z.object({ bucket: z.string(), servers: count }));
+
+export const growthAnswer = z.object({
+	daily: z.array(z.object({ day: z.string(), joins: count, leaves: count })),
+	sizeAtInstall: bucketRows,
+	activation: z.object({ joined: count.optional(), activated: count.optional(), rate: maybe }),
+	installs: z.object({ active: count, inactive: count }).nullable().optional(),
+	lifetimes: bucketRows,
+	serverCount: z.object({ ours: count, discord: maybe, warn: z.boolean() }),
+});
+
+export const audienceAnswer = z.object({
+	daily: z.array(z.object({ day: z.string(), users: count, newUsers: count })),
+	stickiness: maybe,
+	splits: z.record(z.string(), z.array(z.object({ key: z.string().nullable(), value: count }))),
+});
+
+export const reliabilityAnswer = z.object({
+	from: z.string(),
+	totals: z
+		.object({
+			runs: count,
+			missedDeadlines: count,
+			noResponse: count,
+			errors: count,
+			over3sRate: maybe,
+			p50Ms: maybe,
+			p95Ms: maybe,
+			p99Ms: maybe,
+		})
+		.nullable(),
+	errorsByCode: z.array(z.object({ key: z.string(), value: count })),
+	rateLimits: z.array(z.object({ scope: z.string().nullable(), route: z.string().nullable(), count })),
+	shards: z.array(z.object({ shard: z.number(), ping: count, stale: z.boolean() })),
+	shardEvents: z.array(z.object({ ts: z.string(), shard: z.number(), state: z.string(), closeCode: maybe })),
+});
+
+export const gaugeAnswer = z.object({ points: z.array(z.object({ t: z.string(), value: maybe })) });
+
+export const funnelAnswer = z.object({
+	steps: z.array(z.object({ name: z.string(), users: count, medianSeconds: maybe })),
+});
+
+export const retentionAnswer = z.object({
+	periods: z.number(),
+	cohorts: z.array(z.object({ cohort: z.string(), size: count, retained: z.array(count) })),
+});
+
 export type Spec = Record<string, unknown>;
 
 interface Call {

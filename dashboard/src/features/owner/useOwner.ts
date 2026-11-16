@@ -7,7 +7,14 @@ import {
 	type UseQueryResult,
 } from "@tanstack/react-query";
 import {
+	type AudienceReport,
+	type BotActivityReport,
+	type FunnelReport,
+	type GrowthReport,
 	type GuildUsageReport,
+	type PanelsReport,
+	type ReliabilityReport,
+	type RetentionReport,
 	type LogFeed,
 	type LogRuns,
 	type OwnerGuildFilter,
@@ -54,6 +61,49 @@ export function useUsage(days: number): UseQueryResult<UsageReport> {
 		staleTime: 60_000,
 	});
 }
+
+/** One section of the Usage tab, read on its own so a failing one leaves the rest working. */
+function useSection<T>(section: string, query: Record<string, string>, enabled = true): UseQueryResult<T> {
+	const search = new URLSearchParams(query).toString();
+	return useQuery({
+		queryKey: keys.owner.usageSection(section, search),
+		queryFn: () => api.get<T>(`/analytics/${section}?${search}`),
+		staleTime: 60_000,
+		enabled,
+	});
+}
+
+const windowOf = (days: number): Record<string, string> => ({ days: String(days) });
+
+export const useAudience = (days: number, tz: string): UseQueryResult<AudienceReport> =>
+	useSection("audience", { ...windowOf(days), tz });
+
+export const useGrowth = (days: number): UseQueryResult<GrowthReport> => useSection("growth", windowOf(days));
+
+export const usePanels = (days: number): UseQueryResult<PanelsReport> => useSection("panels", windowOf(days));
+
+export const useBotActivity = (days: number): UseQueryResult<BotActivityReport> =>
+	useSection("activity", windowOf(days));
+
+export const useReliability = (days: number): UseQueryResult<ReliabilityReport> =>
+	useSection("reliability", windowOf(days));
+
+/** Asked only once there are two steps to follow, since the collector refuses a funnel of one. */
+export const useFunnel = (days: number, tz: string, steps: string[], hours: number): UseQueryResult<FunnelReport> =>
+	useSection("funnel", { ...windowOf(days), tz, steps: steps.join(","), hours: String(hours) }, steps.length >= 2);
+
+export const useRetention = (
+	days: number,
+	tz: string,
+	start: string | null,
+	back: string | null,
+	interval: "day" | "week",
+): UseQueryResult<RetentionReport> =>
+	useSection(
+		"retention",
+		{ ...windowOf(days), tz, start: start ?? "", interval, ...(back === null ? {} : { back }) },
+		start !== null,
+	);
 
 export function useGuildUsage(guildId: string, days: number): UseQueryResult<GuildUsageReport> {
 	return useQuery({

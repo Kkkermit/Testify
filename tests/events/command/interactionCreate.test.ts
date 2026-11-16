@@ -181,6 +181,25 @@ describe("a switched-off feature", () => {
 		);
 	});
 
+	/** Discord counts the refused command as answered, so the refusal is counted apart with why. */
+	it("counts a command whose feature is off as refused for that reason", async () => {
+		const track = jest.fn();
+		const interaction = { ...arriving("command", "play"), guildId: "900000000000000001" };
+
+		await interactionCreate.run(
+			{ ...client(), shardlens: { track } } as unknown as TestifyClient,
+			interaction as unknown as Interaction,
+		);
+
+		expect(track.mock.calls).toEqual([
+			[
+				"command_refused",
+				{ command: "play", reason: "feature_off", surface: "slash" },
+				{ guildId: "900000000000000001" },
+			],
+		]);
+	});
+
 	it("still says nothing to a button no feature owns", async () => {
 		const interaction = arriving("button", "nobody:press");
 

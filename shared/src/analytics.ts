@@ -321,3 +321,236 @@ export type ScreenView = z.infer<typeof screenView>;
 export function errorRate({ runs, failures }: { runs: number; failures: number }): number {
 	return runs === 0 ? 0 : failures / runs;
 }
+
+/** An IANA zone the runtime knows, which is what the collector accepts; the page sends the reader's own. */
+const timeZone = z
+	.string()
+	.max(64)
+	.refine((zone) => {
+		if (!/^[A-Za-z][\w+-]*(\/[A-Za-z0-9][\w+-]*)*$/.test(zone)) return false;
+		try {
+			new Intl.DateTimeFormat("en", { timeZone: zone });
+			return true;
+		} catch {
+			return false;
+		}
+	}, "must be a time zone")
+	.default("UTC");
+
+export const analyticsZoneQuery = analyticsQuery.extend({ tz: timeZone });
+
+/** A command as the collector names it, which is the bot's own name for it. */
+const commandName = z.string().regex(/^[\w-]{1,32}$/, "must be a command");
+
+export const FUNNEL_WINDOWS = [1, 24, 72, 168] as const;
+
+export const FUNNEL_LIMITS = { minSteps: 2, maxSteps: 5 } as const;
+
+export const funnelQuery = analyticsZoneQuery.extend({
+	/** The commands in order, separated by commas, so a funnel is an address that can be shared. */
+	steps: z
+		.string()
+		.max(200)
+		.transform((text) => text.split(",").map((step) => step.trim()))
+		.pipe(z.array(commandName).min(FUNNEL_LIMITS.minSteps).max(FUNNEL_LIMITS.maxSteps)),
+	hours: z.coerce
+		.number()
+		.int()
+		.refine((value) => (FUNNEL_WINDOWS as readonly number[]).includes(value), {
+			message: `must be one of ${FUNNEL_WINDOWS.join(", ")}`,
+		})
+		.default(24),
+});
+
+export const RETENTION_INTERVALS = ["day", "week"] as const;
+
+export const retentionQuery = analyticsZoneQuery.extend({
+	start: commandName,
+	/** Absent for coming back to the bot at all. */
+	back: commandName.optional(),
+	interval: z.enum(RETENTION_INTERVALS).default("week"),
+});
+
+export interface Tally {
+	key: string;
+	count: number;
+}
+
+/** Who ran a command, as Discord's permissions put them, or a direct message. */
+export const MEMBER_TIERS = ["admin", "manager", "member", "dm"] as const;
+
+export interface AudienceReport {
+	days: number;
+	/** People who used the bot each day and how many of them were new, oldest first and zero-filled. */
+	daily: { day: string; users: number; newUsers: number }[];
+	/** Daily users over monthly users, null until the collector has a month to divide by. */
+	stickiness: number | null;
+	/** The Discord languages of the people running slash commands; a prefix run carries none. */
+	userLanguages: Tally[];
+	/** Each server's own language, read from Discord now rather than from the collector. */
+	serverLanguages: Tally[];
+	tiers: Tally[];
+	/** Discord's interaction contexts: `0` a server, `1` the bot's direct messages, `2` another direct message. */
+	contexts: Tally[];
+	/** Commands by weekday (1 is Monday) and hour, in `timezone`. */
+	hours: { timezone: string; cells: { weekday: number; hour: number; count: number }[] };
+}
+
+export interface GrowthReport {
+	days: number;
+	daily: { day: string; joins: number; leaves: number }[];
+	joins: number;
+	leaves: number;
+	/** Servers that ran a command within a day of adding the bot. */
+	activation: { joined: number; activated: number; rate: number | null };
+	/** Servers the bot is in, and how many of them have run nothing for 30 days. */
+	installs: { active: number; inactive: number } | null;
+	/** How big a server was when it added the bot. */
+	sizeAtInstall: Tally[];
+	/** How long a server that left had kept the bot. */
+	lifetimes: Tally[];
+	/** The collector's own count beside Discord's; `warn` when they differ by more than 2%. */
+	serverCount: { ours: number; discord: number | null; warn: boolean };
+}
+
+export interface PanelButtonRow {
+	/** The handler's id, the first part of every custom ID it builds. */
+	id: string;
+	presses: number;
+	failures: number;
+	actions: Tally[];
+}
+
+export interface PanelFormRow {
+	/** The handler the form belongs to, the first part of its custom ID. */
+	id: string;
+	shown: number;
+	submitted: number;
+}
+
+export interface PanelsReport {
+	days: number;
+	buttons: PanelButtonRow[];
+	forms: PanelFormRow[];
+}
+
+/** Why a command was refused before it ran. */
+export const REFUSAL_REASONS = [
+	"owner_only",
+	"paused",
+	"blacklisted",
+	"off_everywhere",
+	"off_here",
+	"feature_off",
+	"no_subcommand",
+	"music",
+	"casino",
+	"guild_only",
+	"nsfw_only",
+	"you_lack",
+	"bot_lacks",
+	"cooldown",
+] as const;
+
+export type RefusalReason = (typeof REFUSAL_REASONS)[number];
+
+/** Why a track was given up on or a request refused: what the downloader said, or one of the bot's own reasons. */
+export const MUSIC_REASONS = [
+	"forbidden",
+	"bot-check",
+	"session",
+	"unavailable",
+	"drm",
+	"disk",
+	"unplayable",
+	"broken",
+	"error",
+] as const;
+
+export type MusicReason = (typeof MUSIC_REASONS)[number];
+
+/** How the help desk chose an article: the model, search, or the reader picking one from the typeahead. */
+export const SUPPORT_WAYS = ["model", "search", "picked"] as const;
+
+export type SupportWay = (typeof SUPPORT_WAYS)[number];
+
+/** How a dashboard change was made: saved on its screen, put back from Changes, brought in from a backup, or set up. */
+export const CHANGE_WAYS = ["save", "put_back", "backup", "setup"] as const;
+
+export type ChangeWay = (typeof CHANGE_WAYS)[number];
+
+/** The header the page sends with a write that puts a change back or brings a backup in; anything else is a save. */
+export const CHANGE_WAY_HEADER = "x-testify-via";
+
+/** What the bot does on its own, each counted under its own name so its total outlasts the raw events. */
+export const AUTOMATIC_ACTIONS = [
+	"auto_reply",
+	"link_deleted",
+	"level_up",
+	"star_post",
+	"reminder_sent",
+	"schedule_post",
+	"birthday_post",
+	"raid_hold",
+] as const;
+
+export type AutomaticAction = (typeof AUTOMATIC_ACTIONS)[number];
+
+export interface BotActivityReport {
+	days: number;
+	/** Every breakdown here comes from raw events, which the collector keeps this long; the totals go further. */
+	detailDays: number;
+	music: {
+		played: number;
+		skipped: number;
+		refused: number;
+		sources: Tally[];
+		/** Skipped and refused together, by service and reason, so a host YouTube has flagged stands out. */
+		causes: { source: string; reason: string; count: number }[];
+	};
+	support: { answered: number; refused: number; answeredBy: Tally[]; refusedBy: Tally[]; articles: Tally[] };
+	refusals: { total: number; reasons: Tally[]; commands: Tally[] };
+	automatic: { action: AutomaticAction; count: number }[];
+	changes: { total: number; screens: Tally[]; ways: Tally[] };
+}
+
+export interface ReliabilityReport {
+	days: number;
+	/** Runs by day: failures, and slash commands that missed Discord's three seconds or never answered. */
+	daily: { day: string; runs: number; errors: number; late: number }[];
+	/** From raw events, so it reaches back only as far as `from`. */
+	totals: {
+		runs: number;
+		missedDeadlines: number;
+		noResponse: number;
+		errors: number;
+		over3sRate: number | null;
+		p50Ms: number | null;
+		p95Ms: number | null;
+		p99Ms: number | null;
+	} | null;
+	from: string;
+	errorsByCode: Tally[];
+	rateLimits: { daily: { day: string; count: number }[]; routes: { route: string; scope: string; count: number }[] };
+	shards: {
+		now: { shard: number; pingMs: number; stale: boolean }[];
+		/** The gateway's average ping each day, every shard together. */
+		daily: { day: string; pingMs: number | null }[];
+		events: { at: string; shard: number; state: string; closeCode: number | null }[];
+	};
+}
+
+export interface FunnelReport {
+	days: number;
+	hours: number;
+	steps: { command: string; users: number; medianSeconds: number | null }[];
+}
+
+export interface RetentionReport {
+	days: number;
+	interval: (typeof RETENTION_INTERVALS)[number];
+	start: string;
+	back: string | null;
+	periods: number;
+	cohorts: { cohort: string; size: number; retained: number[] }[];
+}

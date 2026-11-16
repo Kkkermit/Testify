@@ -7,13 +7,23 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
 import { findLogRun, listLogRuns, readLogLines } from "@database/repositories/logRepository";
-import { AnalyticsUnavailable, guildUsageReport, usageReport } from "@lib/bot";
+import {
+	AnalyticsUnavailable,
+	audienceReport,
+	funnelReport,
+	guildUsageReport,
+	retentionReport,
+	usageReport,
+} from "@lib/bot";
 import { type GuildUsageReport, type LogFeed, type LogRuns, type RuntimeInfo, type UsageReport } from "@testify/shared";
 
 jest.mock("@lib/bot", () => ({
 	...jest.requireActual<object>("@lib/bot"),
 	usageReport: jest.fn(),
 	guildUsageReport: jest.fn(),
+	audienceReport: jest.fn(() => Promise.resolve({ days: 30 })),
+	funnelReport: jest.fn(() => Promise.resolve({ days: 30 })),
+	retentionReport: jest.fn(() => Promise.resolve({ days: 30 })),
 }));
 jest.mock("@database/repositories/logRepository", () => ({
 	findLogRun: jest.fn(() => Promise.resolve(null)),
@@ -46,7 +56,10 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 				],
 			]),
 		},
-		commands: new Collection<string, unknown>(),
+		commands: new Collection<string, unknown>([
+			["economy", {}],
+			["work", {}],
+		]),
 		isOwner: (id: string) => id === OWNER,
 		eventNames: () => ["ready", "interactionCreate"],
 		startedAt: Date.now() - 60_000,
@@ -78,7 +91,14 @@ beforeEach(() => {
 	logRing.clear();
 });
 
-const OWNER_ONLY = ["/analytics/usage", `/analytics/guilds/${GUILD}`, "/analytics/logs", "/analytics/runtime"];
+const OWNER_ONLY = [
+	"/analytics/usage",
+	"/analytics/audience",
+	"/analytics/funnel?steps=economy,work",
+	`/analytics/guilds/${GUILD}`,
+	"/analytics/logs",
+	"/analytics/runtime",
+];
 
 describe("who can read the analytics", () => {
 	/** These name every server the bot is in and how much each is used — owner-only, like the rest of it. */
@@ -114,6 +134,32 @@ describe("the usage report", () => {
 			expect(response.status).toBe(503);
 			expect(((await response.json()) as { error: { code: string } }).error.code).toBe(`analytics_${problem}`);
 		}
+	});
+});
+
+describe("the sections read in the reader's time", () => {
+	it("takes the reader's zone, and refuses one that is no zone", async () => {
+		await appFor().request("/analytics/audience?days=7&tz=Europe%2FLondon");
+		expect(jest.mocked(audienceReport).mock.calls[0]?.slice(1, 3)).toEqual([7, "Europe/London"]);
+
+		for (const tz of ["Mars/Olympus", "../../etc", "UTC; DROP"]) {
+			expect((await appFor().request(`/analytics/audience?tz=${encodeURIComponent(tz)}`)).status).toBe(400);
+		}
+	});
+
+	/** A step is asked about by name, so only the bot's own commands are ever put to the collector. */
+	it("follows only the bot's own commands, two to five of them", async () => {
+		expect((await appFor().request("/analytics/funnel?steps=economy,work&hours=72")).status).toBe(200);
+		expect(jest.mocked(funnelReport).mock.calls[0]?.[1]).toMatchObject({ steps: ["economy", "work"], hours: 72 });
+
+		const refused = await appFor().request("/analytics/funnel?steps=economy,secret");
+		expect(refused.status).toBe(400);
+		expect(((await refused.json()) as { error: { code: string } }).error.code).toBe("unknown_command");
+		expect((await appFor().request("/analytics/funnel?steps=economy")).status).toBe(400);
+		expect((await appFor().request("/analytics/funnel?steps=economy,work&hours=5")).status).toBe(400);
+		expect((await appFor().request("/analytics/retention?start=economy&back=secret")).status).toBe(400);
+		expect((await appFor().request("/analytics/retention?start=economy&interval=week")).status).toBe(200);
+		expect(jest.mocked(retentionReport).mock.calls[0]?.[1]).toMatchObject({ start: "economy", interval: "week" });
 	});
 });
 
