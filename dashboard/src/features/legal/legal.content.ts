@@ -154,6 +154,7 @@ export const PRIVACY: LegalDocument = {
 				"legal.storedL17",
 				"legal.storedL18",
 				"legal.storedL19",
+				"legal.storedL20",
 			],
 			after: ["legal.storedP2", "legal.storedP3"],
 		},
@@ -230,6 +231,7 @@ export const PRIVACY: LegalDocument = {
 				"legal.retentionL21",
 				"legal.retentionL22",
 				"legal.retentionL23",
+				"legal.retentionL24",
 			],
 		},
 		{
@@ -244,7 +246,7 @@ export const PRIVACY: LegalDocument = {
 			heading: "legal.removal",
 			paragraphs: ["legal.rightsP1"],
 			list: ["legal.rightsL1", "legal.rightsL2", "legal.rightsL3", "legal.rightsL4", "legal.rightsL5"],
-			after: ["legal.removalP1", "legal.removalP3", "legal.removalP4", "legal.removalP2"],
+			after: ["legal.removalP1", "legal.removalP3", "legal.removalP4", "legal.removalP5", "legal.removalP2"],
 		},
 		{
 			heading: "legal.legalBasis",

@@ -135,6 +135,11 @@ describe("the legal pages", () => {
 		const erasure = botSource("src/database/repositories/accountRepository.ts");
 		expect(erasure).toMatch(/blacklist: \{ userId: "keep" \}/);
 		expect(erasure).toMatch(/modcases: \{ userId: "keep", moderatorId: "anonymise" \}/);
+		// `startShardlens` hands the stored opt-outs to the SDK, and `ERASURE` keeps them when the rest is deleted.
+		expect(lens).toMatch(/optedOut,/);
+		expect(text).toMatch(/so the bot keeps leaving you out of Shardlens analytics after a restart/);
+		expect(erasure).toMatch(/analyticsoptouts: \{ userId: "keep" \}/);
+		expect(text).toMatch(/Deleting your data keeps it, so you are not counted again/);
 		expect(text).toMatch(/delete their own data at any time.* can’t be undone/);
 		// `recordsSettings` writes a change made with a command to the same audit log, with the person who made it.
 		expect(text).toMatch(/A setting you change with one of .* commands in Discord is recorded the same way/);

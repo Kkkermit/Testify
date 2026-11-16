@@ -2,6 +2,8 @@ import { createShardlens, type Shardlens } from "@shardlens/discordjs";
 import { BaseInteraction, type Interaction, type Message } from "discord.js";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { readOptOuts } from "@database/repositories/analyticsOptOutRepository";
 import { botVersion } from "@lib/bot/runtime.util";
 import { collectorOrigin } from "@lib/bot/shardlensReader.util";
 import {
@@ -102,9 +104,20 @@ const watches = new WeakMap<Shardlens, Watch>();
 /** The SDK starts its own lines with its name, which the tag already says. */
 const said = (message: string): string => `[SHARDLENS] ${message.replace(/^Shardlens:\s*/, "")}`;
 
-export function startShardlens(client: TestifyClient): Shardlens | null {
+export async function startShardlens(client: TestifyClient): Promise<Shardlens | null> {
 	const env = client.env;
 	if (env.SHARDLENS_URL === undefined && env.SHARDLENS_INGEST_KEY === undefined) return null;
+
+	let optedOut: string[];
+	try {
+		optedOut = await readOptOuts();
+	} catch (error) {
+		client.logger.warn(
+			{ err: toError(error) },
+			"[SHARDLENS] The opt-outs could not be read, so analytics stay off until the next start rather than count somebody who asked not to be.",
+		);
+		return null;
+	}
 
 	const lens = createShardlens(client, {
 		endpoint: env.SHARDLENS_URL,
@@ -115,6 +128,8 @@ export function startShardlens(client: TestifyClient): Shardlens | null {
 		refreshGuildCounts: true,
 		// Who ran each command is sent only once the collector is in audit mode too; until then it is hashed.
 		mode: "audit",
+		auditIncludeProfile: true,
+		optedOut,
 		logger: {
 			debug: (message) => client.logger.debug(said(message)),
 			info: (message) => client.logger.info(said(message)),

@@ -50,6 +50,8 @@ type Erasure = "delete" | "remove" | "anonymise" | "keep";
  */
 export const ERASURE = {
 	afk: { userId: "delete" },
+	// Their own instruction not to be counted, which deleting the rest must not undo.
+	analyticsoptouts: { userId: "keep" },
 	appeals: { userId: "delete", decidedBy: "anonymise" },
 	appealsettings: { updatedBy: "anonymise" },
 	autoresponders: { updatedBy: "anonymise" },

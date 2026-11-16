@@ -30,6 +30,11 @@ jest.mock("@shardlens/discordjs", () => {
 	};
 });
 
+let mockOptedOut: Promise<string[]> = Promise.resolve([]);
+jest.mock("@database/repositories/analyticsOptOutRepository", () => ({
+	readOptOuts: jest.fn(async () => mockOptedOut),
+}));
+
 const USER = "111111111111111111";
 const GUILD = "222222222222222222";
 const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
@@ -94,6 +99,7 @@ const running: TestifyClient[] = [];
 
 afterEach(async () => {
 	mockPrint = true;
+	mockOptedOut = Promise.resolve([]);
 	await Promise.all(running.splice(0).map(async (client) => client.shardlens?.shutdown()));
 });
 
@@ -102,7 +108,7 @@ describe("startShardlens", () => {
 	it("attaches nothing while nothing is set", async () => {
 		const { client, said } = clientWith({});
 
-		expect(startShardlens(client)).toBeNull();
+		expect(await startShardlens(client)).toBeNull();
 		expect(client.shardlens).toBeNull();
 		expect(client.listenerCount("interactionCreate")).toBe(0);
 		expect(said.warn).toEqual([]);
@@ -110,11 +116,11 @@ describe("startShardlens", () => {
 	});
 
 	/** The SDK checks its own settings and warns, so a wrong one must never be the reason the bot does not start. */
-	it("starts with settings Shardlens cannot use, and says so only through the SDK", () => {
+	it("starts with settings Shardlens cannot use, and says so only through the SDK", async () => {
 		const { client } = clientWith({ SHARDLENS_URL: "not an address", SHARDLENS_INGEST_KEY: "slk_read_wrong" });
 		running.push(client);
 
-		expect(() => startShardlens(client)).not.toThrow();
+		await startShardlens(client);
 		expect(shardlensStatus(client)).toMatchObject({ collector: null });
 		expect(shardlensLine(client.env)).toBe("Shardlens");
 	});
@@ -123,7 +129,7 @@ describe("startShardlens", () => {
 		const { client, said } = clientWith(CONFIGURED);
 		running.push(client);
 
-		expect(startShardlens(client)).toBe(client.shardlens);
+		expect(await startShardlens(client)).toBe(client.shardlens);
 		await salted(client);
 		recordPrefixRun(client, prefixMessage(client), {
 			command: "help",
@@ -142,24 +148,49 @@ describe("startShardlens", () => {
 
 describe("what the SDK is started with", () => {
 	/** Audit mode names who ran each command once the collector agrees; option values must still never leave. */
-	it("asks for audit mode and records no option values", () => {
+	it("asks for audit mode and records no option values", async () => {
 		const { client } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 
 		const options = jest.mocked(createShardlens).mock.calls.at(-1)?.[1];
 		expect(options).toMatchObject({ endpoint: "https://stats.example.com", apiKey: KEY });
 		expect(options?.dryRun).toBeUndefined();
 		expect(options?.mode).toBe("audit");
+		expect(options?.auditIncludeProfile).toBe(true);
 		expect(options?.captureOptionValues).toBeUndefined();
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
 	});
 
-	/** Member counts are otherwise read only at start-up and when the bot joins a server. */
-	it("keeps each server's member count current", () => {
+	/** An opt-out held only in memory was forgotten at the next start, and the person counted again. */
+	it("starts with everybody who opted out already left out", async () => {
+		mockOptedOut = Promise.resolve([USER]);
 		const { client } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+
+		await startShardlens(client);
+
+		expect(client.shardlens?.isOptedOut(USER)).toBe(true);
+		expect(client.shardlens?.isOptedOut("999999999999999999")).toBe(false);
+	});
+
+	/** Starting without the list would count somebody who asked not to be; the bot itself still starts. */
+	it("stays off for the run when the opt-outs cannot be read", async () => {
+		mockOptedOut = Promise.reject(new Error("database down"));
+		const { client } = clientWith(CONFIGURED);
+
+		expect(await startShardlens(client)).toBeNull();
+		expect(client.shardlens).toBeNull();
+		expect(client.listenerCount("interactionCreate")).toBe(0);
+		expect(jest.mocked(client.logger.warn).mock.calls[0]?.[1]).toMatch(/opt-outs could not be read/);
+		await client.destroy();
+	});
+
+	/** Member counts are otherwise read only at start-up and when the bot joins a server. */
+	it("keeps each server's member count current", async () => {
+		const { client } = clientWith(CONFIGURED);
+		running.push(client);
+		await startShardlens(client);
 
 		expect(jest.mocked(createShardlens).mock.calls.at(-1)?.[1]?.refreshGuildCounts).toBe(true);
 	});
@@ -170,7 +201,7 @@ describe("recordEvent and recordAction", () => {
 	it("sends the bot's own names with the server as context, and no person", async () => {
 		const { client, said } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 		await salted(client);
 
 		recordEvent(client, "command_refused", { command: "work", reason: "cooldown", surface: "slash" }, GUILD);
@@ -215,7 +246,7 @@ describe("recordPrefixRun", () => {
 	it("reports the command it matched as a message command, by its own name and never by what was typed", async () => {
 		const { client, said } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 		await salted(client);
 
 		recordPrefixRun(client, prefixMessage(client), {
@@ -270,7 +301,7 @@ describe("measured", () => {
 	it("runs the handler and hands back its own error unchanged, so the bot's error handling still runs", async () => {
 		const { client } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 		const failure = new Error("boom");
 
 		await expect(measured(client, press(client), () => Promise.reject(failure))).rejects.toBe(failure);
@@ -283,7 +314,7 @@ describe("measured", () => {
 	it("hands a real interaction to Shardlens, and only a real one", async () => {
 		const { client } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 
 		// A prefix run would otherwise be counted as one of the SDK's own failures every time.
 		await measured(client, { user: { id: USER } }, () => Promise.resolve());
@@ -309,7 +340,7 @@ describe("the bot's runners", () => {
 	it("hand commands and buttons to Shardlens as they run", async () => {
 		const { client } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 		const command = { name: "ping", description: "Pings.", category: "fun", run: jest.fn(() => Promise.resolve()) };
 
 		await runCommand(press(client) as never, command as unknown as Command, client);
@@ -339,7 +370,7 @@ describe("shardlensStatus", () => {
 			SHARDLENS_INGEST_KEY: KEY,
 		});
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 
 		const status = shardlensStatus(client);
 		expect(status).toMatchObject({ state: "waiting", collector: "https://stats.example.com", mode: null });
@@ -350,7 +381,7 @@ describe("shardlensStatus", () => {
 	it("counts what it sent, and has nothing waiting after", async () => {
 		const { client } = clientWith(CONFIGURED);
 		running.push(client);
-		startShardlens(client);
+		await startShardlens(client);
 		await salted(client);
 		recordPrefixRun(client, prefixMessage(client), {
 			command: "help",

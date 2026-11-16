@@ -59,15 +59,15 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 97, across 14 categories          |
-| Command files        | 118 (incl. folded-in subcommands) |
-| Subcommands          | 155                               |
+| Commands             | 98, across 14 categories          |
+| Command files        | 119 (incl. folded-in subcommands) |
+| Subcommands          | 159                               |
 | Prefix aliases       | 107                               |
 | Button handlers      | 53                                |
 | Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
 | `src/lib` helpers    | 240, in 34 domain folders         |
-| Schemas/repositories | 50 / 51                           |
+| Schemas/repositories | 51 / 52                           |
 | Scheduled jobs       | 11                                |
 | Switchable features  | 17                                |
 | Tests                | 4,230 across 569 suites           |
@@ -231,7 +231,7 @@ src/
 │   ├── replies.ts        The refusals and apology every command shares, in each language
 │   ├── permissionNames.ts What each language calls the permissions a refusal names
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  118 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  119 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
 ├── buttons/              53 component handlers, keyed by custom-ID prefix
 ├── menus/                4 right-click actions, on a member or a message
@@ -249,8 +249,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           50 Mongoose schemas, one file per feature
-│   └── repositories/     51 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           51 Mongoose schemas, one file per feature
+│   └── repositories/     52 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -744,10 +744,11 @@ Rules:
 
 1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
    `userId` alone for per-guild data.
-2. **Four deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
+2. **Five deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
    profile (about the person, not the server), reminders (somebody's own, so `/remind list` shows every one
-   they have wherever they set it, and every lookup filters on `userId` instead) and when somebody last read the
-   bot's notifications (which are about the bot, not a server). Do not "fix" these.
+   they have wherever they set it, and every lookup filters on `userId` instead), when somebody last read the
+   bot's notifications (which are about the bot, not a server) and an analytics opt-out (which covers the person
+   everywhere). Do not "fix" these.
 3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
@@ -2271,7 +2272,7 @@ until somebody touched one. The `giveaways` job creates it five seconds after st
 when `SHARDLENS_URL` or `SHARDLENS_INGEST_KEY` is set: an install that never asked gains no listener, no timer and
 no warning. **It is the bot's only analytics.** Nothing analytic is written to MongoDB: the
 owner console's Usage tab, its per-server drill-down and the server list's counts are read back from the collector
-(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). Seven things about it are load-bearing:
+(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). Eight things about it are load-bearing:
 
 - **The settings are optional strings and nothing more, and can never stop the bot starting.** The SDK checks its
   own address and key, logs one `[SHARDLENS]` warning and sends nothing when either is wrong, so `env.ts` adds no
@@ -2315,6 +2316,16 @@ owner console's Usage tab, its per-server drill-down and the server list's count
 - **Shutdown flushes it before the archive closes and the client goes**, and Delete my data calls
   `client.shardlens?.forgetUser`, which asks the collector to delete what it holds under the person's hashes and, in
   audit mode, under their user id.
+- **An opt-out is stored, and read before the SDK starts.** `/privacy opt-out` writes `analyticsoptouts` (a user id
+  and when) and only then calls `lens.optOut`, so a choice the database refused is never shown as made;
+  `startShardlens` reads the list and passes it as `optedOut`, and if it cannot be read Shardlens stays off for that
+  run rather than count somebody who asked not to be. The SDK drops an opted-out person's interactions, prefix runs and
+  any custom event naming them in-process. `/privacy erase` opts them out and calls `forgetUser`, which does not opt
+  anybody out on its own. Delete my data keeps the opt-out (`ERASURE`: `keep`), or deleting the rest would quietly
+  start counting them again, and the privacy notice says so (`legal.storedL20`, `legal.retentionL24`,
+  `legal.removalP5`). The SDK's own `createPrivacyCommand` is not used: it registers a slash command of its own beside
+  the registry, which only the prefix side of `/privacy` would then lack. `/privacy` is in `ALWAYS_ENABLED` and is not
+  open to a blacklisted account, whose attempts are the abuse audit mode is there to show.
 - **Reading is a second key, kept by the bot.** `ShardlensReader` in `shardlensReader.util.ts` posts to the
   collector's `/v1/query` with `SHARDLENS_READ_KEY` as a bearer token, validates every answer with zod, shares an
   answer for a minute (`rangeOf` closes each window on the next whole minute, so a minute's reads ask the same
@@ -2338,7 +2349,8 @@ Nothing reads them any more, and `npm run db:wipe` removes them sooner for anybo
 
 ### Global by design
 
-The blacklist, the user profile, reminders and the notifications' read state are intentionally not guild-scoped. See
+The blacklist, the user profile, reminders, the notifications' read state and analytics opt-outs are intentionally not
+guild-scoped. See
 [§12](#12-multi-guild-rules).
 
 ---
@@ -3677,8 +3689,9 @@ Four things about it are load-bearing:
   `TitledRefusal` — "under maintenance", and that the command may come back — which `refusalEmbed` shows as a
   warning with its own heading; `refusalText` flattens it where a surface has no heading to give it.
 - **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
-  that turned it off would have no way back inside Discord. `/delete-my-data` is there because no server may keep
-  somebody from deleting their own data. The API refuses rather than trusting the form.
+  that turned it off would have no way back inside Discord. `/delete-my-data` and `/privacy` are there because no
+  server may keep somebody from deleting their own data or opting out of analytics. The API refuses rather than
+  trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
   out, so a hand-written request cannot make one visible or switch one off.
 

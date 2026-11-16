@@ -2347,6 +2347,7 @@
 		"removalP2": "Para cualquier otra cosa sobre ti —tus registros en un servidor, un mensaje directo, una entrada en la lista negra—, pregunta al operador de esta instancia. Gestiona la base de datos y puede mostrártelo o borrarlo.",
 		"removalP3": "Cualquiera puede borrar sus propios datos en cualquier momento, desde «Tus datos» en el panel tras iniciar sesión con Discord, o con /delete-my-data en Discord, cuya respuesta solo ve quien lo ejecuta. Ambos te piden confirmar con tu nombre de usuario; después ocurre al instante y no se puede deshacer: todo lo que es tuyo se borra en todos los servidores, se retiran las publicaciones de ideas que {{bot}} hizo por ti y se cierra tu sesión en todas partes. Las advertencias, casos, softbans y bloqueos contra ti se conservan, porque protegen los servidores en los que estás, y solo los dueños del bot pueden poner o quitar un bloqueo. Lo que hiciste por un servidor, como abrir un caso o cambiar un ajuste, se conserva sin tu nombre.",
 		"removalP4": "Si el operador ha configurado Shardlens, borrar tus datos también pide a su recolector que borre todo lo que guarda bajo tu ID con hash y, en modo auditoría, también bajo tu ID de usuario.",
+		"removalP5": "Para que las estadísticas de Shardlens dejen de contarte sin borrar nada más, ejecuta /privacy opt-out. /privacy erase hace eso y además pide al recolector que borre lo que guarda sobre ti, y /privacy info dice qué se envía y si tu ID de usuario va con ello.",
 		"age": "Edad",
 		"ageP1": "Discord exige que sus usuarios tengan al menos 13 años, o más donde la ley local lo establezca, y {{bot}} se basa en eso. Lo único relacionado con la edad que guarda es un cumpleaños que decidas añadir a tu perfil.",
 		"cookies": "Cookies",
@@ -2448,10 +2449,12 @@
 		"retentionL19": "Conversaciones de correo al equipo: 90 días después de cerrarse, y luego se borran automáticamente. Los hilos siguen en el Discord del servidor.",
 		"storedL18": "Seguimiento de invitaciones: si un servidor lo activa, con qué invitación entró cada miembro nuevo, de quién era, ambos nombres de usuario y si se ha ido desde entonces.",
 		"storedL19": "Acceso al panel: si los administradores de un servidor te dan algunas pantallas de su panel, tu ID de usuario y tu nombre de usuario, qué pantallas, quién te las dio y cuándo, y cuándo abriste una por última vez. Lo que cambies allí queda en los registros de auditoría como lo de cualquiera.",
+		"storedL20": "Una exclusión de las estadísticas: si ejecutas /privacy opt-out, tu ID de usuario y cuándo lo hiciste, para que el bot te siga dejando fuera de las estadísticas de Shardlens tras reiniciarse.",
 		"retentionL20": "Seguimiento de invitaciones: 365 días después de cada entrada, y luego se borra automáticamente; todo se borra cuando el bot se quita del servidor.",
 		"retentionL21": "Acceso al panel: hasta que un administrador te lo quite, salgas del servidor o el bot sea retirado de él.",
 		"retentionL22": "Líneas del registro: los últimos 6 arranques del bot, como mucho 2000 líneas cada uno. El siguiente arranque borra el más antiguo, y el operador puede borrarlas antes.",
 		"retentionL23": "Estadísticas de Shardlens: en el propio recolector del operador, durante el tiempo que él decida guardarlas. Quién ejecutó cada comando solo se guarda en modo auditoría, cifrado, y se borra a los 30 días, o hasta a los 90 si el operador lo elige.",
+		"retentionL24": "Una exclusión de las estadísticas: hasta que ejecutes /privacy opt-in. Borrar tus datos la conserva, para que no se te vuelva a contar.",
 		"messagesP5": "Denunciar un mensaje es lo último. Cuando haces clic derecho en un mensaje y eliges Report message, {{bot}} lo publica en el canal de correo al equipo de ese servidor: el texto del mensaje, quién lo escribió, quién lo denunció y lo que dijiste sobre él. Esa publicación vive en Discord, no en la base de datos del bot. El bot recuerda durante una hora, solo en memoria, qué mensajes denunciaste, para que el mismo no se denuncie dos veces; un reinicio lo olvida."
 	},
 	"problem": {

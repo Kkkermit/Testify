@@ -98,6 +98,7 @@ describe("which commands answer privately", () => {
 				"pet walk",
 				"ping",
 				"prefix",
+				"privacy",
 				"profile",
 				"raid-protection",
 				"remind list",

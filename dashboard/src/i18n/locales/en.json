@@ -2283,6 +2283,7 @@
 		"removalP2": "For anything else about you — your records in a server, a direct message, a blacklist entry — ask the operator of this instance. They run the database and can show it to you or delete it.",
 		"removalP3": "Anybody can delete their own data at any time, from Your data on the dashboard after signing in with Discord, or with /delete-my-data in Discord, whose answer only the person who ran it can see. Both ask you to confirm with your username, and then it happens straight away and can’t be undone: everything that is yours is deleted in every server, the idea posts {{bot}} made for you are taken down, and you are signed out everywhere. Warnings, cases, softbans and blocks against you are kept, because they protect the servers you are in, and only the bot’s owners can add or lift a block. Anything you did for a server, such as a case you opened or a setting you changed, stays with your name taken off.",
 		"removalP4": "If the operator has set up Shardlens, deleting your data also asks its collector to delete everything it holds under your hashed id, and in audit mode under your user id as well.",
+		"removalP5": "To stop Shardlens analytics counting you without deleting anything else, run /privacy opt-out. /privacy erase does that and also asks the collector to delete what it holds about you, and /privacy info says what is sent and whether your user id goes with it.",
 		"age": "Age",
 		"ageP1": "Discord requires its users to be at least 13, or older where local law says so, and {{bot}} relies on that. The only thing it keeps that touches on age is a birthday you choose to add to your profile.",
 		"cookies": "Cookies",
@@ -2384,10 +2385,12 @@
 		"retentionL19": "Mod mail conversations: 90 days after they close, then deleted automatically. The threads themselves stay in the server’s Discord.",
 		"storedL18": "Invite tracking: when a server turns it on, which invite each new member joined with, whose invite it was, both usernames, and whether they have since left.",
 		"storedL19": "Dashboard access: if a server’s admins give you some of its dashboard screens, your user id and username, which screens, who gave them and when, and when you last opened one. What you change there goes into the audit records like anybody else’s.",
+		"storedL20": "An analytics opt-out: if you run /privacy opt-out, your user id and when you did it, so the bot keeps leaving you out of Shardlens analytics after a restart.",
 		"retentionL20": "Invite tracking: 365 days after each join, then deleted automatically, and all of it when the bot is removed from the server.",
 		"retentionL21": "Dashboard access: until an admin takes it away, you leave the server, or the bot is removed from it.",
 		"retentionL22": "Log lines: the bot’s last 6 starts, at most 2,000 lines each. The next start deletes the oldest, and the operator can delete them sooner.",
 		"retentionL23": "Shardlens analytics: on the operator’s own collector, for as long as they set it to keep them. Who ran each command is kept only in audit mode, encrypted, and deleted after 30 days, or after up to 90 if the operator chooses.",
+		"retentionL24": "An analytics opt-out: until you run /privacy opt-in. Deleting your data keeps it, so you are not counted again.",
 		"messagesP5": "Reporting a message is the last. When you right-click a message and choose Report message, {{bot}} posts it in that server’s mod mail channel for its staff: the message’s text, who wrote it, who reported it and what you said about it. That post lives in Discord, not in the bot’s database. The bot remembers which messages you reported for an hour, in memory only, so the same one cannot be reported twice; a restart forgets it."
 	},
 	"problem": {

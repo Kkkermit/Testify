@@ -2347,6 +2347,7 @@
 		"removalP2": "Per qualsiasi altra cosa che ti riguardi — i tuoi dati in un server, un messaggio diretto, una voce nella blacklist — chiedi all’operatore di questa istanza. Gestisce lui il database e può mostrartela o cancellarla.",
 		"removalP3": "Chiunque può eliminare i propri dati in qualsiasi momento, da «I tuoi dati» nella dashboard dopo aver effettuato l’accesso con Discord, oppure con /delete-my-data su Discord, la cui risposta è visibile solo a chi lo esegue. Entrambi chiedono di confermare con il tuo nome utente; poi avviene subito e non si può annullare: tutto ciò che è tuo viene eliminato in ogni server, i post delle idee che {{bot}} ha creato per te vengono rimossi e vieni disconnesso ovunque. Avvisi, casi, softban e blocchi contro di te vengono conservati, perché proteggono i server in cui ti trovi, e solo i proprietari del bot possono aggiungere o togliere un blocco. Ciò che hai fatto per un server, come aprire un caso o cambiare un’impostazione, resta senza il tuo nome.",
 		"removalP4": "Se l’operatore ha configurato Shardlens, eliminare i tuoi dati chiede anche al suo collettore di eliminare tutto ciò che conserva con il tuo ID sottoposto a hash e, in modalità audit, anche con il tuo ID utente.",
+		"removalP5": "Per far smettere le statistiche di Shardlens di contarti senza eliminare altro, esegui /privacy opt-out. /privacy erase fa lo stesso e chiede anche al collettore di eliminare ciò che conserva su di te, e /privacy info dice cosa viene inviato e se il tuo ID utente lo accompagna.",
 		"age": "Età",
 		"ageP1": "Discord richiede che i suoi utenti abbiano almeno 13 anni, o di più dove la legge locale lo prevede, e {{bot}} si basa su questo. L’unico dato legato all’età che conserva è un compleanno che scegli di aggiungere al tuo profilo.",
 		"cookies": "Cookie",
@@ -2448,10 +2449,12 @@
 		"retentionL19": "Conversazioni della posta allo staff: 90 giorni dopo la chiusura, poi eliminate automaticamente. I thread restano nel Discord del server.",
 		"storedL18": "Tracciamento degli inviti: se un server lo attiva, con quale invito è entrato ogni nuovo membro, di chi era, entrambi i nomi utente e se nel frattempo è uscito.",
 		"storedL19": "Accesso al pannello: se gli amministratori di un server ti danno alcune schermate del suo pannello, il tuo ID utente e nome utente, quali schermate, chi te le ha date e quando, e quando ne hai aperta una l’ultima volta. Ciò che cambi lì finisce nel registro come per chiunque altro.",
+		"storedL20": "Un’esclusione dalle statistiche: se esegui /privacy opt-out, il tuo ID utente e quando l’hai fatto, così il bot continua a lasciarti fuori dalle statistiche di Shardlens dopo un riavvio.",
 		"retentionL20": "Tracciamento degli inviti: 365 giorni dopo ogni ingresso, poi eliminato automaticamente, e tutto quando il bot viene rimosso dal server.",
 		"retentionL21": "Accesso al pannello: finché un amministratore non lo toglie, non lasci il server, o il bot non viene rimosso dal server.",
 		"retentionL22": "Righe di log: gli ultimi 6 avvii del bot, al massimo 2.000 righe ciascuno. Il prossimo avvio elimina il più vecchio, e l’operatore può eliminarle prima.",
 		"retentionL23": "Statistiche Shardlens: sul collettore dell’operatore, per tutto il tempo che sceglie di conservarle. Chi ha eseguito ogni comando viene conservato solo in modalità audit, cifrato, ed eliminato dopo 30 giorni, o fino a 90 se l’operatore lo sceglie.",
+		"retentionL24": "Un’esclusione dalle statistiche: finché non esegui /privacy opt-in. Eliminare i tuoi dati la conserva, così non vieni contato di nuovo.",
 		"messagesP5": "Segnalare un messaggio è l’ultima. Quando fai clic destro su un messaggio e scegli Report message, {{bot}} lo pubblica nel canale della posta allo staff di quel server: il testo del messaggio, chi l’ha scritto, chi l’ha segnalato e ciò che hai detto. Quella pubblicazione resta su Discord, non nel database del bot. Il bot ricorda per un’ora, solo in memoria, quali messaggi hai segnalato, perché lo stesso non venga segnalato due volte; un riavvio lo dimentica."
 	},
 	"problem": {

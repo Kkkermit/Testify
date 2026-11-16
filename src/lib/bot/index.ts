@@ -1,3 +1,4 @@
+export * from "./analyticsChoice.util";
 export * from "./banner.util";
 export * from "./botControl.util";
 export * from "./botIdentity.util";

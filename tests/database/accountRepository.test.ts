@@ -3,6 +3,7 @@ import { join } from "node:path";
 import mongoose, { type Schema } from "mongoose";
 import { describeWithMongo } from "../helpers/mongo";
 import { AfkStatus } from "@database/models/afk.schema";
+import { AnalyticsOptOut } from "@database/models/analyticsOptOut.schema";
 import { Appeal, AppealSettingsConfig } from "@database/models/appeal.schema";
 import { AutoResponderEntry } from "@database/models/autoResponder.schema";
 import { BirthdaySettingsConfig, SharedBirthday } from "@database/models/birthday.schema";
@@ -249,6 +250,7 @@ describeWithMongo("eraseUserData", () => {
 				{ guildId: GUILD, userId: OTHER, moderatorId: PERSON },
 			]),
 			Blacklist.collection.insertOne({ userId: PERSON, reason: "spam" }),
+			AnalyticsOptOut.collection.insertOne({ userId: PERSON, at: new Date() }),
 			DashboardAudits.collection.insertOne({ actorId: PERSON, actorTag: "person", guildId: GUILD }),
 			DashboardAccess.collection.insertOne({
 				guildId: OTHER_GUILD,
@@ -369,6 +371,8 @@ describeWithMongo("eraseUserData", () => {
 		expect(await Softban.collection.findOne({ userId: PERSON })).toMatchObject({ moderatorId: OTHER });
 		expect(await Softban.collection.findOne({ userId: OTHER })).toMatchObject({ moderatorId: DELETED_USER_ID });
 		expect(await Blacklist.collection.findOne({ userId: PERSON })).toMatchObject({ reason: "spam" });
+		// Deleting the rest must not quietly start counting them again.
+		expect(await AnalyticsOptOut.collection.countDocuments({ userId: PERSON })).toBe(1);
 
 		expect(await DashboardAudits.collection.findOne({ guildId: GUILD })).toMatchObject({
 			actorId: DELETED_USER_ID,
