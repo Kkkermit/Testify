@@ -1,5 +1,6 @@
 import { type InsightDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
+import { ChartReadout } from "@/components/primitives";
 import { barHeight } from "@/features/insights/insights.utils";
 import { shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
@@ -10,16 +11,16 @@ export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Eleme
 
 	return (
 		<figure className="flex flex-col gap-2">
-			<div className="flex h-32 items-end gap-px" aria-hidden="true">
+			<ChartReadout label={t("insights.perDay")} column slide className="flex h-32 items-end gap-px">
 				{days.map((day) => (
 					<span
 						key={day.day}
-						title={`${shortDate(day.day)}: ${formatNumber(day.messages)}`}
+						data-readout={`${shortDate(day.day)}: ${formatNumber(day.messages)}`}
 						className="bg-primary/30 hover:bg-primary/60 min-h-px flex-1 rounded-t-chip transition-colors duration-150"
 						style={{ height: `${String(barHeight(day.messages, max))}%` }}
 					/>
 				))}
-			</div>
+			</ChartReadout>
 			<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
 				<span>{shortDate(days[0]?.day ?? "")}</span>
 				<span>{shortDate(days.at(-1)?.day ?? "")}</span>

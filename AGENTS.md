@@ -3060,6 +3060,33 @@ which the CSP allows under `style-src 'unsafe-inline'`; that combination is veri
 page, not assumed. **It hands its child's own `ref` the element too.** It once replaced it, so a button inside a
 tooltip that a caller focused by ref was never focused — the server switcher's Escape found nothing to return to.
 
+### A chart reads out through `ChartReadout`, never a native title
+
+`ChartReadout` in `components/primitives` is the tooltip for a chart: one tippy box in the same `testify` theme for
+the whole chart, rather than a `title` on each bar. A native title is unstyled, waits a second and a half, and never
+shows on a phone, so every day, hour and status bar was out of reach of anybody without a mouse. Each cell carries what
+it says in `data-readout`. Five things about it are load-bearing:
+
+- **Hover, a tap, a finger sliding sideways and the arrow keys all pick a cell.** The chart is one tab stop,
+  `role="group"` named by its caption. Left and Right step, Up and Down move a row in a grid (`columns`), and Home and
+  End go to a row's ends (`nextCell`). Escape closes it without moving focus, and a tap elsewhere closes it on a phone.
+- **A touch that turns into a scroll shows nothing.** A tap opens the box when the finger lifts, not when it presses,
+  and `slide` sets `touch-action: pan-y`, so a swipe up or down still scrolls the page and only a sideways one scrubs.
+  A touch stays with the element it began on, so a sliding finger is found with `elementFromPoint`.
+- **The cells stay hidden from a screen reader.** The `sr-only` table in the `<figcaption>` is still what one reads;
+  the group adds only the chart's name, and the box is attached with `aria-describedby`.
+- **The box catches no pointer, unlike `Tooltip`'s.** It sits over the cells, and a pointer moving on to the next bar
+  has to reach that bar. `column` points at the cell's column from above the chart, so a bar chart's box never covers
+  a bar.
+- **Its text is written in place.** `setContent` goes through `setProps`, which rebuilds the popper — read out of
+  `tippy.esm.js` — so the box holds one `<span>` whose text changes as the pick moves, and new figures under a picked
+  cell are read out at once.
+
+A chart fits its card on a phone rather than scrolling sideways: the hour heatmap is 24 columns of 7px at 320px, read
+by tapping and sliding, because a sideways scroll hid most of the week with nothing saying it was there.
+`ChartReadout.test.tsx` covers each way in, and taking away the tap, the keys, Escape, the slide, the refresh or the
+tap elsewhere, or showing on the press, each turned it red.
+
 ### Getting around, and not losing work
 
 Five pieces make the common journeys shorter, and four things in them are load-bearing:
@@ -3598,9 +3625,12 @@ about it are load-bearing:
   or `analytics_unreachable` and the console words each one, offering a retry only when one could help. The server
   list and a server's detail still answer, with their counts `null` and the reason in `analytics`; the inactive
   filter then lists nobody, since nobody can be told apart as inactive.
-- **Who ran what is not in the console.** It is on the collector's own Activity page, encrypted there, behind the
-  collector's own sign-in, and the console links it and the server's own page with `collectorPage`, which only ever
-  builds a link from an `http`/`https` origin.
+- **Who ran what is not in the console, and cannot be.** It is on the collector's own Activity page, encrypted there,
+  behind the collector's own sign-in, and the console links it and the server's own page with `collectorPage`, which
+  only ever builds a link from an `http`/`https` origin. Collector 1.1 answers `/v1/audit/*` only to a Discord session
+  of the application's owner or team and refuses a read key, sends `frame-ancestors 'none'`, and keeps the Activity
+  page's filters out of its address — read out of its `requireAdmin` and its page, not assumed — so a link is all the
+  console can give.
 
 **The Usage tab has seven sections, and each reads its own owner-only route**, so one the collector cannot answer
 leaves the rest working: Commands, People (`/analytics/audience`), Servers (`/growth`), Buttons and forms (`/panels`),
@@ -3733,15 +3763,17 @@ wrote. Five things about the history are load-bearing:
 does not check for a newer one. A self-hosted bot that contacts a server on a timer is not something to ship by
 default, and the tab says so in as many words.
 
-**No chart library.** `DayBars` is a `<span>` per day with a height, and the numbers behind it are a real
-`<table>` in a `sr-only` `<figcaption>`. The first load's budget — 200 kB gzipped, and it is met exactly — is the
+**No chart library.** `DayBars` is a `<span>` per day with a height, read out through `ChartReadout`, and the numbers
+behind it are a real `<table>` in a `sr-only` `<figcaption>`. The first load's budget — 200 kB gzipped, and it is met exactly — is the
 reason, and a bar is a div with a width.
 
 `UsageBars` puts its bar **behind** the row rather than beside it, so a long label is never squeezed by the
 value — but a proportional fill then ends wherever the number says, which on a short bar is the middle of a
 word: "Prefix commands" read as "Prefix" being highlighted and the rest clipped. The bar's last 24px are masked
 to transparent (`mask-r-from-[calc(100%-1.5rem)]`), so it fades out instead of cutting. The length still encodes
-the value; the ranking and the printed number are what carry it precisely.
+the value; the ranking and the printed number are what carry it precisely. A row's label and its detail wrap rather than
+truncate, because on a phone the ellipsis took the detail line's failure count. Every usage panel is `min-w-0`: as a
+grid item it otherwise took the width of its longest unbroken label, which held the console at 586px on a 320px phone.
 
 ### Insights are counted, not logged
 

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { ChartReadout } from "@/components/primitives";
 import { countOrDash, shortDay } from "@/features/owner/owner.utils";
 import { cn } from "@/lib/cn";
 
@@ -6,6 +7,11 @@ export interface DayValue {
 	/** `YYYY-MM-DD`, UTC. */
 	day: string;
 	value: number | null;
+}
+
+function dayReadout(day: DayValue, also?: { label: string; value: number | undefined }): string {
+	const first = `${shortDay(day.day)}: ${countOrDash(day.value)}`;
+	return also === undefined ? first : `${first} · ${also.label}: ${countOrDash(also.value)}`;
 }
 
 export function DayBars({
@@ -19,7 +25,7 @@ export function DayBars({
 	days: DayValue[];
 	caption: string;
 	valueLabel: string;
-	/** A second figure for each day, read out beside the bars' own in the table. */
+	/** A second figure for each day, given beside the bar's own. */
 	also?: { label: string; values: number[] };
 	tint?: string;
 	tall?: boolean;
@@ -29,16 +35,19 @@ export function DayBars({
 
 	return (
 		<figure className="flex flex-col gap-2">
-			<div className={cn("flex items-end gap-px", tall ? "h-28" : "h-20")} aria-hidden="true">
-				{days.map((day) => (
+			<ChartReadout label={caption} column slide className={cn("flex items-end gap-px", tall ? "h-28" : "h-20")}>
+				{days.map((day, index) => (
 					<span
 						key={day.day}
-						title={`${shortDay(day.day)}: ${countOrDash(day.value)}`}
+						data-readout={dayReadout(
+							day,
+							also === undefined ? undefined : { label: also.label, value: also.values[index] },
+						)}
 						className={cn("min-h-px flex-1 rounded-t-chip", tint)}
 						style={{ height: `${String(Math.round(((day.value ?? 0) / max) * 100))}%` }}
 					/>
 				))}
-			</div>
+			</ChartReadout>
 
 			<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
 				<span>{shortDay(days[0]?.day ?? "")}</span>

@@ -203,7 +203,7 @@ src/
 ├── components/
 │   ├── brand/          BotMark, BotBanner, FlagIcon — the bot's own picture and banner
 │   ├── primitives/     Avatar Badge Button Card DataList EmptyState PageHeader Pager
-│   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
+│   │                   SegmentedControl Skeleton StatTile TabBar Tooltip ChartReadout
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
 │   │                   SavingIndicator Toggle Warning + fieldStyles.ts
 │   └── ui/             Reserved for shadcn's CLI. Excluded from coverage — keep your own out.
@@ -465,6 +465,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page       |
 | `Summary`                                                    | The one sentence under a page's header saying what the feature does now    |
 | `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                            |
+| `ChartReadout`                                               | Wraps a chart's cells; each says what it shows in `data-readout`           |
 
 ### Form
 
@@ -521,6 +522,11 @@ only by one is unreachable to anybody arriving another way. It opens on `focusin
 
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in
 React 19. The child keeps its own `ref`, so a button inside a tooltip can still be focused by its caller.
+
+A chart is different: its cells are not controls, so it takes `ChartReadout` instead, one box for the whole chart in
+the same theme. Give each cell `data-readout="14 Nov: 1,115"`, the chart a `label` (its caption), `column` for bars,
+`slide` unless the chart scrolls sideways itself, and `columns` for a grid. Never a `title` on a cell: a phone never
+shows one. AGENTS.md §24 has the rules.
 
 ### Deleting and leaving
 
@@ -843,8 +849,8 @@ precisely the screen you want when something is wrong.
   a typed confirmation.
 - **Testify never phones home.** The runtime tab reports its version and links the releases page; it does not
   check for a newer one.
-- **No chart library.** `DayBars` is a `<span>` per day with a height, and the numbers behind it are a real
-  `<table>` in an `sr-only` `<figcaption>`.
+- **No chart library.** `DayBars` is a `<span>` per day with a height, read out through `ChartReadout`, and the
+  numbers behind it are a real `<table>` in an `sr-only` `<figcaption>`.
 
 ### The dashboard wears the bot's face
 
