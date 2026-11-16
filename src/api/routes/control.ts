@@ -142,7 +142,6 @@ control.put("/music", async (context) => {
 
 control.get("/shardlens", (context) => context.json(shardlensStatus(context.get("client"))));
 
-/** Sends what Shardlens has queued now; a 404 while it is off, since there is nothing to send to. */
 control.post("/shardlens/send", async (context) => {
 	const flushed = await sendShardlensNow(context.get("client"));
 	if (flushed === null) throw notFound("shardlens_off", "Shardlens is off, so there is nothing to send.");

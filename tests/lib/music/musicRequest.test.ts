@@ -198,7 +198,7 @@ describe("hostAdvice", () => {
 		await expect(queueRequest(request())).rejects.toThrow();
 		expect(lensTrack).toHaveBeenCalledWith(
 			"music_refused",
-			{ source: "youtube", reason: "bot-check", cause: "youtube/bot-check" },
+			{ source: "youtube", cause: "youtube/bot-check" },
 			{ guildId: "guild-1" },
 		);
 	});
@@ -222,7 +222,7 @@ describe("counting tracks", () => {
 
 		expect(lensTrack.mock.calls).toEqual([
 			["music_played", { source: "youtube" }, { guildId: "guild-1" }],
-			["music_skipped", { source: "youtube", reason: "drm", cause: "youtube/drm" }, { guildId: "guild-1" }],
+			["music_skipped", { source: "youtube", cause: "youtube/drm" }, { guildId: "guild-1" }],
 		]);
 	});
 });

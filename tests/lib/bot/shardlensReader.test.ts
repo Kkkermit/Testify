@@ -97,6 +97,30 @@ describe("ShardlensReader", () => {
 		expect(fetchMock).toHaveBeenCalledTimes(4);
 	});
 
+	/** A slow answer that failed after a newer one replaced it once threw the newer one away with it. */
+	it("keeps a newer answer when an older one for the same question fails late", async () => {
+		let now = 1_000_000;
+		const reader = new ShardlensReader(ENV, () => now);
+		let fail: () => void = () => undefined;
+		fetchMock.mockImplementationOnce(
+			() =>
+				new Promise<Response>((_, reject) => {
+					fail = () => {
+						reject(new TypeError("network"));
+					};
+				}),
+		);
+
+		const slow = reader.query({ kind: "top" }, answer);
+		now += 60_000;
+		await reader.query({ kind: "top" }, answer);
+		fail();
+		await expect(slow).rejects.toBeInstanceOf(AnalyticsUnavailable);
+		await reader.query({ kind: "top" }, answer);
+
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+	});
+
 	it("reads the collector's settings with a plain GET", async () => {
 		answers(200, { rawRetentionDays: 30, mode: "audit" });
 

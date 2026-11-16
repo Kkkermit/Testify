@@ -817,7 +817,7 @@ precisely the screen you want when something is wrong.
   away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_unreachable`) and the server list still
   loads with its counts blank. Who ran what lives on the collector's own Activity page, which the tab links. The
   tab's seven sections — commands, people, servers, buttons and forms, bot activity, reliability and journeys — each
-  read their own route and fail on their own, through `SectionState` in `features/owner/usage/`.
+  read their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.
@@ -835,7 +835,7 @@ precisely the screen you want when something is wrong.
   a typed confirmation.
 - **Testify never phones home.** The runtime tab reports its version and links the releases page; it does not
   check for a newer one.
-- **No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
+- **No chart library.** `DayBars` is a `<span>` per day with a height, and the numbers behind it are a real
   `<table>` in an `sr-only` `<figcaption>`.
 
 ### The dashboard wears the bot's face
@@ -1598,12 +1598,12 @@ rule measures what jsdom cannot. The last sweep was 570 page loads with nothing 
 The script is quick to rewrite; **the exemptions are the part worth keeping**, because each one cost a round of
 chasing a finding that was not a defect:
 
-| Looks like a failure             | Why it is not                                                     |
-| -------------------------------- | ----------------------------------------------------------------- |
-| Skip link at 24×16               | `sr-only` until focus. It has no pointer target to be too small   |
-| Checkbox at 1×1 or 16×16         | The effective target is the `<label>` around it — measure that    |
-| "terms of use" at 71×15          | 2.5.8 exempts a link inside a sentence; line-height sets its size |
-| `UsageChart`'s table overflowing | It lives in an `sr-only` `<figcaption>`, which clips to 1px       |
+| Looks like a failure          | Why it is not                                                     |
+| ----------------------------- | ----------------------------------------------------------------- |
+| Skip link at 24×16            | `sr-only` until focus. It has no pointer target to be too small   |
+| Checkbox at 1×1 or 16×16      | The effective target is the `<label>` around it — measure that    |
+| "terms of use" at 71×15       | 2.5.8 exempts a link inside a sentence; line-height sets its size |
+| `DayBars`'s table overflowing | It lives in an `sr-only` `<figcaption>`, which clips to 1px       |
 
 ### Which skill to reach for
 

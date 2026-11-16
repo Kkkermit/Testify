@@ -6,6 +6,7 @@ import { ErrorState } from "@/app/ErrorState";
 import { Refusal } from "@/components/form";
 import { Badge, type BadgeTone, Button, Card, CARD_HEADING, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { collectorPage } from "@/features/owner/owner.utils";
 import { useSendShardlens, useShardlens } from "@/features/owner/useControl";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -76,7 +77,6 @@ function Figures({ status }: { status: ShardlensStatus }): React.JSX.Element {
 	);
 }
 
-/** Where the bot's Shardlens analytics stand, for the owner only; the key itself never reaches the page. */
 export function ShardlensCard(): React.JSX.Element {
 	const { t } = useTranslation();
 	const status = useShardlens();
@@ -90,6 +90,7 @@ export function ShardlensCard(): React.JSX.Element {
 	} else {
 		const current = status.data;
 		const look = STATES[current.state];
+		const dashboard = current.collector === null ? null : collectorPage(current.collector);
 		body = (
 			<>
 				<div className="flex flex-wrap items-start justify-between gap-3">
@@ -106,9 +107,9 @@ export function ShardlensCard(): React.JSX.Element {
 							{send.isPending ? t("owner.shardlensSendBusy") : t("owner.shardlensSend")}
 						</Button>
 					)}
-					{current.collector !== null && (
+					{dashboard !== null && (
 						<a
-							href={current.collector}
+							href={dashboard}
 							target="_blank"
 							rel="noreferrer"
 							className={cn(INLINE_TARGET, "text-accent gap-2 text-sm hover:underline")}

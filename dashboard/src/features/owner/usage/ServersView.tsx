@@ -1,20 +1,20 @@
 import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Card, Figure, UsageBars } from "@/components/primitives";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { DayBars } from "@/features/owner/components/DayBars";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { DayBars } from "@/features/owner/usage/DayBars";
-import { SectionState } from "@/features/owner/usage/SectionState";
+import { NO_FIGURE, shareOrDash } from "@/features/owner/owner.utils";
 import { labelOf, LIFETIME_LABELS } from "@/features/owner/usage/usage.utils";
 import { useGrowth } from "@/features/owner/useOwner";
-import { formatNumber, formatPercent } from "@/lib/intl";
+import { formatNumber } from "@/lib/intl";
 
-/** Servers gained and lost, whether new ones start using the bot, and how long the ones that leave kept it. */
 export function ServersView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const growth = useGrowth(days);
 
 	return (
-		<SectionState query={growth}>
+		<AnalyticsState query={growth}>
 			{(report) => (
 				<div className="flex flex-col gap-4">
 					{report.serverCount.warn && report.serverCount.discord !== null && (
@@ -33,14 +33,14 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 							<Figure
 								className="px-6 py-4"
 								label={t("owner.usageSections.activated")}
-								value={report.activation.rate === null ? "–" : formatPercent(report.activation.rate, 1)}
+								value={shareOrDash(report.activation.rate)}
 							/>
 							<Figure
 								className="px-6 py-4"
 								label={t("owner.usageSections.inactive")}
 								value={
 									report.installs === null
-										? "–"
+										? NO_FIGURE
 										: t("common.partOf", { part: report.installs.inactive, whole: report.installs.active })
 								}
 							/>
@@ -94,6 +94,6 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 					</div>
 				</div>
 			)}
-		</SectionState>
+		</AnalyticsState>
 	);
 }

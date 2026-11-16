@@ -2,7 +2,7 @@ import { type Context } from "hono";
 import { type ApiBindings } from "@api/context";
 import { toError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { recordEvent } from "@lib/bot";
+import { LENS_EVENTS, recordEvent } from "@lib/bot";
 import {
 	CHANGE_WAY_HEADER,
 	type ChangeWay,
@@ -76,7 +76,7 @@ const WRITTEN_FROM: Record<string, string> = {
 /** Not changes to a server: a test post sends something, and the backup page's program check blocks an account. */
 const NOT_CHANGES = new Set(["test.send", "blacklist.add"]);
 
-/** The screen a server's write came from, as a route pattern, so a change is counted without naming the server. */
+/** The screen a server's write came from, as its route pattern. */
 export function changedScreen(path: string): string | null {
 	const match = /^\/api\/guilds\/\d{17,20}(?:\/([a-z-]+))?/.exec(path);
 	if (match === null) return null;
@@ -87,7 +87,7 @@ export function changedScreen(path: string): string | null {
 	return isScreenRoute(route) ? route : null;
 }
 
-/** How the change was made, from the page's own header; a write without it, or with anything else, is a save. */
+/** A write without the page's header, or with anything else in it, is a save. */
 function wayOf(context: Context<ApiBindings>, action: string): ChangeWay {
 	if (action.startsWith("setup.")) return "setup";
 	const via = context.req.header(CHANGE_WAY_HEADER);
@@ -101,5 +101,5 @@ function countChange(context: Context<ApiBindings>, action: string): void {
 	const screen = changedScreen(context.req.path);
 	if (screen === null) return;
 
-	recordEvent(context.get("client"), "dashboard_change", { screen, how: wayOf(context, action) }, guild.id);
+	recordEvent(context.get("client"), LENS_EVENTS.dashboardChange, { screen, how: wayOf(context, action) }, guild.id);
 }

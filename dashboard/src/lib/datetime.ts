@@ -64,7 +64,6 @@ export function weekdayName(isoWeekday: number): string {
 	);
 }
 
-/** The zone the reader's device keeps, which hours of the day and cohorts are read in. */
 export function readerTimeZone(): string {
 	return new Intl.DateTimeFormat().resolvedOptions().timeZone;
 }

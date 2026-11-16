@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import {
+	chosenSteps,
 	formatWait,
 	heatLevel,
 	isTranslated,
@@ -38,9 +39,16 @@ describe("the usage sections' rules", () => {
 	});
 
 	/** The address is typed into, so anything that could not be a command never reaches the API. */
-	it("keeps only up to five steps that could be commands", () => {
-		expect(stepsFrom(null)).toEqual([]);
-		expect(stepsFrom("ban,<script>,levelling, work ,a,b,c,d")).toEqual(["ban", "levelling", "work", "a", "b"]);
+	/** Picking the second step first once moved it into the first slot. */
+	it("keeps each step in its slot, a blank or unknown one as empty, and at most five", () => {
+		expect(stepsFrom(null)).toEqual([null, null]);
+		expect(stepsFrom(",work")).toEqual([null, "work"]);
+		expect(stepsFrom("ban,<script>,levelling, work ,a,b,c")).toEqual(["ban", null, "levelling", "work", "a"]);
+	});
+
+	it("follows the steps chosen so far once there are two of them", () => {
+		expect(chosenSteps([null, "work"])).toBeNull();
+		expect(chosenSteps(["ban", null, "warn"])).toEqual(["ban", "warn"]);
 	});
 
 	it("says whether a Discord language has one of the eight translations", () => {
@@ -174,7 +182,7 @@ describe("the usage sections", () => {
 
 		expect(await screen.findByText(/has no read key for it/i)).toBeInTheDocument();
 		await user.click(screen.getByRole("button", { name: "Servers" }));
-		expect(await screen.findByText("Servers added")).toBeInTheDocument();
+		expect((await screen.findAllByText("Servers added")).length).toBeGreaterThan(0);
 	});
 
 	it("offers a retry when the collector did not answer", async () => {

@@ -14,7 +14,6 @@ const WHY: Record<AnalyticsProblem, TranslationKey> = {
 	unreachable: "owner.analyticsUnreachable",
 };
 
-/** The Usage tab when Shardlens cannot be read; a missing key is a setting, so only the other two offer a retry. */
 export function AnalyticsUnavailable({
 	problem,
 	onRetry,
@@ -44,14 +43,12 @@ export function AnalyticsUnavailable({
 	);
 }
 
-/** Beside counts Shardlens could not give, on the list of servers and one server's detail. */
 export function CountsUnavailable({ problem }: { problem: AnalyticsProblem }): React.JSX.Element {
 	const { t } = useTranslation();
 
 	return <Warning>{t("owner.countsUnavailable", { reason: t(WHY[problem]) })}</Warning>;
 }
 
-/** Where who ran what is kept: the collector's Activity page, which its own sign-in guards. */
 export function ShardlensLinks({
 	collector,
 	guildId,

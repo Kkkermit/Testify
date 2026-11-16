@@ -207,7 +207,7 @@ describe("usageReport", () => {
 });
 
 describe("every report", () => {
-	/** Prefix runs are the SDK's own message commands now, so asking about a custom event for them reads nothing. */
+	/** Prefix runs are the SDK's own message commands, so asking about a custom event for them reads nothing. */
 	it("reads commands only from the collector's own figures, never from a custom event", async () => {
 		const client = clientFor();
 		const here = client.guilds.cache.get(HERE) as never;
@@ -284,7 +284,7 @@ describe("guildUsageReport", () => {
 			dashboardViews: 4,
 			people: 7,
 		});
-		// Prefix runs carry their server now, so a server's chart counts both surfaces.
+		// Prefix runs carry their server, so a server's chart counts both surfaces.
 		expect(report.daily).toHaveLength(30);
 		expect(report.daily.at(-1)).toEqual({ day: "2026-11-15", count: 8, failures: 0 });
 	});

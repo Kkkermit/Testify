@@ -1,3 +1,4 @@
+import { DAY_MS } from "@config/constants";
 import {
 	ChannelDays,
 	MemberDays,
@@ -7,8 +8,6 @@ import {
 	ServerDays,
 } from "@database/models/insights.schema";
 import { INSIGHTS_LIMITS } from "@testify/shared";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** A UTC day as `YYYY-MM-DD`, the key every per-day insights row is stored under. */
 export function dayKey(at: Date = new Date()): string {

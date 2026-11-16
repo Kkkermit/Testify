@@ -1,22 +1,25 @@
-import { type ZodType } from "zod";
 import { type TestifyClient } from "@core/client";
 import { LENS_EVENTS } from "@lib/bot/shardlens.util";
 import {
+	ALL_ROWS,
+	askFor,
 	audienceAnswer,
+	dailySeries,
+	eventProps,
+	FAILED_OUTCOMES,
 	funnelAnswer,
 	gaugeAnswer,
 	growthAnswer,
 	heatmapAnswer,
 	propsAnswer,
-	rangeOf,
 	readerFor,
 	reliabilityAnswer,
 	retentionAnswer,
 	seriesAnswer,
 	type Spec,
 	topAnswer,
+	windowDays,
 } from "@lib/bot/shardlensReader.util";
-import { windowDays } from "@lib/bot/usageReport.util";
 import {
 	type AudienceReport,
 	AUTOMATIC_ACTIONS,
@@ -33,18 +36,8 @@ import {
 
 /** The owner console's Usage sections beyond commands, each read from Shardlens on its own. */
 
-const ALL = 500;
 const SHOWN = 15;
-const FAILED = ["error", "timeout", "no_response"];
 const LATE = new Set(["timeout", "no_response"]);
-
-type Ask = <T>(spec: Spec, schema: ZodType<T>) => Promise<T>;
-
-function askFor(client: TestifyClient, days: number, now: number): Ask {
-	const reader = readerFor(client);
-	const range = rangeOf(days, now);
-	return (spec, schema) => reader.query({ ...spec, range }, schema);
-}
 
 const byCount = (a: Tally, b: Tally): number => b.count - a.count || a.key.localeCompare(b.key);
 
@@ -64,17 +57,6 @@ const valuesOf = (answer: { values: { value: string; count: number }[] }): Tally
 	tallies(answer.values.map(({ value, count }) => ({ key: value === "null" ? null : value, value: count })));
 
 const sum = (points: { value: number }[]): number => points.reduce((total, point) => total + point.value, 0);
-
-/** Daily totals of one custom event, from its rollup, which lasts longer than the raw events. */
-const customDaily = (name: string): Spec => ({
-	kind: "series",
-	metric: "custom",
-	name,
-	interval: "day",
-	timezone: "UTC",
-});
-
-const props = (name: string, prop: string): Spec => ({ kind: "eventProps", name, prop });
 
 export async function audienceReport(
 	client: TestifyClient,
@@ -156,12 +138,12 @@ export async function panelsReport(client: TestifyClient, days: number, now = Da
 		metric,
 		groupBy: "custom_id",
 		filters,
-		limit: ALL,
+		limit: ALL_ROWS,
 	});
 
 	const [pressed, failed, shown, submitted] = await Promise.all([
 		ask(top("components"), topAnswer),
-		ask(top("components", [{ field: "outcome", op: "in", value: FAILED }]), topAnswer),
+		ask(top("components", [{ field: "outcome", op: "in", value: FAILED_OUTCOMES }]), topAnswer),
 		ask(top("modals.shown"), topAnswer),
 		ask(top("modals.submitted"), topAnswer),
 	]);
@@ -238,9 +220,11 @@ export async function botActivityReport(
 ): Promise<BotActivityReport> {
 	const ask = askFor(client, days, now);
 	const reader = readerFor(client);
-	const total = async (name: string): Promise<number> => sum((await ask(customDaily(name), seriesAnswer)).points);
+	// A custom event's daily rollup outlasts its raw events, so totals reach further back than the breakdowns.
+	const total = async (name: string): Promise<number> =>
+		sum((await ask(dailySeries("custom", { name }), seriesAnswer)).points);
 	const values = async (name: string, prop: string): Promise<Tally[]> =>
-		valuesOf(await ask(props(name, prop), propsAnswer));
+		valuesOf(await ask(eventProps(name, prop), propsAnswer));
 
 	const [
 		[played, skipped, refused, answered, unanswered, refusals, changes],
@@ -301,18 +285,11 @@ export async function reliabilityReport(
 	now = Date.now(),
 ): Promise<ReliabilityReport> {
 	const ask = askFor(client, days, now);
-	const daily = (metric: string, extra: Spec = {}): Spec => ({
-		kind: "series",
-		metric,
-		interval: "day",
-		timezone: "UTC",
-		...extra,
-	});
 
 	const [reliability, outcomes, limits, ping] = await Promise.all([
 		ask({ kind: "reliability" }, reliabilityAnswer),
-		ask(daily("interactions", { groupBy: "outcome" }), seriesAnswer),
-		ask(daily("rest.ratelimits"), seriesAnswer),
+		ask(dailySeries("interactions", { groupBy: "outcome" }), seriesAnswer),
+		ask(dailySeries("rest.ratelimits"), seriesAnswer),
 		ask({ kind: "gauge", name: "shard.ping_ms", interval: "day", timezone: "UTC" }, gaugeAnswer),
 	]);
 

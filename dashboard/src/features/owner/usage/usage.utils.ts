@@ -1,6 +1,7 @@
 import {
 	type AutomaticAction,
 	type ChangeWay,
+	COMMAND_NAME,
 	FUNNEL_LIMITS,
 	type MEMBER_TIERS,
 	type MusicReason,
@@ -119,7 +120,7 @@ export function labelOf<K extends string>(
 	return known === undefined ? key : t(known);
 }
 
-/** Whether the dashboard and the bot's refusals have a translation for a Discord language, by its base. */
+/** Whether a Discord language has one of the dashboard's translations, by its base. */
 export function isTranslated(tag: string): boolean {
 	const base = tag.split("-")[0]?.toLowerCase() ?? "";
 	return (LOCALES as readonly string[]).includes(base);
@@ -133,23 +134,26 @@ export function heatLevel(count: number, max: number): number {
 	return Math.max(1, Math.ceil((count / max) * HEAT_LEVELS));
 }
 
-const STEP = /^[\w-]{1,32}$/;
-
-/** The funnel's commands from the address, keeping only what could be a command and at most five of them. */
-export function stepsFrom(raw: string | null): string[] {
-	if (raw === null) return [];
-	return raw
-		.split(",")
-		.map((step) => step.trim())
-		.filter((step) => STEP.test(step))
-		.slice(0, FUNNEL_LIMITS.maxSteps);
-}
-
 export function commandFrom(raw: string | null): string | null {
-	return raw !== null && STEP.test(raw) ? raw : null;
+	return raw !== null && COMMAND_NAME.test(raw) ? raw : null;
 }
 
-/** A wait in the largest unit that keeps it above one. */
+/** The funnel's slots from the address, a blank one kept in its place so a choice stays where it was made. */
+export function stepsFrom(raw: string | null): (string | null)[] {
+	const slots = (raw ?? "")
+		.split(",")
+		.slice(0, FUNNEL_LIMITS.maxSteps)
+		.map((step) => commandFrom(step.trim()));
+	while (slots.length < FUNNEL_LIMITS.minSteps) slots.push(null);
+	return slots;
+}
+
+/** The commands chosen so far, in order, once there are enough to follow. */
+export function chosenSteps(slots: (string | null)[]): string[] | null {
+	const chosen = slots.filter((slot): slot is string => slot !== null);
+	return chosen.length >= FUNNEL_LIMITS.minSteps ? chosen : null;
+}
+
 export function formatWait(seconds: number): string {
 	if (seconds < 60) return formatUnit(seconds, "second", { digits: seconds < 10 ? 1 : 0 });
 	if (seconds < 3_600) return formatUnit(seconds / 60, "minute", { digits: 0 });

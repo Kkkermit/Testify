@@ -216,7 +216,6 @@ export interface OwnerGuildRow {
 	dashboardViews: number | null;
 }
 
-/** The owner's list of servers, saying why the counts are missing when Shardlens could not be read. */
 export interface OwnerGuildPage extends Paged<OwnerGuildRow> {
 	analytics: AnalyticsProblem | null;
 }

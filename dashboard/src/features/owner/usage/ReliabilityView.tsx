@@ -1,22 +1,21 @@
 import { useTranslation } from "react-i18next";
 import { Card, Figure, UsageBars } from "@/components/primitives";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { DayBars } from "@/features/owner/components/DayBars";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { formatMs } from "@/features/owner/owner.utils";
-import { DayBars } from "@/features/owner/usage/DayBars";
-import { SectionState } from "@/features/owner/usage/SectionState";
+import { formatMs, NO_FIGURE, shareOrDash } from "@/features/owner/owner.utils";
 import { useReliability } from "@/features/owner/useOwner";
 import { dateAndTime, shortDate } from "@/lib/datetime";
-import { formatNumber, formatPercent } from "@/lib/intl";
+import { formatNumber } from "@/lib/intl";
 
-const ms = (value: number | null): string => (value === null ? "–" : formatMs(value));
+const ms = (value: number | null): string => (value === null ? NO_FIGURE : formatMs(value));
 
-/** Failures, missed deadlines, rate limits and the gateway, day by day, beside the Runtime tab's state right now. */
 export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const reliability = useReliability(days);
 
 	return (
-		<SectionState query={reliability}>
+		<AnalyticsState query={reliability}>
 			{(report) => {
 				const totals = report.totals;
 				return (
@@ -36,7 +35,7 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 								<Figure
 									className="px-6 py-4"
 									label={t("owner.usageSections.over3s")}
-									value={totals?.over3sRate === null || totals === null ? "–" : formatPercent(totals.over3sRate, 1)}
+									value={shareOrDash(totals?.over3sRate ?? null)}
 								/>
 								<Figure
 									className="px-6 py-4"
@@ -141,6 +140,6 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 					</div>
 				);
 			}}
-		</SectionState>
+		</AnalyticsState>
 	);
 }

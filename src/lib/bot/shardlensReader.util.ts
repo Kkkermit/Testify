@@ -1,4 +1,5 @@
 import { type ZodType, z } from "zod";
+import { DAY_MS, MINUTE_MS } from "@config/constants";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { ServiceError } from "@core/errors";
@@ -8,10 +9,8 @@ import { type AnalyticsProblem } from "@testify/shared";
 /** The owner console's analytics, read from Shardlens with the read key, which never leaves this process. */
 
 const SERVICE = "Shardlens";
-const CACHE_MS = 60_000;
+const CACHE_MS = MINUTE_MS;
 const MAX_CACHED = 200;
-const MINUTE_MS = 60_000;
-const DAY_MS = 24 * 60 * MINUTE_MS;
 
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
@@ -41,6 +40,13 @@ export function rangeOf(days: number, now = Date.now()): Range {
 	const today = Math.floor(now / DAY_MS) * DAY_MS;
 	const to = Math.ceil((now + 1) / MINUTE_MS) * MINUTE_MS;
 	return { from: new Date(today - (days - 1) * DAY_MS).toISOString(), to: new Date(to).toISOString() };
+}
+
+/** Every day in the window, oldest first and in UTC, so a quiet day is a zero rather than a hole in the chart. */
+export function windowDays(days: number, now = Date.now()): string[] {
+	return Array.from({ length: days }, (_, index) =>
+		new Date(now - (days - 1 - index) * DAY_MS).toISOString().slice(0, 10),
+	);
 }
 
 const count = z
@@ -128,6 +134,23 @@ export const retentionAnswer = z.object({
 
 export type Spec = Record<string, unknown>;
 
+/** As many rows as the collector hands back for one ranking. */
+export const ALL_ROWS = 500;
+
+export const FAILED_OUTCOMES = ["error", "timeout", "no_response"];
+
+export const dailySeries = (metric: string, extra: Spec = {}): Spec => ({
+	kind: "series",
+	metric,
+	interval: "day",
+	timezone: "UTC",
+	...extra,
+});
+
+export const eventProps = (name: string, prop: string): Spec => ({ kind: "eventProps", name, prop });
+
+export const serverFilter = (guildId: string): Spec[] => [{ field: "guild", op: "eq", value: guildId }];
+
 interface Call {
 	method: "GET" | "POST";
 	path: string;
@@ -146,7 +169,7 @@ export class ShardlensReader {
 		this.#now = now;
 	}
 
-	/** The collector's origin, where its own dashboard opens; null until one the key may go to is set. */
+	/** Null until an address the key may go to is set. */
 	get collector(): string | null {
 		return this.#endpoint;
 	}
@@ -160,7 +183,6 @@ export class ShardlensReader {
 		});
 	}
 
-	/** How long the collector keeps raw events, and which privacy mode it is in. */
 	async meta(): Promise<z.infer<typeof metaAnswer>> {
 		return this.#cached("meta", metaAnswer, { method: "GET", path: "/v1/meta" });
 	}
@@ -173,7 +195,9 @@ export class ShardlensReader {
 
 		const answer = this.#ask(this.#endpoint, this.#key, schema, call);
 		this.#remember(id, answer);
-		answer.catch(() => this.#cache.delete(id));
+		answer.catch(() => {
+			if (this.#cache.get(id)?.answer === answer) this.#cache.delete(id);
+		});
 		return answer;
 	}
 
@@ -217,4 +241,13 @@ export function readerFor(client: TestifyClient): ShardlensReader {
 		readers.set(client, reader);
 	}
 	return reader;
+}
+
+export type Ask = <T>(spec: Spec, schema: ZodType<T>) => Promise<T>;
+
+/** Asks the collector about the window ending now. */
+export function askFor(client: TestifyClient, days: number, now = Date.now()): Ask {
+	const reader = readerFor(client);
+	const range = rangeOf(days, now);
+	return (spec, schema) => reader.query({ ...spec, range }, schema);
 }

@@ -1,4 +1,4 @@
-import { FUNNEL_LIMITS, FUNNEL_WINDOWS, type RetentionReport } from "@testify/shared";
+import { FUNNEL_LIMITS, FUNNEL_WINDOWS, RETENTION_INTERVALS, type RetentionReport } from "@testify/shared";
 import { Plus, X } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,16 +6,14 @@ import { useSearchParams } from "react-router";
 import { LABEL, SELECT, Warning } from "@/components/form";
 import { Button, SegmentedControl, UsageBars } from "@/components/primitives";
 import { useCommands } from "@/features/commands/useCommands";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { shortDay } from "@/features/owner/owner.utils";
-import { SectionState } from "@/features/owner/usage/SectionState";
-import { commandFrom, formatWait, stepsFrom } from "@/features/owner/usage/usage.utils";
+import { searchWith, shortDay } from "@/features/owner/owner.utils";
+import { chosenSteps, commandFrom, formatWait, stepsFrom } from "@/features/owner/usage/usage.utils";
 import { useFunnel, useRetention } from "@/features/owner/useOwner";
 import { readerTimeZone } from "@/lib/datetime";
 import { formatPercent, formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
-
-const INTERVALS = ["day", "week"] as const;
 
 function CommandSelect({
 	label,
@@ -59,7 +57,6 @@ function CommandSelect({
 	);
 }
 
-/** Of the people who ran one command, how many went on to others, and how many came back afterwards. */
 export function JourneysView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [params, setParams] = useSearchParams();
@@ -67,33 +64,22 @@ export function JourneysView({ days }: { days: number }): React.JSX.Element {
 	const names = (commands.data?.commands ?? []).map((command) => command.name).sort();
 	const zone = readerTimeZone();
 
-	const steps = stepsFrom(params.get("steps"));
+	const shown = stepsFrom(params.get("steps"));
+	const steps = chosenSteps(shown);
 	const hours = FUNNEL_WINDOWS.find((value) => String(value) === params.get("hours")) ?? 24;
 	const start = commandFrom(params.get("start"));
 	const back = commandFrom(params.get("back"));
-	const interval = oneOf(INTERVALS, params.get("interval"), "week");
+	const interval = oneOf(RETENTION_INTERVALS, params.get("interval"), "week");
 
-	const funnel = useFunnel(days, zone, steps.length >= FUNNEL_LIMITS.minSteps ? steps : [], hours);
+	const funnel = useFunnel(days, zone, steps ?? [], hours);
 	const retention = useRetention(days, zone, start, back, interval);
 
 	const write = (changes: Record<string, string | null>): void => {
-		setParams(
-			(current) => {
-				const next = new URLSearchParams(current);
-				for (const [key, value] of Object.entries(changes)) {
-					if (value === null || value === "") next.delete(key);
-					else next.set(key, value);
-				}
-				return next;
-			},
-			{ replace: true },
-		);
+		setParams(searchWith(params, changes), { replace: true });
 	};
 	const setSteps = (next: (string | null)[]): void => {
-		write({ steps: next.map((name) => name ?? "").join(",") });
+		write({ steps: next.every((name) => name === null) ? null : next.map((name) => name ?? "").join(",") });
 	};
-	const shown: (string | null)[] =
-		steps.length >= FUNNEL_LIMITS.minSteps ? steps : [steps[0] ?? null, steps[1] ?? null];
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -152,10 +138,10 @@ export function JourneysView({ days }: { days: number }): React.JSX.Element {
 					/>
 				</div>
 
-				{steps.length < FUNNEL_LIMITS.minSteps ? (
+				{steps === null ? (
 					<p className="text-muted-foreground text-sm">{t("owner.usageSections.funnelPick")}</p>
 				) : (
-					<SectionState query={funnel}>
+					<AnalyticsState query={funnel}>
 						{(report) => {
 							const entered = report.steps[0]?.users ?? 0;
 							return (
@@ -178,7 +164,7 @@ export function JourneysView({ days }: { days: number }): React.JSX.Element {
 								/>
 							);
 						}}
-					</SectionState>
+					</AnalyticsState>
 				)}
 			</Panel>
 
@@ -220,7 +206,7 @@ export function JourneysView({ days }: { days: number }): React.JSX.Element {
 				{start === null ? (
 					<p className="text-muted-foreground text-sm">{t("owner.usageSections.retentionPick")}</p>
 				) : (
-					<SectionState query={retention}>{(report) => <Cohorts report={report} />}</SectionState>
+					<AnalyticsState query={retention}>{(report) => <Cohorts report={report} />}</AnalyticsState>
 				)}
 			</Panel>
 		</div>

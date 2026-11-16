@@ -17,7 +17,7 @@ import { categoryLabel } from "@/features/commands/categories.labels";
 import { type TranslationKey } from "@/i18n";
 import { ApiError } from "@/lib/api";
 import { dayAndMonth } from "@/lib/datetime";
-import { formatPercent, formatUnit } from "@/lib/intl";
+import { formatNumber, formatPercent, formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
 export const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
@@ -30,6 +30,14 @@ export function windowFrom(raw: string | null): AnalyticsWindow {
 export function levelFrom(raw: string | null): ReportedLogLevel {
 	return oneOf(LOG_LEVELS, raw, "trace");
 }
+
+/** Shown for a figure that could not be read, which is not the same as zero. */
+export const NO_FIGURE = "—";
+
+export const countOrDash = (count: number | null | undefined): string =>
+	count === null || count === undefined ? NO_FIGURE : formatNumber(count);
+
+export const shareOrDash = (share: number | null): string => (share === null ? NO_FIGURE : formatPercent(share, 1));
 
 export function percent(part: number, whole: number): string {
 	return formatPercent(part, Math.max(whole, 0));
@@ -118,13 +126,12 @@ export function surfaceBars(surfaces: { slash: number; prefix: number }, t: TFun
 	];
 }
 
-/** Which of the API's `analytics_*` refusals this is, so the tab says why rather than showing a generic error. */
 export function analyticsProblemOf(error: unknown): AnalyticsProblem | null {
 	if (!(error instanceof ApiError)) return null;
 	return ANALYTICS_PROBLEMS.find((problem) => error.code === `analytics_${problem}`) ?? null;
 }
 
-/** The collector's own pages, only for an address that is the web; the API sends an origin, never anything else. */
+/** Only an http or https origin becomes a link. */
 export function collectorPage(collector: string, path = ""): string | null {
 	return /^https?:\/\/[^/\s]+$/.test(collector) ? `${collector}${path}` : null;
 }

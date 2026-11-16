@@ -9,10 +9,8 @@ const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 const MARKED = new Set([0, 6, 12, 18]);
 
-/** Darker the busier, from the token's own fill, so the grid follows the theme and the accent. */
 const LEVELS = ["bg-muted", "bg-primary/20", "bg-primary/40", "bg-primary/65", "bg-primary"];
 
-/** Commands by weekday and hour of the day, with the counts in a table for a screen reader. */
 export function HourHeatmap({ hours }: { hours: AudienceReport["hours"] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const counts = new Map(hours.cells.map((cell) => [`${String(cell.weekday)}:${String(cell.hour)}`, cell.count]));

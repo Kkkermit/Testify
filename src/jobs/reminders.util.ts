@@ -12,12 +12,13 @@ export async function deliverDueReminders(client: TestifyClient, now: Date = new
 
 		try {
 			const where = await deliverReminder(client, reminder);
-			if (where !== null) recordAction(client, "reminder_sent", reminder.guildId);
 			if (where === null) {
 				client.logger.debug(
 					{ userId: reminder.userId },
 					"[REMINDERS] A reminder could not reach its owner by channel or DM, so it was dropped.",
 				);
+			} else {
+				recordAction(client, "reminder_sent", reminder.guildId);
 			}
 			await finishReminder(reminder.id);
 		} catch (error) {

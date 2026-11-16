@@ -27,7 +27,6 @@ import {
 	analyticsQuery,
 	analyticsZoneQuery,
 	funnelQuery,
-	retentionQuery,
 	guildIdParam,
 	type LogFeed,
 	LOG_LEVEL_RANK,
@@ -36,6 +35,7 @@ import {
 	logRunsQuery,
 	type LogRun,
 	type LogRuns,
+	retentionQuery,
 } from "@testify/shared";
 
 /** The owner console's analytics and logs, read-only. Everything here is behind `requireOwner`. */
@@ -50,7 +50,7 @@ const UNAVAILABLE: Record<AnalyticsProblem, string> = {
 	unreachable: "Shardlens did not answer.",
 };
 
-/** The console words each code itself; the status says the bot is fine and the collector is the one missing. */
+/** A 503 with its own code, since the bot is fine and only the collector is missing. */
 async function fromShardlens<T>(work: () => Promise<T>): Promise<T> {
 	try {
 		return await work();
@@ -92,7 +92,6 @@ analytics.get("/reliability", async (context) => {
 	return context.json(await fromShardlens(() => reliabilityReport(context.get("client"), days)));
 });
 
-/** A funnel or a cohort is asked about the bot's own commands, so a name it does not have is refused before asking. */
 function knownCommands(client: TestifyClient, names: (string | undefined)[]): void {
 	const unknown = names.find((name) => name !== undefined && !client.commands.has(name));
 	if (unknown !== undefined) throw new ApiProblem(400, "unknown_command", "That is not one of the bot's commands.");

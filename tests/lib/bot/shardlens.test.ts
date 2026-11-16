@@ -7,9 +7,9 @@ import { runButton, runCommand } from "@core/errors";
 import { type Logger } from "@core/logger";
 import {
 	measured,
-	musicCause,
 	recordAction,
 	recordEvent,
+	recordMusicProblem,
 	recordPrefixRun,
 	sendShardlensNow,
 	shardlensLine,
@@ -174,11 +174,7 @@ describe("recordEvent and recordAction", () => {
 		await salted(client);
 
 		recordEvent(client, "command_refused", { command: "work", reason: "cooldown", surface: "slash" }, GUILD);
-		recordEvent(client, "music_refused", {
-			source: "youtube",
-			reason: "bot-check",
-			cause: musicCause("youtube", "bot-check"),
-		});
+		recordMusicProblem(client, "music_refused", "youtube", "bot-check", GUILD);
 		recordAction(client, "level_up", GUILD);
 		await sendShardlensNow(client);
 
@@ -194,7 +190,7 @@ describe("recordEvent and recordAction", () => {
 				}),
 				expect.objectContaining({
 					name: "music_refused",
-					props: expect.objectContaining({ cause: "youtube/bot-check" }),
+					props: { source: "youtube", cause: "youtube/bot-check" },
 				}),
 				expect.objectContaining({ name: "level_up", guild: GUILD }),
 			]),

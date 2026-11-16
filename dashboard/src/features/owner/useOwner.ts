@@ -9,19 +9,20 @@ import {
 import {
 	type AudienceReport,
 	type BotActivityReport,
+	FUNNEL_LIMITS,
 	type FunnelReport,
 	type GrowthReport,
 	type GuildUsageReport,
-	type PanelsReport,
-	type ReliabilityReport,
-	type RetentionReport,
 	type LogFeed,
 	type LogRuns,
 	type OwnerGuildFilter,
 	type OwnerGuildPage,
 	type OwnerGuildSort,
 	type OwnerStats,
+	type PanelsReport,
+	type ReliabilityReport,
 	type ReportedLogLevel,
+	type RetentionReport,
 	type RuntimeInfo,
 	type UsageReport,
 } from "@testify/shared";
@@ -62,7 +63,6 @@ export function useUsage(days: number): UseQueryResult<UsageReport> {
 	});
 }
 
-/** One section of the Usage tab, read on its own so a failing one leaves the rest working. */
 function useSection<T>(section: string, query: Record<string, string>, enabled = true): UseQueryResult<T> {
 	const search = new URLSearchParams(query).toString();
 	return useQuery({
@@ -88,16 +88,19 @@ export const useBotActivity = (days: number): UseQueryResult<BotActivityReport> 
 export const useReliability = (days: number): UseQueryResult<ReliabilityReport> =>
 	useSection("reliability", windowOf(days));
 
-/** Asked only once there are two steps to follow, since the collector refuses a funnel of one. */
 export const useFunnel = (days: number, tz: string, steps: string[], hours: number): UseQueryResult<FunnelReport> =>
-	useSection("funnel", { ...windowOf(days), tz, steps: steps.join(","), hours: String(hours) }, steps.length >= 2);
+	useSection(
+		"funnel",
+		{ ...windowOf(days), tz, steps: steps.join(","), hours: String(hours) },
+		steps.length >= FUNNEL_LIMITS.minSteps,
+	);
 
 export const useRetention = (
 	days: number,
 	tz: string,
 	start: string | null,
 	back: string | null,
-	interval: "day" | "week",
+	interval: RetentionReport["interval"],
 ): UseQueryResult<RetentionReport> =>
 	useSection(
 		"retention",

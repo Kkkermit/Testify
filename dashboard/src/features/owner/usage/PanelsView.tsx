@@ -1,19 +1,18 @@
 import { useTranslation } from "react-i18next";
 import { UsageBars } from "@/components/primitives";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { SectionState } from "@/features/owner/usage/SectionState";
 import { usePanels } from "@/features/owner/useOwner";
 import { formatNumber, formatPercent } from "@/lib/intl";
 
 const ACTIONS_SHOWN = 3;
 
-/** Which panel buttons get pressed, and how many forms are opened and never sent. */
 export function PanelsView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const panels = usePanels(days);
 
 	return (
-		<SectionState query={panels}>
+		<AnalyticsState query={panels}>
 			{(report) => (
 				<div className="grid items-start gap-4 lg:grid-cols-2">
 					<Panel title={t("owner.usageSections.buttons")} hint={t("owner.usageSections.buttonsHint")}>
@@ -57,6 +56,6 @@ export function PanelsView({ days }: { days: number }): React.JSX.Element {
 					</Panel>
 				</div>
 			)}
-		</SectionState>
+		</AnalyticsState>
 	);
 }

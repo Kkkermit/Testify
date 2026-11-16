@@ -41,7 +41,6 @@ const cooldowns = new Map<string, number>();
 /** Deleting your own data is not something the blacklist takes away; the blacklist entry itself is never deleted. */
 const OPEN_TO_THE_BLACKLISTED: ReadonlySet<string> = new Set(["delete-my-data"]);
 
-/** A refusal and why it was given, so what is refused can be counted by reason without reading the words. */
 export interface Refusal {
 	failure: string | TitledRefusal;
 	reason: RefusalReason;

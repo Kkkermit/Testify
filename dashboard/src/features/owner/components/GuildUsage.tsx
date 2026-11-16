@@ -2,12 +2,12 @@ import { type AnalyticsWindow } from "@testify/shared";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
-import { ErrorState } from "@/app/ErrorState";
 import { Warning } from "@/components/form";
-import { SegmentedControl, Skeleton } from "@/components/primitives";
-import { AnalyticsUnavailable, ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
+import { SegmentedControl } from "@/components/primitives";
+import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { GuildUsageSummary } from "@/features/owner/components/GuildUsageSummary";
-import { analyticsProblemOf, searchWith, WINDOWS } from "@/features/owner/owner.utils";
+import { searchWith, WINDOWS } from "@/features/owner/owner.utils";
 import { useGuildUsage } from "@/features/owner/useOwner";
 
 const DRILL_DOWN = { guild: null };
@@ -38,28 +38,15 @@ export function GuildUsage({
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
 
-			{report.isError ? (
-				<Unread error={report.error} onRetry={() => void report.refetch()} />
-			) : report.isPending ? (
-				<Skeleton className="h-96 w-full" />
-			) : (
-				<>
-					{report.data.detailDays < days && (
-						<Warning>{t("owner.detailDaysNote", { days: report.data.detailDays })}</Warning>
-					)}
-					<GuildUsageSummary report={report.data} />
-					<ShardlensLinks collector={report.data.collector} guildId={guildId} />
-				</>
-			)}
+			<AnalyticsState query={report}>
+				{(usage) => (
+					<>
+						{usage.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: usage.detailDays })}</Warning>}
+						<GuildUsageSummary report={usage} />
+						<ShardlensLinks collector={usage.collector} guildId={guildId} />
+					</>
+				)}
+			</AnalyticsState>
 		</div>
-	);
-}
-
-function Unread({ error, onRetry }: { error: Error; onRetry: () => void }): React.JSX.Element {
-	const problem = analyticsProblemOf(error);
-	return problem === null ? (
-		<ErrorState as="h2" error={error} onRetry={onRetry} />
-	) : (
-		<AnalyticsUnavailable problem={problem} onRetry={onRetry} />
 	);
 }

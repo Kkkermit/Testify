@@ -110,7 +110,7 @@ describe("who can read the analytics", () => {
 		expect((await appFor().request(path)).status).toBe(200);
 	});
 
-	/** Who ran what lives on the collector's own dashboard now, so the old drill-downs must be gone, not open. */
+	/** Who ran what lives behind the collector's own sign-in, so no console route may show it. */
 	it("no longer serves the member list or the run log", async () => {
 		for (const path of [`/analytics/guilds/${GUILD}/members`, `/analytics/guilds/${GUILD}/runs`]) {
 			expect((await appFor().request(path)).status).toBe(404);

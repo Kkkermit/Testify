@@ -3,9 +3,9 @@ import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { UsageBars } from "@/components/primitives";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { screenLabel } from "@/features/owner/owner.utils";
-import { SectionState } from "@/features/owner/usage/SectionState";
 import {
 	ACTION_LABELS,
 	CHANGE_WAY_LABELS,
@@ -33,13 +33,12 @@ function deskBars(answered: Tally[], refused: Tally[], t: TFunction): Bars {
 	].sort((a, b) => b.count - a.count);
 }
 
-/** What the bot did besides answering commands: music, the help desk, refusals, its own actions and dashboard changes. */
 export function ActivityView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const activity = useBotActivity(days);
 
 	return (
-		<SectionState query={activity}>
+		<AnalyticsState query={activity}>
 			{(report) => (
 				<div className="flex flex-col gap-4">
 					{report.detailDays < days && (
@@ -158,6 +157,6 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 					</div>
 				</div>
 			)}
-		</SectionState>
+		</AnalyticsState>
 	);
 }

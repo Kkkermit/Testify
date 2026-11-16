@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pagination, snowflake } from "./schemas";
+import { COMMAND_NAME, pagination, snowflake } from "./schemas";
 
 export const ANALYTICS_WINDOWS = [7, 30, 90] as const;
 
@@ -216,10 +216,8 @@ export interface RuntimeInfo {
 	cachedChannels: number;
 }
 
-/** Shardlens's state: off unconfigured, waiting for the collector, or sending. */
 export type ShardlensState = "off" | "waiting" | "sending";
 
-/** How the bot's Shardlens analytics are doing, for the owner; it never carries the ingest key. */
 export interface ShardlensStatus {
 	state: ShardlensState;
 	/** The collector's origin, where its own dashboard opens, or null with no address set. */
@@ -234,7 +232,6 @@ export interface ShardlensStatus {
 	lastProblem: { name: string; at: string } | null;
 }
 
-/** What Send now did: whether anything was waiting, and the problem the send hit, if it hit one. */
 export interface ShardlensFlush {
 	sent: number;
 	problem: string | null;
@@ -322,7 +319,7 @@ export function errorRate({ runs, failures }: { runs: number; failures: number }
 	return runs === 0 ? 0 : failures / runs;
 }
 
-/** An IANA zone the runtime knows, which is what the collector accepts; the page sends the reader's own. */
+/** An IANA zone the runtime knows. */
 const timeZone = z
 	.string()
 	.max(64)
@@ -339,15 +336,14 @@ const timeZone = z
 
 export const analyticsZoneQuery = analyticsQuery.extend({ tz: timeZone });
 
-/** A command as the collector names it, which is the bot's own name for it. */
-const commandName = z.string().regex(/^[\w-]{1,32}$/, "must be a command");
+const commandName = z.string().regex(COMMAND_NAME, "must be a command");
 
 export const FUNNEL_WINDOWS = [1, 24, 72, 168] as const;
 
 export const FUNNEL_LIMITS = { minSteps: 2, maxSteps: 5 } as const;
 
 export const funnelQuery = analyticsZoneQuery.extend({
-	/** The commands in order, separated by commas, so a funnel is an address that can be shared. */
+	/** The commands in order, comma-separated. */
 	steps: z
 		.string()
 		.max(200)
@@ -381,7 +377,7 @@ export const MEMBER_TIERS = ["admin", "manager", "member", "dm"] as const;
 
 export interface AudienceReport {
 	days: number;
-	/** People who used the bot each day and how many of them were new, oldest first and zero-filled. */
+	/** Oldest first and zero-filled. */
 	daily: { day: string; users: number; newUsers: number }[];
 	/** Daily users over monthly users, null until the collector has a month to divide by. */
 	stickiness: number | null;
@@ -434,7 +430,6 @@ export interface PanelsReport {
 	forms: PanelFormRow[];
 }
 
-/** Why a command was refused before it ran. */
 export const REFUSAL_REASONS = [
 	"owner_only",
 	"paused",
@@ -482,7 +477,7 @@ export type ChangeWay = (typeof CHANGE_WAYS)[number];
 /** The header the page sends with a write that puts a change back or brings a backup in; anything else is a save. */
 export const CHANGE_WAY_HEADER = "x-testify-via";
 
-/** What the bot does on its own, each counted under its own name so its total outlasts the raw events. */
+/** What the bot does on its own, each the name of the event it is counted under. */
 export const AUTOMATIC_ACTIONS = [
 	"auto_reply",
 	"link_deleted",

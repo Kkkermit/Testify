@@ -1,24 +1,23 @@
-import { type AnalyticsWindow, type GuildUsageRow } from "@testify/shared";
+import { type AnalyticsWindow, type GuildUsageRow, type UsageReport } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
-import { ErrorState } from "@/app/ErrorState";
 import { Warning } from "@/components/form";
-import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
-import { AnalyticsUnavailable, ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
+import { Avatar, Card, Figure, SegmentedControl, UsageBars } from "@/components/primitives";
+import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import {
-	analyticsProblemOf,
+	commandBar,
 	formatMs,
 	percent,
 	screenLabel,
 	searchWith,
 	snowflakeFrom,
-	WINDOWS,
-	commandBar,
 	surfaceBars,
+	WINDOWS,
 } from "@/features/owner/owner.utils";
 import { ActivityView } from "@/features/owner/usage/ActivityView";
 import { JourneysView } from "@/features/owner/usage/JourneysView";
@@ -70,21 +69,26 @@ export function UsageTab({
 }
 
 function FleetUsage({ days }: { days: AnalyticsWindow }): React.JSX.Element {
-	const { t } = useTranslation();
 	const [params] = useSearchParams();
 	const usage = useUsage(days);
 
-	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
-	if (usage.isError) {
-		const problem = analyticsProblemOf(usage.error);
-		return problem === null ? (
-			<ErrorState as="h2" error={usage.error} onRetry={() => void usage.refetch()} />
-		) : (
-			<AnalyticsUnavailable problem={problem} onRetry={() => void usage.refetch()} />
-		);
-	}
+	return (
+		<AnalyticsState query={usage}>
+			{(report) => <FleetFigures report={report} days={days} params={params} />}
+		</AnalyticsState>
+	);
+}
 
-	const report = usage.data;
+function FleetFigures({
+	report,
+	days,
+	params,
+}: {
+	report: UsageReport;
+	days: AnalyticsWindow;
+	params: URLSearchParams;
+}): React.JSX.Element {
+	const { t } = useTranslation();
 
 	return (
 		<div className="flex flex-col gap-4">

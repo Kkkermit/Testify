@@ -2,7 +2,7 @@ import { type Guild, type GuildMember, type VoiceBasedChannel } from "discord.js
 import { type TestifyClient } from "@core/client";
 import { type CommandInput } from "@core/command";
 import { UserFacingError, toError } from "@core/errors";
-import { musicCause, recordEvent } from "@lib/bot/shardlens.util";
+import { LENS_EVENTS, recordEvent, recordMusicProblem } from "@lib/bot/shardlens.util";
 import { reply } from "@lib/discord/reply.util";
 import { type MusicBinaries, type ProblemKind, type Query, type Track } from "@lib/music/music.types";
 import { findBinaries } from "@lib/music/musicBinaries.util";
@@ -83,12 +83,6 @@ function warnHost(request: TrackRequest, kind: ProblemKind): void {
 	if (advice !== null) request.client.logger.warn(advice);
 }
 
-/** A request a service refused, by the service asked and its reason, which is how a flagged host shows up. */
-function countRefusal(request: TrackRequest, asked: Query, reason: ProblemKind): void {
-	const cause = musicCause(asked.source, reason);
-	recordEvent(request.client, "music_refused", { source: asked.source, reason, cause }, request.guild.id);
-}
-
 /** Resolves the query, moving a plain search to SoundCloud when YouTube refuses the host and the owner allows both. */
 async function findTracks(
 	request: TrackRequest,
@@ -104,7 +98,15 @@ async function findTracks(
 				...(asked.kind === "search" ? { results: 1 } : {}),
 			});
 		} catch (error) {
-			if (error instanceof MusicProblemError) countRefusal(request, asked, error.problem.kind);
+			if (error instanceof MusicProblemError) {
+				recordMusicProblem(
+					request.client,
+					LENS_EVENTS.musicRefused,
+					asked.source,
+					error.problem.kind,
+					request.guild.id,
+				);
+			}
 			throw error;
 		}
 	};
@@ -165,11 +167,9 @@ function openSession(guild: Guild, client: TestifyClient): MusicSession {
 /** A track started from its beginning, or given up on with its reason; a retry or a volume change is neither. */
 function countTrack(client: TestifyClient, guildId: string, event: SessionEvent): void {
 	if (event.kind === "track" && !event.resumed) {
-		recordEvent(client, "music_played", { source: event.track.source }, guildId);
+		recordEvent(client, LENS_EVENTS.musicPlayed, { source: event.track.source }, guildId);
 	} else if (event.kind === "failed") {
-		const { source } = event.track;
-		const cause = musicCause(source, event.problem);
-		recordEvent(client, "music_skipped", { source, reason: event.problem, cause }, guildId);
+		recordMusicProblem(client, LENS_EVENTS.musicSkipped, event.track.source, event.problem, guildId);
 	}
 }
 

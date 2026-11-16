@@ -17,7 +17,7 @@ import {
 
 /** Shardlens: analytics the bot sends to a collector its owner runs, attached only once it is configured. */
 
-/** Custom events, one name for each thing counted so each keeps a total; commands on both surfaces are the SDK's. */
+/** One name per thing counted, so each keeps its own total; commands on both surfaces are the SDK's own. */
 export const LENS_EVENTS = {
 	screen: "dashboard_screen",
 	server: "dashboard_server",
@@ -34,19 +34,19 @@ type Surface = "discord" | "dashboard";
 
 /** What each event carries: names the bot chose, never an id, a username or anything somebody typed. */
 interface LensEventProps {
-	music_played: { source: string };
-	music_skipped: { source: string; reason: MusicReason; cause: string };
-	music_refused: { source: string; reason: MusicReason; cause: string };
-	support_answered: { surface: Surface; by: SupportWay; article: string };
-	support_refused: { surface: Surface; by: SupportWay };
-	command_refused: { command: string; reason: RefusalReason; surface: "slash" | "prefix" };
-	dashboard_change: { screen: string; how: ChangeWay };
+	[LENS_EVENTS.musicPlayed]: { source: string };
+	[LENS_EVENTS.musicSkipped]: { source: string; cause: string };
+	[LENS_EVENTS.musicRefused]: { source: string; cause: string };
+	[LENS_EVENTS.supportAnswered]: { surface: Surface; by: SupportWay; article: string };
+	[LENS_EVENTS.supportRefused]: { surface: Surface; by: SupportWay };
+	[LENS_EVENTS.commandRefused]: { command: string; reason: RefusalReason; surface: "slash" | "prefix" };
+	[LENS_EVENTS.dashboardChange]: { screen: string; how: ChangeWay };
 }
 
 const context = (guildId: string | null | undefined): { guildId: string } | undefined =>
 	guildId === null || guildId === undefined ? undefined : { guildId };
 
-/** Counts one event, with the server it happened in as context; never who, since no user is passed. */
+/** Counts one event in the server it happened in; no user is ever passed, so none is counted. */
 export function recordEvent<N extends keyof LensEventProps>(
 	client: TestifyClient,
 	name: N,
@@ -58,13 +58,34 @@ export function recordEvent<N extends keyof LensEventProps>(
 	client.shardlens?.track(event, values, context(guildId));
 }
 
-/** Something the bot did on its own, counted by its name alone. */
 export function recordAction(client: TestifyClient, action: AutomaticAction, guildId?: string | null): void {
 	client.shardlens?.track(action, {}, context(guildId));
 }
 
-/** A track's service and why it was given up on, as one value, so one read shows which service refused what. */
-export const musicCause = (source: string, reason: MusicReason): string => `${source}/${reason}`;
+/** Discord counts a refused slash command as answered, so the refusal is counted apart with its reason. */
+export function recordRefusal(
+	client: TestifyClient,
+	command: string,
+	reason: RefusalReason,
+	surface: "slash" | "prefix",
+	guildId: string | null,
+): void {
+	recordEvent(client, LENS_EVENTS.commandRefused, { command, reason, surface }, guildId);
+}
+
+/** The service and the reason as one value, since a breakdown reads one property at a time. */
+const musicCause = (source: string, reason: MusicReason): string => `${source}/${reason}`;
+
+/** A track the bot gave up on, or a request a service refused. */
+export function recordMusicProblem(
+	client: TestifyClient,
+	event: typeof LENS_EVENTS.musicSkipped | typeof LENS_EVENTS.musicRefused,
+	source: string,
+	reason: MusicReason,
+	guildId: string,
+): void {
+	recordEvent(client, event, { source, cause: musicCause(source, reason) }, guildId);
+}
 
 /** Custom events keep no dimensions, so a view's server is also its own property, which is what can be grouped. */
 export const serverKey = (guildId: string): string => `in_${guildId}`;
@@ -110,7 +131,6 @@ export function startShardlens(client: TestifyClient): Shardlens | null {
 	return lens;
 }
 
-/** The start-up line: where it sends, which is never the key. */
 export function shardlensLine(env: Env): string {
 	const origin = collectorOrigin(env.SHARDLENS_URL);
 	return origin === null ? "Shardlens" : `Shardlens, sending to ${origin}`;
@@ -191,7 +211,7 @@ export function shardlensStatus(client: TestifyClient): ShardlensStatus {
 	};
 }
 
-/** Sends what is queued now rather than at the next five-second flush; null while Shardlens is off. */
+/** Null while Shardlens is off. */
 export async function sendShardlensNow(client: TestifyClient): Promise<ShardlensFlush | null> {
 	const lens = client.shardlens;
 	if (lens === null) return null;

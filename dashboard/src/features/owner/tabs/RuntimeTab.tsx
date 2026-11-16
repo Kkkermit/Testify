@@ -10,7 +10,6 @@ import { cn } from "@/lib/cn";
 import { formatUptime, dateAndTime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
 
-/** The analytics card reads on its own, so a runtime read that fails still leaves it on screen. */
 export function RuntimeTab(): React.JSX.Element {
 	return (
 		<div className="flex flex-col gap-4">

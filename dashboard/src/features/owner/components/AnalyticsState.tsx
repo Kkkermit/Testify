@@ -5,8 +5,8 @@ import { Skeleton } from "@/components/primitives";
 import { AnalyticsUnavailable } from "@/features/owner/components/AnalyticsNotice";
 import { analyticsProblemOf } from "@/features/owner/owner.utils";
 
-/** A section's loading and failure, said the same way in each; a section that failed leaves the rest working. */
-export function SectionState<T>({
+/** A read from Shardlens, with its loading and its failure said the same way on every part of the console. */
+export function AnalyticsState<T>({
 	query,
 	children,
 }: {

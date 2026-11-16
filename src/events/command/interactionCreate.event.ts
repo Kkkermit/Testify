@@ -16,10 +16,10 @@ import { type TestifyClient } from "@core/client";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { readerLanguage, say } from "@core/language";
-import { logCommandUse, measured, recordCommandTime, recordEvent } from "@lib/bot";
+import { logCommandUse, measured, recordCommandTime, recordRefusal } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
-import { commandIsOff, partIsOff, type RefusalReason } from "@testify/shared";
+import { commandIsOff, partIsOff } from "@testify/shared";
 
 type Answerable =
 	ChatInputCommandInteraction | ContextMenuCommandInteraction | MessageComponentInteraction | ModalSubmitInteraction;
@@ -87,7 +87,7 @@ export default defineEvent({
 			const command = client.commands.get(interaction.commandName);
 			const subcommand = interaction.options.getSubcommand(false);
 			if (commandIsOff(client.featuresOff, interaction.commandName, subcommand)) {
-				recordRefusal(client, interaction.commandName, "feature_off", interaction.guildId);
+				recordRefusal(client, interaction.commandName, "feature_off", "slash", interaction.guildId);
 				await refuseSwitchedOff(interaction);
 				return;
 			}
@@ -101,7 +101,7 @@ export default defineEvent({
 
 			const refusal = await checkCommand(interaction, command, client);
 			if (refusal !== null) {
-				recordRefusal(client, command.name, refusal.reason, interaction.guildId);
+				recordRefusal(client, command.name, refusal.reason, "slash", interaction.guildId);
 				await interaction.reply({ embeds: [refusalEmbed(refusal.failure)], flags: MessageFlags.Ephemeral });
 				return;
 			}
@@ -147,8 +147,3 @@ export default defineEvent({
 		await runButton(interaction, () => button.run(interaction, { client, action, args }), client, id);
 	},
 });
-
-/** Discord counts a refused slash command as answered, so the refusal is counted beside it with its reason. */
-function recordRefusal(client: TestifyClient, command: string, reason: RefusalReason, guildId: string | null): void {
-	recordEvent(client, "command_refused", { command, reason, surface: "slash" }, guildId);
-}

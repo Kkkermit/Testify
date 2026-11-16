@@ -3,7 +3,7 @@ import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
-import { recordEvent } from "@lib/bot/shardlens.util";
+import { LENS_EVENTS, recordEvent } from "@lib/bot/shardlens.util";
 import { type SupportContext, type SupportEntry, type SupportPicker } from "@lib/support/support.types";
 import { commandEntries, fillPlaceholders, linkEntries, loadArticles } from "@lib/support/supportArticles.util";
 import { findLeak, secretsOf } from "@lib/support/supportGuard.util";
@@ -85,11 +85,7 @@ export class SupportDesk {
 		this.#now = options.now ?? Date.now;
 	}
 
-	async ask(question: string, context: SupportContext): Promise<SupportReply> {
-		return (await this.answer(question, context)).reply;
-	}
-
-	/** The reply, and whether the model or search chose it, which is all that is counted about a question. */
+	/** The reply, and whether the model or search chose it. */
 	async answer(question: string, context: SupportContext): Promise<{ reply: SupportReply; by: ChosenBy }> {
 		const hits = this.#search.search(question);
 		const { chosen, by } = await this.#choose(question, hits);
@@ -299,7 +295,7 @@ export function supportDesk(client: TestifyClient): SupportDesk {
 	return desk;
 }
 
-/** Whether an answer was found and how, and which article, so the owners see what the desk is used for; never the question. */
+/** Counts an answer by how it was chosen and which article; never the question. */
 export function countAnswer(
 	client: TestifyClient,
 	surface: "discord" | "dashboard",
@@ -307,8 +303,8 @@ export function countAnswer(
 	by: SupportWay,
 	guildId?: string | null,
 ): void {
-	if (reply.answer === null) recordEvent(client, "support_refused", { surface, by }, guildId);
-	else recordEvent(client, "support_answered", { surface, by, article: reply.answer.id }, guildId);
+	if (reply.answer === null) recordEvent(client, LENS_EVENTS.supportRefused, { surface, by }, guildId);
+	else recordEvent(client, LENS_EVENTS.supportAnswered, { surface, by, article: reply.answer.id }, guildId);
 }
 
 export function resetSupportDesk(): void {

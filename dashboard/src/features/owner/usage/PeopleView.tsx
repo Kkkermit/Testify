@@ -1,16 +1,16 @@
 import { type Tally } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Card, Figure, UsageBars } from "@/components/primitives";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { DayBars } from "@/features/owner/components/DayBars";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { DayBars } from "@/features/owner/usage/DayBars";
+import { shareOrDash } from "@/features/owner/owner.utils";
 import { HourHeatmap } from "@/features/owner/usage/HourHeatmap";
-import { SectionState } from "@/features/owner/usage/SectionState";
 import { CONTEXT_LABELS, isTranslated, labelOf, TIER_LABELS } from "@/features/owner/usage/usage.utils";
 import { useAudience } from "@/features/owner/useOwner";
 import { readerTimeZone } from "@/lib/datetime";
-import { formatNumber, formatPercent, languageName } from "@/lib/intl";
+import { formatNumber, languageName } from "@/lib/intl";
 
-/** Who uses the bot: how many a day, when, in which language, and with what standing in their server. */
 export function PeopleView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const audience = useAudience(days, readerTimeZone());
@@ -24,7 +24,7 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 		}));
 
 	return (
-		<SectionState query={audience}>
+		<AnalyticsState query={audience}>
 			{(report) => {
 				const busiest = Math.max(0, ...report.daily.map((day) => day.users));
 				return (
@@ -44,7 +44,7 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 								<Figure
 									className="px-6 py-4"
 									label={t("owner.usageSections.stickiness")}
-									value={report.stickiness === null ? "–" : formatPercent(report.stickiness, 1)}
+									value={shareOrDash(report.stickiness)}
 								/>
 							</dl>
 							<div className="px-6 py-5">
@@ -107,6 +107,6 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 					</div>
 				);
 			}}
-		</SectionState>
+		</AnalyticsState>
 	);
 }

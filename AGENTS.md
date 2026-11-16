@@ -3732,7 +3732,7 @@ wrote. Five things about the history are load-bearing:
 does not check for a newer one. A self-hosted bot that contacts a server on a timer is not something to ship by
 default, and the tab says so in as many words.
 
-**No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
+**No chart library.** `DayBars` is a `<span>` per day with a height, and the numbers behind it are a real
 `<table>` in a `sr-only` `<figcaption>`. The first load's budget — 200 kB gzipped, and it is met exactly — is the
 reason, and a bar is a div with a width.
 

@@ -1,6 +1,7 @@
 import { type OwnerGuildFilter, type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
+import { countOrDash } from "@/features/owner/owner.utils";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
@@ -113,9 +114,4 @@ export function OwnerGuildTable({
 			))}
 		</DataTable>
 	);
-}
-
-/** Null is a count Shardlens could not give, which is not the same as nobody using the server. */
-function countOrDash(count: number | null): string {
-	return count === null ? "—" : formatNumber(count);
 }

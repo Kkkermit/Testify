@@ -1,17 +1,22 @@
 import { type Guild } from "discord.js";
-import { type ZodType } from "zod";
 import { type TestifyClient } from "@core/client";
 import { LENS_EVENTS, serverKey } from "@lib/bot/shardlens.util";
 import {
+	ALL_ROWS,
 	AnalyticsUnavailable,
+	askFor,
 	commandsAnswer,
+	dailySeries,
+	eventProps,
+	FAILED_OUTCOMES,
 	propsAnswer,
-	rangeOf,
 	readerFor,
 	seriesAnswer,
 	serverAnswer,
+	serverFilter,
 	type Spec,
 	topAnswer,
+	windowDays,
 } from "@lib/bot/shardlensReader.util";
 import {
 	type AnalyticsProblem,
@@ -26,10 +31,6 @@ import {
 /** The owner console's usage figures, put together from what Shardlens answers. */
 
 const TOP = 10;
-/** As many rows as the collector hands back for one ranking. */
-const ALL = 500;
-const DAY_MS = 24 * 60 * 60 * 1000;
-const FAILED = ["error", "timeout", "no_response"];
 const PREFIX_KIND = "message_command";
 const SNOWFLAKE = /^\d{17,20}$/;
 
@@ -57,13 +58,6 @@ function rowsOf(rows: { key: string; value: number | null }[]): Counts {
 }
 
 const total = (counts: Counts): number => [...counts.values()].reduce((sum, count) => sum + count, 0);
-
-/** Every day in the window, oldest first and in UTC, so a quiet day is a zero rather than a hole in the chart. */
-export function windowDays(days: number, now = Date.now()): string[] {
-	return Array.from({ length: days }, (_, index) =>
-		new Date(now - (days - 1 - index) * DAY_MS).toISOString().slice(0, 10),
-	);
-}
 
 interface Point {
 	t: string;
@@ -133,25 +127,13 @@ function knownGuilds(client: TestifyClient, counts: Counts): GuildUsageRow[] {
 		.slice(0, TOP);
 }
 
-const daily = (metric: string, extra: Spec = {}): Spec => ({
-	kind: "series",
-	metric,
-	interval: "day",
-	timezone: "UTC",
-	...extra,
-});
-
-const props = (name: string, prop: string): Spec => ({ kind: "eventProps", name, prop });
-
-const serverFilter = (guildId: string): Spec[] => [{ field: "guild", op: "eq", value: guildId }];
-
 /** Runs by what started them, which is how slash commands and right-click actions are told from prefix commands. */
 const byKind = (filters: Spec[] = []): Spec => ({
 	kind: "top",
 	metric: "interactions",
 	groupBy: "kind",
 	filters,
-	limit: ALL,
+	limit: ALL_ROWS,
 });
 
 /** The SDK's `message_command` is a prefix run; every other kind of command is an interaction. */
@@ -167,17 +149,16 @@ function surfacesOf(rows: { key: string; value: number | null }[]): { slash: num
 
 export async function usageReport(client: TestifyClient, days: number, now = Date.now()): Promise<UsageReport> {
 	const reader = readerFor(client);
-	const range = rangeOf(days, now);
-	const ask = <T>(spec: Spec, schema: ZodType<T>): Promise<T> => reader.query({ ...spec, range }, schema);
+	const ask = askFor(client, days, now);
 
 	const [commands, typical, byDay, kinds, byGuild, screens, dashboardByGuild, meta] = await Promise.all([
 		ask({ kind: "commands" }, commandsAnswer),
-		ask({ kind: "top", metric: "interactions", groupBy: "command", stat: "p50", limit: ALL }, topAnswer),
-		ask(daily("interactions", { groupBy: "outcome" }), seriesAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "command", stat: "p50", limit: ALL_ROWS }, topAnswer),
+		ask(dailySeries("interactions", { groupBy: "outcome" }), seriesAnswer),
 		ask(byKind(), topAnswer),
-		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL }, topAnswer),
-		ask(props(LENS_EVENTS.screen, "route"), propsAnswer),
-		ask(props(LENS_EVENTS.server, "server"), propsAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }, topAnswer),
+		ask(eventProps(LENS_EVENTS.screen, "route"), propsAnswer),
+		ask(eventProps(LENS_EVENTS.server, "server"), propsAnswer),
 		reader.meta(),
 	]);
 
@@ -239,25 +220,24 @@ export async function guildUsageReport(
 	now = Date.now(),
 ): Promise<GuildUsageReport> {
 	const reader = readerFor(client);
-	const range = rangeOf(days, now);
-	const ask = <T>(spec: Spec, schema: ZodType<T>): Promise<T> => reader.query({ ...spec, range }, schema);
+	const ask = askFor(client, days, now);
 	const here = serverFilter(guild.id);
 
 	const [byDay, byCommand, failedByCommand, kinds, dashboard, server, meta] = await Promise.all([
-		ask(daily("interactions", { groupBy: "outcome", filters: here }), seriesAnswer),
-		ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL }, topAnswer),
+		ask(dailySeries("interactions", { groupBy: "outcome", filters: here }), seriesAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL_ROWS }, topAnswer),
 		ask(
 			{
 				kind: "top",
 				metric: "interactions",
 				groupBy: "command",
-				filters: [...here, { field: "outcome", op: "in", value: FAILED }],
-				limit: ALL,
+				filters: [...here, { field: "outcome", op: "in", value: FAILED_OUTCOMES }],
+				limit: ALL_ROWS,
 			},
 			topAnswer,
 		),
 		ask(byKind(here), topAnswer),
-		ask(props(LENS_EVENTS.server, serverKey(guild.id)), propsAnswer),
+		ask(eventProps(LENS_EVENTS.server, serverKey(guild.id)), propsAnswer),
 		reader.query({ kind: "server", guild: guild.id }, serverAnswer),
 		reader.meta(),
 	]);
@@ -292,12 +272,11 @@ export interface GuildActivity {
 }
 
 export async function guildActivity(client: TestifyClient, days: number, now = Date.now()): Promise<GuildActivity> {
-	const reader = readerFor(client);
-	const range = rangeOf(days, now);
+	const ask = askFor(client, days, now);
 
 	const [commands, dashboard] = await Promise.all([
-		reader.query({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL, range }, topAnswer),
-		reader.query({ ...props(LENS_EVENTS.server, "server"), range }, propsAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }, topAnswer),
+		ask(eventProps(LENS_EVENTS.server, "server"), propsAnswer),
 	]);
 
 	return {
@@ -313,15 +292,11 @@ export async function oneGuildActivity(
 	days: number,
 	now = Date.now(),
 ): Promise<{ commands: number; dashboard: number }> {
-	const reader = readerFor(client);
-	const range = rangeOf(days, now);
+	const ask = askFor(client, days, now);
 
 	const [commands, dashboard] = await Promise.all([
-		reader.query(
-			{ kind: "top", metric: "interactions", groupBy: "outcome", filters: serverFilter(guildId), range },
-			topAnswer,
-		),
-		reader.query({ ...props(LENS_EVENTS.server, serverKey(guildId)), range }, propsAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "outcome", filters: serverFilter(guildId) }, topAnswer),
+		ask(eventProps(LENS_EVENTS.server, serverKey(guildId)), propsAnswer),
 	]);
 
 	return { commands: total(rowsOf(commands.rows)), dashboard: total(countsOf(dashboard.values)) };

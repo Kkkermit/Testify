@@ -11,7 +11,6 @@ const STATES: Record<ShardlensState, string> = {
 		"Sending every five seconds. Who ran each command is named only while the collector is in audit mode, and hashed otherwise.",
 };
 
-/** Never the key: the status carries none, and the collector is named by its origin. */
 export function shardlensEmbed(status: ShardlensStatus, note?: string) {
 	const lines = [STATES[status.state]];
 	if (note !== undefined) lines.unshift(note, "");
