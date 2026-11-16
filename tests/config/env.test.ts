@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { envFile, isCollectorUrl, loadEnv, resetEnv } from "@config/env";
+import { envFile, loadEnv, resetEnv } from "@config/env";
 
 const VALID = {
 	DISCORD_TOKEN: "a-token",
@@ -185,73 +185,24 @@ describe("the Shardlens settings", () => {
 
 	it("is off with nothing set", () => {
 		setEnv(VALID);
-		const env = loadEnv();
 
-		expect(env.SHARDLENS_URL).toBeUndefined();
-		expect(env.SHARDLENS_DRY_RUN).toBe(false);
+		expect(loadEnv().SHARDLENS_URL).toBeUndefined();
 	});
 
-	/** The SDK sends to nothing else, so an address it would refuse is caught at start-up rather than silently ignored. */
-	it("takes HTTPS, or plain HTTP to this machine only, and never an address holding credentials", () => {
-		const cases: [string, boolean][] = [
-			["https://stats.example.com", true],
-			["http://localhost:8080", true],
-			["http://127.0.0.1:8080", true],
-			["http://[::1]:8080", true],
-			["http://stats.example.com", false],
-			["https://user:pass@stats.example.com", false],
-			["https://:slk_ingest_x@stats.example.com", false],
-			["ftp://stats.example.com", false],
-			["stats.example.com", false],
+	/** The SDK checks its own settings and warns, so nothing about Shardlens may stop the bot starting. */
+	it("starts with any Shardlens settings, however wrong, alone or together", () => {
+		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
+		const cases = [
+			{ SHARDLENS_URL: "http://stats.example.com" },
+			{ SHARDLENS_URL: "not an address", SHARDLENS_INGEST_KEY: read },
+			{ SHARDLENS_INGEST_KEY: "wrong" },
+			{ SHARDLENS_READ_KEY: read },
 		];
 
-		const wrong = cases.filter(([url, ok]) => isCollectorUrl(url) !== ok).map(([url]) => url);
-		expect(wrong).toEqual([]);
-	});
-
-	/** Each key does one job, so one in the other's place is caught at start-up, and never repeated in the error. */
-	it("refuses each key in the other's place, without repeating it", () => {
-		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
-		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: read });
-		expect(() => loadEnv()).toThrow(/SHARDLENS_INGEST_KEY/);
-		expect(() => loadEnv()).not.toThrow(new RegExp(read));
-
-		setEnv({
-			...VALID,
-			SHARDLENS_URL: "https://stats.example.com",
-			SHARDLENS_INGEST_KEY: KEY,
-			SHARDLENS_READ_KEY: KEY,
-		});
-		expect(() => loadEnv()).toThrow(/SHARDLENS_READ_KEY/);
-		expect(() => loadEnv()).not.toThrow(new RegExp(KEY));
-	});
-
-	/** Reading needs somewhere to read from; the console would otherwise say analytics are off with a key set. */
-	it("takes a read key beside the address, and names the address when it is missing", () => {
-		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
-		setEnv({
-			...VALID,
-			SHARDLENS_URL: "https://stats.example.com",
-			SHARDLENS_INGEST_KEY: KEY,
-			SHARDLENS_READ_KEY: read,
-		});
-		expect(loadEnv().SHARDLENS_READ_KEY).toBe(read);
-
-		setEnv({ ...VALID, SHARDLENS_READ_KEY: read });
-		expect(() => loadEnv()).toThrow(/SHARDLENS_URL is required when SHARDLENS_READ_KEY is set/);
-	});
-
-	it("names the other setting when only one is set", () => {
-		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com" });
-		expect(() => loadEnv()).toThrow(/SHARDLENS_INGEST_KEY is required when SHARDLENS_URL is set/);
-
-		setEnv({ ...VALID, SHARDLENS_INGEST_KEY: KEY });
-		expect(() => loadEnv()).toThrow(/SHARDLENS_URL is required when SHARDLENS_INGEST_KEY is set/);
-	});
-
-	it("runs a dry run with neither, since nothing is sent", () => {
-		setEnv({ ...VALID, SHARDLENS_DRY_RUN: "true" });
-		expect(loadEnv().SHARDLENS_DRY_RUN).toBe(true);
+		for (const settings of cases) {
+			setEnv({ ...VALID, ...settings });
+			expect(() => loadEnv()).not.toThrow();
+		}
 	});
 
 	it("accepts a complete configuration", () => {

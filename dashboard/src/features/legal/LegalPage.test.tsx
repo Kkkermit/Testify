@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 15 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 16 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -113,8 +113,10 @@ describe("the legal pages", () => {
 		expect(botSource("src/lib/account/accountActions.util.ts")).toContain("shardlens?.forgetUser(userId)");
 		expect(text).toMatch(/the names of the options you filled in but never what you typed/);
 		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
-		// A prefix run is a custom event, which the SDK never sends with an actor.
-		expect(text).toMatch(/A prefix command is never named this way/);
+		// A prefix run is the SDK's own message command, sent with its actor in audit mode like any other.
+		expect(lens).toMatch(/trackMessageCommand\(message, \{\s*command: run\.command,/);
+		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);
+		expect(text).not.toMatch(/prefix command is never named/i);
 		expect(text).toMatch(/under your hashed id, and in audit mode under your user id as well/);
 		// `markNoticesSeen` and `markNoticeHinted` write two times against a user id, in a record tied to no server.
 		expect(text).toMatch(

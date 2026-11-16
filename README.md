@@ -360,9 +360,8 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `CHANNEL_EVAL_LOG`           |    —     | Every `/eval` run with its code, and anyone else trying an owner command. Else the error channel       |
 | `SUPPORT_AI_API_KEY`         |    —     | Lets `/ask` use Claude to pick the right help article. Without it, search alone answers                |
 | `SHARDLENS_URL`              |    —     | A [Shardlens](https://github.com/Kkkermit/Shardlens) collector you run, for analytics. Off while blank |
-| `SHARDLENS_INGEST_KEY`       |    —     | That collector's ingest key, `slk_ingest_…`. Needed with the address, and never its read key           |
+| `SHARDLENS_INGEST_KEY`       |    —     | That collector's ingest key, `slk_ingest_…`, from the `bot.env` its `init` writes. Never its read key  |
 | `SHARDLENS_READ_KEY`         |    —     | Its read key, `slk_read_…`, for the owner console's usage. Kept by the bot, never sent to a browser    |
-| `SHARDLENS_DRY_RUN`          |    —     | `true` writes what would be sent to the log instead, so you can see it before switching it on          |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks. The music and dashboard
 variables are covered in their own sections below.

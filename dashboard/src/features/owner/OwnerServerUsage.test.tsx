@@ -127,7 +127,7 @@ describe("one server's usage", () => {
 
 		refuse("analytics_off");
 		const { unmount } = renderAt(DRILL_DOWN);
-		expect(await screen.findByText(/has no read key for it yet/)).toBeInTheDocument();
+		expect(await screen.findByText(/has no read key for it, or no address/)).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
 		unmount();
 

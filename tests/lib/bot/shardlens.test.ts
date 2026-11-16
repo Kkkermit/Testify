@@ -1,5 +1,5 @@
 import { createShardlens } from "@shardlens/discordjs";
-import { ButtonInteraction, ComponentType, InteractionType } from "discord.js";
+import { ButtonInteraction, ChannelType, ComponentType, InteractionType, type Message } from "discord.js";
 import { type Env } from "@config/env";
 import { TestifyClient } from "@core/client";
 import { type Command } from "@core/command";
@@ -14,14 +14,24 @@ import {
 	startShardlens,
 } from "@lib/bot/shardlens.util";
 
+// The bot has no dry-run setting, so a test that reads what would be sent asks the SDK for one itself.
+let mockPrint = true;
 jest.mock("@shardlens/discordjs", () => {
 	const actual = jest.requireActual<{ createShardlens: typeof createShardlens }>("@shardlens/discordjs");
-	return { ...actual, createShardlens: jest.fn(actual.createShardlens) };
+	return {
+		...actual,
+		createShardlens: jest.fn(
+			(client: Parameters<typeof createShardlens>[0], options: Parameters<typeof createShardlens>[1]) =>
+				actual.createShardlens(client, mockPrint ? { ...options, dryRun: true } : options),
+		),
+	};
 });
 
 const USER = "111111111111111111";
 const GUILD = "222222222222222222";
 const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
+const CONFIGURED = { SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: KEY };
+const TYPED = "t?bal view secret words";
 
 interface Said {
 	info: string[];
@@ -37,7 +47,7 @@ function clientWith(settings: Partial<Env>): { client: TestifyClient; said: Said
 		info: jest.fn((message: unknown) => said.info.push(String(message))),
 		warn: jest.fn((message: unknown) => said.warn.push(String(message))),
 	} as unknown as Logger;
-	const env = { DISCORD_OWNER_IDS: [], DISABLED_FEATURES: [], NODE_ENV: "test", SHARDLENS_DRY_RUN: false, ...settings };
+	const env = { DISCORD_OWNER_IDS: [], DISABLED_FEATURES: [], NODE_ENV: "test", ...settings };
 	return { client: new TestifyClient(env as unknown as Env, logger), said };
 }
 
@@ -57,6 +67,21 @@ function press(client: TestifyClient): ButtonInteraction {
 	return interaction;
 }
 
+/** A message that ran a prefix command, carrying text the SDK must never read. */
+function prefixMessage(client: TestifyClient): Message {
+	return {
+		client,
+		content: TYPED,
+		createdTimestamp: Date.now(),
+		author: { id: USER, username: "tester", avatar: null },
+		guildId: GUILD,
+		guild: { id: GUILD, preferredLocale: "en-GB", shardId: 0 },
+		channel: { type: ChannelType.GuildText },
+		member: null,
+		inGuild: () => true,
+	} as unknown as Message;
+}
+
 /** A dry run makes its own salt a moment after it starts, and an event with a user waits for it. */
 async function salted(client: TestifyClient): Promise<void> {
 	while (client.shardlens?.stats().ready !== true) await new Promise((resolve) => setImmediate(resolve));
@@ -65,6 +90,7 @@ async function salted(client: TestifyClient): Promise<void> {
 const running: TestifyClient[] = [];
 
 afterEach(async () => {
+	mockPrint = true;
 	await Promise.all(running.splice(0).map(async (client) => client.shardlens?.shutdown()));
 });
 
@@ -80,19 +106,28 @@ describe("startShardlens", () => {
 		await client.destroy();
 	});
 
+	/** The SDK checks its own settings and warns, so a wrong one must never be the reason the bot does not start. */
+	it("starts with settings Shardlens cannot use, and says so only through the SDK", () => {
+		const { client } = clientWith({ SHARDLENS_URL: "not an address", SHARDLENS_INGEST_KEY: "slk_read_wrong" });
+		running.push(client);
+
+		expect(() => startShardlens(client)).not.toThrow();
+		expect(shardlensStatus(client)).toMatchObject({ collector: null });
+		expect(shardlensLine(client.env)).toBe("Shardlens");
+	});
+
 	it("attaches once configured, and tags what the SDK says", async () => {
-		const { client, said } = clientWith({ SHARDLENS_DRY_RUN: true });
+		const { client, said } = clientWith(CONFIGURED);
 		running.push(client);
 
 		expect(startShardlens(client)).toBe(client.shardlens);
 		await salted(client);
-		recordPrefixRun(client, {
+		recordPrefixRun(client, prefixMessage(client), {
 			command: "help",
 			subcommand: null,
-			ok: true,
 			durationMs: 1,
-			userId: USER,
-			guildId: null,
+			ok: true,
+			error: undefined,
 		});
 		await sendShardlensNow(client);
 
@@ -104,12 +139,13 @@ describe("startShardlens", () => {
 describe("what the SDK is started with", () => {
 	/** Audit mode names who ran each command once the collector agrees; option values must still never leave. */
 	it("asks for audit mode and records no option values", () => {
-		const { client } = clientWith({ SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: KEY });
+		const { client } = clientWith(CONFIGURED);
 		running.push(client);
 		startShardlens(client);
 
 		const options = jest.mocked(createShardlens).mock.calls.at(-1)?.[1];
-		expect(options).toMatchObject({ endpoint: "https://stats.example.com", apiKey: KEY, dryRun: false });
+		expect(options).toMatchObject({ endpoint: "https://stats.example.com", apiKey: KEY });
+		expect(options?.dryRun).toBeUndefined();
 		expect(options?.mode).toBe("audit");
 		expect(options?.captureOptionValues).toBeUndefined();
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
@@ -117,47 +153,52 @@ describe("what the SDK is started with", () => {
 });
 
 describe("recordPrefixRun", () => {
-	/** A prefix run is a custom event, and the person running it may only ever leave the bot as a hash. */
-	it("sends the command and how it went, with the user hashed and never in the properties", async () => {
-		const { client, said } = clientWith({ SHARDLENS_DRY_RUN: true });
+	/** Only the SDK's own message commands are counted beside slash commands, and the text typed must never leave. */
+	it("reports the command it matched as a message command, by its own name and never by what was typed", async () => {
+		const { client, said } = clientWith(CONFIGURED);
 		running.push(client);
 		startShardlens(client);
 		await salted(client);
 
-		recordPrefixRun(client, {
+		recordPrefixRun(client, prefixMessage(client), {
 			command: "balance",
 			subcommand: "view",
-			ok: false,
 			durationMs: 12.6,
-			userId: USER,
-			guildId: GUILD,
+			ok: false,
+			error: new TypeError("the words somebody typed"),
 		});
 		await sendShardlensNow(client);
 
-		const sent = said.info.find((line) => line.includes('"prefix_command"'));
+		const sent = said.info.find((line) => line.includes('"message_command"'));
 		expect(sent).toBeDefined();
 		const event = JSON.parse(sent?.slice(sent.indexOf("{")) ?? "{}") as Record<string, unknown>;
 		expect(event).toMatchObject({
-			type: "custom",
-			name: "prefix_command",
-			props: { command: "balance", subcommand: "view", outcome: "error", duration_ms: 13 },
+			type: "message_command",
+			command: "balance",
+			sub: "view",
+			outcome: "error",
+			errorClass: "TypeError",
+			handlerMs: 13,
 			guild: GUILD,
 		});
 		expect(event.user).toMatch(/^h1:/);
-		expect(said.info.join("\n")).not.toContain(USER);
+		const everything = said.info.join("\n");
+		expect(everything).not.toContain(USER);
+		expect(everything).not.toContain("secret words");
+		expect(everything).not.toContain("the words somebody typed");
+		expect(said.info.some((line) => line.includes('"custom"'))).toBe(false);
 	});
 
 	it("does nothing while Shardlens is off", async () => {
 		const { client } = clientWith({});
 
 		expect(() => {
-			recordPrefixRun(client, {
+			recordPrefixRun(client, prefixMessage(client), {
 				command: "help",
 				subcommand: null,
-				ok: true,
 				durationMs: 1,
-				userId: USER,
-				guildId: null,
+				ok: true,
+				error: undefined,
 			});
 		}).not.toThrow();
 		await client.destroy();
@@ -166,7 +207,7 @@ describe("recordPrefixRun", () => {
 
 describe("measured", () => {
 	it("runs the handler and hands back its own error unchanged, so the bot's error handling still runs", async () => {
-		const { client } = clientWith({ SHARDLENS_DRY_RUN: true });
+		const { client } = clientWith(CONFIGURED);
 		running.push(client);
 		startShardlens(client);
 		const failure = new Error("boom");
@@ -179,7 +220,7 @@ describe("measured", () => {
 
 	/** The wrap is what times the handler, so an interaction it never saw would be recorded without a handler time. */
 	it("hands a real interaction to Shardlens, and only a real one", async () => {
-		const { client } = clientWith({ SHARDLENS_DRY_RUN: true });
+		const { client } = clientWith(CONFIGURED);
 		running.push(client);
 		startShardlens(client);
 
@@ -205,7 +246,7 @@ describe("measured", () => {
 describe("the bot's runners", () => {
 	/** Shardlens times a handler only through the wrap, so a runner that skipped it would report no handler times. */
 	it("hand commands and buttons to Shardlens as they run", async () => {
-		const { client } = clientWith({ SHARDLENS_DRY_RUN: true });
+		const { client } = clientWith(CONFIGURED);
 		running.push(client);
 		startShardlens(client);
 		const command = { name: "ping", description: "Pings.", category: "fun", run: jest.fn(() => Promise.resolve()) };
@@ -231,6 +272,7 @@ describe("shardlensStatus", () => {
 
 	/** The page and the command both show this, so the ingest key must never be in it, nor anything but the origin. */
 	it("names the collector by its origin and never carries the key", async () => {
+		mockPrint = false;
 		const { client } = clientWith({
 			SHARDLENS_URL: "https://stats.example.com/v1/?token=x#y",
 			SHARDLENS_INGEST_KEY: KEY,
@@ -244,30 +286,34 @@ describe("shardlensStatus", () => {
 		expect(JSON.stringify(await sendShardlensNow(client))).not.toContain("slk_");
 	});
 
-	it("reports a dry run as one, with what it has printed counted as sent", async () => {
-		const { client } = clientWith({ SHARDLENS_DRY_RUN: true });
+	it("counts what it sent, and has nothing waiting after", async () => {
+		const { client } = clientWith(CONFIGURED);
 		running.push(client);
 		startShardlens(client);
 		await salted(client);
-		recordPrefixRun(client, {
+		recordPrefixRun(client, prefixMessage(client), {
 			command: "help",
 			subcommand: null,
-			ok: true,
 			durationMs: 1,
-			userId: USER,
-			guildId: null,
+			ok: true,
+			error: undefined,
 		});
 
 		const flush = await sendShardlensNow(client);
-		expect(flush).toMatchObject({ problem: null, status: { state: "dryRun", queued: 0 } });
+		expect(flush).toMatchObject({ problem: null, status: { state: "sending", queued: 0 } });
+		expect(flush?.sent).toBeGreaterThan(0);
 	});
 });
 
 describe("shardlensLine", () => {
-	it("names where it sends and never the key", () => {
-		const env = { SHARDLENS_URL: "https://stats.example.com/x", SHARDLENS_INGEST_KEY: KEY, SHARDLENS_DRY_RUN: false };
+	/** The read key goes where this address points, so one it may not go to is named as nothing at all. */
+	it("names where it sends and never the key, nor an address the key may not go to", () => {
+		const line = (url: string): string =>
+			shardlensLine({ SHARDLENS_URL: url, SHARDLENS_INGEST_KEY: KEY } as unknown as Env);
 
-		expect(shardlensLine(env as unknown as Env)).toBe("Shardlens, sending to https://stats.example.com");
-		expect(shardlensLine({ ...env, SHARDLENS_DRY_RUN: true } as unknown as Env)).toMatch(/dry run/);
+		expect(line("https://stats.example.com/x")).toBe("Shardlens, sending to https://stats.example.com");
+		expect(line("http://localhost:8080")).toBe("Shardlens, sending to http://localhost:8080");
+		expect(line("http://stats.example.com")).toBe("Shardlens");
+		expect(line("https://user:pass@stats.example.com")).toBe("Shardlens");
 	});
 });

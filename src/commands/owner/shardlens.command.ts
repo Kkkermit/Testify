@@ -6,7 +6,6 @@ import { type ShardlensFlush, type ShardlensState, type ShardlensStatus } from "
 
 const STATES: Record<ShardlensState, string> = {
 	off: "Off. Nothing is attached and nothing is sent. Set `SHARDLENS_URL` and `SHARDLENS_INGEST_KEY` to send to a collector you run.",
-	dryRun: "A dry run. What would be sent is written to the bot's log instead, and nothing leaves the bot.",
 	waiting: "Waiting for the collector to answer. Events wait in memory and go once it does.",
 	sending:
 		"Sending every five seconds. Who ran each command is named only while the collector is in audit mode, and hashed otherwise.",
@@ -49,7 +48,7 @@ export function sendNote(flushed: ShardlensFlush): string {
 		return `Could not send (\`${flushed.problem}\`). It keeps the events and tries again on its own.`;
 	}
 	if (flushed.sent === 0) return "Nothing was waiting to send.";
-	return flushed.status.state === "dryRun" ? "Written to the bot's log." : "Sent what was waiting.";
+	return "Sent what was waiting.";
 }
 
 export default defineCommand({

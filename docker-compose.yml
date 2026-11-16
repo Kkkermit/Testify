@@ -58,7 +58,6 @@ services:
       SHARDLENS_URL: ${SHARDLENS_URL:-}
       SHARDLENS_INGEST_KEY: ${SHARDLENS_INGEST_KEY:-}
       SHARDLENS_READ_KEY: ${SHARDLENS_READ_KEY:-}
-      SHARDLENS_DRY_RUN: ${SHARDLENS_DRY_RUN:-false}
     ports:
       # Bound to the host's loopback: an admin panel reachable from the internet is not a default.
       # Put a reverse proxy in front and set DASHBOARD_TRUST_PROXY=true to expose it deliberately.

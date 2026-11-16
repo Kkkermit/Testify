@@ -9,16 +9,6 @@ const id = z.string().regex(/^\d{17,20}$/, "should be a Discord ID (17-20 digits
 /** `true`/`false` as written in a .env file. `z.coerce.boolean()` reads "false" as true. */
 const flag = z.enum(["true", "false"]).transform((value) => value === "true");
 
-const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
-
-/** What the Shardlens SDK will send to: HTTPS, or plain HTTP to this machine, and never a key inside the address. */
-export function isCollectorUrl(value: string): boolean {
-	if (!URL.canParse(value)) return false;
-	const url = new URL(value);
-	if (url.username !== "" || url.password !== "") return false;
-	return url.protocol === "https:" || (url.protocol === "http:" && LOOPBACK.has(url.hostname));
-}
-
 const fields = z.object({
 	// Required.
 	DISCORD_TOKEN: z.string().min(1, "is required — copy it from the Developer Portal"),
@@ -90,44 +80,18 @@ const fields = z.object({
 	SUPPORT_AI_API_KEY: z.string().min(1).optional(),
 	SUPPORT_AI_MODEL: z.string().min(1).default("claude-opus-5"),
 
-	// Shardlens: analytics sent to a collector the bot's owner runs. Off while both are blank.
-	SHARDLENS_URL: z
-		.string()
-		.refine(isCollectorUrl, "should be https://, or http:// to localhost, with no username or password in it")
-		.optional(),
-	SHARDLENS_INGEST_KEY: z
-		.string()
-		.regex(/^slk_ingest_\S+$/, "should be the collector's ingest key, starting slk_ingest_, never its read key")
-		.optional(),
+	// Shardlens: analytics sent to a collector the bot's owner runs. Off while both are blank, and never a reason not
+	// to start: the SDK checks them itself and warns.
+	SHARDLENS_URL: z.string().optional(),
+	SHARDLENS_INGEST_KEY: z.string().optional(),
 	// Read-only, for the owner console's analytics. Held by the bot and never sent to a browser.
-	SHARDLENS_READ_KEY: z
-		.string()
-		.regex(/^slk_read_\S+$/, "should be the collector's read key, starting slk_read_")
-		.optional(),
-	SHARDLENS_DRY_RUN: flag.default(false),
+	SHARDLENS_READ_KEY: z.string().optional(),
 });
 
 /** Every variable name, so the support assistant can refuse to repeat one. */
 export const ENV_KEYS: readonly string[] = Object.keys(fields.shape);
 
 const schema = fields.superRefine((env, ctx) => {
-	const shardlens = ["SHARDLENS_URL", "SHARDLENS_INGEST_KEY"] as const;
-	if (!env.SHARDLENS_DRY_RUN && shardlens.some((key) => env[key] !== undefined)) {
-		for (const key of shardlens) {
-			if (env[key] === undefined) {
-				ctx.addIssue({
-					code: "custom",
-					path: [key],
-					message: `is required when ${shardlens.find((other) => other !== key)} is set`,
-				});
-			}
-		}
-	}
-
-	if (env.SHARDLENS_READ_KEY !== undefined && env.SHARDLENS_URL === undefined) {
-		ctx.addIssue({ code: "custom", path: ["SHARDLENS_URL"], message: "is required when SHARDLENS_READ_KEY is set" });
-	}
-
 	if (!env.DASHBOARD_ENABLED) return;
 
 	for (const key of ["DISCORD_CLIENT_SECRET", "DASHBOARD_BASE_URL", "DASHBOARD_SESSION_SECRET"] as const) {

@@ -13,6 +13,17 @@ const MAX_CACHED = 200;
 const MINUTE_MS = 60_000;
 const DAY_MS = 24 * 60 * MINUTE_MS;
 
+const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/** Where the collector is, if it is somewhere the read key may go: HTTPS, or HTTP to this machine, with no login in it. */
+export function collectorOrigin(value: string | undefined): string | null {
+	if (value === undefined || !URL.canParse(value)) return null;
+	const url = new URL(value);
+	if (url.username !== "" || url.password !== "") return null;
+	const safe = url.protocol === "https:" || (url.protocol === "http:" && LOOPBACK.has(url.hostname));
+	return safe ? url.origin : null;
+}
+
 export class AnalyticsUnavailable extends Error {
 	constructor(readonly problem: AnalyticsProblem) {
 		super(`Shardlens analytics are unavailable: ${problem}`);
@@ -72,12 +83,12 @@ export class ShardlensReader {
 	readonly #cache = new Map<string, { at: number; answer: Promise<unknown> }>();
 
 	constructor(env: Pick<Env, "SHARDLENS_URL" | "SHARDLENS_READ_KEY">, now: () => number = Date.now) {
-		this.#endpoint = env.SHARDLENS_URL === undefined ? null : new URL(env.SHARDLENS_URL).origin;
+		this.#endpoint = collectorOrigin(env.SHARDLENS_URL);
 		this.#key = env.SHARDLENS_READ_KEY ?? null;
 		this.#now = now;
 	}
 
-	/** The collector's origin, where its own dashboard opens; null until one is set. */
+	/** The collector's origin, where its own dashboard opens; null until one the key may go to is set. */
 	get collector(): string | null {
 		return this.#endpoint;
 	}

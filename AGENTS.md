@@ -96,7 +96,7 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report, suggestion and eval — see
 [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
-`SHARDLENS_URL`, `SHARDLENS_INGEST_KEY`, `SHARDLENS_READ_KEY` and `SHARDLENS_DRY_RUN` (analytics to a collector the
+`SHARDLENS_URL`, `SHARDLENS_INGEST_KEY` and `SHARDLENS_READ_KEY` (analytics to a collector the
 owner runs, and the owner console's usage read back from it — see
 [§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)),
 `SITE_ENABLED` and `SITE_GITHUB_TOKEN` (the website, on unless switched off — see
@@ -2268,30 +2268,36 @@ until somebody touched one. The `giveaways` job creates it five seconds after st
 ### Analytics go to a Shardlens collector the owner runs, and only the owners see how it is doing
 
 `@shardlens/discordjs` is attached by `startShardlens` in `src/lib/bot/shardlens.util.ts`, before login, and only
-when `SHARDLENS_URL`, `SHARDLENS_INGEST_KEY` or `SHARDLENS_DRY_RUN` is set: an install that never asked gains no
-listener, no timer and no warning. **It is the bot's only analytics.** Nothing analytic is written to MongoDB: the
+when `SHARDLENS_URL` or `SHARDLENS_INGEST_KEY` is set: an install that never asked gains no listener, no timer and
+no warning. **It is the bot's only analytics.** Nothing analytic is written to MongoDB: the
 owner console's Usage tab, its per-server drill-down and the server list's counts are read back from the collector
 (see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). Seven things about it are load-bearing:
 
-- **The settings are checked at start-up, not left to the SDK.** `isCollectorUrl` in `env.ts` takes HTTPS, or plain
-  HTTP to this machine, and never an address with credentials in it. The ingest key must start `slk_ingest_` and the
-  read key `slk_read_`, so neither can sit in the other's place, and one setting without its partner names the
-  missing one. A dry run needs neither, since it sends nothing and writes each event to the log at `info` instead.
+- **The settings are optional strings and nothing more, and can never stop the bot starting.** The SDK checks its
+  own address and key, logs one `[SHARDLENS]` warning and sends nothing when either is wrong, so `env.ts` adds no
+  format check and no "both or neither" rule; `env.test.ts` fails if one comes back. The read key is the bot's own, so
+  `collectorOrigin` in `shardlensReader.util.ts` is where it is guarded: it goes only to HTTPS, or plain HTTP to this
+  machine, and never to an address with a login in it, and the reader is `off` for anything else. There is no dry-run
+  setting; to see what would be sent, pass `dryRun: true` to `createShardlens` once by hand.
 - **Audit mode is asked for, and the collector decides.** `startShardlens` passes `mode: "audit"`, so once the
   collector is in audit mode too, each interaction carries who ran it — user id, username, avatar — and the collector
   keeps that encrypted for its own Activity page. Until the collector agrees, the SDK strips the actor and sends
-  hashes, and logs one `[SHARDLENS]` warning saying so. `captureOptionValues` is never passed, so no option value
-  leaves the bot, and a custom event never carries an actor, so a prefix run is never named. The privacy notice says
+  hashes, and logs one `[SHARDLENS]` warning saying so. A prefix run carries its actor the same way. `captureOptionValues`
+  is never passed, so no option value leaves the bot. The privacy notice says
   exactly this (`legal.outsideL5`, `legal.retentionL23`, `legal.removalP4`), and `LegalPage.test.tsx` and
   `shardlens.test.ts` pin it to the code. Turning on option values is a change to the notice first.
 - **The runners are wrapped, not the listener.** `measured` runs a handler through one `lens.wrap` kept per lens, inside
   the `try` of `runCommand` and `runButton` and around autocomplete, so the SDK times the handler and sees it throw
   while the bot's own error handling still answers. A prefix run is not an interaction, so `measured` just runs it,
-  and `recordPrefixRun` sends `prefix_command` (and `prefix_command_failed` beside a failure) — the command, the
-  subcommand, `ok` or `error`, the time, and the server twice: as `server`, and as `in_<id>` holding the command,
-  because a custom event keeps no dimensions and a property is the only thing the collector can group by. The
-  dashboard's screen views are `dashboard_screen` by route pattern and `dashboard_server` by server, the second only
-  for one of that server's managers (`recordScreenView`, behind `managesGuild`), and neither names anybody.
+  and the prefix handler tells the SDK once `runCommand` has answered: `recordPrefixRun` calls
+  `lens.trackMessageCommand` with the command's own name after aliases, the subcommand, the time, and what was thrown
+  (`runCommand` hands it back, and the SDK keeps only its class and Discord's code). **Never a custom event for a
+  prefix run** — only the SDK's own message commands are counted with slash commands, by server and by day — and
+  never the message's text, the name typed or an argument. A message that is no command, or one a check refuses, is
+  not a run. The dashboard's screen views are the only custom events: `dashboard_screen` by route pattern and
+  `dashboard_server` by server, the second only for one of that server's managers (`recordScreenView`, behind
+  `managesGuild`), with the server also as an `in_<id>` property because a custom event keeps no dimensions, and
+  neither names anybody.
 - **Nothing here is wrapped in a `try`.** The SDK never throws into the bot and counts its own failures; its lines go
   to the logger tagged `[SHARDLENS]`.
 - **Shutdown flushes it before the archive closes and the client goes**, and Delete my data calls
@@ -2303,8 +2309,9 @@ owner console's Usage tab, its per-server drill-down and the server list's count
   question) and keeps no failure. It answers `AnalyticsUnavailable` with `off`, `refused` or `unreachable`; a 400 is
   this code asking a question the collector does not take, so it is rethrown as a bug. Its calls pass
   `recorded: false`, because a collector only the owners use must not mark the bot degraded on the public status
-  page. `usageReport.util.ts` puts the answers together. The read key reaches every figure but never who ran what,
-  which stays behind the collector's own sign-in.
+  page. `usageReport.util.ts` puts the answers together, every command figure from the collector's interaction
+  rollups, where slash and prefix runs are counted together and told apart by `kind` (`message_command` is a prefix
+  run). The read key reaches every figure but never who ran what, which stays behind the collector's own sign-in.
 - **Only the owners see it, and never a key.** `GET /control/shardlens`, `POST /control/shardlens/send` and every
   `/analytics` route sit behind `requireOwner`, so `ownerGate.test.ts` covers them; the Runtime tab's card and the
   private, owner-only `/shardlens status` and `/shardlens send` show the state, what is waiting, what was dropped or
@@ -3562,18 +3569,18 @@ the server list's counts and one server's detail each ask the collector through 
 [§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)). Five things
 about it are load-bearing:
 
-- **Slash runs and prefix runs come from different places and are added up per command.** The SDK's `interactions`
-  rollups give slash commands and right-click actions — counts, outcomes and Discord's answer times — and the
-  `prefix_command` events give the prefix side; `usageReport` merges them by name. A right-click action is filed
-  under the command its `switchedBy` names.
-- **Event figures reach only as far back as the collector keeps raw events.** Prefix runs by name, per server and
-  the dashboard's counts are read with `eventProps`, which reads raw events, top 50 values at a time; the rollups
-  behind slash counts last much longer. `detailDays` is the shorter reach, and the page says so when the window
-  passes it. A server's daily chart is slash only, because a prefix run has no day per server, and the page says
-  that too.
+- **Slash runs and prefix runs are one set of figures.** The collector counts the SDK's message commands in the same
+  `interactions` rollups as slash commands and right-click actions, so each command's runs and failures, each
+  server's runs and each day's, a server's chart included, cover both. The surfaces are told apart by grouping on
+  `kind`, where `message_command` is a prefix run and every other kind is an interaction. A right-click action is
+  filed under the command its `switchedBy` names.
+- **Only the dashboard's figures reach no further than raw events.** Its screens and servers are custom events read
+  with `eventProps`, top 50 values at a time, for as long as the collector keeps raw events; the rollups behind every
+  command figure last much longer. `detailDays` is that shorter reach, and the page says so when the window passes
+  it.
 - **The slowest commands are Discord's wait, not the handler's.** `slowMs` is the p95 of how long Discord waited for
-  the bot's first reply and `typicalMs` the p50, for slash commands and right-click actions; prefix runs have no
-  such figure.
+  the bot's first reply and `typicalMs` the p50, for slash commands and right-click actions; a prefix run has no reply
+  Discord waits on, so it adds runs but no time.
 - **Shardlens being away costs figures, never pages.** The Usage tab answers 503 `analytics_off`, `analytics_refused`
   or `analytics_unreachable` and the console words each one, offering a retry only when one could help. The server
   list and a server's detail still answer, with their counts `null` and the reason in `analytics`; the inactive

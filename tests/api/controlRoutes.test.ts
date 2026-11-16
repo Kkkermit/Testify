@@ -378,12 +378,12 @@ describe("Shardlens", () => {
 				failedFlushes: 0,
 			}),
 		};
-		const env = { SHARDLENS_URL: "https://stats.example.com/v1", SHARDLENS_INGEST_KEY: KEY, SHARDLENS_DRY_RUN: false };
+		const env = { SHARDLENS_URL: "https://stats.example.com/v1", SHARDLENS_INGEST_KEY: KEY };
 		return { client: clientFor({ shardlens: lens, env } as never), flush };
 	}
 
 	it("says it is off, and refuses to send to nothing", async () => {
-		const client = clientFor({ shardlens: null, env: { SHARDLENS_DRY_RUN: false } } as never);
+		const client = clientFor({ shardlens: null, env: {} } as never);
 
 		const status = await send("/shardlens", { client });
 		expect(await status.json()).toMatchObject({ state: "off", collector: null });

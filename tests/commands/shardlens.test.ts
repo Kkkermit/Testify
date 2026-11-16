@@ -65,10 +65,6 @@ describe("/shardlens", () => {
 		const cases = [
 			{ flushed: { sent: 3, problem: null, status: sending }, said: "Sent what was waiting." },
 			{ flushed: { sent: 0, problem: null, status: sending }, said: "Nothing was waiting to send." },
-			{
-				flushed: { sent: 2, problem: null, status: { ...sending, state: "dryRun" as const } },
-				said: "Written to the bot's log.",
-			},
 			{ flushed: { sent: 0, problem: "network", status: sending }, said: "Could not send (`network`)." },
 		];
 

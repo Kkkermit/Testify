@@ -30,6 +30,7 @@ const TOP = 10;
 const ALL = 500;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const FAILED = ["error", "timeout", "no_response"];
+const PREFIX_KIND = "message_command";
 const SNOWFLAKE = /^\d{17,20}$/;
 
 type Counts = Map<string, number>;
@@ -70,20 +71,15 @@ interface Point {
 	value: number;
 }
 
-/** `outcome` series count every point and fail all but `ok`; a series with no key is all one or the other. */
-export function dailyOf(days: number, now: number, counted: Point[][], failed: Point[][]): UsageDay[] {
+/** An `outcome` series counts every point, and every outcome but `ok` is a failure. */
+export function dailyOf(days: number, now: number, points: Point[]): UsageDay[] {
 	const byDay = new Map<string, Tally>(windowDays(days, now).map((day) => [day, { count: 0, failures: 0 }]));
-	const at = (point: Point): Tally | undefined => byDay.get(point.t.slice(0, 10));
 
-	for (const point of counted.flat()) {
-		const day = at(point);
+	for (const point of points) {
+		const day = byDay.get(point.t.slice(0, 10));
 		if (day === undefined) continue;
 		day.count += point.value;
-		if (point.key !== null && point.key !== "ok") day.failures += point.value;
-	}
-	for (const point of failed.flat()) {
-		const day = at(point);
-		if (day !== undefined) day.failures += point.value;
+		if (point.key !== "ok") day.failures += point.value;
 	}
 
 	return [...byDay].map(([day, { count, failures }]) => ({ day, count, failures }));
@@ -145,86 +141,73 @@ const daily = (metric: string, extra: Spec = {}): Spec => ({
 	...extra,
 });
 
-const custom = (name: string): Spec => daily("custom", { name });
-
 const props = (name: string, prop: string): Spec => ({ kind: "eventProps", name, prop });
 
 const serverFilter = (guildId: string): Spec[] => [{ field: "guild", op: "eq", value: guildId }];
+
+/** Runs by what started them, which is how slash commands and right-click actions are told from prefix commands. */
+const byKind = (filters: Spec[] = []): Spec => ({
+	kind: "top",
+	metric: "interactions",
+	groupBy: "kind",
+	filters,
+	limit: ALL,
+});
+
+/** The SDK's `message_command` is a prefix run; every other kind of command is an interaction. */
+function surfacesOf(rows: { key: string; value: number | null }[]): { slash: number; prefix: number } {
+	let slash = 0;
+	let prefix = 0;
+	for (const { key, value } of rows) {
+		if (key === PREFIX_KIND) prefix += value ?? 0;
+		else slash += value ?? 0;
+	}
+	return { slash, prefix };
+}
 
 export async function usageReport(client: TestifyClient, days: number, now = Date.now()): Promise<UsageReport> {
 	const reader = readerFor(client);
 	const range = rangeOf(days, now);
 	const ask = <T>(spec: Spec, schema: ZodType<T>): Promise<T> => reader.query({ ...spec, range }, schema);
 
-	const [
-		commands,
-		typical,
-		slashDays,
-		prefixDays,
-		prefixFailedDays,
-		prefixByCommand,
-		prefixFailedByCommand,
-		slashByGuild,
-		prefixByGuild,
-		screens,
-		dashboardByGuild,
-		meta,
-	] = await Promise.all([
+	const [commands, typical, byDay, kinds, byGuild, screens, dashboardByGuild, meta] = await Promise.all([
 		ask({ kind: "commands" }, commandsAnswer),
 		ask({ kind: "top", metric: "interactions", groupBy: "command", stat: "p50", limit: ALL }, topAnswer),
 		ask(daily("interactions", { groupBy: "outcome" }), seriesAnswer),
-		ask(custom(LENS_EVENTS.prefix), seriesAnswer),
-		ask(custom(LENS_EVENTS.prefixFailed), seriesAnswer),
-		ask(props(LENS_EVENTS.prefix, "command"), propsAnswer),
-		ask(props(LENS_EVENTS.prefixFailed, "command"), propsAnswer),
+		ask(byKind(), topAnswer),
 		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL }, topAnswer),
-		ask(props(LENS_EVENTS.prefix, "server"), propsAnswer),
 		ask(props(LENS_EVENTS.screen, "route"), propsAnswer),
 		ask(props(LENS_EVENTS.server, "server"), propsAnswer),
 		reader.meta(),
 	]);
 
 	const tallies = new Map<string, Tally>();
-	const tallyOf = (command: string): Tally => {
-		let tally = tallies.get(command);
-		if (tally === undefined) {
-			tally = { count: 0, failures: 0 };
-			tallies.set(command, tally);
-		}
-		return tally;
-	};
 	for (const row of commands.rows) {
 		if (row.runs === 0) continue;
-		const tally = tallyOf(row.command);
-		tally.count += row.runs;
-		tally.failures += Math.round(row.runs * (row.errorRate ?? 0));
+		tallies.set(row.command, { count: row.runs, failures: Math.round(row.runs * (row.errorRate ?? 0)) });
 	}
-	for (const [command, count] of countsOf(prefixByCommand.values)) tallyOf(command).count += count;
-	for (const [command, count] of countsOf(prefixFailedByCommand.values)) tallyOf(command).failures += count;
 
-	const byGuild = rowsOf(slashByGuild.rows.filter((row) => SNOWFLAKE.test(row.key)));
-	for (const [guildId, count] of countsOf(prefixByGuild.values)) add(byGuild, guildId, count);
-
-	const dailyRuns = dailyOf(days, now, [slashDays.points, prefixDays.points], [prefixFailedDays.points]);
-	const slash = slashDays.points.reduce((sum, point) => sum + point.value, 0);
-	const prefix = prefixDays.points.reduce((sum, point) => sum + point.value, 0);
+	const guilds = rowsOf(byGuild.rows.filter((row) => SNOWFLAKE.test(row.key)));
+	const dailyRuns = dailyOf(days, now, byDay.points);
+	const surfaces = surfacesOf(kinds.rows);
 	const typicalMs = rowsOf(typical.rows);
 	const ranked = commandRows(client, tallies);
 
 	return {
 		days,
-		runs: slash + prefix,
+		runs: surfaces.slash + surfaces.prefix,
 		failures: dailyRuns.reduce((sum, day) => sum + day.failures, 0),
-		activeGuilds: [...byGuild.values()].filter((count) => count > 0).length,
+		activeGuilds: [...guilds.values()].filter((count) => count > 0).length,
 		commandsUsed: ranked.length,
 		commandsTotal: client.commands.size,
-		surfaces: { slash, prefix },
+		surfaces,
 		daily: dailyRuns,
 		mostUsed: ranked.slice(0, TOP),
 		leastUsed: leastUsed(client, tallies),
-		busiestGuilds: knownGuilds(client, byGuild),
+		busiestGuilds: knownGuilds(client, guilds),
 		dashboardGuilds: knownGuilds(client, countsOf(dashboardByGuild.values)),
 		detailDays: Math.min(days, meta.rawRetentionDays),
+		// Only an interaction has Discord waiting on a reply, so a command run only with the prefix has no time here.
 		slowest: commands.rows
 			.flatMap((row) =>
 				row.runs > 0 && row.p95Ms !== null
@@ -259,46 +242,33 @@ export async function guildUsageReport(
 	const range = rangeOf(days, now);
 	const ask = <T>(spec: Spec, schema: ZodType<T>): Promise<T> => reader.query({ ...spec, range }, schema);
 	const here = serverFilter(guild.id);
-	const key = serverKey(guild.id);
 
-	const [slashDays, slashByCommand, failedByCommand, prefixByCommand, prefixFailedByCommand, dashboard, server, meta] =
-		await Promise.all([
-			ask(daily("interactions", { groupBy: "outcome", filters: here }), seriesAnswer),
-			ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL }, topAnswer),
-			ask(
-				{
-					kind: "top",
-					metric: "interactions",
-					groupBy: "command",
-					filters: [...here, { field: "outcome", op: "in", value: FAILED }],
-					limit: ALL,
-				},
-				topAnswer,
-			),
-			ask(props(LENS_EVENTS.prefix, key), propsAnswer),
-			ask(props(LENS_EVENTS.prefixFailed, key), propsAnswer),
-			ask(props(LENS_EVENTS.server, key), propsAnswer),
-			reader.query({ kind: "server", guild: guild.id }, serverAnswer),
-			reader.meta(),
-		]);
+	const [byDay, byCommand, failedByCommand, kinds, dashboard, server, meta] = await Promise.all([
+		ask(daily("interactions", { groupBy: "outcome", filters: here }), seriesAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL }, topAnswer),
+		ask(
+			{
+				kind: "top",
+				metric: "interactions",
+				groupBy: "command",
+				filters: [...here, { field: "outcome", op: "in", value: FAILED }],
+				limit: ALL,
+			},
+			topAnswer,
+		),
+		ask(byKind(here), topAnswer),
+		ask(props(LENS_EVENTS.server, serverKey(guild.id)), propsAnswer),
+		reader.query({ kind: "server", guild: guild.id }, serverAnswer),
+		reader.meta(),
+	]);
 
-	const tallies = new Map<string, Tally>();
-	const merge = (counts: Counts, field: keyof Tally): void => {
-		for (const [command, count] of counts) {
-			const tally = tallies.get(command) ?? { count: 0, failures: 0 };
-			tally[field] += count;
-			tallies.set(command, tally);
-		}
-	};
-	const slash = rowsOf(slashByCommand.rows);
-	const prefix = countsOf(prefixByCommand.values);
-	merge(slash, "count");
-	merge(rowsOf(failedByCommand.rows), "failures");
-	merge(prefix, "count");
-	merge(countsOf(prefixFailedByCommand.values), "failures");
-
+	const failures = rowsOf(failedByCommand.rows);
+	const tallies = new Map<string, Tally>(
+		[...rowsOf(byCommand.rows)].map(([command, count]) => [command, { count, failures: failures.get(command) ?? 0 }]),
+	);
 	const commands = commandRows(client, tallies);
-	const runs = total(slash) + total(prefix);
+	const surfaces = surfacesOf(kinds.rows);
+	const runs = surfaces.slash + surfaces.prefix;
 
 	return {
 		guild: { ...guildRow(guild, runs), joinedAt: guild.joinedAt.toISOString() },
@@ -306,8 +276,8 @@ export async function guildUsageReport(
 		detailDays: Math.min(days, meta.rawRetentionDays),
 		runs,
 		failures: commands.reduce((sum, row) => sum + row.failures, 0),
-		surfaces: { slash: total(slash), prefix: total(prefix) },
-		daily: dailyOf(days, now, [slashDays.points], []),
+		surfaces,
+		daily: dailyOf(days, now, byDay.points),
 		commands,
 		dashboardViews: total(countsOf(dashboard.values)),
 		people: server.found ? (server.uniqueUsersThisPeriod ?? null) : null,
@@ -325,15 +295,15 @@ export async function guildActivity(client: TestifyClient, days: number, now = D
 	const reader = readerFor(client);
 	const range = rangeOf(days, now);
 
-	const [slash, prefix, dashboard] = await Promise.all([
+	const [commands, dashboard] = await Promise.all([
 		reader.query({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL, range }, topAnswer),
-		reader.query({ ...props(LENS_EVENTS.prefix, "server"), range }, propsAnswer),
 		reader.query({ ...props(LENS_EVENTS.server, "server"), range }, propsAnswer),
 	]);
 
-	const commands = rowsOf(slash.rows.filter((row) => SNOWFLAKE.test(row.key)));
-	for (const [guildId, count] of countsOf(prefix.values)) add(commands, guildId, count);
-	return { commands, dashboard: countsOf(dashboard.values) };
+	return {
+		commands: rowsOf(commands.rows.filter((row) => SNOWFLAKE.test(row.key))),
+		dashboard: countsOf(dashboard.values),
+	};
 }
 
 /** One server's figures, read by its own key, so a quiet server is not lost below the top of a ranking. */
@@ -345,21 +315,16 @@ export async function oneGuildActivity(
 ): Promise<{ commands: number; dashboard: number }> {
 	const reader = readerFor(client);
 	const range = rangeOf(days, now);
-	const key = serverKey(guildId);
 
-	const [slash, prefix, dashboard] = await Promise.all([
+	const [commands, dashboard] = await Promise.all([
 		reader.query(
 			{ kind: "top", metric: "interactions", groupBy: "outcome", filters: serverFilter(guildId), range },
 			topAnswer,
 		),
-		reader.query({ ...props(LENS_EVENTS.prefix, key), range }, propsAnswer),
-		reader.query({ ...props(LENS_EVENTS.server, key), range }, propsAnswer),
+		reader.query({ ...props(LENS_EVENTS.server, serverKey(guildId)), range }, propsAnswer),
 	]);
 
-	return {
-		commands: total(rowsOf(slash.rows)) + total(countsOf(prefix.values)),
-		dashboard: total(countsOf(dashboard.values)),
-	};
+	return { commands: total(rowsOf(commands.rows)), dashboard: total(countsOf(dashboard.values)) };
 }
 
 /** For a figure that is a nicety on its page: the page still loads, and says why the number is missing. */

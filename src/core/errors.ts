@@ -62,6 +62,8 @@ interface RunOutcome {
 	ok: boolean;
 	/** Set only for an unexpected failure, which is the one kind written to the log with a reference. */
 	reference: string | null;
+	/** What the command threw, undefined when it finished. */
+	error: unknown;
 }
 
 /** Runs a command so the user always gets an answer, and says whether it finished cleanly. */
@@ -72,10 +74,10 @@ export async function runCommand(
 ): Promise<RunOutcome> {
 	try {
 		await measured(client, interaction, () => dispatch(interaction, command, client));
-		return { ok: true, reference: null };
+		return { ok: true, reference: null, error: undefined };
 	} catch (error) {
 		const reference = await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
-		return { ok: false, reference };
+		return { ok: false, reference, error };
 	}
 }
 

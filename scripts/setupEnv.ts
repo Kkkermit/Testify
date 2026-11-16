@@ -2,7 +2,6 @@ import { randomBytes } from "node:crypto";
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import prompts from "prompts";
-import { isCollectorUrl } from "@config/env";
 import { box, painter } from "@core/terminal";
 import { BOT_FEATURE_KEYS, isBotFeature } from "@testify/shared";
 
@@ -132,25 +131,20 @@ export function fields(isDev: boolean): Field[] {
 		{
 			key: "SHARDLENS_URL",
 			message: "Shardlens collector address, for analytics",
-			hint: "Blank sends no analytics anywhere",
+			hint: "Blank sends no analytics anywhere; it is in the bot.env the collector's init wrote",
 			required: false,
-			check: (value) =>
-				isCollectorUrl(value) ? null : "It starts with https://, or http://localhost on this machine.",
 		},
 		{
 			key: "SHARDLENS_INGEST_KEY",
 			message: "Shardlens ingest key",
-			hint: "From the collector's .env; it starts slk_ingest_",
+			hint: "From the same bot.env; it starts slk_ingest_",
 			required: false,
-			check: (value) =>
-				/^slk_ingest_\S+$/.test(value) ? null : "The ingest key starts slk_ingest_. Never use the read key.",
 		},
 		{
 			key: "SHARDLENS_READ_KEY",
 			message: "Shardlens read key, for the owner console's analytics",
-			hint: "From the collector's .env; it starts slk_read_",
+			hint: "From the collector's own settings; it starts slk_read_",
 			required: false,
-			check: (value) => (/^slk_read_\S+$/.test(value) ? null : "The read key starts slk_read_."),
 		},
 	];
 }

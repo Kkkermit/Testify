@@ -69,23 +69,17 @@ beforeEach(() => {
 });
 
 describe("usageReport", () => {
-	/** Slash runs are the SDK's own and prefix runs are custom events, so a command's count is the two added up. */
-	it("adds prefix runs to slash runs per command, failures included", async () => {
+	/** Shardlens counts prefix runs with slash runs, so the command table is the whole of each command's figures. */
+	it("ranks commands by what the collector counts, with failures from each one's error rate", async () => {
 		collector((spec) => {
 			if (spec.kind === "commands") {
 				return {
 					rows: [
-						{ command: "ban", runs: 10, errorRate: 0.2, p95Ms: 900 },
+						{ command: "ban", runs: 15, errorRate: 0.2, p95Ms: 900 },
 						{ command: "Warn", runs: 4, errorRate: 0, p95Ms: 300 },
 						{ command: "beg", runs: 0, errorRate: null, p95Ms: null },
 					],
 				};
-			}
-			if (spec.kind === "eventProps" && spec.name === "prefix_command" && spec.prop === "command") {
-				return { values: [{ value: "ban", count: 5 }] };
-			}
-			if (spec.kind === "eventProps" && spec.name === "prefix_command_failed" && spec.prop === "command") {
-				return { values: [{ value: "ban", count: 1 }] };
 			}
 			return empty(spec);
 		});
@@ -105,22 +99,25 @@ describe("usageReport", () => {
 		]);
 	});
 
-	it("draws every day of the window, with each surface and every failed outcome counted", async () => {
+	it("draws every day of the window, and tells the surfaces apart by what started each run", async () => {
 		collector((spec) => {
 			if (spec.kind === "series" && spec.metric === "interactions") {
 				return {
 					points: [
-						{ t: "2026-11-15T00:00:00", key: "ok", value: 6 },
+						{ t: "2026-11-15T00:00:00", key: "ok", value: 9 },
 						{ t: "2026-11-15T00:00:00", key: "timeout", value: 1 },
 						{ t: "2026-11-13T00:00:00", key: "error", value: 2 },
 					],
 				};
 			}
-			if (spec.kind === "series" && spec.name === "prefix_command") {
-				return { points: [{ t: "2026-11-15T00:00:00", key: null, value: 3 }] };
-			}
-			if (spec.kind === "series" && spec.name === "prefix_command_failed") {
-				return { points: [{ t: "2026-11-15T00:00:00", key: null, value: 1 }] };
+			if (spec.kind === "top" && spec.groupBy === "kind") {
+				return {
+					rows: [
+						{ key: "chat_input", value: 7 },
+						{ key: "user_context", value: 2 },
+						{ key: "message_command", value: 3 },
+					],
+				};
 			}
 			return empty(spec);
 		});
@@ -130,27 +127,25 @@ describe("usageReport", () => {
 		expect(report.daily).toEqual([
 			{ day: "2026-11-13", count: 2, failures: 2 },
 			{ day: "2026-11-14", count: 0, failures: 0 },
-			{ day: "2026-11-15", count: 10, failures: 2 },
+			{ day: "2026-11-15", count: 10, failures: 1 },
 		]);
-		expect(report).toMatchObject({ runs: 12, failures: 4, surfaces: { slash: 9, prefix: 3 } });
+		expect(report).toMatchObject({ runs: 12, failures: 3, surfaces: { slash: 9, prefix: 3 } });
 		// Every daily series is grouped by UTC day, as the chart labels them.
 		expect(asked.filter((spec) => spec.kind === "series").every((spec) => spec.timezone === "UTC")).toBe(true);
 	});
 
 	/** A server the bot has left still has figures, and a row labelled "unknown server" is noise. */
-	it("ranks servers by both surfaces, leaving out a server the bot is no longer in", async () => {
+	it("ranks servers by their runs, leaving out a server the bot is no longer in", async () => {
 		collector((spec) => {
 			if (spec.kind === "top" && spec.groupBy === "guild") {
 				return {
 					rows: [
 						{ key: THERE, value: 4 },
+						{ key: HERE, value: 5 },
 						{ key: GONE, value: 99 },
 						{ key: "", value: 7 },
 					],
 				};
-			}
-			if (spec.kind === "eventProps" && spec.name === "prefix_command" && spec.prop === "server") {
-				return { values: [{ value: HERE, count: 5 }] };
 			}
 			if (spec.kind === "eventProps" && spec.name === "dashboard_server") {
 				return { values: [{ value: THERE, count: 2 }] };
@@ -202,12 +197,34 @@ describe("usageReport", () => {
 		]);
 	});
 
-	/** Prefix runs by name and the dashboard's figures are read from raw events, which the collector keeps less long. */
+	/** The dashboard's figures are read from raw events, which the collector keeps less long than its rollups. */
 	it("says how far back the event figures reach, and where the collector's own dashboard is", async () => {
 		const report = await usageReport(clientFor(), 90, NOW);
 
 		expect(report).toMatchObject({ days: 90, detailDays: 30, collector: "https://stats.example.com" });
 		expect(JSON.stringify(report)).not.toContain("slk_");
+	});
+});
+
+describe("every report", () => {
+	/** Prefix runs are the SDK's own message commands now, so asking about a custom event for them reads nothing. */
+	it("reads commands only from the collector's own figures, never from a custom event", async () => {
+		const client = clientFor();
+		const here = client.guilds.cache.get(HERE) as never;
+		const names: unknown[] = [];
+		for (const work of [
+			() => usageReport(client, 7, NOW),
+			() => guildUsageReport(client, here, 7, NOW),
+			() => guildActivity(client, 7, NOW),
+			() => oneGuildActivity(client, HERE, 7, NOW),
+		]) {
+			await work();
+			names.push(
+				...asked.filter((spec) => spec.kind === "eventProps" || spec.metric === "custom").map((spec) => spec.name),
+			);
+		}
+
+		expect(new Set(names)).toEqual(new Set(["dashboard_screen", "dashboard_server"]));
 	});
 });
 
@@ -218,21 +235,35 @@ describe("guildUsageReport", () => {
 
 		const filtered = asked.filter((spec) => spec.metric === "interactions");
 		const props = asked.filter((spec) => spec.kind === "eventProps");
-		expect(filtered).toHaveLength(3);
+		expect(filtered).toHaveLength(4);
 		for (const spec of filtered) {
 			expect(spec.filters).toEqual(expect.arrayContaining([{ field: "guild", op: "eq", value: HERE }]));
 		}
-		expect(props.map((spec) => spec.prop)).toEqual([`in_${HERE}`, `in_${HERE}`, `in_${HERE}`]);
+		expect(props.map((spec) => spec.prop)).toEqual([`in_${HERE}`]);
 		expect(asked).toContainEqual({ kind: "server", guild: HERE });
 	});
 
-	it("adds the two surfaces per command, and names how many people used it there", async () => {
+	it("counts each command and both surfaces there, and names how many people used it", async () => {
 		collector((spec) => {
-			if (spec.kind === "top" && Array.isArray(spec.filters) && spec.filters.length === 2) {
-				return { rows: [{ key: "ban", value: 1 }] };
+			const filters = Array.isArray(spec.filters) ? spec.filters : [];
+			if (spec.kind === "top" && spec.groupBy === "kind") {
+				return {
+					rows: [
+						{ key: "chat_input", value: 6 },
+						{ key: "message_command", value: 2 },
+					],
+				};
 			}
-			if (spec.kind === "top") return { rows: [{ key: "ban", value: 6 }] };
-			if (spec.kind === "eventProps" && spec.name === "prefix_command") return { values: [{ value: "beg", count: 2 }] };
+			if (spec.kind === "top" && filters.length === 2) return { rows: [{ key: "ban", value: 1 }] };
+			if (spec.kind === "top") {
+				return {
+					rows: [
+						{ key: "ban", value: 6 },
+						{ key: "beg", value: 2 },
+					],
+				};
+			}
+			if (spec.kind === "series") return { points: [{ t: "2026-11-15T00:00:00", key: "ok", value: 8 }] };
 			if (spec.kind === "eventProps" && spec.name === "dashboard_server") {
 				return { values: [{ value: "/guilds/:guildId", count: 4 }] };
 			}
@@ -253,14 +284,16 @@ describe("guildUsageReport", () => {
 			dashboardViews: 4,
 			people: 7,
 		});
+		// Prefix runs carry their server now, so a server's chart counts both surfaces.
 		expect(report.daily).toHaveLength(30);
+		expect(report.daily.at(-1)).toEqual({ day: "2026-11-15", count: 8, failures: 0 });
 	});
 });
 
 describe("guildActivity and oneGuildActivity", () => {
 	it("count commands on both surfaces and dashboard use, per server", async () => {
 		collector((spec) => {
-			if (spec.kind === "top" && spec.groupBy === "guild") return { rows: [{ key: HERE, value: 3 }] };
+			if (spec.kind === "top" && spec.groupBy === "guild") return { rows: [{ key: HERE, value: 5 }] };
 			if (spec.kind === "top")
 				return {
 					rows: [
@@ -268,7 +301,6 @@ describe("guildActivity and oneGuildActivity", () => {
 						{ key: "error", value: 1 },
 					],
 				};
-			if (spec.kind === "eventProps" && spec.name === "prefix_command") return { values: [{ value: HERE, count: 2 }] };
 			if (spec.kind === "eventProps" && spec.name === "dashboard_server")
 				return { values: [{ value: HERE, count: 6 }] };
 			return empty(spec);
@@ -278,7 +310,7 @@ describe("guildActivity and oneGuildActivity", () => {
 		const one = await oneGuildActivity(clientFor(), HERE, 30, NOW);
 
 		expect([all.commands.get(HERE), all.dashboard.get(HERE)]).toEqual([5, 6]);
-		expect(one).toEqual({ commands: 6, dashboard: 6 });
+		expect(one).toEqual({ commands: 4, dashboard: 6 });
 	});
 });
 
@@ -294,7 +326,7 @@ describe("orUnavailable", () => {
 
 describe("dailyOf", () => {
 	it("ignores a point outside the window rather than adding a day", () => {
-		const days = dailyOf(2, NOW, [[{ t: "2026-10-01T00:00:00", key: null, value: 5 }]], []);
+		const days = dailyOf(2, NOW, [{ t: "2026-10-01T00:00:00", key: "ok", value: 5 }]);
 
 		expect(days.map((day) => day.count)).toEqual([0, 0]);
 	});

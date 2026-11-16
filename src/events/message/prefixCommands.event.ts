@@ -55,7 +55,7 @@ export default defineMessageHandler({
 		}
 
 		const started = Date.now();
-		const { ok } = await runCommand(interaction, command, client);
+		const { ok, error } = await runCommand(interaction, command, client);
 		const durationMs = Date.now() - started;
 		recordCommandTime(durationMs, ok);
 		logCommandUse(client, interaction, command, {
@@ -66,13 +66,12 @@ export default defineMessageHandler({
 			prefix,
 			typed: `${parsed.prefix ?? `@${client.user?.username ?? "mention"} `}${parsed.name}`,
 		});
-		recordPrefixRun(client, {
+		recordPrefixRun(client, message, {
 			command: command.name,
 			subcommand: chosenSubcommand(interaction, command),
-			ok,
 			durationMs,
-			userId: message.author.id,
-			guildId: message.guild?.id ?? null,
+			ok,
+			error,
 		});
 		// A message cannot be private, so the hint clears itself like a refusal.
 		mentionNoticesAfterCommand(message.author.id, client.logger, (unread) =>

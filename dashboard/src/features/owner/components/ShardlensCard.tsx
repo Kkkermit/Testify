@@ -14,12 +14,11 @@ import { formatNumber } from "@/lib/intl";
 
 const STATES: Record<ShardlensState, { label: TranslationKey; body: TranslationKey; tone: BadgeTone }> = {
 	off: { label: "owner.shardlensOff", body: "owner.shardlensOffBody", tone: "muted" },
-	dryRun: { label: "owner.shardlensDryRun", body: "owner.shardlensDryRunBody", tone: "warning" },
 	waiting: { label: "owner.shardlensWaiting", body: "owner.shardlensWaitingBody", tone: "warning" },
 	sending: { label: "owner.shardlensSending", body: "owner.shardlensSendingBody", tone: "success" },
 };
 
-function SendNote({ flushed, dryRun }: { flushed: ShardlensFlush; dryRun: boolean }): React.JSX.Element {
+function SendNote({ flushed }: { flushed: ShardlensFlush }): React.JSX.Element {
 	const { t } = useTranslation();
 
 	if (flushed.problem !== null) {
@@ -31,8 +30,7 @@ function SendNote({ flushed, dryRun }: { flushed: ShardlensFlush; dryRun: boolea
 		);
 	}
 
-	const said =
-		flushed.sent === 0 ? "owner.shardlensNothing" : dryRun ? "owner.shardlensPrinted" : "owner.shardlensSent";
+	const said = flushed.sent === 0 ? "owner.shardlensNothing" : "owner.shardlensSent";
 	return (
 		<>
 			<Check size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -126,7 +124,7 @@ export function ShardlensCard(): React.JSX.Element {
 							send.data?.problem === null ? "text-success" : "text-destructive-text",
 						)}
 					>
-						{send.data !== undefined && <SendNote flushed={send.data} dryRun={current.state === "dryRun"} />}
+						{send.data !== undefined && <SendNote flushed={send.data} />}
 					</span>
 				</div>
 

@@ -88,7 +88,7 @@
 		"@discordjs/voice": "0.19.2",
 		"@hono/node-server": "2.1.6",
 		"@napi-rs/canvas": "1.1.0",
-		"@shardlens/discordjs": "1.0.0",
+		"@shardlens/discordjs": "1.1.0",
 		"@testify/shared": "*",
 		"discord-giveaways": "6.0.1",
 		"discord-html-transcripts": "3.2.0",

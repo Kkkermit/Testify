@@ -67,7 +67,7 @@ export interface UsageReport {
 	leastUsed: CommandUsageRow[];
 	busiestGuilds: GuildUsageRow[];
 	dashboardGuilds: GuildUsageRow[];
-	/** Prefix runs by name, by server and the dashboard's figures come from events the collector keeps this long. */
+	/** The dashboard's figures come from raw events, which the collector keeps this long. */
 	detailDays: number;
 	slowest: SlowCommandRow[];
 	screens: ScreenTally[];
@@ -82,7 +82,6 @@ export interface GuildUsageReport {
 	runs: number;
 	failures: number;
 	surfaces: { slash: number; prefix: number };
-	/** Slash commands and right-click actions; a prefix run carries no day the collector can group by server. */
 	daily: UsageDay[];
 	commands: CommandUsageRow[];
 	dashboardViews: number;
@@ -217,8 +216,8 @@ export interface RuntimeInfo {
 	cachedChannels: number;
 }
 
-/** Shardlens's state: off unconfigured, printing to the log in a dry run, waiting for the collector, or sending. */
-export type ShardlensState = "off" | "dryRun" | "waiting" | "sending";
+/** Shardlens's state: off unconfigured, waiting for the collector, or sending. */
+export type ShardlensState = "off" | "waiting" | "sending";
 
 /** How the bot's Shardlens analytics are doing, for the owner; it never carries the ingest key. */
 export interface ShardlensStatus {

@@ -20,9 +20,15 @@ beforeEach(() => {
 });
 
 describe("ShardlensReader", () => {
-	/** An install without a read key must not reach out anywhere, and the console says so rather than showing zeros. */
-	it("is off without an address or a read key, and asks nobody", async () => {
-		for (const env of [{}, { SHARDLENS_URL: "https://stats.example.com" }, { SHARDLENS_READ_KEY: KEY }]) {
+	/** The settings are not checked at start-up, so the reader is what keeps the key off plain HTTP and odd addresses. */
+	it("is off without an address the key may go to or without a read key, and asks nobody", async () => {
+		const unusable = ["not an address", "http://stats.example.com", "https://user:pass@stats.example.com", "ftp://x"];
+		for (const env of [
+			{},
+			{ SHARDLENS_URL: "https://stats.example.com" },
+			{ SHARDLENS_READ_KEY: KEY },
+			...unusable.map((url) => ({ SHARDLENS_URL: url, SHARDLENS_READ_KEY: KEY })),
+		]) {
 			await expect(new ShardlensReader(env as unknown as Env).query({ kind: "overview" }, answer)).rejects.toEqual(
 				new AnalyticsUnavailable("off"),
 			);
@@ -33,9 +39,14 @@ describe("ShardlensReader", () => {
 	/** The read key opens the collector's figures, so it goes to the collector's own origin and nowhere else. */
 	it("sends the key only as a bearer token, to the collector's origin", async () => {
 		await new ShardlensReader(ENV).query({ kind: "top" }, answer);
+		await new ShardlensReader({ SHARDLENS_URL: "http://localhost:8080", SHARDLENS_READ_KEY: KEY }).query(
+			{ kind: "top" },
+			answer,
+		);
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(url).toBe("https://stats.example.com/v1/query");
+		expect(fetchMock.mock.calls[1]?.[0]).toBe("http://localhost:8080/v1/query");
 		expect(init?.method).toBe("POST");
 		expect(init?.headers).toEqual({ authorization: `Bearer ${KEY}`, "content-type": "application/json" });
 		expect(init?.body).not.toContain("slk_");

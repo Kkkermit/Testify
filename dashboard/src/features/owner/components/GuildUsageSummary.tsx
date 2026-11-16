@@ -33,7 +33,6 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 						value={formatNumber(report.dashboardViews)}
 					/>
 				</RunFigures>
-				<p className="text-muted-foreground px-6 py-3 text-xs">{t("owner.serverChartNote")}</p>
 			</Card>
 
 			<div className="grid items-start gap-4 lg:grid-cols-2">

@@ -83,26 +83,38 @@ describe("the prefix handler", () => {
 		expect(ping).toHaveBeenCalledTimes(1);
 	});
 
-	/** Shardlens sees slash commands through the gateway, so a prefix run reaches it only as this custom event. */
-	it("tells Shardlens about a prefix run, with the person only in the context it hashes", async () => {
-		const track = jest.fn();
-		const client = Object.assign(fakeClient(), { shardlens: { track }, env: {} });
+	/** The SDK never reads a message, so it counts a prefix run beside slash runs only by the name the bot matched. */
+	it("tells Shardlens the command it matched, by its own name, and never what was typed", async () => {
+		const trackMessageCommand = jest.fn();
+		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
+		const message = fakeMessage("t?setwelcome some words");
 
-		await runMessageHandlers(fakeMessage("t?setwelcome"), client);
+		await runMessageHandlers(message, client);
 
-		expect(track).toHaveBeenCalledWith(
-			"prefix_command",
-			{
-				command: "welcome",
-				subcommand: "set",
-				outcome: "ok",
-				duration_ms: expect.any(Number) as number,
-				server: "444",
-				in_444: "welcome",
-			},
-			{ userId: "222", guildId: "444" },
-		);
-		expect(JSON.stringify(track.mock.calls[0]?.[1])).not.toContain("222");
+		expect(trackMessageCommand).toHaveBeenCalledTimes(1);
+		const [sent, run] = trackMessageCommand.mock.calls[0] as [Message, Record<string, unknown>];
+		expect(sent).toBe(message);
+		expect(run).toEqual({ command: "welcome", sub: "set", durationMs: expect.any(Number) as number, failed: false });
+		expect(JSON.stringify(run)).not.toMatch(/setwelcome|t\?|words/);
+	});
+
+	/** Only what the parser matched is a run, and a failure carries what was thrown for the SDK to name by class. */
+	it("records a failure with what it threw, and nothing for a message that is no command", async () => {
+		const trackMessageCommand = jest.fn();
+		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
+		const failure = new TypeError("broke");
+		ping.mockRejectedValueOnce(failure);
+
+		await runMessageHandlers(fakeMessage("t?nosuchcommand"), client);
+		expect(trackMessageCommand).not.toHaveBeenCalled();
+
+		await runMessageHandlers(fakeMessage("t?ping"), client);
+		expect(trackMessageCommand.mock.calls[0]?.[1]).toEqual({
+			command: "ping",
+			durationMs: expect.any(Number) as number,
+			failed: true,
+			error: failure,
+		});
 	});
 
 	/** `/help` declares autocomplete, and refusing those made `t?help` fail. */
