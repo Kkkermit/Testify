@@ -1,4 +1,9 @@
 {
+	"1247710": {
+		"active": true,
+		"notes": "picomatch ReDoS through repeated extglobs (GHSA-fc5q-39xc-vjpf), reached only through development tooling: jest, lint-staged, vite, eslint-import-resolver-typescript and tsc-alias (chokidar, readdirp, anymatch, micromatch). Nothing the bot runs installs it (npm ls picomatch --omit=dev is empty, and the image installs with --omit=dev), and those tools match only globs written in this repository, while the advisory needs an attacker\u2019s pattern. No fixed release yet: picomatch 4.0.7 is already the latest and the advisory covers every version up to it. Re-evaluate when a patched picomatch ships.",
+		"expiry": 1802649600000
+	},
 	"//example": {
 		"active": false,
 		"notes": "TEMPLATE \u2014 copy this shape, do not activate it. Every real entry needs three things: why it cannot be fixed now, the version that fixes it, and a hard expiry, so a suppression cannot rot into a permanent blind spot. Wording to follow: reached only through <package>@<version>, which cannot be upgraded without a breaking change to <dependency>. Fixed in <package>@<version> \u2014 re-evaluate when <dependency> ships a compatible release.",
