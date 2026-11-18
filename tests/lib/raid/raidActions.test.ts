@@ -227,6 +227,21 @@ describe("guardJoin", () => {
 		expect(titles).toEqual(["🛡️ Held back a new account", "🛡️ Held back a new account", "🚨 Joins are spiking"]);
 	});
 
+	it("counts each account it held back, by server", async () => {
+		jest.mocked(getRaidSettings).mockResolvedValue(ON);
+		const track = jest.fn();
+		const guild = guildWith();
+
+		await guardJoin(
+			createMockClient({ shardlens: { track } } as never),
+			memberOf(guild) as unknown as GuildMember,
+			new JoinWatch(),
+			NOW,
+		);
+
+		expect(track.mock.calls).toEqual([["raid_hold", {}, { guildId: expect.any(String) as string }]]);
+	});
+
 	/** A failure here must not stop the welcome, auto-roles and the rest of the join from running. */
 	it("contains its own failures", async () => {
 		jest.mocked(getRaidSettings).mockRejectedValue(new Error("database down"));

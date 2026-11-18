@@ -13,7 +13,7 @@ export function UsagePanel({
 	children: React.ReactNode;
 }): React.JSX.Element {
 	return (
-		<Card className={cn("flex flex-col gap-3", wide && "lg:col-span-2")}>
+		<Card className={cn("flex min-w-0 flex-col gap-3", wide && "lg:col-span-2")}>
 			<div>
 				<h2 className={CARD_HEADING}>{title}</h2>
 				<p className="text-muted-foreground text-xs">{hint}</p>

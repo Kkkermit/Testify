@@ -12,7 +12,11 @@ export async function eraseAccount(client: TestifyClient, userId: string): Promi
 	activity.forget(userId);
 	forgetNoticeHint(userId);
 	logRing.forget(userId);
-	const [posts] = await Promise.all([eraseUserData(userId), forgetInLogs(userId)]);
+	const [posts] = await Promise.all([
+		eraseUserData(userId),
+		forgetInLogs(userId),
+		client.shardlens?.forgetUser(userId),
+	]);
 	clearAfkCache();
 
 	// An idea's or an appeal's post carries their words, and one Discord will not let go of is not worth failing over.

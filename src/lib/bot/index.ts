@@ -1,3 +1,4 @@
+export * from "./analyticsChoice.util";
 export * from "./banner.util";
 export * from "./botControl.util";
 export * from "./botIdentity.util";
@@ -16,6 +17,9 @@ export * from "./ownerAudit.util";
 export * from "./owners.util";
 export * from "./performance.util";
 export * from "./runtime.util";
+export * from "./shardlens.util";
+export * from "./shardlensReader.util";
 export * from "./startup.util";
 export * from "./status.util";
-export * from "./usage.util";
+export * from "./usageReport.util";
+export * from "./usageSections.util";

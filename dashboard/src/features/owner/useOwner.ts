@@ -7,17 +7,22 @@ import {
 	type UseQueryResult,
 } from "@tanstack/react-query";
 import {
-	type CommandRunRow,
+	type AudienceReport,
+	type BotActivityReport,
+	FUNNEL_LIMITS,
+	type FunnelReport,
+	type GrowthReport,
 	type GuildUsageReport,
 	type LogFeed,
 	type LogRuns,
-	type MemberUsageRow,
 	type OwnerGuildFilter,
-	type OwnerGuildRow,
+	type OwnerGuildPage,
 	type OwnerGuildSort,
 	type OwnerStats,
-	type Paged,
+	type PanelsReport,
+	type ReliabilityReport,
 	type ReportedLogLevel,
+	type RetentionReport,
 	type RuntimeInfo,
 	type UsageReport,
 } from "@testify/shared";
@@ -39,13 +44,13 @@ export function useOwnerGuilds(
 	sort: OwnerGuildSort,
 	filter: OwnerGuildFilter,
 	search: string,
-): UseQueryResult<Paged<OwnerGuildRow>> {
+): UseQueryResult<OwnerGuildPage> {
 	const query = new URLSearchParams({ page: String(page), perPage: String(PER_PAGE), sort, filter });
 	if (search.trim() !== "") query.set("q", search.trim());
 
 	return useQuery({
 		queryKey: keys.owner.guilds(page, sort, filter, search.trim()),
-		queryFn: () => api.get<Paged<OwnerGuildRow>>(`/owner/guilds?${query.toString()}`),
+		queryFn: () => api.get<OwnerGuildPage>(`/owner/guilds?${query.toString()}`),
 		placeholderData: keepPreviousData,
 	});
 }
@@ -58,6 +63,51 @@ export function useUsage(days: number): UseQueryResult<UsageReport> {
 	});
 }
 
+function useSection<T>(section: string, query: Record<string, string>, enabled = true): UseQueryResult<T> {
+	const search = new URLSearchParams(query).toString();
+	return useQuery({
+		queryKey: keys.owner.usageSection(section, search),
+		queryFn: () => api.get<T>(`/analytics/${section}?${search}`),
+		staleTime: 60_000,
+		enabled,
+	});
+}
+
+const windowOf = (days: number): Record<string, string> => ({ days: String(days) });
+
+export const useAudience = (days: number, tz: string): UseQueryResult<AudienceReport> =>
+	useSection("audience", { ...windowOf(days), tz });
+
+export const useGrowth = (days: number): UseQueryResult<GrowthReport> => useSection("growth", windowOf(days));
+
+export const usePanels = (days: number): UseQueryResult<PanelsReport> => useSection("panels", windowOf(days));
+
+export const useBotActivity = (days: number): UseQueryResult<BotActivityReport> =>
+	useSection("activity", windowOf(days));
+
+export const useReliability = (days: number): UseQueryResult<ReliabilityReport> =>
+	useSection("reliability", windowOf(days));
+
+export const useFunnel = (days: number, tz: string, steps: string[], hours: number): UseQueryResult<FunnelReport> =>
+	useSection(
+		"funnel",
+		{ ...windowOf(days), tz, steps: steps.join(","), hours: String(hours) },
+		steps.length >= FUNNEL_LIMITS.minSteps,
+	);
+
+export const useRetention = (
+	days: number,
+	tz: string,
+	start: string | null,
+	back: string | null,
+	interval: RetentionReport["interval"],
+): UseQueryResult<RetentionReport> =>
+	useSection(
+		"retention",
+		{ ...windowOf(days), tz, start: start ?? "", interval, ...(back === null ? {} : { back }) },
+		start !== null,
+	);
+
 export function useGuildUsage(guildId: string, days: number): UseQueryResult<GuildUsageReport> {
 	return useQuery({
 		queryKey: keys.owner.guildUsage(guildId, days),
@@ -66,41 +116,6 @@ export function useGuildUsage(guildId: string, days: number): UseQueryResult<Gui
 	});
 }
 
-export function useGuildMembers(
-	guildId: string,
-	days: number,
-	page: number,
-	search: string,
-): UseQueryResult<Paged<MemberUsageRow>> {
-	const query = new URLSearchParams({ days: String(days), page: String(page), perPage: String(PER_PAGE) });
-	if (search.trim() !== "") query.set("q", search.trim());
-
-	return useQuery({
-		queryKey: keys.owner.guildMembers(guildId, days, page, search.trim()),
-		queryFn: () => api.get<Paged<MemberUsageRow>>(`/analytics/guilds/${guildId}/members?${query.toString()}`),
-		placeholderData: keepPreviousData,
-	});
-}
-
-export function useGuildRuns(
-	guildId: string,
-	days: number,
-	page: number,
-	userId: string | null,
-	command: string | null,
-): UseQueryResult<Paged<CommandRunRow>> {
-	const query = new URLSearchParams({ days: String(days), page: String(page), perPage: String(PER_PAGE) });
-	if (userId !== null) query.set("userId", userId);
-	if (command !== null) query.set("command", command);
-
-	return useQuery({
-		queryKey: keys.owner.guildRuns(guildId, days, page, userId, command),
-		queryFn: () => api.get<Paged<CommandRunRow>>(`/analytics/guilds/${guildId}/runs?${query.toString()}`),
-		placeholderData: keepPreviousData,
-	});
-}
-
-/** `run` is null for the run going now, which is the only one that still changes. */
 export function useLogs(
 	run: string | null,
 	level: ReportedLogLevel,

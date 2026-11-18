@@ -5,7 +5,7 @@ import { barWidth } from "@/components/primitives/UsageBars";
 import { levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { logFeed, logRuns, PAST_RUN } from "@/test/fixtures/owner";
+import { logFeed, logRuns, PAST_RUN, shardlensStatus } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -70,7 +70,7 @@ describe("the usage tab", () => {
 		expect(screen.getByText("4.2s")).toBeInTheDocument();
 		expect(screen.getByText("40 runs · typically 850 ms")).toBeInTheDocument();
 		expect(screen.getByText("1,300 runs · typically 90 ms")).toBeInTheDocument();
-		expect(screen.getByText(/over the last 30 days in servers/)).toBeInTheDocument();
+		expect(screen.getByText(/how long Discord waited for the bot’s first reply/i)).toBeInTheDocument();
 	});
 
 	/** The bars are decoration; the numbers behind them have to be readable without them. */
@@ -248,6 +248,49 @@ describe("the runtime tab", () => {
 
 		expect(link).toHaveAttribute("href", "https://github.com/Kkkermit/Testify/releases");
 		expect(screen.getByText(/never contacts a server to check/i)).toBeInTheDocument();
+	});
+});
+
+describe("the Shardlens card", () => {
+	it("says where the analytics go, links the collector's dashboard and shows what is waiting", async () => {
+		renderTab("runtime");
+
+		expect(await screen.findByText(/sending to https:\/\/stats\.example\.com every five seconds/i)).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /open the shardlens dashboard/i })).toHaveAttribute(
+			"href",
+			"https://stats.example.com",
+		);
+		expect(screen.getByText("network")).toBeInTheDocument();
+	});
+
+	/** A send that went and one that did not look the same unless the card says which. */
+	it("says what Send now did, whether it worked or not", async () => {
+		const user = userEvent.setup();
+		renderTab("runtime");
+
+		await user.click(await screen.findByRole("button", { name: /send now/i }));
+		expect(await screen.findByText("Sent what was waiting.")).toBeInTheDocument();
+
+		server.use(
+			http.post("/api/control/shardlens/send", () =>
+				HttpResponse.json({ sent: 0, problem: "network", status: shardlensStatus }),
+			),
+		);
+		await user.click(screen.getByRole("button", { name: /send now/i }));
+		expect(await screen.findByText(/could not send \(network\)/i)).toBeInTheDocument();
+	});
+
+	it("offers nothing to press while it is off", async () => {
+		server.use(
+			http.get("/api/control/shardlens", () =>
+				HttpResponse.json({ ...shardlensStatus, state: "off", collector: null, lastProblem: null }),
+			),
+		);
+		renderTab("runtime");
+
+		expect(await screen.findByText(/nothing is attached and nothing is sent/i)).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /send now/i })).not.toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /open the shardlens dashboard/i })).not.toBeInTheDocument();
 	});
 });
 

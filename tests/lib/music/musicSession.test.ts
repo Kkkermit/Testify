@@ -325,6 +325,33 @@ describe("a queue where nothing can be opened", () => {
 	});
 });
 
+describe("what the session says about each track", () => {
+	/** Played is counted from these, so a retry or a volume change must not count the same song twice. */
+	it("marks a track opened again where it was as resumed, and a fresh start as not", async () => {
+		const { session, events } = sessionWith(["song"]);
+
+		await session.play(0);
+		await session.play(0, { seekMs: 30_000, resumed: true });
+
+		expect(events.filter((event) => event.kind === "track").map((event) => event.resumed)).toEqual([false, true]);
+	});
+
+	/** The reason a track was given up on is what tells a flagged host from a broken track. */
+	it("gives each failure the reason it was given up for", async () => {
+		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
+		describeTrack
+			.mockResolvedValueOnce({ formats: [] })
+			.mockRejectedValueOnce(new Error("ERROR: Sign in to confirm you’re not a bot"))
+			.mockRejectedValueOnce(new Error("something nobody has seen"));
+
+		const { session, events } = sessionWith(["a", "b", "c", "fine"]);
+		await session.play(0);
+
+		const failed = events.flatMap((event) => (event.kind === "failed" ? [event.problem] : []));
+		expect(failed).toEqual(["unplayable", "bot-check", "error"]);
+	});
+});
+
 describe("the live panel", () => {
 	beforeEach(() => {
 		jest.useFakeTimers();

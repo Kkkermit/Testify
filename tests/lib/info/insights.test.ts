@@ -6,6 +6,7 @@ import { countMove, fillDays, flushActivity, readInsights } from "@lib/info/insi
 import { averagePerDay, busiestHour } from "@testify/shared";
 
 jest.mock("@database/repositories/insightsRepository", () => ({
+	...jest.requireActual<object>("@database/repositories/insightsRepository"),
 	readInsightRows: jest.fn(),
 	recentMoves: jest.fn(() => Promise.resolve([])),
 	recordMove: jest.fn(() => Promise.resolve()),
