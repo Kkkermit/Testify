@@ -2,7 +2,6 @@ export { Avatar } from "@/components/primitives/Avatar";
 export { Badge, type BadgeTone } from "@/components/primitives/Badge";
 export { Button } from "@/components/primitives/Button";
 export { Card, cardClass } from "@/components/primitives/Card";
-export { ChartReadout } from "@/components/primitives/ChartReadout";
 export { CARD_ROW, HoverChevron } from "@/components/primitives/CardRow";
 export { DataList, Figure } from "@/components/primitives/DataList";
 export { CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives/DataTable";

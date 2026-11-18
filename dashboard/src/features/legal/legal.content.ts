@@ -20,7 +20,7 @@ export function sectionId(section: LegalSection): string {
 }
 
 /** Move this whenever either document's wording changes; the page prints it as the date the text last changed. */
-const LEGAL_UPDATED = "2026-11-16";
+const LEGAL_UPDATED = "2026-11-06";
 
 export const TERMS: LegalDocument = {
 	title: "legal.termsTitle",
@@ -129,7 +129,15 @@ export const PRIVACY: LegalDocument = {
 		{
 			heading: "legal.commands",
 			paragraphs: ["legal.commandsP1"],
-			list: ["legal.commandsL2", "legal.commandsL3", "legal.commandsL6", "legal.commandsL4", "legal.commandsL5"],
+			list: [
+				"legal.commandsL1",
+				"legal.commandsL7",
+				"legal.commandsL2",
+				"legal.commandsL3",
+				"legal.commandsL6",
+				"legal.commandsL4",
+				"legal.commandsL5",
+			],
 		},
 		{
 			heading: "legal.stored",
@@ -154,7 +162,6 @@ export const PRIVACY: LegalDocument = {
 				"legal.storedL17",
 				"legal.storedL18",
 				"legal.storedL19",
-				"legal.storedL20",
 			],
 			after: ["legal.storedP2", "legal.storedP3"],
 		},
@@ -178,7 +185,7 @@ export const PRIVACY: LegalDocument = {
 		{
 			heading: "legal.outside",
 			paragraphs: ["legal.outsideP1"],
-			list: ["legal.outsideL1", "legal.outsideL2", "legal.outsideL3", "legal.outsideL4", "legal.outsideL5"],
+			list: ["legal.outsideL1", "legal.outsideL2", "legal.outsideL3", "legal.outsideL4"],
 			after: ["legal.outsideP2"],
 		},
 		{
@@ -230,8 +237,6 @@ export const PRIVACY: LegalDocument = {
 				"legal.retentionL20",
 				"legal.retentionL21",
 				"legal.retentionL22",
-				"legal.retentionL23",
-				"legal.retentionL24",
 			],
 		},
 		{
@@ -246,7 +251,7 @@ export const PRIVACY: LegalDocument = {
 			heading: "legal.removal",
 			paragraphs: ["legal.rightsP1"],
 			list: ["legal.rightsL1", "legal.rightsL2", "legal.rightsL3", "legal.rightsL4", "legal.rightsL5"],
-			after: ["legal.removalP1", "legal.removalP3", "legal.removalP4", "legal.removalP5", "legal.removalP2"],
+			after: ["legal.removalP1", "legal.removalP3", "legal.removalP2"],
 		},
 		{
 			heading: "legal.legalBasis",

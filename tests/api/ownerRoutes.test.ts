@@ -8,9 +8,9 @@ import { databaseConnected } from "@database/connection";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
-import { AnalyticsUnavailable, guildActivity } from "@lib/bot";
-import { type OwnerGuildPage } from "@testify/shared";
+import { type OwnerGuildRow, type Paged } from "@testify/shared";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
@@ -23,12 +23,10 @@ jest.mock("@database/repositories/countingRepository", () => ({
 jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
-jest.mock("@lib/bot", () => ({ ...jest.requireActual<object>("@lib/bot"), guildActivity: jest.fn() }));
-
-const quiet = (): { commands: Map<string, number>; dashboard: Map<string, number> } => ({
-	commands: new Map(),
-	dashboard: new Map(),
-});
+jest.mock("@database/repositories/usageRepository", () => ({
+	guildTallies: jest.fn(() => Promise.resolve([])),
+	dashboardTallies: jest.fn(() => Promise.resolve([])),
+}));
 
 const OWNER = "100000000000000001";
 const MANAGER = "100000000000000002";
@@ -81,7 +79,8 @@ beforeEach(() => {
 	jest.mocked(getAuditLogConfig).mockResolvedValue(null);
 	jest.mocked(getCounting).mockResolvedValue(null);
 	jest.mocked(getWelcome).mockResolvedValue(null);
-	jest.mocked(guildActivity).mockResolvedValue(quiet());
+	jest.mocked(guildTallies).mockResolvedValue([]);
+	jest.mocked(dashboardTallies).mockResolvedValue([]);
 });
 
 describe("the owner stats", () => {
@@ -94,7 +93,7 @@ describe("the owner stats", () => {
 describe("the owner guild list", () => {
 	/** The question this screen exists to answer: which of my servers has never configured anything. */
 	it("says a server has nothing configured when it has nothing configured", async () => {
-		const body = (await (await appFor(1).request("/owner/guilds")).json()) as OwnerGuildPage;
+		const body = (await (await appFor(1).request("/owner/guilds")).json()) as Paged<OwnerGuildRow>;
 
 		expect(body.items[0]?.configured).toEqual([]);
 	});
@@ -103,29 +102,13 @@ describe("the owner guild list", () => {
 	it("does not count a disabled feature as configured", async () => {
 		jest.mocked(getLevelSettings).mockResolvedValue({ isDisabled: true } as never);
 
-		const body = (await (await appFor(1).request("/owner/guilds")).json()) as OwnerGuildPage;
+		const body = (await (await appFor(1).request("/owner/guilds")).json()) as Paged<OwnerGuildRow>;
 
 		expect(body.items[0]?.configured).toEqual([]);
 	});
 
 	it("refuses a page number that is not one", async () => {
 		expect((await appFor(1).request("/owner/guilds?page=-1")).status).toBe(400);
-	});
-
-	/** The list is how the owner reaches a server, so Shardlens being away costs the counts and never the list. */
-	it("still lists every server while Shardlens cannot be read, and says why the counts are missing", async () => {
-		jest.mocked(guildActivity).mockRejectedValue(new AnalyticsUnavailable("unreachable"));
-
-		const body = (await (await appFor(2).request("/owner/guilds")).json()) as OwnerGuildPage;
-		const inactive = (await (await appFor(2).request("/owner/guilds?filter=inactive")).json()) as OwnerGuildPage;
-
-		expect(body.analytics).toBe("unreachable");
-		expect(body.items.map((row) => [row.commands, row.dashboardViews])).toEqual([
-			[null, null],
-			[null, null],
-		]);
-		// Nobody can be told apart as inactive without the counts, and listing everybody would say they all were.
-		expect(inactive.items).toEqual([]);
 	});
 });
 
@@ -139,7 +122,7 @@ describe("sorting and searching the owner guild list", () => {
 		]);
 
 	async function names(query: string, guilds = three()): Promise<string[]> {
-		const body = (await (await appFor(guilds).request(`/owner/guilds${query}`)).json()) as OwnerGuildPage;
+		const body = (await (await appFor(guilds).request(`/owner/guilds${query}`)).json()) as Paged<OwnerGuildRow>;
 		return body.items.map((guild) => guild.name);
 	}
 
@@ -163,7 +146,7 @@ describe("sorting and searching the owner guild list", () => {
 	it("puts the server that ran the fewest commands first, and the oldest of equals", async () => {
 		expect(await names("?sort=quietest")).toEqual(["alpha", "Bravo", "Charlie"]);
 
-		jest.mocked(guildActivity).mockResolvedValue({ ...quiet(), commands: new Map([["900000000000000001", 3]]) });
+		jest.mocked(guildTallies).mockResolvedValue([{ guildId: "900000000000000001", count: 3 }]);
 
 		expect(await names("?sort=quietest")).toEqual(["Bravo", "Charlie", "alpha"]);
 	});

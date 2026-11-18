@@ -14,18 +14,9 @@ import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
+import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
-import {
-	botIdentity,
-	controlState,
-	forgetBotIdentity,
-	oneGuildActivity,
-	orUnavailable,
-	pause,
-	resume,
-	sendShardlensNow,
-	shardlensStatus,
-} from "@lib/bot";
+import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
 import { normaliseSettings } from "@lib/levelling";
 import { applyMusicSources, readMusicSources, readMusicSourceSetting, sourcesName } from "@lib/music";
 import {
@@ -140,21 +131,6 @@ control.put("/music", async (context) => {
 	return context.json(setting);
 });
 
-control.get("/shardlens", (context) => context.json(shardlensStatus(context.get("client"))));
-
-control.post("/shardlens/send", async (context) => {
-	const flushed = await sendShardlensNow(context.get("client"));
-	if (flushed === null) throw notFound("shardlens_off", "Shardlens is off, so there is nothing to send.");
-
-	await auditChange(context, {
-		action: "bot.shardlensSend",
-		summary: "Sent the queued analytics to Shardlens",
-		after: { sent: flushed.sent, problem: flushed.problem },
-	});
-
-	return context.json(flushed);
-});
-
 control.get("/guilds/:guildId", async (context) => {
 	const client = context.get("client");
 	const { guildId } = parseParams(context, guildIdParam);
@@ -162,9 +138,10 @@ control.get("/guilds/:guildId", async (context) => {
 
 	if (guild === undefined) throw notInGuild();
 
-	const [configured, activity] = await Promise.all([
+	const [configured, tallies, dashboard] = await Promise.all([
 		configuredIn(guild),
-		orUnavailable(oneGuildActivity(client, guild.id, ANALYTICS.defaultWindowDays)),
+		guildTallies(ANALYTICS.defaultWindowDays, 0),
+		dashboardTallies(ANALYTICS.defaultWindowDays, 0, undefined, guild.id),
 	]);
 
 	const me = guild.members.me;
@@ -182,9 +159,8 @@ control.get("/guilds/:guildId", async (context) => {
 		highestRole: me?.roles.highest.name ?? null,
 		missingPermissions: missingIn(guild),
 		configured,
-		usage: activity.value?.commands ?? null,
-		dashboardViews: activity.value?.dashboard ?? null,
-		analytics: activity.problem,
+		usage: tallies.find((row) => row.guildId === guild.id)?.count ?? 0,
+		dashboardViews: dashboard[0]?.count ?? 0,
 	};
 
 	return context.json(body);

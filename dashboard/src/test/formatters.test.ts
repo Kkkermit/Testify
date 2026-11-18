@@ -3,7 +3,7 @@ import { everyModule, offenders } from "./sourceFiles";
 /** Only the two shared modules build a formatter, because only they are handed a language the browser accepts. */
 
 const HAND_BUILT =
-	/new Intl\.(?:DateTimeFormat|NumberFormat|RelativeTimeFormat|PluralRules|ListFormat|DisplayNames)\b|\.toLocale(?:Date|Time)?String\(/;
+	/new Intl\.(?:DateTimeFormat|NumberFormat|RelativeTimeFormat|PluralRules|ListFormat)\b|\.toLocale(?:Date|Time)?String\(/;
 const SHARED = /[\\/]lib[\\/](?:intl|datetime)\.ts$/;
 
 describe("formatting", () => {

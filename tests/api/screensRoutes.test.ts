@@ -4,9 +4,12 @@ import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { screens } from "@api/routes/screens";
 import { type TestifyClient } from "@core/client";
-import { recordScreenView } from "@lib/bot";
+import { recordDashboardView, recordScreenView } from "@database/repositories/usageRepository";
 
-jest.mock("@lib/bot", () => ({ ...jest.requireActual<object>("@lib/bot"), recordScreenView: jest.fn() }));
+jest.mock("@database/repositories/usageRepository", () => ({
+	recordScreenView: jest.fn(() => Promise.resolve()),
+	recordDashboardView: jest.fn(() => Promise.resolve()),
+}));
 
 const MANAGER = "100000000000000002";
 const MEMBER = "100000000000000003";
@@ -71,13 +74,8 @@ it.each([
 ])("does not count the server for %s", async (_, userId, guildId) => {
 	expect(await view(userId, { route: ROUTE, guildId })).toBe(204);
 
-	expect(jest.mocked(recordScreenView).mock.calls[0]?.slice(1)).toEqual([ROUTE, null]);
-});
-
-it("counts the server for one of its managers", async () => {
-	expect(await view(MANAGER, { route: ROUTE, guildId: GUILD })).toBe(204);
-
-	expect(jest.mocked(recordScreenView).mock.calls[0]?.slice(1)).toEqual([ROUTE, GUILD]);
+	expect(recordScreenView).toHaveBeenCalledWith(ROUTE);
+	expect(recordDashboardView).not.toHaveBeenCalled();
 });
 
 it("refuses a server id that is not one", async () => {
@@ -87,6 +85,12 @@ it("refuses a server id that is not one", async () => {
 
 it("refuses somebody signed out", async () => {
 	expect(await view(null, { route: ROUTE, guildId: GUILD })).toBe(401);
+});
+
+it("answers 204 when the count cannot be written, because a navigation must never fail over it", async () => {
+	jest.mocked(recordDashboardView).mockRejectedValueOnce(new Error("down"));
+
+	expect(await view(MANAGER, { route: ROUTE, guildId: GUILD })).toBe(204);
 });
 
 /** Each route is a row in the owner's tally, so free text would let one person write as many rows as they liked. */

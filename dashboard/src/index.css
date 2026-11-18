@@ -461,12 +461,6 @@
 	color: var(--color-popover);
 }
 
-/** The cell a chart's readout is reading, so it is still found under the box. */
-[data-readout][data-active] {
-	outline: 2px solid var(--color-ring);
-	outline-offset: 1px;
-}
-
 /** `prefers-contrast: more` swaps dividers for the interactive border and muted text for the full-contrast one. */
 @media (prefers-contrast: more) {
 	:root {

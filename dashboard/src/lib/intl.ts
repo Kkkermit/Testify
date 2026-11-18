@@ -21,23 +21,6 @@ function numberFormat(options: Intl.NumberFormatOptions): Intl.NumberFormat {
 	return made;
 }
 
-const languageNames = new Map<string, Intl.DisplayNames>();
-
-/** `German`, for a language tag Discord reports; the tag itself when the browser has no name for it. */
-export function languageName(tag: string): string {
-	const locale = formattingLocale();
-	let names = languageNames.get(locale);
-	if (names === undefined) {
-		names = new Intl.DisplayNames([locale], { type: "language" });
-		languageNames.set(locale, names);
-	}
-	try {
-		return names.of(tag) ?? tag;
-	} catch {
-		return tag;
-	}
-}
-
 export function formatNumber(value: number): string {
 	return numberFormat({}).format(value);
 }

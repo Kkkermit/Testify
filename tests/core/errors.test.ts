@@ -25,10 +25,9 @@ describe("runCommand", () => {
 		const interaction = createMockInteraction();
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
-		const failure = new Error("boom");
 		const outcome = await runCommand(
 			interaction,
-			command(() => Promise.reject(failure)),
+			command(() => Promise.reject(new Error("boom"))),
 			client,
 		);
 
@@ -36,7 +35,7 @@ describe("runCommand", () => {
 		expect(reference).toBeDefined();
 		expect(client.logger.error).toHaveBeenCalledWith(expect.objectContaining({ reference }), expect.any(String));
 		// The run log keeps the same reference, which is what links a failed run to its log lines.
-		expect(outcome).toEqual({ ok: false, reference, error: failure });
+		expect(outcome).toEqual({ ok: false, reference });
 	});
 
 	/** The apology and its reference reach a French reader in French, with the reference still the one in the log. */
@@ -58,14 +57,13 @@ describe("runCommand", () => {
 	it("returns no reference for a failure that was not logged as a bug", async () => {
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
-		const refusal = new UserFacingError("You need 500 more coins.");
 		const outcome = await runCommand(
 			createMockInteraction(),
-			command(() => Promise.reject(refusal)),
+			command(() => Promise.reject(new UserFacingError("You need 500 more coins."))),
 			client,
 		);
 
-		expect(outcome).toEqual({ ok: false, reference: null, error: refusal });
+		expect(outcome).toEqual({ ok: false, reference: null });
 	});
 
 	it("answers privately when nothing has been sent yet", async () => {

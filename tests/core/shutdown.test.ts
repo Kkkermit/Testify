@@ -67,19 +67,6 @@ describe("shutdown", () => {
 		expect(client.destroy).toHaveBeenCalled();
 	});
 
-	/** Shardlens sends every five seconds, so what it holds when the bot stops is lost unless it is told first. */
-	it("sends what Shardlens holds before the client goes", async () => {
-		const { shutdown } = loadShutdown();
-		const client = clientFor();
-		const order: string[] = [];
-		client.shardlens = { shutdown: jest.fn(() => Promise.resolve(void order.push("shardlens"))) } as never;
-		jest.mocked(client.destroy).mockImplementation(() => Promise.resolve(void order.push("destroy")));
-
-		await shutdown(client, "SIGINT");
-
-		expect(order).toEqual(["shardlens", "destroy"]);
-	});
-
 	/** Two signals in quick succession must not race two teardowns. */
 	it("ignores a second call", async () => {
 		const { shutdown, disconnectDatabase } = loadShutdown();

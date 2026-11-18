@@ -87,11 +87,9 @@ describe("the back up and copy page", () => {
 	/** Nothing is written until the reader has seen the plan, and then only what they left ticked. */
 	it("reads a backup file, matches its channels by name and applies what is ticked", async () => {
 		const sent: { path: string; body: unknown }[] = [];
-		const ways: (string | null)[] = [];
 		server.use(
 			http.patch(`/api/guilds/${GUILD}/:feature`, async ({ params, request }) => {
 				sent.push({ path: String(params.feature), body: await request.json() });
-				ways.push(request.headers.get("x-testify-via"));
 				return HttpResponse.json({});
 			}),
 		);
@@ -110,8 +108,6 @@ describe("the back up and copy page", () => {
 				{ path: "starboard", body: { enabled: true, channelId: "400000000000000001", threshold: 9 } },
 			]);
 		});
-		// Each section's write says it came from a backup, so it is counted as one and not as an ordinary save.
-		expect(ways).toEqual(["backup"]);
 		expect(await screen.findByText("Saved")).toBeInTheDocument();
 	});
 

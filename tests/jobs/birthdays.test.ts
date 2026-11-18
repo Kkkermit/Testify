@@ -96,15 +96,3 @@ describe("announcing today's birthdays", () => {
 		expect(warn).toHaveBeenCalledWith(expect.anything(), expect.stringContaining("[BIRTHDAYS]"));
 	});
 });
-
-describe("counting birthday posts", () => {
-	it("counts a birthday that was posted and none that could not be", async () => {
-		const track = jest.fn();
-		jest.mocked(birthdaysDue).mockResolvedValue([birthday("1", "a"), birthday("1", "b")]);
-		jest.mocked(postBirthday).mockResolvedValueOnce("sent").mockResolvedValueOnce("unreachable");
-
-		await announceBirthdays(createMockClient({ shardlens: { track } } as never), NOW);
-
-		expect(track.mock.calls).toEqual([["birthday_post", {}, { guildId: "1" }]]);
-	});
-});

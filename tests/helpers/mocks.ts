@@ -158,7 +158,6 @@ export function createMockClient(overrides: Overrides<TestifyClient> = {}): Test
 			logger: createLogger("fatal", false),
 			env: { DISCORD_OWNER_IDS: [OWNER_ID], DISABLED_FEATURES: [] },
 			featuresOff: new Set(),
-			shardlens: null,
 			isOwner: jest.fn((id: string) => id === OWNER_ID),
 			user: {
 				id: BOT_ID,

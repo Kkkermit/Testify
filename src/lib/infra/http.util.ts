@@ -12,8 +12,6 @@ interface RequestOptions {
 	timeoutMs?: number;
 	/** Query parameters appended to the URL, skipping undefined values. */
 	query?: Record<string, string | number | boolean | undefined>;
-	/** False for a call only the owners rely on, which the public status page has no business judging the bot by. */
-	recorded?: boolean;
 }
 
 function withQuery(url: string, query: RequestOptions["query"]): string {
@@ -29,9 +27,7 @@ export async function fetchRaw(service: string, url: string, options: RequestOpt
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? LIMITS.externalApiTimeoutMs);
 	const started = Date.now();
-	const settle = (ok: boolean): void => {
-		if (options.recorded !== false) recordOutcome(service, { ok, at: Date.now(), latencyMs: Date.now() - started });
-	};
+	const settle = (ok: boolean): void => recordOutcome(service, { ok, at: Date.now(), latencyMs: Date.now() - started });
 
 	try {
 		const response = await fetch(withQuery(url, options.query), {

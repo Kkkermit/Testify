@@ -4,7 +4,7 @@ import { notFound } from "@api/errors";
 import { requireAuth } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
-import { countAnswer, supportContext, supportDesk } from "@lib/support";
+import { supportContext, supportDesk } from "@lib/support";
 import { supportArticleParams, type SupportIndex, supportQuestion, type SupportReply } from "@testify/shared";
 
 /** The help articles, public because the docs show them to somebody who has not signed in. */
@@ -26,10 +26,8 @@ supportArticles.get("/", (context) => {
 supportQuestions.post("/ask", async (context) => {
 	const client = context.get("client");
 	const { question } = await parseBody(context, supportQuestion);
-	const { reply, by } = await supportDesk(client).answer(question, supportContext(DEFAULT_PREFIX));
-	countAnswer(client, "dashboard", reply, by);
+	const body: SupportReply = await supportDesk(client).ask(question, supportContext(DEFAULT_PREFIX));
 
-	const body: SupportReply = reply;
 	return context.json(body);
 });
 

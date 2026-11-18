@@ -9,7 +9,6 @@ import {
 	type StoredBirthdaySettings,
 } from "@database/repositories/birthdayRepository";
 import { birthdaysOn, postBirthday } from "@lib/birthdays";
-import { recordAction } from "@lib/bot";
 
 /** Each birthday is claimed for the year before it is posted, and handed back if the post may yet work. */
 export async function announceBirthdays(client: TestifyClient, now: Date = new Date()): Promise<void> {
@@ -27,7 +26,6 @@ export async function announceBirthdays(client: TestifyClient, now: Date = new D
 		const where = { guildId: birthday.guildId };
 		try {
 			const outcome = await postBirthday(client, birthday, settings);
-			if (outcome === "sent") recordAction(client, "birthday_post", birthday.guildId);
 			if (outcome === "gone") await forgetBirthday(birthday.guildId, birthday.userId);
 			if (outcome === "unreachable") {
 				await releaseBirthday(birthday.guildId, birthday.userId, year);

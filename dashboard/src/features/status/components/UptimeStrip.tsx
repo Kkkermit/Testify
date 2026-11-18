@@ -1,6 +1,5 @@
 import { type StatusDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { ChartReadout } from "@/components/primitives";
 import { dayFill, percent } from "@/features/status/status.utils";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
@@ -12,15 +11,15 @@ export function UptimeStrip({ days }: { days: StatusDay[] }): React.JSX.Element 
 
 	return (
 		<figure className="flex flex-col gap-2">
-			<ChartReadout label={t("status.perDay")} column slide className="flex h-10 items-stretch gap-px">
+			<div className="flex h-10 items-stretch gap-px" aria-hidden="true">
 				{days.map((day) => (
 					<span
 						key={day.day}
-						data-readout={`${shortDate(day.day)}: ${label(day)}`}
+						title={`${shortDate(day.day)}: ${label(day)}`}
 						className={cn("rounded-chip min-w-0 flex-1 opacity-80 hover:opacity-100", dayFill(day.uptime))}
 					/>
 				))}
-			</ChartReadout>
+			</div>
 
 			<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
 				<span>{shortDate(days[0]?.day ?? "")}</span>

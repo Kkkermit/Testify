@@ -1,4 +1,3 @@
-import { DAY_MS } from "@config/constants";
 import {
 	ChannelDays,
 	MemberDays,
@@ -7,17 +6,10 @@ import {
 	type ServerDay,
 	ServerDays,
 } from "@database/models/insights.schema";
+import { dayKey } from "@database/repositories/usageRepository";
 import { INSIGHTS_LIMITS } from "@testify/shared";
 
-/** A UTC day as `YYYY-MM-DD`, the key every per-day insights row is stored under. */
-export function dayKey(at: Date = new Date()): string {
-	return at.toISOString().slice(0, 10);
-}
-
-/** The oldest day still inside a window, inclusive, so `day >= since` selects it. */
-export function since(days: number, now: Date = new Date()): string {
-	return dayKey(new Date(now.getTime() - (days - 1) * DAY_MS));
-}
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function expiry(now: Date): Date {
 	// A day past the window, so the oldest day a window shows is never half reaped.

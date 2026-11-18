@@ -3,7 +3,6 @@ import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
 import { getRaidSettings, type RaidSettingsOnDisk, saveRaidSettings } from "@database/repositories/raidRepository";
-import { recordAction } from "@lib/bot/shardlens.util";
 import { canPostIn } from "@lib/discord/channels.util";
 import { embed } from "@lib/discord/embeds.util";
 import { discordTime, formatDurationLong } from "@lib/format/format.util";
@@ -214,7 +213,6 @@ export async function guardJoin(
 		if (!settings.enabled) return;
 
 		const outcome = await holdNewAccount(member, settings, now);
-		if (outcome?.held === true) recordAction(client, "raid_hold", member.guild.id);
 		const spike = watch.record(
 			member.guild.id,
 			{

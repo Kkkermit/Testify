@@ -1,13 +1,12 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { botName } from "@core/brand";
-import { checkCommand } from "@core/checks";
-import { chosenSubcommand, givenOptions } from "@core/command";
+import { runChecks } from "@core/checks";
 import { runCommand } from "@core/errors";
 import { readerLanguage, say } from "@core/language";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/prefixRepository";
-import { logCommandUse, recordCommandTime, recordPrefixRun, recordRefusal } from "@lib/bot";
+import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff } from "@testify/shared";
@@ -33,10 +32,7 @@ export default defineMessageHandler({
 		const [name = parsed.name, subcommand] = (client.aliases.get(parsed.name) ?? parsed.name).split(" ");
 		const args = subcommand === undefined ? parsed.args : [subcommand, ...parsed.args];
 
-		// `commandIsOff` matches only a name a feature declares, so what is counted is never free text.
-		const lowered = name.toLowerCase();
-		if (commandIsOff(client.featuresOff, lowered, args[0]?.toLowerCase())) {
-			recordRefusal(client, lowered, "feature_off", "prefix", message.guildId);
+		if (commandIsOff(client.featuresOff, name.toLowerCase(), args[0]?.toLowerCase())) {
 			const refusal = say(readerLanguage({ guild: message.guild }), "featureOff", { bot: botName() });
 			await replyTemporarily(client, message, refusalEmbed(refusal));
 			return true;
@@ -50,34 +46,28 @@ export default defineMessageHandler({
 		const interaction = new PrefixInteraction(message, command, args);
 		await interaction.options.prepare();
 
-		const refusal = await checkCommand(interaction, command, client);
+		const refusal = await runChecks(interaction, command, client);
 		if (refusal !== null) {
-			recordRefusal(client, command.name, refusal.reason, "prefix", message.guildId);
 			// A message cannot be private, so the refusal clears itself rather than staying in the channel.
-			await replyTemporarily(client, message, refusalEmbed(refusal.failure));
+			await replyTemporarily(client, message, refusalEmbed(refusal));
 			return true;
 		}
 
 		const started = Date.now();
-		const { ok, error } = await runCommand(interaction, command, client);
+		const { ok, reference } = await runCommand(interaction, command, client);
 		const durationMs = Date.now() - started;
 		recordCommandTime(durationMs, ok);
-		logCommandUse(client, interaction, command, {
+		const run = {
 			surface: "prefix",
 			ok,
+			reference,
 			durationMs,
 			channelId: message.guild === null ? null : message.channelId,
 			prefix,
 			typed: `${parsed.prefix ?? `@${client.user?.username ?? "mention"} `}${parsed.name}`,
-		});
-		recordPrefixRun(client, message, {
-			command: command.name,
-			subcommand: chosenSubcommand(interaction, command),
-			options: givenOptions(interaction, command).map((option) => option.name),
-			durationMs,
-			ok,
-			error,
-		});
+		} as const;
+		countCommandUse(client, interaction, command, run);
+		logCommandUse(client, interaction, command, run);
 		// A message cannot be private, so the hint clears itself like a refusal.
 		mentionNoticesAfterCommand(message.author.id, client.logger, (unread) =>
 			replyTemporarily(client, message, noticeHint(unread, `${prefix}${NOTICE_COMMAND}`)),

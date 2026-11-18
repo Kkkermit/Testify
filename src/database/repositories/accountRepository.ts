@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { AfkStatus } from "@database/models/afk.schema";
 import { Appeal, AppealSettingsConfig } from "@database/models/appeal.schema";
 import { AutoResponderEntry } from "@database/models/autoResponder.schema";
@@ -8,6 +7,7 @@ import { FixedStats } from "@database/models/botStats.schema";
 import { CasinoHand } from "@database/models/casinoHand.schema";
 import { CasinoSettingsConfig } from "@database/models/casinoSettings.schema";
 import { CasinoStats } from "@database/models/casinoStats.schema";
+import { CommandRuns } from "@database/models/commandRuns.schema";
 import { CommandToggleConfig } from "@database/models/commandToggles.schema";
 import { Counting } from "@database/models/counting.schema";
 import { DashboardAccess } from "@database/models/dashboardAccess.schema";
@@ -50,8 +50,6 @@ type Erasure = "delete" | "remove" | "anonymise" | "keep";
  */
 export const ERASURE = {
 	afk: { userId: "delete" },
-	// Their own instruction not to be counted, which deleting the rest must not undo.
-	analyticsoptouts: { userId: "keep" },
 	appeals: { userId: "delete", decidedBy: "anonymise" },
 	appealsettings: { updatedBy: "anonymise" },
 	autoresponders: { updatedBy: "anonymise" },
@@ -63,6 +61,7 @@ export const ERASURE = {
 	casinohands: { userId: "delete" },
 	casinosettings: { updatedBy: "anonymise" },
 	casinostats: { userId: "delete" },
+	commandrun: { userId: "delete" },
 	commandtoggles: { updatedBy: "anonymise" },
 	countingSchema: { lastUserId: "anonymise" },
 	dashboardaccess: { userId: "delete", addedBy: "anonymise" },
@@ -113,9 +112,6 @@ export const ERASURE = {
 	warnTutorial: { userId: "keep", "warnings.executorId": "anonymise", "warnings.edits.editedById": "anonymise" },
 } as const satisfies Record<string, Record<string, Erasure>>;
 
-/** An earlier release's who-ran-what log, which its own index empties within 30 days; until then, theirs goes too. */
-const OLD_RUN_LOG = "commandruns";
-
 /** An idea or an appeal the person wrote, whose post in Discord carries their words. */
 interface ErasedPost {
 	channelId: string;
@@ -140,7 +136,7 @@ export async function eraseUserData(userId: string): Promise<ErasedPost[]> {
 		CasinoHand.deleteMany({ userId }).exec(),
 		CasinoStats.deleteMany({ userId }).exec(),
 		DashboardAccess.deleteMany({ userId }).exec(),
-		mongoose.connection.db?.collection(OLD_RUN_LOG).deleteMany({ userId }),
+		CommandRuns.deleteMany({ userId }).exec(),
 		DashboardSessions.deleteMany({ userId }).exec(),
 		DmLog.deleteMany({ authorId: userId }).exec(),
 		Economy.deleteMany({ userId }).exec(),

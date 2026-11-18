@@ -36,7 +36,6 @@ import { musicPanel, type PanelState } from "@lib/music/musicPanel.util";
 import { aboutTheTrack, classifyProblem } from "@lib/music/musicProblem.util";
 import { currentTrack, decideOnIdle, endedEarly, finished } from "@lib/music/musicQueue.util";
 import { describeTrack, forgetDescription, openStream } from "@lib/music/musicSource.util";
-import { type MusicReason } from "@testify/shared";
 
 /** One guild's voice connection, player and queue, and the rules for moving between tracks. */
 
@@ -61,18 +60,12 @@ const STREAM_TYPES: Record<StreamShape, StreamType> = {
 };
 
 export type SessionEvent =
-	/** `resumed` for a track opened again where it was, by a retry or a volume change, rather than started. */
-	| { kind: "track"; track: Track; resumed: boolean }
+	| { kind: "track"; track: Track }
 	| { kind: "queue-ended" }
-	| { kind: "failed"; track: Track; reason: string; problem: MusicReason }
+	| { kind: "failed"; track: Track; reason: string }
 	| { kind: "retrying"; track: Track; attempt: number };
 
 type SessionListener = (event: SessionEvent) => void;
-
-interface PlayOptions {
-	seekMs?: number;
-	resumed?: boolean;
-}
 
 /** The message the live panel rewrites, narrowed to the one call it makes so a test needs no Discord. */
 interface PanelTarget {
@@ -236,7 +229,7 @@ export class MusicSession {
 	}
 
 	/** Starts the track at `index`, replacing whatever was playing. */
-	async play(index: number, options: PlayOptions = {}): Promise<void> {
+	async play(index: number, options: { seekMs?: number } = {}): Promise<void> {
 		const track = this.queue.tracks[index];
 		if (track === undefined) return;
 
@@ -245,7 +238,7 @@ export class MusicSession {
 
 		this.queue = { ...this.queue, index };
 
-		let failure: { text: string; problem: MusicReason } | null = null;
+		let failure: string | null = null;
 
 		try {
 			// Closing leaves the player idle for as long as yt-dlp takes to answer, which must not advance the queue.
@@ -260,12 +253,9 @@ export class MusicSession {
 			const plan = info === null ? null : planStream(info.formats ?? [], { ffmpeg: this.canSetVolume, filtered });
 
 			if (plan === null) {
-				failure = {
-					text: this.canSetVolume
-						? "no playable audio was offered for it."
-						: "it is not offered in a format Discord can play, and FFmpeg is not installed.",
-					problem: "unplayable",
-				};
+				failure = this.canSetVolume
+					? "no playable audio was offered for it."
+					: "it is not offered in a format Discord can play, and FFmpeg is not installed.";
 			} else {
 				const stream = openStream(track.url, plan, this.#binaries, {
 					volume: this.#volume,
@@ -290,15 +280,15 @@ export class MusicSession {
 		}
 
 		if (failure !== null) {
-			this.#notify(`Skipped **${track.title}** — ${failure.text}`);
-			this.#emit({ kind: "failed", track, reason: failure.text, problem: failure.problem });
+			this.#notify(`Skipped **${track.title}** — ${failure}`);
+			this.#emit({ kind: "failed", track, reason: failure });
 			await this.#advancePast();
 			return;
 		}
 
 		this.#cardFor(track);
 		this.#startTicker();
-		this.#emit({ kind: "track", track, resumed: options.resumed === true });
+		this.#emit({ kind: "track", track });
 		void this.refreshPanel();
 	}
 
@@ -331,7 +321,7 @@ export class MusicSession {
 			}
 			this.#attempts = decision.attempt;
 			this.#emit({ kind: "retrying", track, attempt: decision.attempt });
-			await this.play(this.queue.index, { seekMs: resumeAt, resumed: true });
+			await this.play(this.queue.index, { seekMs: resumeAt });
 			return;
 		}
 
@@ -339,12 +329,7 @@ export class MusicSession {
 		if (brokeEarly && track !== null) {
 			this.#warnGaveUp(track, problem);
 			this.#notify(`Skipped **${track.title}** — ${problem?.advice ?? "the stream kept breaking."}`);
-			this.#emit({
-				kind: "failed",
-				track,
-				reason: problem?.advice ?? "the stream kept breaking",
-				problem: problem?.kind ?? "broken",
-			});
+			this.#emit({ kind: "failed", track, reason: problem?.advice ?? "the stream kept breaking" });
 		}
 
 		this.#attempts = 0;
@@ -384,19 +369,19 @@ export class MusicSession {
 	}
 
 	/** Why a track would not open, as the panel words it; only a failure nothing recognises is worth a warning. */
-	#openFailure(track: Track, error: unknown): { text: string; problem: MusicReason } {
+	#openFailure(track: Track, error: unknown): string {
 		const known = classifyProblem(toError(error).message);
 
 		if (known !== null && aboutTheTrack(known)) {
 			this.#logger.debug({ guildId: this.guildId, track: track.url }, `[MUSIC] Skipped a track: ${known.kind}.`);
-			return { text: known.advice, problem: known.kind };
+			return known.advice;
 		}
 
 		this.#logger.warn(
 			{ err: toError(error), guildId: this.guildId },
 			"[MUSIC] A track could not be opened. Moving on.",
 		);
-		return { text: "it could not be opened.", problem: known?.kind ?? "error" };
+		return "it could not be opened.";
 	}
 
 	#notify(text: string, now = Date.now()): void {
@@ -461,7 +446,7 @@ export class MusicSession {
 		this.#volume = clampVolume(volume);
 
 		if (currentTrack(this.queue) !== null && (this.playing || this.paused)) {
-			this.#playSoon(this.queue.index, { seekMs: this.playedMs, resumed: true });
+			this.#playSoon(this.queue.index, { seekMs: this.playedMs });
 		}
 
 		return this.#volume;
@@ -478,7 +463,7 @@ export class MusicSession {
 	/**
 	 * Starts a track without waiting; `play` marks itself as re-opening first, so the idle in between is not an ending.
 	 */
-	#playSoon(index: number, options: PlayOptions = {}): void {
+	#playSoon(index: number, options: { seekMs?: number } = {}): void {
 		void this.play(index, options).catch((error: unknown) => {
 			this.#logger.warn({ err: toError(error), guildId: this.guildId }, "[MUSIC] Could not start a track.");
 		});

@@ -34,5 +34,5 @@
 
 		"types": ["node", "jest", "@testing-library/jest-dom"]
 	},
-	"include": ["./src/**/*.ts", "./src/**/*.tsx", "./fixtures/**/*.ts", "../shared/src/**/*.ts", "*.config.ts"]
+	"include": ["./src/**/*.ts", "./src/**/*.tsx", "../shared/src/**/*.ts", "*.config.ts"]
 }

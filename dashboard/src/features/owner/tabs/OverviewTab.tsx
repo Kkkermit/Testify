@@ -5,7 +5,6 @@ import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { LABEL, SearchField, SELECT } from "@/components/form";
 import { Card, SectionHeading, Pager, Skeleton, StatTile } from "@/components/primitives";
-import { CountsUnavailable } from "@/features/owner/components/AnalyticsNotice";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
 import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
@@ -26,18 +25,11 @@ export function OverviewTab(): React.JSX.Element {
 	const health = useOwnerStats();
 	const guilds = useOwnerGuilds(page, sort, filter, useDebounced(search));
 	const results = currentData(guilds);
-	const countsProblem = results?.analytics ?? null;
 
 	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
 
 	const selected = params.get("server");
 	const stats = health.data;
-
-	function emptyNote(): string | null {
-		if (search.trim() !== "") return t("owner.noServersMatch");
-		if (filter !== "inactive") return null;
-		return countsProblem === null ? t("owner.noInactive") : t("owner.inactiveUnknown");
-	}
 
 	// Merged rather than replaced, or paging drops `?tab=`.
 	function put(changes: Record<string, string | null>, replace = false): void {
@@ -146,8 +138,6 @@ export function OverviewTab(): React.JSX.Element {
 					/>
 				)}
 
-				{countsProblem !== null && <CountsUnavailable problem={countsProblem} />}
-
 				{guilds.isError ? (
 					<ErrorState as="h2" error={guilds.error} onRetry={() => void guilds.refetch()} />
 				) : results === undefined ? (
@@ -157,7 +147,9 @@ export function OverviewTab(): React.JSX.Element {
 						guilds={results.items}
 						sort={sort}
 						filter={filter}
-						empty={emptyNote()}
+						empty={
+							search.trim() !== "" ? t("owner.noServersMatch") : filter === "inactive" ? t("owner.noInactive") : null
+						}
 						selected={selected}
 						onSelect={(guildId) => {
 							put({ server: guildId });

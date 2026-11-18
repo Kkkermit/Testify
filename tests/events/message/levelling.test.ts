@@ -25,26 +25,3 @@ describe("the levelling message handler", () => {
 		expect(awardXp).toHaveBeenCalledWith(expect.any(String), expect.any(String), 5, 120_000);
 	});
 });
-
-describe("counting level-ups", () => {
-	it("counts a message that levelled somebody up, and nothing for one that did not", async () => {
-		const track = jest.fn();
-		jest.mocked(getTuning).mockResolvedValue(DEFAULT_TUNING);
-		const message = createMockMessage({
-			content: "hello",
-			overrides: { member: { roles: { cache: mockCollection([]) } } } as never,
-		});
-		// Nowhere to announce it, so the handler stops once the level-up is counted.
-		const client = createMockClient({
-			shardlens: { track },
-			channels: { fetch: jest.fn(() => Promise.resolve(null)) },
-		} as never);
-
-		await handler.run(message, client);
-		expect(track).not.toHaveBeenCalled();
-
-		jest.mocked(awardXp).mockResolvedValueOnce({ levelledUp: true, record: { level: 2 } } as never);
-		await handler.run(message, client);
-		expect(track.mock.calls[0]?.[0]).toBe("level_up");
-	});
-});

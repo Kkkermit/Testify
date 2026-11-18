@@ -1,7 +1,6 @@
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { claimDueSchedule, settleSchedule } from "@database/repositories/scheduledMessageRepository";
-import { recordAction } from "@lib/bot";
 import { deliverSchedule, nextAfter, SCHEDULE_TIMING } from "@lib/scheduledMessages";
 
 /** Each due post is claimed for a lease and moved on only once it is sent, so a restart mid-send posts it again. */
@@ -20,9 +19,7 @@ export async function postDueSchedules(client: TestifyClient, now: Date = new Da
 		}
 
 		try {
-			const outcome = await deliverSchedule(client, due);
-			if (outcome === "sent") recordAction(client, "schedule_post", due.guildId);
-			if (outcome === "unreachable") {
+			if ((await deliverSchedule(client, due)) === "unreachable") {
 				client.logger.info(
 					where,
 					"[SCHEDULED] A scheduled message could not be posted, because its channel is gone or the bot may not post there.",
