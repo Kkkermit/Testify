@@ -1,5 +1,6 @@
 import { ActivityType, type Client, Events } from "discord.js";
-import { DEFAULT_PREFIX, INTERVALS } from "@config/constants";
+import { INTERVALS } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { type TestifyClient } from "@core/client";
 import { defineEvent } from "@core/event";
 import { publishScope } from "@core/loader";
@@ -9,7 +10,7 @@ export default defineEvent({
 	name: Events.ClientReady,
 	once: true,
 	run(client, ready: Client<true>) {
-		printBanner(client, ready, DEFAULT_PREFIX, publishScope(client), client.loaded);
+		printBanner(client, ready, instanceConfig().defaultPrefix, publishScope(client), client.loaded);
 
 		ready.user.setStatus("online");
 		rotatePresence(client, ready);

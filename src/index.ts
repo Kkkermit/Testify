@@ -1,6 +1,7 @@
 import { startApi } from "@api/server";
 import { dashboardBuilt } from "@api/static";
 import { envFile, loadEnv } from "@config/env";
+import { instanceFile, loadInstance } from "@config/instance";
 import { botName } from "@core/brand";
 import { TestifyClient } from "@core/client";
 import { loadEverything, publishCommands, publishScope } from "@core/loader";
@@ -23,6 +24,8 @@ import { BOT_FEATURE_KEYS, BOT_FEATURES, switchedOff } from "@testify/shared";
 
 async function main(): Promise<void> {
 	const env = loadEnv();
+	const instance = instanceFile(env);
+	loadInstance(env);
 	// A development bot always prints readable lines, even through `npm run dev:all`'s pipe.
 	const logger = createLogger(env.LOG_LEVEL, process.stdout.isTTY === true || env.NODE_ENV === "development");
 
@@ -44,7 +47,7 @@ async function main(): Promise<void> {
 			`${process.version} is older than the ${MINIMUM_NODE} this is tested on — update Node`,
 		);
 	}
-	report.note("done", "Settings", `read from ${envFile().name}`);
+	report.note("done", "Settings", `read from ${envFile().name}${instance.exists ? ` and ${instance.name}` : ""}`);
 
 	const { pulled } = switchedOff(env.DISABLED_FEATURES);
 	if (client.featuresOff.size > 0) {

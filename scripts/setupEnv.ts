@@ -2,6 +2,8 @@ import { randomBytes } from "node:crypto";
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import prompts from "prompts";
+import { type z } from "zod";
+import { instanceFileSchema } from "@config/instance";
 import { box, painter } from "@core/terminal";
 import { BOT_FEATURE_KEYS, isBotFeature } from "@testify/shared";
 
@@ -129,6 +131,79 @@ export function fields(isDev: boolean): Field[] {
 			required: false,
 		},
 	];
+}
+
+/** The same rule the bot reads the file with, so a wizard answer can never write a file the bot refuses. */
+const byRule =
+	(rule: z.ZodType) =>
+	(value: string): string | null => {
+		const result = rule.safeParse(value);
+		return result.success ? null : `It ${result.error.issues[0]?.message ?? "is not valid"}.`;
+	};
+
+const keys = instanceFileSchema.shape;
+const operator = keys.operator.unwrap().unwrap().shape;
+
+export function instanceFields(): Field[] {
+	return [
+		{
+			key: "operator.name",
+			message: "Who runs this copy",
+			hint: "Your name or your organisation's, shown on the privacy notice",
+			required: false,
+			check: byRule(operator.name),
+		},
+		{
+			key: "supportServer",
+			message: "Support server link",
+			hint: "Where Support buttons lead. Type none to hide them, or leave blank for the default",
+			required: false,
+			check: (value) => (value === "none" ? null : byRule(keys.supportServer)(value)),
+		},
+		{
+			key: "repository",
+			message: "Your fork on GitHub",
+			hint: "Blank keeps the original repository",
+			required: false,
+			check: byRule(keys.repository),
+		},
+		{
+			key: "defaultPrefix",
+			message: "Default prefix",
+			hint: "What a server starts with; blank keeps t?",
+			required: false,
+			check: byRule(keys.defaultPrefix),
+		},
+	];
+}
+
+export const OPERATOR_CONTACT: Field = {
+	key: "operator.contact",
+	message: "How to reach them",
+	hint: "An email address or an https:// page",
+	required: true,
+	check: byRule(operator.contact),
+};
+
+/** The file the wizard writes: only what was answered, so everything left blank keeps following the defaults. */
+export function instanceFileText(answers: Record<string, string>): string | null {
+	const given = (key: string): string | undefined => {
+		const value = answers[key]?.trim() ?? "";
+		return value === "" ? undefined : value;
+	};
+	const name = given("operator.name");
+	const contact = given("operator.contact");
+	const support = given("supportServer");
+
+	const config: Record<string, unknown> = {
+		...(given("repository") === undefined ? {} : { repository: given("repository") }),
+		...(support === undefined ? {} : { supportServer: support === "none" ? null : support }),
+		...(name === undefined || contact === undefined ? {} : { operator: { name, contact } }),
+		...(given("defaultPrefix") === undefined ? {} : { defaultPrefix: given("defaultPrefix") }),
+	};
+	if (Object.keys(config).length === 0) return null;
+
+	return `${JSON.stringify({ $schema: "./testify.config.schema.json", ...config }, null, "\t")}\n`;
 }
 
 export function dashboardFields(isDev: boolean): Field[] {
@@ -263,7 +338,45 @@ async function main(): Promise<void> {
 		steps.push("", "One more step in the Developer Portal, under OAuth2 → Redirects:", `  ${paint.bold(callback)}`);
 	}
 
+	const configured = await makeItYours(isDev);
+	if (configured !== null) steps.push("", `Your links and settings are in ${paint.bold(configured)}.`);
+
 	print(["", ...box("Done", steps, "success", paint).map((line) => `  ${line}`), ""]);
+}
+
+/** Optional, and separate from `.env`, because none of it is secret and a fork may want to commit it. */
+async function makeItYours(isDev: boolean): Promise<string | null> {
+	const filename = isDev ? "testify.config.development.json" : "testify.config.json";
+	const target = resolve(process.cwd(), filename);
+
+	const { wanted } = await prompts(
+		{
+			type: "confirm",
+			name: "wanted",
+			message: `${paint.bold("Make it your own?")}${paint.dim(` (who runs it, your links, the prefix — written to ${filename})`)}`,
+			initial: false,
+		},
+		{ onCancel: () => process.exit(1) },
+	);
+	if (wanted !== true) return null;
+
+	if (existsSync(target)) {
+		const { overwrite } = await prompts({
+			type: "confirm",
+			name: "overwrite",
+			message: `${filename} already exists. Replace it?`,
+			initial: false,
+		});
+		if (overwrite !== true) return null;
+	}
+
+	const answers = await ask(instanceFields());
+	const contact = (answers["operator.name"] ?? "") === "" ? {} : await ask([OPERATOR_CONTACT]);
+	const text = instanceFileText({ ...answers, ...contact });
+	if (text === null) return null;
+
+	writeFileSync(target, text, "utf8");
+	return filename;
 }
 
 if (require.main === module) {

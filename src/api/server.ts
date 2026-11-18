@@ -28,7 +28,7 @@ import { status } from "@api/routes/status";
 import { supportArticles, supportQuestions } from "@api/routes/support";
 import { dashboardRoot, serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { botVersion, siteUrl } from "@lib/bot";
@@ -79,7 +79,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const appealing = limiterPair(APPEAL_LIMIT);
 	const oauth = oauthConfigFrom(env);
 	const github = new GitHubReader({
-		repository: theme.repository,
+		repository: instanceConfig().repository,
 		version: botVersion(),
 		token: env.SITE_GITHUB_TOKEN,
 		logger: client.logger,

@@ -1,5 +1,4 @@
-import { DEFAULT_PREFIX } from "@config/constants";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { defineButton } from "@core/button";
 import { getPrefix } from "@database/repositories/prefixRepository";
 import { dashboardUrl } from "@lib/bot";
@@ -13,7 +12,7 @@ export default defineButton({
 		if (!interaction.isButton() || context.action !== "open") return;
 
 		const [articleId = ""] = context.args;
-		const prefix = interaction.guild === null ? DEFAULT_PREFIX : await getPrefix(interaction.guild.id);
+		const prefix = interaction.guild === null ? instanceConfig().defaultPrefix : await getPrefix(interaction.guild.id);
 		const help = supportContext(prefix);
 		const desk = supportDesk(context.client);
 
@@ -24,7 +23,7 @@ export default defineButton({
 					bot: help.bot,
 					ownerId: interaction.user.id,
 					dashboard: dashboardUrl(context.client.env),
-					supportServer: theme.supportServer,
+					supportServer: instanceConfig().supportServer,
 				},
 			),
 		);

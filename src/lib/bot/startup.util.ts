@@ -1,5 +1,6 @@
 import { type Client, DiscordAPIError, Events, HTTPError } from "discord.js";
 import { EnvError, type EnvFile } from "@config/env";
+import { InstanceError } from "@config/instance";
 import { SetupError } from "@core/errors";
 import { badge, box, colourEnabled, type Paint, painter, stepLine, type StepState, type Tone } from "@core/terminal";
 
@@ -137,6 +138,26 @@ function fixEnv(file: EnvFile, paint: Paint): string[] {
 	];
 }
 
+function instanceFailure(error: InstanceError, paint: Paint): StartupFailure {
+	const width = Math.max(...error.problems.map((problem) => problem.key.length));
+	const count = error.problems.length === 1 ? "one change" : "a few changes";
+
+	return {
+		title: "The config file needs attention",
+		tone: "warning",
+		lines: [
+			`${paint.bold(error.file.name)} needs ${count}:`,
+			"",
+			...error.problems.map(
+				(problem) => `  ${paint.yellow("•")} ${paint.bold(problem.key.padEnd(width))}  ${problem.message}`,
+			),
+			"",
+			`${paint.cyan("➜")} Fix it, or delete it to use the built-in settings.`,
+			`  ${paint.bold("docs/customising.md")} explains every setting.`,
+		],
+	};
+}
+
 function discordFailure(error: DiscordAPIError): StartupFailure | null {
 	if (error.status === 401) return FATAL_CLOSE_CODES[4004] ?? null;
 
@@ -239,6 +260,7 @@ function unreachableFailure(error: unknown): StartupFailure | null {
 /** Turns anything start-up can throw into a titled explanation, keeping the stack only for real bugs. */
 export function explainStartupFailure(error: unknown, paint: Paint = painter()): StartupFailure {
 	if (error instanceof EnvError) return envFailure(error, paint);
+	if (error instanceof InstanceError) return instanceFailure(error, paint);
 	if (error instanceof SetupError)
 		return { title: "The bot could not start", tone: "error", lines: error.message.split("\n") };
 

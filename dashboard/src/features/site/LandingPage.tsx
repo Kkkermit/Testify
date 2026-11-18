@@ -1,5 +1,5 @@
 import commandList from "@repo/docs/commands.md?raw";
-import { inviteUrl } from "@testify/shared";
+import { DEFAULT_PREFIX, inviteUrl } from "@testify/shared";
 import { ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
@@ -83,7 +83,7 @@ export function LandingPage(): React.JSX.Element {
 					)}
 				</div>
 
-				<Composer palette={palette} featuresOff={featuresOff} />
+				<Composer palette={palette} featuresOff={featuresOff} prefix={site.data?.defaultPrefix ?? DEFAULT_PREFIX} />
 			</section>
 
 			<section aria-labelledby="landing-features" className="flex flex-col gap-6 py-10">

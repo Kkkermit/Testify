@@ -546,6 +546,25 @@ Each feature is declared once, in [`shared/src/botFeatures.ts`](shared/src/botFe
 button, event, job, route, screen and help article it owns. The test suite checks that declaration against the bot, so
 a new part that belongs to a feature has to be listed there.
 
+## 🎨 Making it your own
+
+The bot takes its name and picture from your Discord application, so renaming it is done in the Developer Portal.
+Your links, who runs your copy and the default prefix go in `testify.config.json`, beside `.env` — copy
+`testify.config.example.json`, or answer "Make it your own?" at the end of `npm run setup`:
+
+```json
+{
+	"$schema": "./testify.config.schema.json",
+	"repository": "https://github.com/you/your-fork",
+	"supportServer": null,
+	"operator": { "name": "Your name", "contact": "privacy@example.com" },
+	"defaultPrefix": "!"
+}
+```
+
+Every key is optional, and nothing in it is secret. [Make it your own](docs/customising.md) covers each setting,
+what takes code, the message the bot sends whoever adds it to a server, and how to keep a fork up to date.
+
 ## 🛠️ Adding your own command
 
 Create one file. The loader finds it, `/help` lists it, and it works as a slash **and** a prefix command

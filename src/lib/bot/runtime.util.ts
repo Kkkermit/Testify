@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { version as discordVersion } from "discord.js";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { type TestifyClient } from "@core/client";
 import { repoRoot } from "@core/paths";
 import { type RuntimeInfo } from "@testify/shared";
@@ -47,7 +47,7 @@ export function runtimeInfo(client: TestifyClient, now = Date.now()): RuntimeInf
 			rss: Math.round(memory.rss / MB),
 		},
 		// Linked rather than checked: a bot that calls home on a timer is not something to ship by default.
-		repositoryUrl: theme.repository,
+		repositoryUrl: instanceConfig().repository,
 		commands: client.commands.size,
 		events: client.eventNames().length,
 		guilds: client.guilds.cache.size,

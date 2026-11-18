@@ -1,4 +1,4 @@
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getPrefix } from "@database/repositories/prefixRepository";
@@ -23,7 +23,7 @@ export default defineCommand({
 	options: [{ name: "query", description: "A command or category name.", type: "string", autocomplete: true }],
 
 	async run(interaction, client) {
-		const prefix = interaction.guild ? await getPrefix(interaction.guild.id) : DEFAULT_PREFIX;
+		const prefix = interaction.guild ? await getPrefix(interaction.guild.id) : instanceConfig().defaultPrefix;
 		const query = interaction.options.getString("query")?.toLowerCase().trim();
 		const surface = "slash";
 

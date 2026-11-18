@@ -13,7 +13,8 @@ import { customId } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { type Command, subcommandsOf } from "@core/command";
 import { dashboardUrl } from "@lib/bot/dashboard.util";
-import { button, linkButton, row, select, selectRow } from "@lib/discord/components.util";
+import { projectLinkButtons } from "@lib/bot/projectLinks.util";
+import { button, row, select, selectRow } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
 import { truncate } from "@lib/format/format.util";
 import { HELP_HOME } from "@lib/info/info.constants";
@@ -233,7 +234,7 @@ export function categoryControls(
 }
 
 export function helpLinks() {
-	return row(linkButton("Support server", theme.supportServer), linkButton("Source code", theme.repository));
+	return row(...projectLinkButtons());
 }
 
 export function resolveCategory(value: string): Category | null {

@@ -10,6 +10,9 @@ coverage/
 .env.*
 !.env.example
 !.env.development.example
+# Per copy, like .env; a fork that wants its own committed removes these two lines.
+testify.config.json
+testify.config.development.json
 
 # Logs
 logs/

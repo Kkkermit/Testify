@@ -1,9 +1,9 @@
 import { model, Schema } from "mongoose";
-import { DEFAULT_PREFIX } from "@config/constants";
 
 export interface PrefixSettings {
 	guildId: string;
-	prefix: string;
+	/** Absent until a server picks one, so it follows the default prefix in `testify.config.json`. */
+	prefix?: string;
 	/** Prefix commands can be switched off per server; slash commands always work. */
 	isEnabled: boolean;
 	createdAt: Date;
@@ -13,7 +13,7 @@ export interface PrefixSettings {
 const prefixSchema = new Schema<PrefixSettings>(
 	{
 		guildId: { type: String, required: true, unique: true },
-		prefix: { type: String, required: true, default: DEFAULT_PREFIX },
+		prefix: { type: String },
 		isEnabled: { type: Boolean, required: true, default: true },
 	},
 	{ timestamps: true },

@@ -832,6 +832,41 @@ IDs) and its default.
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
 comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
 
+### What makes a copy someone's own is `testify.config.json`, not code and not `.env`
+
+`.env` holds secrets and switches. Everything else that differs between copies and that a reader sees — the
+repository the Source code buttons open, the support server, who `/bot info` names, who runs the copy, the default
+prefix and whether the bot greets whoever adds it — is `testify.config.json`, read by `src/config/instance.ts`.
+[`docs/customising.md`](docs/customising.md) is the reader's guide to it. Six things about it are load-bearing:
+
+- **Every key is optional and the defaults are the original's** (`INSTANCE_DEFAULTS`), so a copy with no file behaves
+  as it always did. It sits beside `.env` and is found the same way, `testify.config.development.json` under
+  `npm run dev`, and it is gitignored like `.env`; a fork that wants it committed removes those two lines.
+- **It is read once, in `main()` straight after `loadEnv`, and fails start-up with a list**, unknown keys included
+  (`z.strictObject`), so a misspelt setting never silently does nothing. `explainStartupFailure` turns an
+  `InstanceError` into the same kind of box as a bad `.env`. Everything else reads `instanceConfig()`, which is the
+  defaults until then — what the tests and the scripts see. **Never read it at import time:** `index.ts` imports
+  every module before `main()` runs, so a module-level constant built from it holds the defaults for ever. `FACTS`'s
+  `prefix.default` is a getter for exactly that reason.
+- **Docker mounts the folder, not the file.** `docker-compose.yml` mounts the folder it runs from at `/app/instance`,
+  read-only, and sets `TESTIFY_CONFIG` to the file there. Mounting a file that does not exist makes Docker create a
+  folder in its place, and `instanceFile` reads a folder as no file, so the defaults apply either way.
+- **The links live nowhere else.** `theme.ts` no longer holds `author`, `repository` or `supportServer`, and
+  `tests/config/instance.test.ts` fails on the original's repository, its support invite or `DEFAULT_PREFIX` written
+  anywhere in `src` but `instance.ts`. `projectLinkButtons` draws Source code and Support, leaving Support out when the
+  host set `supportServer` to `null`, so nobody is sent to somebody else's.
+- **`testify.config.schema.json` is generated** by `npm run config:schema` from the same zod schema, so an editor
+  completes and checks the file as it is typed; the suite fails when the two drift. The setup wizard asks its
+  questions with the schema's own rules (`instanceFields`) and writes only what was answered.
+- **The operator is shown, never assumed.** With `operator` set, the privacy notice and the terms open with a card
+  naming them; `contactHref` in `@testify/shared` turns the contact into a link only for an email address or an
+  `https` page, which is also all the schema accepts.
+
+**A server's prefix is stored only when it is not the default.** `prefix.schema.ts` has no default, and `setPrefix`
+unsets the field when it is given the default, so changing `defaultPrefix` reaches every server that never chose one.
+A record written before this kept `t?` even for a server that only switched prefix commands off; it keeps that until
+the prefix panel's Reset, and the guide says so.
+
 ---
 
 ## 15. Logging
@@ -2260,6 +2295,25 @@ under it, switching each feature off removes exactly its parts and nothing else,
 **The giveaways manager starts with the bot.** `discord-giveaways` only ends a giveaway on a timer its manager starts
 when something creates it, and only `/giveaway` and its route did, so a giveaway running across a restart never ended
 until somebody touched one. The `giveaways` job creates it five seconds after start-up.
+
+### Whoever adds the bot gets one message, and nothing about it can fail the join
+
+`guildCreate` runs `greetInviter` beside the log post, and neither waits on the other. Four things about it are
+load-bearing:
+
+- **The adder is read, never guessed, whichever way they added it.** An invite link, the Add App button on the bot's
+  profile and the App Directory all write the same `BotAdd` audit entry, so `findInviter` reads that first, asking once
+  more after `AUDIT_RETRY_MS` because Discord writes it a moment after the join arrives; `pickBotAdd` takes only the
+  newest entry for this bot that is under ten minutes old, since a bot added before has older ones. Without View Audit
+  Log it reads the bot's own integration, whose `user` is the adder, and without Manage Server either it writes to the
+  owner. The entry can carry a partial user, so the person written to is fetched whole.
+- **Closed direct messages are the person's choice.** `CannotSendMessagesToThisUser` is a `debug` line and anything
+  else a `warn` saying the bot joined normally; nothing is thrown into the event.
+- **Bots, blacklisted accounts and a host who set `greetInviter: false` get nothing.** Nothing about the greeting is
+  stored, and the privacy notice says so (`legal.messagesP6`).
+- **The message is built by `inviterGreeting`, a pure function**: `/help` and the server's prefix, the dashboard's
+  setup checklist when the dashboard is on and every feature's setup command when it is not, `/prefix`, and the
+  project's links from `projectLinkButtons`.
 
 ### Global by design
 

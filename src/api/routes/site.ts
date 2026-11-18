@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { type ApiProblem, forbidden, notFound, UpstreamProblem } from "@api/errors";
 import { parseQuery } from "@api/validate";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { ServiceError } from "@core/errors";
 import { botVersion } from "@lib/bot";
 import { type GitHubReader, SiteProblem, type SiteRefusal } from "@lib/site";
@@ -53,7 +53,9 @@ export function siteRoutes(github: GitHubReader): Hono<ApiBindings> {
 		.get("/", (context) => {
 			const body: SiteInfo = {
 				dashboard: context.get("env").DASHBOARD_ENABLED,
-				repository: theme.repository,
+				repository: instanceConfig().repository,
+				defaultPrefix: instanceConfig().defaultPrefix,
+				operator: instanceConfig().operator,
 				version: botVersion(),
 				featuresOff: BOT_FEATURE_KEYS.filter((key) => context.get("client").featuresOff.has(key)),
 			};

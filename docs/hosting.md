@@ -35,6 +35,12 @@ docker compose up -d
 docker compose logs -f bot
 ```
 
+Your own links, who runs your copy and the default prefix go in `testify.config.json`, beside `.env`. It is
+optional: copy `testify.config.example.json` to start one, and [Make it your own](customising.md) explains each
+setting. The compose file mounts the folder it runs from into the container, read-only, and the bot reads the file
+from there, so a missing one simply means the defaults. It mounts the folder rather than the file because Docker,
+asked to mount a file that does not exist, creates an empty folder in its place.
+
 Three variables have no sensible default and compose refuses to start without them, naming the one it wants:
 `DISCORD_TOKEN`, `DISCORD_CLIENT_ID` and `DISCORD_OWNER_IDS`. Everything else falls back to the same defaults
 the bot uses when run from source.
@@ -63,7 +69,7 @@ and `.env` beside each other:
 docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
 ```
 
-It follows the newest release. `TESTIFY_TAG=2.4.0` in `.env` pins one, and updating is the same command after a
+Put `testify.config.json` in the same folder if you want one. It follows the newest release. `TESTIFY_TAG=2.4.0` in `.env` pins one, and updating is the same command after a
 `pull`:
 
 ```bash
