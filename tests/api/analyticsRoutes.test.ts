@@ -2,42 +2,67 @@ import { Collection } from "discord.js";
 import { Hono } from "hono";
 import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
-import { analytics } from "@api/routes/analytics";
+import { analytics, zeroFill } from "@api/routes/analytics";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
+import { activeMembers, memberTallies, recentRuns, slowestCommands } from "@database/repositories/commandRunRepository";
 import { findLogRun, listLogRuns, readLogLines } from "@database/repositories/logRepository";
 import {
-	AnalyticsUnavailable,
-	audienceReport,
-	funnelReport,
-	guildUsageReport,
-	retentionReport,
-	usageReport,
-} from "@lib/bot";
-import { type GuildUsageReport, type LogFeed, type LogRuns, type RuntimeInfo, type UsageReport } from "@testify/shared";
+	commandTallies,
+	dailyTallies,
+	dashboardTallies,
+	guildTallies,
+	surfaceTallies,
+	usageTotals,
+} from "@database/repositories/usageRepository";
+import {
+	type CommandRunRow,
+	type GuildUsageReport,
+	type LogFeed,
+	type LogRuns,
+	type MemberUsageRow,
+	type Paged,
+	type RuntimeInfo,
+	type UsageReport,
+} from "@testify/shared";
 
-jest.mock("@lib/bot", () => ({
-	...jest.requireActual<object>("@lib/bot"),
-	usageReport: jest.fn(),
-	guildUsageReport: jest.fn(),
-	audienceReport: jest.fn(() => Promise.resolve({ days: 30 })),
-	funnelReport: jest.fn(() => Promise.resolve({ days: 30 })),
-	retentionReport: jest.fn(() => Promise.resolve({ days: 30 })),
+jest.mock("@database/repositories/usageRepository", () => ({
+	usageTotals: jest.fn(() => Promise.resolve({ runs: 0, failures: 0, activeGuilds: 0, commandsUsed: 0 })),
+	commandTallies: jest.fn(() => Promise.resolve([])),
+	guildTallies: jest.fn(() => Promise.resolve([])),
+	dailyTallies: jest.fn(() => Promise.resolve([])),
+	surfaceTallies: jest.fn(() => Promise.resolve({ slash: 0, prefix: 0 })),
+	screenTallies: jest.fn(() => Promise.resolve([])),
+	dashboardTallies: jest.fn(() => Promise.resolve([])),
 }));
 jest.mock("@database/repositories/logRepository", () => ({
 	findLogRun: jest.fn(() => Promise.resolve(null)),
 	listLogRuns: jest.fn(() => Promise.resolve([])),
 	readLogLines: jest.fn(() => Promise.resolve({ lines: [], matched: 0, held: 0 })),
 }));
+jest.mock("@database/repositories/commandRunRepository", () => ({
+	activeMembers: jest.fn(() => Promise.resolve(0)),
+	memberTallies: jest.fn(() => Promise.resolve([])),
+	recentRuns: jest.fn(() => Promise.resolve({ items: [], total: 0 })),
+	slowestCommands: jest.fn(() => Promise.resolve([])),
+}));
 
 const OWNER = "100000000000000001";
 const MANAGER = "100000000000000002";
 const GUILD = "900000000000000001";
+const ALICE = "800000000000000001";
+const BOB = "800000000000000002";
 const CHANNEL = "700000000000000001";
 
-const REPORT = { days: 30, runs: 0 } as UsageReport;
-const GUILD_REPORT = { days: 30, runs: 0 } as GuildUsageReport;
+const totals = jest.mocked(usageTotals);
+const byCommand = jest.mocked(commandTallies);
+const byGuild = jest.mocked(guildTallies);
+const byDay = jest.mocked(dailyTallies);
+const bySurface = jest.mocked(surfaceTallies);
+const byDashboard = jest.mocked(dashboardTallies);
+const members = jest.mocked(memberTallies);
+const runs = jest.mocked(recentRuns);
 
 function appFor(userId = OWNER): Hono<ApiBindings> {
 	const client = {
@@ -57,13 +82,16 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 			]),
 		},
 		commands: new Collection<string, unknown>([
-			["economy", {}],
-			["work", {}],
+			["ban", { name: "ban", category: "moderation" }],
+			["rank", { name: "rank", category: "levelling" }],
+			["beg", { name: "beg", category: "economy" }],
 		]),
 		isOwner: (id: string) => id === OWNER,
 		eventNames: () => ["ready", "interactionCreate"],
 		startedAt: Date.now() - 60_000,
-		users: { cache: new Collection<string, unknown>() },
+		users: {
+			cache: new Collection<string, unknown>([[ALICE, { displayAvatarURL: () => "https://cdn.example/alice.png" }]]),
+		},
 		channels: { cache: new Collection<string, unknown>() },
 		ws: { ping: 42, shards: new Collection<string, unknown>() },
 		env: { NODE_ENV: "test", LOG_LEVEL: "warn" } as Env,
@@ -84,100 +112,182 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 	return app;
 }
 
+async function usage(query = ""): Promise<UsageReport> {
+	return (await (await appFor().request(`/analytics/usage${query}`)).json()) as UsageReport;
+}
+
 beforeEach(() => {
 	jest.clearAllMocks();
-	jest.mocked(usageReport).mockResolvedValue(REPORT);
-	jest.mocked(guildUsageReport).mockResolvedValue(GUILD_REPORT);
+	totals.mockResolvedValue({ runs: 0, failures: 0, activeGuilds: 0, commandsUsed: 0 });
+	byCommand.mockResolvedValue([]);
+	byGuild.mockResolvedValue([]);
+	byDay.mockResolvedValue([]);
+	bySurface.mockResolvedValue({ slash: 0, prefix: 0 });
+	byDashboard.mockResolvedValue([]);
+	members.mockResolvedValue([]);
+	runs.mockResolvedValue({ items: [], total: 0 });
+	jest.mocked(activeMembers).mockResolvedValue(0);
+	jest.mocked(slowestCommands).mockResolvedValue([]);
 	logRing.clear();
 });
 
-const OWNER_ONLY = [
-	"/analytics/usage",
-	"/analytics/audience",
-	"/analytics/funnel?steps=economy,work",
+const SERVER_PATHS = [
 	`/analytics/guilds/${GUILD}`,
-	"/analytics/logs",
-	"/analytics/runtime",
+	`/analytics/guilds/${GUILD}/members`,
+	`/analytics/guilds/${GUILD}/runs`,
 ];
 
 describe("who can read the analytics", () => {
 	/** These name every server the bot is in and how much each is used — owner-only, like the rest of it. */
-	it.each(OWNER_ONLY)("hides %s from a manager", async (path) => {
-		expect((await appFor(MANAGER).request(path)).status).toBe(404);
-	});
+	it.each(["/analytics/usage", "/analytics/logs", "/analytics/runtime", ...SERVER_PATHS])(
+		"hides %s from a manager",
+		async (path) => {
+			expect((await appFor(MANAGER).request(path)).status).toBe(404);
+		},
+	);
 
-	it.each(OWNER_ONLY)("serves %s to the owner", async (path) => {
+	it.each(["/analytics/usage", "/analytics/logs", "/analytics/runtime"])("serves %s to the owner", async (path) => {
 		expect((await appFor().request(path)).status).toBe(200);
-	});
-
-	/** Who ran what lives behind the collector's own sign-in, so no console route may show it. */
-	it("no longer serves the member list or the run log", async () => {
-		for (const path of [`/analytics/guilds/${GUILD}/members`, `/analytics/guilds/${GUILD}/runs`]) {
-			expect((await appFor().request(path)).status).toBe(404);
-		}
 	});
 });
 
 describe("the usage report", () => {
 	it("takes the window from the query, and refuses one it does not support", async () => {
-		await appFor().request("/analytics/usage?days=7");
-		expect(jest.mocked(usageReport).mock.calls[0]?.[1]).toBe(7);
+		expect((await usage("?days=7")).days).toBe(7);
 		expect((await appFor().request("/analytics/usage?days=365")).status).toBe(400);
 	});
 
-	/** Shardlens being away is not the bot failing, so each reason is its own code the console can word. */
-	it("answers 503 with a code naming why Shardlens could not be read", async () => {
-		for (const problem of ["off", "refused", "unreachable"] as const) {
-			jest.mocked(usageReport).mockRejectedValueOnce(new AnalyticsUnavailable(problem));
-			const response = await appFor().request("/analytics/usage");
+	/** A command nobody has run has no usage row, and still ranks as least used. */
+	it("ranks a never-used command below one that ran once", async () => {
+		byCommand.mockResolvedValue([{ command: "ban", count: 1, failures: 0 }]);
 
-			expect(response.status).toBe(503);
-			expect(((await response.json()) as { error: { code: string } }).error.code).toBe(`analytics_${problem}`);
-		}
-	});
-});
+		const least = (await usage()).leastUsed;
 
-describe("the sections read in the reader's time", () => {
-	it("takes the reader's zone, and refuses one that is no zone", async () => {
-		await appFor().request("/analytics/audience?days=7&tz=Europe%2FLondon");
-		expect(jest.mocked(audienceReport).mock.calls[0]?.slice(1, 3)).toEqual([7, "Europe/London"]);
-
-		for (const tz of ["Mars/Olympus", "../../etc", "UTC; DROP"]) {
-			expect((await appFor().request(`/analytics/audience?tz=${encodeURIComponent(tz)}`)).status).toBe(400);
-		}
+		expect(least.map((row) => row.command)).toEqual(["beg", "rank", "ban"]);
+		expect(least[0]).toMatchObject({ count: 0, category: "economy" });
 	});
 
-	/** A step is asked about by name, so only the bot's own commands are ever put to the collector. */
-	it("follows only the bot's own commands, two to five of them", async () => {
-		expect((await appFor().request("/analytics/funnel?steps=economy,work&hours=72")).status).toBe(200);
-		expect(jest.mocked(funnelReport).mock.calls[0]?.[1]).toMatchObject({ steps: ["economy", "work"], hours: 72 });
+	/** Rows outlive the bot's membership, and a row labelled "unknown server" is noise rather than information. */
+	it("drops a server the bot has since left", async () => {
+		byGuild.mockResolvedValue([{ guildId: "900000000000000009", count: 42 }]);
 
-		const refused = await appFor().request("/analytics/funnel?steps=economy,secret");
-		expect(refused.status).toBe(400);
-		expect(((await refused.json()) as { error: { code: string } }).error.code).toBe("unknown_command");
-		expect((await appFor().request("/analytics/funnel?steps=economy")).status).toBe(400);
-		expect((await appFor().request("/analytics/funnel?steps=economy,work&hours=5")).status).toBe(400);
-		expect((await appFor().request("/analytics/retention?start=economy&back=secret")).status).toBe(400);
-		expect((await appFor().request("/analytics/retention?start=economy&interval=week")).status).toBe(200);
-		expect(jest.mocked(retentionReport).mock.calls[0]?.[1]).toMatchObject({ start: "economy", interval: "week" });
+		expect((await usage()).busiestGuilds).toEqual([]);
 	});
 });
 
 describe("one server's usage", () => {
-	/** The path names the server, so a drill-down can never be another server's figures. */
-	it("reads the server in the path, and refuses one the bot is not in", async () => {
-		await appFor().request(`/analytics/guilds/${GUILD}?days=90`);
-		const [, guild, days] = jest.mocked(guildUsageReport).mock.calls[0] ?? [];
+	async function report(query = ""): Promise<GuildUsageReport> {
+		return (await (await appFor().request(`/analytics/guilds/${GUILD}${query}`)).json()) as GuildUsageReport;
+	}
 
-		expect((guild as { id: string } | undefined)?.id).toBe(GUILD);
-		expect(days).toBe(90);
-		expect((await appFor().request("/analytics/guilds/900000000000000009")).status).toBe(404);
+	/** Every query is narrowed to the server in the path, or one server's drill-down would show the whole bot. */
+	it("asks for that server's rows and no other's", async () => {
+		await report();
+
+		expect(byCommand).toHaveBeenCalledWith(30, 0, undefined, GUILD);
+		expect(byDay).toHaveBeenCalledWith(30, undefined, GUILD);
+		expect(bySurface).toHaveBeenCalledWith(30, undefined, GUILD);
+		expect(byDashboard).toHaveBeenCalledWith(30, 0, undefined, GUILD);
+		expect(activeMembers).toHaveBeenCalledWith(GUILD, 30);
 	});
 
-	it("answers 503 when Shardlens refuses the key", async () => {
-		jest.mocked(guildUsageReport).mockRejectedValueOnce(new AnalyticsUnavailable("refused"));
+	/** Who ran what is kept for 30 days, so a 90-day window says its member figures cover less. */
+	it("caps the member figures at what is kept", async () => {
+		expect((await report("?days=90")).memberDays).toBe(30);
+		expect(activeMembers).toHaveBeenCalledWith(GUILD, 30);
+	});
+});
 
-		expect((await appFor().request(`/analytics/guilds/${GUILD}`)).status).toBe(503);
+describe("who ran what in one server", () => {
+	const alice = {
+		userId: ALICE,
+		username: "alice",
+		runs: 6,
+		failures: 1,
+		prefix: 2,
+		commands: [
+			{ command: "rank", count: 3 },
+			{ command: "balance", count: 2 },
+			{ command: "beg", count: 1 },
+			{ command: "ban", count: 1 },
+		],
+		lastAt: new Date("2026-08-01T12:00:00.000Z"),
+	};
+	const bob = { ...alice, userId: BOB, username: "bob", runs: 1, commands: [{ command: "beg", count: 1 }] };
+
+	async function people(query = ""): Promise<Paged<MemberUsageRow>> {
+		return (await (
+			await appFor().request(`/analytics/guilds/${GUILD}/members${query}`)
+		).json()) as Paged<MemberUsageRow>;
+	}
+
+	it("finds a member by name or by a pasted mention", async () => {
+		members.mockResolvedValue([alice, bob]);
+
+		expect((await people("?q=BO")).items.map((row) => row.username)).toEqual(["bob"]);
+		expect((await people(`?q=%3C%40${ALICE}%3E`)).items.map((row) => row.username)).toEqual(["alice"]);
+	});
+
+	it("lists runs with the channel's name, and passes the filters through", async () => {
+		runs.mockResolvedValue({
+			items: [
+				{
+					guildId: GUILD,
+					channelId: CHANNEL,
+					userId: ALICE,
+					username: "alice",
+					command: "music",
+					subcommand: "play",
+					surface: "slash",
+					failed: true,
+					reference: "AB12CD",
+					durationMs: 120,
+					at: new Date("2026-08-01T12:00:00.000Z"),
+					expiresAt: new Date("2026-08-31T12:00:00.000Z"),
+				},
+			],
+			total: 1,
+		});
+
+		const response = await appFor().request(`/analytics/guilds/${GUILD}/runs?userId=${ALICE}&command=music&page=2`);
+		const body = (await response.json()) as Paged<CommandRunRow>;
+
+		expect(body.items).toEqual([
+			{
+				at: "2026-08-01T12:00:00.000Z",
+				userId: ALICE,
+				username: "alice",
+				command: "music",
+				subcommand: "play",
+				surface: "slash",
+				failed: true,
+				reference: "AB12CD",
+				durationMs: 120,
+				channelId: CHANNEL,
+				channelName: "general",
+			},
+		]);
+		expect(runs).toHaveBeenCalledWith(GUILD, 30, { userId: ALICE, command: "music" }, { skip: 25, limit: 25 });
+	});
+
+	it("refuses a filter that is not an ID or a command name", async () => {
+		expect((await appFor().request(`/analytics/guilds/${GUILD}/runs?userId=alice`)).status).toBe(400);
+		expect((await appFor().request(`/analytics/guilds/${GUILD}/runs?command=%24where`)).status).toBe(400);
+	});
+});
+
+describe("zeroFill", () => {
+	const now = new Date("2026-08-01T12:00:00.000Z");
+
+	/** A chart with holes reads as missing data rather than as a quiet day. */
+	it("fills a day with no activity with a zero", () => {
+		const filled = zeroFill([{ day: "2026-08-01", count: 5, failures: 1 }], 3, now);
+
+		expect(filled).toEqual([
+			{ day: "2026-07-30", count: 0, failures: 0 },
+			{ day: "2026-07-31", count: 0, failures: 0 },
+			{ day: "2026-08-01", count: 5, failures: 1 },
+		]);
 	});
 });
 

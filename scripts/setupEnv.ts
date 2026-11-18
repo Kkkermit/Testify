@@ -128,24 +128,6 @@ export function fields(isDev: boolean): Field[] {
 			hint: "Blank works, but a token lifts GitHub's limit of 60 an hour and shows traffic",
 			required: false,
 		},
-		{
-			key: "SHARDLENS_URL",
-			message: "Shardlens collector address, for analytics",
-			hint: "Blank sends no analytics anywhere; it is in the bot.env the collector's init wrote",
-			required: false,
-		},
-		{
-			key: "SHARDLENS_INGEST_KEY",
-			message: "Shardlens ingest key",
-			hint: "From the same bot.env; it starts slk_ingest_",
-			required: false,
-		},
-		{
-			key: "SHARDLENS_READ_KEY",
-			message: "Shardlens read key, for the owner console's analytics",
-			hint: "From the collector's own settings; it starts slk_read_",
-			required: false,
-		},
 	];
 }
 

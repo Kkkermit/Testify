@@ -7,7 +7,6 @@ import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptio
 import { readerLanguage, say } from "@core/language";
 import { triageRow } from "@lib/bot/errorTriage.util";
 import { logAuthor, loggedOptionsText, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
-import { measured } from "@lib/bot/shardlens.util";
 import { embed } from "@lib/discord/embeds.util";
 
 /** Anything the bot can answer privately: a command on either surface, a button or form, a right-click action. */
@@ -62,8 +61,6 @@ interface RunOutcome {
 	ok: boolean;
 	/** Set only for an unexpected failure, which is the one kind written to the log with a reference. */
 	reference: string | null;
-	/** What the command threw, undefined when it finished. */
-	error: unknown;
 }
 
 /** Runs a command so the user always gets an answer, and says whether it finished cleanly. */
@@ -73,11 +70,11 @@ export async function runCommand(
 	client: TestifyClient,
 ): Promise<RunOutcome> {
 	try {
-		await measured(client, interaction, () => dispatch(interaction, command, client));
-		return { ok: true, reference: null, error: undefined };
+		await dispatch(interaction, command, client);
+		return { ok: true, reference: null };
 	} catch (error) {
 		const reference = await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
-		return { ok: false, reference, error };
+		return { ok: false, reference };
 	}
 }
 
@@ -88,7 +85,7 @@ export async function runButton(
 	label: string,
 ): Promise<void> {
 	try {
-		await measured(client, interaction, handler);
+		await handler();
 	} catch (error) {
 		await reportFailure(interaction, error, client, label, null);
 	}

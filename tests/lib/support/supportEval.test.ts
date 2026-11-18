@@ -74,8 +74,6 @@ const PARAPHRASES: [string, string[]][] = [
 	["change the language of the dashboard", ["appearance"]],
 	["what data do you store about me", ["privacy"]],
 	["delete everything you have on me", ["privacy", "command-delete-my-data"]],
-	["how do i stop the bot tracking me", ["privacy", "command-privacy"]],
-	["can i opt out of the analytics", ["privacy", "command-privacy"]],
 	["report a bug", ["report-a-problem"]],
 	["how do I remove the bot", ["remove-the-bot"]],
 	["can I host my own version", ["self-hosting"]],

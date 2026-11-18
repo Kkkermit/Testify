@@ -1,5 +1,4 @@
 import { Collection, type Message } from "discord.js";
-import { checkCommand } from "@core/checks";
 import { type TestifyClient } from "@core/client";
 import { defineCommand } from "@core/command";
 import { createLogger } from "@core/logger";
@@ -10,9 +9,14 @@ const prefixConfig = { prefix: "t?", isEnabled: true };
 jest.mock("@database/repositories/prefixRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
 }));
+// A run is counted without being awaited, and with no database its write would land after the suite ends.
+jest.mock("@database/repositories/usageRepository", () => ({ recordCommandUse: jest.fn(() => Promise.resolve()) }));
+jest.mock("@database/repositories/commandRunRepository", () => ({
+	recordCommandRun: jest.fn(() => Promise.resolve()),
+}));
 // Routing a message to the right command; the checks have their own tests.
 jest.mock("@core/checks", () => ({
-	checkCommand: jest.fn(() => Promise.resolve(null)),
+	runChecks: jest.fn(() => Promise.resolve(null)),
 	clearCooldowns: jest.fn(),
 }));
 
@@ -47,7 +51,6 @@ function fakeClient(): TestifyClient {
 		logger: createLogger("fatal", false),
 		user: { id: BOT },
 		isOwner: () => false,
-		shardlens: null,
 	} as unknown as TestifyClient;
 }
 
@@ -82,87 +85,6 @@ describe("the prefix handler", () => {
 	it("runs one typed with a mention instead", async () => {
 		await runMessageHandlers(fakeMessage(`<@${BOT}> ping`), fakeClient());
 		expect(ping).toHaveBeenCalledTimes(1);
-	});
-
-	/** The SDK never reads a message, so it counts a prefix run beside slash runs only by the name the bot matched. */
-	it("tells Shardlens the command it matched, by its own name, and never what was typed", async () => {
-		const trackMessageCommand = jest.fn();
-		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
-		const message = fakeMessage("t?setwelcome some words");
-
-		await runMessageHandlers(message, client);
-
-		expect(trackMessageCommand).toHaveBeenCalledTimes(1);
-		const [sent, run] = trackMessageCommand.mock.calls[0] as [Message, Record<string, unknown>];
-		expect(sent).toBe(message);
-		expect(run).toEqual({ command: "welcome", sub: "set", durationMs: expect.any(Number) as number, failed: false });
-		expect(JSON.stringify(run)).not.toMatch(/setwelcome|t\?|words/);
-	});
-
-	/** Only what the parser matched is a run, and a failure carries what was thrown for the SDK to name by class. */
-	it("records a failure with what it threw, and nothing for a message that is no command", async () => {
-		const trackMessageCommand = jest.fn();
-		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
-		const failure = new TypeError("broke");
-		ping.mockRejectedValueOnce(failure);
-
-		await runMessageHandlers(fakeMessage("t?nosuchcommand"), client);
-		expect(trackMessageCommand).not.toHaveBeenCalled();
-
-		await runMessageHandlers(fakeMessage("t?ping"), client);
-		expect(trackMessageCommand.mock.calls[0]?.[1]).toEqual({
-			command: "ping",
-			durationMs: expect.any(Number) as number,
-			failed: true,
-			error: failure,
-		});
-	});
-
-	/** Slash runs already send which options were filled in, so a prefix run sends the same names, never their values. */
-	it("names the options given and never what was given for them", async () => {
-		const trackMessageCommand = jest.fn();
-		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
-		client.commands.set(
-			"give",
-			defineCommand({
-				name: "give",
-				description: "Gives.",
-				category: "economy",
-				options: [
-					{ name: "amount", description: "How much.", type: "integer", required: true },
-					{ name: "note", description: "Why.", type: "string" },
-				],
-				run: jest.fn(),
-			}),
-		);
-
-		await runMessageHandlers(fakeMessage("t?give 500"), client);
-
-		const run = trackMessageCommand.mock.calls[0]?.[1] as Record<string, unknown>;
-		expect(run).toMatchObject({ command: "give", options: ["amount"] });
-		expect(JSON.stringify(run)).not.toContain("500");
-	});
-
-	/** A refused run is not a run, so it is counted apart, with its reason and the command's own name. */
-	it("counts a refusal by its reason and runs nothing", async () => {
-		const track = jest.fn();
-		const trackMessageCommand = jest.fn();
-		const client = Object.assign(fakeClient(), {
-			shardlens: { track, trackMessageCommand },
-			env: {},
-			timers: { after: jest.fn() },
-		});
-		jest.mocked(checkCommand).mockResolvedValueOnce({ failure: "Slow down.", reason: "cooldown" });
-
-		await runMessageHandlers(fakeMessage("t?ping"), client);
-
-		expect(ping).not.toHaveBeenCalled();
-		expect(trackMessageCommand).not.toHaveBeenCalled();
-		expect(track).toHaveBeenCalledWith(
-			"command_refused",
-			{ command: "ping", reason: "cooldown", surface: "prefix" },
-			{ guildId: "444" },
-		);
 	});
 
 	/** `/help` declares autocomplete, and refusing those made `t?help` fail. */

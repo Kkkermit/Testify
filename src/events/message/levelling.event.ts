@@ -4,7 +4,6 @@ import { theme } from "@config/theme";
 import { defineMessageHandler } from "@core/message";
 import { awardXp, getLevelSettings } from "@database/repositories/levelRepository";
 import { getTuning } from "@database/repositories/tuningRepository";
-import { recordAction } from "@lib/bot";
 import { applyLevelRewards, earnsXp, multiplierFor, normaliseSettings } from "@lib/levelling";
 import { atRate } from "@testify/shared";
 
@@ -30,7 +29,6 @@ export default defineMessageHandler({
 		const amount = atRate(base, tuning.xpRate);
 		const result = await awardXp(message.guild.id, message.author.id, amount, tuning.xpCooldownSeconds * 1_000);
 		if (!result?.levelledUp) return;
-		recordAction(client, "level_up", message.guild.id);
 
 		const level = result.record.level;
 		await applyLevelRewards(message.member, config, level, client.logger);

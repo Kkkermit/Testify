@@ -11,12 +11,12 @@ import {
 } from "discord.js";
 import { botName } from "@core/brand";
 import { parseCustomId } from "@core/button";
-import { checkCommand, checkContextMenu } from "@core/checks";
+import { checkContextMenu, runChecks } from "@core/checks";
 import { type TestifyClient } from "@core/client";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { readerLanguage, say } from "@core/language";
-import { logCommandUse, measured, recordCommandTime, recordRefusal } from "@lib/bot";
+import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 import { commandIsOff, partIsOff } from "@testify/shared";
@@ -66,9 +66,7 @@ export default defineEvent({
 			if (!command?.autocomplete) return;
 
 			try {
-				await measured(client, interaction, async () => {
-					await command.autocomplete?.(interaction, client);
-				});
+				await command.autocomplete(interaction, client);
 			} catch (error) {
 				const command = interaction.commandName;
 
@@ -87,7 +85,6 @@ export default defineEvent({
 			const command = client.commands.get(interaction.commandName);
 			const subcommand = interaction.options.getSubcommand(false);
 			if (commandIsOff(client.featuresOff, interaction.commandName, subcommand)) {
-				recordRefusal(client, interaction.commandName, "feature_off", "slash", interaction.guildId);
 				await refuseSwitchedOff(interaction);
 				return;
 			}
@@ -99,23 +96,19 @@ export default defineEvent({
 				return;
 			}
 
-			const refusal = await checkCommand(interaction, command, client);
+			const refusal = await runChecks(interaction, command, client);
 			if (refusal !== null) {
-				recordRefusal(client, command.name, refusal.reason, "slash", interaction.guildId);
-				await interaction.reply({ embeds: [refusalEmbed(refusal.failure)], flags: MessageFlags.Ephemeral });
+				await interaction.reply({ embeds: [refusalEmbed(refusal)], flags: MessageFlags.Ephemeral });
 				return;
 			}
 
 			const started = Date.now();
-			const { ok } = await runCommand(interaction, command, client);
+			const { ok, reference } = await runCommand(interaction, command, client);
 			const durationMs = Date.now() - started;
 			recordCommandTime(durationMs, ok);
-			logCommandUse(client, interaction, command, {
-				surface: "slash",
-				ok,
-				durationMs,
-				channelId: interaction.channelId,
-			});
+			const run = { surface: "slash", ok, reference, durationMs, channelId: interaction.channelId } as const;
+			countCommandUse(client, interaction, command, run);
+			logCommandUse(client, interaction, command, run);
 			mentionNoticesAfterCommand(interaction.user.id, client.logger, (unread) =>
 				interaction.followUp({ embeds: [noticeHint(unread, `/${NOTICE_COMMAND}`)], flags: MessageFlags.Ephemeral }),
 			);

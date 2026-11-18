@@ -239,15 +239,6 @@ describe("handleStarChange", () => {
 		expect(setBoardMessage).toHaveBeenCalledWith(GUILD, MESSAGE, { channelId: BOARD, messageId: REPOST });
 	});
 
-	it("counts a repost once it is on the board, with its server and nobody's name", async () => {
-		const { guild } = world();
-		const track = jest.fn();
-
-		await handleStarChange({ ...client(), shardlens: { track } } as never, reaction(guild) as never);
-
-		expect(track.mock.calls).toEqual([["star_post", {}, { guildId: GUILD }]]);
-	});
-
 	/** A repost a moderator deleted stays off the board, however many stars follow. */
 	it("never reposts one a moderator took down", async () => {
 		const { guild, board } = world();

@@ -59,15 +59,15 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 98, across 14 categories          |
-| Command files        | 119 (incl. folded-in subcommands) |
-| Subcommands          | 159                               |
+| Commands             | 96, across 14 categories          |
+| Command files        | 117 (incl. folded-in subcommands) |
+| Subcommands          | 145                               |
 | Prefix aliases       | 107                               |
 | Button handlers      | 53                                |
 | Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
-| `src/lib` helpers    | 240, in 34 domain folders         |
-| Schemas/repositories | 51 / 52                           |
+| `src/lib` helpers    | 238, in 34 domain folders         |
+| Schemas/repositories | 54 / 53                           |
 | Scheduled jobs       | 11                                |
 | Switchable features  | 17                                |
 | Tests                | 4,230 across 569 suites           |
@@ -96,9 +96,6 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report, suggestion and eval — see
 [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
-`SHARDLENS_URL`, `SHARDLENS_INGEST_KEY` and `SHARDLENS_READ_KEY` (analytics to a collector the
-owner runs, and the owner console's usage read back from it — see
-[§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)),
 `SITE_ENABLED` and `SITE_GITHUB_TOKEN` (the website, on unless switched off — see
 [§24](#the-website-is-on-by-default-and-the-dashboard-is-a-part-of-it)), and the `DASHBOARD_*` block — off unless
 you want the web dashboard, and covered in [§24](#24-the-dashboard).
@@ -231,11 +228,11 @@ src/
 │   ├── replies.ts        The refusals and apology every command shares, in each language
 │   ├── permissionNames.ts What each language calls the permissions a refusal names
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  119 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  117 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               36 handlers in command, community, create, logging, ready and message
 ├── buttons/              53 component handlers, keyed by custom-ID prefix
 ├── menus/                4 right-click actions, on a member or a message
-├── lib/                  240 helpers in 34 domain folders, each behind its own index.ts barrel
+├── lib/                  238 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -249,8 +246,8 @@ src/
 │       site/ notices/ account/ appeals/ modmail/ invites/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           51 Mongoose schemas, one file per feature
-│   └── repositories/     52 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           54 Mongoose schemas, one file per feature
+│   └── repositories/     53 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -396,8 +393,7 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
   `button.run(interaction, { client, action, args })`
 - Right-click → the same listener → `client.contextMenus` by name → `checkContextMenu` → `menu.run(interaction, client)`
 
-There is **exactly one** `interactionCreate` listener of the bot's own. The original had 27. Shardlens, when it is on,
-adds one of its own that only watches, and is not this rule's concern.
+There is **exactly one** `interactionCreate` listener. The original had 27.
 
 ---
 
@@ -744,11 +740,10 @@ Rules:
 
 1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
    `userId` alone for per-guild data.
-2. **Five deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
+2. **Four deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
    profile (about the person, not the server), reminders (somebody's own, so `/remind list` shows every one
-   they have wherever they set it, and every lookup filters on `userId` instead), when somebody last read the
-   bot's notifications (which are about the bot, not a server) and an analytics opt-out (which covers the person
-   everywhere). Do not "fix" these.
+   they have wherever they set it, and every lookup filters on `userId` instead) and when somebody last read the
+   bot's notifications (which are about the bot, not a server). Do not "fix" these.
 3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
@@ -2266,91 +2261,9 @@ under it, switching each feature off removes exactly its parts and nothing else,
 when something creates it, and only `/giveaway` and its route did, so a giveaway running across a restart never ended
 until somebody touched one. The `giveaways` job creates it five seconds after start-up.
 
-### Analytics go to a Shardlens collector the owner runs, and only the owners see how it is doing
-
-`@shardlens/discordjs` is attached by `startShardlens` in `src/lib/bot/shardlens.util.ts`, before login, and only
-when `SHARDLENS_URL` or `SHARDLENS_INGEST_KEY` is set: an install that never asked gains no listener, no timer and
-no warning. **It is the bot's only analytics.** Nothing analytic is written to MongoDB: the
-owner console's Usage tab, its per-server drill-down and the server list's counts are read back from the collector
-(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). Eight things about it are load-bearing:
-
-- **The settings are optional strings and nothing more, and can never stop the bot starting.** The SDK checks its
-  own address and key, logs one `[SHARDLENS]` warning and sends nothing when either is wrong, so `env.ts` adds no
-  format check and no "both or neither" rule; `env.test.ts` fails if one comes back. The read key is the bot's own, so
-  `collectorOrigin` in `shardlensReader.util.ts` is where it is guarded: it goes only to HTTPS, or plain HTTP to this
-  machine, and never to an address with a login in it, and the reader is `off` for anything else. There is no dry-run
-  setting; to see what would be sent, pass `dryRun: true` to `createShardlens` once by hand.
-- **Audit mode is asked for, and the collector decides.** `startShardlens` passes `mode: "audit"`, so once the
-  collector is in audit mode too, each interaction carries who ran it — user id, username, avatar — and the collector
-  keeps that encrypted for its own Activity page. Until the collector agrees, the SDK strips the actor and sends
-  hashes, and logs one `[SHARDLENS]` warning saying so. A prefix run carries its actor the same way. `captureOptionValues`
-  is never passed, so no option value leaves the bot. The privacy notice says
-  exactly this (`legal.outsideL5`, `legal.retentionL23`, `legal.removalP4`), and `LegalPage.test.tsx` and
-  `shardlens.test.ts` pin it to the code. Turning on option values is a change to the notice first.
-- **The runners are wrapped, not the listener.** `measured` runs a handler through one `lens.wrap` kept per lens, inside
-  the `try` of `runCommand` and `runButton` and around autocomplete, so the SDK times the handler and sees it throw
-  while the bot's own error handling still answers. A prefix run is not an interaction, so `measured` just runs it,
-  and the prefix handler tells the SDK once `runCommand` has answered: `recordPrefixRun` calls
-  `lens.trackMessageCommand` with the command's own name after aliases, the subcommand, the time, and what was thrown
-  (`runCommand` hands it back, and the SDK keeps only its class and Discord's code). **Never a custom event for a
-  prefix run** — only the SDK's own message commands are counted with slash commands, by server and by day — and
-  never the message's text, the name typed or an argument. A message that is no command, or one a check refuses, is
-  not a run. A prefix run sends the names of the options given (`givenOptions`), as a slash run already does, and
-  never what was given for them. The dashboard's screen views are custom events: `dashboard_screen` by route pattern
-  and `dashboard_server` by server, the second only for one of that server's managers (`recordScreenView`, behind
-  `managesGuild`), with the server also as an `in_<id>` property because a custom event keeps no dimensions, and
-  neither names anybody.
-- **What the bot does is counted under the bot's own names, with the server and never a person.** `recordEvent` and
-  `recordAction` pass the server as context and no user, so none of these counts towards people or funnels: a command
-  refused before it ran (`command_refused`, with the reason `checkCommand` gives from `REFUSAL_REASONS`, because
-  Discord counts a refused slash command as answered), a track played, given up on or refused (`music_played`,
-  `music_skipped`, `music_refused`, with the service and its `MusicReason`), a help desk answer and how it was chosen
-  (`support_answered` with its article, `support_refused`, never the question), a dashboard change by screen and way
-  (`dashboard_change`, written beside the audit record in `api/audit.ts`), and the eight `AUTOMATIC_ACTIONS`, each
-  counted only once it has happened. One name per thing is what keeps its total in the collector's long rollups; a
-  breakdown by property reads raw events. A track counts as played on its first open only: a retry or a volume change
-  re-opens it with `resumed`, and `openSession` listens once, as a session opens. `refreshGuildCounts` keeps member
-  counts current at one server every two seconds of the bot's REST budget.
-- **Nothing here is wrapped in a `try`.** The SDK never throws into the bot and counts its own failures; its lines go
-  to the logger tagged `[SHARDLENS]`.
-- **Shutdown flushes it before the archive closes and the client goes**, and Delete my data calls
-  `client.shardlens?.forgetUser`, which asks the collector to delete what it holds under the person's hashes and, in
-  audit mode, under their user id.
-- **An opt-out is stored, and read before the SDK starts.** `/privacy opt-out` writes `analyticsoptouts` (a user id
-  and when) and only then calls `lens.optOut`, so a choice the database refused is never shown as made;
-  `startShardlens` reads the list and passes it as `optedOut`, and if it cannot be read Shardlens stays off for that
-  run rather than count somebody who asked not to be. The SDK drops an opted-out person's interactions, prefix runs and
-  any custom event naming them in-process. `/privacy erase` opts them out and calls `forgetUser`, which does not opt
-  anybody out on its own. Delete my data keeps the opt-out (`ERASURE`: `keep`), or deleting the rest would quietly
-  start counting them again, and the privacy notice says so (`legal.storedL20`, `legal.retentionL24`,
-  `legal.removalP5`). The SDK's own `createPrivacyCommand` is not used: it registers a slash command of its own beside
-  the registry, which only the prefix side of `/privacy` would then lack. `/privacy` is in `ALWAYS_ENABLED` and is not
-  open to a blacklisted account, whose attempts are the abuse audit mode is there to show.
-- **Reading is a second key, kept by the bot.** `ShardlensReader` in `shardlensReader.util.ts` posts to the
-  collector's `/v1/query` with `SHARDLENS_READ_KEY` as a bearer token, validates every answer with zod, shares an
-  answer for a minute (`rangeOf` closes each window on the next whole minute, so a minute's reads ask the same
-  question) and keeps no failure. It answers `AnalyticsUnavailable` with `off`, `refused` or `unreachable`; a 400 is
-  this code asking a question the collector does not take, so it is rethrown as a bug. Its calls pass
-  `recorded: false`, because a collector only the owners use must not mark the bot degraded on the public status
-  page. `usageReport.util.ts` puts the answers together, every command figure from the collector's interaction
-  rollups, where slash and prefix runs are counted together and told apart by `kind` (`message_command` is a prefix
-  run). The read key reaches every figure but never who ran what, which stays behind the collector's own sign-in.
-- **Only the owners see it, and never a key.** `GET /control/shardlens`, `POST /control/shardlens/send` and every
-  `/analytics` route sit behind `requireOwner`, so `ownerGate.test.ts` covers them; the Runtime tab's card and the
-  private, owner-only `/shardlens status` and `/shardlens send` show the state, what is waiting, what was dropped or
-  failed, the last problem by the SDK's own short name, and the collector by its origin, which is where its own
-  dashboard opens. `findLeak` treats both keys as secrets. Send now waits for events still being hashed before it
-  flushes.
-
-**The old analytics collections are left to expire, not dropped.** `commandusages`, `screenviews` and
-`dashboardviews` (90 days) and `commandruns` (30 days) each carry a TTL index, so MongoDB empties them on its own
-after an upgrade; until it has, `eraseUserData` still deletes the person's rows from `commandruns` by collection name.
-Nothing reads them any more, and `npm run db:wipe` removes them sooner for anybody who wants that.
-
 ### Global by design
 
-The blacklist, the user profile, reminders, the notifications' read state and analytics opt-outs are intentionally not
-guild-scoped. See
+The blacklist, the user profile, reminders and the notifications' read state are intentionally not guild-scoped. See
 [§12](#12-multi-guild-rules).
 
 ---
@@ -2532,14 +2445,13 @@ four tabs, three shared components and two testable modules.
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
-| Command                      | What it does                                                     |
-| ---------------------------- | ---------------------------------------------------------------- |
-| `npm run dev:all`            | Bot and Vite together. The page is on :5174, the API on :3000    |
-| `npm run dashboard:dev`      | Just Vite                                                        |
-| `npm run dashboard:fixtures` | Vite on fixture data, signed in as an owner — see the guide's §3 |
-| `npm run build`              | shared → bot → dashboard, in that order                          |
-| `npm run build:shared`       | Only needed by hand after editing `shared/src`                   |
-| `npm run test:coverage`      | Both projects, each against its own thresholds                   |
+| Command                 | What it does                                                  |
+| ----------------------- | ------------------------------------------------------------- |
+| `npm run dev:all`       | Bot and Vite together. The page is on :5174, the API on :3000 |
+| `npm run dashboard:dev` | Just Vite                                                     |
+| `npm run build`         | shared → bot → dashboard, in that order                       |
+| `npm run build:shared`  | Only needed by hand after editing `shared/src`                |
+| `npm run test:coverage` | Both projects, each against its own thresholds                |
 
 In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
 work with no CORS configuration at all. In production the API serves `dashboard/dist` from the same port.
@@ -3072,33 +2984,6 @@ which the CSP allows under `style-src 'unsafe-inline'`; that combination is veri
 page, not assumed. **It hands its child's own `ref` the element too.** It once replaced it, so a button inside a
 tooltip that a caller focused by ref was never focused — the server switcher's Escape found nothing to return to.
 
-### A chart reads out through `ChartReadout`, never a native title
-
-`ChartReadout` in `components/primitives` is the tooltip for a chart: one tippy box in the same `testify` theme for
-the whole chart, rather than a `title` on each bar. A native title is unstyled, waits a second and a half, and never
-shows on a phone, so every day, hour and status bar was out of reach of anybody without a mouse. Each cell carries what
-it says in `data-readout`. Five things about it are load-bearing:
-
-- **Hover, a tap, a finger sliding sideways and the arrow keys all pick a cell.** The chart is one tab stop,
-  `role="group"` named by its caption. Left and Right step, Up and Down move a row in a grid (`columns`), and Home and
-  End go to a row's ends (`nextCell`). Escape closes it without moving focus, and a tap elsewhere closes it on a phone.
-- **A touch that turns into a scroll shows nothing.** A tap opens the box when the finger lifts, not when it presses,
-  and `slide` sets `touch-action: pan-y`, so a swipe up or down still scrolls the page and only a sideways one scrubs.
-  A touch stays with the element it began on, so a sliding finger is found with `elementFromPoint`.
-- **The cells stay hidden from a screen reader.** The `sr-only` table in the `<figcaption>` is still what one reads;
-  the group adds only the chart's name, and the box is attached with `aria-describedby`.
-- **The box catches no pointer, unlike `Tooltip`'s.** It sits over the cells, and a pointer moving on to the next bar
-  has to reach that bar. `column` points at the cell's column from above the chart, so a bar chart's box never covers
-  a bar.
-- **Its text is written in place.** `setContent` goes through `setProps`, which rebuilds the popper — read out of
-  `tippy.esm.js` — so the box holds one `<span>` whose text changes as the pick moves, and new figures under a picked
-  cell are read out at once.
-
-A chart fits its card on a phone rather than scrolling sideways: the hour heatmap is 24 columns of 7px at 320px, read
-by tapping and sliding, because a sideways scroll hid most of the week with nothing saying it was there.
-`ChartReadout.test.tsx` covers each way in, and taking away the tap, the keys, Escape, the slide, the refresh or the
-tap elsewhere, or showing on the press, each turned it red.
-
 ### Getting around, and not losing work
 
 Five pieces make the common journeys shorter, and four things in them are load-bearing:
@@ -3616,66 +3501,61 @@ which reads the env array on every request — so removing an ID revokes the con
 rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the
 whole shape of that, including that a near-miss ID cannot match.
 
-**Usage is read from Shardlens, and nothing analytic is stored here.** `/analytics/usage`, `/analytics/guilds/:id`,
-the server list's counts and one server's detail each ask the collector through `ShardlensReader` (see
-[§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)). Five things
-about it are load-bearing:
+**Usage is counted, and who ran what is logged beside it for a month.** `commandusage` holds one row per command
+per server per day per surface, `$inc`-ed in place by `countCommandUse` at the two dispatch sites, with a TTL that
+reaps a row 90 days after it was created. Four things about it are load-bearing:
 
-- **Slash runs and prefix runs are one set of figures.** The collector counts the SDK's message commands in the same
-  `interactions` rollups as slash commands and right-click actions, so each command's runs and failures, each
-  server's runs and each day's, a server's chart included, cover both. The surfaces are told apart by grouping on
-  `kind`, where `message_command` is a prefix run and every other kind is an interaction. A right-click action is
-  filed under the command its `switchedBy` names.
-- **Only the dashboard's figures reach no further than raw events.** Its screens and servers are custom events read
-  with `eventProps`, top 50 values at a time, for as long as the collector keeps raw events; the rollups behind every
-  command figure last much longer. `detailDays` is that shorter reach, and the page says so when the window passes
-  it.
-- **The slowest commands are Discord's wait, not the handler's.** `slowMs` is the p95 of how long Discord waited for
-  the bot's first reply and `typicalMs` the p50, for slash commands and right-click actions; a prefix run has no reply
-  Discord waits on, so it adds runs but no time.
-- **Shardlens being away costs figures, never pages.** The Usage tab answers 503 `analytics_off`, `analytics_refused`
-  or `analytics_unreachable` and the console words each one, offering a retry only when one could help. The server
-  list and a server's detail still answer, with their counts `null` and the reason in `analytics`; the inactive
-  filter then lists nobody, since nobody can be told apart as inactive.
-- **Who ran what is not in the console, and cannot be.** It is on the collector's own Activity page, encrypted there,
-  behind the collector's own sign-in, and the console links it and the server's own page with `collectorPage`, which
-  only ever builds a link from an `http`/`https` origin. Collector 1.1 answers `/v1/audit/*` only to a Discord session
-  of the application's owner or team and refuses a read key, sends `frame-ancestors 'none'`, and keeps the Activity
-  page's filters out of its address — read out of its `requireAdmin` and its page, not assumed — so a link is all the
-  console can give.
+- **The counts carry no user id, and `commandruns` is the one analytics record that does.** The owner asked to see
+  who in a server runs what, so each run in a server is written there too: the user id and the username it had,
+  the command and subcommand, the channel, the surface, whether it worked and how long it took. **Never an option
+  value** — what somebody typed is what the command log channels already treat as sensitive. It expires after
+  `RUN_RETENTION_DAYS` (30, in `@testify/shared`), a third as long as the counts, and a run in a direct message is
+  not written at all, since the drill-down is per server and would have nowhere to show it. The privacy notice
+  says all of this (`legal.commandsL7`, `legal.retentionL8`) and `LegalPage.test.tsx` pins it. Say so there when
+  adding a field.
+- **A row per invocation would grow without bound, which is why only the month-long log has one.** The aggregate
+  shape is what lets one query answer a 90-day window on a busy bot; the drill-down's member figures cover at most
+  the 30 days of runs, and the page says so when the window is longer (`memberDays`). The Usage tab's slowest
+  commands come from the same log (`slowestCommands`), ranked by the time the slowest run in twenty took rather
+  than the average, so one hung run reads differently from a slow command. That query uses `$percentile`, which is
+  why the bot needs **MongoDB 7.0 or newer**; Atlas and the compose file's `mongo:8` both are.
+- **`runCommand` returns a `RunOutcome`**, whether it succeeded and, for an unexpected failure, the reference it
+  was logged under, so a failure can be counted without catching the error and breaking the guarantee that the
+  user always gets an answer. The run log keeps that reference, and a failed run's badge links to the Logs tab
+  searching for it, where the list of runs says which of the six kept holds it. Past those six, or past a run's
+  2,000 lines, an old failure links to nothing, and the reference in the error channel post is the copy that
+  lasts. `countCommandUse` is not awaited and drops its own error after a debug line — the count is the least
+  important thing that happened, and nothing reads a result from it.
 
-**The Usage tab has seven sections, and each reads its own owner-only route**, so one the collector cannot answer
-leaves the rest working: Commands, People (`/analytics/audience`), Servers (`/growth`), Buttons and forms (`/panels`),
-Bot activity (`/activity`), Reliability (`/reliability`) and Journeys (`/funnel`, `/retention`), built by
-`usageSections.util.ts` and chosen with `?view=`. Four things about them are load-bearing:
+**Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
+dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
+`useScreenView.ts` puts every matched parameter back as its name, so no member id is ever sent and the pattern
+names no server. It carries **no guild id**: a server has one or two people who can open this dashboard, so which
+screens one server opened would describe one identifiable person's browsing. Bot-wide answers the question the
+count exists for — which screens are worth investing in — and nothing else.
 
-- **Hours, funnels and returns are read in the reader's own time zone.** The page sends `tz`, and the route takes only
-  an IANA zone the runtime knows (`analyticsZoneQuery`); every daily chart stays in UTC like the Commands section.
-- **A funnel or a return asks only about the bot's own commands.** The steps are names in the address, checked against
-  `client.commands` and refused as `unknown_command` otherwise, and sent as `{ type: "command" }` steps, so nothing
-  typed there becomes a custom event name. The page asks nothing until two steps are chosen.
-- **Buttons and forms are read only for the bot's own handlers**, by the first two parts of each custom ID, because the
-  rest is whatever a handler packed into it. The collector files a form opened from a button under the button's ID and
-  a submitted one under its own, so a handler's forms are summed on both sides.
-- **The way a dashboard change was made is the page's word for it.** Put back and Bring in send `x-testify-via`
-  (`CHANGE_WAY_HEADER`) as `put_back` or `backup`, setup steps are told by their action, and anything else reads as a
-  save. It is a label on a count and decides nothing.
+**Which servers use the dashboard is a second count, narrower again.** The owner asked for it, and `dashboardview`
+answers it with a server, a day and a number — no user id and no route — so it says how much a server's managers
+use the dashboard and never what they looked at. A pattern must be one of `SCREEN_ROUTES`, so nobody can fill the
+tally with rows of their own, and `useScreenView.test.ts` pins that list to `routes.tsx`. The browser sends the server
+beside the pattern (`screenView`),
+and it counts only when the sender is a member with Manage Server there, checked live like `requireGuild`
+(`managesGuild` in `routes/screens.ts`): anybody signed in can post a guild id, and an owner browsing a server is
+not that server using the dashboard, so the owner is held to the same rule.
 
-**Screen views are counted bot-wide by route pattern, and the server only for its own managers.** `routePattern` in
-`useScreenView.ts` puts every matched parameter back as its name, so no member id is ever sent and the pattern names no
-server. A pattern must be one of `SCREEN_ROUTES`, and `useScreenView.test.ts` pins that list to `routes.tsx`. The
-browser sends the server beside the pattern (`screenView`), and `/api/screens` passes it on only when the sender is a
-member with Manage Server there, checked live like `requireGuild` (`managesGuild` in `routes/screens.ts`): anybody
-signed in can post a guild id, and an owner browsing a server is not that server using the dashboard. Neither event
-names anybody, and the privacy notice says so (`legal.dashboardP4`, `legal.dashboardP6`).
+Two things follow. The write lives in its own `/api/screens` route rather than in the owner-only `analytics`
+app, because every signed-in manager generates one while only the owner reads them back. And the privacy notice
+names both, with `LegalPage.test.tsx` pinning the "no user id and no server id" claim for screens, the "no user
+id, and not which screens" claim for servers, and "IP address is not stored" — a change that starts storing any
+of them breaks a test.
 
 **No IP address, no geolocation, no device or browser string.** Not an oversight: an admin panel that records
 where its users connect from is keeping personal data, and this bot's privacy notice promises it does not. If a
 self-hoster ever needs that, it belongs in their reverse proxy's access log where they own the retention
 decision, not in the bot's database.
 
-**Least-used is ranked over `client.commands`, not over what the collector answers.** A command nobody has ever run
-has no figures at all, and it is exactly what that list exists to surface.
+**Least-used is ranked over `client.commands`, not over the usage rows.** A command nobody has ever run has no
+row at all, and it is exactly what that list exists to surface.
 
 **Commands can be switched off, in one server or everywhere.** `commandtoggles` holds one row per scope, keyed
 by guild id with `GLOBAL` as the bot-wide row — a Discord id is 17-20 digits, so the sentinel cannot collide.
@@ -3689,9 +3569,8 @@ Four things about it are load-bearing:
   `TitledRefusal` — "under maintenance", and that the command may come back — which `refusalEmbed` shows as a
   warning with its own heading; `refusalText` flattens it where a surface has no heading to give it.
 - **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
-  that turned it off would have no way back inside Discord. `/delete-my-data` and `/privacy` are there because no
-  server may keep somebody from deleting their own data or opting out of analytics. The API refuses rather than
-  trusting the form.
+  that turned it off would have no way back inside Discord. `/delete-my-data` is there because no server may keep
+  somebody from deleting their own data. The API refuses rather than trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
   out, so a hand-written request cannot make one visible or switch one off.
 
@@ -3714,9 +3593,9 @@ with no frontend work. Four things about it are load-bearing:
 owner able to blacklist another owner could lock every one of them out of their own bot, and a rule written
 twice is a rule that will eventually be written differently. The list is an id field rather than a picker
 because somebody worth blocking is usually in no server the bot can still see, and a row whose account Discord
-no longer knows still renders: an entry nobody can read is an entry nobody can lift. A link with `?block=<id>`
-opens this tab with the id filled in and the reason focused — it never blocks on its own, because the entry is
-bot-wide and the owner should say why.
+no longer knows still renders: an entry nobody can read is an entry nobody can lift. A member row on a server's
+usage page offers **Block**, which opens this tab with `?block=<id>` filled in and the reason focused — it never
+blocks on its own, because the entry is bot-wide and the owner should say why.
 
 **Leaving a server is confirmed by name, and the server is what compares it.** Rejoining needs a fresh invite
 from somebody still inside, so the browser asking for the name is the warning and `confirm !== guild.name` is
@@ -3776,17 +3655,15 @@ wrote. Five things about the history are load-bearing:
 does not check for a newer one. A self-hosted bot that contacts a server on a timer is not something to ship by
 default, and the tab says so in as many words.
 
-**No chart library.** `DayBars` is a `<span>` per day with a height, read out through `ChartReadout`, and the numbers
-behind it are a real `<table>` in a `sr-only` `<figcaption>`. The first load's budget — 200 kB gzipped, and it is met exactly — is the
+**No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
+`<table>` in a `sr-only` `<figcaption>`. The first load's budget — 200 kB gzipped, and it is met exactly — is the
 reason, and a bar is a div with a width.
 
 `UsageBars` puts its bar **behind** the row rather than beside it, so a long label is never squeezed by the
 value — but a proportional fill then ends wherever the number says, which on a short bar is the middle of a
 word: "Prefix commands" read as "Prefix" being highlighted and the rest clipped. The bar's last 24px are masked
 to transparent (`mask-r-from-[calc(100%-1.5rem)]`), so it fades out instead of cutting. The length still encodes
-the value; the ranking and the printed number are what carry it precisely. A row's label and its detail wrap rather than
-truncate, because on a phone the ellipsis took the detail line's failure count. Every usage panel is `min-w-0`: as a
-grid item it otherwise took the width of its longest unbroken label, which held the console at 586px on a 320px phone.
+the value; the ranking and the printed number are what carry it precisely.
 
 ### Insights are counted, not logged
 

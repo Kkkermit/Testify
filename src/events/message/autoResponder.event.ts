@@ -2,7 +2,6 @@ import { toError } from "@core/errors";
 import { defineMessageHandler } from "@core/message";
 import { listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { responderFor, shouldAnswer } from "@lib/autoResponders";
-import { recordAction } from "@lib/bot";
 
 /** After the prefix commands, counting and the link filter, so a command, a count or a deleted link is never answered. */
 export default defineMessageHandler({
@@ -19,7 +18,6 @@ export default defineMessageHandler({
 
 		await message
 			.reply({ content: responder.reply, allowedMentions: { parse: [], repliedUser: false } })
-			.then(() => recordAction(client, "auto_reply", message.guildId))
 			.catch((error: unknown) => {
 				client.logger.debug(
 					{ err: toError(error), guildId: message.guildId, channelId: message.channelId },

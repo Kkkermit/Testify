@@ -24,7 +24,6 @@ import {
 	setBoardMessage,
 	type StoredStarPost,
 } from "@database/repositories/starboardRepository";
-import { recordAction } from "@lib/bot/shardlens.util";
 import { canPostIn } from "@lib/discord/channels.util";
 import { VOTER_PAGE } from "@lib/starboard/starboard.constants";
 import { starboardPost, starLine, starsFrom, type StarredMessage } from "@lib/starboard/starboardPanel.util";
@@ -250,7 +249,6 @@ export async function handleStarChange(
 	});
 	if (sent === null) return;
 	await setBoardMessage(guild.id, message.id, { channelId: board.id, messageId: sent.id });
-	recordAction(client, "star_post", guild.id);
 	trace(`Reposted it with ${String(stars)} ⭐.`);
 
 	// A star that landed while this one was posting moved only the stored count.

@@ -1,4 +1,3 @@
-import { type Shardlens } from "@shardlens/discordjs";
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 import { type Env } from "@config/env";
 import { nameBot } from "@core/brand";
@@ -52,9 +51,6 @@ export class TestifyClient extends Client {
 
 	/** The dashboard listener once `startApi()` opens one; typed structurally because `src/api` imports this file. */
 	api: { close(): Promise<void> } | null = null;
-
-	/** Shardlens once `startShardlens()` attaches it, which it does only when its settings are set. */
-	shardlens: Shardlens | null = null;
 
 	/**
 	 * True while the owner has paused the bot: commands are refused, message handlers skipped and the bot shown

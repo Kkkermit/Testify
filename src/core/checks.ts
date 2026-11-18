@@ -15,7 +15,7 @@ import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND, CASINO_STATS_SUBCOMMAND } f
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
-import { type CasinoGame, isAlwaysEnabled, isCasinoGame, type RefusalReason } from "@testify/shared";
+import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
 
 interface TitledRefusal {
 	title: string;
@@ -41,40 +41,24 @@ const cooldowns = new Map<string, number>();
 /** Deleting your own data is not something the blacklist takes away; the blacklist entry itself is never deleted. */
 const OPEN_TO_THE_BLACKLISTED: ReadonlySet<string> = new Set(["delete-my-data"]);
 
-export interface Refusal {
-	failure: string | TitledRefusal;
-	reason: RefusalReason;
-}
-
 export async function runChecks(
 	interaction: CommandInput,
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
-	return (await checkCommand(interaction, command, client))?.failure ?? null;
-}
-
-const refused = (reason: RefusalReason, failure: CheckFailure): Refusal | null =>
-	failure === null ? null : { failure, reason };
-
-export async function checkCommand(
-	interaction: CommandInput,
-	command: Command,
-	client: TestifyClient,
-): Promise<Refusal | null> {
 	const language = readerLanguage(interaction);
 
 	// First, so an attempt is recorded and refused whatever else would have stopped it.
 	if (command.ownerOnly === true && !client.isOwner(interaction.user.id)) {
 		await reportOwnerAttempt(client, interaction, command);
-		return refused("owner_only", say(language, "ownerOnly"));
+		return say(language, "ownerOnly");
 	}
 
-	if (client.paused) return refused("paused", pausedRefusal(language));
+	if (client.paused) return pausedRefusal(language);
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
 	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) {
-		return refused("blacklisted", blacklistRefusal(blacklisted, await ownerNames(client), language));
+		return blacklistRefusal(blacklisted, await ownerNames(client), language);
 	}
 
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId, language);
@@ -83,23 +67,23 @@ export async function checkCommand(
 	const subcommand = chosenSubcommand(interaction, command);
 	if (subcommand === undefined) {
 		const names = subcommandsOf(command).map((sub) => `\`${sub.name}\``);
-		return refused("no_subcommand", say(language, "pickSubcommand", { subcommands: eitherOf(language, names) }));
+		return say(language, "pickSubcommand", { subcommands: eitherOf(language, names) });
 	}
 
 	const musicOff = await checkMusicSystem(interaction, command, subcommand);
-	if (musicOff !== null) return refused("music", musicOff);
+	if (musicOff !== null) return musicOff;
 
 	const casinoClosed = await checkCasino(interaction, command, subcommand);
-	if (casinoClosed !== null) return refused("casino", casinoClosed);
+	if (casinoClosed !== null) return casinoClosed;
 
 	if (command.guildOnly && !interaction.guild) {
-		return refused("guild_only", say(language, "guildOnly"));
+		return say(language, "guildOnly");
 	}
 
 	if (command.nsfw) {
 		const channel = interaction.channel;
 		const isNsfw = channel !== null && "nsfw" in channel && channel.nsfw;
-		if (!isNsfw) return refused("nsfw_only", say(language, "nsfwOnly"));
+		if (!isNsfw) return say(language, "nsfwOnly");
 	}
 
 	const member = interaction.member;
@@ -108,18 +92,18 @@ export async function checkCommand(
 	if (needed.length > 0 && member !== null) {
 		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
 		if (missing.length > 0) {
-			return refused("you_lack", lacking(language, "youNeed", missing));
+			return lacking(language, "youNeed", missing);
 		}
 	}
 
 	if (command.botPermissions?.length && interaction.guild?.members.me) {
 		const missing = interaction.guild.members.me.permissions.missing(new PermissionsBitField(command.botPermissions));
 		if (missing.length > 0) {
-			return refused("bot_lacks", lacking(language, "iNeed", missing));
+			return lacking(language, "iNeed", missing);
 		}
 	}
 
-	return refused("cooldown", checkCooldown(interaction, command, client, language));
+	return checkCooldown(interaction, command, client, language);
 }
 
 function lacking(language: BotLanguage, who: "youNeed" | "iNeed", missing: string[]): string {
@@ -185,7 +169,7 @@ export async function checkOpenControl(
 	const blacklisted = await findBlacklistEntry(who.userId);
 	if (blacklisted) return blacklistRefusal(blacklisted, await ownerNames(client), language);
 
-	return (await checkSwitchedOff(command, who.guildId, language))?.failure ?? null;
+	return checkSwitchedOff(command, who.guildId, language);
 }
 
 /** The gates a right-click action and its form pass: those of its command, then its own permissions and the bot's. */
@@ -240,18 +224,18 @@ export async function checkCasinoPlay(
 }
 
 /** Nobody bypasses a switch, the bot owner included. */
-async function checkSwitchedOff(name: string, guildId: string | null, language: BotLanguage): Promise<Refusal | null> {
+async function checkSwitchedOff(name: string, guildId: string | null, language: BotLanguage): Promise<CheckFailure> {
 	if (isAlwaysEnabled(name)) return null;
 
 	if ((await disabledGlobally()).includes(name)) {
-		return refused("off_everywhere", {
+		return {
 			title: `${theme.emoji.maintenance} ${say(language, "maintenanceTitle")}`,
 			message: say(language, "maintenance", { name }),
-		});
+		};
 	}
 
 	if (guildId !== null && (await disabledInGuild(guildId)).includes(name)) {
-		return refused("off_here", say(language, "offHere"));
+		return say(language, "offHere");
 	}
 
 	return null;

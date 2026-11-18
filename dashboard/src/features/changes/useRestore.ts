@@ -32,10 +32,7 @@ export function usePutBack(guildId: string): UseMutationResult<unknown, Error, C
 		mutationFn: (restore: ChangeRestore) => {
 			const entry = entryOf(restore);
 			const path = `/guilds/${guildId}${entry.path}`;
-			const via = { via: "put_back" } as const;
-			return entry.method === "PUT"
-				? api.put<unknown>(path, restore.put, via)
-				: api.patch<unknown>(path, restore.put, via);
+			return entry.method === "PUT" ? api.put<unknown>(path, restore.put) : api.patch<unknown>(path, restore.put);
 		},
 		onSuccess: () => client.invalidateQueries({ queryKey: keys.guild(guildId).all() }),
 	});

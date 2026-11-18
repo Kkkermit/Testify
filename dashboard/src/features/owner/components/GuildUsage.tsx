@@ -2,15 +2,16 @@ import { type AnalyticsWindow } from "@testify/shared";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
+import { ErrorState } from "@/app/ErrorState";
 import { Warning } from "@/components/form";
-import { SegmentedControl } from "@/components/primitives";
-import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
-import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { SegmentedControl, Skeleton } from "@/components/primitives";
+import { GuildMembers } from "@/features/owner/components/GuildMembers";
+import { GuildRuns } from "@/features/owner/components/GuildRuns";
 import { GuildUsageSummary } from "@/features/owner/components/GuildUsageSummary";
 import { searchWith, WINDOWS } from "@/features/owner/owner.utils";
 import { useGuildUsage } from "@/features/owner/useOwner";
 
-const DRILL_DOWN = { guild: null };
+const DRILL_DOWN = { guild: null, who: null, people: null, member: null, command: null, runs: null };
 
 export function GuildUsage({
 	guildId,
@@ -38,15 +39,20 @@ export function GuildUsage({
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
 
-			<AnalyticsState query={report}>
-				{(usage) => (
-					<>
-						{usage.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: usage.detailDays })}</Warning>}
-						<GuildUsageSummary report={usage} />
-						<ShardlensLinks collector={usage.collector} guildId={guildId} />
-					</>
-				)}
-			</AnalyticsState>
+			{report.isError ? (
+				<ErrorState as="h2" error={report.error} onRetry={() => void report.refetch()} />
+			) : report.isPending ? (
+				<Skeleton className="h-96 w-full" />
+			) : (
+				<>
+					<GuildUsageSummary report={report.data} />
+					{report.data.memberDays < days && (
+						<Warning>{t("owner.memberDaysNote", { days: report.data.memberDays })}</Warning>
+					)}
+					<GuildMembers guildId={guildId} report={report.data} />
+					<GuildRuns guildId={guildId} report={report.data} />
+				</>
+			)}
 		</div>
 	);
 }

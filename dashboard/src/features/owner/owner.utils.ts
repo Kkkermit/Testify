@@ -1,12 +1,11 @@
 import {
-	ANALYTICS_PROBLEMS,
 	ANALYTICS_WINDOWS,
 	LOG_LEVELS,
 	OWNER_GUILD_FILTERS,
 	OWNER_GUILD_SORTS,
 	snowflake,
-	type AnalyticsProblem,
 	type AnalyticsWindow,
+	type CommandRunRow,
 	type CommandUsageRow,
 	type OwnerGuildFilter,
 	type OwnerGuildSort,
@@ -15,9 +14,8 @@ import {
 import { type TFunction } from "i18next";
 import { categoryLabel } from "@/features/commands/categories.labels";
 import { type TranslationKey } from "@/i18n";
-import { ApiError } from "@/lib/api";
 import { dayAndMonth } from "@/lib/datetime";
-import { formatNumber, formatPercent, formatUnit } from "@/lib/intl";
+import { formatPercent, formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
 export const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
@@ -30,14 +28,6 @@ export function windowFrom(raw: string | null): AnalyticsWindow {
 export function levelFrom(raw: string | null): ReportedLogLevel {
 	return oneOf(LOG_LEVELS, raw, "trace");
 }
-
-/** Shown for a figure that could not be read, which is not the same as zero. */
-export const NO_FIGURE = "—";
-
-export const countOrDash = (count: number | null | undefined): string =>
-	count === null || count === undefined ? NO_FIGURE : formatNumber(count);
-
-export const shareOrDash = (share: number | null): string => (share === null ? NO_FIGURE : formatPercent(share, 1));
 
 export function percent(part: number, whole: number): string {
 	return formatPercent(part, Math.max(whole, 0));
@@ -86,10 +76,18 @@ export function snowflakeFrom(raw: string | null): string | null {
 	return raw !== null && isSnowflake(raw) ? raw : null;
 }
 
+export function commandFrom(raw: string | null): string | null {
+	return raw !== null && /^[\w-]{1,32}$/.test(raw) ? raw : null;
+}
+
 export function formatMs(ms: number): string {
 	return ms < 1_000
 		? formatUnit(ms, "millisecond")
 		: formatUnit(ms / 1_000, "second", { digits: 1, display: "narrow" });
+}
+
+export function runName(run: Pick<CommandRunRow, "command" | "subcommand">): string {
+	return run.subcommand === null ? `/${run.command}` : `/${run.command} ${run.subcommand}`;
 }
 
 export function searchWith(current: URLSearchParams, changes: Record<string, string | null>): string {
@@ -124,14 +122,4 @@ export function surfaceBars(surfaces: { slash: number; prefix: number }, t: TFun
 		{ id: "slash", label: t("owner.slashCommands"), count: surfaces.slash },
 		{ id: "prefix", label: t("owner.prefixCommands"), count: surfaces.prefix },
 	];
-}
-
-export function analyticsProblemOf(error: unknown): AnalyticsProblem | null {
-	if (!(error instanceof ApiError)) return null;
-	return ANALYTICS_PROBLEMS.find((problem) => error.code === `analytics_${problem}`) ?? null;
-}
-
-/** Only an http or https origin becomes a link. */
-export function collectorPage(collector: string, path = ""): string | null {
-	return /^https?:\/\/[^/\s]+$/.test(collector) ? `${collector}${path}` : null;
 }

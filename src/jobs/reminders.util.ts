@@ -1,7 +1,6 @@
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { claimDueReminder, finishReminder } from "@database/repositories/reminderRepository";
-import { recordAction } from "@lib/bot";
 import { deliverReminder, REMINDER_LIMITS } from "@lib/reminders";
 
 /** Each due reminder is claimed for a lease and deleted only once it is sent, so a restart mid-send repeats it. */
@@ -17,8 +16,6 @@ export async function deliverDueReminders(client: TestifyClient, now: Date = new
 					{ userId: reminder.userId },
 					"[REMINDERS] A reminder could not reach its owner by channel or DM, so it was dropped.",
 				);
-			} else {
-				recordAction(client, "reminder_sent", reminder.guildId);
 			}
 			await finishReminder(reminder.id);
 		} catch (error) {

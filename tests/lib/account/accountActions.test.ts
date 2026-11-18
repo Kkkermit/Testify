@@ -44,19 +44,6 @@ describe("eraseAccount", () => {
 		expect(deleted).toEqual(["500000000000000002"]);
 	});
 
-	/** The collector holds their interactions under hashes of their id, which only the bot can work out. */
-	it("asks the Shardlens collector to forget them too, when there is one", async () => {
-		const forgetUser = jest.fn(() => Promise.resolve({ erased: 3 }));
-		const client = {
-			...clientWith(() => Promise.resolve(null)),
-			shardlens: { forgetUser },
-		} as unknown as TestifyClient;
-
-		await eraseAccount(client, PERSON);
-
-		expect(forgetUser).toHaveBeenCalledWith(PERSON);
-	});
-
 	/** Counts held in memory would write a fresh row about them on the next flush. */
 	it("forgets the messages counted for them but not yet written", async () => {
 		const client = clientWith(() => Promise.resolve(null));

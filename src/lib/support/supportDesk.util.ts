@@ -3,7 +3,6 @@ import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
-import { LENS_EVENTS, recordEvent } from "@lib/bot/shardlens.util";
 import { type SupportContext, type SupportEntry, type SupportPicker } from "@lib/support/support.types";
 import { commandEntries, fillPlaceholders, linkEntries, loadArticles } from "@lib/support/supportArticles.util";
 import { findLeak, secretsOf } from "@lib/support/supportGuard.util";
@@ -20,7 +19,6 @@ import {
 	SUPPORT_LIMITS,
 	type SupportReply,
 	SupportSearch,
-	type SupportWay,
 } from "@testify/shared";
 
 /** Answers a question with a vetted article or with nothing, and checks every answer for secrets on the way out. */
@@ -62,8 +60,6 @@ interface DeskOptions {
 	now?: () => number;
 }
 
-type ChosenBy = Exclude<SupportWay, "picked">;
-
 export class SupportDesk {
 	readonly #entries: Map<string, SupportEntry>;
 	readonly #search: SupportSearch<SupportEntry>;
@@ -72,8 +68,8 @@ export class SupportDesk {
 	readonly #logger: Logger;
 	readonly #budget: HourlyBudget;
 	readonly #now: () => number;
-	/** Keyed by the question, holding only which article was chosen and how; nothing here names who asked. */
-	readonly #cache = new Map<string, { at: number; id: string | null; by: ChosenBy }>();
+	/** Keyed by the question, holding only which article was chosen; nothing here names who asked. */
+	readonly #cache = new Map<string, { at: number; id: string | null }>();
 
 	constructor(options: DeskOptions) {
 		this.#entries = new Map(options.entries.map((entry) => [entry.id, entry]));
@@ -85,17 +81,13 @@ export class SupportDesk {
 		this.#now = options.now ?? Date.now;
 	}
 
-	/** The reply, and whether the model or search chose it. */
-	async answer(question: string, context: SupportContext): Promise<{ reply: SupportReply; by: ChosenBy }> {
+	async ask(question: string, context: SupportContext): Promise<SupportReply> {
 		const hits = this.#search.search(question);
-		const { chosen, by } = await this.#choose(question, hits);
+		const chosen = await this.#choose(question, hits);
 
 		return {
-			reply: {
-				answer: chosen === null ? null : this.#render(chosen, context),
-				related: this.#related(chosen, hits, context),
-			},
-			by,
+			answer: chosen === null ? null : this.#render(chosen, context),
+			related: this.#related(chosen, hits, context),
 		};
 	}
 
@@ -137,19 +129,15 @@ export class SupportDesk {
 		});
 	}
 
-	async #choose(
-		question: string,
-		hits: SearchHit<SupportEntry>[],
-	): Promise<{ chosen: SupportEntry | null; by: ChosenBy }> {
+	async #choose(question: string, hits: SearchHit<SupportEntry>[]): Promise<SupportEntry | null> {
 		const now = this.#now();
 		const key = question.toLowerCase().replace(/\s+/g, " ").trim();
 		const cached = this.#cache.get(key);
 		if (cached !== undefined && now - cached.at < CACHE_MS) {
-			return { chosen: cached.id === null ? null : (this.#entries.get(cached.id) ?? null), by: cached.by };
+			return cached.id === null ? null : (this.#entries.get(cached.id) ?? null);
 		}
 
 		let chosen: SupportEntry | null | undefined;
-		let by: ChosenBy = "model";
 		if (this.#picker !== null && this.#budget.take(now)) {
 			try {
 				const pick = await this.#picker.pick(question);
@@ -167,13 +155,12 @@ export class SupportDesk {
 		if (chosen === undefined) {
 			const [top] = hits;
 			chosen = isConfident(top) ? top.entry : null;
-			by = "search";
 		}
 
 		if (this.#cache.size >= CACHE_SIZE) this.#cache.delete(this.#cache.keys().next().value ?? "");
-		this.#cache.set(key, { at: now, id: chosen?.id ?? null, by });
+		this.#cache.set(key, { at: now, id: chosen?.id ?? null });
 
-		return { chosen, by };
+		return chosen;
 	}
 
 	#related(
@@ -293,18 +280,6 @@ export function supportDesk(client: TestifyClient): SupportDesk {
 	});
 
 	return desk;
-}
-
-/** Counts an answer by how it was chosen and which article; never the question. */
-export function countAnswer(
-	client: TestifyClient,
-	surface: "discord" | "dashboard",
-	reply: SupportReply,
-	by: SupportWay,
-	guildId?: string | null,
-): void {
-	if (reply.answer === null) recordEvent(client, LENS_EVENTS.supportRefused, { surface, by }, guildId);
-	else recordEvent(client, LENS_EVENTS.supportAnswered, { surface, by, article: reply.answer.id }, guildId);
 }
 
 export function resetSupportDesk(): void {

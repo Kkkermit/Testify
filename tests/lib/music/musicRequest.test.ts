@@ -14,7 +14,7 @@ jest.mock("@lib/music/musicSession.util", () => ({ sessionFor: jest.fn(), findSe
 jest.mock("@database/repositories/botSettingsRepository", () => ({ getBotSettings: jest.fn() }));
 
 const { resolveTracks } = jest.requireMock("@lib/music/musicSource.util");
-const { sessionFor, findSession } = jest.requireMock("@lib/music/musicSession.util");
+const { sessionFor } = jest.requireMock("@lib/music/musicSession.util");
 const { getBotSettings } = jest.requireMock("@database/repositories/botSettingsRepository");
 
 function track(title: string): Track {
@@ -39,12 +39,10 @@ function fakeSession(queue: QueueState, active: boolean) {
 	};
 }
 
-const lensTrack = jest.fn();
-
 function request(next = false) {
 	return {
 		guild: { id: "guild-1" } as Guild,
-		client: { env: {}, logger: { warn: jest.fn() }, shardlens: { track: lensTrack } } as never,
+		client: { env: {}, logger: { warn: jest.fn() } } as never,
 		channel: { id: "voice-1" } as VoiceBasedChannel,
 		query: requestedQuery("never gonna give you up"),
 		requestedBy: "100000000000000001",
@@ -187,42 +185,5 @@ describe("hostAdvice", () => {
 	it("says nothing for a refusal that is about the track", () => {
 		expect(hostAdvice("unavailable")).toBeNull();
 		expect(hostAdvice("drm")).toBeNull();
-	});
-
-	/** A refusal is counted by the service asked and what it said, which is how a flagged host shows on the console. */
-	it("counts a refusal by its service and reason", async () => {
-		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));
-		const { MusicProblemError } = jest.requireActual<typeof Source>("@lib/music/musicSource.util");
-		resolveTracks.mockRejectedValue(new MusicProblemError({ kind: "bot-check", advice: "YouTube asked." }));
-
-		await expect(queueRequest(request())).rejects.toThrow();
-		expect(lensTrack).toHaveBeenCalledWith(
-			"music_refused",
-			{ source: "youtube", cause: "youtube/bot-check" },
-			{ guildId: "guild-1" },
-		);
-	});
-});
-
-describe("counting tracks", () => {
-	/** One listener per session, attached as it opens, so a long queue is not counted once per request. */
-	it("counts a fresh start and a give-up, and nothing for a track opened again", async () => {
-		const session = { ...fakeSession({ tracks: [], index: -1, loop: "off" }, false), on: jest.fn() };
-		sessionFor.mockReturnValue(session);
-		findSession.mockReturnValueOnce(null);
-
-		await queueRequest(request());
-		await queueRequest(request());
-
-		expect(session.on).toHaveBeenCalledTimes(1);
-		const listen = session.on.mock.calls[0]?.[0] as (event: unknown) => void;
-		listen({ kind: "track", track: track("a"), resumed: false });
-		listen({ kind: "track", track: track("a"), resumed: true });
-		listen({ kind: "failed", track: track("b"), reason: "x", problem: "drm" });
-
-		expect(lensTrack.mock.calls).toEqual([
-			["music_played", { source: "youtube" }, { guildId: "guild-1" }],
-			["music_skipped", { source: "youtube", cause: "youtube/drm" }, { guildId: "guild-1" }],
-		]);
 	});
 });

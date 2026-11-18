@@ -124,23 +124,15 @@ needing `npm run build:shared` by hand.
 
 ## 3. Running it
 
-| Command                      | What it does                                                         |
-| ---------------------------- | -------------------------------------------------------------------- |
-| `npm run dev:all`            | Bot and Vite together. The page is on :5174, the API on :3000        |
-| `npm run dashboard:dev`      | Vite only — useful when the API is already up                        |
-| `npm run dashboard:fixtures` | Vite on fixture data, signed in as an owner, with no bot or database |
-| `npm run check`              | typecheck → lint → format:check → test, both projects                |
-| `npm run test:coverage`      | Both projects, each against its own thresholds                       |
+| Command                 | What it does                                                  |
+| ----------------------- | ------------------------------------------------------------- |
+| `npm run dev:all`       | Bot and Vite together. The page is on :5174, the API on :3000 |
+| `npm run dashboard:dev` | Vite only — useful when the API is already up                 |
+| `npm run check`         | typecheck → lint → format:check → test, both projects         |
+| `npm run test:coverage` | Both projects, each against its own thresholds                |
 
 In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
 work with **no CORS configuration at all**. In production the API serves `dashboard/dist` from the same port.
-
-**`dashboard:fixtures` is for looking, not for testing a change against the bot.** `dashboard/fixtures/server.ts`
-starts Vite with a plugin that answers every `/api` call itself: `showcase.ts` first, a made-up busy bot whose owner
-console figures follow the window and time zone asked for, then the test suite's own `handlers.ts` for every other
-screen. `/auth/me` answers as an owner, so there is no sign-in. Nothing is saved, and a route nothing answers is a 404
-named once in the terminal. The fixtures load through Vite, so an edit to one shows on the next request, and none of
-it is in the build.
 
 **`dev:all` is one supervisor process, and one Ctrl+C stops everything.** `scripts/devAll.ts` replaced
 `concurrently` for a reason worth knowing: concurrently spawns every command through a shell — `cmd.exe /s /c`
@@ -203,7 +195,7 @@ src/
 ├── components/
 │   ├── brand/          BotMark, BotBanner, FlagIcon — the bot's own picture and banner
 │   ├── primitives/     Avatar Badge Button Card DataList EmptyState PageHeader Pager
-│   │                   SegmentedControl Skeleton StatTile TabBar Tooltip ChartReadout
+│   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
 │   │                   SavingIndicator Toggle Warning + fieldStyles.ts
 │   └── ui/             Reserved for shadcn's CLI. Excluded from coverage — keep your own out.
@@ -465,7 +457,6 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page       |
 | `Summary`                                                    | The one sentence under a page's header saying what the feature does now    |
 | `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                            |
-| `ChartReadout`                                               | Wraps a chart's cells; each says what it shows in `data-readout`           |
 
 ### Form
 
@@ -522,11 +513,6 @@ only by one is unreachable to anybody arriving another way. It opens on `focusin
 
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in
 React 19. The child keeps its own `ref`, so a button inside a tooltip can still be focused by its caller.
-
-A chart is different: its cells are not controls, so it takes `ChartReadout` instead, one box for the whole chart in
-the same theme. Give each cell `data-readout="14 Nov: 1,115"`, the chart a `label` (its caption), `column` for bars,
-`slide` unless the chart scrolls sideways itself, and `columns` for a grid. Never a `title` on a cell: a phone never
-shows one. AGENTS.md §24 has the rules.
 
 ### Deleting and leaving
 
@@ -825,13 +811,10 @@ precisely the screen you want when something is wrong.
 
 - **Ownership is `DISCORD_OWNER_IDS` and nothing else**, read from env on every request — so removing an ID
   revokes the console on that person's next click, and no flag on the session can grant it.
-- **Usage is read from Shardlens, and nothing analytic is kept in MongoDB.** The Usage tab, its per-server
-  drill-down and the server list's command and dashboard counts are queries to the collector with
-  `SHARDLENS_READ_KEY`, which the bot holds and no browser sees. Without the key, or with the collector refusing or
-  away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_unreachable`) and the server list still
-  loads with its counts blank. Who ran what lives on the collector's own Activity page, which the tab links. The
-  tab's seven sections — commands, people, servers, buttons and forms, bot activity, reliability and journeys — each
-  read their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`.
+- **Usage is counted, and who ran what is kept for a month.** One row per command per server per day per surface,
+  `$inc`-ed in place, TTL'd at 90 days, with no user id. Beside it `commandruns` holds each run in a server — who,
+  which command, where, whether it worked — for 30 days and never with an option value; it is what the usage tab's
+  drill-down into one server reads. Dashboard use per server is a count with no user id and no route.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.
@@ -849,8 +832,8 @@ precisely the screen you want when something is wrong.
   a typed confirmation.
 - **Testify never phones home.** The runtime tab reports its version and links the releases page; it does not
   check for a newer one.
-- **No chart library.** `DayBars` is a `<span>` per day with a height, read out through `ChartReadout`, and the
-  numbers behind it are a real `<table>` in an `sr-only` `<figcaption>`.
+- **No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
+  `<table>` in an `sr-only` `<figcaption>`.
 
 ### The dashboard wears the bot's face
 
@@ -1612,12 +1595,12 @@ rule measures what jsdom cannot. The last sweep was 570 page loads with nothing 
 The script is quick to rewrite; **the exemptions are the part worth keeping**, because each one cost a round of
 chasing a finding that was not a defect:
 
-| Looks like a failure          | Why it is not                                                     |
-| ----------------------------- | ----------------------------------------------------------------- |
-| Skip link at 24×16            | `sr-only` until focus. It has no pointer target to be too small   |
-| Checkbox at 1×1 or 16×16      | The effective target is the `<label>` around it — measure that    |
-| "terms of use" at 71×15       | 2.5.8 exempts a link inside a sentence; line-height sets its size |
-| `DayBars`'s table overflowing | It lives in an `sr-only` `<figcaption>`, which clips to 1px       |
+| Looks like a failure             | Why it is not                                                     |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Skip link at 24×16               | `sr-only` until focus. It has no pointer target to be too small   |
+| Checkbox at 1×1 or 16×16         | The effective target is the `<label>` around it — measure that    |
+| "terms of use" at 71×15          | 2.5.8 exempts a link inside a sentence; line-height sets its size |
+| `UsageChart`'s table overflowing | It lives in an `sr-only` `<figcaption>`, which clips to 1px       |
 
 ### Which skill to reach for
 

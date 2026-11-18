@@ -1,4 +1,4 @@
-import { type ApiErrorBody, CHANGE_WAY_HEADER, type ChangeWay } from "@testify/shared";
+import { type ApiErrorBody } from "@testify/shared";
 
 const BASE = "/api";
 const CSRF_COOKIE = "dash_csrf";
@@ -31,15 +31,9 @@ function readCookie(name: string): string | null {
 	return match === undefined ? null : decodeURIComponent(match.slice(name.length + 1));
 }
 
-/** A write that puts a change back or brings a backup in says so, so the owners can count how settings change. */
-interface WriteOptions {
-	via?: Exclude<ChangeWay, "save" | "setup">;
-}
-
-async function request<T>(method: string, path: string, body?: unknown, options: WriteOptions = {}): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
 	const headers: Record<string, string> = {};
 	if (body !== undefined) headers["content-type"] = "application/json";
-	if (options.via !== undefined) headers[CHANGE_WAY_HEADER] = options.via;
 
 	if (method !== "GET") {
 		// Double-submit: the readable cookie echoed in a header the browser cannot set cross-site.
@@ -74,8 +68,7 @@ async function errorBody(response: Response): Promise<ApiErrorBody> {
 export const api = {
 	get: <T>(path: string): Promise<T> => request<T>("GET", path),
 	post: <T>(path: string, body?: unknown): Promise<T> => request<T>("POST", path, body),
-	patch: <T>(path: string, body?: unknown, options?: WriteOptions): Promise<T> =>
-		request<T>("PATCH", path, body, options),
-	put: <T>(path: string, body?: unknown, options?: WriteOptions): Promise<T> => request<T>("PUT", path, body, options),
+	patch: <T>(path: string, body?: unknown): Promise<T> => request<T>("PATCH", path, body),
+	put: <T>(path: string, body?: unknown): Promise<T> => request<T>("PUT", path, body),
 	delete: <T>(path: string): Promise<T> => request<T>("DELETE", path),
 };
