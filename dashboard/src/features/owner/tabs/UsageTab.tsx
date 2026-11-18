@@ -1,22 +1,31 @@
-import { type AnalyticsWindow, type GuildUsageRow } from "@testify/shared";
+import { type AnalyticsWindow, type GuildUsageRow, type UsageReport } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
-import { ErrorState } from "@/app/ErrorState";
-import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
+import { Warning } from "@/components/form";
+import { Avatar, Card, Figure, SegmentedControl, UsageBars } from "@/components/primitives";
+import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
+import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import {
+	commandBar,
 	formatMs,
 	percent,
 	screenLabel,
 	searchWith,
 	snowflakeFrom,
-	WINDOWS,
-	commandBar,
 	surfaceBars,
+	WINDOWS,
 } from "@/features/owner/owner.utils";
+import { ActivityView } from "@/features/owner/usage/ActivityView";
+import { JourneysView } from "@/features/owner/usage/JourneysView";
+import { PanelsView } from "@/features/owner/usage/PanelsView";
+import { PeopleView } from "@/features/owner/usage/PeopleView";
+import { ReliabilityView } from "@/features/owner/usage/ReliabilityView";
+import { ServersView } from "@/features/owner/usage/ServersView";
+import { USAGE_VIEWS, viewFrom, VIEW_LABELS } from "@/features/owner/usage/usage.utils";
 import { useUsage } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
@@ -27,44 +36,71 @@ export function UsageTab({
 	days: AnalyticsWindow;
 	onWindow: (days: AnalyticsWindow) => void;
 }): React.JSX.Element {
-	const [params] = useSearchParams();
-	const guildId = snowflakeFrom(params.get("guild"));
-
-	return guildId === null ? (
-		<FleetUsage days={days} onWindow={onWindow} />
-	) : (
-		<GuildUsage guildId={guildId} days={days} onWindow={onWindow} />
-	);
-}
-
-function FleetUsage({
-	days,
-	onWindow,
-}: {
-	days: AnalyticsWindow;
-	onWindow: (days: AnalyticsWindow) => void;
-}): React.JSX.Element {
 	const { t } = useTranslation();
-	const [params] = useSearchParams();
-	const usage = useUsage(days);
+	const [params, setParams] = useSearchParams();
+	const guildId = snowflakeFrom(params.get("guild"));
+	const view = viewFrom(params.get("view"));
 
-	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
-	if (usage.isError) return <ErrorState as="h2" error={usage.error} onRetry={() => void usage.refetch()} />;
-
-	const report = usage.data;
+	if (guildId !== null) return <GuildUsage guildId={guildId} days={days} onWindow={onWindow} />;
 
 	return (
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-center justify-between gap-3">
-				<p className="text-muted-foreground text-sm">
-					{t("owner.usageSummary", {
-						count: report.runs,
-						days,
-						failing: percent(report.failures, report.runs),
-					})}
-				</p>
+				<SegmentedControl
+					label={t("owner.usageSections.views")}
+					segments={USAGE_VIEWS.map((value) => ({ value, label: t(VIEW_LABELS[value]) }))}
+					value={view}
+					onChange={(value) => {
+						setParams(searchWith(params, { view: value === "commands" ? null : value }), { replace: true });
+					}}
+				/>
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
+
+			{view === "commands" && <FleetUsage days={days} />}
+			{view === "people" && <PeopleView days={days} />}
+			{view === "servers" && <ServersView days={days} />}
+			{view === "panels" && <PanelsView days={days} />}
+			{view === "activity" && <ActivityView days={days} />}
+			{view === "reliability" && <ReliabilityView days={days} />}
+			{view === "journeys" && <JourneysView days={days} />}
+		</div>
+	);
+}
+
+function FleetUsage({ days }: { days: AnalyticsWindow }): React.JSX.Element {
+	const [params] = useSearchParams();
+	const usage = useUsage(days);
+
+	return (
+		<AnalyticsState query={usage}>
+			{(report) => <FleetFigures report={report} days={days} params={params} />}
+		</AnalyticsState>
+	);
+}
+
+function FleetFigures({
+	report,
+	days,
+	params,
+}: {
+	report: UsageReport;
+	days: AnalyticsWindow;
+	params: URLSearchParams;
+}): React.JSX.Element {
+	const { t } = useTranslation();
+
+	return (
+		<div className="flex flex-col gap-4">
+			<p className="text-muted-foreground text-sm">
+				{t("owner.usageSummary", {
+					count: report.runs,
+					days,
+					failing: percent(report.failures, report.runs),
+				})}
+			</p>
+
+			{report.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: report.detailDays })}</Warning>}
 
 			<Card padding="none" className="divide-border divide-y">
 				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
@@ -107,7 +143,7 @@ function FleetUsage({
 					/>
 				</Panel>
 
-				<Panel title={t("owner.slowest")} hint={t("owner.slowestHint", { days: report.runDays })}>
+				<Panel title={t("owner.slowest")} hint={t("owner.slowestHint")}>
 					<UsageBars
 						tint="bg-destructive/15"
 						empty={t("owner.noSlowRuns")}
@@ -143,6 +179,8 @@ function FleetUsage({
 					/>
 				</Panel>
 			</div>
+
+			<ShardlensLinks collector={report.collector} />
 		</div>
 	);
 }

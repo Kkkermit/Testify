@@ -79,6 +79,13 @@ const fields = z.object({
 	// Support assistant. Without a key it answers by search alone and never contacts anybody.
 	SUPPORT_AI_API_KEY: z.string().min(1).optional(),
 	SUPPORT_AI_MODEL: z.string().min(1).default("claude-opus-5"),
+
+	// Shardlens: analytics sent to a collector the bot's owner runs. Off while both are blank, and never a reason not
+	// to start: the SDK checks them itself and warns.
+	SHARDLENS_URL: z.string().optional(),
+	SHARDLENS_INGEST_KEY: z.string().optional(),
+	// Read-only, for the owner console's analytics. Held by the bot and never sent to a browser.
+	SHARDLENS_READ_KEY: z.string().optional(),
 });
 
 /** Every variable name, so the support assistant can refuse to repeat one. */

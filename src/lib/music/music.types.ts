@@ -1,5 +1,6 @@
 import { type Readable } from "node:stream";
 import { type MUSIC_SOURCES, type LOOP_MODES } from "@lib/music/music.constants";
+import { type MusicReason } from "@testify/shared";
 
 export interface MusicBinaries {
 	/** Required: nothing can be resolved or streamed without it. */
@@ -31,7 +32,8 @@ export interface StreamPlan {
 	shape: StreamShape;
 }
 
-export type ProblemKind = "forbidden" | "bot-check" | "session" | "unavailable" | "drm" | "disk";
+/** What the downloader said went wrong; the rest of `MusicReason` is the bot's own. */
+export type ProblemKind = Exclude<MusicReason, "unplayable" | "broken" | "error">;
 
 export interface DownloadProblem {
 	kind: ProblemKind;

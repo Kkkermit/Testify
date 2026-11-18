@@ -1,11 +1,11 @@
-import { type OwnerGuildRow, type Paged } from "@testify/shared";
+import { type OwnerGuildPage, type OwnerGuildRow } from "@testify/shared";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse, type JsonBodyType } from "msw";
-import { commandFrom, snowflakeFrom } from "@/features/owner/owner.utils";
+import { collectorPage, snowflakeFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { commandRuns, guildUsage } from "@/test/fixtures/owner";
+import { guildUsage, usageReport } from "@/test/fixtures/owner";
 import { aGuild } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -39,7 +39,7 @@ const row: OwnerGuildRow = {
 	commands: 77,
 	dashboardViews: 5,
 };
-const onePage: Paged<OwnerGuildRow> = { items: [row], total: 1, page: 1, perPage: 25 };
+const onePage: OwnerGuildPage = { items: [row], total: 1, page: 1, perPage: 25, analytics: null };
 
 describe("the owner's server list", () => {
 	/** Debounced, so a five-letter name is one request rather than five. */
@@ -70,81 +70,71 @@ describe("the owner's server list", () => {
 		expect(seen.at(-1)?.get("page")).toBe("1");
 		expect(screen.getByRole("columnheader", { name: "Joined" }).className).not.toMatch(/\bhidden\b/);
 	});
+
+	/** A blank count is Shardlens being away, which must never read as nobody using the server. */
+	it("shows a dash for each count Shardlens could not give, and says why", async () => {
+		watch("/api/owner/guilds", {
+			...onePage,
+			items: [{ ...row, commands: null, dashboardViews: null }],
+			analytics: "refused",
+		});
+		renderAt("/owner?tab=overview");
+		const table = await screen.findByRole("table");
+
+		expect(await screen.findByText(/Shardlens refused the bot’s read key/)).toBeInTheDocument();
+		expect(table.textContent).toContain("—");
+		expect(table.textContent).not.toContain("77");
+	});
 });
 
 describe("one server's usage", () => {
-	/** Pressing a name shows only what that person ran. */
-	it("narrows the runs to a member when their name is pressed, and back", async () => {
-		const seen = watch("/api/analytics/guilds/:guildId/runs", { items: [], total: 0, page: 1, perPage: 25 });
-		renderAt(DRILL_DOWN);
-
-		const alice = await screen.findByRole("button", { name: /^alice/ });
-		await userEvent.click(alice);
-
-		await waitFor(() => {
-			expect(seen.at(-1)?.get("userId")).toBe(ALICE);
-		});
-		expect(screen.getByRole("button", { name: /^alice/, pressed: true })).toBeInTheDocument();
-
-		await userEvent.click(screen.getByRole("button", { name: /Show everyone’s runs/ }));
-
-		await waitFor(() => {
-			expect(seen.at(-1)?.has("userId")).toBe(false);
-		});
-	});
-
-	/** The reference is what the error was logged under, so following it lands on that failure's lines. */
-	it("links a failed run to its lines on the Logs tab", async () => {
-		renderAt(DRILL_DOWN);
-
-		const link = await screen.findByRole("link", { name: /Failed AB12CD/ });
-		expect(link).toHaveAttribute("href", expect.stringMatching(/[?&]tab=logs\b/));
-		expect(link).toHaveAttribute("href", expect.stringMatching(/[?&]q=AB12CD\b/));
-
-		await userEvent.click(link);
-
-		expect(await screen.findByLabelText("Search the log")).toHaveValue("AB12CD");
-	});
-
-	/** A refusal was never logged as a bug, so there is nothing to link to. */
-	it("leaves a failure with no reference as a plain badge", async () => {
-		watch("/api/analytics/guilds/:guildId/runs", {
-			items: [{ ...commandRuns[0], reference: null }],
-			total: 1,
-			page: 1,
-			perPage: 25,
-		});
-		renderAt(DRILL_DOWN);
-
-		await screen.findByRole("table", { name: /Commands run in Test Server/ });
-		expect(screen.queryByRole("link", { name: /Failed/ })).toBeNull();
-		expect(screen.getAllByText("Failed").length).toBeGreaterThan(0);
-	});
-
-	it("opens the blacklist with the member's ID filled in, ready for a reason", async () => {
-		renderAt(DRILL_DOWN);
-
-		await userEvent.click(await screen.findByRole("button", { name: "Block alice from Testify" }));
-
-		expect(await screen.findByLabelText("User ID")).toHaveValue(ALICE);
-		expect(screen.getByLabelText("Reason (optional)")).toHaveFocus();
-		// Filling the form is not blocking: the owner still has to press it.
-		expect(screen.getByRole("button", { name: "Block them" })).toBeEnabled();
-	});
-
-	/** Runs are kept for 30 days, so a 90-day window has to say the member half covers less. */
-	it("says when who ran what covers less than the window", async () => {
-		watch("/api/analytics/guilds/:guildId", { ...guildUsage, days: 90, memberDays: 30 });
+	/** Prefix runs by name and dashboard figures come from raw events, which Shardlens keeps less long than its counts. */
+	it("says how far back the event figures reach when the window is longer", async () => {
+		watch("/api/analytics/guilds/:guildId", { ...guildUsage, days: 90, detailDays: 30 });
 		renderAt(`${DRILL_DOWN}&days=90`);
 
-		expect(await screen.findByText(/kept for 30 days/)).toBeInTheDocument();
+		expect(await screen.findByText(/reach back 30 days/)).toBeInTheDocument();
 	});
 
-	it("does not mention the shorter keep when the window fits inside it", async () => {
+	it("does not mention it when the window fits inside what is kept", async () => {
 		renderAt(DRILL_DOWN);
 		await screen.findByRole("heading", { level: 2, name: aGuild.name });
 
-		expect(screen.queryByText(/kept for 30 days/)).toBeNull();
+		expect(screen.queryByText(/reach back/)).toBeNull();
+	});
+
+	/** Who ran what lives on the collector, behind its own sign-in, so the console points there rather than showing it. */
+	it("links who ran what and this server to Shardlens, in a new tab", async () => {
+		renderAt(DRILL_DOWN);
+
+		const activity = await screen.findByRole("link", { name: /Who ran what, on Shardlens/ });
+		const server = screen.getByRole("link", { name: /This server on Shardlens/ });
+		expect(activity).toHaveAttribute("href", "https://stats.example.com/activity");
+		expect(server).toHaveAttribute("href", `https://stats.example.com/servers/${aGuild.id}`);
+		expect(activity).toHaveAttribute("target", "_blank");
+		expect(activity).toHaveAttribute("rel", "noreferrer");
+	});
+
+	/** A missing key is a setting, not an outage, so only an outage or a refused key offers to try again. */
+	it("says why Shardlens could not be read, and offers a retry only when one could help", async () => {
+		const refuse = (code: string): void => {
+			server.use(
+				http.get("/api/analytics/guilds/:guildId", () =>
+					HttpResponse.json({ error: { code, message: "x" } }, { status: 503 }),
+				),
+			);
+		};
+
+		refuse("analytics_off");
+		const { unmount } = renderAt(DRILL_DOWN);
+		expect(await screen.findByText(/has no read key for it, or no address/)).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+		unmount();
+
+		refuse("analytics_unreachable");
+		renderAt(DRILL_DOWN);
+		expect(await screen.findByText(/Shardlens is not answering/)).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
 	});
 
 	/** A bad id in a pasted link falls back to every server rather than asking the API for a 400. */
@@ -156,18 +146,42 @@ describe("one server's usage", () => {
 
 	it("has no automatically detectable violations", async () => {
 		const { container } = renderAt(DRILL_DOWN);
-		await screen.findByRole("table", { name: /Commands run in Test Server/ });
+		await screen.findByRole("link", { name: /This server on Shardlens/ });
 
 		await expectNoViolations(container);
 	});
 });
 
+describe("the bot-wide usage", () => {
+	it("links who ran what to Shardlens beside the figures", async () => {
+		renderAt("/owner?tab=usage");
+
+		expect(await screen.findByRole("link", { name: /Who ran what, on Shardlens/ })).toHaveAttribute(
+			"href",
+			`${usageReport.collector}/activity`,
+		);
+		expect(screen.queryByRole("link", { name: /This server on Shardlens/ })).toBeNull();
+	});
+});
+
 describe("the owner console's URL readers", () => {
-	it("drops a member or command filter the API would refuse", () => {
+	it("drops a guild id the API would refuse", () => {
 		expect(snowflakeFrom(ALICE)).toBe(ALICE);
 		expect(snowflakeFrom("alice")).toBeNull();
-		expect(commandFrom("bug-report")).toBe("bug-report");
-		expect(commandFrom("$where")).toBeNull();
-		expect(commandFrom(null)).toBeNull();
+	});
+
+	/** The collector's address reaches an href, so anything but an http(s) origin is never a link. */
+	it("links only an http or https origin", () => {
+		expect(collectorPage("https://stats.example.com", "/activity")).toBe("https://stats.example.com/activity");
+		expect(collectorPage("http://localhost:8787")).toBe("http://localhost:8787");
+		for (const bad of [
+			"ftp://stats.example.com",
+			"https://stats.example.com/x",
+			"data:text/html,x",
+			"",
+			"https://a b",
+		]) {
+			expect(collectorPage(bad)).toBeNull();
+		}
 	});
 });

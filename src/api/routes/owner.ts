@@ -12,9 +12,15 @@ import { databaseConnected } from "@database/connection";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
-import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
-import { ownerGuildQuery, type OwnerGuildRow, type OwnerGuildSort, type OwnerStats, type Paged } from "@testify/shared";
+import { guildActivity, type GuildActivity, orUnavailable } from "@lib/bot";
+import {
+	ownerGuildQuery,
+	type OwnerGuildPage,
+	type OwnerGuildRow,
+	type OwnerGuildSort,
+	type OwnerStats,
+} from "@testify/shared";
 
 export const owner = new Hono<ApiBindings>();
 
@@ -47,38 +53,29 @@ owner.get("/guilds", async (context) => {
 	const { page, perPage, sort, filter, q = "" } = parseQuery(context, ownerGuildQuery);
 	const client = context.get("client");
 
-	const [commands, dashboard] = await Promise.all([
-		guildTallies(ANALYTICS.defaultWindowDays),
-		dashboardTallies(ANALYTICS.defaultWindowDays),
-	]);
-	const counts: GuildCounts = {
-		commands: new Map(commands.map((row) => [row.guildId, row.count])),
-		dashboard: new Map(dashboard.map((row) => [row.guildId, row.count])),
-	};
+	const { value: counts, problem } = await orUnavailable(guildActivity(client, ANALYTICS.defaultWindowDays));
 
+	// Without the counts nobody can be told apart as inactive, so the filter lists nobody rather than everybody.
 	const all = sortGuilds(
 		[...client.guilds.cache.values()].filter(
-			(guild) => guildMatches(guild, q) && (filter === "all" || (counts.commands.get(guild.id) ?? 0) === 0),
+			(guild) =>
+				guildMatches(guild, q) && (filter === "all" || (counts !== null && (counts.commands.get(guild.id) ?? 0) === 0)),
 		),
 		sort,
 		counts,
 	);
 	const slice = all.slice((page - 1) * perPage, page * perPage);
 
-	const body: Paged<OwnerGuildRow> = {
+	const body: OwnerGuildPage = {
 		items: await Promise.all(slice.map((guild) => toRow(guild, counts))),
 		total: all.length,
 		page,
 		perPage,
+		analytics: problem,
 	};
 
 	return context.json(body);
 });
-
-interface GuildCounts {
-	commands: Map<string, number>;
-	dashboard: Map<string, number>;
-}
 
 type Listed = Pick<Guild, "id" | "name" | "memberCount" | "joinedTimestamp">;
 
@@ -90,17 +87,18 @@ function guildMatches(guild: Pick<Guild, "id" | "name">, query: string): boolean
 }
 
 /** Ties fall back to the name, so a page never reshuffles between two requests for it. */
-function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts: GuildCounts): T[] {
-	const count = (map: Map<string, number>, guild: T): number => map.get(guild.id) ?? 0;
+function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts: GuildActivity | null): T[] {
+	const count = (map: Map<string, number> | undefined, guild: T): number => map?.get(guild.id) ?? 0;
 	const order: Record<OwnerGuildSort, (a: T, b: T) => number> = {
 		members: (a, b) => b.memberCount - a.memberCount,
 		fewest: (a, b) => a.memberCount - b.memberCount,
 		newest: (a, b) => b.joinedTimestamp - a.joinedTimestamp,
 		oldest: (a, b) => a.joinedTimestamp - b.joinedTimestamp,
-		commands: (a, b) => count(counts.commands, b) - count(counts.commands, a),
+		commands: (a, b) => count(counts?.commands, b) - count(counts?.commands, a),
 		// Among equally quiet servers, the one that has had longest to start using the bot comes first.
-		quietest: (a, b) => count(counts.commands, a) - count(counts.commands, b) || a.joinedTimestamp - b.joinedTimestamp,
-		dashboard: (a, b) => count(counts.dashboard, b) - count(counts.dashboard, a),
+		quietest: (a, b) =>
+			count(counts?.commands, a) - count(counts?.commands, b) || a.joinedTimestamp - b.joinedTimestamp,
+		dashboard: (a, b) => count(counts?.dashboard, b) - count(counts?.dashboard, a),
 		name: () => 0,
 	};
 
@@ -110,7 +108,7 @@ function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts:
 	);
 }
 
-async function toRow(guild: Guild, counts: GuildCounts): Promise<OwnerGuildRow> {
+async function toRow(guild: Guild, counts: GuildActivity | null): Promise<OwnerGuildRow> {
 	const [levels, audit, welcome, counting] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -131,7 +129,7 @@ async function toRow(guild: Guild, counts: GuildCounts): Promise<OwnerGuildRow> 
 		memberCount: guild.memberCount,
 		joinedAt: guild.joinedAt.toISOString(),
 		configured,
-		commands: counts.commands.get(guild.id) ?? 0,
-		dashboardViews: counts.dashboard.get(guild.id) ?? 0,
+		commands: counts === null ? null : (counts.commands.get(guild.id) ?? 0),
+		dashboardViews: counts === null ? null : (counts.dashboard.get(guild.id) ?? 0),
 	};
 }

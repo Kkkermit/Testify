@@ -26,6 +26,8 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 		// Counted messages live in memory until a flush, so the last minute's are written before the database goes.
 		await flushActivity(client.logger);
 		await flushCommandLog(client);
+		// Before the archive closes, so anything it says on the way out is kept, and before the client it listens to goes.
+		await client.shardlens?.shutdown();
 		await logArchive.close(client.logger);
 		await disconnectDatabase();
 		await client.destroy();

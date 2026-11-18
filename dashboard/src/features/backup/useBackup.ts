@@ -69,7 +69,10 @@ export function useApplyBackup(guildId: string): UseMutationResult<StepResult[],
 			for (const step of steps) {
 				const path = `/guilds/${guildId}${step.path}`;
 				try {
-					await (step.method === "PUT" ? api.put<unknown>(path, step.body) : api.patch<unknown>(path, step.body));
+					const via = { via: "backup" } as const;
+					await (step.method === "PUT"
+						? api.put<unknown>(path, step.body, via)
+						: api.patch<unknown>(path, step.body, via));
 					results.push({ action: step.action, ok: true });
 				} catch (error) {
 					results.push({ action: step.action, ok: false, error });

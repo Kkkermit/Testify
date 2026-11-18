@@ -1,5 +1,6 @@
 import { busiestHour } from "@testify/shared";
 import { useTranslation } from "react-i18next";
+import { ChartReadout } from "@/components/primitives";
 import { barHeight, hourLabel } from "@/features/insights/insights.utils";
 import { formatNumber } from "@/lib/intl";
 
@@ -13,16 +14,16 @@ export function HoursChart({ hours }: { hours: number[] }): React.JSX.Element {
 			<p className="text-sm">
 				{busiest === null ? t("insights.noBusiestHour") : t("insights.busiestHour", { hour: hourLabel(busiest) })}
 			</p>
-			<div className="flex h-20 items-end gap-px" aria-hidden="true">
+			<ChartReadout label={t("insights.perHour")} column slide className="flex h-20 items-end gap-px">
 				{hours.map((count, hour) => (
 					<span
 						key={hour}
-						title={`${hourLabel(hour)}: ${formatNumber(count)}`}
+						data-readout={`${hourLabel(hour)}: ${formatNumber(count)}`}
 						className={`min-h-px flex-1 rounded-t-chip ${hour === busiest ? "bg-primary/70" : "bg-primary/25"}`}
 						style={{ height: `${String(barHeight(count, max))}%` }}
 					/>
 				))}
-			</div>
+			</ChartReadout>
 			<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
 				<span>{hourLabel(0)}</span>
 				<span>{hourLabel(12)}</span>

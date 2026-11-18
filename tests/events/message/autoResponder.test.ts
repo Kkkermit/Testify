@@ -82,3 +82,14 @@ describe("the auto-responder message handler", () => {
 		expect(error).not.toHaveBeenCalled();
 	});
 });
+
+describe("counting replies", () => {
+	it("counts a reply that went out, with the server and nothing that was typed", async () => {
+		const track = jest.fn();
+		const message = messageSaying("the rules, please");
+
+		await handler.run(message, createMockClient({ shardlens: { track } } as never));
+
+		expect(track.mock.calls).toEqual([["auto_reply", {}, { guildId: message.guildId }]]);
+	});
+});

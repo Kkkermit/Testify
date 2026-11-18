@@ -3,6 +3,7 @@ import economy from "@commands/economy/create.command";
 import lottery from "@commands/economy/lottery.command";
 import {
 	checkCasinoPlay,
+	checkCommand,
 	checkContextMenu,
 	checkMusicControl,
 	clearCooldowns,
@@ -228,6 +229,78 @@ describe("runChecks", () => {
 		const other = createMockInteraction({ overrides: { user: { id: USER_ID + "9" } as never } });
 
 		expect(await runChecks(other, command, client)).toBeNull();
+	});
+});
+
+describe("checkCommand", () => {
+	/** A refused run is counted by its reason, so each gate has to say which one it is. */
+	it("names why it refused, whichever gate refused", async () => {
+		const cases: [string, () => Promise<unknown>][] = [
+			["owner_only", () => checkCommand(createMockInteraction(), { ...plain, ownerOnly: true }, createMockClient())],
+			["paused", () => checkCommand(createMockInteraction(), plain, createMockClient({ paused: true }))],
+			[
+				"blacklisted",
+				() => {
+					findBlacklistEntry.mockResolvedValueOnce({ reason: "Spamming", createdAt: new Date() });
+					return checkCommand(createMockInteraction(), plain, createMockClient());
+				},
+			],
+			[
+				"off_everywhere",
+				() => {
+					offGlobally.mockResolvedValueOnce(["ping"]);
+					return checkCommand(createMockInteraction(), plain, createMockClient());
+				},
+			],
+			[
+				"off_here",
+				() => {
+					offInGuild.mockResolvedValueOnce(["ping"]);
+					return checkCommand(createMockInteraction(), plain, createMockClient());
+				},
+			],
+			[
+				"music",
+				() => {
+					musicSettings.mockResolvedValueOnce({ enabled: false, djRoleIds: [] });
+					const skip = createMockInteraction({ subcommand: "skip" });
+					return checkCommand(skip, music, createMockClient());
+				},
+			],
+			[
+				"guild_only",
+				() =>
+					checkCommand(createMockInteraction({ inGuild: false }), { ...plain, guildOnly: true }, createMockClient()),
+			],
+			["nsfw_only", () => checkCommand(createMockInteraction(), { ...plain, nsfw: true }, createMockClient())],
+			[
+				"you_lack",
+				() =>
+					checkCommand(
+						createMockInteraction({ overrides: { member: { permissions: "0" } as never } }),
+						{ ...plain, permissions: [PermissionFlagsBits.BanMembers] },
+						createMockClient(),
+					),
+			],
+			[
+				"cooldown",
+				async () => {
+					const command = { ...plain, cooldown: 5_000 };
+					const client = createMockClient();
+					await checkCommand(createMockInteraction(), command, client);
+					return checkCommand(createMockInteraction(), command, client);
+				},
+			],
+		];
+
+		const wrong: string[] = [];
+		for (const [reason, run] of cases) {
+			clearCooldowns();
+			const refusal = (await run()) as { reason: string; failure: unknown } | null;
+			if (refusal?.reason !== reason || refusal.failure === null) wrong.push(`${reason}: ${String(refusal?.reason)}`);
+		}
+		expect(wrong).toEqual([]);
+		expect(await checkCommand(createMockInteraction(), plain, createMockClient())).toBeNull();
 	});
 });
 

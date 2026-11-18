@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type AnalyticsProblem } from "./analytics";
 import { plainLine } from "./text";
 
 export type GatewayState = "online" | "paused" | "connecting";
@@ -70,8 +71,9 @@ export interface OwnerGuildDetail {
 	highestRole: string | null;
 	missingPermissions: string[];
 	configured: string[];
-	/** Commands run there in the last 30 days. */
-	usage: number;
-	/** Dashboard screens its managers opened in the last 30 days. */
-	dashboardViews: number;
+	/** Commands run there in the last 30 days; null while analytics cannot be read. */
+	usage: number | null;
+	/** Dashboard screens its managers opened in the last 30 days; null while analytics cannot be read. */
+	dashboardViews: number | null;
+	analytics: AnalyticsProblem | null;
 }
