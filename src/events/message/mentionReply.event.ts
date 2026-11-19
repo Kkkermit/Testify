@@ -1,9 +1,9 @@
-import { DEFAULT_PREFIX } from "@config/constants";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
 import { getPrefix } from "@database/repositories/prefixRepository";
-import { embed, linkButton, row } from "@lib/discord";
+import { projectLinkButtons } from "@lib/bot";
+import { embed, row } from "@lib/discord";
 
 /** Replies when someone mentions the bot on its own, and nothing else. */
 export default defineMessageHandler({
@@ -14,7 +14,7 @@ export default defineMessageHandler({
 		if (botId === undefined) return;
 		if (!new RegExp(`^<@!?${botId}>$`).test(message.content.trim())) return;
 
-		const prefix = message.guild === null ? DEFAULT_PREFIX : await getPrefix(message.guild.id);
+		const prefix = message.guild === null ? instanceConfig().defaultPrefix : await getPrefix(message.guild.id);
 
 		await message.reply({
 			embeds: [
@@ -25,7 +25,7 @@ export default defineMessageHandler({
 					thumbnail: client.user?.displayAvatarURL(),
 				}),
 			],
-			components: [row(linkButton("Source code", theme.repository), linkButton("Support", theme.supportServer))],
+			components: [row(...projectLinkButtons("Support"))],
 		});
 
 		return true;

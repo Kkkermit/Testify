@@ -1,0 +1,9 @@
+{
+	"$schema": "./testify.config.schema.json",
+	"repository": "https://github.com/Kkkermit/Testify",
+	"supportServer": "https://discord.gg/xcMVwAVjSD",
+	"developer": "Kkermit",
+	"operator": null,
+	"defaultPrefix": "t?",
+	"greetInviter": true
+}

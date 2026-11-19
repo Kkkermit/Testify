@@ -1,4 +1,4 @@
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { runChecks } from "@core/checks";
 import { runCommand } from "@core/errors";
@@ -20,7 +20,9 @@ export default defineMessageHandler({
 
 		// A direct message has no server to have configured anything.
 		const config =
-			message.guild === null ? { prefix: DEFAULT_PREFIX, isEnabled: true } : await getPrefixConfig(message.guild.id);
+			message.guild === null
+				? { prefix: instanceConfig().defaultPrefix, isEnabled: true }
+				: await getPrefixConfig(message.guild.id);
 
 		if (!config.isEnabled) return;
 

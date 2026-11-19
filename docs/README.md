@@ -40,6 +40,7 @@
 | --------------------------------------------- | -------------------------------------------------------------------------------- |
 | 📋 [`commands.md`](commands.md)               | Every command, subcommand and alias. **Generated** — run `npm run docs:commands` |
 | 🤝 [`contributing.md`](contributing.md)       | Branches, commit format, house style and what CI will check                      |
+| 🎨 [`customising.md`](customising.md)         | Your links, who runs it and the prefix in `testify.config.json`, and forks       |
 | 🐳 [`hosting.md`](hosting.md)                 | Running the bot and dashboard in Docker, and what is deliberately not there      |
 | 🔒 [`security.md`](security.md)               | Reporting a vulnerability, the data model, and every dependency exception        |
 | 🌱 [`code-of-conduct.md`](code-of-conduct.md) | The standard everybody here is held to, and how to report a problem              |

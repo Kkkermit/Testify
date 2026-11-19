@@ -1,4 +1,4 @@
-import { type BotFeature, commandIsOff, DEFAULT_PREFIX } from "@testify/shared";
+import { type BotFeature, commandIsOff } from "@testify/shared";
 import { Hash, PlusCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,9 +18,11 @@ import { cn } from "@/lib/cn";
 export function Composer({
 	palette,
 	featuresOff,
+	prefix,
 }: {
 	palette: readonly PaletteCommand[];
 	featuresOff: ReadonlySet<BotFeature>;
+	prefix: string;
 }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const reduced = usePrefersReducedMotion();
@@ -80,7 +82,7 @@ export function Composer({
 				<span className="sr-only">{t("landing.composer.example", { command: slashLine(scene) })}</span>
 				{t("landing.composer.twin")}
 				<code className="bg-muted text-foreground rounded-chip px-1.5 py-0.5 font-mono text-[0.8125rem]">
-					{prefixLine(scene, DEFAULT_PREFIX)}
+					{prefixLine(scene, prefix)}
 				</code>
 			</figcaption>
 		</figure>

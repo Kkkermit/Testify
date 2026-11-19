@@ -1,4 +1,5 @@
-import { CACHE, DEFAULT_PREFIX } from "@config/constants";
+import { CACHE } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { GuildPrefix, type PrefixSettings } from "@database/models/prefix.schema";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
@@ -24,7 +25,7 @@ export async function getPrefixConfig(guildId: string): Promise<PrefixConfig> {
 	const record = await GuildPrefix.findOne({ guildId }).lean<PrefixSettings>().exec();
 
 	return remember(guildId, {
-		prefix: record?.prefix ?? DEFAULT_PREFIX,
+		prefix: record?.prefix ?? instanceConfig().defaultPrefix,
 		// A server that has never touched the setting gets prefix commands on.
 		isEnabled: record?.isEnabled ?? true,
 	});
@@ -34,10 +35,10 @@ export async function getPrefix(guildId: string): Promise<string> {
 	return (await getPrefixConfig(guildId)).prefix;
 }
 
+/** The default is stored as nothing, so a server that is on it moves when the host changes it. */
 export async function setPrefix(guildId: string, prefix: string): Promise<string> {
-	const record = await GuildPrefix.findOneAndUpdate({ guildId }, { $set: { prefix } }, UPSERT)
-		.lean<PrefixSettings>()
-		.exec();
+	const update = prefix === instanceConfig().defaultPrefix ? { $unset: { prefix: 1 } } : { $set: { prefix } };
+	const record = await GuildPrefix.findOneAndUpdate({ guildId }, update, UPSERT).lean<PrefixSettings>().exec();
 
 	remember(guildId, { prefix, isEnabled: record?.isEnabled ?? true });
 	return prefix;
@@ -48,7 +49,7 @@ export async function setPrefixEnabled(guildId: string, isEnabled: boolean): Pro
 		.lean<PrefixSettings>()
 		.exec();
 
-	return remember(guildId, { prefix: record?.prefix ?? DEFAULT_PREFIX, isEnabled });
+	return remember(guildId, { prefix: record?.prefix ?? instanceConfig().defaultPrefix, isEnabled });
 }
 
 /** Used by the tests, and after a prefix is changed elsewhere. */

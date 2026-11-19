@@ -1,10 +1,11 @@
 import { arch, type as osType, cpus, freemem, platform, totalmem } from "node:os";
 import { version as djsVersion } from "discord.js";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { defineCommand, type CommandInput } from "@core/command";
-import { embed, linkButton, reply, row } from "@lib/discord";
+import { projectLinkButtons } from "@lib/bot";
+import { embed, reply, row } from "@lib/discord";
 import { discordTime, formatBytes, formatUptime } from "@lib/format";
 import { reachFields } from "@lib/info";
 
@@ -60,11 +61,11 @@ async function showInfo(interaction: CommandInput, client: TestifyClient): Promi
 				category: "info",
 				title: `About ${botName()}`,
 				description: "An open source, multipurpose Discord bot written in TypeScript.",
-				fields: [...reachFields(client), { name: "Developer", value: theme.author, inline: true }],
+				fields: [...reachFields(client), { name: "Developer", value: instanceConfig().developer, inline: true }],
 				thumbnail: client.user?.displayAvatarURL(),
 			}),
 		],
-		components: [row(linkButton("Source code", theme.repository), linkButton("Support server", theme.supportServer))],
+		components: [row(...projectLinkButtons())],
 	});
 }
 

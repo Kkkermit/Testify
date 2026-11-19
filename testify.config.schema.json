@@ -1,0 +1,44 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "testify.config.json",
+	"description": "What makes this copy of the bot your own. Every setting is optional; docs/customising.md lists them.",
+	"type": "object",
+	"properties": {
+		"$schema": { "type": "string" },
+		"repository": {
+			"description": "Your copy's GitHub repository. The website's source browser shows it, and the bot's Source code buttons open it.",
+			"type": "string",
+			"maxLength": 200,
+			"pattern": "^https:\\/\\/[^\\s<>\"]+$"
+		},
+		"supportServer": {
+			"anyOf": [{ "type": "null" }, { "type": "string", "maxLength": 200, "pattern": "^https:\\/\\/[^\\s<>\"]+$" }],
+			"description": "Where the bot's Support buttons lead, such as a Discord invite. null hides them."
+		},
+		"developer": { "description": "Who /bot info names as the developer.", "type": "string" },
+		"operator": {
+			"anyOf": [
+				{
+					"type": "object",
+					"properties": {
+						"name": { "description": "A person or an organisation.", "type": "string" },
+						"contact": { "type": "string", "maxLength": 200, "description": "An email address or an https:// page." }
+					},
+					"required": ["name", "contact"],
+					"additionalProperties": false
+				},
+				{ "type": "null" }
+			],
+			"description": "Who runs this copy and how to reach them, shown on the privacy notice and the terms."
+		},
+		"defaultPrefix": {
+			"description": "The prefix a server starts with until it picks its own. Up to 8 characters, with no spaces.",
+			"type": "string"
+		},
+		"greetInviter": {
+			"type": "boolean",
+			"description": "Sends whoever adds the bot to a server a direct message on how to get started."
+		}
+	},
+	"additionalProperties": false
+}

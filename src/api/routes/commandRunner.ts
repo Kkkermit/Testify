@@ -5,7 +5,7 @@ import { type ApiBindings } from "@api/context";
 import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -27,7 +27,10 @@ commandRunner.get("/", (context) => {
 	const client = context.get("client");
 	const runnable = [...client.commands.values()].filter((command) => runnableInDashboard(command.name));
 
-	const body: CommandCatalogue = buildCatalogue(runnable, { prefix: DEFAULT_PREFIX, includeOwnerOnly: true });
+	const body: CommandCatalogue = buildCatalogue(runnable, {
+		prefix: instanceConfig().defaultPrefix,
+		includeOwnerOnly: true,
+	});
 	return context.json(body);
 });
 

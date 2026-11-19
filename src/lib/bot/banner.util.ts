@@ -1,5 +1,5 @@
 import { type Client } from "discord.js";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { colourEnabled } from "@core/terminal";
@@ -135,7 +135,7 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 		fact(ICONS.messages, "Messages", `${formatNumber(facts.loaded.messageHandlers)} loaded`),
 		"",
 		...(facts.watching ? [`  ${paint(ansi.yellow, RELOAD_GLYPH)} ${paint(ansi.bold, "Hot reload is on")}`, ""] : []),
-		paint(ansi.grey, `  ${theme.repository}`),
+		paint(ansi.grey, `  ${instanceConfig().repository}`),
 		"",
 	];
 }

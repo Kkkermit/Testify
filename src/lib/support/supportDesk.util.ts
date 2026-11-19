@@ -1,4 +1,4 @@
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
@@ -256,7 +256,7 @@ function buildEntries(client: TestifyClient, secrets: readonly string[]): Suppor
 }
 
 export function supportContext(prefix: string): SupportContext {
-	return { bot: botName(), prefix, repository: theme.repository };
+	return { bot: botName(), prefix, repository: instanceConfig().repository };
 }
 
 let desk: SupportDesk | null = null;
