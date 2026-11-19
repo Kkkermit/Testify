@@ -1,5 +1,4 @@
 import { MessageFlags } from "discord.js";
-import { DEFAULT_PREFIX } from "@config/constants";
 import { parseCustomId } from "@core/button";
 import { text } from "@lib/discord/containers.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
@@ -17,6 +16,7 @@ import {
 } from "@lib/settings/settings.constants";
 import { channelValue, roleValue, settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
 import { voiceStatsPanel } from "@lib/settings/voiceStatsPanel.util";
+import { DEFAULT_PREFIX } from "@testify/shared";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

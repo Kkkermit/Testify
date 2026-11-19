@@ -2075,6 +2075,9 @@
 		"termsTitle": "Termini d’uso",
 		"termsSummary": "Le regole per usare {{bot}} e questa dashboard, e cosa succede quando vengono violate. Leggile prima di usare l’uno o l’altra.",
 		"whoRuns": "Chi lo gestisce",
+		"operatorTitle": "Chi gestisce questa copia",
+		"operatorName": "Gestita da",
+		"operatorContact": "Contatto",
 		"whoRunsP1": "{{bot}} è self-hosted. Chi ha messo in piedi questa istanza — l’operatore — decide cosa fa, cosa conserva e chi può raggiungerla. La responsabilità è sua, non degli autori del progetto.",
 		"whoRunsP2": "Il software è fornito così com’è, senza garanzie di alcun tipo. Nessuno promette che sarà disponibile, corretto o privo di difetti.",
 		"whoRunsP3": "Il codice è pubblicato con licenza MIT. Chiunque può usarlo, modificarlo, condividerlo e venderlo, purché in ogni copia restino l’avviso di copyright che nomina l’autore originale e la licenza stessa.",
@@ -2274,7 +2277,8 @@
 		"retentionL20": "Tracciamento degli inviti: 365 giorni dopo ogni ingresso, poi eliminato automaticamente, e tutto quando il bot viene rimosso dal server.",
 		"retentionL21": "Accesso al pannello: finché un amministratore non lo toglie, non lasci il server, o il bot non viene rimosso dal server.",
 		"retentionL22": "Righe di log: gli ultimi 6 avvii del bot, al massimo 2.000 righe ciascuno. Il prossimo avvio elimina il più vecchio, e l’operatore può eliminarle prima.",
-		"messagesP5": "Segnalare un messaggio è l’ultima. Quando fai clic destro su un messaggio e scegli Report message, {{bot}} lo pubblica nel canale della posta allo staff di quel server: il testo del messaggio, chi l’ha scritto, chi l’ha segnalato e ciò che hai detto. Quella pubblicazione resta su Discord, non nel database del bot. Il bot ricorda per un’ora, solo in memoria, quali messaggi hai segnalato, perché lo stesso non venga segnalato due volte; un riavvio lo dimentica."
+		"messagesP5": "Segnalare un messaggio è l’ultima. Quando fai clic destro su un messaggio e scegli Report message, {{bot}} lo pubblica nel canale della posta allo staff di quel server: il testo del messaggio, chi l’ha scritto, chi l’ha segnalato e ciò che hai detto. Quella pubblicazione resta su Discord, non nel database del bot. Il bot ricorda per un’ora, solo in memoria, quali messaggi hai segnalato, perché lo stesso non venga segnalato due volte; un riavvio lo dimentica.",
+		"messagesP6": "Aggiungere {{bot}} a un server invia anche un messaggio diretto: una nota per iniziare, a chi l’ha aggiunto. Per saperlo, il bot legge la voce del proprio arrivo nel registro di controllo del server o, in mancanza, la propria voce tra le integrazioni del server, e scrive al proprietario del server se nessuna delle due lo indica. Non ne conserva nulla. Non viene inviato nulla a chi ha i messaggi diretti chiusi, e l’operatore può disattivare il messaggio."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",
@@ -2710,6 +2714,8 @@
 			"featuresSummary": "Esegui il bot senza musica, senza casinò o senza qualsiasi altra cosa che non vuoi.",
 			"docker": "Docker",
 			"dockerSummary": "Il bot e il suo database con Docker Compose, e dove altro può girare.",
+			"customising": "Rendilo tuo",
+			"customisingSummary": "I tuoi link, chi lo gestisce e il prefisso predefinito, in un file accanto a .env, e come tenere aggiornato un fork.",
 			"dashboard": "Il sito e la dashboard",
 			"dashboardSummary": "Questo sito, la dashboard dietro l’accesso, chi vede cosa e metterli su internet.",
 			"scripts": "Script",

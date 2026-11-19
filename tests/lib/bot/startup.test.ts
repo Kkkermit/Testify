@@ -8,6 +8,7 @@ import {
 	FATAL_CLOSE_CODES,
 	nodeTooOld,
 	startupFailureLines,
+	StartupStopped,
 } from "@lib/bot/startup.util";
 
 const plain = painter(false);
@@ -126,6 +127,33 @@ describe("BootReport", () => {
 
 		expect(lines[0]).toMatch(/✔ Modules\s+3 loaded/);
 		expect(lines[1]).toMatch(/✖ Database/);
+	});
+
+	/** A reload mid-start printed "connected", then the failures its own shutdown caused, as if both were true. */
+	it("says nothing once the bot is shutting down, and ends start-up rather than report what that undid", async () => {
+		const lines: string[] = [];
+		let stopping = false;
+		const report = new BootReport((line) => lines.push(line), plain).stopWhen(() => stopping);
+
+		const connecting = report.step(
+			"Database",
+			() => {
+				stopping = true;
+				return "ok";
+			},
+			() => "connected",
+		);
+		await expect(connecting).rejects.toBeInstanceOf(StartupStopped);
+		await expect(
+			report.step(
+				"Logs",
+				() => Promise.reject(new Error("Client must be connected before running operations")),
+				() => "",
+			),
+		).rejects.toBeInstanceOf(StartupStopped);
+		report.note("working", "Discord", "logging in…");
+
+		expect(lines).toEqual([]);
 	});
 });
 

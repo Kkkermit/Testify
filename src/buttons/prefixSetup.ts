@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
@@ -81,8 +81,11 @@ export default recordsSettings(
 				}
 
 				case "reset": {
-					await setPrefix(guildId, DEFAULT_PREFIX);
-					await show({ ...state, prefix: DEFAULT_PREFIX }, `Back to \`${DEFAULT_PREFIX}\`.`);
+					await setPrefix(guildId, instanceConfig().defaultPrefix);
+					await show(
+						{ ...state, prefix: instanceConfig().defaultPrefix },
+						`Back to \`${instanceConfig().defaultPrefix}\`.`,
+					);
 					return;
 				}
 

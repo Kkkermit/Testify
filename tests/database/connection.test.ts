@@ -1,6 +1,6 @@
 import { getServers } from "node:dns";
 import mongoose from "mongoose";
-import { explainConnectionFailure, pingDatabase } from "@database/connection";
+import { connectDatabase, disconnectDatabase, explainConnectionFailure, pingDatabase } from "@database/connection";
 
 const SECRET = "sup3rs3cr3tw0rd";
 const URI = `mongodb+srv://user:${SECRET}@cluster0.example.mongodb.net/testify`;
@@ -108,5 +108,33 @@ describe("pingDatabase", () => {
 		connectedWith(() => Promise.reject(new Error("not primary")));
 
 		await expect(pingDatabase()).resolves.toBeNull();
+	});
+});
+
+describe("what the connection reports about itself", () => {
+	const events = ["disconnected", "reconnected", "error"] as const;
+	const before = Object.fromEntries(events.map((event) => [event, mongoose.connection.listeners(event)]));
+
+	afterEach(() => {
+		for (const event of events) {
+			for (const listener of mongoose.connection.listeners(event)) {
+				if (!before[event]?.includes(listener)) mongoose.connection.off(event, listener as () => void);
+			}
+		}
+		jest.restoreAllMocks();
+	});
+
+	/** Shutting down closed the connection, and the log said it had been lost and Mongoose was reconnecting. */
+	it("warns about a connection that is lost, and not about the one shutting down closes", async () => {
+		jest.spyOn(mongoose, "connect").mockResolvedValue(mongoose);
+		const logger = { warn: jest.fn(), info: jest.fn(), error: jest.fn(), debug: jest.fn() };
+		await connectDatabase({ uri: URI, logger: logger as never });
+
+		mongoose.connection.emit("disconnected");
+		await disconnectDatabase();
+		mongoose.connection.emit("disconnected");
+
+		expect(logger.warn).toHaveBeenCalledTimes(1);
+		expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/Lost the connection/));
 	});
 });

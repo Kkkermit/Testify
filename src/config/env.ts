@@ -79,6 +79,9 @@ const fields = z.object({
 	// Support assistant. Without a key it answers by search alone and never contacts anybody.
 	SUPPORT_AI_API_KEY: z.string().min(1).optional(),
 	SUPPORT_AI_MODEL: z.string().min(1).default("claude-opus-5"),
+
+	// Where `testify.config.json` is, when it is not beside `.env`. Only docker-compose.yml sets it.
+	TESTIFY_CONFIG: z.string().min(1).optional(),
 });
 
 /** Every variable name, so the support assistant can refuse to repeat one. */

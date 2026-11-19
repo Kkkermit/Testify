@@ -1,6 +1,6 @@
 {
 	"name": "testify",
-	"version": "2.4.5",
+	"version": "2.4.6",
 	"description": "Self-hosted, all-in-one Discord bot in TypeScript: every command works as slash and prefix, with a web dashboard",
 	"main": "dist/index.js",
 	"license": "MIT",
@@ -36,8 +36,9 @@
 		"dashboard:dev": "npm run dev --workspace dashboard",
 		"db:wipe": "tsx scripts/wipeDatabase.ts",
 		"db:wipe:dev": "tsx scripts/wipeDatabase.ts --dev",
-		"dev": "npm run build:shared && cross-env NODE_ENV=development tsx watch --clear-screen=false src/index.ts",
+		"dev": "cross-env NODE_ENV=development tsx watch --clear-screen=false --conditions=development src/index.ts",
 		"dev:all": "tsx scripts/devAll.ts",
+		"config:schema": "tsx scripts/generateConfigSchema.ts",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
 		"i18n:commands": "tsx scripts/commandStrings.ts",
 		"docs:images": "tsx scripts/renderDocImages.ts",
@@ -73,15 +74,14 @@
 		"brace-expansion": "^5.0.12",
 		"js-yaml": "^4.3.2",
 		"fast-uri": "^3.1.9",
-		"discord-html-transcripts": {
-			"undici": "^6.29.1"
-		},
+		"undici@^5": "^6.29.1",
 		"discord-giveaways": {
 			"deepmerge-ts": "^8.0.1"
 		},
 		"@istanbuljs/load-nyc-config": {
 			"js-yaml": "^3.15.1"
-		}
+		},
+		"jsdom": "^29.1.1"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "0.128.0",
@@ -117,7 +117,7 @@
 		"@types/jest": "30.0.0",
 		"@types/node": "24.19.2",
 		"@types/prompts": "2.4.9",
-		"better-npm-audit": "3.11.0",
+		"better-npm-audit": "4.2.1",
 		"cross-env": "10.1.0",
 		"eslint": "10.14.0",
 		"eslint-config-prettier": "10.1.8",

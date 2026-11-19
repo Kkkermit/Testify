@@ -2009,6 +2009,9 @@
 		"termsTitle": "Terms of use",
 		"termsSummary": "The rules for using {{bot}} and this dashboard, and what happens when they are broken. Please read them before you use either.",
 		"whoRuns": "Who runs this",
+		"operatorTitle": "Who runs this copy",
+		"operatorName": "Run by",
+		"operatorContact": "Contact",
 		"whoRunsP1": "{{bot}} is self-hosted. Whoever deployed this instance — the operator — decides what it does, what it stores and who can reach it. They are responsible for it, not the project’s authors.",
 		"whoRunsP2": "The software is provided as-is, without warranty of any kind. Nobody promises it will be available, correct, or free of defects.",
 		"whoRunsP3": "The code is published under the MIT licence. Anyone may use, change, share and sell it, as long as the copyright notice naming its original author and the licence itself are kept in every copy.",
@@ -2208,7 +2211,8 @@
 		"retentionL20": "Invite tracking: 365 days after each join, then deleted automatically, and all of it when the bot is removed from the server.",
 		"retentionL21": "Dashboard access: until an admin takes it away, you leave the server, or the bot is removed from it.",
 		"retentionL22": "Log lines: the bot’s last 6 starts, at most 2,000 lines each. The next start deletes the oldest, and the operator can delete them sooner.",
-		"messagesP5": "Reporting a message is the last. When you right-click a message and choose Report message, {{bot}} posts it in that server’s mod mail channel for its staff: the message’s text, who wrote it, who reported it and what you said about it. That post lives in Discord, not in the bot’s database. The bot remembers which messages you reported for an hour, in memory only, so the same one cannot be reported twice; a restart forgets it."
+		"messagesP5": "Reporting a message is the last. When you right-click a message and choose Report message, {{bot}} posts it in that server’s mod mail channel for its staff: the message’s text, who wrote it, who reported it and what you said about it. That post lives in Discord, not in the bot’s database. The bot remembers which messages you reported for an hour, in memory only, so the same one cannot be reported twice; a restart forgets it.",
+		"messagesP6": "Adding {{bot}} to a server sends one direct message too: a note on getting started, to whoever added it. To find them, the bot reads the entry for its own arrival in that server’s audit log, or failing that its own entry in the server’s integrations, and writes to the server’s owner if neither says. It keeps none of this. Nothing is sent to somebody whose direct messages are closed, and the operator can turn the message off."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -2636,6 +2640,8 @@
 			"featuresSummary": "Run the bot without music, the casino or anything else you do not want.",
 			"docker": "Docker",
 			"dockerSummary": "The bot and its database with Docker Compose, and where else it can run.",
+			"customising": "Make it your own",
+			"customisingSummary": "Your links, who runs it and the default prefix, in one file beside .env, and how to keep a fork up to date.",
 			"dashboard": "The website and dashboard",
 			"dashboardSummary": "This site, the dashboard behind its sign-in, who can see what, and putting them on the internet.",
 			"scripts": "Scripts",

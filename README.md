@@ -546,6 +546,25 @@ Each feature is declared once, in [`shared/src/botFeatures.ts`](shared/src/botFe
 button, event, job, route, screen and help article it owns. The test suite checks that declaration against the bot, so
 a new part that belongs to a feature has to be listed there.
 
+## 🎨 Making it your own
+
+The bot takes its name and picture from your Discord application, so renaming it is done in the Developer Portal.
+Your links, who runs your copy and the default prefix go in `testify.config.json`, beside `.env` — copy
+`testify.config.example.json`, or answer "Make it your own?" at the end of `npm run setup`:
+
+```json
+{
+	"$schema": "./testify.config.schema.json",
+	"repository": "https://github.com/you/your-fork",
+	"supportServer": null,
+	"operator": { "name": "Your name", "contact": "privacy@example.com" },
+	"defaultPrefix": "!"
+}
+```
+
+Every key is optional, and nothing in it is secret. [Make it your own](docs/customising.md) covers each setting,
+what takes code, the message the bot sends whoever adds it to a server, and how to keep a fork up to date.
+
 ## 🛠️ Adding your own command
 
 Create one file. The loader finds it, `/help` lists it, and it works as a slash **and** a prefix command
@@ -862,16 +881,17 @@ The colours and links live in `src/config/theme.ts`.
 
 ## 🩺 Troubleshooting
 
-| Symptom                                          | Fix                                                                                                  |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                    |
-| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string |
-| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                           |
-| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how   |
-| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                               |
-| `EBADENGINE` during install                      | Your Node is older than 24.11. Run `nvm use`                                                         |
-| Cards render with no text on them                | You are in a container without fonts — use this repository's `Dockerfile`                            |
-| `Sign in to confirm you're not a bot`            | YouTube is refusing the host. Update yt-dlp, or set `/play` to SoundCloud only                       |
+| Symptom                                          | Fix                                                                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                       |
+| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string    |
+| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                              |
+| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how      |
+| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                                  |
+| `EBADENGINE` during install                      | Your Node is older than 24.11. Run `nvm use`                                                            |
+| Cards render with no text on them                | You are in a container without fonts — use this repository's `Dockerfile`                               |
+| `Sign in to confirm you're not a bot`            | YouTube is refusing the host. Update yt-dlp, or set `/play` to SoundCloud only                          |
+| `ECANCELED`, or the dev bot restarts on its own  | The project is in a synced folder, such as an iCloud Desktop. Move it, or rename it to end in `.nosync` |
 
 Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 [open an issue](https://github.com/Kkkermit/Testify/issues/new/choose).

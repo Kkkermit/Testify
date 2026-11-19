@@ -69,6 +69,9 @@ RUN npm ci --omit=dev --ignore-scripts --workspace @testify/shared --include-wor
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/shared/dist ./shared/dist
 COPY --from=build /app/dashboard/dist ./dashboard/dist
+# A copy's testify.config.json, when its repository carries one, since a host building this file (Railway, say) has
+# nowhere else to put it. The bracket makes it optional; the legacy builder refuses a pattern that is the only source.
+COPY package.json testify.config.jso[n] ./
 
 # `dist/api` resolves the SPA at ../../dashboard/dist, so the two must keep this layout.
 USER node

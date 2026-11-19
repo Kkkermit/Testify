@@ -1,7 +1,7 @@
 import { gitHubAdvice } from "@api/routes/site";
 import { createApi } from "@api/server";
 import { type Env } from "@config/env";
-import { theme } from "@config/theme";
+import { INSTANCE_DEFAULTS, useInstance } from "@config/instance";
 import { ServiceError } from "@core/errors";
 import { fetchJson } from "@lib/infra/http.util";
 import { type ApiErrorBody, type SiteInfo } from "@testify/shared";
@@ -36,7 +36,7 @@ function github(repo: object | Error): void {
 }
 
 const repo = (isPrivate = false) => ({
-	html_url: theme.repository,
+	html_url: INSTANCE_DEFAULTS.repository,
 	full_name: "owner/bot",
 	description: null,
 	private: isPrivate,
@@ -61,8 +61,18 @@ describe("GET /api/site", () => {
 		const off = (await (await api(false).request("/api/site")).json()) as SiteInfo;
 		const on = (await (await api(true).request("/api/site")).json()) as SiteInfo;
 
-		expect(off).toMatchObject({ dashboard: false, repository: theme.repository });
+		expect(off).toMatchObject({ dashboard: false, repository: INSTANCE_DEFAULTS.repository, operator: null });
 		expect(on.dashboard).toBe(true);
+	});
+
+	/** The privacy notice tells people to ask the operator, so it has to be able to say who that is. */
+	it("names who runs this copy and its default prefix, from the config file", async () => {
+		const operator = { name: "Sam's Servers", contact: "privacy@example.com" };
+		useInstance({ ...INSTANCE_DEFAULTS, operator, defaultPrefix: "!" });
+
+		const info = (await (await api(false).request("/api/site")).json()) as SiteInfo;
+
+		expect(info).toMatchObject({ operator, defaultPrefix: "!" });
 	});
 });
 

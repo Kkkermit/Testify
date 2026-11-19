@@ -1,15 +1,6 @@
 import { PermissionsBitField } from "discord.js";
-import {
-	AFK,
-	DAY_MS,
-	DEFAULT_PREFIX,
-	ECONOMY,
-	ECONOMY_COOLDOWNS,
-	HOUR_MS,
-	LEVELLING,
-	MINUTE_MS,
-	TICKET,
-} from "@config/constants";
+import { AFK, DAY_MS, ECONOMY, ECONOMY_COOLDOWNS, HOUR_MS, LEVELLING, MINUTE_MS, TICKET } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { ANSWER_EVERY_MS } from "@lib/autoResponders/autoResponders.util";
 import { CASINO_TIMING } from "@lib/casino/casino.constants";
 import { COINFLIP_RETURN, DICE_RETURNS } from "@lib/casino/chance.util";
@@ -43,7 +34,10 @@ import {
 
 /** Every number an article quotes, read from the code, so an article cannot state a limit the bot no longer has. */
 export const FACTS: Readonly<Record<string, string>> = {
-	"prefix.default": DEFAULT_PREFIX,
+	// Read when an article is filled, because the host's config is loaded after this module is.
+	get "prefix.default"(): string {
+		return instanceConfig().defaultPrefix;
+	},
 	"prefix.maxLength": formatNumber(SETTINGS_LIMITS.maxPrefix),
 	"invite.permissions": new PermissionsBitField(BigInt(INVITE_PERMISSIONS))
 		.toArray()

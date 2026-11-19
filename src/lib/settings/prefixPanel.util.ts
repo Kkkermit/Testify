@@ -1,4 +1,4 @@
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { PREFIX_LIMITS, PREFIX_PANEL_ID } from "@lib/settings/settings.constants";
 import { type PrefixPanelState } from "@lib/settings/settings.types";
@@ -35,7 +35,11 @@ export function prefixPanel(state: PrefixPanelState, ownerId: string): Container
 		],
 		actions: [
 			switchAction(state.isEnabled),
-			{ action: "reset", label: `Reset to ${DEFAULT_PREFIX}`, disabled: state.prefix === DEFAULT_PREFIX },
+			{
+				action: "reset",
+				label: `Reset to ${instanceConfig().defaultPrefix}`,
+				disabled: state.prefix === instanceConfig().defaultPrefix,
+			},
 		],
 		footer: "Mentioning the bot works as a prefix too, whatever this is set to.",
 	});

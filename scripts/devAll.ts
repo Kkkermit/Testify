@@ -14,6 +14,9 @@ const paint = painter();
 
 const GRACE_MS = 5_000;
 
+/** Shared runs from its source, through its `development` export, so it can never be an old build. */
+export const BOT_WATCH = ["watch", "--clear-screen=false", "--conditions=development", "src/index.ts"];
+
 function label(name: string): string {
 	const colour = COLOURS[name];
 	return colour === undefined || !colourEnabled() ? `[${name}] ` : `${paint.bold(paint[colour](`[${name}]`))} `;
@@ -37,9 +40,34 @@ function child(script: string, args: string[]): ChildProcess {
 	});
 }
 
+/** macOS cancels a read of a file that iCloud Drive, or another sync client, has not finished downloading. */
+export function syncedFolderRead(chunk: string): boolean {
+	return chunk.includes("ECANCELED: operation canceled");
+}
+
+let toldAboutSync = false;
+
 function pipe(name: string, process_: ChildProcess): void {
 	process_.stdout?.on("data", (chunk: Buffer) => process.stdout.write(prefixLines(name, chunk.toString())));
-	process_.stderr?.on("data", (chunk: Buffer) => process.stderr.write(prefixLines(name, chunk.toString())));
+	process_.stderr?.on("data", (chunk: Buffer) => {
+		const text = chunk.toString();
+		process.stderr.write(prefixLines(name, text));
+		if (toldAboutSync || !syncedFolderRead(text)) return;
+		toldAboutSync = true;
+		print(
+			[
+				"macOS cancelled reading a file, which is what a folder kept in sync",
+				"by iCloud Drive, Dropbox or Google Drive does while it downloads one.",
+				"The same syncing touches files, so the bot keeps restarting too.",
+				"With Desktop & Documents on, iCloud syncs ~/Desktop and ~/Documents.",
+				"",
+				`${paint.cyan("➜")} Move the project somewhere not synced, such as ~/Developer,`,
+				"  or rename its folder to end in .nosync, which iCloud leaves alone.",
+			],
+			"warning",
+			"The project folder is being synced",
+		);
+	});
 }
 
 export function stopTree(target: ChildProcess, signal: NodeJS.Signals = "SIGTERM"): void {
@@ -103,17 +131,6 @@ function main(): void {
 	const values = readyToStart(resolve(root, ".env.development"));
 	if (values === null) process.exit(1);
 
-	// Build shared first: `tsx` resolves it to its `dist`, and a stale one breaks every validating route.
-	const shared = spawnSync(process.execPath, [resolve(root, "node_modules/tsup/dist/cli-default.js")], {
-		cwd: resolve(root, "shared"),
-		stdio: "pipe",
-	});
-	if (shared.status !== 0) {
-		process.stderr.write(`${shared.stdout.toString()}${shared.stderr.toString()}`);
-		print(["Run `npm run build:shared` on its own to see why."], "error", "Could not build @testify/shared");
-		process.exit(1);
-	}
-
 	print(
 		[
 			`${label(BOT)}the Discord bot, restarting whenever a file under src/ is saved`,
@@ -128,7 +145,7 @@ function main(): void {
 
 	const tsx = resolve(root, "node_modules/tsx/dist/cli.mjs");
 	const children = [
-		[BOT, child(tsx, ["watch", "--clear-screen=false", "src/index.ts"])],
+		[BOT, child(tsx, BOT_WATCH)],
 		[WEB, child(tsx, ["scripts/devWeb.ts"])],
 	] as const;
 

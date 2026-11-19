@@ -1,5 +1,6 @@
 import { type Client, DiscordAPIError, Events, HTTPError } from "discord.js";
 import { EnvError, type EnvFile } from "@config/env";
+import { InstanceError } from "@config/instance";
 import { SetupError } from "@core/errors";
 import { badge, box, colourEnabled, type Paint, painter, stepLine, type StepState, type Tone } from "@core/terminal";
 
@@ -18,13 +19,28 @@ type Write = (line: string) => void;
 const toStdout: Write = (line) => process.stdout.write(`${line}\n`);
 
 /** Prints one line per start-up step as it finishes, so a slow or failing step is visible where it happens. */
+/** Start-up was cut short by a reload or Ctrl+C; shutdown is already on its way out, so nothing is reported. */
+export class StartupStopped extends Error {
+	constructor() {
+		super("Start-up stopped because the bot is shutting down.");
+		this.name = "StartupStopped";
+	}
+}
+
 export class BootReport {
 	readonly #write: Write;
 	readonly #paint: Paint;
+	#stopped: () => boolean = () => false;
 
 	constructor(write: Write = toStdout, paint: Paint = painter()) {
 		this.#write = write;
 		this.#paint = paint;
+	}
+
+	/** Once this answers true no line is printed, and the step running then ends start-up with `StartupStopped`. */
+	stopWhen(stopped: () => boolean): this {
+		this.#stopped = stopped;
+		return this;
 	}
 
 	header(facts: BootFacts): void {
@@ -38,21 +54,27 @@ export class BootReport {
 	}
 
 	note(state: StepState, label: string, detail: string, ms?: number): void {
+		if (this.#stopped()) return;
 		this.#write(stepLine(state, label, detail, ms, this.#paint));
 	}
 
 	/** Runs one step and reports it; a failure is marked on its own line and then thrown on for the caller to explain. */
 	async step<T>(label: string, work: () => Promise<T> | T, describe: (result: T) => string): Promise<T> {
 		const started = performance.now();
+		let result: T;
 
 		try {
-			const result = await work();
-			this.note("done", label, describe(result), performance.now() - started);
-			return result;
+			result = await work();
 		} catch (error) {
+			// A step that failed because shutting down closed what it was using is not a failure worth reporting.
+			if (this.#stopped()) throw new StartupStopped();
 			this.note("failed", label, this.#paint.red("could not finish"), performance.now() - started);
 			throw error;
 		}
+
+		if (this.#stopped()) throw new StartupStopped();
+		this.note("done", label, describe(result), performance.now() - started);
+		return result;
 	}
 }
 
@@ -135,6 +157,26 @@ function fixEnv(file: EnvFile, paint: Paint): string[] {
 		`${paint.cyan("➜")} Run ${paint.bold(setup)} to be asked for each value,`,
 		`  or copy ${paint.bold(template)} to ${paint.bold(file.name)} and fill it in.`,
 	];
+}
+
+function instanceFailure(error: InstanceError, paint: Paint): StartupFailure {
+	const width = Math.max(...error.problems.map((problem) => problem.key.length));
+	const count = error.problems.length === 1 ? "one change" : "a few changes";
+
+	return {
+		title: "The config file needs attention",
+		tone: "warning",
+		lines: [
+			`${paint.bold(error.file.name)} needs ${count}:`,
+			"",
+			...error.problems.map(
+				(problem) => `  ${paint.yellow("•")} ${paint.bold(problem.key.padEnd(width))}  ${problem.message}`,
+			),
+			"",
+			`${paint.cyan("➜")} Fix it, or delete it to use the built-in settings.`,
+			`  ${paint.bold("docs/customising.md")} explains every setting.`,
+		],
+	};
 }
 
 function discordFailure(error: DiscordAPIError): StartupFailure | null {
@@ -239,6 +281,7 @@ function unreachableFailure(error: unknown): StartupFailure | null {
 /** Turns anything start-up can throw into a titled explanation, keeping the stack only for real bugs. */
 export function explainStartupFailure(error: unknown, paint: Paint = painter()): StartupFailure {
 	if (error instanceof EnvError) return envFailure(error, paint);
+	if (error instanceof InstanceError) return instanceFailure(error, paint);
 	if (error instanceof SetupError)
 		return { title: "The bot could not start", tone: "error", lines: error.message.split("\n") };
 

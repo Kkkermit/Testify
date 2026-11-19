@@ -85,7 +85,7 @@ export const TICKET = {
 	closeDelayMs: 5 * SECOND_MS,
 } as const;
 
-export { DEFAULT_PREFIX, TREASURE_DEFAULTS } from "@testify/shared";
+export { TREASURE_DEFAULTS } from "@testify/shared";
 
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 

@@ -10,6 +10,8 @@ coverage/
 .env.*
 !.env.example
 !.env.development.example
+# Per copy, like .env. A fork that deploys from git commits its own with `git add -f testify.config.json`.
+testify.config.json
 
 # Logs
 logs/

@@ -102,11 +102,13 @@ export function HelpPage(): React.JSX.Element {
 				<div className="flex flex-wrap gap-4">
 					{bot.data !== undefined && (
 						<>
-							<a href={bot.data.supportUrl} target="_blank" rel="noreferrer" className={LINK}>
-								<BookOpen size={15} aria-hidden="true" />
-								{t("help.supportServer")}
-								<ExternalLink size={13} aria-hidden="true" />
-							</a>
+							{bot.data.supportUrl !== null && (
+								<a href={bot.data.supportUrl} target="_blank" rel="noreferrer" className={LINK}>
+									<BookOpen size={15} aria-hidden="true" />
+									{t("help.supportServer")}
+									<ExternalLink size={13} aria-hidden="true" />
+								</a>
+							)}
 							<a href={bot.data.repositoryUrl} target="_blank" rel="noreferrer" className={LINK}>
 								<Code2 size={15} aria-hidden="true" />
 								{t("help.sourceCode")}

@@ -1,5 +1,5 @@
 import { type Client } from "discord.js";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { colourEnabled } from "@core/terminal";
@@ -34,6 +34,7 @@ export const ICONS = {
 
 const RELOAD_GLYPH = "\u21BB";
 
+// figlet's ANSI Shadow, six rows of it.
 const LETTERS: Record<string, string[]> = {
 	A: [" █████╗ ", "██╔══██╗", "███████║", "██╔══██║", "██║  ██║", "╚═╝  ╚═╝"],
 	B: ["██████╗ ", "██╔══██╗", "██████╔╝", "██╔══██╗", "██████╔╝", "╚═════╝ "],
@@ -72,12 +73,44 @@ const LETTERS: Record<string, string[]> = {
 	"8": [" █████╗ ", "██╔══██╗", "╚█████╔╝", "██╔══██╗", "╚█████╔╝", " ╚════╝ "],
 	"9": [" █████╗ ", "██╔══██╗", "╚██████║", " ╚═══██║", " █████╔╝", " ╚════╝ "],
 	"-": ["      ", "      ", "█████╗", "╚════╝", "      ", "      "],
+	".": ["   ", "   ", "   ", "   ", "██╗", "╚═╝"],
+	",": ["   ", "   ", "   ", "   ", "▄█╗", "╚═╝"],
+	"!": ["██╗", "██║", "██║", "╚═╝", "██╗", "╚═╝"],
+	"?": ["██████╗ ", "╚════██╗", "  ▄███╔╝", "  ▀▀══╝ ", "  ██╗   ", "  ╚═╝   "],
+	":": ["   ", "██╗", "╚═╝", "██╗", "╚═╝", "   "],
+	";": ["   ", "██╗", "╚═╝", "▄█╗", "▀═╝", "   "],
+	_: ["        ", "        ", "        ", "        ", "███████╗", "╚══════╝"],
+	"/": ["    ██╗", "   ██╔╝", "  ██╔╝ ", " ██╔╝  ", "██╔╝   ", "╚═╝    "],
+	"(": [" ██╗", "██╔╝", "██║ ", "██║ ", "╚██╗", " ╚═╝"],
+	")": ["██╗ ", "╚██╗", " ██║", " ██║", "██╔╝", "╚═╝ "],
+	"[": ["███╗", "██╔╝", "██║ ", "██║ ", "███╗", "╚══╝"],
+	"]": ["███╗", "╚██║", " ██║", " ██║", "███║", "╚══╝"],
+	"<": ["  ██╗", " ██╔╝", "██╔╝ ", "╚██╗ ", " ╚██╗", "  ╚═╝"],
+	">": ["██╗  ", "╚██╗ ", " ╚██╗", " ██╔╝", "██╔╝ ", "╚═╝  "],
+	"#": [" ██╗ ██╗ ", "████████╗", "╚██╔═██╔╝", "████████╗", "╚██╔═██╔╝", " ╚═╝ ╚═╝ "],
+	$: ["▄▄███▄▄ ", "██╔════╝", "███████╗", "╚════██║", "███████║", "╚═▀▀▀══╝"],
+	"%": ["██╗ ██╗", "╚═╝██╔╝", "  ██╔╝ ", " ██╔╝  ", "██╔╝██╗", "╚═╝ ╚═╝"],
+	"&": ["   ██╗   ", "   ██║   ", "████████╗", "██╔═██╔═╝", "██████║  ", "╚═════╝  "],
+	"*": ["      ", "▄ ██╗▄", " ████╗", "▀╚██╔▀", "  ╚═╝ ", "      "],
+	"@": [" ██████╗ ", "██╔═══██╗", "██║██╗██║", "██║██║██║", "╚█║████╔╝", " ╚╝╚═══╝ "],
+	"^": [" ███╗ ", "██╔██╗", "╚═╝╚═╝", "      ", "      ", "      "],
+	// The font leaves these blank, so they are drawn to match it.
+	"'": ["██╗", "██║", "╚═╝", "   ", "   ", "   "],
+	'"': ["██╗██╗", "██║██║", "╚═╝╚═╝", "      ", "      ", "      "],
+	"+": ["       ", "  ██╗  ", "██████╗", "╚═██╔═╝", "  ╚═╝  ", "       "],
+	"=": ["       ", "██████╗", "╚═════╝", "██████╗", "╚═════╝", "       "],
+	"\\": ["██╗    ", "╚██╗   ", " ╚██╗  ", "  ╚██╗ ", "   ╚██╗", "    ╚═╝"],
+	"|": ["██╗", "██║", "██║", "██║", "██║", "╚═╝"],
 	" ": ["   ", "   ", "   ", "   ", "   ", "   "],
 };
 
-/** Turns a word into six lines of block capitals. */
+/** Turns a name into six lines of block capitals, without accents, leaving out any character the font cannot draw. */
 export function bigText(text: string): string[] {
-	const glyphs = [...text.toUpperCase()].map((character) => LETTERS[character]).filter((glyph) => glyph !== undefined);
+	const plain = text
+		.normalize("NFD")
+		.replace(/\p{Mn}/gu, "")
+		.toUpperCase();
+	const glyphs = [...plain].map((character) => LETTERS[character]).filter((glyph) => glyph !== undefined);
 	if (glyphs.length === 0) return [];
 
 	return Array.from({ length: 6 }, (_unused, line) => glyphs.map((glyph) => glyph[line] ?? "").join(""));
@@ -135,7 +168,7 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 		fact(ICONS.messages, "Messages", `${formatNumber(facts.loaded.messageHandlers)} loaded`),
 		"",
 		...(facts.watching ? [`  ${paint(ansi.yellow, RELOAD_GLYPH)} ${paint(ansi.bold, "Hot reload is on")}`, ""] : []),
-		paint(ansi.grey, `  ${theme.repository}`),
+		paint(ansi.grey, `  ${instanceConfig().repository}`),
 		"",
 	];
 }

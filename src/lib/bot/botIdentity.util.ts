@@ -1,5 +1,5 @@
 import { type APIUser, type ClientUser, Routes } from "discord.js";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
@@ -36,8 +36,8 @@ export function identityOf(user: ClientUser): BotIdentity {
 		avatarUrl: user.displayAvatarURL({ size: SIZE }),
 		bannerUrl: user.bannerURL({ size: 1024 }) ?? null,
 		accentColour: hexOf(user.accentColor),
-		supportUrl: theme.supportServer,
-		repositoryUrl: theme.repository,
+		supportUrl: instanceConfig().supportServer,
+		repositoryUrl: instanceConfig().repository,
 	};
 }
 
@@ -60,8 +60,8 @@ async function connectingIdentity(client: TestifyClient, now: number): Promise<B
 					: cdn.avatar(user.id, user.avatar, { size: SIZE }),
 			bannerUrl: typeof user.banner === "string" ? cdn.banner(user.id, user.banner, { size: 1024 }) : null,
 			accentColour: hexOf(user.accent_color),
-			supportUrl: theme.supportServer,
-			repositoryUrl: theme.repository,
+			supportUrl: instanceConfig().supportServer,
+			repositoryUrl: instanceConfig().repository,
 		};
 		connecting = { value, at: now };
 		return value;

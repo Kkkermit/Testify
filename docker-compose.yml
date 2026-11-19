@@ -1,10 +1,12 @@
 # Testify and a MongoDB to keep its data in.
 #
 #   cp .env.example .env    # fill it in, or run `npm run setup`
+#   cp testify.config.example.json testify.config.json   # optional: your links, who runs it, the prefix
 #   docker compose up -d
 #   docker compose logs -f bot
 #
-# Everything below reads from .env. Nothing is hardcoded, and no secret is baked into the image.
+# Everything below reads from .env, and testify.config.json beside it. Nothing is hardcoded, and no secret is
+# baked into the image.
 
 services:
   bot:
@@ -19,7 +21,12 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+    volumes:
+      # This folder, read-only, so testify.config.json is read from beside .env. A missing file means the defaults;
+      # mounting the file itself would make Docker create an empty folder in its place when there is none.
+      - .:/app/instance:ro
     environment:
+      TESTIFY_CONFIG: /app/instance/testify.config.json
       # `mongo` is this compose network's hostname for the database below.
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/testify}
       DISCORD_TOKEN: ${DISCORD_TOKEN:?set DISCORD_TOKEN in .env}
