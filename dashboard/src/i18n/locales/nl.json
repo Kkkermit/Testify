@@ -2188,6 +2188,9 @@
 		"termsTitle": "Gebruiksvoorwaarden",
 		"termsSummary": "De regels voor het gebruik van {{bot}} en dit dashboard, en wat er gebeurt als ze worden overtreden. Lees ze voordat je een van beide gebruikt.",
 		"whoRuns": "Wie dit draait",
+		"operatorTitle": "Wie deze kopie beheert",
+		"operatorName": "Beheerd door",
+		"operatorContact": "Contact",
 		"whoRunsP1": "{{bot}} wordt zelf gehost. Wie deze instantie heeft opgezet — de beheerder — bepaalt wat hij doet, wat hij bewaart en wie hem kan bereiken. Die is ervoor verantwoordelijk, niet de makers van het project.",
 		"whoRunsP2": "De software wordt geleverd zoals hij is, zonder enige garantie. Niemand belooft dat hij beschikbaar, correct of foutloos zal zijn.",
 		"whoRunsP3": "De code is gepubliceerd onder de MIT-licentie. Iedereen mag hem gebruiken, wijzigen, delen en verkopen, zolang de copyrightvermelding met de oorspronkelijke maker en de licentie zelf in elke kopie blijven staan.",
@@ -2391,7 +2394,8 @@
 		"retentionL22": "Logregels: de laatste 6 starts van de bot, hooguit 2.000 regels per start. De volgende start verwijdert de oudste, en de beheerder kan ze eerder verwijderen.",
 		"retentionL23": "Shardlens-analyses: op de eigen collector van de beheerder, zo lang als die ze laat bewaren. Wie elk commando uitvoerde, wordt alleen in auditmodus bewaard, versleuteld, en na 30 dagen verwijderd, of na hooguit 90 als de beheerder dat kiest.",
 		"retentionL24": "Een afmelding voor de statistieken: tot je /privacy opt-in uitvoert. Het verwijderen van je gegevens houdt die afmelding, zodat je niet opnieuw wordt meegeteld.",
-		"messagesP5": "Een bericht melden is de laatste. Als je met de rechtermuisknop op een bericht Report message kiest, plaatst {{bot}} het in het modmailkanaal van die server voor het team: de tekst van het bericht, wie het schreef, wie het meldde en wat je erover zei. Dat bericht staat in Discord, niet in de database van de bot. De bot onthoudt een uur lang, alleen in het geheugen, welke berichten je meldde, zodat hetzelfde niet twee keer gemeld kan worden; een herstart vergeet het."
+		"messagesP5": "Een bericht melden is de laatste. Als je met de rechtermuisknop op een bericht Report message kiest, plaatst {{bot}} het in het modmailkanaal van die server voor het team: de tekst van het bericht, wie het schreef, wie het meldde en wat je erover zei. Dat bericht staat in Discord, niet in de database van de bot. De bot onthoudt een uur lang, alleen in het geheugen, welke berichten je meldde, zodat hetzelfde niet twee keer gemeld kan worden; een herstart vergeet het.",
+		"messagesP6": "Als {{bot}} aan een server wordt toegevoegd, stuurt het ook één privébericht: een korte uitleg om te beginnen, aan wie het toevoegde. Om die te vinden leest de bot het item over zijn eigen komst in het auditlogboek van de server, of anders zijn eigen item bij de integraties van de server, en schrijft hij de eigenaar van de server als geen van beide het zegt. Hiervan wordt niets bewaard. Wie privéberichten heeft uitgezet, krijgt niets, en de beheerder kan het bericht uitzetten."
 	},
 	"problem": {
 		"automodMentionLimit": "Kies hoeveel mentions je toestaat.",
@@ -2819,6 +2823,8 @@
 			"featuresSummary": "Draai de bot zonder muziek, casino of iets anders dat je niet wilt.",
 			"docker": "Docker",
 			"dockerSummary": "De bot en zijn database met Docker Compose, en waar hij verder kan draaien.",
+			"customising": "Maak het je eigen",
+			"customisingSummary": "Je links, wie het beheert en het standaardvoorvoegsel, in één bestand naast .env, en hoe je een fork bijhoudt.",
 			"dashboard": "De website en het dashboard",
 			"dashboardSummary": "Deze site, het dashboard achter de inlog, wie wat kan zien, en ze op internet zetten.",
 			"scripts": "Scripts",

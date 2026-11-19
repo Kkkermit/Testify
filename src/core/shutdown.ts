@@ -11,6 +11,11 @@ import { destroyAllSessions } from "@lib/music/musicSession.util";
 
 let stopping = false;
 
+/** True from the first signal on, so start-up stops instead of reporting what shutting down undid. */
+export function isShuttingDown(): boolean {
+	return stopping;
+}
+
 /** Stops timers, closes the database and disconnects, then exits. */
 export async function shutdown(client: TestifyClient, reason: string, code = 0): Promise<void> {
 	if (stopping) return;

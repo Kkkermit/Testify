@@ -837,6 +837,44 @@ IDs) and its default.
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
 comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
 
+### What makes a copy someone's own is `testify.config.json`, not code and not `.env`
+
+`.env` holds secrets and switches. Everything else that differs between copies and that a reader sees — the
+repository the Source code buttons open, the support server, who `/bot info` names, who runs the copy, the default
+prefix and whether the bot greets whoever adds it — is `testify.config.json`, read by `src/config/instance.ts`.
+[`docs/customising.md`](docs/customising.md) is the reader's guide to it. Six things about it are load-bearing:
+
+- **Every key is optional and the defaults are the original's** (`INSTANCE_DEFAULTS`), so a copy with no file behaves
+  as it always did. It sits beside `.env`, one file for `npm run dev` and `npm start` alike, and it is gitignored like
+  `.env`; a fork that deploys from git adds it with `git add -f`.
+- **It is read once, in `main()` straight after `loadEnv`, and fails start-up with a list**, unknown keys included
+  (`z.strictObject`), so a misspelt setting never silently does nothing. `explainStartupFailure` turns an
+  `InstanceError` into the same kind of box as a bad `.env`. Everything else reads `instanceConfig()`, which is the
+  defaults until then — what the tests and the scripts see. **Never read it at import time:** `index.ts` imports
+  every module before `main()` runs, so a module-level constant built from it holds the defaults for ever. `FACTS`'s
+  `prefix.default` is a getter for exactly that reason.
+- **Docker mounts the folder, not the file.** `docker-compose.yml` mounts the folder it runs from at `/app/instance`,
+  read-only, and sets `TESTIFY_CONFIG` to the file there. Mounting a file that does not exist makes Docker create a
+  folder in its place, and `instanceFile` reads a folder as no file, so the defaults apply either way. **A host that
+  builds the `Dockerfile` gets the file in the image:** Railway has nowhere else to put one, so the runtime stage copies
+  `testify.config.jso[n]` into `/app` beside `package.json`, because the legacy builder refuses a pattern that is a
+  `COPY`'s only source. The published image is built from a checkout without one, so it never carries anybody's.
+- **The links live nowhere else.** `theme.ts` no longer holds `author`, `repository` or `supportServer`, and
+  `tests/config/instance.test.ts` fails on the original's repository, its support invite or `DEFAULT_PREFIX` written
+  anywhere in `src` but `instance.ts`. `projectLinkButtons` draws Source code and Support, leaving Support out when the
+  host set `supportServer` to `null`, so nobody is sent to somebody else's.
+- **`testify.config.schema.json` is generated** by `npm run config:schema` from the same zod schema, so an editor
+  completes and checks the file as it is typed; the suite fails when the two drift. The setup wizard asks its
+  questions with the schema's own rules (`instanceFields`) and writes only what was answered.
+- **The operator is shown, never assumed.** With `operator` set, the privacy notice and the terms open with a card
+  naming them; `contactHref` in `@testify/shared` turns the contact into a link only for an email address or an
+  `https` page, which is also all the schema accepts.
+
+**A server's prefix is stored only when it is not the default.** `prefix.schema.ts` has no default, and `setPrefix`
+unsets the field when it is given the default, so changing `defaultPrefix` reaches every server that never chose one.
+A record written before this kept `t?` even for a server that only switched prefix commands off; it keeps that until
+the prefix panel's Reset, and the guide says so.
+
 ---
 
 ## 15. Logging
@@ -877,7 +915,12 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
   happens. `explainStartupFailure` turns `EnvError` (each unset variable with where to find it), `SetupError`, and
   Discord's 401, 10002 and 50001 into advice; only an error it does not recognise keeps its stack, because that is
   a bug. `exitOnFatalClose` catches gateway close codes 4004 and 4014: without it a bot missing the privileged
-  intents logged one line and then waited for ever, never becoming ready.
+  intents logged one line and then waited for ever, never becoming ready. **A signal partway through start-up ends
+  it quietly.** `shutdown()` closes the database while `main()` is still starting, so a reload mid-start used to
+  print "connected", then the log history failing and the connection "lost" — what its own shutdown had done. The
+  report is built with `stopWhen(isShuttingDown)`: it prints nothing once shutting down, its next step throws
+  `StartupStopped`, and `main().catch` leaves the exit to `shutdown()`. A disconnect `disconnectDatabase` asked for is
+  never reported as a lost connection.
 - **Boxes are measured, not guessed.** `visibleWidth` strips colour codes and counts `\p{Emoji_Presentation}` as
   two columns and everything else as one; counting a range of code points put `➜` at two, which pushed the right
   edge of one line out. Keep every box line under 80 columns, which is why the hints are short.
@@ -2347,6 +2390,25 @@ owner console's Usage tab, its per-server drill-down and the server list's count
 after an upgrade; until it has, `eraseUserData` still deletes the person's rows from `commandruns` by collection name.
 Nothing reads them any more, and `npm run db:wipe` removes them sooner for anybody who wants that.
 
+### Whoever adds the bot gets one message, and nothing about it can fail the join
+
+`guildCreate` runs `greetInviter` beside the log post, and neither waits on the other. Four things about it are
+load-bearing:
+
+- **The adder is read, never guessed, whichever way they added it.** An invite link, the Add App button on the bot's
+  profile and the App Directory all write the same `BotAdd` audit entry, so `findInviter` reads that first, asking once
+  more after `AUDIT_RETRY_MS` because Discord writes it a moment after the join arrives; `pickBotAdd` takes only the
+  newest entry for this bot that is under ten minutes old, since a bot added before has older ones. Without View Audit
+  Log it reads the bot's own integration, whose `user` is the adder, and without Manage Server either it writes to the
+  owner. The entry can carry a partial user, so the person written to is fetched whole.
+- **Closed direct messages are the person's choice.** `CannotSendMessagesToThisUser` is a `debug` line and anything
+  else a `warn` saying the bot joined normally; nothing is thrown into the event.
+- **Bots, blacklisted accounts and a host who set `greetInviter: false` get nothing.** Nothing about the greeting is
+  stored, and the privacy notice says so (`legal.messagesP6`).
+- **The message is built by `inviterGreeting`, a pure function**: `/help` and the server's prefix, the dashboard's
+  setup checklist when the dashboard is on and every feature's setup command when it is not, `/prefix`, and the
+  project's links from `projectLinkButtons`.
+
 ### Global by design
 
 The blacklist, the user profile, reminders, the notifications' read state and analytics opt-outs are intentionally not
@@ -2553,6 +2615,16 @@ restarts the bot on every save, which the ordering cannot help with, so the prox
 with one line per outage — Vite registers its handler immediately **after** calling `configure`, so the replacement
 waits a tick, and that ordering was read out of `vite/dist/node/chunks/node.js` rather than guessed.
 
+**The dev bot runs `@testify/shared` from its source.** `npm run dev` and `BOT_WATCH` pass `--conditions=development`,
+which the `exports` in `shared/package.json` answer with `src/index.ts`, so a change there restarts the bot like any
+other and nothing has to be built first. Building it first was the old answer, and both halves of it went wrong: on
+macOS the watcher saw that write and restarted the bot a second in, and a branch switched under a running `dev:all`
+left it on a build without an export the new code read. **A synced
+folder is named, not left to look like a bug:** iCloud Drive, Dropbox and Google Drive touch files as they sync, which
+restarts the bot over and over, and macOS cancels a read of a file still downloading, which crashes it with
+`ECANCELED`. `dev:all` recognises that line (`syncedFolderRead`) and says once to move the project or name its folder
+`.nosync`; the README's troubleshooting table says the same for `npm run dev`.
+
 ### `@testify/shared` is a real package, not an alias
 
 **It is deliberately absent from `tsconfig.json`'s `paths`, and adding it there would break the build in a way
@@ -2563,22 +2635,23 @@ type-checks, and the only symptom is an empty object at runtime.
 
 So the workspace resolves like any other package, and each consumer reads what suits it:
 
-| Consumer          | Reads                     | Needs a build? |
-| ----------------- | ------------------------- | -------------- |
-| `tsc`             | `types: "src/index.ts"`   | No             |
-| Jest              | an explicit source mapper | No             |
-| Vite              | an alias to source        | No             |
-| The bot's `dist/` | `main: "dist/index.js"`   | **Yes**        |
+| Consumer          | Reads                                    | Needs a build? |
+| ----------------- | ---------------------------------------- | -------------- |
+| `tsc`             | the `types` export, `src/index.ts`       | No             |
+| Jest              | an explicit source mapper                | No             |
+| Vite              | an alias to source                       | No             |
+| The dev bot       | the `development` export, `src/index.ts` | No             |
+| The bot's `dist/` | the `require` export, `dist/index.js`    | **Yes**        |
 
 `prepare` builds it after any install, so a fresh clone works. Editing `shared/src` and then running the built
 bot is the one case that needs `npm run build:shared` by hand.
 
 > [!WARNING]
-> **`tsx` reads the built `dist`, not the source — and `shared/dist` is gitignored.** So does the dev bot, not
-> just the production one. Pull a commit that adds an export to `shared/src`, run the bot without reinstalling,
-> and that export is `undefined` at runtime: every route validating with it dies on
-> `Cannot read properties of undefined (reading 'safeParse')`, naming nothing that points at the cause. `dev`
-> and `dev:all` now build shared first — about 40ms — so the state cannot happen.
+> **Anything that runs without the `development` condition reads `shared/dist`, and it is gitignored.** That is the
+> built bot and any other `tsx` run — `npm run setup`, the docs generators. Pull a commit that adds an export to
+> `shared/src`, run one of those without reinstalling, and that export is `undefined` at runtime: a schema read from
+> it dies on `Cannot read properties of undefined (reading 'safeParse')`, naming nothing that points at the cause.
+> The dev bot once did exactly that, mid-session, after a branch switch.
 
 `shared/` stays dependency-light: zod and nothing else. No discord.js, no React.
 
@@ -2866,6 +2939,15 @@ Three things there are load-bearing and non-obvious, all commented in place:
 `transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
 `moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
 `node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
+
+**jsdom loads no stylesheet, so `src/test/setup.ts` gives it the display rules an accessible name depends on.** A
+name is joined from its parts with a space only where a part is not `display: inline`. jsdom 26 called every element
+a block, so every name had its spaces; jsdom 27 and later call a `<span>` inline, as a browser does without CSS, and
+`Failed AB12CD` read as `FailedAB12CD`. In the real page those parts are flex items or `block`, and Chromium with the
+built CSS reads all four names that failed with their spaces, so the setup makes the children of `flex`, `inline-flex`,
+`grid` and `inline-grid` and anything `block` block-level, as the browser does. A name built from plain inline spans
+still runs together, which is what a browser would read too. jsdom itself is held at 29 by an override, because
+`jest-environment-jsdom` still asks for 26 (see `docs/security.md`).
 
 ### Adding to the dashboard
 

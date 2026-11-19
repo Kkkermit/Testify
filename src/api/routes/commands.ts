@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { requireAuth } from "@api/middleware/session";
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { buildCatalogue } from "@lib/bot";
 
 /** Every command the bot has; behind a session because owner commands are filtered by who asks. */
@@ -11,7 +11,7 @@ export const commands = new Hono<ApiBindings>().use("*", requireAuth).get("/", (
 
 	return context.json(
 		buildCatalogue(client.commands.values(), {
-			prefix: DEFAULT_PREFIX,
+			prefix: instanceConfig().defaultPrefix,
 			includeOwnerOnly: session !== undefined && client.isOwner(session.userId),
 		}),
 	);

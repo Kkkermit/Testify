@@ -13,12 +13,21 @@ export const SITE_LIMITS = {
 	pathMax: 400,
 } as const;
 
+/** Who runs this copy of the bot, from its `testify.config.json`, so the privacy notice can say who to ask. */
+export interface InstanceOperator {
+	name: string;
+	contact: string;
+}
+
 export interface SiteInfo {
 	dashboard: boolean;
 	repository: string;
 	version: string;
 	/** What `DISABLED_FEATURES` switched off, so the pages leave out what the bot no longer does. */
 	featuresOff: BotFeature[];
+	/** The prefix a server starts with, which a host may change from the built-in `t?`. */
+	defaultPrefix: string;
+	operator: InstanceOperator | null;
 }
 
 interface LatestRelease {
@@ -119,6 +128,15 @@ export function repositoryCoordinates(url: string): { owner: string; repo: strin
 
 	const [, owner, repo] = match;
 	return owner === undefined || repo === undefined ? null : { owner, repo };
+}
+
+const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
+
+/** The link a contact opens: an `https` page or an email address, and nothing else, so no scheme can run script. */
+export function contactHref(contact: string): string | null {
+	if (/^https:\/\/[^\s<>"]+$/.test(contact)) return contact;
+	if (EMAIL.test(contact)) return `mailto:${contact}`;
+	return null;
 }
 
 export function githubFileUrl(repository: string, ref: string, path: string): string {

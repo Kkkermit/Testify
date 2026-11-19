@@ -43,6 +43,15 @@ globalThis.ResizeObserver = class {
 
 Element.prototype.scrollIntoView = jest.fn();
 
+// jsdom loads no stylesheet, so an accessible name joins flex items and block spans with no space where a browser
+// puts one; these are the display rules a name depends on.
+const displayRules = document.createElement("style");
+displayRules.textContent = [
+	".block, :is(.flex, .inline-flex, .grid, .inline-grid) > * { display: block; }",
+	".flex { display: flex; } .inline-flex { display: inline-flex; } .grid { display: grid; }",
+].join("\n");
+document.head.append(displayRules);
+
 // Node's fetch demands an absolute URL where a browser resolves against the document, so the harness supplies the origin.
 const nodeFetch = globalThis.fetch;
 globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) =>

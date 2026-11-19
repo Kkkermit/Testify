@@ -2252,6 +2252,9 @@
 		"termsTitle": "Condiciones de uso",
 		"termsSummary": "Las reglas para usar {{bot}} y este panel, y qué pasa cuando se incumplen. Léelas antes de usar cualquiera de los dos.",
 		"whoRuns": "Quién lo gestiona",
+		"operatorTitle": "Quién gestiona esta copia",
+		"operatorName": "Gestionada por",
+		"operatorContact": "Contacto",
 		"whoRunsP1": "{{bot}} es autoalojado. Quien haya desplegado esta instancia —el operador— decide qué hace, qué almacena y quién puede acceder. La responsabilidad es suya, no de los autores del proyecto.",
 		"whoRunsP2": "El software se entrega tal cual, sin garantía de ningún tipo. Nadie promete que esté disponible, que sea correcto ni que carezca de defectos.",
 		"whoRunsP3": "El código se publica bajo la licencia MIT. Cualquiera puede usarlo, modificarlo, compartirlo y venderlo, siempre que se conserven en cada copia el aviso de copyright que nombra a su autor original y la propia licencia.",
@@ -2455,7 +2458,8 @@
 		"retentionL22": "Líneas del registro: los últimos 6 arranques del bot, como mucho 2000 líneas cada uno. El siguiente arranque borra el más antiguo, y el operador puede borrarlas antes.",
 		"retentionL23": "Estadísticas de Shardlens: en el propio recolector del operador, durante el tiempo que él decida guardarlas. Quién ejecutó cada comando solo se guarda en modo auditoría, cifrado, y se borra a los 30 días, o hasta a los 90 si el operador lo elige.",
 		"retentionL24": "Una exclusión de las estadísticas: hasta que ejecutes /privacy opt-in. Borrar tus datos la conserva, para que no se te vuelva a contar.",
-		"messagesP5": "Denunciar un mensaje es lo último. Cuando haces clic derecho en un mensaje y eliges Report message, {{bot}} lo publica en el canal de correo al equipo de ese servidor: el texto del mensaje, quién lo escribió, quién lo denunció y lo que dijiste sobre él. Esa publicación vive en Discord, no en la base de datos del bot. El bot recuerda durante una hora, solo en memoria, qué mensajes denunciaste, para que el mismo no se denuncie dos veces; un reinicio lo olvida."
+		"messagesP5": "Denunciar un mensaje es lo último. Cuando haces clic derecho en un mensaje y eliges Report message, {{bot}} lo publica en el canal de correo al equipo de ese servidor: el texto del mensaje, quién lo escribió, quién lo denunció y lo que dijiste sobre él. Esa publicación vive en Discord, no en la base de datos del bot. El bot recuerda durante una hora, solo en memoria, qué mensajes denunciaste, para que el mismo no se denuncie dos veces; un reinicio lo olvida.",
+		"messagesP6": "Al añadir {{bot}} a un servidor también se envía un mensaje directo: una nota para empezar, a quien lo añadió. Para saber quién fue, el bot lee la entrada de su propia llegada en el registro de auditoría del servidor o, si no, su propia entrada en las integraciones del servidor, y escribe al propietario del servidor si ninguna de las dos lo indica. No guarda nada de esto. A quien tenga cerrados los mensajes directos no se le envía nada, y el operador puede desactivar el mensaje."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",
@@ -2891,6 +2895,8 @@
 			"featuresSummary": "Ejecuta el bot sin música, sin casino o sin cualquier otra cosa que no quieras.",
 			"docker": "Docker",
 			"dockerSummary": "El bot y su base de datos con Docker Compose, y dónde más puede ejecutarse.",
+			"customising": "Hazlo tuyo",
+			"customisingSummary": "Tus enlaces, quién lo gestiona y el prefijo por defecto, en un archivo junto a .env, y cómo mantener un fork al día.",
 			"dashboard": "El sitio web y el panel",
 			"dashboardSummary": "Este sitio, el panel tras el inicio de sesión, quién ve qué y publicarlos en internet.",
 			"scripts": "Scripts",

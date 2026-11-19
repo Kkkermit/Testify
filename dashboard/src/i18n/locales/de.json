@@ -2188,6 +2188,9 @@
 		"termsTitle": "Nutzungsbedingungen",
 		"termsSummary": "Die Regeln für die Nutzung von {{bot}} und diesem Dashboard, und was passiert, wenn sie gebrochen werden. Bitte lies sie, bevor du eines davon nutzt.",
 		"whoRuns": "Wer das betreibt",
+		"operatorTitle": "Wer diese Kopie betreibt",
+		"operatorName": "Betrieben von",
+		"operatorContact": "Kontakt",
 		"whoRunsP1": "{{bot}} wird selbst gehostet. Wer diese Instanz aufgesetzt hat — die Betreiberin — entscheidet, was sie tut, was sie speichert und wer sie erreicht. Verantwortlich ist sie, nicht die Autoren des Projekts.",
 		"whoRunsP2": "Die Software wird wie besehen bereitgestellt, ohne jede Gewährleistung. Niemand verspricht Verfügbarkeit, Richtigkeit oder Fehlerfreiheit.",
 		"whoRunsP3": "Der Code ist unter der MIT-Lizenz veröffentlicht. Alle dürfen ihn nutzen, ändern, weitergeben und verkaufen, solange der Urheberrechtshinweis mit dem ursprünglichen Autor und die Lizenz selbst in jeder Kopie erhalten bleiben.",
@@ -2391,7 +2394,8 @@
 		"retentionL22": "Log-Zeilen: die letzten 6 Starts des Bots, höchstens 2.000 Zeilen je Start. Der nächste Start löscht den ältesten, und die Betreiberin kann sie früher löschen.",
 		"retentionL23": "Shardlens-Analysen: auf dem eigenen Collector des Betreibers, so lange, wie er sie aufbewahren lässt. Wer welchen Befehl ausgeführt hat, wird nur im Audit-Modus aufbewahrt, verschlüsselt, und nach 30 Tagen gelöscht, oder nach bis zu 90, wenn der Betreiber es so einstellt.",
 		"retentionL24": "Ein Widerspruch gegen die Analysen: bis du /privacy opt-in ausführst. Beim Löschen deiner Daten bleibt er bestehen, damit du nicht wieder gezählt wirst.",
-		"messagesP5": "Das Melden einer Nachricht ist das Letzte. Wenn du mit Rechtsklick auf eine Nachricht „Report message“ wählst, postet {{bot}} sie im Modmail-Kanal dieses Servers für dessen Team: den Text der Nachricht, wer sie geschrieben hat, wer sie gemeldet hat und was du dazu gesagt hast. Dieser Beitrag liegt in Discord, nicht in der Datenbank des Bots. Der Bot merkt sich eine Stunde lang, nur im Arbeitsspeicher, welche Nachrichten du gemeldet hast, damit dieselbe nicht zweimal gemeldet wird; ein Neustart vergisst es."
+		"messagesP5": "Das Melden einer Nachricht ist das Letzte. Wenn du mit Rechtsklick auf eine Nachricht „Report message“ wählst, postet {{bot}} sie im Modmail-Kanal dieses Servers für dessen Team: den Text der Nachricht, wer sie geschrieben hat, wer sie gemeldet hat und was du dazu gesagt hast. Dieser Beitrag liegt in Discord, nicht in der Datenbank des Bots. Der Bot merkt sich eine Stunde lang, nur im Arbeitsspeicher, welche Nachrichten du gemeldet hast, damit dieselbe nicht zweimal gemeldet wird; ein Neustart vergisst es.",
+		"messagesP6": "Wenn {{bot}} einem Server hinzugefügt wird, schickt es außerdem eine Direktnachricht: einen Hinweis für den Einstieg an die Person, die es hinzugefügt hat. Um sie zu finden, liest der Bot den Eintrag zu seiner eigenen Aufnahme im Audit-Log des Servers, sonst seinen eigenen Eintrag bei den Integrationen des Servers, und schreibt der Person, der der Server gehört, wenn keins von beidem es verrät. Davon wird nichts gespeichert. Wer Direktnachrichten geschlossen hat, bekommt nichts, und die Betreiberin kann die Nachricht abschalten."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
@@ -2819,6 +2823,8 @@
 			"featuresSummary": "Betreibe den Bot ohne Musik, Casino oder anderes, das du nicht brauchst.",
 			"docker": "Docker",
 			"dockerSummary": "Bot und Datenbank mit Docker Compose, und wo sie sonst laufen können.",
+			"customising": "Zu deiner eigenen machen",
+			"customisingSummary": "Deine Links, wer sie betreibt und das Standardpräfix in einer Datei neben .env, und wie ein Fork aktuell bleibt.",
 			"dashboard": "Website und Dashboard",
 			"dashboardSummary": "Diese Website, das Dashboard hinter der Anmeldung, wer was sieht und beides ins Internet stellen.",
 			"scripts": "Skripte",

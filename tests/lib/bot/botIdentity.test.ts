@@ -1,4 +1,4 @@
-import { theme } from "@config/theme";
+import { INSTANCE_DEFAULTS, useInstance } from "@config/instance";
 import { nameBot } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { botIdentity, forgetBotIdentity, identityOf } from "@lib/bot/botIdentity.util";
@@ -33,8 +33,18 @@ describe("identityOf", () => {
 			avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
 			bannerUrl: "https://cdn.discordapp.com/banners/1/def.png",
 			accentColour: "#7c3aed",
-			supportUrl: theme.supportServer,
-			repositoryUrl: theme.repository,
+			supportUrl: INSTANCE_DEFAULTS.supportServer,
+			repositoryUrl: INSTANCE_DEFAULTS.repository,
+		});
+	});
+
+	/** Every self-hosted copy linked its users to the original's support server and code, because the links were code. */
+	it("links the host's own repository and support server, and no support server when there is none", () => {
+		useInstance({ ...INSTANCE_DEFAULTS, repository: "https://github.com/someone/fork", supportServer: null });
+
+		expect(identityOf(userLike() as never)).toMatchObject({
+			supportUrl: null,
+			repositoryUrl: "https://github.com/someone/fork",
 		});
 	});
 

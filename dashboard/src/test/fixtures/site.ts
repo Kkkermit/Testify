@@ -11,6 +11,8 @@ export const siteInfo: SiteInfo = {
 	repository: "https://github.com/Kkkermit/Testify",
 	version: "2.0.9",
 	featuresOff: [],
+	defaultPrefix: "t?",
+	operator: null,
 };
 
 export const standing: RepositoryStanding = {

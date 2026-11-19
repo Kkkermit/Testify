@@ -9,6 +9,7 @@ export const SETTINGS_LIMITS = {
 	maxCount: 1_000_000,
 } as const;
 
+/** The built-in default; a host may set another in `testify.config.json`, which the bot and the API read instead. */
 export const DEFAULT_PREFIX = "t?";
 
 export const BYPASS_PERMISSIONS = ["ManageMessages", "ManageGuild", "ModerateMembers", "Administrator"] as const;
@@ -64,11 +65,13 @@ export interface ServerSettings {
 }
 
 /** A prefix of pure whitespace matches every message; one with a space inside can never be typed. */
+export const prefixText = plainLine(1, SETTINGS_LIMITS.maxPrefix).refine(
+	(value) => !/\s/.test(value),
+	"cannot contain a space",
+);
+
 export const prefixPatch = z
-	.object({
-		prefix: plainLine(1, SETTINGS_LIMITS.maxPrefix).refine((value) => !/\s/.test(value), "cannot contain a space"),
-		enabled: z.boolean(),
-	})
+	.object({ prefix: prefixText, enabled: z.boolean() })
 	.partial()
 	.refine((patch) => Object.keys(patch).length > 0, "must change something");
 

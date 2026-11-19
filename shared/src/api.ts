@@ -25,7 +25,8 @@ export interface BotIdentity {
 	bannerUrl: string | null;
 	/** The profile accent as a CSS hex, when the application has set one. */
 	accentColour: string | null;
-	supportUrl: string;
+	/** Null when the host has no support server, so nothing links to somebody else's. */
+	supportUrl: string | null;
 	repositoryUrl: string;
 }
 

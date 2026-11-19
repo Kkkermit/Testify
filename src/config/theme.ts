@@ -2,10 +2,6 @@ import { type ColorResolvable } from "discord.js";
 import { CATEGORIES, type Category } from "@config/categories";
 
 export const theme = {
-	author: "Kkermit",
-	repository: "https://github.com/Kkkermit/Testify",
-	supportServer: "https://discord.gg/xcMVwAVjSD",
-
 	/** The only place a colour is written. Everything else names one of these. */
 	colours: {
 		default: "Blurple",

@@ -1,13 +1,16 @@
+import { contactHref } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { BackLink, Card, CARD_HEADING, DataList, PageHeader, PublicPage } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { type LegalDocument, type LegalSection, sectionId } from "@/features/legal/legal.content";
 import { TrailBack } from "@/features/site/components/TrailBack";
+import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
 
 const PROSE = "text-muted-foreground text-sm leading-relaxed";
+const LINK = "text-accent underline decoration-1 underline-offset-2 hover:decoration-2";
 
 export function LegalPage({ document }: { document: LegalDocument }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
@@ -28,6 +31,8 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 				<h2 className={cn(CARD_HEADING, "px-6 pt-6 pb-2")}>{t("legal.glance")}</h2>
 				<DataList rows={document.glance.map((row) => ({ label: t(row.label), value: t(row.value) }))} />
 			</Card>
+
+			<Operator />
 
 			<Card className="flex flex-col gap-6">
 				<nav aria-labelledby="legal-contents" className="flex flex-col gap-3">
@@ -56,6 +61,35 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 				</ol>
 			</Card>
 		</PublicPage>
+	);
+}
+
+/** Who runs this copy, from its config file, so "ask the operator" names somebody to ask. */
+function Operator(): React.JSX.Element | null {
+	const { t } = useTranslation();
+	const operator = useSite().data?.operator ?? null;
+	if (operator === null) return null;
+
+	const href = contactHref(operator.contact);
+	const contact =
+		href === null ? (
+			operator.contact
+		) : (
+			<a href={href} className={LINK} rel="noreferrer">
+				{operator.contact}
+			</a>
+		);
+
+	return (
+		<Card padding="none">
+			<h2 className={cn(CARD_HEADING, "px-6 pt-6 pb-2")}>{t("legal.operatorTitle")}</h2>
+			<DataList
+				rows={[
+					{ label: t("legal.operatorName"), value: operator.name },
+					{ label: t("legal.operatorContact"), value: contact },
+				]}
+			/>
+		</Card>
 	);
 }
 

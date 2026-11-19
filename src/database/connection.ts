@@ -13,6 +13,8 @@ interface ConnectOptions {
 }
 
 let everConnected = false;
+/** Set by `disconnectDatabase`, so the disconnect it asks for is not reported as a lost connection. */
+let closing = false;
 
 /** Turns the driver's failure into something you can act on. */
 export function explainConnectionFailure(error: unknown, uri: string): string {
@@ -93,10 +95,11 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	const retryDelayMs = options.retryDelayMs ?? 2_000;
 
 	mongoose.set("strictQuery", true);
+	closing = false;
 
 	mongoose.connection.on("disconnected", () => {
-		// Only worth saying after a connection has been lost.
-		if (everConnected)
+		// Only worth saying after a connection has been lost, and not when shutting down closed it.
+		if (everConnected && !closing)
 			options.logger.warn("[DATABASE] Lost the connection to MongoDB. Mongoose is reconnecting on its own.");
 	});
 	mongoose.connection.on("reconnected", () => {
@@ -104,7 +107,7 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	});
 	mongoose.connection.on("error", (error: unknown) => {
 		// The retry loop below reports a failure to connect, so this would only say the same thing twice.
-		if (everConnected)
+		if (everConnected && !closing)
 			options.logger.error({ err: toError(error) }, "[DATABASE_ERROR] The MongoDB connection reported an error.");
 	});
 
@@ -155,6 +158,7 @@ export async function pingDatabase(timeoutMs = 2_000): Promise<number | null> {
 }
 
 export async function disconnectDatabase(): Promise<void> {
+	closing = true;
 	if (mongoose.connection.readyState === mongoose.ConnectionStates.disconnected) return;
 	await mongoose.disconnect();
 }

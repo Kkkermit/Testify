@@ -2252,6 +2252,9 @@
 		"termsTitle": "Conditions d’utilisation",
 		"termsSummary": "Les règles d’utilisation de {{bot}} et de ce tableau de bord, et ce qui se passe quand elles ne sont pas respectées. Lisez-les avant d’utiliser l’un ou l’autre.",
 		"whoRuns": "Qui gère ceci",
+		"operatorTitle": "Qui gère cette copie",
+		"operatorName": "Gérée par",
+		"operatorContact": "Contact",
 		"whoRunsP1": "{{bot}} est auto-hébergé. Qui a déployé cette instance — l’exploitant — décide de ce qu’elle fait, de ce qu’elle stocke et de qui peut l’atteindre. La responsabilité lui incombe, pas aux auteurs du projet.",
 		"whoRunsP2": "Le logiciel est fourni tel quel, sans garantie d’aucune sorte. Personne ne promet qu’il sera disponible, correct ou exempt de défauts.",
 		"whoRunsP3": "Le code est publié sous licence MIT. Chacun peut l’utiliser, le modifier, le partager et le vendre, à condition de conserver dans chaque copie la mention de droit d’auteur qui nomme son auteur d’origine, ainsi que la licence elle-même.",
@@ -2455,7 +2458,8 @@
 		"retentionL22": "Lignes du journal : les 6 derniers démarrages du bot, 2 000 lignes au plus chacun. Le prochain démarrage supprime le plus ancien, et l’exploitant peut les supprimer plus tôt.",
 		"retentionL23": "Statistiques Shardlens : sur le collecteur de l’opérateur, aussi longtemps qu’il choisit de les garder. Qui a exécuté chaque commande n’est conservé qu’en mode audit, chiffré, et supprimé au bout de 30 jours, ou jusqu’à 90 si l’opérateur le choisit.",
 		"retentionL24": "Une désinscription des statistiques : jusqu’à ce que vous lanciez /privacy opt-in. Supprimer vos données la conserve, pour que vous ne soyez pas compté de nouveau.",
-		"messagesP5": "Signaler un message est la dernière. Quand vous faites un clic droit sur un message et choisissez Report message, {{bot}} le publie dans le salon de messagerie modération de ce serveur pour son équipe : le texte du message, qui l’a écrit, qui l’a signalé et ce que vous en avez dit. Cette publication est dans Discord, pas dans la base de données du bot. Le bot retient pendant une heure, en mémoire seulement, les messages que vous avez signalés, pour qu’un même message ne soit pas signalé deux fois ; un redémarrage l’oublie."
+		"messagesP5": "Signaler un message est la dernière. Quand vous faites un clic droit sur un message et choisissez Report message, {{bot}} le publie dans le salon de messagerie modération de ce serveur pour son équipe : le texte du message, qui l’a écrit, qui l’a signalé et ce que vous en avez dit. Cette publication est dans Discord, pas dans la base de données du bot. Le bot retient pendant une heure, en mémoire seulement, les messages que vous avez signalés, pour qu’un même message ne soit pas signalé deux fois ; un redémarrage l’oublie.",
+		"messagesP6": "Ajouter {{bot}} à un serveur envoie aussi un message privé : une note pour bien démarrer, à la personne qui l’a ajouté. Pour la trouver, le bot lit l’entrée de sa propre arrivée dans le journal d’audit du serveur, ou à défaut sa propre entrée dans les intégrations du serveur, et écrit au propriétaire du serveur si aucune des deux ne le dit. Il n’en garde rien. Rien n’est envoyé à quelqu’un dont les messages privés sont fermés, et l’exploitant peut désactiver ce message."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
@@ -2891,6 +2895,8 @@
 			"featuresSummary": "Faites tourner le bot sans musique, sans casino ou sans tout ce dont vous ne voulez pas.",
 			"docker": "Docker",
 			"dockerSummary": "Le bot et sa base de données avec Docker Compose, et où il peut tourner ailleurs.",
+			"customising": "À votre image",
+			"customisingSummary": "Vos liens, qui l’exploite et le préfixe par défaut, dans un fichier à côté de .env, et comment garder un fork à jour.",
 			"dashboard": "Le site et le tableau de bord",
 			"dashboardSummary": "Ce site, le tableau de bord derrière la connexion, qui voit quoi, et les mettre sur Internet.",
 			"scripts": "Scripts",

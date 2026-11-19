@@ -68,14 +68,14 @@ server, and each should be before it is relied on.
 
 ### Dependencies behind their latest release
 
-| Package                    | Here    | Latest | What it takes                                                                                                                                                                                                                                                                 |
-| -------------------------- | ------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `discord-html-transcripts` | 3.2.0   | 3.3.0  | It moves to undici 7, so the `undici` override can go, but it pins React to exactly 19.1.1. Installed over this lockfile, React 18 stays hoisted for its components and a transcript fails with "Objects are not valid as a React child"; it needs React 19 at the root first |
-| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                                                                                                                                             |
-| `mongoose`                 | 8.24.1  | 9.12.0 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                                                                                                                                                      |
-| `react-router`             | 7.18.2  | 8.5.1  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                                                                                                                                                           |
-| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `docs/dashboard/screenshots/README.md`                                                                                                                                                                      |
-| `@anthropic-ai/sdk`        | 0.128.0 | 1.6.0  | Its first major. Only the support assistant's optional model picker uses it                                                                                                                                                                                                   |
+| Package                    | Here    | Latest | What it takes                                                                                                                                                                                                 |
+| -------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `discord-html-transcripts` | 3.2.0   | 3.3.0  | Not an option: its author has deprecated 3.3.0 as "broken due to a critical bug" and points back to 3.2.0. Wait for the release after it, which should also move to undici 7 and let the `undici` override go |
+| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                                                                             |
+| `mongoose`                 | 8.24.1  | 9.12.0 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                                                                                      |
+| `react-router`             | 7.18.2  | 8.5.1  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                                                                                           |
+| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `docs/dashboard/screenshots/README.md`                                                                                                      |
+| `@anthropic-ai/sdk`        | 0.128.0 | 1.6.0  | Its first major. Only the support assistant's optional model picker uses it                                                                                                                                   |
 
 `discord-giveaways` is at its latest, 6.0.1, but that was published in **August 2022** and nothing since. Replacing it
 with a giveaway system of the bot's own — records in MongoDB, a job that ends them, entries counted from a button —
@@ -87,5 +87,6 @@ Each `overrides` pin in `package.json` exists because a parent asked for a versi
 is explained in [`security.md`](security.md); remove a pin once its parent asks for a fixed version by itself. On
 5 November 2026 none did: minimatch 10 still asks `brace-expansion` `^5.0.5` (only minimatch 11 asks `^5.0.12`),
 cosmiconfig 9 asks `js-yaml` `^4.1.0`, ajv asks `fast-uri` `^3.0.1`, `@istanbuljs/load-nyc-config` asks `js-yaml`
-`^3.13.1`, and `discord-html-transcripts` 3.2.0 still pins undici v5. On 10 November 2026 `discord-giveaways` 6.0.1
+`^3.13.1`, and `discord-html-transcripts` 3.2.0 still pins undici v5. On 19 November 2026 jest-environment-jsdom 30.5.2 still
+asked jsdom `^26.1.0`. On 10 November 2026 `discord-giveaways` 6.0.1
 still asked `deepmerge-ts` `^4.2.1`.

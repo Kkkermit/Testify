@@ -1,5 +1,4 @@
 import { describeWithMongo } from "../helpers/mongo";
-import { DEFAULT_PREFIX } from "@config/constants";
 import { getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
 import { getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { createAutoResponder, listAutoResponders } from "@database/repositories/autoResponderRepository";
@@ -16,6 +15,7 @@ import { listSticky, setSticky } from "@database/repositories/stickyRepository";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
+import { DEFAULT_PREFIX } from "@testify/shared";
 
 const GUILD = "900000000000000001";
 const OTHER = "900000000000000002";

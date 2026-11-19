@@ -6,7 +6,7 @@ import { badRequest, notInGuild } from "@api/errors";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { disableAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
 import { setAutoRoles } from "@database/repositories/autoRoleRepository";
@@ -178,7 +178,9 @@ function summarisePrefix(patch: PrefixPatch): string {
 		parts.push(patch.enabled ? "Turned prefix commands on" : "Turned prefix commands off");
 	if (patch.prefix !== undefined) parts.push(`Changed the prefix to ${patch.prefix}`);
 
-	return parts.length === 0 ? `Changed the prefix settings (default is ${DEFAULT_PREFIX})` : parts.join(", ");
+	return parts.length === 0
+		? `Changed the prefix settings (default is ${instanceConfig().defaultPrefix})`
+		: parts.join(", ");
 }
 
 function summariseAntiLink(patch: AntiLinkPatch): string {

@@ -20,7 +20,7 @@ export function sectionId(section: LegalSection): string {
 }
 
 /** Move this whenever either document's wording changes; the page prints it as the date the text last changed. */
-const LEGAL_UPDATED = "2026-11-16";
+const LEGAL_UPDATED = "2026-11-18";
 
 export const TERMS: LegalDocument = {
 	title: "legal.termsTitle",
@@ -160,7 +160,14 @@ export const PRIVACY: LegalDocument = {
 		},
 		{
 			heading: "legal.messages",
-			paragraphs: ["legal.messagesP1", "legal.messagesP2", "legal.messagesP3", "legal.messagesP4", "legal.messagesP5"],
+			paragraphs: [
+				"legal.messagesP1",
+				"legal.messagesP2",
+				"legal.messagesP3",
+				"legal.messagesP4",
+				"legal.messagesP6",
+				"legal.messagesP5",
+			],
 		},
 		{
 			heading: "legal.purposes",

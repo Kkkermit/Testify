@@ -1,5 +1,4 @@
-import { DEFAULT_PREFIX } from "@config/constants";
-import { theme } from "@config/theme";
+import { instanceConfig } from "@config/instance";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getPrefix } from "@database/repositories/prefixRepository";
@@ -54,7 +53,7 @@ export default defineCommand({
 		// Matching can call out to a model, which may take longer than Discord waits for a first reply.
 		await interaction.deferReply();
 
-		const prefix = interaction.guild === null ? DEFAULT_PREFIX : await getPrefix(interaction.guild.id);
+		const prefix = interaction.guild === null ? instanceConfig().defaultPrefix : await getPrefix(interaction.guild.id);
 		const help = supportContext(prefix);
 		const desk = supportDesk(client);
 		const { question } = parsed.data;
@@ -70,14 +69,14 @@ export default defineCommand({
 				bot: help.bot,
 				ownerId: interaction.user.id,
 				dashboard: dashboardUrl(client.env),
-				supportServer: theme.supportServer,
+				supportServer: instanceConfig().supportServer,
 			}),
 		);
 	},
 
 	async autocomplete(interaction, client) {
 		const typed = interaction.options.getFocused().slice(0, QUESTION_MAX);
-		const links = supportDesk(client).suggest(typed, supportContext(DEFAULT_PREFIX), CHOICES_MAX);
+		const links = supportDesk(client).suggest(typed, supportContext(instanceConfig().defaultPrefix), CHOICES_MAX);
 		const choices = links.map((link) => ({ name: suggestionName(link), value: `${ARTICLE_CHOICE}${link.id}` }));
 
 		// First, so pressing Enter asks exactly what was typed rather than opening the top suggestion.

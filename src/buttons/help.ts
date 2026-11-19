@@ -1,4 +1,4 @@
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { defineButton } from "@core/button";
 import { getPrefix } from "@database/repositories/prefixRepository";
 import {
@@ -19,7 +19,7 @@ export default defineButton({
 
 	async run(interaction, context) {
 		const { client, action, args } = context;
-		const prefix = interaction.guildId === null ? DEFAULT_PREFIX : await getPrefix(interaction.guildId);
+		const prefix = interaction.guildId === null ? instanceConfig().defaultPrefix : await getPrefix(interaction.guildId);
 		const ownerId = args.at(-1) ?? interaction.user.id;
 
 		if (action === "noop") return;

@@ -3,7 +3,7 @@ import { type ApiBindings } from "@api/context";
 import { notFound } from "@api/errors";
 import { requireAuth } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
-import { DEFAULT_PREFIX } from "@config/constants";
+import { instanceConfig } from "@config/instance";
 import { countAnswer, supportContext, supportDesk } from "@lib/support";
 import { supportArticleParams, type SupportIndex, supportQuestion, type SupportReply } from "@testify/shared";
 
@@ -18,7 +18,9 @@ supportQuestions.use("*", requireAuth);
 
 supportArticles.get("/", (context) => {
 	const client = context.get("client");
-	const body: SupportIndex = { articles: supportDesk(client).catalogue(supportContext(DEFAULT_PREFIX)) };
+	const body: SupportIndex = {
+		articles: supportDesk(client).catalogue(supportContext(instanceConfig().defaultPrefix)),
+	};
 
 	return context.json(body);
 });
@@ -26,7 +28,7 @@ supportArticles.get("/", (context) => {
 supportQuestions.post("/ask", async (context) => {
 	const client = context.get("client");
 	const { question } = await parseBody(context, supportQuestion);
-	const { reply, by } = await supportDesk(client).answer(question, supportContext(DEFAULT_PREFIX));
+	const { reply, by } = await supportDesk(client).answer(question, supportContext(instanceConfig().defaultPrefix));
 	countAnswer(client, "dashboard", reply, by);
 
 	const body: SupportReply = reply;
@@ -36,7 +38,7 @@ supportQuestions.post("/ask", async (context) => {
 supportArticles.get("/articles/:articleId", (context) => {
 	const client = context.get("client");
 	const { articleId } = parseParams(context, supportArticleParams);
-	const help = supportContext(DEFAULT_PREFIX);
+	const help = supportContext(instanceConfig().defaultPrefix);
 	const desk = supportDesk(client);
 
 	const answer = desk.article(articleId, help);

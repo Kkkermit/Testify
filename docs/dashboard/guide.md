@@ -101,22 +101,23 @@ only symptom is an empty object at runtime.
 
 Each consumer reads what suits it:
 
-| Consumer          | Reads                     | Needs a build? |
-| ----------------- | ------------------------- | -------------- |
-| `tsc`             | `types: "src/index.ts"`   | No             |
-| Jest              | an explicit source mapper | No             |
-| Vite              | an alias to source        | No             |
-| The bot's `dist/` | `main: "dist/index.js"`   | **Yes**        |
+| Consumer          | Reads                                    | Needs a build? |
+| ----------------- | ---------------------------------------- | -------------- |
+| `tsc`             | the `types` export, `src/index.ts`       | No             |
+| Jest              | an explicit source mapper                | No             |
+| Vite              | an alias to source                       | No             |
+| The dev bot       | the `development` export, `src/index.ts` | No             |
+| The bot's `dist/` | the `require` export, `dist/index.js`    | **Yes**        |
 
 `prepare` builds it after any install. Editing `shared/src` and then running the **built** bot is the one case
 needing `npm run build:shared` by hand.
 
 > [!WARNING]
-> **This bit once cost an afternoon.** `tsx` resolves `@testify/shared` to `dist/index.js`, so the **dev** bot
-> reads the build too, and `shared/dist` is gitignored — pulling never refreshes it. A new export in
-> `shared/src` is then `undefined` at runtime and every route using it 500s with
-> `Cannot read properties of undefined (reading 'safeParse')`. `npm run dev` and `npm run dev:all` build shared
-> first now, so it cannot recur.
+> **This bit once cost an afternoon.** Anything run without the `development` condition resolves
+> `@testify/shared` to `dist/index.js`, and `shared/dist` is gitignored — pulling never refreshes it. A new export
+> in `shared/src` is then `undefined` at runtime and every route using it 500s with
+> `Cannot read properties of undefined (reading 'safeParse')`. `npm run dev` and `npm run dev:all` pass the
+> condition, so the dev bot always reads the source.
 
 `shared/` stays dependency-light: **zod and nothing else.** No discord.js, no React.
 
