@@ -28,12 +28,29 @@ describe("bigText", () => {
 	});
 
 	it("skips characters it has no glyph for rather than breaking the block", () => {
-		const widths = new Set(bigText("A-B!").map((line) => [...line].length));
+		const widths = new Set(bigText("A-B✓").map((line) => [...line].length));
 		expect(widths.size).toBe(1);
 	});
 
 	it("returns nothing for a name it cannot draw at all", () => {
-		expect(bigText("!!!")).toEqual([]);
+		expect(bigText("✓✓✓")).toEqual([]);
+	});
+
+	/** A bot called Fixxer2.0 was drawn as FIXXER20, because the font had no full stop. */
+	it("draws the punctuation a bot's name can hold, each glyph a rectangle", () => {
+		const width = (text: string): number => [...(bigText(text)[0] ?? "")].length;
+		const punctuation = [...".,!?:;'\"-_+=/\\|()[]<>#$%&*@^"];
+		const broken = punctuation.filter((mark) => {
+			const lines = bigText(mark);
+			return lines.length !== 6 || new Set(lines.map((line) => [...line].length)).size !== 1 || width(mark) === 0;
+		});
+
+		expect(broken).toEqual([]);
+		expect(width("Fixxer2.0")).toBe(width("Fixxer20") + width("."));
+	});
+
+	it("draws an accented letter as the letter", () => {
+		expect(bigText("Café")).toEqual(bigText("Cafe"));
 	});
 });
 
