@@ -2852,6 +2852,15 @@ Three things there are load-bearing and non-obvious, all commented in place:
 `moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
 `node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
 
+**jsdom loads no stylesheet, so `src/test/setup.ts` gives it the display rules an accessible name depends on.** A
+name is joined from its parts with a space only where a part is not `display: inline`. jsdom 26 called every element
+a block, so every name had its spaces; jsdom 27 and later call a `<span>` inline, as a browser does without CSS, and
+`Failed AB12CD` read as `FailedAB12CD`. In the real page those parts are flex items or `block`, and Chromium with the
+built CSS reads all four names that failed with their spaces, so the setup makes the children of `flex`, `inline-flex`,
+`grid` and `inline-grid` and anything `block` block-level, as the browser does. A name built from plain inline spans
+still runs together, which is what a browser would read too. jsdom itself is held at 29 by an override, because
+`jest-environment-jsdom` still asks for 26 (see `docs/security.md`).
+
 ### Adding to the dashboard
 
 Three registries exist so the common changes are data rather than edits to a screen. Reach for these first — a
