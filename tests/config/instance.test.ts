@@ -88,28 +88,30 @@ describe("the instance config file", () => {
 		mkdirSync(join(folder, "testify.config.json"));
 		const cwd = jest.spyOn(process, "cwd").mockReturnValue(folder);
 
-		expect(instanceFile({ NODE_ENV: "production", TESTIFY_CONFIG: undefined }).exists).toBe(false);
+		expect(instanceFile({ TESTIFY_CONFIG: undefined }).exists).toBe(false);
 		cwd.mockRestore();
 	});
 
-	it("is read beside .env, as the development file under npm run dev, and wherever Docker points", () => {
-		const names = [
-			instanceFile({ NODE_ENV: "production", TESTIFY_CONFIG: undefined }).name,
-			instanceFile({ NODE_ENV: "development", TESTIFY_CONFIG: undefined }).name,
-			instanceFile({ NODE_ENV: "production", TESTIFY_CONFIG: "/app/instance/testify.config.json" }).path,
-		];
-
-		expect(names).toEqual([
-			"testify.config.json",
-			"testify.config.development.json",
-			resolve("/app/instance/testify.config.json"),
-		]);
+	/** `npm run dev` and `npm start` read one file, so a development bot never runs with links nobody set. */
+	it("is read beside .env whichever way the bot runs, and wherever Docker points", () => {
+		expect([
+			instanceFile({ TESTIFY_CONFIG: undefined }).path,
+			instanceFile({ TESTIFY_CONFIG: "/srv/t.json" }).path,
+		]).toEqual([resolve("testify.config.json"), resolve("/srv/t.json")]);
 	});
 
 	it("ships an example that changes nothing when copied as it is", () => {
 		const example = { name: "example", path: join(ROOT, "testify.config.example.json"), exists: true };
 
 		expect(readInstance(example)).toEqual(INSTANCE_DEFAULTS);
+	});
+
+	/** Railway and every other host that builds the Dockerfile ran with the defaults, because the file never left the build. */
+	it("goes into the image when the repository carries one, and the image still builds when it does not", () => {
+		const runtime = readFileSync(join(ROOT, "Dockerfile"), "utf8").split(/^FROM .* AS runtime$/m)[1] ?? "";
+
+		expect(runtime).toMatch(/^COPY \S+ testify\.config\.jso\[n\] \.\/$/m);
+		expect(readFileSync(join(ROOT, ".dockerignore"), "utf8")).not.toMatch(/testify\.config/);
 	});
 
 	/** The schema is what an editor checks the file against, so it has to follow the bot's own rules. */

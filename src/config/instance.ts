@@ -88,10 +88,9 @@ export interface InstanceFile {
 	exists: boolean;
 }
 
-/** Beside `.env`, as `npm run dev` reads `.env.development`; `TESTIFY_CONFIG` names another place, as Docker does. */
-export function instanceFile(env: Pick<Env, "NODE_ENV" | "TESTIFY_CONFIG">): InstanceFile {
-	const given =
-		env.TESTIFY_CONFIG ?? (env.NODE_ENV === "development" ? "testify.config.development.json" : "testify.config.json");
+/** Beside `.env`, for `npm run dev` and `npm start` alike; `TESTIFY_CONFIG` names another place, as Docker does. */
+export function instanceFile(env: Pick<Env, "TESTIFY_CONFIG">): InstanceFile {
+	const given = env.TESTIFY_CONFIG ?? "testify.config.json";
 	const path = resolve(process.cwd(), given);
 
 	// A folder is not the file, which is what Docker leaves where it was asked to mount one that did not exist.
@@ -149,7 +148,7 @@ export function readInstance(file: InstanceFile): InstanceConfig {
 
 let loaded: InstanceConfig | null = null;
 
-export function loadInstance(env: Pick<Env, "NODE_ENV" | "TESTIFY_CONFIG">): InstanceConfig {
+export function loadInstance(env: Pick<Env, "TESTIFY_CONFIG">): InstanceConfig {
 	loaded = readInstance(instanceFile(env));
 	return loaded;
 }

@@ -167,6 +167,20 @@ Vercel is worth being explicit about, because people ask: it can host Discord _H
 webhook-delivered slash commands — but not a gateway client, and a serverless function cannot hold a voice
 connection open. There is no configuration that makes this bot run there.
 
+### Your settings on Railway
+
+`.env`'s variables go in the service's **Variables** tab. `testify.config.json` is a file, and Railway has no folder
+beside them to put it in, so it gets there one of two ways:
+
+- **Building from your fork:** commit it. It is gitignored so that nobody commits their settings by accident, and
+  `git add -f testify.config.json` adds it anyway; once it is tracked, git keeps tracking it. The image copies it to
+  `/app`, where the bot looks, so a change is a push and Railway's rebuild.
+- **Running the published image:** attach a volume to the service, put the file on it with Railway's volume file
+  browser, and set `TESTIFY_CONFIG` to its path there, such as `/data/testify.config.json`. A change needs only a
+  restart.
+
+Without either, the bot runs with the built-in settings, exactly as a copy with no file does.
+
 ---
 
 ## 🩺 The health check

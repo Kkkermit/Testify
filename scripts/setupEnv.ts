@@ -338,15 +338,15 @@ async function main(): Promise<void> {
 		steps.push("", "One more step in the Developer Portal, under OAuth2 → Redirects:", `  ${paint.bold(callback)}`);
 	}
 
-	const configured = await makeItYours(isDev);
+	const configured = await makeItYours();
 	if (configured !== null) steps.push("", `Your links and settings are in ${paint.bold(configured)}.`);
 
 	print(["", ...box("Done", steps, "success", paint).map((line) => `  ${line}`), ""]);
 }
 
 /** Optional, and separate from `.env`, because none of it is secret and a fork may want to commit it. */
-async function makeItYours(isDev: boolean): Promise<string | null> {
-	const filename = isDev ? "testify.config.development.json" : "testify.config.json";
+async function makeItYours(): Promise<string | null> {
+	const filename = "testify.config.json";
 	const target = resolve(process.cwd(), filename);
 
 	const { wanted } = await prompts(

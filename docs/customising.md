@@ -62,11 +62,14 @@ A few things worth knowing:
   most other editors complete the keys and underline a mistake.
 - **It is read once, at start-up.** Restart the bot after changing it. A mistake stops the start with a list of
   every problem, and an unknown key is one of them, so a misspelt setting never quietly does nothing.
-- **`npm run dev` reads `testify.config.development.json`**, the way it reads `.env.development`, so a development
-  bot can use a different prefix from the one people invite.
+- **One file, however the bot runs.** `npm run dev` and `npm start` both read `testify.config.json`; only `.env` is
+  split in two.
 - **In Docker it sits beside `.env` too.** `docker-compose.yml` mounts the folder it runs from, read-only, so the bot
   finds the file there, and a missing one simply means the defaults. See [Docker](hosting.md).
-- **It is ignored by git, like `.env`.** In a fork you want to commit it in, delete its two lines from `.gitignore`.
+- **On Railway, commit it, or put it on a volume.** A host that builds from your repository finds nothing that git
+  does not have. [Your settings on Railway](hosting.md#your-settings-on-railway) has both ways.
+- **It is ignored by git, like `.env`.** `git add -f testify.config.json` commits it anyway, and git keeps tracking it
+  from then on.
 
 ### The operator
 

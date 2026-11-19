@@ -840,8 +840,8 @@ prefix and whether the bot greets whoever adds it — is `testify.config.json`, 
 [`docs/customising.md`](docs/customising.md) is the reader's guide to it. Six things about it are load-bearing:
 
 - **Every key is optional and the defaults are the original's** (`INSTANCE_DEFAULTS`), so a copy with no file behaves
-  as it always did. It sits beside `.env` and is found the same way, `testify.config.development.json` under
-  `npm run dev`, and it is gitignored like `.env`; a fork that wants it committed removes those two lines.
+  as it always did. It sits beside `.env`, one file for `npm run dev` and `npm start` alike, and it is gitignored like
+  `.env`; a fork that deploys from git adds it with `git add -f`.
 - **It is read once, in `main()` straight after `loadEnv`, and fails start-up with a list**, unknown keys included
   (`z.strictObject`), so a misspelt setting never silently does nothing. `explainStartupFailure` turns an
   `InstanceError` into the same kind of box as a bad `.env`. Everything else reads `instanceConfig()`, which is the
@@ -850,7 +850,10 @@ prefix and whether the bot greets whoever adds it — is `testify.config.json`, 
   `prefix.default` is a getter for exactly that reason.
 - **Docker mounts the folder, not the file.** `docker-compose.yml` mounts the folder it runs from at `/app/instance`,
   read-only, and sets `TESTIFY_CONFIG` to the file there. Mounting a file that does not exist makes Docker create a
-  folder in its place, and `instanceFile` reads a folder as no file, so the defaults apply either way.
+  folder in its place, and `instanceFile` reads a folder as no file, so the defaults apply either way. **A host that
+  builds the `Dockerfile` gets the file in the image:** Railway has nowhere else to put one, so the runtime stage copies
+  `testify.config.jso[n]` into `/app` beside `package.json`, because the legacy builder refuses a pattern that is a
+  `COPY`'s only source. The published image is built from a checkout without one, so it never carries anybody's.
 - **The links live nowhere else.** `theme.ts` no longer holds `author`, `repository` or `supportServer`, and
   `tests/config/instance.test.ts` fails on the original's repository, its support invite or `DEFAULT_PREFIX` written
   anywhere in `src` but `instance.ts`. `projectLinkButtons` draws Source code and Support, leaving Support out when the
