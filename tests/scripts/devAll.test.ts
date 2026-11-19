@@ -1,5 +1,7 @@
 import { type ChildProcess } from "node:child_process";
-import { prefixLines, stopTree } from "../../scripts/devAll";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { BOT_WATCH, prefixLines, stopTree, syncedFolderRead } from "../../scripts/devAll";
 
 /** How a child's output is prefixed; the Windows interrupt behaviour itself needs a Windows terminal. */
 
@@ -68,5 +70,31 @@ describe("stopping a child", () => {
 		expect(killSpy).toHaveBeenCalledWith(-1234, "SIGTERM");
 		expect(child.kill).toHaveBeenCalledWith("SIGTERM");
 		killSpy.mockRestore();
+	});
+});
+
+describe("watching the bot", () => {
+	/**
+	 * The dev bot read shared's build: a branch switch under a running dev:all crashed it on an export the build lacked,
+	 * and rebuilding it at start restarted the bot a second in, because macOS reported the write.
+	 */
+	it("runs shared from its source, the same way in npm run dev and dev:all", () => {
+		const read = (path: string): unknown => JSON.parse(readFileSync(resolve(__dirname, "../..", path), "utf8"));
+		const { scripts } = read("package.json") as { scripts: Record<string, string> };
+		const { exports } = read("shared/package.json") as { exports: Record<string, Record<string, string>> };
+
+		expect(BOT_WATCH).toContain("--conditions=development");
+		expect(exports["."]?.["development"]).toBe("./src/index.ts");
+		expect(scripts["dev"]).toContain(`tsx ${BOT_WATCH.join(" ")}`);
+	});
+
+	/** A project on an iCloud-synced Desktop crashed on every restart with nothing to say why. */
+	it("recognises the read macOS cancels in a synced folder, and nothing else", () => {
+		const cancelled = "Error: ECANCELED: operation canceled, read\n    at Object.readFileSync (node:fs:440:20)";
+
+		expect([syncedFolderRead(cancelled), syncedFolderRead("Error: ENOENT: no such file or directory")]).toEqual([
+			true,
+			false,
+		]);
 	});
 });

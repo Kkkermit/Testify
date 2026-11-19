@@ -5,7 +5,7 @@ import { botName } from "@core/brand";
 import { TestifyClient } from "@core/client";
 import { loadEverything, publishCommands, publishScope } from "@core/loader";
 import { createLogger } from "@core/logger";
-import { handleProcessSignals } from "@core/shutdown";
+import { handleProcessSignals, isShuttingDown } from "@core/shutdown";
 import { connectDatabase } from "@database/connection";
 import {
 	BootReport,
@@ -29,7 +29,7 @@ async function main(): Promise<void> {
 	const client = new TestifyClient(env, logger);
 	handleProcessSignals(client);
 
-	const report = new BootReport();
+	const report = new BootReport().stopWhen(isShuttingDown);
 	report.header({
 		name: botName(),
 		version: botVersion(),
@@ -88,6 +88,7 @@ async function main(): Promise<void> {
 	exitOnFatalClose(client);
 	report.note("working", "Discord", "logging in…");
 	await client.login(env.DISCORD_TOKEN);
+	if (isShuttingDown()) return;
 
 	// After login, so the cache is filled; a website that fails to start does not stop the bot.
 	if (website) {
@@ -99,6 +100,8 @@ async function main(): Promise<void> {
 
 // Startup is the one place a failure still exits: a bot that never connected has nothing to keep alive.
 main().catch((error: unknown) => {
+	// A reload or Ctrl+C partway through: shutdown() is already exiting, and whatever failed was its doing.
+	if (isShuttingDown()) return;
 	printStartupFailure(error);
 	process.exit(1);
 });
