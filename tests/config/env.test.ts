@@ -197,6 +197,7 @@ describe("the Shardlens settings", () => {
 			{ SHARDLENS_URL: "not an address", SHARDLENS_INGEST_KEY: read },
 			{ SHARDLENS_INGEST_KEY: "wrong" },
 			{ SHARDLENS_READ_KEY: read },
+			{ SHARDLENS_ACTIVITY_KEY: "slk_read_not_an_activity_key" },
 		];
 
 		for (const settings of cases) {

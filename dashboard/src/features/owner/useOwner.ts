@@ -13,6 +13,7 @@ import {
 	type FunnelReport,
 	type GrowthReport,
 	type GuildUsageReport,
+	type LiveRead,
 	type LogFeed,
 	type LogRuns,
 	type OwnerGuildFilter,
@@ -23,9 +24,13 @@ import {
 	type ReliabilityReport,
 	type ReportedLogLevel,
 	type RetentionReport,
+	type RunsFilters,
+	type RunsPage,
 	type RuntimeInfo,
+	type TopRunners,
 	type UsageReport,
 } from "@testify/shared";
+import { useDocumentVisible } from "@/hooks/useDocumentVisible";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -107,6 +112,35 @@ export const useRetention = (
 		{ ...windowOf(days), tz, start: start ?? "", interval, ...(back === null ? {} : { back }) },
 		start !== null,
 	);
+
+/** A POST, so the person looked up stays in the body and out of every address. */
+export function useRuns(days: number, filters: RunsFilters, before: string | null): UseQueryResult<RunsPage> {
+	return useQuery({
+		queryKey: keys.owner.runs(days, JSON.stringify(filters), before ?? ""),
+		queryFn: () => api.post<RunsPage>("/analytics/runs", { days, ...filters, ...(before === null ? {} : { before }) }),
+		staleTime: 60_000,
+		placeholderData: keepPreviousData,
+	});
+}
+
+export const useTopRunners = (window: TopRunners["window"]): UseQueryResult<TopRunners> =>
+	useQuery({
+		queryKey: keys.owner.topRunners(window),
+		queryFn: () => api.get<TopRunners>(`/analytics/runs/top?window=${window}`),
+		staleTime: 60_000,
+	});
+
+const LIVE_EVERY_MS = 3_000;
+
+/** Asking is what keeps the bot's one stream open, so a hidden tab stops asking and the stream closes. */
+export function useLive(): UseQueryResult<LiveRead> {
+	const visible = useDocumentVisible();
+	return useQuery({
+		queryKey: keys.owner.live(),
+		queryFn: () => api.get<LiveRead>("/analytics/live"),
+		refetchInterval: visible ? LIVE_EVERY_MS : false,
+	});
+}
 
 export function useGuildUsage(guildId: string, days: number): UseQueryResult<GuildUsageReport> {
 	return useQuery({

@@ -10,7 +10,7 @@ import {
 	retentionReport,
 } from "@lib/bot/usageSections.util";
 
-const KEY = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
+const KEY = `slk_read_${"r".repeat(43)}`;
 const NOW = Date.parse("2026-11-15T12:00:00.000Z");
 
 type Spec = Record<string, unknown> & { kind: string };

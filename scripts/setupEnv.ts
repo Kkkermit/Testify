@@ -148,6 +148,12 @@ export function fields(isDev: boolean): Field[] {
 			hint: "From the collector's own settings; it starts slk_read_",
 			required: false,
 		},
+		{
+			key: "SHARDLENS_ACTIVITY_KEY",
+			message: "Shardlens activity key, for who ran what in the owner console",
+			hint: "Blank keeps who ran what on the collector; it starts slk_activity_",
+			required: false,
+		},
 	];
 }
 

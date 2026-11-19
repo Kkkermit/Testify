@@ -362,6 +362,7 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `SHARDLENS_URL`              |    —     | A [Shardlens](https://github.com/Kkkermit/Shardlens) collector you run, for analytics. Off while blank |
 | `SHARDLENS_INGEST_KEY`       |    —     | That collector's ingest key, `slk_ingest_…`, from the `bot.env` its `init` writes. Never its read key  |
 | `SHARDLENS_READ_KEY`         |    —     | Its read key, `slk_read_…`, for the owner console's usage. Kept by the bot, never sent to a browser    |
+| `SHARDLENS_ACTIVITY_KEY`     |    —     | Its activity key, `slk_activity_…`, for who ran what in the owner console. Owners only, audit mode     |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks. The music and dashboard
 variables are covered in their own sections below.

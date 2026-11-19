@@ -47,8 +47,8 @@ export interface UsageDay {
 	failures: number;
 }
 
-/** Why the console cannot show analytics: no read key, a key the collector refuses, or a collector not answering. */
-export const ANALYTICS_PROBLEMS = ["off", "refused", "unreachable"] as const;
+/** Why the console cannot show analytics: no key, a key the collector refuses, no answer, or no activity log kept. */
+export const ANALYTICS_PROBLEMS = ["off", "refused", "unreachable", "audit_off"] as const;
 
 export type AnalyticsProblem = (typeof ANALYTICS_PROBLEMS)[number];
 
@@ -548,4 +548,93 @@ export interface RetentionReport {
 	back: string | null;
 	periods: number;
 	cohorts: { cohort: string; size: number; retained: number[] }[];
+}
+
+/** How a run ended, as the collector names it: `timeout` missed Discord's three seconds, `no_response` never answered. */
+export const RUN_OUTCOMES = ["ok", "error", "timeout", "no_response"] as const;
+
+export type RunOutcome = (typeof RUN_OUTCOMES)[number];
+
+/** `failed` is every outcome but `ok`. */
+export const RUN_FILTERS = ["failed", ...RUN_OUTCOMES] as const;
+
+/** A page of the activity log is a time, then `~` and the last row's ID, exactly as the collector hands it back. */
+const RUN_CURSOR =
+	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z~[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** A body rather than a query, so a user id never lands in an address, where a proxy, a log or a history keeps it. */
+export const runsBody = z.strictObject({
+	days: analyticsQuery.shape.days,
+	guildId: snowflake.optional(),
+	command: z.string().regex(COMMAND_NAME, "must be a command").optional(),
+	/** An exact Discord id: the only way to look one person up. */
+	userId: snowflake.optional(),
+	outcome: z.enum(RUN_FILTERS).optional(),
+	before: z.string().max(64).regex(RUN_CURSOR, "must be a page from the collector").optional(),
+});
+
+export type RunsBody = z.output<typeof runsBody>;
+
+/** What the console narrows the log by; the window is the tab's own. */
+export type RunsFilters = Omit<RunsBody, "days" | "before">;
+
+export interface RunRow {
+	/** The collector's id for the run, not Discord's. */
+	id: string;
+	at: string;
+	guildId: string | null;
+	/** Chosen by the server's owner, so drawn as text. */
+	guildName: string | null;
+	/** `chat_input`, `button`, `select`, `modal_submit`, `message_command` and the rest. */
+	kind: string;
+	command: string | null;
+	sub: string | null;
+	/** A component's handler and action, and only for the bot's own handlers. */
+	handler: string | null;
+	outcome: RunOutcome;
+	/** How long Discord waited for the first reply; null for a prefix run, which has none. */
+	answerMs: number | null;
+	/** Null for a run written under another audit key, which this one cannot read. */
+	userId: string | null;
+	/** Chosen by the person, so drawn as text. */
+	username: string | null;
+	avatarUrl: string | null;
+}
+
+export interface RunsPage {
+	rows: RunRow[];
+	/** Pass back as `before` for the page after; null on the last. */
+	next: string | null;
+	collector: string;
+}
+
+export const TOP_RUNNER_WINDOWS = ["24h", "7d"] as const;
+
+export const topRunnersQuery = z.object({ window: z.enum(TOP_RUNNER_WINDOWS).default("24h") });
+
+export interface TopRunners {
+	window: (typeof TOP_RUNNER_WINDOWS)[number];
+	/** Up to 25, the busiest first; a name only for somebody the bot already knows, since nobody is fetched for it. */
+	rows: { userId: string | null; username: string | null; avatarUrl: string | null; runs: number }[];
+}
+
+/** What the bot is doing this minute, from the collector's live stream. */
+export interface LiveNumbers {
+	at: string;
+	/** Runs in the last 60 seconds. */
+	perMinute: number;
+	/** Failed runs in the last 15 minutes. */
+	failed15m: number;
+	/** Runs in each of the last 60 seconds, oldest first. */
+	perSecond: number[];
+	/** The slowest one in twenty first replies over the last five minutes. */
+	slowMs: number | null;
+	shards: { shard: number; pingMs: number; fresh: boolean }[];
+	servers: number;
+}
+
+/** `numbers` is null while the stream connects, or when `problem` says why there are none. */
+export interface LiveRead {
+	numbers: LiveNumbers | null;
+	problem: AnalyticsProblem | null;
 }

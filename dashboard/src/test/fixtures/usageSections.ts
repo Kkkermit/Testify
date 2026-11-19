@@ -3,9 +3,12 @@ import {
 	type BotActivityReport,
 	type FunnelReport,
 	type GrowthReport,
+	type LiveRead,
 	type PanelsReport,
 	type ReliabilityReport,
 	type RetentionReport,
+	type RunsPage,
+	type TopRunners,
 } from "@testify/shared";
 
 const week = ["2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07"];
@@ -123,4 +126,66 @@ export const retention: RetentionReport = {
 	back: null,
 	periods: 8,
 	cohorts: [{ cohort: "2026-08-03", size: 10, retained: [5, 2, 0, 0, 0, 0, 0, 0] }],
+};
+
+export const liveRead: LiveRead = {
+	numbers: {
+		at: "2026-08-07T12:00:00.000Z",
+		perMinute: 18,
+		failed15m: 2,
+		perSecond: [0, 1, 0, 2, 0, 0, 1],
+		slowMs: 840,
+		shards: [
+			{ shard: 0, pingMs: 41, fresh: true },
+			{ shard: 1, pingMs: 0, fresh: false },
+		],
+		servers: 12,
+	},
+	problem: null,
+};
+
+/** One row carries text a person chose that looks like markup, which must arrive as text. */
+export const runsPage: RunsPage = {
+	rows: [
+		{
+			id: "0190f1a2-0000-7000-8000-000000000001",
+			at: "2026-08-07T11:58:00.000Z",
+			guildId: "900000000000000001",
+			guildName: "Testify HQ",
+			kind: "chat_input",
+			command: "warn",
+			sub: "create",
+			handler: null,
+			outcome: "error",
+			answerMs: 3_400,
+			userId: "100000000000000002",
+			username: "<img src=x onerror=alert(1)>",
+			avatarUrl: null,
+		},
+		{
+			id: "0190f1a2-0000-7000-8000-000000000002",
+			at: "2026-08-07T11:57:00.000Z",
+			guildId: null,
+			guildName: null,
+			kind: "button",
+			command: null,
+			sub: null,
+			handler: "shop:buy",
+			outcome: "ok",
+			answerMs: 90,
+			userId: null,
+			username: null,
+			avatarUrl: null,
+		},
+	],
+	next: "2026-08-07T11:57:00.000Z~0190f1a2-0000-7000-8000-000000000002",
+	collector: "https://stats.example.com",
+};
+
+export const topRunners: TopRunners = {
+	window: "24h",
+	rows: [
+		{ userId: "100000000000000002", username: "maple.fox", avatarUrl: null, runs: 40 },
+		{ userId: null, username: null, avatarUrl: null, runs: 3 },
+	],
 };

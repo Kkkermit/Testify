@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
-import { parseParams, parseQuery } from "@api/validate";
+import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { logRing } from "@core/logRing";
@@ -16,7 +16,10 @@ import {
 	funnelReport,
 	growthReport,
 	guildUsageReport,
+	liveFeedFor,
 	panelsReport,
+	readRuns,
+	readTopRunners,
 	reliabilityReport,
 	retentionReport,
 	runtimeInfo,
@@ -36,6 +39,8 @@ import {
 	type LogRun,
 	type LogRuns,
 	retentionQuery,
+	runsBody,
+	topRunnersQuery,
 } from "@testify/shared";
 
 /** The owner console's analytics and logs, read-only. Everything here is behind `requireOwner`. */
@@ -46,8 +51,9 @@ analytics.use("*", requireOwner);
 
 const UNAVAILABLE: Record<AnalyticsProblem, string> = {
 	off: "Analytics are read from Shardlens, which needs its address and a read key.",
-	refused: "Shardlens refused the read key.",
+	refused: "Shardlens refused the key.",
 	unreachable: "Shardlens did not answer.",
+	audit_off: "The collector is not in audit mode, so it keeps no record of who ran what.",
 };
 
 /** A 503 with its own code, since the bot is fine and only the collector is missing. */
@@ -109,6 +115,22 @@ analytics.get("/retention", async (context) => {
 	const client = context.get("client");
 	knownCommands(client, [query.start, query.back]);
 	return context.json(await fromShardlens(() => retentionReport(client, query)));
+});
+
+/** A POST so the person looked up never lands in an address, where a proxy, a log or a history keeps it. */
+analytics.post("/runs", async (context) => {
+	const body = await parseBody(context, runsBody);
+	const client = context.get("client");
+	knownCommands(client, [body.command]);
+	return context.json(await fromShardlens(() => readRuns(client, body)));
+});
+
+/** Read from the one stream the bot keeps open while somebody is looking, never a stream per request. */
+analytics.get("/live", (context) => context.json(liveFeedFor(context.get("client")).read()));
+
+analytics.get("/runs/top", async (context) => {
+	const { window } = parseQuery(context, topRunnersQuery);
+	return context.json(await fromShardlens(() => readTopRunners(context.get("client"), window)));
 });
 
 analytics.get("/guilds/:guildId", async (context) => {

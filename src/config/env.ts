@@ -86,6 +86,8 @@ const fields = z.object({
 	SHARDLENS_INGEST_KEY: z.string().optional(),
 	// Read-only, for the owner console's analytics. Held by the bot and never sent to a browser.
 	SHARDLENS_READ_KEY: z.string().optional(),
+	// Reads who ran what, from a collector in audit mode, for the owner console alone.
+	SHARDLENS_ACTIVITY_KEY: z.string().optional(),
 	// Where `testify.config.json` is, when it is not beside `.env`. Only docker-compose.yml sets it.
 	TESTIFY_CONFIG: z.string().min(1).optional(),
 });

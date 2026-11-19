@@ -1,3 +1,4 @@
+import { type Filter, type TopQuery } from "@shardlens/client";
 import { type Guild } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { LENS_EVENTS, serverKey } from "@lib/bot/shardlens.util";
@@ -5,17 +6,11 @@ import {
 	ALL_ROWS,
 	AnalyticsUnavailable,
 	askFor,
-	commandsAnswer,
 	dailySeries,
 	eventProps,
 	FAILED_OUTCOMES,
-	propsAnswer,
 	readerFor,
-	seriesAnswer,
-	serverAnswer,
 	serverFilter,
-	type Spec,
-	topAnswer,
 	windowDays,
 } from "@lib/bot/shardlensReader.util";
 import {
@@ -128,7 +123,7 @@ function knownGuilds(client: TestifyClient, counts: Counts): GuildUsageRow[] {
 }
 
 /** Runs by what started them, which is how slash commands and right-click actions are told from prefix commands. */
-const byKind = (filters: Spec[] = []): Spec => ({
+const byKind = (filters: Filter[] = []): Omit<TopQuery, "range"> => ({
 	kind: "top",
 	metric: "interactions",
 	groupBy: "kind",
@@ -152,13 +147,13 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 	const ask = askFor(client, days, now);
 
 	const [commands, typical, byDay, kinds, byGuild, screens, dashboardByGuild, meta] = await Promise.all([
-		ask({ kind: "commands" }, commandsAnswer),
-		ask({ kind: "top", metric: "interactions", groupBy: "command", stat: "p50", limit: ALL_ROWS }, topAnswer),
-		ask(dailySeries("interactions", { groupBy: "outcome" }), seriesAnswer),
-		ask(byKind(), topAnswer),
-		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }, topAnswer),
-		ask(eventProps(LENS_EVENTS.screen, "route"), propsAnswer),
-		ask(eventProps(LENS_EVENTS.server, "server"), propsAnswer),
+		ask({ kind: "commands" }),
+		ask({ kind: "top", metric: "interactions", groupBy: "command", stat: "p50", limit: ALL_ROWS }),
+		ask(dailySeries("interactions", { groupBy: "outcome" })),
+		ask(byKind()),
+		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }),
+		ask(eventProps(LENS_EVENTS.screen, "route")),
+		ask(eventProps(LENS_EVENTS.server, "server")),
 		reader.meta(),
 	]);
 
@@ -224,21 +219,18 @@ export async function guildUsageReport(
 	const here = serverFilter(guild.id);
 
 	const [byDay, byCommand, failedByCommand, kinds, dashboard, server, meta] = await Promise.all([
-		ask(dailySeries("interactions", { groupBy: "outcome", filters: here }), seriesAnswer),
-		ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL_ROWS }, topAnswer),
-		ask(
-			{
-				kind: "top",
-				metric: "interactions",
-				groupBy: "command",
-				filters: [...here, { field: "outcome", op: "in", value: FAILED_OUTCOMES }],
-				limit: ALL_ROWS,
-			},
-			topAnswer,
-		),
-		ask(byKind(here), topAnswer),
-		ask(eventProps(LENS_EVENTS.server, serverKey(guild.id)), propsAnswer),
-		reader.query({ kind: "server", guild: guild.id }, serverAnswer),
+		ask(dailySeries("interactions", { groupBy: "outcome", filters: here })),
+		ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL_ROWS }),
+		ask({
+			kind: "top",
+			metric: "interactions",
+			groupBy: "command",
+			filters: [...here, { field: "outcome", op: "in", value: FAILED_OUTCOMES }],
+			limit: ALL_ROWS,
+		}),
+		ask(byKind(here)),
+		ask(eventProps(LENS_EVENTS.server, serverKey(guild.id))),
+		reader.query({ kind: "server", guild: guild.id }),
 		reader.meta(),
 	]);
 
@@ -275,8 +267,8 @@ export async function guildActivity(client: TestifyClient, days: number, now = D
 	const ask = askFor(client, days, now);
 
 	const [commands, dashboard] = await Promise.all([
-		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }, topAnswer),
-		ask(eventProps(LENS_EVENTS.server, "server"), propsAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }),
+		ask(eventProps(LENS_EVENTS.server, "server")),
 	]);
 
 	return {
@@ -295,8 +287,8 @@ export async function oneGuildActivity(
 	const ask = askFor(client, days, now);
 
 	const [commands, dashboard] = await Promise.all([
-		ask({ kind: "top", metric: "interactions", groupBy: "outcome", filters: serverFilter(guildId) }, topAnswer),
-		ask(eventProps(LENS_EVENTS.server, serverKey(guildId)), propsAnswer),
+		ask({ kind: "top", metric: "interactions", groupBy: "outcome", filters: serverFilter(guildId) }),
+		ask(eventProps(LENS_EVENTS.server, serverKey(guildId))),
 	]);
 
 	return { commands: total(rowsOf(commands.rows)), dashboard: total(countsOf(dashboard.values)) };

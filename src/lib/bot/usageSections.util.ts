@@ -1,23 +1,14 @@
+import { type Filter, type SeriesMetric, type TopQuery } from "@shardlens/client";
 import { type TestifyClient } from "@core/client";
 import { LENS_EVENTS } from "@lib/bot/shardlens.util";
 import {
 	ALL_ROWS,
 	askFor,
-	audienceAnswer,
+	commandStep,
 	dailySeries,
 	eventProps,
 	FAILED_OUTCOMES,
-	funnelAnswer,
-	gaugeAnswer,
-	growthAnswer,
-	heatmapAnswer,
-	propsAnswer,
 	readerFor,
-	reliabilityAnswer,
-	retentionAnswer,
-	seriesAnswer,
-	type Spec,
-	topAnswer,
 	windowDays,
 } from "@lib/bot/shardlensReader.util";
 import {
@@ -66,8 +57,8 @@ export async function audienceReport(
 ): Promise<AudienceReport> {
 	const ask = askFor(client, days, now);
 	const [audience, heat] = await Promise.all([
-		ask({ kind: "audience" }, audienceAnswer),
-		ask({ kind: "heatmap", metric: "interactions", timezone }, heatmapAnswer),
+		ask({ kind: "audience" }),
+		ask({ kind: "heatmap", metric: "interactions", timezone }),
 	]);
 
 	const byDay = new Map(audience.daily.map((row) => [row.day, row]));
@@ -99,7 +90,7 @@ const buckets = (rows: { bucket: string; servers: number }[]): Tally[] =>
 
 export async function growthReport(client: TestifyClient, days: number, now = Date.now()): Promise<GrowthReport> {
 	const ask = askFor(client, days, now);
-	const growth = await ask({ kind: "growth", timezone: "UTC" }, growthAnswer);
+	const growth = await ask({ kind: "growth", timezone: "UTC" });
 
 	const byDay = new Map(growth.daily.map((row) => [row.day, row]));
 	const daily = windowDays(days, now).map((day) => ({
@@ -133,7 +124,7 @@ function handlerOf(customId: string): { id: string; action: string } {
 
 export async function panelsReport(client: TestifyClient, days: number, now = Date.now()): Promise<PanelsReport> {
 	const ask = askFor(client, days, now);
-	const top = (metric: string, filters: Spec[] = []): Spec => ({
+	const top = (metric: SeriesMetric, filters: Filter[] = []): Omit<TopQuery, "range"> => ({
 		kind: "top",
 		metric,
 		groupBy: "custom_id",
@@ -142,10 +133,10 @@ export async function panelsReport(client: TestifyClient, days: number, now = Da
 	});
 
 	const [pressed, failed, shown, submitted] = await Promise.all([
-		ask(top("components"), topAnswer),
-		ask(top("components", [{ field: "outcome", op: "in", value: FAILED_OUTCOMES }]), topAnswer),
-		ask(top("modals.shown"), topAnswer),
-		ask(top("modals.submitted"), topAnswer),
+		ask(top("components")),
+		ask(top("components", [{ field: "outcome", op: "in", value: FAILED_OUTCOMES }])),
+		ask(top("modals.shown")),
+		ask(top("modals.submitted")),
 	]);
 
 	// Only the bot's own handlers, so nothing but the names it gave its buttons ever reaches the page.
@@ -221,10 +212,8 @@ export async function botActivityReport(
 	const ask = askFor(client, days, now);
 	const reader = readerFor(client);
 	// A custom event's daily rollup outlasts its raw events, so totals reach further back than the breakdowns.
-	const total = async (name: string): Promise<number> =>
-		sum((await ask(dailySeries("custom", { name }), seriesAnswer)).points);
-	const values = async (name: string, prop: string): Promise<Tally[]> =>
-		valuesOf(await ask(eventProps(name, prop), propsAnswer));
+	const total = async (name: string): Promise<number> => sum((await ask(dailySeries("custom", { name }))).points);
+	const values = async (name: string, prop: string): Promise<Tally[]> => valuesOf(await ask(eventProps(name, prop)));
 
 	const [
 		[played, skipped, refused, answered, unanswered, refusals, changes],
@@ -287,10 +276,10 @@ export async function reliabilityReport(
 	const ask = askFor(client, days, now);
 
 	const [reliability, outcomes, limits, ping] = await Promise.all([
-		ask({ kind: "reliability" }, reliabilityAnswer),
-		ask(dailySeries("interactions", { groupBy: "outcome" }), seriesAnswer),
-		ask(dailySeries("rest.ratelimits"), seriesAnswer),
-		ask({ kind: "gauge", name: "shard.ping_ms", interval: "day", timezone: "UTC" }, gaugeAnswer),
+		ask({ kind: "reliability" }),
+		ask(dailySeries("interactions", { groupBy: "outcome" })),
+		ask(dailySeries("rest.ratelimits")),
+		ask({ kind: "gauge", name: "shard.ping_ms", interval: "day", timezone: "UTC" }),
 	]);
 
 	const window = windowDays(days, now);
@@ -335,18 +324,18 @@ export async function reliabilityReport(
 	};
 }
 
-const step = (name: string): Spec => ({ type: "command", name });
-
 export async function funnelReport(
 	client: TestifyClient,
 	query: { days: number; tz: string; steps: string[]; hours: number },
 	now = Date.now(),
 ): Promise<FunnelReport> {
 	const ask = askFor(client, query.days, now);
-	const funnel = await ask(
-		{ kind: "funnel", steps: query.steps.map(step), windowHours: query.hours, timezone: query.tz },
-		funnelAnswer,
-	);
+	const funnel = await ask({
+		kind: "funnel",
+		steps: query.steps.map(commandStep),
+		windowHours: query.hours,
+		timezone: query.tz,
+	});
 
 	return {
 		days: query.days,
@@ -361,16 +350,13 @@ export async function retentionReport(
 	now = Date.now(),
 ): Promise<RetentionReport> {
 	const ask = askFor(client, query.days, now);
-	const retention = await ask(
-		{
-			kind: "retention",
-			start: step(query.start),
-			return: query.back === undefined ? "any" : step(query.back),
-			interval: query.interval,
-			timezone: query.tz,
-		},
-		retentionAnswer,
-	);
+	const retention = await ask({
+		kind: "retention",
+		start: commandStep(query.start),
+		return: query.back === undefined ? "any" : commandStep(query.back),
+		interval: query.interval,
+		timezone: query.tz,
+	});
 
 	return {
 		days: query.days,

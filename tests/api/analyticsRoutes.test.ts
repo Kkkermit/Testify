@@ -12,6 +12,9 @@ import {
 	audienceReport,
 	funnelReport,
 	guildUsageReport,
+	liveFeedFor,
+	readRuns,
+	readTopRunners,
 	retentionReport,
 	usageReport,
 } from "@lib/bot";
@@ -24,6 +27,9 @@ jest.mock("@lib/bot", () => ({
 	audienceReport: jest.fn(() => Promise.resolve({ days: 30 })),
 	funnelReport: jest.fn(() => Promise.resolve({ days: 30 })),
 	retentionReport: jest.fn(() => Promise.resolve({ days: 30 })),
+	readRuns: jest.fn(() => Promise.resolve({ rows: [], next: null, collector: "" })),
+	readTopRunners: jest.fn(() => Promise.resolve({ window: "24h", rows: [] })),
+	liveFeedFor: jest.fn(() => ({ read: () => ({ numbers: null, problem: null }) })),
 }));
 jest.mock("@database/repositories/logRepository", () => ({
 	findLogRun: jest.fn(() => Promise.resolve(null)),
@@ -98,6 +104,8 @@ const OWNER_ONLY = [
 	`/analytics/guilds/${GUILD}`,
 	"/analytics/logs",
 	"/analytics/runtime",
+	"/analytics/live",
+	"/analytics/runs/top",
 ];
 
 describe("who can read the analytics", () => {
@@ -110,11 +118,67 @@ describe("who can read the analytics", () => {
 		expect((await appFor().request(path)).status).toBe(200);
 	});
 
-	/** Who ran what lives behind the collector's own sign-in, so no console route may show it. */
-	it("no longer serves the member list or the run log", async () => {
+	/** Who ran what is read only through the activity key's own route, never per server or by member. */
+	it("no longer serves the member list or a server's run log", async () => {
 		for (const path of [`/analytics/guilds/${GUILD}/members`, `/analytics/guilds/${GUILD}/runs`]) {
 			expect((await appFor().request(path)).status).toBe(404);
 		}
+	});
+});
+
+describe("who ran what", () => {
+	const ask = (body: unknown, userId = OWNER): Promise<Response> =>
+		Promise.resolve(
+			appFor(userId).request("/analytics/runs", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(body),
+			}),
+		);
+
+	it("is hidden from a manager, and read for the owner from the body", async () => {
+		expect((await ask({ days: 7 }, MANAGER)).status).toBe(404);
+
+		const response = await ask({ days: 7, userId: OWNER, outcome: "failed" });
+		expect(response.status).toBe(200);
+		expect(jest.mocked(readRuns).mock.calls[0]?.[1]).toEqual({ days: 7, userId: OWNER, outcome: "failed" });
+	});
+
+	/** A misspelt or extra field is refused rather than ignored, so nothing the form never showed reaches the collector. */
+	it("refuses anything but the filters it knows, a page cursor the collector never gave, and a command the bot lacks", async () => {
+		const refused = [
+			{ days: 7, user: OWNER },
+			{ days: 7, userId: "not-an-id" },
+			{ days: 7, before: "2026-11-15T00:00:00Z~../../x" },
+			{ days: 7, before: "' OR 1=1 --" },
+			{ days: 7, outcome: "sideways" },
+			{ days: 365 },
+			{ days: 7, command: "secret" },
+			{ days: 7, guildId: { $ne: null } },
+		];
+		for (const body of refused) expect((await ask(body)).status).toBe(400);
+		expect(readRuns).not.toHaveBeenCalled();
+	});
+
+	it("says when the collector keeps no record of who ran what", async () => {
+		jest.mocked(readRuns).mockRejectedValueOnce(new AnalyticsUnavailable("audit_off"));
+		const response = await ask({ days: 7 });
+
+		expect(response.status).toBe(503);
+		expect(((await response.json()) as { error: { code: string } }).error.code).toBe("analytics_audit_off");
+	});
+
+	it("reads who ran the most over a window the collector keeps, and no other", async () => {
+		expect((await appFor().request("/analytics/runs/top?window=7d")).status).toBe(200);
+		expect(jest.mocked(readTopRunners).mock.calls[0]?.[1]).toBe("7d");
+		expect((await appFor().request("/analytics/runs/top?window=30d")).status).toBe(400);
+	});
+
+	it("reads the live numbers from the one shared feed", async () => {
+		const response = await appFor().request("/analytics/live");
+
+		expect(await response.json()).toEqual({ numbers: null, problem: null });
+		expect(liveFeedFor).toHaveBeenCalledTimes(1);
 	});
 });
 

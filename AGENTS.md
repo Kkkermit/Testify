@@ -96,7 +96,7 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report, suggestion and eval — see
 [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
-`SHARDLENS_URL`, `SHARDLENS_INGEST_KEY` and `SHARDLENS_READ_KEY` (analytics to a collector the
+`SHARDLENS_URL`, `SHARDLENS_INGEST_KEY`, `SHARDLENS_READ_KEY` and `SHARDLENS_ACTIVITY_KEY` (analytics to a collector the
 owner runs, and the owner console's usage read back from it — see
 [§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)),
 `SITE_ENABLED` and `SITE_GITHUB_TOKEN` (the website, on unless switched off — see
@@ -2369,15 +2369,37 @@ owner console's Usage tab, its per-server drill-down and the server list's count
   `legal.removalP5`). The SDK's own `createPrivacyCommand` is not used: it registers a slash command of its own beside
   the registry, which only the prefix side of `/privacy` would then lack. `/privacy` is in `ALWAYS_ENABLED` and is not
   open to a blacklisted account, whose attempts are the abuse audit mode is there to show.
-- **Reading is a second key, kept by the bot.** `ShardlensReader` in `shardlensReader.util.ts` posts to the
-  collector's `/v1/query` with `SHARDLENS_READ_KEY` as a bearer token, validates every answer with zod, shares an
-  answer for a minute (`rangeOf` closes each window on the next whole minute, so a minute's reads ask the same
-  question) and keeps no failure. It answers `AnalyticsUnavailable` with `off`, `refused` or `unreachable`; a 400 is
-  this code asking a question the collector does not take, so it is rethrown as a bug. Its calls pass
-  `recorded: false`, because a collector only the owners use must not mark the bot degraded on the public status
+- **Reading is a second key, kept by the bot, through `@shardlens/client`.** `ShardlensReader` in
+  `shardlensReader.util.ts` makes the client's own `createShardlensClient` with `SHARDLENS_READ_KEY` and asks it, so
+  the address rule, the key format, `redirect: "manual"` and the timeout are the package's and no request is written
+  by hand. The client types the collector's answers but checks none of them, so every answer is checked again with
+  zod: `ANSWERS` holds one schema per query kind, the query's own `kind` picks it, and `takesWhatIsSent` makes a
+  schema that would refuse what the client declares a compile error rather than a blank chart. It shares an answer for
+  a minute (`rangeOf` closes each window on the next whole minute, so a minute's reads ask the same question) and keeps
+  no failure. A `ShardlensClientError` becomes `AnalyticsUnavailable` with `off` (`invalid_options`: a key or an
+  address the client will not send to, which never leaves the process), `refused`, `audit_off` or `unreachable`; a 400
+  is this code asking a question the collector does not take, so it is rethrown as a bug. A setting the owner can fix
+  is warned about once a run, in the client's own words, which never hold the key. The client sends with its own
+  `fetch`, never `fetchJson`, so a collector only the owners use cannot mark the bot degraded on the public status
   page. `usageReport.util.ts` puts the answers together, every command figure from the collector's interaction
   rollups, where slash and prefix runs are counted together and told apart by `kind` (`message_command` is a prefix
-  run). The read key reaches every figure but never who ran what, which stays behind the collector's own sign-in.
+  run). The read key reaches every figure but never who ran what.
+- **Who ran what needs a third key, and only the owners see it.** `SHARDLENS_ACTIVITY_KEY` (`slk_activity_…`) is a
+  second client, used for `activity.log` and `activity.topUsers` and nothing else, and only when the collector and
+  the bot are both in audit mode. `runLog.util.ts` reads it for `POST /analytics/runs` and `GET /analytics/runs/top`,
+  both behind `requireOwner`. The log is a POST so the person looked up travels in the body: no user id is ever in an
+  address the browser shows, keeps in its history or a proxy logs, and the console holds the filters in state, never
+  in `?`. A person is found only by their exact id (`runsBody`, strict, with the collector's own page cursor shape),
+  and no page profiles anybody beyond that lookup. A picture's address is built only from an id and a hash that pass
+  their patterns, a component shows only one of the bot's own handlers and its action, and every name is drawn as
+  text. The collector records each of these reads in its access log, and the privacy notice says the owners can see
+  who ran what (`legal.outsideL5`).
+- **Live numbers are one stream, opened while somebody looks.** `LiveFeed` in `liveFeed.util.ts` follows the
+  client's `live()` and `GET /analytics/live` hands back the latest numbers; the console asks every three seconds
+  while its tab is visible. The collector keeps ten live streams an address, so every owner looking shares the bot's
+  one, and the stream closes 30 seconds after the last read, forgetting its numbers so the next reader is never shown
+  an old minute as now. A refusal waits at least five seconds, or the collector's `retryAfterSeconds`, before the next
+  read opens it again, and shutdown closes it.
 - **Only the owners see it, and never a key.** `GET /control/shardlens`, `POST /control/shardlens/send` and every
   `/analytics` route sit behind `requireOwner`, so `ownerGate.test.ts` covers them; the Runtime tab's card and the
   private, owner-only `/shardlens status` and `/shardlens send` show the state, what is waiting, what was dropped or
@@ -3715,21 +3737,24 @@ about it are load-bearing:
 - **The slowest commands are Discord's wait, not the handler's.** `slowMs` is the p95 of how long Discord waited for
   the bot's first reply and `typicalMs` the p50, for slash commands and right-click actions; a prefix run has no reply
   Discord waits on, so it adds runs but no time.
-- **Shardlens being away costs figures, never pages.** The Usage tab answers 503 `analytics_off`, `analytics_refused`
-  or `analytics_unreachable` and the console words each one, offering a retry only when one could help. The server
+- **Shardlens being away costs figures, never pages.** The Usage tab answers 503 `analytics_off`, `analytics_refused`,
+  `analytics_audit_off` or `analytics_unreachable` and the console words each one, offering a retry only when one could
+  help; a section read with the activity key names that key in its reasons (`AnalyticsState`'s `why`). The server
   list and a server's detail still answer, with their counts `null` and the reason in `analytics`; the inactive
   filter then lists nobody, since nobody can be told apart as inactive.
-- **Who ran what is not in the console, and cannot be.** It is on the collector's own Activity page, encrypted there,
-  behind the collector's own sign-in, and the console links it and the server's own page with `collectorPage`, which
-  only ever builds a link from an `http`/`https` origin. Collector 1.1 answers `/v1/audit/*` only to a Discord session
-  of the application's owner or team and refuses a read key, sends `frame-ancestors 'none'`, and keeps the Activity
-  page's filters out of its address — read out of its `requireAdmin` and its page, not assumed — so a link is all the
-  console can give.
+- **Who ran what is in the console only with an activity key.** Collector 1.2 answers `/v1/audit/log` and
+  `/v1/audit/top-users` to a Discord session of the application's owner or team or to an activity key, refuses a read
+  key with `activity_key_required`, and logs every read, a lookup of one person as `lookup_user` — read out of its
+  `requireActivityReader` and `logRead`, not assumed. Without the key the section says how to add one; with it the
+  section reads the log a page of 50 at a time, newest first, and pages with the collector's own `nextBefore`. The
+  collector's own Activity page and the server's page are still linked with `collectorPage`, which only ever builds a
+  link from an `http`/`https` origin.
 
-**The Usage tab has seven sections, and each reads its own owner-only route**, so one the collector cannot answer
+**The Usage tab has eight sections, and each reads its own owner-only route**, so one the collector cannot answer
 leaves the rest working: Commands, People (`/analytics/audience`), Servers (`/growth`), Buttons and forms (`/panels`),
-Bot activity (`/activity`), Reliability (`/reliability`) and Journeys (`/funnel`, `/retention`), built by
-`usageSections.util.ts` and chosen with `?view=`. Four things about them are load-bearing:
+Bot activity (`/activity`), Reliability (`/reliability`), Journeys (`/funnel`, `/retention`), built by
+`usageSections.util.ts`, and Who ran what (`/runs`, `/runs/top`), built by `runLog.util.ts`, chosen with `?view=`.
+**Right now** sits above them all, read from `/analytics/live`, and says nothing while Shardlens is off. Four things about them are load-bearing:
 
 - **Hours, funnels and returns are read in the reader's own time zone.** The page sends `tz`, and the route takes only
   an IANA zone the runtime knows (`analyticsZoneQuery`); every daily chart stays in UTC like the Commands section.

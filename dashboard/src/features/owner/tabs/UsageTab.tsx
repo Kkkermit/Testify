@@ -7,6 +7,7 @@ import { Avatar, Card, Figure, SegmentedControl, UsageBars } from "@/components/
 import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
+import { LiveStrip } from "@/features/owner/components/LiveStrip";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import {
@@ -24,6 +25,7 @@ import { JourneysView } from "@/features/owner/usage/JourneysView";
 import { PanelsView } from "@/features/owner/usage/PanelsView";
 import { PeopleView } from "@/features/owner/usage/PeopleView";
 import { ReliabilityView } from "@/features/owner/usage/ReliabilityView";
+import { RunsView } from "@/features/owner/usage/RunsView";
 import { ServersView } from "@/features/owner/usage/ServersView";
 import { USAGE_VIEWS, viewFrom, VIEW_LABELS } from "@/features/owner/usage/usage.utils";
 import { useUsage } from "@/features/owner/useOwner";
@@ -57,6 +59,8 @@ export function UsageTab({
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
 
+			<LiveStrip />
+
 			{view === "commands" && <FleetUsage days={days} />}
 			{view === "people" && <PeopleView days={days} />}
 			{view === "servers" && <ServersView days={days} />}
@@ -64,6 +68,7 @@ export function UsageTab({
 			{view === "activity" && <ActivityView days={days} />}
 			{view === "reliability" && <ReliabilityView days={days} />}
 			{view === "journeys" && <JourneysView days={days} />}
+			{view === "runs" && <RunsView days={days} />}
 		</div>
 	);
 }

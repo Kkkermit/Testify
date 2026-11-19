@@ -828,11 +828,14 @@ precisely the screen you want when something is wrong.
   revokes the console on that person's next click, and no flag on the session can grant it.
 - **Usage is read from Shardlens, and nothing analytic is kept in MongoDB.** The Usage tab, its per-server
   drill-down and the server list's command and dashboard counts are queries to the collector with
-  `SHARDLENS_READ_KEY`, which the bot holds and no browser sees. Without the key, or with the collector refusing or
-  away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_unreachable`) and the server list still
-  loads with its counts blank. Who ran what lives on the collector's own Activity page, which the tab links. The
-  tab's seven sections — commands, people, servers, buttons and forms, bot activity, reliability and journeys — each
-  read their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`.
+  `SHARDLENS_READ_KEY` through `@shardlens/client`, which the bot holds and no browser sees. Without the key, or with
+  the collector refusing or away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_audit_off`,
+  `analytics_unreachable`) and the server list still loads with its counts blank. The tab's eight sections —
+  commands, people, servers, buttons and forms, bot activity, reliability, journeys and who ran what — each read
+  their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`; **Right now**
+  above them reads the bot's one shared live stream. Who ran what needs `SHARDLENS_ACTIVITY_KEY` and a collector in
+  audit mode, is read with a POST so no user id ever lands in an address, and looks a person up only by their exact
+  id.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.

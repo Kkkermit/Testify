@@ -9,6 +9,7 @@ import {
 	type GrowthReport,
 	type GuildUsageReport,
 	type GuildUsageRow,
+	type LiveRead,
 	type ManageableGuild,
 	type MeResponse,
 	type OwnerGuildDetail,
@@ -18,8 +19,13 @@ import {
 	type PanelsReport,
 	type ReliabilityReport,
 	type RetentionReport,
+	type RunOutcome,
+	type RunRow,
+	type RunsBody,
+	type RunsPage,
 	type ShardlensStatus,
 	type Tally,
+	type TopRunners,
 	type UsageDay,
 	type UsageReport,
 } from "@testify/shared";
@@ -813,6 +819,133 @@ function retention(url: URL): RetentionReport {
 	};
 }
 
+/** Made-up people, so the run log shows nobody real; their pictures are the lettered fallback. */
+const PEOPLE = [
+	"maple.fox",
+	"quietlynx",
+	"mothlight",
+	"tidepool",
+	"paperplane",
+	"ember.wren",
+	"saltmarsh",
+	"kettle_drum",
+	"orbit.owl",
+	"fern_and_nettle",
+	"lantern",
+	"cobalt.hare",
+].map((username, index) => ({ userId: `30000000000000000${String(index + 10)}`, username }));
+
+const RUN_SHAPES: { kind: string; command: string | null; sub: string | null; handler: string | null }[] = [
+	{ kind: "chat_input", command: "rank", sub: null, handler: null },
+	{ kind: "chat_input", command: "play", sub: null, handler: null },
+	{ kind: "chat_input", command: "daily", sub: null, handler: null },
+	{ kind: "message_command", command: "work", sub: null, handler: null },
+	{ kind: "chat_input", command: "casino", sub: "roulette", handler: null },
+	{ kind: "button", command: null, sub: null, handler: "shop:buy" },
+	{ kind: "button", command: null, sub: null, handler: "music:pause" },
+	{ kind: "chat_input", command: "warn", sub: "create", handler: null },
+	{ kind: "modal_submit", command: null, sub: null, handler: "moderationForm:warn" },
+	{ kind: "user_context", command: "Time out", sub: null, handler: null },
+	{ kind: "chat_input", command: "remind", sub: "me", handler: null },
+];
+
+const RUN_COUNT = 240;
+
+/** The same few hundred runs on every reload, newest first, a few minutes apart. */
+const RUNS: RunRow[] = (() => {
+	const random = seeded("runs");
+	const now = Date.now();
+	let at = now;
+	return Array.from({ length: RUN_COUNT }, (_, index) => {
+		at -= between(random, 20_000, 400_000);
+		const person = PEOPLE[Math.floor(random() ** 1.6 * PEOPLE.length)]!;
+		const shape = RUN_SHAPES[Math.floor(random() * RUN_SHAPES.length)]!;
+		const server = SERVERS[Math.floor(random() ** 1.4 * SERVERS.length)]!;
+		const roll = random();
+		const outcome: RunOutcome = roll < 0.9 ? "ok" : roll < 0.95 ? "error" : roll < 0.98 ? "timeout" : "no_response";
+		const direct = shape.kind === "chat_input" && random() < 0.05;
+		return {
+			id: `0190f1a2-0000-7000-8000-${String(index).padStart(12, "0")}`,
+			at: new Date(at).toISOString(),
+			guildId: direct ? null : server.id,
+			guildName: direct ? null : server.name,
+			...shape,
+			outcome,
+			answerMs:
+				shape.kind === "message_command"
+					? null
+					: outcome === "timeout"
+						? between(random, 3_100, 6_000)
+						: between(random, 60, 1_400),
+			userId: index % 37 === 5 ? null : person.userId,
+			username: index % 37 === 5 ? null : person.username,
+			avatarUrl: null,
+		};
+	});
+})();
+
+const cursorOf = (row: RunRow): string => `${row.at}~${row.id}`;
+
+/** Narrowed and paged the way the collector does it, fifty a page. */
+function runsPageFor(body: Partial<RunsBody>): RunsPage {
+	const PAGE = 50;
+	const from = Date.now() - (body.days ?? 30) * DAY_MS;
+	const matching = RUNS.filter(
+		(row) =>
+			Date.parse(row.at) >= from &&
+			(body.guildId === undefined || row.guildId === body.guildId) &&
+			(body.command === undefined || row.command === body.command) &&
+			(body.userId === undefined || row.userId === body.userId) &&
+			(body.outcome === undefined || (body.outcome === "failed" ? row.outcome !== "ok" : row.outcome === body.outcome)),
+	);
+	const start = body.before === undefined ? 0 : matching.findIndex((row) => cursorOf(row) === body.before) + 1;
+	const rows = matching.slice(start, start + PAGE);
+	const last = rows.at(-1);
+	return { rows, next: rows.length === PAGE && last !== undefined ? cursorOf(last) : null, collector: COLLECTOR };
+}
+
+function topRunnersFor(window: TopRunners["window"]): TopRunners {
+	const since = Date.now() - (window === "24h" ? DAY_MS : 7 * DAY_MS);
+	const counts = new Map<string, number>();
+	for (const row of RUNS) {
+		if (row.userId === null || Date.parse(row.at) < since) continue;
+		counts.set(row.userId, (counts.get(row.userId) ?? 0) + 1);
+	}
+	return {
+		window,
+		rows: [...counts]
+			.sort((a, b) => b[1] - a[1])
+			.slice(0, 25)
+			.map(([userId, runs]) => ({
+				userId,
+				username: PEOPLE.find((person) => person.userId === userId)?.username ?? null,
+				avatarUrl: null,
+				runs,
+			})),
+	};
+}
+
+/** Moves a little on every read, as the collector's stream does second by second. */
+function liveNow(): LiveRead {
+	const second = Math.floor(Date.now() / 1_000);
+	const random = seeded(`live:${String(second)}`);
+	const perSecond = Array.from({ length: 60 }, (_, index) =>
+		Math.max(0, Math.round(3 + 2 * Math.sin((second - 60 + index) / 7) + random() * 3)),
+	);
+	return {
+		numbers: {
+			at: new Date(second * 1_000).toISOString(),
+			perMinute: sumOf(perSecond),
+			failed15m: between(random, 0, 6),
+			perSecond,
+			slowMs: between(random, 700, 1_300),
+			shards: [0, 1, 2].map((shard) => ({ shard, pingMs: between(random, 38, 70), fresh: true })),
+			servers: SERVERS.length,
+		},
+		problem: null,
+	};
+}
+
 const shardlens: ShardlensStatus = {
 	state: "sending",
 	collector: COLLECTOR,
@@ -863,6 +996,13 @@ export const showcaseHandlers = [
 		const url = new URL(request.url);
 		return unknownCommand((url.searchParams.get("steps") ?? "").split(",")) ?? HttpResponse.json(funnel(url));
 	}),
+	http.get("/api/analytics/live", () => HttpResponse.json(liveNow())),
+	http.post("/api/analytics/runs", async ({ request }) =>
+		HttpResponse.json(runsPageFor((await request.json()) as Partial<RunsBody>)),
+	),
+	http.get("/api/analytics/runs/top", ({ request }) =>
+		HttpResponse.json(topRunnersFor(new URL(request.url).searchParams.get("window") === "7d" ? "7d" : "24h")),
+	),
 	http.get("/api/analytics/retention", ({ request }) => {
 		const url = new URL(request.url);
 		return (

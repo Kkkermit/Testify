@@ -106,6 +106,10 @@ export const keys = {
 		usage: (days: number) => ["owner", "usage", days] as const,
 		usageSection: (section: string, query: string) => ["owner", "usage", section, query] as const,
 		guildUsage: (id: string, days: number) => ["owner", "guild-usage", id, days] as const,
+		/** Held in memory only: the person a lookup names never reaches an address. */
+		runs: (days: number, filters: string, before: string) => ["owner", "runs", days, filters, before] as const,
+		topRunners: (window: string) => ["owner", "top-runners", window] as const,
+		live: () => ["owner", "live"] as const,
 		logs: (run: string, level: string, search: string) => ["owner", "logs", run, level, search] as const,
 		logRuns: (level: string, search: string) => ["owner", "log-runs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,

@@ -13,7 +13,16 @@ import { LOCALES, type TranslationKey } from "@/i18n";
 import { formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
-export const USAGE_VIEWS = ["commands", "people", "servers", "panels", "activity", "reliability", "journeys"] as const;
+export const USAGE_VIEWS = [
+	"commands",
+	"people",
+	"servers",
+	"panels",
+	"activity",
+	"reliability",
+	"journeys",
+	"runs",
+] as const;
 
 export type UsageView = (typeof USAGE_VIEWS)[number];
 
@@ -27,6 +36,7 @@ export const VIEW_LABELS: Record<UsageView, TranslationKey> = {
 	activity: "owner.usageSections.viewActivity",
 	reliability: "owner.usageSections.viewReliability",
 	journeys: "owner.usageSections.viewJourneys",
+	runs: "owner.usageSections.viewRuns",
 };
 
 export const TIER_LABELS: Record<(typeof MEMBER_TIERS)[number], TranslationKey> = {

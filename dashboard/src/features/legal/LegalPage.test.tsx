@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 18 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 19 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -113,6 +113,13 @@ describe("the legal pages", () => {
 		expect(botSource("src/lib/account/accountActions.util.ts")).toContain("shardlens?.forgetUser(userId)");
 		expect(text).toMatch(/the names of the options you filled in but never what you typed/);
 		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
+		// Who ran what reaches the console only through the activity key, on owner-only routes the collector logs.
+		expect(botSource("src/lib/bot/shardlensReader.util.ts")).toMatch(
+			/this\.#activity = clientFor\(env\.SHARDLENS_ACTIVITY_KEY\)/,
+		);
+		expect(botSource("src/api/routes/analytics.ts")).toMatch(/analytics\.use\("\*", requireOwner\)/);
+		expect(text).toMatch(/by the bot’s owners in its owner console if the operator has given the bot an activity key/);
+		expect(text).not.toMatch(/only the people who can sign in to it can see who ran what/);
 		// A prefix run is the SDK's own message command, sent with its actor in audit mode like any other.
 		expect(lens).toMatch(/trackMessageCommand\(message, \{\s*command: run\.command,/);
 		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);

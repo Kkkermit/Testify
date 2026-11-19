@@ -8,18 +8,24 @@ import { collectorPage } from "@/features/owner/owner.utils";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-const WHY: Record<AnalyticsProblem, TranslationKey> = {
+export type ProblemWords = Record<AnalyticsProblem, TranslationKey>;
+
+const WHY: ProblemWords = {
 	off: "owner.analyticsOff",
 	refused: "owner.analyticsRefused",
 	unreachable: "owner.analyticsUnreachable",
+	audit_off: "owner.analyticsAuditOff",
 };
 
 export function AnalyticsUnavailable({
 	problem,
 	onRetry,
+	why = WHY,
 }: {
 	problem: AnalyticsProblem;
 	onRetry: () => void;
+	/** A section read with another key says its own reasons. */
+	why?: ProblemWords;
 }): React.JSX.Element {
 	const { t } = useTranslation();
 
@@ -28,8 +34,8 @@ export function AnalyticsUnavailable({
 			<EmptyState
 				icon={<BarChart3 size={20} />}
 				title={t("owner.analyticsTitle")}
-				body={t(WHY[problem])}
-				{...(problem === "off"
+				body={t(why[problem])}
+				{...(problem === "off" || problem === "audit_off"
 					? {}
 					: {
 							action: (

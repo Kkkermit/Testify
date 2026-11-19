@@ -10,7 +10,7 @@ import {
 	usageReport,
 } from "@lib/bot/usageReport.util";
 
-const KEY = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
+const KEY = `slk_read_${"r".repeat(43)}`;
 const HERE = "900000000000000001";
 const THERE = "900000000000000002";
 const GONE = "900000000000000009";
