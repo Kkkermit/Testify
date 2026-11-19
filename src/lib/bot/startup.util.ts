@@ -18,13 +18,28 @@ type Write = (line: string) => void;
 const toStdout: Write = (line) => process.stdout.write(`${line}\n`);
 
 /** Prints one line per start-up step as it finishes, so a slow or failing step is visible where it happens. */
+/** Start-up was cut short by a reload or Ctrl+C; shutdown is already on its way out, so nothing is reported. */
+export class StartupStopped extends Error {
+	constructor() {
+		super("Start-up stopped because the bot is shutting down.");
+		this.name = "StartupStopped";
+	}
+}
+
 export class BootReport {
 	readonly #write: Write;
 	readonly #paint: Paint;
+	#stopped: () => boolean = () => false;
 
 	constructor(write: Write = toStdout, paint: Paint = painter()) {
 		this.#write = write;
 		this.#paint = paint;
+	}
+
+	/** Once this answers true no line is printed, and the step running then ends start-up with `StartupStopped`. */
+	stopWhen(stopped: () => boolean): this {
+		this.#stopped = stopped;
+		return this;
 	}
 
 	header(facts: BootFacts): void {
@@ -38,21 +53,27 @@ export class BootReport {
 	}
 
 	note(state: StepState, label: string, detail: string, ms?: number): void {
+		if (this.#stopped()) return;
 		this.#write(stepLine(state, label, detail, ms, this.#paint));
 	}
 
 	/** Runs one step and reports it; a failure is marked on its own line and then thrown on for the caller to explain. */
 	async step<T>(label: string, work: () => Promise<T> | T, describe: (result: T) => string): Promise<T> {
 		const started = performance.now();
+		let result: T;
 
 		try {
-			const result = await work();
-			this.note("done", label, describe(result), performance.now() - started);
-			return result;
+			result = await work();
 		} catch (error) {
+			// A step that failed because shutting down closed what it was using is not a failure worth reporting.
+			if (this.#stopped()) throw new StartupStopped();
 			this.note("failed", label, this.#paint.red("could not finish"), performance.now() - started);
 			throw error;
 		}
+
+		if (this.#stopped()) throw new StartupStopped();
+		this.note("done", label, describe(result), performance.now() - started);
+		return result;
 	}
 }
 

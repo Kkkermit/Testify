@@ -872,7 +872,12 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
   happens. `explainStartupFailure` turns `EnvError` (each unset variable with where to find it), `SetupError`, and
   Discord's 401, 10002 and 50001 into advice; only an error it does not recognise keeps its stack, because that is
   a bug. `exitOnFatalClose` catches gateway close codes 4004 and 4014: without it a bot missing the privileged
-  intents logged one line and then waited for ever, never becoming ready.
+  intents logged one line and then waited for ever, never becoming ready. **A signal partway through start-up ends
+  it quietly.** `shutdown()` closes the database while `main()` is still starting, so a reload mid-start used to
+  print "connected", then the log history failing and the connection "lost" — what its own shutdown had done. The
+  report is built with `stopWhen(isShuttingDown)`: it prints nothing once shutting down, its next step throws
+  `StartupStopped`, and `main().catch` leaves the exit to `shutdown()`. A disconnect `disconnectDatabase` asked for is
+  never reported as a lost connection.
 - **Boxes are measured, not guessed.** `visibleWidth` strips colour codes and counts `\p{Emoji_Presentation}` as
   two columns and everything else as one; counting a range of code points put `➜` at two, which pushed the right
   edge of one line out. Keep every box line under 80 columns, which is why the hints are short.
@@ -2465,6 +2470,16 @@ restarts the bot on every save, which the ordering cannot help with, so the prox
 with one line per outage — Vite registers its handler immediately **after** calling `configure`, so the replacement
 waits a tick, and that ordering was read out of `vite/dist/node/chunks/node.js` rather than guessed.
 
+**The dev bot runs `@testify/shared` from its source.** `npm run dev` and `BOT_WATCH` pass `--conditions=development`,
+which the `exports` in `shared/package.json` answer with `src/index.ts`, so a change there restarts the bot like any
+other and nothing has to be built first. Building it first was the old answer, and both halves of it went wrong: on
+macOS the watcher saw that write and restarted the bot a second in, and a branch switched under a running `dev:all`
+left it on a build without an export the new code read. **A synced
+folder is named, not left to look like a bug:** iCloud Drive, Dropbox and Google Drive touch files as they sync, which
+restarts the bot over and over, and macOS cancels a read of a file still downloading, which crashes it with
+`ECANCELED`. `dev:all` recognises that line (`syncedFolderRead`) and says once to move the project or name its folder
+`.nosync`; the README's troubleshooting table says the same for `npm run dev`.
+
 ### `@testify/shared` is a real package, not an alias
 
 **It is deliberately absent from `tsconfig.json`'s `paths`, and adding it there would break the build in a way
@@ -2475,22 +2490,23 @@ type-checks, and the only symptom is an empty object at runtime.
 
 So the workspace resolves like any other package, and each consumer reads what suits it:
 
-| Consumer          | Reads                     | Needs a build? |
-| ----------------- | ------------------------- | -------------- |
-| `tsc`             | `types: "src/index.ts"`   | No             |
-| Jest              | an explicit source mapper | No             |
-| Vite              | an alias to source        | No             |
-| The bot's `dist/` | `main: "dist/index.js"`   | **Yes**        |
+| Consumer          | Reads                                    | Needs a build? |
+| ----------------- | ---------------------------------------- | -------------- |
+| `tsc`             | the `types` export, `src/index.ts`       | No             |
+| Jest              | an explicit source mapper                | No             |
+| Vite              | an alias to source                       | No             |
+| The dev bot       | the `development` export, `src/index.ts` | No             |
+| The bot's `dist/` | the `require` export, `dist/index.js`    | **Yes**        |
 
 `prepare` builds it after any install, so a fresh clone works. Editing `shared/src` and then running the built
 bot is the one case that needs `npm run build:shared` by hand.
 
 > [!WARNING]
-> **`tsx` reads the built `dist`, not the source — and `shared/dist` is gitignored.** So does the dev bot, not
-> just the production one. Pull a commit that adds an export to `shared/src`, run the bot without reinstalling,
-> and that export is `undefined` at runtime: every route validating with it dies on
-> `Cannot read properties of undefined (reading 'safeParse')`, naming nothing that points at the cause. `dev`
-> and `dev:all` now build shared first — about 40ms — so the state cannot happen.
+> **Anything that runs without the `development` condition reads `shared/dist`, and it is gitignored.** That is the
+> built bot and any other `tsx` run — `npm run setup`, the docs generators. Pull a commit that adds an export to
+> `shared/src`, run one of those without reinstalling, and that export is `undefined` at runtime: a schema read from
+> it dies on `Cannot read properties of undefined (reading 'safeParse')`, naming nothing that points at the cause.
+> The dev bot once did exactly that, mid-session, after a branch switch.
 
 `shared/` stays dependency-light: zod and nothing else. No discord.js, no React.
 

@@ -18,5 +18,13 @@
 	},
 	"devDependencies": {
 		"tsup": "9.0.0"
+	},
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"development": "./src/index.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js"
+		}
 	}
 }

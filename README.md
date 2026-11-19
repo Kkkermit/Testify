@@ -862,16 +862,17 @@ The colours and links live in `src/config/theme.ts`.
 
 ## 🩺 Troubleshooting
 
-| Symptom                                          | Fix                                                                                                  |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                    |
-| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string |
-| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                           |
-| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how   |
-| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                               |
-| `EBADENGINE` during install                      | Your Node is older than 24.11. Run `nvm use`                                                         |
-| Cards render with no text on them                | You are in a container without fonts — use this repository's `Dockerfile`                            |
-| `Sign in to confirm you're not a bot`            | YouTube is refusing the host. Update yt-dlp, or set `/play` to SoundCloud only                       |
+| Symptom                                          | Fix                                                                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                       |
+| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string    |
+| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                              |
+| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how      |
+| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                                  |
+| `EBADENGINE` during install                      | Your Node is older than 24.11. Run `nvm use`                                                            |
+| Cards render with no text on them                | You are in a container without fonts — use this repository's `Dockerfile`                               |
+| `Sign in to confirm you're not a bot`            | YouTube is refusing the host. Update yt-dlp, or set `/play` to SoundCloud only                          |
+| `ECANCELED`, or the dev bot restarts on its own  | The project is in a synced folder, such as an iCloud Desktop. Move it, or rename it to end in `.nosync` |
 
 Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 [open an issue](https://github.com/Kkkermit/Testify/issues/new/choose).
