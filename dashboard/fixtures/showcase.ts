@@ -3,7 +3,9 @@ import {
 	type AudienceReport,
 	AUTOMATIC_ACTIONS,
 	type BotActivityReport,
+	type CollectorSetup,
 	type CommandCatalogue,
+	type CommandReport,
 	type CommandSummary,
 	type FunnelReport,
 	type GrowthReport,
@@ -323,6 +325,17 @@ function guildUsage(guildId: string, days: number): GuildUsageReport {
 		commands,
 		dashboardViews: Math.round(days * 6 * server.share * 10),
 		people: Math.round(server.members * 0.18),
+		profile: {
+			sizeAtJoin: Math.round(server.members * 0.7),
+			firstCommandAt: new Date(Date.parse(joinedAt(server)) + 4 * 60_000).toISOString(),
+			lastCommandAt: new Date(Date.now() - 20 * 60_000).toISOString(),
+			missingPermissions: server.share < 0.05 ? ["ManageRoles", "EmbedLinks"] : [],
+			history: [
+				{ at: new Date(Date.now() - 3 * DAY_MS).toISOString(), kind: "available", atStartup: false },
+				{ at: new Date(Date.now() - 3 * DAY_MS - 900_000).toISOString(), kind: "unavailable", atStartup: false },
+				{ at: joinedAt(server), kind: "join", atStartup: false },
+			],
+		},
 		collector: COLLECTOR,
 	};
 }
@@ -450,6 +463,20 @@ function audience(days: number, timezone: string): AudienceReport {
 			["1", 1_200],
 			["2", 310],
 		]),
+		weekly: Array.from({ length: Math.ceil(days / 7) }, (_, index) => ({
+			week: new Date(Date.now() - (Math.ceil(days / 7) - 1 - index) * 7 * DAY_MS).toISOString().slice(0, 10),
+			users: Math.round(2_100 * (0.85 + 0.03 * index)),
+		})),
+		periods: [
+			{ period: new Date(Date.now() - 60 * DAY_MS).toISOString().slice(0, 8) + "01", users: 6_480, final: true },
+			{ period: new Date(Date.now() - 30 * DAY_MS).toISOString().slice(0, 8) + "01", users: 7_120, final: true },
+			{ period: new Date().toISOString().slice(0, 8) + "01", users: 4_310, final: false },
+		],
+		installs: tallies([
+			["guild", 24_800],
+			["user", 540],
+			["both", 150],
+		]),
 		hours: {
 			timezone,
 			cells: Array.from({ length: 7 }, (_, row) => row + 1).flatMap((weekday) =>
@@ -489,7 +516,34 @@ function growth(days: number): GrowthReport {
 			["90d+", Math.round(sumOf(leaves) * 0.09)],
 		]),
 		serverCount: { ours: 412, discord: 412, warn: false },
+		detected: { joins: Math.round(joined * 0.05), leaves: 1 },
+		discordCount: dayList(days).map((day, index) => ({ day, value: index % 9 === 4 ? null : 380 + index })),
+		cohorts: cohortsOf(Math.min(6, Math.ceil(days / 7))),
+		installsFromDiscord: {
+			webhookStatus: 2,
+			daily: dayList(days).map((day, index) => ({
+				day,
+				serverInstalls: joins[index] ?? 0,
+				userInstalls: index % 3 === 0 ? 2 : 0,
+				userRemovals: index % 7 === 0 ? 1 : 0,
+			})),
+			scopes: tallies([
+				["bot", joined],
+				["applications.commands", joined],
+			]),
+		},
 	};
+}
+
+/** Servers that ran a command in the week they added the bot, and fewer each week after. */
+function cohortsOf(count: number): GrowthReport["cohorts"] {
+	return Array.from({ length: count }, (_, index) => {
+		const size = between(seeded(`cohort:${String(index)}`), 18, 34);
+		return {
+			cohort: new Date(Date.now() - (count - 1 - index) * 7 * DAY_MS).toISOString().slice(0, 10),
+			weeks: Array.from({ length: count - index }, (_, week) => Math.round(size * 0.82 ** week)),
+		};
+	});
 }
 
 const BUTTONS: [string, [string, number][]][] = [
@@ -704,6 +758,21 @@ function activity(days: number): BotActivityReport {
 				["backup", 15],
 			]),
 		},
+		events: [
+			["level_up", 4_210],
+			["music_played", 3_180],
+			["dashboard_screen", 2_640],
+			["auto_reply", 1_920],
+			["command_refused", 610],
+			["dashboard_change", 560],
+			["support_answered", 340],
+			["music_skipped", 120],
+		].map(([name, count], index) => ({
+			name: name as string,
+			count: Math.round(((count as number) * days) / 30),
+			people: 0,
+			lastAt: new Date(Date.now() - (index + 1) * 7 * 60_000).toISOString(),
+		})),
 	};
 }
 
@@ -771,8 +840,160 @@ function reliability(days: number): ReliabilityReport {
 				closeCode: closeCode as number | null,
 			})),
 		},
+		rest: [
+			["POST", "/interactions/:id/:token/callback", 21_400, 12, 0, 180],
+			["POST", "/channels/:id/messages", 9_870, 31, 4, 240],
+			["PATCH", "/webhooks/:id/:token/messages/@original", 6_120, 8, 0, 210],
+			["GET", "/guilds/:id", 4_300, 0, 0, 120],
+			["PUT", "/guilds/:id/members/:id/roles/:id", 1_240, 19, 2, 260],
+		].map(([method, route, calls, failures, retries, p95Ms]) => ({
+			method: method as string,
+			route: route as string,
+			calls: Math.round(((calls as number) * days) / 30),
+			failures: failures as number,
+			retries: retries as number,
+			p95Ms: p95Ms as number,
+		})),
+		invalidRequests: { used: 37, limit: 10_000, share: 0.0037 },
+		sessions: { remaining: 996, total: 1_000 },
+		process: {
+			memory: window.map((day, index) => ({
+				day,
+				value: 196_000_000 + index * 900_000,
+				max: 240_000_000 + index * 900_000,
+			})),
+			eventLoop: window.map((day) => ({ day, value: between(random, 8, 16), max: between(random, 30, 90) })),
+		},
+		bursts: BURSTS.map(([ago, hour, runs, median]) => ({
+			minute: new Date(Math.floor((Date.now() - ago * DAY_MS) / DAY_MS) * DAY_MS + hour * 3_600_000).toISOString(),
+			runs,
+			median,
+		})),
 	};
 }
+
+/** Days ago, the hour, the runs that minute and the usual minute. */
+const BURSTS: [number, number, number, number][] = [
+	[2, 19, 212, 21],
+	[5, 20, 168, 20],
+	[9, 21, 141, 19],
+];
+
+function commandDetail(name: string, days: number): CommandReport {
+	const spec = COMMAND_SPECS.find(([command]) => command === name) ?? COMMAND_SPECS[0]!;
+	const daily = dailyRuns(`command:${name}`, days, Math.max(4, spec[3] * 2));
+	const runs = sumOf(daily.map((day) => day.count));
+	const failures = sumOf(daily.map((day) => day.failures));
+	const peak = 18 + (spec[3] % 6);
+	return {
+		command: spec[0],
+		category: spec[1],
+		days,
+		from:
+			new Date(Date.now() - (Math.min(days, DETAIL_DAYS) - 1) * DAY_MS).toISOString().slice(0, 10) + "T00:00:00.000Z",
+		daily,
+		totals: {
+			runs,
+			ok: runs - failures,
+			errors: Math.round(failures * 0.7),
+			late: Math.round(failures * 0.25),
+			noResponse: failures - Math.round(failures * 0.7) - Math.round(failures * 0.25),
+			deferRate: 0.32,
+			ephemeralRate: 0.18,
+			over3sRate: 0.004,
+			handlerP95Ms: 410,
+			firstAt: new Date(Date.now() - 300 * DAY_MS).toISOString(),
+			lastAt: new Date(Date.now() - 5 * 60_000).toISOString(),
+		},
+		latency: Array.from({ length: 40 }, (_, index) => Math.round(runs * 0.3 * Math.exp(-((index - peak) ** 2) / 6))),
+		kinds: tallies([
+			["chat_input", Math.round(runs * 0.86)],
+			["message_command", Math.round(runs * 0.14)],
+		]),
+		subcommands: tallies([
+			["view", Math.round(runs * 0.6)],
+			["set", Math.round(runs * 0.3)],
+		]),
+		options: tallies([
+			["user", Math.round(runs * 0.4)],
+			["page", Math.round(runs * 0.1)],
+		]),
+		optionValues: [
+			{ option: "section", value: "items", runs: Math.round(runs * 0.2) },
+			{ option: "section", value: "pets", runs: Math.round(runs * 0.08) },
+		],
+		tiers: tallies([
+			["member", Math.round(runs * 0.8)],
+			["manager", Math.round(runs * 0.15)],
+			["admin", Math.round(runs * 0.05)],
+		]),
+		installs: tallies([["guild", runs]]),
+		contexts: tallies([
+			["0", Math.round(runs * 0.97)],
+			["1", Math.round(runs * 0.03)],
+		]),
+		channelTypes: tallies([
+			["0", Math.round(runs * 0.88)],
+			["11", Math.round(runs * 0.08)],
+			["2", Math.round(runs * 0.04)],
+		]),
+		locales: tallies(USER_LANGUAGES.map(([key, count]) => [key, Math.round((count * runs) / 25_000)])),
+		servers: SERVERS.slice(0, 5).map((server) => guildRow(server, Math.round(runs * server.share))),
+		components: [
+			{ handler: `${spec[0]}:refresh`, kind: "button", count: Math.round(runs * 0.2) },
+			{ handler: `${spec[0]}:page`, kind: "button", count: Math.round(runs * 0.1) },
+		],
+		forms: [],
+		collector: COLLECTOR,
+	};
+}
+
+const collectorSetup: CollectorSetup = {
+	collector: COLLECTOR,
+	app: {
+		name: "Testify",
+		mode: "audit",
+		saltPeriod: "month",
+		timezone: "UTC",
+		rawRetentionDays: 14,
+		discordLogin: true,
+	},
+	checks: {
+		receivingEvents: true,
+		appInfoReceived: true,
+		webhookEventsEnabled: true,
+		requiredPermissionsSet: false,
+		auditMode: true,
+		auditKey: true,
+		activityKey: true,
+	},
+	lastEventAt: new Date(Date.now() - 60_000).toISOString(),
+	servers: 412,
+	people: 7_120,
+	bot: {
+		at: new Date(Date.now() - 15 * 60_000).toISOString(),
+		approxServers: 412,
+		approxUserInstalls: 690,
+		sessionsLeft: 996,
+		sessionsTotal: 1_000,
+		nodeVersion: "24.11.1",
+		libraryVersion: "14.24.2",
+		sdkVersion: "1.1.0",
+		release: "2.4.6",
+	},
+	instances: [
+		{
+			instance: "0190f1a2-7c1e-7000-8000-4a2b3c4d5e6f",
+			at: new Date(Date.now() - 30_000).toISOString(),
+			shards: [0, 1, 2, 3],
+			queued: 14,
+			dropped: 0,
+			failedSends: 0,
+			internalErrors: 0,
+			sdkVersion: "1.1.0",
+		},
+	],
+};
 
 function funnel(url: URL): FunnelReport {
 	const steps = (url.searchParams.get("steps") ?? "").split(",").map((step) => step.trim());
@@ -992,6 +1213,11 @@ export const showcaseHandlers = [
 	http.get("/api/analytics/panels", ({ request }) => HttpResponse.json(panels(daysIn(request)))),
 	http.get("/api/analytics/activity", ({ request }) => HttpResponse.json(activity(daysIn(request)))),
 	http.get("/api/analytics/reliability", ({ request }) => HttpResponse.json(reliability(daysIn(request)))),
+	http.get("/api/analytics/setup", () => HttpResponse.json(collectorSetup)),
+	http.get("/api/analytics/commands/:name", ({ request, params }) => {
+		const name = String(params.name);
+		return unknownCommand([name]) ?? HttpResponse.json(commandDetail(name, daysIn(request)));
+	}),
 	http.get("/api/analytics/funnel", ({ request }) => {
 		const url = new URL(request.url);
 		return unknownCommand((url.searchParams.get("steps") ?? "").split(",")) ?? HttpResponse.json(funnel(url));

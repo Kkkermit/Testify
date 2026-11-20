@@ -179,7 +179,12 @@ describe("ShardlensReader", () => {
 	it("reads the collector's settings with a plain GET", async () => {
 		answers(200, { rawRetentionDays: 30, mode: "audit" });
 
-		expect(await new ShardlensReader(ENV).meta()).toEqual({ rawRetentionDays: 30, mode: "audit" });
+		expect(await new ShardlensReader(ENV).meta()).toEqual({
+			rawRetentionDays: 30,
+			mode: "audit",
+			auditKeyConfigured: false,
+			discordLogin: false,
+		});
 		expect(sentTo()).toBe("https://stats.example.com/v1/meta");
 		expect(sentWith()).toMatchObject({ method: "GET", headers: { authorization: `Bearer ${KEY}` } });
 		expect(sentWith()?.body).toBeUndefined();

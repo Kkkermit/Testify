@@ -2315,7 +2315,7 @@ until somebody touched one. The `giveaways` job creates it five seconds after st
 when `SHARDLENS_URL` or `SHARDLENS_INGEST_KEY` is set: an install that never asked gains no listener, no timer and
 no warning. **It is the bot's only analytics.** Nothing analytic is written to MongoDB: the
 owner console's Usage tab, its per-server drill-down and the server list's counts are read back from the collector
-(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). Eight things about it are load-bearing:
+(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). These things about it are load-bearing:
 
 - **The settings are optional strings and nothing more, and can never stop the bot starting.** The SDK checks its
   own address and key, logs one `[SHARDLENS]` warning and sends nothing when either is wrong, so `env.ts` adds no
@@ -2326,10 +2326,19 @@ owner console's Usage tab, its per-server drill-down and the server list's count
 - **Audit mode is asked for, and the collector decides.** `startShardlens` passes `mode: "audit"`, so once the
   collector is in audit mode too, each interaction carries who ran it — user id, username, avatar — and the collector
   keeps that encrypted for its own Activity page. Until the collector agrees, the SDK strips the actor and sends
-  hashes, and logs one `[SHARDLENS]` warning saying so. A prefix run carries its actor the same way. `captureOptionValues`
-  is never passed, so no option value leaves the bot. The privacy notice says
-  exactly this (`legal.outsideL5`, `legal.retentionL23`, `legal.removalP4`), and `LegalPage.test.tsx` and
-  `shardlens.test.ts` pin it to the code. Turning on option values is a change to the notice first.
+  hashes, and logs one `[SHARDLENS]` warning saying so. A prefix run carries its actor the same way. The privacy
+  notice says exactly this (`legal.outsideL5`, `legal.retentionL23`, `legal.removalP4`), and `LegalPage.test.tsx` and
+  `shardlens.test.ts` pin it to the code.
+- **An option's value leaves the bot only when it is a fixed choice wherever it is declared.** `choiceOptions` reads
+  the registry at start-up and hands `captureOptionValues` every option name whose every declaration lists `choices`,
+  leaving out one marked `unlogged`, because the SDK keeps a value by name alone and a name typed freely anywhere would
+  let that text through. A prefix run passes `optionValues` for those names only (`recordPrefixRun`), so typed text
+  never reaches the SDK even in memory. A birthday is personal, so `/birthday set`'s day and month are `unlogged`, out
+  of the operator's logs as well. Widening what is sent is a change to the notice first.
+- **What waits to be sent waits on disk while the collector is away.** `spool: { dir: spoolDir(env) }` keeps the
+  SDK's queue in a folder under the system's temporary directory, named by a hash of the collector's address and the
+  ingest key, so two installs on one machine never send each other's events. The SDK writes it hashed and without
+  audit identities, readable by the bot's user only, drops an erased person's events from it, and caps it at 100 MB.
 - **The runners are wrapped, not the listener.** `measured` runs a handler through one `lens.wrap` kept per lens, inside
   the `try` of `runCommand` and `runButton` and around autocomplete, so the SDK times the handler and sees it throw
   while the bot's own error handling still answers. A prefix run is not an interaction, so `measured` just runs it,
@@ -2393,7 +2402,9 @@ owner console's Usage tab, its per-server drill-down and the server list's count
   and no page profiles anybody beyond that lookup. A picture's address is built only from an id and a hash that pass
   their patterns, a component shows only one of the bot's own handlers and its action, and every name is drawn as
   text. The collector records each of these reads in its access log, and the privacy notice says the owners can see
-  who ran what (`legal.outsideL5`).
+  who ran what (`legal.outsideL5`). Who ran what needs collector 1.2 or later in audit mode with its audit key, and the
+  activity key in the bot; `collectorSetup` (`GET /analytics/setup`) reads the collector's `overview` and `meta` and
+  names each of the three that is missing, with its checklist, its last event and every SDK process's queue.
 - **Live numbers are one stream, opened while somebody looks.** `LiveFeed` in `liveFeed.util.ts` follows the
   client's `live()` and `GET /analytics/live` hands back the latest numbers; the console asks every three seconds
   while its tab is visible. The collector keeps ten live streams an address, so every owner looking shares the bot's
@@ -3750,11 +3761,16 @@ about it are load-bearing:
   collector's own Activity page and the server's page are still linked with `collectorPage`, which only ever builds a
   link from an `http`/`https` origin.
 
-**The Usage tab has eight sections, and each reads its own owner-only route**, so one the collector cannot answer
+**The Usage tab has nine sections, and each reads its own owner-only route**, so one the collector cannot answer
 leaves the rest working: Commands, People (`/analytics/audience`), Servers (`/growth`), Buttons and forms (`/panels`),
-Bot activity (`/activity`), Reliability (`/reliability`), Journeys (`/funnel`, `/retention`), built by
-`usageSections.util.ts`, and Who ran what (`/runs`, `/runs/top`), built by `runLog.util.ts`, chosen with `?view=`.
-**Right now** sits above them all, read from `/analytics/live`, and says nothing while Shardlens is off. Four things about them are load-bearing:
+Bot activity (`/activity`), Reliability (`/reliability`), Journeys (`/funnel`, `/retention`) and Setup (`/setup`),
+built by `usageSections.util.ts`, and Who ran what (`/runs`, `/runs/top`), built by `runLog.util.ts`, chosen with
+`?view=`. A command named in any Commands list opens that command in depth (`?command=`, read from
+`/analytics/commands/:name` by `commandReport`): its outcomes, answer times as the collector's 40 log-scale buckets,
+subcommands, options, the fixed choices picked, who ran it and where, and its own buttons and forms. Between them the
+sections ask every query `@shardlens/client` offers but `servers`, which the owner's server list already answers from
+Discord's own cache, and `premium`, since the bot sells nothing. **Right now** sits above them all, read from
+`/analytics/live`, and says nothing while Shardlens is off. Five things about them are load-bearing:
 
 - **Hours, funnels and returns are read in the reader's own time zone.** The page sends `tz`, and the route takes only
   an IANA zone the runtime knows (`analyticsZoneQuery`); every daily chart stays in UTC like the Commands section.
@@ -3764,6 +3780,9 @@ Bot activity (`/activity`), Reliability (`/reliability`), Journeys (`/funnel`, `
 - **Buttons and forms are read only for the bot's own handlers**, by the first two parts of each custom ID, because the
   rest is whatever a handler packed into it. The collector files a form opened from a button under the button's ID and
   a submitted one under its own, so a handler's forms are summed on both sides.
+- **A newer figure an older collector does not send reads as none, never as a refused answer.** Every row
+  `ANSWERS` reads that collector 1.2 added is `later(…)` (an empty list by default) or optional, so a section keeps
+  working on 1.1 and fills in once the collector is upgraded; a shape it cannot read at all is still refused.
 - **The way a dashboard change was made is the page's word for it.** Put back and Bring in send `x-testify-via`
   (`CHANGE_WAY_HEADER`) as `put_back` or `backup`, setup steps are told by their action, and anything else reads as a
   save. It is a label on a count and decides nothing.

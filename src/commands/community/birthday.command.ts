@@ -23,13 +23,23 @@ export default defineCommand({
 			description: "Shares your birthday with this server: the day and month, never the year.",
 			private: true,
 			options: [
-				{ name: "day", description: "The day of the month.", type: "integer", required: true, min: 1, max: 31 },
+				// A birthday is personal, so neither the operator's logs nor the analytics ever hold it.
+				{
+					name: "day",
+					description: "The day of the month.",
+					type: "integer",
+					required: true,
+					min: 1,
+					max: 31,
+					unlogged: true,
+				},
 				{
 					name: "month",
 					description: "The month.",
 					type: "integer",
 					required: true,
 					choices: MONTHS.map((name, index) => ({ name, value: index + 1 })),
+					unlogged: true,
 				},
 			],
 			async run(interaction) {

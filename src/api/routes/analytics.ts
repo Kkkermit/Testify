@@ -13,6 +13,8 @@ import {
 	audienceReport,
 	botActivityReport,
 	botVersion,
+	collectorSetup,
+	commandReport,
 	funnelReport,
 	growthReport,
 	guildUsageReport,
@@ -29,6 +31,7 @@ import {
 	type AnalyticsProblem,
 	analyticsQuery,
 	analyticsZoneQuery,
+	commandParam,
 	funnelQuery,
 	guildIdParam,
 	type LogFeed,
@@ -102,6 +105,19 @@ function knownCommands(client: TestifyClient, names: (string | undefined)[]): vo
 	const unknown = names.find((name) => name !== undefined && !client.commands.has(name));
 	if (unknown !== undefined) throw new ApiProblem(400, "unknown_command", "That is not one of the bot's commands.");
 }
+
+analytics.get("/commands/:name", async (context) => {
+	const { days } = parseQuery(context, analyticsQuery);
+	const { name } = parseParams(context, commandParam);
+	const client = context.get("client");
+	knownCommands(client, [name]);
+	return context.json(await fromShardlens(() => commandReport(client, name, days)));
+});
+
+/** How the collector is set up, read from its own overview, so a missing step for who ran what can be named. */
+analytics.get("/setup", async (context) =>
+	context.json(await fromShardlens(() => collectorSetup(context.get("client")))),
+);
 
 analytics.get("/funnel", async (context) => {
 	const query = parseQuery(context, funnelQuery);

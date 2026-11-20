@@ -2,10 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Card, Figure, UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { CohortTable } from "@/features/owner/components/CohortTable";
 import { DayBars } from "@/features/owner/components/DayBars";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { NO_FIGURE, shareOrDash } from "@/features/owner/owner.utils";
-import { labelOf, LIFETIME_LABELS } from "@/features/owner/usage/usage.utils";
+import { labelOf, LIFETIME_LABELS, tallyBars, WEBHOOK_LABELS } from "@/features/owner/usage/usage.utils";
 import { useGrowth } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
@@ -65,6 +66,14 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 								/>
 							</div>
 						</div>
+						{report.detected.joins + report.detected.leaves > 0 && (
+							<p className="text-muted-foreground px-6 py-3 text-xs">
+								{t("owner.usageSections.detectedNote", {
+									added: report.detected.joins,
+									left: report.detected.leaves,
+								})}
+							</p>
+						)}
 					</Card>
 
 					<div className="grid items-start gap-4 lg:grid-cols-2">
@@ -88,6 +97,59 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 									id: row.key,
 									label: labelOf(LIFETIME_LABELS, row.key, t),
 									count: row.count,
+								}))}
+							/>
+						</Panel>
+
+						<Panel title={t("owner.usageSections.discordCount")} hint={t("owner.usageSections.discordCountHint")}>
+							<DayBars
+								tint="bg-hue-blue/40"
+								days={report.discordCount}
+								caption={t("owner.usageSections.discordCount")}
+								valueLabel={t("owner.usageSections.servers")}
+							/>
+						</Panel>
+
+						<Panel
+							title={t("owner.usageSections.fromDiscord")}
+							hint={t(
+								WEBHOOK_LABELS[String(report.installsFromDiscord.webhookStatus)] ??
+									"owner.usageSections.webhooksUnknown",
+							)}
+						>
+							<DayBars
+								tint="bg-success/40"
+								days={report.installsFromDiscord.daily.map((day) => ({ day: day.day, value: day.serverInstalls }))}
+								caption={t("owner.usageSections.fromDiscord")}
+								valueLabel={t("owner.usageSections.serverInstalls")}
+								also={{
+									label: t("owner.usageSections.userInstalls"),
+									values: report.installsFromDiscord.daily.map((day) => day.userInstalls),
+								}}
+							/>
+							<UsageBars
+								tint="bg-success/20"
+								empty={t("owner.nothingRecorded")}
+								rows={tallyBars(report.installsFromDiscord.scopes, (key) => (
+									<code className="font-mono text-sm">{key}</code>
+								))}
+							/>
+						</Panel>
+
+						<Panel
+							wide
+							title={t("owner.usageSections.serverCohorts")}
+							hint={t("owner.usageSections.serverCohortsHint")}
+						>
+							<CohortTable
+								caption={t("owner.usageSections.serverCohorts")}
+								sizeLabel={t("owner.usageSections.firstWeek")}
+								empty={t("owner.usageSections.noServerCohorts")}
+								periodLabel={(period) => t("owner.usageSections.weekN", { number: period })}
+								rows={report.cohorts.map((row) => ({
+									cohort: row.cohort,
+									size: row.weeks[0] ?? 0,
+									cells: row.weeks.slice(1).map((servers) => formatNumber(servers)),
 								}))}
 							/>
 						</Panel>

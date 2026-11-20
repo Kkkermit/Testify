@@ -10,6 +10,8 @@ import { findLogRun, listLogRuns, readLogLines } from "@database/repositories/lo
 import {
 	AnalyticsUnavailable,
 	audienceReport,
+	collectorSetup,
+	commandReport,
 	funnelReport,
 	guildUsageReport,
 	liveFeedFor,
@@ -25,6 +27,8 @@ jest.mock("@lib/bot", () => ({
 	usageReport: jest.fn(),
 	guildUsageReport: jest.fn(),
 	audienceReport: jest.fn(() => Promise.resolve({ days: 30 })),
+	commandReport: jest.fn(() => Promise.resolve({ days: 30 })),
+	collectorSetup: jest.fn(() => Promise.resolve({ collector: "" })),
 	funnelReport: jest.fn(() => Promise.resolve({ days: 30 })),
 	retentionReport: jest.fn(() => Promise.resolve({ days: 30 })),
 	readRuns: jest.fn(() => Promise.resolve({ rows: [], next: null, collector: "" })),
@@ -106,6 +110,8 @@ const OWNER_ONLY = [
 	"/analytics/runtime",
 	"/analytics/live",
 	"/analytics/runs/top",
+	"/analytics/setup",
+	"/analytics/commands/work",
 ];
 
 describe("who can read the analytics", () => {
@@ -198,6 +204,32 @@ describe("the usage report", () => {
 			expect(response.status).toBe(503);
 			expect(((await response.json()) as { error: { code: string } }).error.code).toBe(`analytics_${problem}`);
 		}
+	});
+});
+
+describe("one command in depth", () => {
+	/** A name goes to the collector as it is, so only the bot's own commands, in their own spelling, are asked about. */
+	it("reads one of the bot's own commands over the window, and refuses anything else", async () => {
+		expect((await appFor().request("/analytics/commands/work?days=7")).status).toBe(200);
+		expect(jest.mocked(commandReport).mock.calls[0]?.slice(1)).toEqual(["work", 7]);
+
+		const unknown = await appFor().request("/analytics/commands/secret");
+		expect(unknown.status).toBe(400);
+		expect(((await unknown.json()) as { error: { code: string } }).error.code).toBe("unknown_command");
+		for (const name of ["Work", "work%20x", "..%2F..%2Fetc", "a".repeat(40)]) {
+			expect((await appFor().request(`/analytics/commands/${name}`)).status).toBe(400);
+		}
+		expect(commandReport).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("the collector's setup", () => {
+	it("answers 503 naming why Shardlens could not be read, like every other section", async () => {
+		jest.mocked(collectorSetup).mockRejectedValueOnce(new AnalyticsUnavailable("refused"));
+		const response = await appFor().request("/analytics/setup");
+
+		expect(response.status).toBe(503);
+		expect(((await response.json()) as { error: { code: string } }).error.code).toBe("analytics_refused");
 	});
 });
 

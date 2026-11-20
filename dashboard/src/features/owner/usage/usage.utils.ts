@@ -3,12 +3,15 @@ import {
 	type ChangeWay,
 	COMMAND_NAME,
 	FUNNEL_LIMITS,
+	type GuildProfile,
 	type MEMBER_TIERS,
 	type MusicReason,
 	type RefusalReason,
 	type SupportWay,
+	type Tally,
 } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { type UsageBars } from "@/components/primitives";
 import { LOCALES, type TranslationKey } from "@/i18n";
 import { formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
@@ -22,6 +25,7 @@ export const USAGE_VIEWS = [
 	"reliability",
 	"journeys",
 	"runs",
+	"setup",
 ] as const;
 
 export type UsageView = (typeof USAGE_VIEWS)[number];
@@ -37,7 +41,14 @@ export const VIEW_LABELS: Record<UsageView, TranslationKey> = {
 	reliability: "owner.usageSections.viewReliability",
 	journeys: "owner.usageSections.viewJourneys",
 	runs: "owner.usageSections.viewRuns",
+	setup: "owner.usageSections.viewSetup",
 };
+
+export type Bars = React.ComponentProps<typeof UsageBars>["rows"];
+
+/** A breakdown as bars, each labelled by its key; `prefix` keeps ids apart when two breakdowns share a list. */
+export const tallyBars = (rows: Tally[], label: (key: string) => React.ReactNode, prefix = ""): Bars =>
+	rows.map((row) => ({ id: `${prefix}${row.key}`, label: label(row.key), count: row.count }));
 
 export const TIER_LABELS: Record<(typeof MEMBER_TIERS)[number], TranslationKey> = {
 	admin: "owner.usageSections.tierAdmin",
@@ -51,6 +62,41 @@ export const CONTEXT_LABELS: Record<string, TranslationKey> = {
 	"0": "owner.usageSections.contextServer",
 	"1": "owner.usageSections.contextBotDm",
 	"2": "owner.usageSections.contextOtherDm",
+};
+
+/** How the bot was installed where it ran. */
+export const INSTALL_LABELS: Record<string, TranslationKey> = {
+	guild: "owner.usageSections.installGuild",
+	user: "owner.usageSections.installUser",
+	both: "owner.usageSections.installBoth",
+};
+
+/** Discord's channel types, which arrive as their numbers; anything rarer shows its number. */
+export const CHANNEL_TYPE_LABELS: Record<string, TranslationKey> = {
+	"0": "owner.usageSections.channelText",
+	"1": "owner.usageSections.channelDm",
+	"2": "owner.usageSections.channelVoice",
+	"3": "owner.usageSections.channelGroupDm",
+	"5": "owner.usageSections.channelAnnouncement",
+	"10": "owner.usageSections.channelThread",
+	"11": "owner.usageSections.channelThread",
+	"12": "owner.usageSections.channelThread",
+	"13": "owner.usageSections.channelStage",
+	"15": "owner.usageSections.channelForum",
+};
+
+export const HISTORY_LABELS: Record<GuildProfile["history"][number]["kind"], TranslationKey> = {
+	join: "owner.usageSections.historyJoin",
+	leave: "owner.usageSections.historyLeave",
+	unavailable: "owner.usageSections.historyUnavailable",
+	available: "owner.usageSections.historyAvailable",
+};
+
+/** Discord's webhook events status: 1 off, 2 on, 3 turned off by Discord after failing deliveries. */
+export const WEBHOOK_LABELS: Record<string, TranslationKey> = {
+	"1": "owner.usageSections.webhooksOff",
+	"2": "owner.usageSections.webhooksOn",
+	"3": "owner.usageSections.webhooksDisabled",
 };
 
 export const LIFETIME_LABELS: Record<string, TranslationKey> = {

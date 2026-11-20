@@ -2,11 +2,18 @@ import { type Tally } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Card, Figure, UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
-import { DayBars } from "@/features/owner/components/DayBars";
+import { ColumnBars, DayBars } from "@/features/owner/components/DayBars";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { shareOrDash } from "@/features/owner/owner.utils";
+import { shareOrDash, shortDay } from "@/features/owner/owner.utils";
 import { HourHeatmap } from "@/features/owner/usage/HourHeatmap";
-import { CONTEXT_LABELS, isTranslated, labelOf, TIER_LABELS } from "@/features/owner/usage/usage.utils";
+import {
+	CONTEXT_LABELS,
+	INSTALL_LABELS,
+	isTranslated,
+	labelOf,
+	tallyBars,
+	TIER_LABELS,
+} from "@/features/owner/usage/usage.utils";
 import { useAudience } from "@/features/owner/useOwner";
 import { readerTimeZone } from "@/lib/datetime";
 import { formatNumber, languageName } from "@/lib/intl";
@@ -101,6 +108,40 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 										label: labelOf(CONTEXT_LABELS, row.key, t),
 										count: row.count,
 									}))}
+								/>
+							</Panel>
+
+							<Panel wide title={t("owner.usageSections.weekly")} hint={t("owner.usageSections.weeklyHint")}>
+								<ColumnBars
+									caption={t("owner.usageSections.weekly")}
+									columnLabel={t("owner.usageSections.week")}
+									valueLabel={t("owner.usageSections.people")}
+									columns={report.weekly.map((row) => ({
+										key: row.week,
+										label: shortDay(row.week),
+										value: row.users,
+									}))}
+								/>
+							</Panel>
+
+							<Panel title={t("owner.usageSections.periods")} hint={t("owner.usageSections.periodsHint")}>
+								<UsageBars
+									tint="bg-hue-green/20"
+									empty={t("owner.nothingRecorded")}
+									rows={report.periods.map((row) => ({
+										id: row.period,
+										label: t("owner.usageSections.since", { date: shortDay(row.period) }),
+										...(row.final ? {} : { sub: t("owner.usageSections.stillCounting") }),
+										count: row.users,
+									}))}
+								/>
+							</Panel>
+
+							<Panel title={t("owner.usageSections.installs")} hint={t("owner.usageSections.installsHint")}>
+								<UsageBars
+									tint="bg-hue-violet/20"
+									empty={t("owner.nothingRecorded")}
+									rows={tallyBars(report.installs, (key) => labelOf(INSTALL_LABELS, key, t))}
 								/>
 							</Panel>
 						</div>

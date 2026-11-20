@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 import { UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
+import { formBars, handlerName } from "@/features/owner/usage/usageBars";
 import { usePanels } from "@/features/owner/useOwner";
-import { formatNumber, formatPercent } from "@/lib/intl";
 
 const ACTIONS_SHOWN = 3;
 
@@ -21,7 +21,7 @@ export function PanelsView({ days }: { days: number }): React.JSX.Element {
 							empty={t("owner.usageSections.noPresses")}
 							rows={report.buttons.map((row) => ({
 								id: row.id,
-								label: <code className="font-mono text-sm">{row.id}</code>,
+								label: handlerName(row.id),
 								sub: [
 									...row.actions
 										.slice(0, ACTIONS_SHOWN)
@@ -39,19 +39,7 @@ export function PanelsView({ days }: { days: number }): React.JSX.Element {
 						<UsageBars
 							tint="bg-hue-amber/20"
 							empty={t("owner.usageSections.noForms")}
-							rows={report.forms.map((row) => {
-								const abandoned = Math.max(0, row.shown - row.submitted);
-								return {
-									id: row.id,
-									label: <code className="font-mono text-sm">{row.id}</code>,
-									sub: t("owner.usageSections.formSub", {
-										shown: formatNumber(row.shown),
-										submitted: formatNumber(Math.min(row.submitted, row.shown)),
-									}),
-									count: abandoned,
-									value: t("owner.usageSections.abandoned", { share: formatPercent(abandoned, row.shown) }),
-								};
-							})}
+							rows={formBars(report.forms, t)}
 						/>
 					</Panel>
 				</div>

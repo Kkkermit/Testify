@@ -1,6 +1,6 @@
 import { type Filter, type SeriesMetric, type TopQuery } from "@shardlens/client";
 import { type TestifyClient } from "@core/client";
-import { LENS_EVENTS } from "@lib/bot/shardlens.util";
+import { LENS_EVENTS, ownHandler } from "@lib/bot/shardlens.util";
 import {
 	ALL_ROWS,
 	askFor,
@@ -15,6 +15,7 @@ import {
 	type AudienceReport,
 	AUTOMATIC_ACTIONS,
 	type BotActivityReport,
+	type CollectorSetup,
 	type FunnelReport,
 	type GrowthReport,
 	type PanelButtonRow,
@@ -28,11 +29,13 @@ import {
 /** The owner console's Usage sections beyond commands, each read from Shardlens on its own. */
 
 const SHOWN = 15;
+/** Weeks after adding the bot shown for a server's cohort; a quarter is as far as the window reaches. */
+const MAX_COHORT_WEEK = 13;
 const LATE = new Set(["timeout", "no_response"]);
 
 const byCount = (a: Tally, b: Tally): number => b.count - a.count || a.key.localeCompare(b.key);
 
-function tallies(rows: { key: string | null; value: number }[], limit = SHOWN): Tally[] {
+export function tallies(rows: { key: string | null; value: number }[], limit = SHOWN): Tally[] {
 	const counts = new Map<string, number>();
 	for (const { key, value } of rows) {
 		if (key === null || key === "" || value <= 0) continue;
@@ -82,22 +85,45 @@ export async function audienceReport(
 				.filter((cell) => cell.value > 0)
 				.map((cell) => ({ weekday: cell.weekday, hour: cell.hour, count: cell.value })),
 		},
+		weekly: [...audience.weekly].sort((a, b) => a.week.localeCompare(b.week)),
+		periods: [...audience.periods].sort((a, b) => a.period.localeCompare(b.period)),
+		installs: tallies(audience.splits.install ?? []),
 	};
 }
 
 const buckets = (rows: { bucket: string; servers: number }[]): Tally[] =>
 	rows.filter((row) => row.servers > 0).map((row) => ({ key: row.bucket, count: row.servers }));
 
+/** Weeks a server was active in, from the week it added the bot, so a week nobody ran anything is a zero. */
+function serverCohorts(rows: { cohort: string; week: number; servers: number }[]): GrowthReport["cohorts"] {
+	const byCohort = new Map<string, number[]>();
+	for (const { cohort, week, servers } of rows) {
+		if (!Number.isInteger(week) || week < 0 || week > MAX_COHORT_WEEK) continue;
+		const weeks = byCohort.get(cohort) ?? [];
+		weeks[week] = servers;
+		byCohort.set(cohort, weeks);
+	}
+	return [...byCohort]
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(([cohort, weeks]) => ({ cohort, weeks: Array.from({ length: weeks.length }, (_, week) => weeks[week] ?? 0) }));
+}
+
 export async function growthReport(client: TestifyClient, days: number, now = Date.now()): Promise<GrowthReport> {
 	const ask = askFor(client, days, now);
-	const growth = await ask({ kind: "growth", timezone: "UTC" });
+	const [growth, installs] = await Promise.all([
+		ask({ kind: "growth", timezone: "UTC" }),
+		ask({ kind: "installs", timezone: "UTC" }),
+	]);
 
+	const window = windowDays(days, now);
 	const byDay = new Map(growth.daily.map((row) => [row.day, row]));
-	const daily = windowDays(days, now).map((day) => ({
+	const daily = window.map((day) => ({
 		day,
 		joins: byDay.get(day)?.joins ?? 0,
 		leaves: byDay.get(day)?.leaves ?? 0,
 	}));
+	const discordBy = new Map(growth.approximateGuilds.map((row) => [row.day, row.value]));
+	const installsBy = new Map(installs.daily.map((row) => [row.day, row]));
 
 	return {
 		days,
@@ -113,13 +139,43 @@ export async function growthReport(client: TestifyClient, days: number, now = Da
 		sizeAtInstall: buckets(growth.sizeAtInstall),
 		lifetimes: buckets(growth.lifetimes),
 		serverCount: growth.serverCount,
+		detected: {
+			joins: growth.daily.reduce((total, row) => total + (row.joinsDetected ?? 0), 0),
+			leaves: growth.daily.reduce((total, row) => total + (row.leavesDetected ?? 0), 0),
+		},
+		discordCount: window.map((day) => ({ day, value: discordBy.get(day) ?? null })),
+		cohorts: serverCohorts(growth.cohorts),
+		installsFromDiscord: {
+			webhookStatus: installs.webhookStatus,
+			daily: window.map((day) => ({
+				day,
+				serverInstalls: installsBy.get(day)?.serverInstalls ?? 0,
+				userInstalls: installsBy.get(day)?.userInstalls ?? 0,
+				userRemovals: installsBy.get(day)?.userRemovals ?? 0,
+			})),
+			scopes: tallies(installs.scopes.map((row) => ({ key: row.scope, value: row.installs }))),
+		},
 	};
 }
 
-/** A custom ID is `handler:action:…` with every number already replaced by the SDK; only the first two parts are kept. */
-function handlerOf(customId: string): { id: string; action: string } {
-	const [id = "", action = ""] = customId.split(":");
-	return { id, action };
+/** A form opened from a button is filed under the button's ID, and one submitted under its own, so both sum by handler. */
+export function formsByHandler(
+	client: TestifyClient,
+	rows: { customId: string; shown: number; submitted: number }[],
+): PanelFormRow[] {
+	const forms = new Map<string, PanelFormRow>();
+	for (const { customId, shown, submitted } of rows) {
+		const handler = ownHandler(client, customId);
+		if (handler === null) continue;
+		const row = forms.get(handler.id) ?? { id: handler.id, shown: 0, submitted: 0 };
+		row.shown += shown;
+		row.submitted += submitted;
+		forms.set(handler.id, row);
+	}
+	return [...forms.values()]
+		.filter((row) => row.shown > 0)
+		.sort((a, b) => abandoned(b) - abandoned(a) || b.shown - a.shown || a.id.localeCompare(b.id))
+		.slice(0, SHOWN);
 }
 
 export async function panelsReport(client: TestifyClient, days: number, now = Date.now()): Promise<PanelsReport> {
@@ -140,8 +196,6 @@ export async function panelsReport(client: TestifyClient, days: number, now = Da
 	]);
 
 	// Only the bot's own handlers, so nothing but the names it gave its buttons ever reaches the page.
-	const ours = (customId: string): boolean => client.buttons.has(handlerOf(customId).id);
-
 	const rows = new Map<string, PanelButtonRow & { byAction: Map<string, number> }>();
 	const rowOf = (id: string): PanelButtonRow & { byAction: Map<string, number> } => {
 		let row = rows.get(id);
@@ -153,35 +207,17 @@ export async function panelsReport(client: TestifyClient, days: number, now = Da
 	};
 
 	for (const { key, value } of pressed.rows) {
-		if (!ours(key)) continue;
-		const { id, action } = handlerOf(key);
-		const row = rowOf(id);
+		const handler = ownHandler(client, key);
+		if (handler === null) continue;
+		const row = rowOf(handler.id);
 		row.presses += value ?? 0;
-		if (action !== "") row.byAction.set(action, (row.byAction.get(action) ?? 0) + (value ?? 0));
+		if (handler.action !== "") {
+			row.byAction.set(handler.action, (row.byAction.get(handler.action) ?? 0) + (value ?? 0));
+		}
 	}
 	for (const { key, value } of failed.rows) {
-		if (ours(key)) rowOf(handlerOf(key).id).failures += value ?? 0;
-	}
-
-	// A form opened from a button is filed under the button's ID, and one submitted under its own, so both sum by handler.
-	const forms = new Map<string, PanelFormRow>();
-	const formOf = (customId: string): PanelFormRow | null => {
-		if (!ours(customId)) return null;
-		const { id } = handlerOf(customId);
-		let row = forms.get(id);
-		if (row === undefined) {
-			row = { id, shown: 0, submitted: 0 };
-			forms.set(id, row);
-		}
-		return row;
-	};
-	for (const { key, value } of shown.rows) {
-		const row = formOf(key);
-		if (row !== null) row.shown += value ?? 0;
-	}
-	for (const { key, value } of submitted.rows) {
-		const row = formOf(key);
-		if (row !== null) row.submitted += value ?? 0;
+		const handler = ownHandler(client, key);
+		if (handler !== null) rowOf(handler.id).failures += value ?? 0;
 	}
 
 	return {
@@ -194,10 +230,10 @@ export async function panelsReport(client: TestifyClient, days: number, now = Da
 			}))
 			.sort((a, b) => b.presses - a.presses || a.id.localeCompare(b.id))
 			.slice(0, SHOWN),
-		forms: [...forms.values()]
-			.filter((row) => row.shown > 0)
-			.sort((a, b) => abandoned(b) - abandoned(a) || b.shown - a.shown || a.id.localeCompare(b.id))
-			.slice(0, SHOWN),
+		forms: formsByHandler(client, [
+			...shown.rows.map((row) => ({ customId: row.key, shown: row.value ?? 0, submitted: 0 })),
+			...submitted.rows.map((row) => ({ customId: row.key, shown: 0, submitted: row.value ?? 0 })),
+		]),
 	};
 }
 
@@ -220,6 +256,7 @@ export async function botActivityReport(
 		automatic,
 		[sources, skipCauses, refuseCauses, answeredBy, refusedBy, articles, reasons, commands, screens, ways],
 		meta,
+		events,
 	] = await Promise.all([
 		Promise.all(
 			[
@@ -246,6 +283,7 @@ export async function botActivityReport(
 			values(LENS_EVENTS.dashboardChange, "how"),
 		]),
 		reader.meta(),
+		ask({ kind: "events" }),
 	]);
 
 	const causes = tallies([...skipCauses, ...refuseCauses].map(({ key, count }) => ({ key, value: count }))).flatMap(
@@ -263,6 +301,7 @@ export async function botActivityReport(
 		refusals: { total: refusals ?? 0, reasons, commands },
 		automatic,
 		changes: { total: changes ?? 0, screens, ways },
+		events: events.rows.map((row) => ({ name: row.name, count: row.count, people: row.users, lastAt: row.lastSeen })),
 	};
 }
 
@@ -275,11 +314,16 @@ export async function reliabilityReport(
 ): Promise<ReliabilityReport> {
 	const ask = askFor(client, days, now);
 
-	const [reliability, outcomes, limits, ping] = await Promise.all([
+	const daily = (name: string) => ask({ kind: "gauge", name, interval: "day", timezone: "UTC" });
+
+	const [reliability, outcomes, limits, ping, memory, eventLoop, bursts] = await Promise.all([
 		ask({ kind: "reliability" }),
 		ask(dailySeries("interactions", { groupBy: "outcome" })),
 		ask(dailySeries("rest.ratelimits")),
-		ask({ kind: "gauge", name: "shard.ping_ms", interval: "day", timezone: "UTC" }),
+		daily("shard.ping_ms"),
+		daily("memory.rss_bytes"),
+		daily("eventloop.p99_ms"),
+		ask({ kind: "bursts" }),
 	]);
 
 	const window = windowDays(days, now);
@@ -295,6 +339,11 @@ export async function reliabilityReport(
 	const limitedBy = new Map<string, number>();
 	for (const point of limits.points) limitedBy.set(dayOf(point.t), (limitedBy.get(dayOf(point.t)) ?? 0) + point.value);
 	const pingBy = new Map(ping.points.map((point) => [dayOf(point.t), point.value]));
+	const gaugeDays = (points: { t: string; value: number | null; max: number | null }[]) => {
+		const byDay = new Map(points.map((point) => [dayOf(point.t), point]));
+		return window.map((day) => ({ day, value: byDay.get(day)?.value ?? null, max: byDay.get(day)?.max ?? null }));
+	};
+	const { invalidBudget, identify } = reliability;
 
 	return {
 		days,
@@ -321,6 +370,71 @@ export async function reliabilityReport(
 				closeCode: row.closeCode,
 			})),
 		},
+		rest: [...reliability.routes].sort((a, b) => b.calls - a.calls || a.route.localeCompare(b.route)).slice(0, SHOWN),
+		invalidRequests:
+			invalidBudget === null || invalidBudget === undefined
+				? null
+				: { used: invalidBudget.used, limit: invalidBudget.limit, share: invalidBudget.share },
+		sessions:
+			identify?.remaining === null || identify?.remaining === undefined || identify.total === null
+				? null
+				: { remaining: identify.remaining, total: identify.total },
+		process: { memory: gaugeDays(memory.points), eventLoop: gaugeDays(eventLoop.points) },
+		bursts: bursts.rows.slice(0, SHOWN),
+	};
+}
+
+/** What the collector says of its own setup and of the bot, which is where a missing step for who ran what shows. */
+export async function collectorSetup(client: TestifyClient): Promise<CollectorSetup> {
+	const reader = readerFor(client);
+	const [overview, meta] = await Promise.all([reader.query({ kind: "overview" }), reader.meta()]);
+	const app = overview.app;
+	const info = overview.appInfo;
+	const added = (counts: Record<string, number>): number => Object.values(counts).reduce((total, n) => total + n, 0);
+
+	return {
+		collector: reader.collector ?? "",
+		app: {
+			name: app?.name ?? "",
+			mode: app?.mode ?? (meta.mode === "audit" ? "audit" : "privacy"),
+			saltPeriod: app?.saltPeriod ?? "month",
+			timezone: app?.timezone ?? "UTC",
+			rawRetentionDays: app?.rawRetentionDays ?? meta.rawRetentionDays,
+			discordLogin: meta.discordLogin,
+		},
+		checks: {
+			...overview.checklist,
+			auditMode: (app?.mode ?? meta.mode) === "audit",
+			auditKey: meta.auditKeyConfigured,
+			activityKey: reader.readsActivity,
+		},
+		lastEventAt: overview.lastEventAt,
+		servers: overview.servers,
+		people: overview.uniqueUsersThisPeriod,
+		bot:
+			info === null
+				? null
+				: {
+						at: info.ts,
+						approxServers: info.approxGuilds,
+						approxUserInstalls: info.approxUserInstalls,
+						sessionsLeft: info.sessionStartRemaining,
+						sessionsTotal: info.sessionStartTotal,
+						nodeVersion: info.nodeVersion,
+						libraryVersion: info.libVersion,
+						sdkVersion: info.sdkVersion,
+						release: info.release,
+					},
+		instances: overview.sdkInstances.map((instance) => ({
+			instance: instance.instance,
+			at: instance.ts,
+			shards: instance.shards,
+			queued: instance.queueDepth,
+			dropped: added(instance.dropped),
+			failedSends: instance.failedFlushes,
+			internalErrors: added(instance.internalErrors),
+			sdkVersion: instance.sdkVersion,
+		})),
 	};
 }
 

@@ -180,6 +180,13 @@ export const guildUsage: GuildUsageReport = {
 	],
 	dashboardViews: 12,
 	people: 2,
+	profile: {
+		sizeAtJoin: 900,
+		firstCommandAt: "2026-01-01T00:05:00.000Z",
+		lastCommandAt: "2026-08-01T11:00:00.000Z",
+		missingPermissions: ["ManageRoles"],
+		history: [{ at: "2026-01-01T00:00:00.000Z", kind: "join", atStartup: false }],
+	},
 	collector: "https://stats.example.com",
 };
 

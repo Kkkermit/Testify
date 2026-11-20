@@ -10,10 +10,12 @@ import {
 	recordAction,
 	recordEvent,
 	recordMusicProblem,
+	choiceOptions,
 	recordPrefixRun,
 	sendShardlensNow,
 	shardlensLine,
 	shardlensStatus,
+	spoolDir,
 	startShardlens,
 } from "@lib/bot/shardlens.util";
 
@@ -147,9 +149,10 @@ describe("startShardlens", () => {
 });
 
 describe("what the SDK is started with", () => {
-	/** Audit mode names who ran each command once the collector agrees; option values must still never leave. */
-	it("asks for audit mode and records no option values", async () => {
+	/** Audit mode names who ran each command once the collector agrees; only a value the bot itself wrote may leave. */
+	it("asks for audit mode, values only of fixed choices, and a spool of its own", async () => {
 		const { client } = clientWith(CONFIGURED);
+		client.commands.set("casino", CHOOSING);
 		running.push(client);
 		await startShardlens(client);
 
@@ -158,7 +161,8 @@ describe("what the SDK is started with", () => {
 		expect(options?.dryRun).toBeUndefined();
 		expect(options?.mode).toBe("audit");
 		expect(options?.auditIncludeProfile).toBe(true);
-		expect(options?.captureOptionValues).toBeUndefined();
+		expect(options?.captureOptionValues).toEqual(["bet", "table"]);
+		expect(options?.spool).toEqual({ dir: spoolDir(CONFIGURED) });
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
 	});
 
@@ -241,6 +245,52 @@ describe("recordEvent and recordAction", () => {
 	});
 });
 
+/** A command with one fixed list, one typed amount, one name that is typed elsewhere and a private choice. */
+const CHOOSING = {
+	name: "casino",
+	description: "Plays.",
+	category: "casino",
+	subcommands: [
+		{
+			name: "roulette",
+			description: "Spins.",
+			options: [
+				{ name: "bet", description: "On.", type: "string", choices: [{ name: "Red", value: "red" }] },
+				{ name: "amount", description: "How much.", type: "integer" },
+				{ name: "table", description: "Which.", type: "string", choices: [{ name: "Public", value: "public" }] },
+				{ name: "month", description: "When.", type: "integer", choices: [{ name: "May", value: 5 }], unlogged: true },
+			],
+		},
+	],
+} as unknown as Command;
+
+describe("choiceOptions", () => {
+	/** The SDK keeps a value by option name alone, so one name typed freely anywhere must never be on the list. */
+	it("lists an option only when every command declares it with fixed choices, and never a private one", () => {
+		const typedTable = {
+			name: "other",
+			description: "Else.",
+			category: "fun",
+			options: [{ name: "table", description: "Typed.", type: "string" }],
+		} as unknown as Command;
+
+		expect(choiceOptions([CHOOSING])).toEqual(["bet", "table"]);
+		expect(choiceOptions([CHOOSING, typedTable])).toEqual(["bet"]);
+	});
+});
+
+describe("spoolDir", () => {
+	/** Two installs on one machine sending to different collectors must never replay each other's events. */
+	it("gives each collector and key its own folder, named without the key", () => {
+		const other = spoolDir({ ...CONFIGURED, SHARDLENS_URL: "https://elsewhere.example.com" });
+
+		expect(spoolDir(CONFIGURED)).toBe(spoolDir({ ...CONFIGURED }));
+		expect(other).not.toBe(spoolDir(CONFIGURED));
+		expect(spoolDir(CONFIGURED)).not.toContain(KEY);
+		expect(spoolDir(CONFIGURED)).not.toContain(KEY.slice(11, 30));
+	});
+});
+
 describe("recordPrefixRun", () => {
 	/** Only the SDK's own message commands are counted beside slash commands, and the text typed must never leave. */
 	it("reports the command it matched as a message command, by its own name and never by what was typed", async () => {
@@ -252,7 +302,7 @@ describe("recordPrefixRun", () => {
 		recordPrefixRun(client, prefixMessage(client), {
 			command: "balance",
 			subcommand: "view",
-			options: ["user"],
+			options: [{ name: "user", value: `@someone (${USER})` }],
 			durationMs: 12.6,
 			ok: false,
 			error: new TypeError("the words somebody typed"),
@@ -278,6 +328,38 @@ describe("recordPrefixRun", () => {
 		expect(everything).not.toContain("secret words");
 		expect(everything).not.toContain("the words somebody typed");
 		expect(said.info.some((line) => line.includes('"custom"'))).toBe(false);
+	});
+
+	/** A prefix run reads typed text, so a value goes only for a name that is a fixed choice wherever it is declared. */
+	it("sends the value of a fixed choice, and never one somebody typed or a private one", async () => {
+		const { client, said } = clientWith(CONFIGURED);
+		client.commands.set("casino", CHOOSING);
+		running.push(client);
+		await startShardlens(client);
+		await salted(client);
+		// What the bot hands the SDK, not only what the SDK sends: typed text must never reach it at all.
+		const handed = jest.spyOn(client.shardlens!, "trackMessageCommand");
+
+		recordPrefixRun(client, prefixMessage(client), {
+			command: "casino",
+			subcommand: "roulette",
+			options: [
+				{ name: "bet", value: "red" },
+				{ name: "amount", value: "4096" },
+				{ name: "month", value: null },
+			],
+			durationMs: 3,
+			ok: true,
+			error: undefined,
+		});
+		await sendShardlensNow(client);
+
+		const sent = said.info.find((line) => line.includes('"message_command"')) ?? "";
+		const event = JSON.parse(sent.slice(sent.indexOf("{"))) as Record<string, unknown>;
+		expect(event).toMatchObject({ options: ["bet", "amount", "month"], optionValues: { bet: "red" } });
+		expect(sent).not.toContain("4096");
+		expect(handed.mock.calls[0]?.[1]).toMatchObject({ optionValues: { bet: "red" } });
+		expect(JSON.stringify(handed.mock.calls[0]?.[1])).not.toContain("4096");
 	});
 
 	it("does nothing while Shardlens is off", async () => {

@@ -75,7 +75,7 @@ export default defineMessageHandler({
 		recordPrefixRun(client, message, {
 			command: command.name,
 			subcommand: chosenSubcommand(interaction, command),
-			options: givenOptions(interaction, command).map((option) => option.name),
+			options: givenOptions(interaction, command),
 			durationMs,
 			ok,
 			error,

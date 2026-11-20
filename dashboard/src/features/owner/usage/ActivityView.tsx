@@ -14,22 +14,24 @@ import {
 	REFUSAL_LABELS,
 	sourceName,
 	SUPPORT_WAY_LABELS,
+	tallyBars,
+	type Bars,
 } from "@/features/owner/usage/usage.utils";
 import { useBotActivity } from "@/features/owner/useOwner";
-
-type Bars = React.ComponentProps<typeof UsageBars>["rows"];
-
-const plain = (rows: Tally[], label: (key: string) => React.ReactNode, prefix = ""): Bars =>
-	rows.map((row) => ({ id: `${prefix}${row.key}`, label: label(row.key), count: row.count }));
+import { since } from "@/lib/datetime";
 
 function deskBars(answered: Tally[], refused: Tally[], t: TFunction): Bars {
 	return [
-		...plain(
+		...tallyBars(
 			answered,
 			(key) => t("owner.usageSections.answeredBy", { way: labelOf(SUPPORT_WAY_LABELS, key, t) }),
 			"a:",
 		),
-		...plain(refused, (key) => t("owner.usageSections.refusedBy", { way: labelOf(SUPPORT_WAY_LABELS, key, t) }), "r:"),
+		...tallyBars(
+			refused,
+			(key) => t("owner.usageSections.refusedBy", { way: labelOf(SUPPORT_WAY_LABELS, key, t) }),
+			"r:",
+		),
 	].sort((a, b) => b.count - a.count);
 }
 
@@ -72,7 +74,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-pink/20"
 								empty={t("owner.usageSections.noTracks")}
-								rows={plain(report.music.sources, (key) => sourceName(key, t))}
+								rows={tallyBars(report.music.sources, (key) => sourceName(key, t))}
 							/>
 						</Panel>
 
@@ -94,7 +96,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-blue/20"
 								empty={t("owner.usageSections.noQuestions")}
-								rows={plain(report.support.articles, (key) => (
+								rows={tallyBars(report.support.articles, (key) => (
 									<code className="font-mono text-sm">{key}</code>
 								))}
 							/>
@@ -107,7 +109,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-amber/20"
 								empty={t("owner.usageSections.noRefusals")}
-								rows={plain(report.refusals.reasons, (key) => labelOf(REFUSAL_LABELS, key, t))}
+								rows={tallyBars(report.refusals.reasons, (key) => labelOf(REFUSAL_LABELS, key, t))}
 							/>
 						</Panel>
 
@@ -115,7 +117,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-amber/20"
 								empty={t("owner.usageSections.noRefusals")}
-								rows={plain(report.refusals.commands, (key) => `/${key}`)}
+								rows={tallyBars(report.refusals.commands, (key) => `/${key}`)}
 							/>
 						</Panel>
 
@@ -139,7 +141,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-green/20"
 								empty={t("owner.usageSections.noChanges")}
-								rows={plain(report.changes.ways, (key) => labelOf(CHANGE_WAY_LABELS, key, t))}
+								rows={tallyBars(report.changes.ways, (key) => labelOf(CHANGE_WAY_LABELS, key, t))}
 							/>
 						</Panel>
 
@@ -152,6 +154,19 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 									.filter((row) => row.count > 0)
 									.sort((a, b) => b.count - a.count)
 									.map((row) => ({ id: row.action, label: t(ACTION_LABELS[row.action]), count: row.count }))}
+							/>
+						</Panel>
+
+						<Panel wide title={t("owner.usageSections.events")} hint={t("owner.usageSections.eventsHint")}>
+							<UsageBars
+								tint="bg-hue-blue/20"
+								empty={t("owner.nothingRecorded")}
+								rows={report.events.map((row) => ({
+									id: row.name,
+									label: <code className="font-mono text-sm">{row.name}</code>,
+									sub: t("owner.usageSections.lastSeen", { time: since(row.lastAt) }),
+									count: row.count,
+								}))}
 							/>
 						</Panel>
 					</div>

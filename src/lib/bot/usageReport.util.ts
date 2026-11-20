@@ -1,7 +1,7 @@
 import { type Filter, type TopQuery } from "@shardlens/client";
-import { type Guild } from "discord.js";
+import { type Guild, PermissionsBitField } from "discord.js";
 import { type TestifyClient } from "@core/client";
-import { LENS_EVENTS, serverKey } from "@lib/bot/shardlens.util";
+import { LENS_EVENTS, ownHandlerName, serverKey } from "@lib/bot/shardlens.util";
 import {
 	ALL_ROWS,
 	AnalyticsUnavailable,
@@ -13,9 +13,12 @@ import {
 	serverFilter,
 	windowDays,
 } from "@lib/bot/shardlensReader.util";
+import { formsByHandler, tallies } from "@lib/bot/usageSections.util";
 import {
 	type AnalyticsProblem,
+	type CommandReport,
 	type CommandUsageRow,
+	type GuildProfile,
 	type GuildUsageReport,
 	type GuildUsageRow,
 	isScreenRoute,
@@ -253,8 +256,94 @@ export async function guildUsageReport(
 		commands,
 		dashboardViews: total(countsOf(dashboard.values)),
 		people: server.found ? (server.uniqueUsersThisPeriod ?? null) : null,
+		profile: server.found ? profileOf(server) : null,
 		collector: reader.collector ?? "",
 	};
+}
+
+/** The collector's own record of a server, with the permissions it lacks named as Discord names them. */
+function profileOf(server: {
+	profile?: { sizeAtJoin: number | null; firstCommandAt: string | null; lastCommandAt: string | null } | undefined;
+	events: { ts: string; kind: GuildProfile["history"][number]["kind"]; detectedAtStartup: boolean }[];
+	missingPermissions?: string | null | undefined;
+}): GuildProfile {
+	const bits = server.missingPermissions;
+	return {
+		sizeAtJoin: server.profile?.sizeAtJoin ?? null,
+		firstCommandAt: server.profile?.firstCommandAt ?? null,
+		lastCommandAt: server.profile?.lastCommandAt ?? null,
+		missingPermissions: bits === null || bits === undefined ? [] : new PermissionsBitField(BigInt(bits)).toArray(),
+		history: server.events
+			.slice(0, TOP)
+			.map((event) => ({ at: event.ts, kind: event.kind, atStartup: event.detectedAtStartup })),
+	};
+}
+
+/** One command in depth: every breakdown the collector keeps, read from its raw events. */
+export async function commandReport(
+	client: TestifyClient,
+	name: string,
+	days: number,
+	now = Date.now(),
+): Promise<CommandReport> {
+	const reader = readerFor(client);
+	const ask = askFor(client, days, now);
+	const [detail, byDay] = await Promise.all([
+		ask({ kind: "command", name }),
+		ask(dailySeries("interactions", { groupBy: "outcome", filters: [{ field: "command", op: "eq", value: name }] })),
+	]);
+	const { totals } = detail;
+
+	return {
+		command: name,
+		category: categoryOf(client, name),
+		days,
+		from: detail.from,
+		daily: dailyOf(days, now, byDay.points),
+		totals: {
+			runs: totals.runs,
+			ok: totals.ok,
+			errors: totals.error,
+			late: totals.timeout,
+			noResponse: totals.noResponse,
+			deferRate: totals.deferRate,
+			ephemeralRate: totals.ephemeralRate,
+			over3sRate: totals.over3sRate,
+			handlerP95Ms: totals.handlerP95Ms,
+			firstAt: totals.firstSeen,
+			lastAt: totals.lastSeen,
+		},
+		latency: detail.latencyHistogram,
+		kinds: tallies(detail.kinds),
+		subcommands: tallies(detail.subcommands),
+		options: tallies(detail.options),
+		optionValues: detail.optionValues.slice(0, TOP * 2),
+		tiers: tallies(detail.memberTiers),
+		installs: tallies(detail.installs),
+		contexts: tallies(detail.contexts),
+		channelTypes: tallies(detail.channelTypes),
+		locales: tallies(detail.locales),
+		servers: knownGuilds(client, rowsOf(detail.topServers.filter((row) => SNOWFLAKE.test(row.key)))),
+		components: componentsOf(client, detail.components),
+		forms: formsByHandler(client, detail.modals),
+		collector: reader.collector ?? "",
+	};
+}
+
+/** Only the bot's own handlers, by handler and action, so nothing a handler packed into an ID reaches the page. */
+function componentsOf(
+	client: TestifyClient,
+	rows: { key: string | null; kind: string; value: number }[],
+): CommandReport["components"] {
+	const counts = new Map<string, { handler: string; kind: string; count: number }>();
+	for (const { key, kind, value } of rows) {
+		const handler = ownHandlerName(client, key);
+		if (handler === null) continue;
+		const row = counts.get(`${kind} ${handler}`) ?? { handler, kind, count: 0 };
+		row.count += value;
+		counts.set(`${kind} ${handler}`, row);
+	}
+	return [...counts.values()].sort((a, b) => b.count - a.count || a.handler.localeCompare(b.handler)).slice(0, TOP);
 }
 
 /** Commands run and dashboard screens opened in every server, for sorting the owner's list of servers. */

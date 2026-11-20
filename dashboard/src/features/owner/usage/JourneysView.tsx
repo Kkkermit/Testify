@@ -6,8 +6,9 @@ import { LABEL, Warning } from "@/components/form";
 import { Button, SegmentedControl, UsageBars } from "@/components/primitives";
 import { useCommands } from "@/features/commands/useCommands";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { CohortTable } from "@/features/owner/components/CohortTable";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { searchWith, shortDay } from "@/features/owner/owner.utils";
+import { searchWith } from "@/features/owner/owner.utils";
 import { CommandSelect } from "@/features/owner/usage/CommandSelect";
 import { chosenSteps, commandFrom, formatWait, stepsFrom } from "@/features/owner/usage/usage.utils";
 import { useFunnel, useRetention } from "@/features/owner/useOwner";
@@ -171,53 +172,25 @@ export function JourneysView({ days }: { days: number }): React.JSX.Element {
 	);
 }
 
-const COLUMNS = 8;
-
 function Cohorts({ report }: { report: RetentionReport }): React.JSX.Element {
 	const { t } = useTranslation();
-	const periods = Array.from({ length: Math.min(COLUMNS, report.periods) }, (_, index) => index + 1);
-
-	if (report.cohorts.length === 0) {
-		return <p className="text-muted-foreground text-sm">{t("owner.usageSections.noCohorts")}</p>;
-	}
+	const periods = Array.from({ length: report.periods }, (_, index) => index);
 
 	return (
-		<div className="overflow-x-auto">
-			<table className="w-full min-w-[32rem] text-sm tabular-nums">
-				<caption className="sr-only">{t("owner.usageSections.retention")}</caption>
-				<thead className="text-muted-foreground text-xs">
-					<tr>
-						<th scope="col" className="py-1 text-left font-medium">
-							{t("owner.usageSections.cohort")}
-						</th>
-						<th scope="col" className="py-1 text-right font-medium">
-							{t("owner.usageSections.people")}
-						</th>
-						{periods.map((period) => (
-							<th key={period} scope="col" className="py-1 text-right font-medium">
-								{report.interval === "day"
-									? t("owner.usageSections.dayN", { number: period })
-									: t("owner.usageSections.weekN", { number: period })}
-							</th>
-						))}
-					</tr>
-				</thead>
-				<tbody className="divide-border divide-y">
-					{report.cohorts.map((cohort) => (
-						<tr key={cohort.cohort}>
-							<th scope="row" className="py-1.5 text-left font-normal">
-								{shortDay(cohort.cohort)}
-							</th>
-							<td className="py-1.5 text-right">{cohort.size}</td>
-							{periods.map((period) => (
-								<td key={period} className="py-1.5 text-right">
-									{formatPercent(cohort.retained[period - 1] ?? 0, cohort.size)}
-								</td>
-							))}
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+		<CohortTable
+			caption={t("owner.usageSections.retention")}
+			sizeLabel={t("owner.usageSections.people")}
+			empty={t("owner.usageSections.noCohorts")}
+			periodLabel={(period) =>
+				report.interval === "day"
+					? t("owner.usageSections.dayN", { number: period })
+					: t("owner.usageSections.weekN", { number: period })
+			}
+			rows={report.cohorts.map((cohort) => ({
+				cohort: cohort.cohort,
+				size: cohort.size,
+				cells: periods.map((index) => formatPercent(cohort.retained[index] ?? 0, cohort.size)),
+			}))}
+		/>
 	);
 }

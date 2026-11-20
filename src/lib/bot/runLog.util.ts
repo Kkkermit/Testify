@@ -1,6 +1,7 @@
 import { type ActivityLogPage, type ActivityTopUsers } from "@shardlens/client";
 import { z } from "zod";
 import { type TestifyClient } from "@core/client";
+import { ownHandlerName } from "@lib/bot/shardlens.util";
 import { rangeOf, readerFor } from "@lib/bot/shardlensReader.util";
 import { RUN_OUTCOMES, type RunRow, type RunsBody, type RunsPage, type TopRunners } from "@testify/shared";
 
@@ -56,14 +57,6 @@ function avatarUrl(userId: string | null, hash: string | null): string | null {
 	return `https://cdn.discordapp.com/avatars/${userId}/${hash}.webp?size=64`;
 }
 
-/** Only the first two parts of one of the bot's own custom IDs: the rest is whatever a handler packed into it. */
-function handlerOf(client: TestifyClient, customId: string | null): string | null {
-	if (customId === null) return null;
-	const [id = "", action = ""] = customId.split(":");
-	if (!client.buttons.has(id)) return null;
-	return action === "" ? id : `${id}:${action}`;
-}
-
 function rowOf(client: TestifyClient, row: z.output<typeof runRow>): RunRow {
 	const guildId = idOrNull(row.guildId);
 	const userId = idOrNull(row.userId);
@@ -76,7 +69,7 @@ function rowOf(client: TestifyClient, row: z.output<typeof runRow>): RunRow {
 		kind: row.kind,
 		command: row.command,
 		sub: row.sub,
-		handler: handlerOf(client, row.customId),
+		handler: ownHandlerName(client, row.customId),
 		outcome: row.outcome,
 		answerMs: row.ackMs,
 		userId,

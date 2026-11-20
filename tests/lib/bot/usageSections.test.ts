@@ -3,6 +3,7 @@ import { type TestifyClient } from "@core/client";
 import {
 	audienceReport,
 	botActivityReport,
+	collectorSetup,
 	funnelReport,
 	growthReport,
 	panelsReport,
@@ -32,9 +33,9 @@ const points = (rows: [string, string | null, number][]): unknown => ({
 	points: rows.map(([t, key, value]) => ({ t, key, value })),
 });
 
-function clientFor(): TestifyClient {
+function clientFor(env: Record<string, string> = {}): TestifyClient {
 	return {
-		env: { SHARDLENS_URL: "https://stats.example.com", SHARDLENS_READ_KEY: KEY },
+		env: { SHARDLENS_URL: "https://stats.example.com", SHARDLENS_READ_KEY: KEY, ...env },
 		commands: new Collection(),
 		buttons: new Collection<string, unknown>([
 			["shop", {}],
@@ -79,6 +80,9 @@ describe("audienceReport", () => {
 
 		const report = await audienceReport(clientFor(), 7, "Europe/Paris", NOW);
 
+		// An older collector sends no weeks or periods, which read as none rather than refusing the whole answer.
+		expect(report).toMatchObject({ weekly: [], periods: [], installs: [] });
+
 		expect(report.daily).toHaveLength(7);
 		expect(report.daily.at(-2)).toEqual({ day: "2026-11-14", users: 5, newUsers: 2 });
 		expect(report.daily.at(-1)).toEqual({ day: "2026-11-15", users: 0, newUsers: 0 });
@@ -95,17 +99,26 @@ describe("audienceReport", () => {
 
 describe("growthReport", () => {
 	it("totals the window's joins and leaves and keeps every day", async () => {
-		collector(() => ({
-			daily: [
-				{ day: "2026-11-15", joins: 2, leaves: 1 },
-				{ day: "2026-10-01", joins: 50, leaves: 0 },
-			],
-			sizeAtInstall: [{ bucket: "1-10", servers: 2 }],
-			activation: { rate: null },
-			installs: { active: 3, inactive: 1 },
-			lifetimes: [{ bucket: "<1d", servers: 0 }],
-			serverCount: { ours: 3, discord: null, warn: false },
-		}));
+		collector((spec) =>
+			spec.kind === "installs"
+				? {
+						daily: [{ day: "2026-11-15", userInstalls: 1, userRemovals: 0, serverInstalls: 2 }],
+						scopes: [{ scope: "applications.commands", installs: 2 }],
+						webhookStatus: 2,
+					}
+				: {
+						daily: [
+							{ day: "2026-11-15", joins: 2, leaves: 1, joinsDetected: 1, leavesDetected: null },
+							{ day: "2026-10-01", joins: 50, leaves: 0 },
+						],
+						sizeAtInstall: [{ bucket: "1-10", servers: 2 }],
+						activation: { rate: null },
+						installs: { active: 3, inactive: 1 },
+						lifetimes: [{ bucket: "<1d", servers: 0 }],
+						approximateGuilds: [{ day: "2026-11-14", value: 5 }],
+						serverCount: { ours: 3, discord: null, warn: false },
+					},
+		);
 
 		const report = await growthReport(clientFor(), 7, NOW);
 
@@ -113,6 +126,47 @@ describe("growthReport", () => {
 		expect(report.daily).toHaveLength(7);
 		expect(report.lifetimes).toEqual([]);
 		expect(report.sizeAtInstall).toEqual([{ key: "1-10", count: 2 }]);
+		expect(report.detected).toEqual({ joins: 1, leaves: 0 });
+		expect(report.discordCount.slice(-2)).toEqual([
+			{ day: "2026-11-14", value: 5 },
+			{ day: "2026-11-15", value: null },
+		]);
+		expect(report.installsFromDiscord).toMatchObject({
+			webhookStatus: 2,
+			scopes: [{ key: "applications.commands", count: 2 }],
+		});
+		expect(report.installsFromDiscord.daily.at(-1)).toEqual({
+			day: "2026-11-15",
+			serverInstalls: 2,
+			userInstalls: 1,
+			userRemovals: 0,
+		});
+	});
+
+	/** A week nobody ran anything is missing from the answer, and a zero is what it means. */
+	it("fills a cohort's quiet weeks with zeros and leaves out a week past a quarter", async () => {
+		collector((spec) =>
+			spec.kind === "installs"
+				? { daily: [], scopes: [], webhookStatus: null }
+				: {
+						daily: [],
+						sizeAtInstall: [],
+						activation: { rate: null },
+						cohorts: [
+							{ cohort: "2026-11-09", week: 2, servers: 1 },
+							{ cohort: "2026-11-09", week: 0, servers: 4 },
+							{ cohort: "2026-11-02", week: 99, servers: 7 },
+							{ cohort: "2026-11-02", week: 0, servers: 3 },
+						],
+						lifetimes: [],
+						serverCount: { ours: 0, discord: null, warn: false },
+					},
+		);
+
+		expect((await growthReport(clientFor(), 30, NOW)).cohorts).toEqual([
+			{ cohort: "2026-11-02", weeks: [3] },
+			{ cohort: "2026-11-09", weeks: [4, 0, 1] },
+		]);
 	});
 });
 
@@ -170,11 +224,15 @@ describe("botActivityReport", () => {
 			}
 			if (spec.name === "command_refused" && spec.prop === "reason")
 				return { values: [{ value: "cooldown", count: 2 }] };
+			if (spec.kind === "events") {
+				return { rows: [{ name: "level_up", count: 9, users: 0, lastSeen: "2026-11-15T11:00:00.000Z" }] };
+			}
 			return { values: [] };
 		});
 
 		const report = await botActivityReport(clientFor(), 30, NOW);
 
+		expect(report.events).toEqual([{ name: "level_up", count: 9, people: 0, lastAt: "2026-11-15T11:00:00.000Z" }]);
 		expect(report.music).toMatchObject({
 			played: 3,
 			skipped: 0,
@@ -198,9 +256,19 @@ describe("reliabilityReport", () => {
 					totals: null,
 					errorsByCode: [],
 					rateLimits: [{ scope: "user", route: "/channels/:id/messages", count: 2 }],
+					routes: [
+						{ method: "GET", route: "/guilds/:id", calls: 3, failures: 0, retries: 0, p95Ms: 80 },
+						{ method: "POST", route: "/channels/:id/messages", calls: 9, failures: 1, retries: 2, p95Ms: null },
+					],
+					invalidBudget: { used: 4, limit: 10_000, share: 0.0004 },
+					identify: { remaining: 990, total: null },
 					shards: [{ shard: 0, ping: 41.6, stale: false }],
 					shardEvents: [],
 				};
+			}
+			if (spec.kind === "bursts") return { rows: [{ minute: "2026-11-14T20:01:00.000Z", runs: 40, median: 3 }] };
+			if (spec.kind === "gauge" && spec.name === "memory.rss_bytes") {
+				return { points: [{ t: "2026-11-15T00:00:00", value: 2e8, max: 3e8 }] };
 			}
 			if (spec.kind === "gauge") return { points: [{ t: "2026-11-15T00:00:00", value: 99.4 }] };
 			if (spec.metric === "rest.ratelimits") return points([["2026-11-15T00:00:00", null, 2]]);
@@ -219,6 +287,87 @@ describe("reliabilityReport", () => {
 		expect(report.shards.now).toEqual([{ shard: 0, pingMs: 42, stale: false }]);
 		expect(report.shards.daily.at(-1)).toEqual({ day: "2026-11-15", pingMs: 99 });
 		expect(report.shards.daily[0]).toEqual({ day: "2026-11-09", pingMs: null });
+		expect(report.rest.map((row) => row.route)).toEqual(["/channels/:id/messages", "/guilds/:id"]);
+		expect(report.invalidRequests).toEqual({ used: 4, limit: 10_000, share: 0.0004 });
+		// Half a figure is no figure: Discord's total is what makes the sessions left mean anything.
+		expect(report.sessions).toBeNull();
+		expect(report.process.memory.at(-1)).toEqual({ day: "2026-11-15", value: 2e8, max: 3e8 });
+		expect(report.process.eventLoop.at(-1)).toEqual({ day: "2026-11-15", value: 99.4, max: null });
+		expect(report.bursts).toEqual([{ minute: "2026-11-14T20:01:00.000Z", runs: 40, median: 3 }]);
+		expect(asked.filter((spec) => spec.kind === "gauge").map((spec) => spec.name)).toEqual([
+			"shard.ping_ms",
+			"memory.rss_bytes",
+			"eventloop.p99_ms",
+		]);
+	});
+});
+
+describe("collectorSetup", () => {
+	const overview = {
+		app: { id: "1", name: "Testify", mode: "privacy", saltPeriod: "week", timezone: "UTC", rawRetentionDays: 7 },
+		appInfo: null,
+		sdkInstances: [
+			{
+				instance: "a",
+				ts: "2026-11-15T11:59:00.000Z",
+				shards: [0, 1],
+				queueDepth: 2,
+				dropped: { queue_full: 3, spool_evicted: 1 },
+				failedFlushes: 0,
+				internalErrors: {},
+				sdkVersion: "1.1.0",
+			},
+		],
+		runs30d: [],
+		servers: 4,
+		uniqueUsersThisPeriod: null,
+		periodStart: "2026-11-01",
+		lastEventAt: null,
+		checklist: {
+			receivingEvents: false,
+			appInfoReceived: false,
+			webhookEventsEnabled: false,
+			requiredPermissionsSet: true,
+		},
+	};
+
+	/** Who ran what needs the collector in audit mode, its audit key and the bot's activity key; each is named. */
+	it("says which step for who ran what is missing, and adds up what each process dropped", async () => {
+		collector(() => overview);
+
+		const setup = await collectorSetup(clientFor());
+
+		expect(setup.checks).toEqual({
+			receivingEvents: false,
+			appInfoReceived: false,
+			webhookEventsEnabled: false,
+			requiredPermissionsSet: true,
+			auditMode: false,
+			auditKey: false,
+			activityKey: false,
+		});
+		expect(setup.app).toMatchObject({ mode: "privacy", saltPeriod: "week", rawRetentionDays: 7, discordLogin: false });
+		expect(setup.instances).toEqual([
+			{
+				instance: "a",
+				at: "2026-11-15T11:59:00.000Z",
+				shards: [0, 1],
+				queued: 2,
+				dropped: 4,
+				failedSends: 0,
+				internalErrors: 0,
+				sdkVersion: "1.1.0",
+			},
+		]);
+		expect(setup.bot).toBeNull();
+	});
+
+	it("sees the activity key the bot holds, and the collector's audit mode", async () => {
+		collector(() => ({ ...overview, app: { ...overview.app, mode: "audit" } }));
+
+		const setup = await collectorSetup(clientFor({ SHARDLENS_ACTIVITY_KEY: `slk_activity_${"a".repeat(43)}` }));
+
+		expect(setup.checks).toMatchObject({ auditMode: true, activityKey: true });
 	});
 });
 

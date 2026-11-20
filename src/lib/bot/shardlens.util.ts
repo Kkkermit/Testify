@@ -1,7 +1,11 @@
+import { createHash } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createShardlens, type Shardlens } from "@shardlens/discordjs";
 import { BaseInteraction, type Interaction, type Message } from "discord.js";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { type Command, type GivenOption, subcommandsOf } from "@core/command";
 import { toError } from "@core/errors";
 import { readOptOuts } from "@database/repositories/analyticsOptOutRepository";
 import { botVersion } from "@lib/bot/runtime.util";
@@ -89,6 +93,20 @@ export function recordMusicProblem(
 	recordEvent(client, event, { source, cause: musicCause(source, reason) }, guildId);
 }
 
+/** One of the bot's own handlers, by the first two parts of a custom ID; the rest is whatever the handler packed in. */
+export function ownHandler(client: TestifyClient, customId: string | null): { id: string; action: string } | null {
+	if (customId === null) return null;
+	const [id = "", action = ""] = customId.split(":");
+	return client.buttons.has(id) ? { id, action } : null;
+}
+
+/** The handler and its action as one name, `shop:buy`, or null for anything not the bot's own. */
+export function ownHandlerName(client: TestifyClient, customId: string | null): string | null {
+	const handler = ownHandler(client, customId);
+	if (handler === null) return null;
+	return handler.action === "" ? handler.id : `${handler.id}:${handler.action}`;
+}
+
 /** Custom events keep no dimensions, so a view's server is also its own property, which is what can be grouped. */
 export const serverKey = (guildId: string): string => `in_${guildId}`;
 
@@ -97,12 +115,38 @@ type Runner = (interaction: Interaction, work: () => Promise<unknown>) => Promis
 interface Watch {
 	run: Runner;
 	lastProblem: { name: string; at: number } | null;
+	/** The options whose values may be sent, for a prefix run as for a slash one. */
+	choices: ReadonlySet<string>;
 }
 
 const watches = new WeakMap<Shardlens, Watch>();
 
 /** The SDK starts its own lines with its name, which the tag already says. */
 const said = (message: string): string => `[SHARDLENS] ${message.replace(/^Shardlens:\s*/, "")}`;
+
+/**
+ * Options that list fixed choices wherever they are declared, so a value is one the bot wrote and never text, a number
+ * or an id somebody typed; a name declared anywhere without choices is left out, since the SDK matches by name alone.
+ */
+export function choiceOptions(commands: Iterable<Command>): string[] {
+	const fixed = new Map<string, boolean>();
+	for (const command of commands) {
+		for (const option of [...(command.options ?? []), ...subcommandsOf(command).flatMap((sub) => sub.options ?? [])]) {
+			const listed = (option.choices?.length ?? 0) > 0 && option.unlogged !== true;
+			fixed.set(option.name, (fixed.get(option.name) ?? true) && listed);
+		}
+	}
+	return [...fixed].flatMap(([name, listed]) => (listed ? [name] : [])).sort();
+}
+
+/** Events wait here while the collector is away; one folder per collector and key, so two installs never swap them. */
+export function spoolDir(env: Pick<Env, "SHARDLENS_URL" | "SHARDLENS_INGEST_KEY">): string {
+	const id = createHash("sha256")
+		.update(`${env.SHARDLENS_URL ?? ""}\n${env.SHARDLENS_INGEST_KEY ?? ""}`)
+		.digest("hex")
+		.slice(0, 16);
+	return join(tmpdir(), `testify-shardlens-${id}`);
+}
 
 export async function startShardlens(client: TestifyClient): Promise<Shardlens | null> {
 	const env = client.env;
@@ -119,9 +163,13 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 		return null;
 	}
 
+	const choices = choiceOptions(client.commands.values());
 	const lens = createShardlens(client, {
 		endpoint: env.SHARDLENS_URL,
 		apiKey: env.SHARDLENS_INGEST_KEY,
+		captureOptionValues: choices,
+		// Kept hashed and without who ran them, so a long outage or a restart costs no figures.
+		spool: { dir: spoolDir(env) },
 		release: botVersion(),
 		environment: env.NODE_ENV,
 		// One server every two seconds, so member counts stay current rather than being read only at start-up.
@@ -137,7 +185,11 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 		},
 	});
 
-	const watch: Watch = { run: lens.wrap((_: Interaction, work: () => Promise<unknown>) => work()), lastProblem: null };
+	const watch: Watch = {
+		run: lens.wrap((_: Interaction, work: () => Promise<unknown>) => work()),
+		lastProblem: null,
+		choices: new Set(choices),
+	};
 	lens.on("error", (name) => {
 		watch.lastProblem = { name, at: Date.now() };
 	});
@@ -162,8 +214,8 @@ export interface PrefixRun {
 	/** The command's own name, after aliases, never what was typed. */
 	command: string;
 	subcommand: string | null;
-	/** The names of the options given, which slash commands already send; never what was given for them. */
-	options: readonly string[];
+	/** The options given: every name is sent, a value only for an option with fixed choices. */
+	options: readonly GivenOption[];
 	durationMs: number;
 	ok: boolean;
 	/** What the command threw, of which the SDK keeps only the class and Discord's code. */
@@ -172,10 +224,21 @@ export interface PrefixRun {
 
 /** A prefix run is a message, which the SDK never reads, so the bot names the command it matched once it has run. */
 export function recordPrefixRun(client: TestifyClient, message: Message, run: PrefixRun): void {
-	client.shardlens?.trackMessageCommand(message, {
+	const lens = client.shardlens;
+	if (lens === null) return;
+	const choices = watches.get(lens)?.choices ?? new Set<string>();
+	const options = run.options.map((option) => option.name);
+	const optionValues = Object.fromEntries(
+		run.options.flatMap((option) =>
+			option.value !== null && choices.has(option.name) ? [[option.name, option.value]] : [],
+		),
+	);
+
+	lens.trackMessageCommand(message, {
 		command: run.command,
 		...(run.subcommand === null ? {} : { sub: run.subcommand }),
-		...(run.options.length === 0 ? {} : { options: run.options }),
+		...(options.length === 0 ? {} : { options }),
+		...(Object.keys(optionValues).length === 0 ? {} : { optionValues }),
 		durationMs: run.durationMs,
 		failed: !run.ok,
 		...(run.error === undefined ? {} : { error: run.error }),

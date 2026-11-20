@@ -101,6 +101,8 @@ import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fi
 import {
 	activity,
 	audience,
+	collectorSetup,
+	commandReport,
 	funnel,
 	growth,
 	liveRead,
@@ -283,6 +285,8 @@ export const handlers = [
 	http.get("/api/analytics/panels", () => HttpResponse.json(panels)),
 	http.get("/api/analytics/activity", () => HttpResponse.json(activity)),
 	http.get("/api/analytics/reliability", () => HttpResponse.json(reliability)),
+	http.get("/api/analytics/setup", () => HttpResponse.json(collectorSetup)),
+	http.get("/api/analytics/commands/:name", () => HttpResponse.json(commandReport)),
 	http.get("/api/analytics/funnel", () => HttpResponse.json(funnel)),
 	http.get("/api/analytics/retention", () => HttpResponse.json(retention)),
 	http.get("/api/analytics/live", () => HttpResponse.json(liveRead)),

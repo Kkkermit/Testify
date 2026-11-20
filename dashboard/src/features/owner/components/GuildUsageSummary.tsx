@@ -1,9 +1,12 @@
 import { type GuildUsageReport } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Avatar, Card, Figure, UsageBars } from "@/components/primitives";
+import { Avatar, Card, DataList, Figure, UsageBars } from "@/components/primitives";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel } from "@/features/owner/components/UsagePanel";
-import { commandBar, countOrDash, surfaceBars } from "@/features/owner/owner.utils";
+import { commandBar, countOrDash, NO_FIGURE, surfaceBars } from "@/features/owner/owner.utils";
+import { HISTORY_LABELS } from "@/features/owner/usage/usage.utils";
+import { dateAndTime } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 
 export function GuildUsageSummary({ report }: { report: GuildUsageReport }): React.JSX.Element {
@@ -46,7 +49,45 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 						rows={surfaceBars(report.surfaces, t)}
 					/>
 				</UsagePanel>
+
+				{report.profile !== null && <GuildProfilePanel profile={report.profile} />}
 			</div>
 		</>
+	);
+}
+
+function GuildProfilePanel({ profile }: { profile: NonNullable<GuildUsageReport["profile"]> }): React.JSX.Element {
+	const { t } = useTranslation();
+	const when = (at: string | null): string => (at === null ? NO_FIGURE : dateAndTime(at));
+
+	return (
+		<UsagePanel wide title={t("owner.serverProfile.title")} hint={t("owner.serverProfile.hint")}>
+			<DataList
+				dense
+				rows={[
+					{ label: t("owner.serverProfile.sizeAtJoin"), value: countOrDash(profile.sizeAtJoin) },
+					{ label: t("owner.serverProfile.firstCommand"), value: when(profile.firstCommandAt) },
+					{ label: t("owner.serverProfile.lastCommand"), value: when(profile.lastCommandAt) },
+					{
+						label: t("owner.serverProfile.missing"),
+						value:
+							profile.missingPermissions.length === 0
+								? t("owner.serverProfile.nothingMissing")
+								: profile.missingPermissions.map((flag) => permissionLabel(flag, t)).join(t("common.listSeparator")),
+					},
+				]}
+			/>
+			{profile.history.length > 0 && (
+				<ol className="divide-border flex flex-col divide-y text-sm" aria-label={t("owner.serverProfile.history")}>
+					{profile.history.map((event) => (
+						<li key={`${event.at} ${event.kind}`} className="flex flex-wrap gap-x-3 py-2">
+							<span className="tabular-nums">{dateAndTime(event.at)}</span>
+							<span>{t(HISTORY_LABELS[event.kind])}</span>
+							{event.atStartup && <span className="text-muted-foreground">{t("owner.serverProfile.atStartup")}</span>}
+						</li>
+					))}
+				</ol>
+			)}
+		</UsagePanel>
 	);
 }

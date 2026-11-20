@@ -1,14 +1,43 @@
+import { type ReliabilityReport } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Card, Figure, UsageBars } from "@/components/primitives";
+import { Card, DataList, Figure, UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { DayBars } from "@/features/owner/components/DayBars";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { formatMs, NO_FIGURE, shareOrDash } from "@/features/owner/owner.utils";
 import { useReliability } from "@/features/owner/useOwner";
 import { dateAndTime, shortDate } from "@/lib/datetime";
-import { formatNumber } from "@/lib/intl";
+import { formatNumber, formatPercent, formatUnit } from "@/lib/intl";
 
-const ms = (value: number | null): string => (value === null ? NO_FIGURE : formatMs(value));
+const ms = (value: number | null | undefined): string =>
+	value === null || value === undefined ? NO_FIGURE : formatMs(Math.round(value));
+
+const megabytes = (bytes: number | null | undefined): string =>
+	bytes === null || bytes === undefined ? NO_FIGURE : formatUnit(bytes / 1_000_000, "megabyte");
+
+/** A gauge a day: its average as the bar, its worst minute beside it. */
+function GaugeBars({
+	days,
+	format,
+	caption,
+}: {
+	days: ReliabilityReport["process"]["memory"];
+	format: (value: number | null | undefined) => string;
+	caption: string;
+}): React.JSX.Element {
+	const { t } = useTranslation();
+
+	return (
+		<DayBars
+			tint="bg-hue-violet/40"
+			days={days.map((day) => ({ day: day.day, value: day.value }))}
+			also={{ label: t("owner.usageSections.worstMinute"), values: days.map((day) => day.max ?? 0) }}
+			format={format}
+			caption={caption}
+			valueLabel={t("owner.usageSections.average")}
+		/>
+	);
+}
 
 export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -60,6 +89,74 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 						</Card>
 
 						<div className="grid items-start gap-4 lg:grid-cols-2">
+							<Panel wide title={t("owner.usageSections.routes")} hint={t("owner.usageSections.routesHint")}>
+								<UsageBars
+									tint="bg-hue-blue/20"
+									empty={t("owner.nothingRecorded")}
+									rows={report.rest.map((row) => ({
+										id: `${row.method} ${row.route}`,
+										label: (
+											<code className="font-mono text-sm">
+												{row.method} {row.route}
+											</code>
+										),
+										sub: t("owner.usageSections.routeSub", {
+											failed: row.failures,
+											retried: row.retries,
+											slow: ms(row.p95Ms),
+										}),
+										count: row.calls,
+									}))}
+								/>
+							</Panel>
+
+							<Panel title={t("owner.usageSections.limits")} hint={t("owner.usageSections.limitsHint")}>
+								<DataList
+									dense
+									rows={[
+										{
+											label: t("owner.usageSections.invalidRequests"),
+											value:
+												report.invalidRequests === null
+													? NO_FIGURE
+													: t("owner.usageSections.invalidValue", {
+															used: formatNumber(report.invalidRequests.used),
+															limit: formatNumber(report.invalidRequests.limit),
+															share: formatPercent(report.invalidRequests.share, 1),
+														}),
+										},
+										{
+											label: t("owner.usageSections.sessionsLeft"),
+											value:
+												report.sessions === null
+													? NO_FIGURE
+													: t("common.partOf", { part: report.sessions.remaining, whole: report.sessions.total }),
+										},
+									]}
+								/>
+							</Panel>
+
+							<Panel title={t("owner.usageSections.bursts")} hint={t("owner.usageSections.burstsHint")}>
+								<UsageBars
+									tint="bg-hue-amber/20"
+									empty={t("owner.usageSections.noBursts")}
+									rows={report.bursts.map((row) => ({
+										id: row.minute,
+										label: dateAndTime(row.minute),
+										sub: t("owner.usageSections.burstSub", { number: Math.round(row.median) }),
+										count: row.runs,
+									}))}
+								/>
+							</Panel>
+
+							<Panel title={t("owner.usageSections.memory")} hint={t("owner.usageSections.memoryHint")}>
+								<GaugeBars days={report.process.memory} format={megabytes} caption={t("owner.usageSections.memory")} />
+							</Panel>
+
+							<Panel title={t("owner.usageSections.eventLoop")} hint={t("owner.usageSections.eventLoopHint")}>
+								<GaugeBars days={report.process.eventLoop} format={ms} caption={t("owner.usageSections.eventLoop")} />
+							</Panel>
+
 							<Panel title={t("owner.usageSections.errorsByCode")} hint={t("owner.usageSections.errorsByCodeHint")}>
 								<UsageBars
 									tint="bg-destructive/15"

@@ -830,12 +830,15 @@ precisely the screen you want when something is wrong.
   drill-down and the server list's command and dashboard counts are queries to the collector with
   `SHARDLENS_READ_KEY` through `@shardlens/client`, which the bot holds and no browser sees. Without the key, or with
   the collector refusing or away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_audit_off`,
-  `analytics_unreachable`) and the server list still loads with its counts blank. The tab's eight sections —
-  commands, people, servers, buttons and forms, bot activity, reliability, journeys and who ran what — each read
-  their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`; **Right now**
-  above them reads the bot's one shared live stream. Who ran what needs `SHARDLENS_ACTIVITY_KEY` and a collector in
-  audit mode, is read with a POST so no user id ever lands in an address, and looks a person up only by their exact
-  id.
+  `analytics_unreachable`) and the server list still loads with its counts blank. The tab's nine sections —
+  commands, people, servers, buttons and forms, bot activity, reliability, journeys, who ran what and setup — each
+  read their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`; **Right now**
+  above them reads the bot's one shared live stream. A command's name in any Commands list opens it in depth
+  (`?command=`, `CommandDetail`). Who ran what needs `SHARDLENS_ACTIVITY_KEY` and collector 1.2 or later in audit
+  mode, which **Setup** checks step by step; it is read with a POST so no user id ever lands in an address, and
+  looks a person up only by their exact id. The bars, columns and cohort tables are `UsageBars`, `ColumnBars` (with
+  `DayBars` over it) and `CohortTable`, and a section's own bar rows come from `usage/usageBars.tsx` and
+  `tallyBars`, so a new figure is drawn with what is there.
 - **Commands can be switched off** per-server or bot-wide. `checks.ts` is the gate — hiding a switch is not
   access control. Nobody bypasses it, the bot owner included. `ALWAYS_ENABLED` keeps `/help` reachable so a
   server cannot lock itself out.

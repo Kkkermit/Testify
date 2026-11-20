@@ -2,6 +2,7 @@ import { Collection } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
 import {
+	commandReport,
 	dailyOf,
 	guildActivity,
 	guildUsageReport,
@@ -54,6 +55,7 @@ function clientFor(): TestifyClient {
 			["beg", { name: "beg", category: "economy" }],
 		]),
 		contextMenus: new Collection<string, unknown>([["Warn", { name: "Warn", switchedBy: "warn" }]]),
+		buttons: new Collection<string, unknown>([["warnform", {}]]),
 		guilds: {
 			cache: new Collection<string, unknown>([
 				[HERE, guild(HERE, "Here")],
@@ -243,6 +245,37 @@ describe("guildUsageReport", () => {
 		expect(asked).toContainEqual({ kind: "server", guild: HERE });
 	});
 
+	/** The collector stores permission bits, which mean nothing to an owner until Discord's own names are put on them. */
+	it("names the permissions the collector says the bot lacks there, with the server's history", async () => {
+		collector((spec) =>
+			spec.kind === "server"
+				? {
+						found: true,
+						uniqueUsersThisPeriod: null,
+						profile: { sizeAtJoin: 40, firstCommandAt: "2026-01-01T00:05:00.000Z", lastCommandAt: null },
+						events: [{ ts: "2026-01-01T00:00:00.000Z", kind: "join", detectedAtStartup: true }],
+						missingPermissions: String(1n << 28n),
+					}
+				: empty(spec),
+		);
+
+		const report = await guildUsageReport(clientFor(), clientFor().guilds.cache.get(HERE) as never, 30, NOW);
+
+		expect(report.profile).toEqual({
+			sizeAtJoin: 40,
+			firstCommandAt: "2026-01-01T00:05:00.000Z",
+			lastCommandAt: null,
+			missingPermissions: ["ManageRoles"],
+			history: [{ at: "2026-01-01T00:00:00.000Z", kind: "join", atStartup: true }],
+		});
+	});
+
+	it("has no profile of a server the collector has never seen", async () => {
+		const report = await guildUsageReport(clientFor(), clientFor().guilds.cache.get(HERE) as never, 30, NOW);
+
+		expect(report.profile).toBeNull();
+	});
+
 	it("counts each command and both surfaces there, and names how many people used it", async () => {
 		collector((spec) => {
 			const filters = Array.isArray(spec.filters) ? spec.filters : [];
@@ -287,6 +320,78 @@ describe("guildUsageReport", () => {
 		// Prefix runs carry their server, so a server's chart counts both surfaces.
 		expect(report.daily).toHaveLength(30);
 		expect(report.daily.at(-1)).toEqual({ day: "2026-11-15", count: 8, failures: 0 });
+	});
+});
+
+describe("commandReport", () => {
+	const detail = {
+		from: "2026-11-09T00:00:00.000Z",
+		totals: {
+			runs: 10,
+			ok: 7,
+			error: 1,
+			timeout: 1,
+			noResponse: 1,
+			deferRate: 0.5,
+			ephemeralRate: null,
+			premiumShare: null,
+			over3sRate: 0.1,
+			handlerP95Ms: 300,
+			firstSeen: "2026-11-09T10:00:00.000Z",
+			lastSeen: "2026-11-15T11:00:00.000Z",
+		},
+		latencyHistogram: [0, 3, 7],
+		kinds: [{ key: "chat_input", value: 10 }],
+		subcommands: [{ key: "create", value: 10 }],
+		options: [{ key: "reason", value: 4 }],
+		optionValues: [{ option: "duration", value: "1h", runs: 2 }],
+		memberTiers: [{ key: "manager", value: 10 }],
+		installs: [{ key: "guild", value: 10 }],
+		contexts: [{ key: "0", value: 10 }],
+		channelTypes: [{ key: "0", value: 10 }],
+		locales: [{ key: "en-GB", value: 10 }],
+		topServers: [
+			{ key: HERE, value: 8, name: "Here", icon: null },
+			{ key: GONE, value: 2, name: "Gone", icon: null },
+		],
+		components: [
+			{ key: "warnform:submit:*", kind: "modal_submit", value: 3 },
+			{ key: "somebody:typed words", kind: "button", value: 9 },
+		],
+		modals: [
+			{ customId: "warnform:open:*", shown: 5, submitted: 0 },
+			{ customId: "warnform:submit:*", shown: 0, submitted: 3 },
+		],
+	};
+
+	/** One command's page must never quietly show the whole bot's figures. */
+	it("asks about that command alone, for its breakdowns and its days", async () => {
+		collector((spec) => (spec.kind === "command" ? detail : empty(spec)));
+		await commandReport(clientFor(), "warn", 7, NOW);
+
+		expect(asked).toContainEqual(expect.objectContaining({ kind: "command", name: "warn" }));
+		expect(asked.find((spec) => spec.kind === "series")).toMatchObject({
+			groupBy: "outcome",
+			filters: [{ field: "command", op: "eq", value: "warn" }],
+		});
+	});
+
+	it("keeps only the bot's own handlers and the servers it is still in", async () => {
+		collector((spec) => (spec.kind === "command" ? detail : empty(spec)));
+
+		const report = await commandReport(clientFor(), "warn", 7, NOW);
+
+		expect(report).toMatchObject({
+			command: "warn",
+			category: "moderation",
+			totals: { runs: 10, ok: 7, errors: 1, late: 1, noResponse: 1, ephemeralRate: null },
+			latency: [0, 3, 7],
+			tiers: [{ key: "manager", count: 10 }],
+		});
+		expect(report.servers.map((row) => row.guildId)).toEqual([HERE]);
+		expect(report.components).toEqual([{ handler: "warnform:submit", kind: "modal_submit", count: 3 }]);
+		expect(report.forms).toEqual([{ id: "warnform", shown: 5, submitted: 3 }]);
+		expect(JSON.stringify(report)).not.toContain("typed words");
 	});
 });
 

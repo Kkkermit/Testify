@@ -87,7 +87,20 @@ export interface GuildUsageReport {
 	dashboardViews: number;
 	/** People who used the bot there this month, as the collector counts them; null before it has. */
 	people: number | null;
+	/** What the collector knows of the server; null for one it has never seen. */
+	profile: GuildProfile | null;
 	collector: string;
+}
+
+export interface GuildProfile {
+	/** Members when the bot was added, and whether it only noticed at start-up, having been offline. */
+	sizeAtJoin: number | null;
+	firstCommandAt: string | null;
+	lastCommandAt: string | null;
+	/** Discord's names of the permissions the collector's settings require that the bot lacks there. */
+	missingPermissions: string[];
+	/** The newest joins, leaves and outages first. */
+	history: { at: string; kind: "join" | "leave" | "unavailable" | "available"; atStartup: boolean }[];
 }
 
 export const OWNER_GUILD_SORTS = [
@@ -390,6 +403,12 @@ export interface AudienceReport {
 	contexts: Tally[];
 	/** Commands by weekday (1 is Monday) and hour, in `timezone`. */
 	hours: { timezone: string; cells: { weekday: number; hour: number; count: number }[] };
+	/** Oldest first, each week by its Monday. */
+	weekly: { week: string; users: number }[];
+	/** Each counting period's people; `final` once it has ended and can no longer change. */
+	periods: { period: string; users: number; final: boolean }[];
+	/** How the bot was installed where it ran: `guild`, `user` or `both`. */
+	installs: Tally[];
 }
 
 export interface GrowthReport {
@@ -407,6 +426,19 @@ export interface GrowthReport {
 	lifetimes: Tally[];
 	/** The collector's own count beside Discord's; `warn` when they differ by more than 2%. */
 	serverCount: { ours: number; discord: number | null; warn: boolean };
+	/** Joins and leaves the bot only noticed at start-up, having been offline when they happened. */
+	detected: { joins: number; leaves: number };
+	/** Discord's own count of the bot's servers, each day it was reported; zero-filled is wrong here, so it has gaps. */
+	discordCount: { day: string; value: number | null }[];
+	/** Servers by the week they added the bot, and how many ran a command that week and each week after. */
+	cohorts: { cohort: string; weeks: number[] }[];
+	/** Discord's webhook events: adds and removals by day, and the scopes granted. */
+	installsFromDiscord: {
+		/** 1 disabled, 2 enabled, 3 disabled by Discord; null until the bot has said. */
+		webhookStatus: number | null;
+		daily: { day: string; serverInstalls: number; userInstalls: number; userRemovals: number }[];
+		scopes: Tally[];
+	};
 }
 
 export interface PanelButtonRow {
@@ -507,6 +539,8 @@ export interface BotActivityReport {
 	refusals: { total: number; reasons: Tally[]; commands: Tally[] };
 	automatic: { action: AutomaticAction; count: number }[];
 	changes: { total: number; screens: Tally[]; ways: Tally[] };
+	/** Every event the bot counts under its own name, the most frequent first. */
+	events: { name: string; count: number; people: number; lastAt: string }[];
 }
 
 export interface ReliabilityReport {
@@ -533,6 +567,19 @@ export interface ReliabilityReport {
 		daily: { day: string; pingMs: number | null }[];
 		events: { at: string; shard: number; state: string; closeCode: number | null }[];
 	};
+	/** Calls to Discord's API by route; `failures` are answers of 400 and above. */
+	rest: { method: string; route: string; calls: number; failures: number; retries: number; p95Ms: number | null }[];
+	/** 401, 403 and 429 answers in the last ten minutes against Discord's limit, past which it blocks the bot. */
+	invalidRequests: { used: number; limit: number; share: number } | null;
+	/** Gateway session starts left today; Discord refuses to connect once they run out. */
+	sessions: { remaining: number; total: number } | null;
+	/** Memory and event-loop delay each day, the bot's average and its worst minute. */
+	process: {
+		memory: { day: string; value: number | null; max: number | null }[];
+		eventLoop: { day: string; value: number | null; max: number | null }[];
+	};
+	/** Minutes with far more runs than usual, the busiest first; the collector looks back 14 days. */
+	bursts: { minute: string; runs: number; median: number }[];
 }
 
 export interface FunnelReport {
@@ -548,6 +595,105 @@ export interface RetentionReport {
 	back: string | null;
 	periods: number;
 	cohorts: { cohort: string; size: number; retained: number[] }[];
+}
+
+export const commandParam = z.object({ name: commandName });
+
+/** One command in depth, from raw events, so it reaches back only as far as `from`. */
+export interface CommandReport {
+	command: string;
+	category: string;
+	days: number;
+	from: string;
+	daily: UsageDay[];
+	totals: {
+		runs: number;
+		ok: number;
+		errors: number;
+		/** Answered after Discord's three seconds. */
+		late: number;
+		noResponse: number;
+		deferRate: number | null;
+		ephemeralRate: number | null;
+		over3sRate: number | null;
+		/** How long the handler itself took, the slowest one in twenty. */
+		handlerP95Ms: number | null;
+		firstAt: string | null;
+		lastAt: string | null;
+	};
+	/** Runs by time to the first reply, in buckets on a log scale; null when nothing answered. */
+	latency: number[] | null;
+	kinds: Tally[];
+	subcommands: Tally[];
+	options: Tally[];
+	/** Values of options with a fixed list of choices, the only ones the bot sends. */
+	optionValues: { option: string; value: string; runs: number }[];
+	tiers: Tally[];
+	installs: Tally[];
+	contexts: Tally[];
+	channelTypes: Tally[];
+	locales: Tally[];
+	servers: GuildUsageRow[];
+	/** The bot's own handlers on the command's messages, by handler and action. */
+	components: { handler: string; kind: string; count: number }[];
+	forms: PanelFormRow[];
+	collector: string;
+}
+
+/** Bucket `i` of `CommandReport.latency` ends at this many milliseconds. */
+export const LATENCY_BUCKETS = 40;
+
+export const latencyBucketEnd = (index: number): number => 60_000 ** ((index + 1) / (LATENCY_BUCKETS - 1));
+
+/** How the collector is set up and whether the bot is reaching it, from the collector's side. */
+export interface CollectorSetup {
+	collector: string;
+	app: {
+		name: string;
+		mode: "privacy" | "audit";
+		saltPeriod: "day" | "week" | "month";
+		timezone: string;
+		/** How long single events are kept, which is how far back every breakdown reaches. */
+		rawRetentionDays: number;
+		/** Whether people can sign in to the collector's own dashboard with Discord. */
+		discordLogin: boolean;
+	};
+	checks: {
+		receivingEvents: boolean;
+		appInfoReceived: boolean;
+		webhookEventsEnabled: boolean;
+		requiredPermissionsSet: boolean;
+		/** Who ran what: the collector in audit mode with its key, and the bot holding an activity key to read it. */
+		auditMode: boolean;
+		auditKey: boolean;
+		activityKey: boolean;
+	};
+	lastEventAt: string | null;
+	servers: number;
+	people: number | null;
+	/** What the bot last reported about itself; null until it has. */
+	bot: {
+		at: string;
+		approxServers: number | null;
+		approxUserInstalls: number | null;
+		sessionsLeft: number | null;
+		sessionsTotal: number | null;
+		nodeVersion: string | null;
+		libraryVersion: string | null;
+		sdkVersion: string | null;
+		release: string | null;
+	} | null;
+	/** Each process of the bot, as its SDK last reported. */
+	instances: {
+		instance: string;
+		at: string;
+		shards: number[];
+		queued: number;
+		dropped: number;
+		failedSends: number;
+		internalErrors: number;
+		sdkVersion: string | null;
+	}[];
 }
 
 /** How a run ended, as the collector names it: `timeout` missed Discord's three seconds, `no_response` never answered. */

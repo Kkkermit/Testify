@@ -1,9 +1,8 @@
-import { type AnalyticsWindow, type GuildUsageRow, type UsageReport } from "@testify/shared";
-import { type TFunction } from "i18next";
+import { type AnalyticsWindow, type UsageReport } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { Warning } from "@/components/form";
-import { Avatar, Card, Figure, SegmentedControl, UsageBars } from "@/components/primitives";
+import { Card, Figure, SegmentedControl, UsageBars } from "@/components/primitives";
 import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
@@ -11,7 +10,6 @@ import { LiveStrip } from "@/features/owner/components/LiveStrip";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import {
-	commandBar,
 	formatMs,
 	percent,
 	screenLabel,
@@ -21,13 +19,16 @@ import {
 	WINDOWS,
 } from "@/features/owner/owner.utils";
 import { ActivityView } from "@/features/owner/usage/ActivityView";
+import { CollectorView } from "@/features/owner/usage/CollectorView";
+import { CommandDetail } from "@/features/owner/usage/CommandDetail";
 import { JourneysView } from "@/features/owner/usage/JourneysView";
 import { PanelsView } from "@/features/owner/usage/PanelsView";
 import { PeopleView } from "@/features/owner/usage/PeopleView";
 import { ReliabilityView } from "@/features/owner/usage/ReliabilityView";
 import { RunsView } from "@/features/owner/usage/RunsView";
 import { ServersView } from "@/features/owner/usage/ServersView";
-import { USAGE_VIEWS, viewFrom, VIEW_LABELS } from "@/features/owner/usage/usage.utils";
+import { commandFrom, USAGE_VIEWS, viewFrom, VIEW_LABELS } from "@/features/owner/usage/usage.utils";
+import { commandLink, commandLinkBar, guildBar } from "@/features/owner/usage/usageBars";
 import { useUsage } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
@@ -53,7 +54,9 @@ export function UsageTab({
 					segments={USAGE_VIEWS.map((value) => ({ value, label: t(VIEW_LABELS[value]) }))}
 					value={view}
 					onChange={(value) => {
-						setParams(searchWith(params, { view: value === "commands" ? null : value }), { replace: true });
+						setParams(searchWith(params, { view: value === "commands" ? null : value, command: null }), {
+							replace: true,
+						});
 					}}
 				/>
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
@@ -69,13 +72,17 @@ export function UsageTab({
 			{view === "reliability" && <ReliabilityView days={days} />}
 			{view === "journeys" && <JourneysView days={days} />}
 			{view === "runs" && <RunsView days={days} />}
+			{view === "setup" && <CollectorView />}
 		</div>
 	);
 }
 
 function FleetUsage({ days }: { days: AnalyticsWindow }): React.JSX.Element {
 	const [params] = useSearchParams();
+	const command = commandFrom(params.get("command"));
 	const usage = useUsage(days);
+
+	if (command !== null) return <CommandDetail name={command} days={days} />;
 
 	return (
 		<AnalyticsState query={usage}>
@@ -121,14 +128,17 @@ function FleetFigures({
 			{/* `items-start` so a short panel ends where its list does, rather than stretching to its neighbour. */}
 			<div className="grid items-start gap-4 lg:grid-cols-2">
 				<Panel title={t("owner.mostUsed")} hint={t("owner.mostUsedHint")}>
-					<UsageBars empty={t("owner.noCommandRun")} rows={report.mostUsed.map((row) => commandBar(row, t))} />
+					<UsageBars
+						empty={t("owner.noCommandRun")}
+						rows={report.mostUsed.map((row) => commandLinkBar(row, params, t))}
+					/>
 				</Panel>
 
 				<Panel title={t("owner.leastUsed")} hint={t("owner.leastUsedHint")}>
 					<UsageBars
 						tint="bg-muted"
 						empty={t("owner.noCommandsRegistered")}
-						rows={report.leastUsed.map((row) => commandBar(row, t))}
+						rows={report.leastUsed.map((row) => commandLinkBar(row, params, t))}
 					/>
 				</Panel>
 
@@ -154,7 +164,7 @@ function FleetFigures({
 						empty={t("owner.noSlowRuns")}
 						rows={report.slowest.map((row) => ({
 							id: row.command,
-							label: `/${row.command}`,
+							label: commandLink(row.command, params),
 							sub: t("owner.slowSub", { count: row.runs, typical: formatMs(row.typicalMs) }),
 							count: row.slowMs,
 							value: formatMs(row.slowMs),
@@ -188,25 +198,4 @@ function FleetFigures({
 			<ShardlensLinks collector={report.collector} />
 		</div>
 	);
-}
-
-function guildBar(
-	row: GuildUsageRow,
-	params: URLSearchParams,
-	t: TFunction,
-): React.ComponentProps<typeof UsageBars>["rows"][number] {
-	return {
-		id: row.guildId,
-		label: (
-			<Link
-				to={searchWith(params, { guild: row.guildId })}
-				className="hover:text-accent flex items-center gap-2 transition-colors duration-150"
-			>
-				<Avatar name={row.name} url={row.iconUrl} size={18} seed={row.guildId} />
-				<span className="truncate">{row.name}</span>
-			</Link>
-		),
-		sub: t("common.memberCount", { count: row.memberCount }),
-		count: row.count,
-	};
 }

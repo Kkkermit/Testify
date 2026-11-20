@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 19 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 20 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -106,12 +106,17 @@ describe("the legal pages", () => {
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);
-		// `startShardlens` asks for audit mode but never option values, and `eraseAccount` asks the collector to forget.
+		// `startShardlens` asks for audit mode and values only of fixed choices, and `eraseAccount` asks the collector to forget.
 		const lens = botSource("src/lib/bot/shardlens.util.ts");
 		expect(lens).toMatch(/mode: "audit"/);
-		expect(lens).not.toMatch(/captureOptionValues/);
+		expect(lens).toMatch(/captureOptionValues: choices,/);
 		expect(botSource("src/lib/account/accountActions.util.ts")).toContain("shardlens?.forgetUser(userId)");
-		expect(text).toMatch(/the names of the options you filled in but never what you typed/);
+		expect(text).toMatch(
+			/the names of the options you filled in and, for one with a fixed list, the choice you picked, but never what you typed/,
+		);
+		// The spool holds what the SDK has not sent, which it writes hashed and without an audit identity.
+		expect(lens).toMatch(/spool: \{ dir: spoolDir\(env\) \}/);
+		expect(text).toMatch(/kept in a folder on the bot’s own machine, hashed and without who ran it, until it is sent/);
 		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
 		// Who ran what reaches the console only through the activity key, on owner-only routes the collector logs.
 		expect(botSource("src/lib/bot/shardlensReader.util.ts")).toMatch(
@@ -125,9 +130,9 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);
 		expect(text).not.toMatch(/prefix command is never named/i);
 		expect(text).toMatch(/under your hashed id, and in audit mode under your user id as well/);
-		// `recordPrefixRun` sends option names only, and `recordEvent` passes the server as context and never a user.
-		expect(lens).toMatch(/\{ options: run\.options \}/);
-		expect(text).toMatch(/the names of the options you gave it but never what you typed/);
+		// `recordPrefixRun` sends a value only for a fixed choice, and `recordEvent` passes the server and never a user.
+		expect(lens).toMatch(/option\.value !== null && choices\.has\(option\.name\)/);
+		expect(text).toMatch(/the names of the options you gave it and, for one with a fixed list, the choice you picked/);
 		expect(lens).toMatch(/track\(event, values, context\(guildId\)\)/);
 		expect(lens).not.toMatch(/userId/);
 		expect(text).toMatch(/counts what the bot does with nobody named: .* but never the question/);

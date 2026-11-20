@@ -9,6 +9,8 @@ import {
 import {
 	type AudienceReport,
 	type BotActivityReport,
+	type CollectorSetup,
+	type CommandReport,
 	FUNNEL_LIMITS,
 	type FunnelReport,
 	type GrowthReport,
@@ -92,6 +94,12 @@ export const useBotActivity = (days: number): UseQueryResult<BotActivityReport> 
 
 export const useReliability = (days: number): UseQueryResult<ReliabilityReport> =>
 	useSection("reliability", windowOf(days));
+
+/** The name is already checked by `commandFrom`, so it can stand in the path as it is. */
+export const useCommandReport = (name: string, days: number): UseQueryResult<CommandReport> =>
+	useSection(`commands/${name}`, windowOf(days));
+
+export const useCollectorSetup = (): UseQueryResult<CollectorSetup> => useSection("setup", {});
 
 export const useFunnel = (days: number, tz: string, steps: string[], hours: number): UseQueryResult<FunnelReport> =>
 	useSection(
