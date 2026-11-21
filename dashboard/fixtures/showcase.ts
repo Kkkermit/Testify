@@ -950,6 +950,7 @@ function commandDetail(name: string, days: number): CommandReport {
 
 const collectorSetup: CollectorSetup = {
 	collector: COLLECTOR,
+	embedded: false,
 	app: {
 		name: "Testify",
 		mode: "audit",
@@ -1170,6 +1171,7 @@ function liveNow(): LiveRead {
 const shardlens: ShardlensStatus = {
 	state: "sending",
 	collector: COLLECTOR,
+	embedded: false,
 	mode: "audit",
 	queued: 4,
 	waitingForResponse: 1,

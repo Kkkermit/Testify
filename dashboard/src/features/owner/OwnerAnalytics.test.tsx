@@ -280,6 +280,23 @@ describe("the Shardlens card", () => {
 		expect(await screen.findByText(/could not send \(network\)/i)).toBeInTheDocument();
 	});
 
+	/** The collector inside the bot listens on the bot's own machine, so its link has to say it opens nowhere else. */
+	it("says the counting stays on the bot's machine, and where its dashboard opens", async () => {
+		server.use(
+			http.get("/api/control/shardlens", () =>
+				HttpResponse.json({ ...shardlensStatus, collector: "http://127.0.0.1:8080", embedded: true }),
+			),
+		);
+		renderTab("runtime");
+
+		expect(await screen.findByText(/inside the bot, so nothing leaves the machine/i)).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /open the shardlens dashboard/i })).toHaveAttribute(
+			"href",
+			"http://127.0.0.1:8080",
+		);
+		expect(screen.getByText(/opens only on the machine the bot runs on/i)).toBeInTheDocument();
+	});
+
 	it("offers nothing to press while it is off", async () => {
 		server.use(
 			http.get("/api/control/shardlens", () =>

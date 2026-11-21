@@ -291,6 +291,7 @@ export const runtimeInfo: RuntimeInfo = {
 export const shardlensStatus: ShardlensStatus = {
 	state: "sending",
 	collector: "https://stats.example.com",
+	embedded: false,
 	mode: "privacy",
 	queued: 3,
 	waitingForResponse: 1,

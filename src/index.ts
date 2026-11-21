@@ -91,7 +91,7 @@ async function main(): Promise<void> {
 	}
 
 	// Before login, so it sees the shards connect and every interaction from the first.
-	if ((await startShardlens(client)) !== null) report.note("done", "Analytics", shardlensLine(env));
+	if ((await startShardlens(client)) !== null) report.note("done", "Analytics", shardlensLine(client.lensTarget));
 
 	exitOnFatalClose(client);
 	report.note("working", "Discord", "logging in…");

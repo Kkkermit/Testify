@@ -2,14 +2,17 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+	analyticsLines,
 	dashboardFields,
 	type Field,
 	fields,
 	instanceFields,
 	instanceFileText,
+	newAuditKey,
 	OPERATOR_CONTACT,
 } from "../../scripts/setupEnv";
 import { INSTANCE_DEFAULTS, readInstance } from "@config/instance";
+import { isAuditKey } from "@lib/bot/embeddedCollector.util";
 
 function field(list: Field[], key: string): Field {
 	const found = list.find((candidate) => candidate.key === key);
@@ -40,6 +43,26 @@ describe("the setup questions", () => {
 
 	it("suggests a separate local database for a development bot", () => {
 		expect(field(fields(true), "MONGODB_URI").initial).toBe("mongodb://localhost:27017/testify-dev");
+	});
+});
+
+describe("the analytics question", () => {
+	/** Choosing the collector inside the bot must be the whole set-up, with a key the bot accepts. */
+	it("writes nothing while off, one switch inside the bot, and the four settings for a collector elsewhere", () => {
+		const key = newAuditKey();
+
+		expect(analyticsLines("off", {}, null)).toEqual([]);
+		expect(analyticsLines("embedded", {}, null)).toEqual(["", "SHARDLENS_EMBEDDED=true"]);
+		expect(analyticsLines("embedded", {}, key)).toEqual(["", "SHARDLENS_EMBEDDED=true", `SHARDLENS_AUDIT_KEY=${key}`]);
+		expect(isAuditKey(key)).toBe(true);
+		expect(analyticsLines("collector", { SHARDLENS_URL: "https://stats.example.com" }, null)).toEqual([
+			"",
+			"SHARDLENS_URL=https://stats.example.com",
+			"SHARDLENS_INGEST_KEY=",
+			"SHARDLENS_READ_KEY=",
+			"SHARDLENS_ACTIVITY_KEY=",
+		]);
+		expect(fields(false).some((question) => question.key.startsWith("SHARDLENS_"))).toBe(false);
 	});
 });
 

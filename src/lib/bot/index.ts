@@ -7,6 +7,7 @@ export * from "./commandLog.util";
 export * from "./commandRunner.util";
 export * from "./dashboard.util";
 export * from "./dmLog.util";
+export * from "./embeddedCollector.util";
 export * from "./errorTriage.util";
 export * from "./guildLifecycle.util";
 export * from "./healthProbe.util";

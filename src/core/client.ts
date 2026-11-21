@@ -26,6 +26,28 @@ const intents = [
 
 const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 
+/** Where Shardlens sends and where the owner console reads it back. */
+export interface LensTarget {
+	url: string | undefined;
+	ingestKey: string | undefined;
+	readKey: string | undefined;
+	activityKey: string | undefined;
+	/** The collector this process runs, which shutdown closes last. */
+	embedded: { dashboardUrl: string; close(): Promise<void> } | null;
+}
+
+/** The four settings for a collector run elsewhere; with `SHARDLENS_EMBEDDED=true` they are ignored. */
+export function settingsTarget(env: Env): LensTarget {
+	const own = env.SHARDLENS_EMBEDDED === "true";
+	return {
+		url: own ? undefined : env.SHARDLENS_URL,
+		ingestKey: own ? undefined : env.SHARDLENS_INGEST_KEY,
+		readKey: own ? undefined : env.SHARDLENS_READ_KEY,
+		activityKey: own ? undefined : env.SHARDLENS_ACTIVITY_KEY,
+		embedded: null,
+	};
+}
+
 export class TestifyClient extends Client {
 	readonly commands = new Collection<string, Command>();
 	readonly aliases = new Collection<string, string>();
@@ -56,6 +78,9 @@ export class TestifyClient extends Client {
 	/** Shardlens once `startShardlens()` attaches it, which it does only when its settings are set. */
 	shardlens: Shardlens | null = null;
 
+	/** The settings, until `startShardlens()` starts a collector inside the bot and points this at it. */
+	lensTarget: LensTarget;
+
 	/**
 	 * True while the owner has paused the bot: commands are refused, message handlers skipped and the bot shown
 	 * invisible. A flag rather than `destroy()`, which nulls the token.
@@ -71,6 +96,7 @@ export class TestifyClient extends Client {
 		this.featuresOff = switchedOff(env.DISABLED_FEATURES).off;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);
+		this.lensTarget = settingsTarget(env);
 		nameBot(() => this.user?.username ?? this.restName);
 	}
 

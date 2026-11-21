@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { type Env } from "@config/env";
+import { type LensTarget } from "@core/client";
 import { AnalyticsUnavailable, rangeOf, ShardlensReader } from "@lib/bot/shardlensReader.util";
 import { serviceChecks } from "@lib/infra/serviceHealth.util";
 
 const KEY = `slk_read_${"r".repeat(43)}`;
 const ACTIVITY_KEY = `slk_activity_${"a".repeat(43)}`;
-const ENV = { SHARDLENS_URL: "https://stats.example.com/v1/ingest?token=x#y", SHARDLENS_READ_KEY: KEY } as Env;
+const ENV = { url: "https://stats.example.com/v1/ingest?token=x#y", readKey: KEY } as LensTarget;
 const TOP = { kind: "top", metric: "interactions", groupBy: "command", range: rangeOf(7) } as const;
 const SERIES = { kind: "series", metric: "interactions", interval: "day", range: rangeOf(7) } as const;
 const page = z.object({
@@ -38,13 +38,11 @@ describe("ShardlensReader", () => {
 		const unusable = ["not an address", "http://stats.example.com", "https://user:pass@stats.example.com", "ftp://x"];
 		for (const env of [
 			{},
-			{ SHARDLENS_URL: "https://stats.example.com" },
-			{ SHARDLENS_READ_KEY: KEY },
-			...unusable.map((url) => ({ SHARDLENS_URL: url, SHARDLENS_READ_KEY: KEY })),
+			{ url: "https://stats.example.com" },
+			{ readKey: KEY },
+			...unusable.map((url) => ({ url, readKey: KEY })),
 		]) {
-			await expect(new ShardlensReader(env as unknown as Env).query(TOP)).rejects.toEqual(
-				new AnalyticsUnavailable("off"),
-			);
+			await expect(new ShardlensReader(env).query(TOP)).rejects.toEqual(new AnalyticsUnavailable("off"));
 		}
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
@@ -54,7 +52,7 @@ describe("ShardlensReader", () => {
 		const warn = jest.fn();
 		const ingest = `slk_ingest_${"i".repeat(43)}`;
 		const reader = new ShardlensReader(
-			{ SHARDLENS_URL: "https://stats.example.com", SHARDLENS_READ_KEY: ingest },
+			{ url: "https://stats.example.com", readKey: ingest },
 			{
 				warn,
 			},
@@ -72,7 +70,7 @@ describe("ShardlensReader", () => {
 	/** A key opens the collector's figures, so it goes to the collector's own origin, unredirected, and nowhere else. */
 	it("sends the key only as a bearer token, to the collector's origin, and follows no redirect", async () => {
 		await new ShardlensReader(ENV).query(TOP);
-		await new ShardlensReader({ SHARDLENS_URL: "http://localhost:8080", SHARDLENS_READ_KEY: KEY }).query(TOP);
+		await new ShardlensReader({ url: "http://localhost:8080", readKey: KEY }).query(TOP);
 
 		expect(sentTo(0)).toBe("https://stats.example.com/v1/query");
 		expect(sentTo(1)).toBe("http://localhost:8080/v1/query");
@@ -192,7 +190,7 @@ describe("ShardlensReader", () => {
 
 	/** Who ran what is behind its own key, so a read key alone never asks for it and an activity key is not spent on counts. */
 	it("asks who ran what only with the activity key, and counts with the read key", async () => {
-		const both = new ShardlensReader({ ...ENV, SHARDLENS_ACTIVITY_KEY: ACTIVITY_KEY });
+		const both = new ShardlensReader({ ...ENV, activityKey: ACTIVITY_KEY });
 		answers(200, { rows: [], nextBefore: null });
 
 		await both.activityLog({ guild: "900000000000000001", outcome: "failed" }, page);
@@ -208,15 +206,15 @@ describe("ShardlensReader", () => {
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 
 		const activityOnly = new ShardlensReader({
-			SHARDLENS_URL: ENV.SHARDLENS_URL,
-			SHARDLENS_ACTIVITY_KEY: ACTIVITY_KEY,
+			url: ENV.url,
+			activityKey: ACTIVITY_KEY,
 		});
 		await activityOnly.query(TOP);
 		expect(sentWith(2)).toMatchObject({ headers: { authorization: `Bearer ${ACTIVITY_KEY}` } });
 	});
 
 	it("says when the collector keeps no record of who ran what, or the key cannot read it", async () => {
-		const reader = new ShardlensReader({ ...ENV, SHARDLENS_ACTIVITY_KEY: ACTIVITY_KEY });
+		const reader = new ShardlensReader({ ...ENV, activityKey: ACTIVITY_KEY });
 
 		answers(404, { error: "audit_mode_off" });
 		await expect(reader.activityLog({}, page)).rejects.toEqual(new AnalyticsUnavailable("audit_off"));

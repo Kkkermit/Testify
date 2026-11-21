@@ -394,6 +394,7 @@ export async function collectorSetup(client: TestifyClient): Promise<CollectorSe
 
 	return {
 		collector: reader.collector ?? "",
+		embedded: client.lensTarget.embedded !== null,
 		app: {
 			name: app?.name ?? "",
 			mode: app?.mode ?? (meta.mode === "audit" ? "audit" : "privacy"),

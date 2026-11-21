@@ -5,7 +5,7 @@ import { discordTime, formatNumber } from "@lib/format";
 import { type ShardlensFlush, type ShardlensState, type ShardlensStatus } from "@testify/shared";
 
 const STATES: Record<ShardlensState, string> = {
-	off: "Off. Nothing is attached and nothing is sent. Set `SHARDLENS_URL` and `SHARDLENS_INGEST_KEY` to send to a collector you run.",
+	off: "Off. Nothing is attached and nothing is sent. Set `SHARDLENS_EMBEDDED=true` to run a collector inside the bot, or `SHARDLENS_URL` and `SHARDLENS_INGEST_KEY` to send to one you run.",
 	waiting: "Waiting for the collector to answer. Events wait in memory and go once it does.",
 	sending:
 		"Sending every five seconds. Who ran each command is named only while the collector is in audit mode, and hashed otherwise.",
@@ -14,7 +14,9 @@ const STATES: Record<ShardlensState, string> = {
 export function shardlensEmbed(status: ShardlensStatus, note?: string) {
 	const lines = [STATES[status.state]];
 	if (note !== undefined) lines.unshift(note, "");
-	if (status.collector !== null) lines.push("", `Its dashboard: ${status.collector}`);
+	if (status.collector !== null) {
+		lines.push("", `Its dashboard: ${status.collector}${status.embedded ? ", on the machine the bot runs on" : ""}`);
+	}
 
 	const problem = status.lastProblem;
 	return embed({

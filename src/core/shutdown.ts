@@ -38,6 +38,8 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 		await logArchive.close(client.logger);
 		await disconnectDatabase();
 		await client.destroy();
+		// Last, so everything the SDK flushed above has reached it.
+		await client.lensTarget.embedded?.close();
 	} catch (error) {
 		client.logger.error({ err: toError(error) }, "[SHUTDOWN_ERROR] Something went wrong while shutting down.");
 		code = code === 0 ? 1 : code;

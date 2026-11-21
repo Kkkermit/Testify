@@ -130,6 +130,14 @@ export function fields(isDev: boolean): Field[] {
 			hint: "Blank works, but a token lifts GitHub's limit of 60 an hour and shows traffic",
 			required: false,
 		},
+	];
+}
+
+export type AnalyticsChoice = "off" | "embedded" | "collector";
+
+/** The four settings for a collector run elsewhere, asked only when that is the choice. */
+export function collectorFields(): Field[] {
+	return [
 		{
 			key: "SHARDLENS_URL",
 			message: "Shardlens collector address, for analytics",
@@ -155,6 +163,21 @@ export function fields(isDev: boolean): Field[] {
 			required: false,
 		},
 	];
+}
+
+/** The same shape `openssl rand -base64 32` gives, which is what the collector inside the bot asks for. */
+export const newAuditKey = (): string => randomBytes(32).toString("base64");
+
+/** What the analytics choice writes: nothing while off, one switch and maybe an audit key inside the bot. */
+export function analyticsLines(
+	choice: AnalyticsChoice,
+	collector: Record<string, string>,
+	auditKey: string | null,
+): string[] {
+	if (choice === "off") return [];
+	if (choice === "collector")
+		return ["", ...collectorFields().map((field) => `${field.key}=${collector[field.key] ?? ""}`)];
+	return ["", "SHARDLENS_EMBEDDED=true", ...(auditKey === null ? [] : [`SHARDLENS_AUDIT_KEY=${auditKey}`])];
 }
 
 /** The same rule the bot reads the file with, so a wizard answer can never write a file the bot refuses. */
@@ -338,6 +361,35 @@ async function main(): Promise<void> {
 	const extra = wantsDashboard === true ? dashboardFields(isDev) : [];
 	const dashboard = extra.length > 0 ? await ask(extra) : {};
 
+	const { analytics, identify } = (await prompts(
+		[
+			{
+				type: "select",
+				name: "analytics",
+				message: `${paint.bold("Analytics for the owner console?")}${paint.dim(" (Shardlens — which commands run, how they end)")}`,
+				choices: [
+					{ title: "Off", value: "off" },
+					{ title: "Inside the bot", description: "Nothing else to run or set", value: "embedded" },
+					{
+						title: "A collector I run",
+						description: "Its address and keys, from npx shardlens init",
+						value: "collector",
+					},
+				],
+				initial: 0,
+			},
+			{
+				type: (previous: AnalyticsChoice) => (previous === "embedded" ? "confirm" : null),
+				name: "identify",
+				message: `${paint.bold("Show who ran each command?")}${paint.dim(" (only the bot's owners see it)")}`,
+				initial: true,
+			},
+		],
+		{ onCancel: () => process.exit(1) },
+	)) as { analytics: AnalyticsChoice; identify?: boolean };
+	const collector = analytics === "collector" ? await ask(collectorFields()) : {};
+	const auditKey = identify === true ? newAuditKey() : null;
+
 	const lines = questions.map((field) => `${field.key}=${answers[field.key] ?? ""}`);
 
 	if (wantsDashboard === true) {
@@ -348,6 +400,8 @@ async function main(): Promise<void> {
 			`DASHBOARD_SESSION_SECRET=${randomBytes(32).toString("base64url")}`,
 		);
 	}
+
+	lines.push(...analyticsLines(analytics, collector, auditKey));
 
 	writeFileSync(target, `${lines.join("\n")}\n`, "utf8");
 
@@ -360,6 +414,15 @@ async function main(): Promise<void> {
 	if (wantsDashboard === true) {
 		const callback = `${dashboard.DASHBOARD_BASE_URL ?? ""}/api/auth/callback`;
 		steps.push("", "One more step in the Developer Portal, under OAuth2 → Redirects:", `  ${paint.bold(callback)}`);
+	}
+
+	if (analytics === "embedded") {
+		steps.push(
+			"",
+			`Analytics run inside the bot. Keep the ${paint.bold("shardlens-data")} folder: its keys are there.`,
+		);
+		if (auditKey !== null)
+			steps.push(`Keep a copy of ${paint.bold("SHARDLENS_AUDIT_KEY")}: the names are unreadable without it.`);
 	}
 
 	const configured = await makeItYours();

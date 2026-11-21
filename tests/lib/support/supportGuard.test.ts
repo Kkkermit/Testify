@@ -32,6 +32,8 @@ describe("findLeak", () => {
 			["credentials-in-url", "connect with mongodb://admin:letmein@db.internal/x"],
 			["api-key", `use ${FAKE.otherAnthropicKey}`],
 			["api-key", `a ${FAKE.githubToken} token`],
+			// The collector inside the bot makes its keys at run time, so no setting holds them for the list above.
+			["api-key", `the key is ${FAKE.shardlensKey}`],
 			["private-key", FAKE.privateKey],
 			["email", "write to someone@example.com"],
 			["discord-id", "the owner is 123456789012345678"],

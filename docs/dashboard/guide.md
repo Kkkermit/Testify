@@ -827,15 +827,16 @@ precisely the screen you want when something is wrong.
 - **Ownership is `DISCORD_OWNER_IDS` and nothing else**, read from env on every request — so removing an ID
   revokes the console on that person's next click, and no flag on the session can grant it.
 - **Usage is read from Shardlens, and nothing analytic is kept in MongoDB.** The Usage tab, its per-server
-  drill-down and the server list's command and dashboard counts are queries to the collector with
-  `SHARDLENS_READ_KEY` through `@shardlens/client`, which the bot holds and no browser sees. Without the key, or with
+  drill-down and the server list's command and dashboard counts are queries to the collector with its read key
+  through `@shardlens/client`, which the bot holds and no browser sees: `SHARDLENS_READ_KEY`, or the key the
+  collector inside the bot made for itself with `SHARDLENS_EMBEDDED=true`. Without the key, or with
   the collector refusing or away, the tab says which (`analytics_off`, `analytics_refused`, `analytics_audit_off`,
   `analytics_unreachable`) and the server list still loads with its counts blank. The tab's nine sections —
   commands, people, servers, buttons and forms, bot activity, reliability, journeys, who ran what and setup — each
   read their own route and fail on their own, through `AnalyticsState` in `features/owner/components/`; **Right now**
   above them reads the bot's one shared live stream. A command's name in any Commands list opens it in depth
-  (`?command=`, `CommandDetail`). Who ran what needs `SHARDLENS_ACTIVITY_KEY` and collector 1.2 or later in audit
-  mode, which **Setup** checks step by step; it is read with a POST so no user id ever lands in an address, and
+  (`?command=`, `CommandDetail`). Who ran what needs collector 1.2 or later in audit mode and an activity key, which
+  **Setup** checks step by step and words for the collector inside the bot when it is that one (`embedded`); it is read with a POST so no user id ever lands in an address, and
   looks a person up only by their exact id. The bars, columns and cohort tables are `UsageBars`, `ColumnBars` (with
   `DayBars` over it) and `CohortTable`, and a section's own bar rows come from `usage/usageBars.tsx` and
   `tallyBars`, so a new figure is drawn with what is there.

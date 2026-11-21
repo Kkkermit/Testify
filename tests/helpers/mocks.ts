@@ -9,7 +9,7 @@ import {
 	type TextChannel,
 	type User,
 } from "discord.js";
-import { type TestifyClient } from "@core/client";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import { createLogger } from "@core/logger";
 
 /** Mock factories, one per surface, with every method already stubbed. */
@@ -148,7 +148,7 @@ export function createMockGuild(overrides: Overrides<Guild> = {}): Guild {
 }
 
 export function createMockClient(overrides: Overrides<TestifyClient> = {}): TestifyClient {
-	return merge(
+	const client = merge(
 		{
 			commands: new Collection(),
 			aliases: new Collection(),
@@ -179,6 +179,7 @@ export function createMockClient(overrides: Overrides<TestifyClient> = {}): Test
 		} as unknown as TestifyClient,
 		overrides,
 	);
+	return "lensTarget" in overrides ? client : Object.assign(client, { lensTarget: settingsTarget(client.env) });
 }
 
 /** What the option getters should answer, keyed by option name. */

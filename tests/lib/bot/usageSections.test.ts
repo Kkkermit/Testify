@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
-import { type TestifyClient } from "@core/client";
+import { type Env } from "@config/env";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import {
 	audienceReport,
 	botActivityReport,
@@ -33,9 +34,11 @@ const points = (rows: [string, string | null, number][]): unknown => ({
 	points: rows.map(([t, key, value]) => ({ t, key, value })),
 });
 
-function clientFor(env: Record<string, string> = {}): TestifyClient {
+function clientFor(settings: Record<string, string> = {}): TestifyClient {
+	const env = { SHARDLENS_URL: "https://stats.example.com", SHARDLENS_READ_KEY: KEY, ...settings } as unknown as Env;
 	return {
-		env: { SHARDLENS_URL: "https://stats.example.com", SHARDLENS_READ_KEY: KEY, ...env },
+		env,
+		lensTarget: settingsTarget(env),
 		commands: new Collection(),
 		buttons: new Collection<string, unknown>([
 			["shop", {}],

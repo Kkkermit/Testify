@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
-import { type TestifyClient } from "@core/client";
+import { type Env } from "@config/env";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import { readRuns, readTopRunners } from "@lib/bot/runLog.util";
 import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
 import { runsBody } from "@testify/shared";
@@ -43,9 +44,11 @@ function row(overrides: Record<string, unknown> = {}): Record<string, unknown> {
 }
 
 /** A client whose activity key is set, with a guild and a user the bot already knows. */
-function clientFor(env: Record<string, string> = { SHARDLENS_ACTIVITY_KEY: ACTIVITY_KEY }): TestifyClient {
+function clientFor(settings: Record<string, string> = { SHARDLENS_ACTIVITY_KEY: ACTIVITY_KEY }): TestifyClient {
+	const env = { SHARDLENS_URL: "https://stats.example.com", ...settings } as unknown as Env;
 	return {
-		env: { SHARDLENS_URL: "https://stats.example.com", ...env },
+		env,
+		lensTarget: settingsTarget(env),
 		buttons: new Collection<string, unknown>([["warnform", {}]]),
 		guilds: { cache: new Collection<string, unknown>([[GUILD, { name: "From the cache" }]]) },
 		users: {

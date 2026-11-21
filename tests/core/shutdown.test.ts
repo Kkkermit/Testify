@@ -80,6 +80,26 @@ describe("shutdown", () => {
 		expect(order).toEqual(["shardlens", "destroy"]);
 	});
 
+	/** The collector inside the bot is where the SDK flushes to, so it has to outlast everything that sends. */
+	it("closes the collector inside the bot last", async () => {
+		const { shutdown } = loadShutdown();
+		const client = clientFor();
+		const order: string[] = [];
+		client.shardlens = { shutdown: jest.fn(() => Promise.resolve(void order.push("shardlens"))) } as never;
+		client.lensTarget = {
+			url: undefined,
+			ingestKey: undefined,
+			readKey: undefined,
+			activityKey: undefined,
+			embedded: { dashboardUrl: "http://localhost:8080", close: () => Promise.resolve(void order.push("collector")) },
+		};
+		jest.mocked(client.destroy).mockImplementation(() => Promise.resolve(void order.push("destroy")));
+
+		await shutdown(client, "SIGINT");
+
+		expect(order).toEqual(["shardlens", "destroy", "collector"]);
+	});
+
 	/** Two signals in quick succession must not race two teardowns. */
 	it("ignores a second call", async () => {
 		const { shutdown, disconnectDatabase } = loadShutdown();

@@ -14,9 +14,19 @@ import { formatNumber } from "@/lib/intl";
 type Check = keyof CollectorSetup["checks"];
 
 /** Who ran what first, since it needs all three; each says what to change when it is missing. */
-const CHECKS: { check: Check; done: TranslationKey; missing: TranslationKey }[] = [
-	{ check: "auditMode", done: "owner.setup.auditMode", missing: "owner.setup.auditModeMissing" },
-	{ check: "auditKey", done: "owner.setup.auditKey", missing: "owner.setup.auditKeyMissing" },
+const CHECKS: { check: Check; done: TranslationKey; missing: TranslationKey; ownMissing?: TranslationKey }[] = [
+	{
+		check: "auditMode",
+		done: "owner.setup.auditMode",
+		missing: "owner.setup.auditModeMissing",
+		ownMissing: "owner.setup.auditMissingEmbedded",
+	},
+	{
+		check: "auditKey",
+		done: "owner.setup.auditKey",
+		missing: "owner.setup.auditKeyMissing",
+		ownMissing: "owner.setup.auditMissingEmbedded",
+	},
 	{ check: "activityKey", done: "owner.setup.activityKey", missing: "owner.setup.activityKeyMissing" },
 	{ check: "receivingEvents", done: "owner.setup.receiving", missing: "owner.setup.receivingMissing" },
 	{ check: "appInfoReceived", done: "owner.setup.appInfo", missing: "owner.setup.appInfoMissing" },
@@ -59,8 +69,9 @@ function CollectorFigures({ report }: { report: CollectorSetup }): React.JSX.Ele
 					<Figure className="px-6 py-4" label={t("owner.peopleThisMonth")} value={countOrDash(report.people)} />
 				</dl>
 				<ul className="flex flex-col gap-3 px-6 py-5" aria-label={t("owner.setup.checksLabel")}>
-					{CHECKS.map(({ check, done, missing }) => {
+					{CHECKS.map(({ check, done, missing, ownMissing }) => {
 						const ok = report.checks[check];
+						const advice = report.embedded ? (ownMissing ?? missing) : missing;
 						const Icon = ok ? Check : X;
 						return (
 							<li key={check} className="flex gap-3 text-sm">
@@ -74,7 +85,7 @@ function CollectorFigures({ report }: { report: CollectorSetup }): React.JSX.Ele
 										{t(done)}
 										<span className="sr-only"> {t(ok ? "owner.setup.isDone" : "owner.setup.isMissing")}</span>
 									</span>
-									{!ok && <span className="text-muted-foreground">{t(missing)}</span>}
+									{!ok && <span className="text-muted-foreground">{t(advice)}</span>}
 								</span>
 							</li>
 						);

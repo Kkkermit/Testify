@@ -184,6 +184,7 @@ export const commandReport: CommandReport = {
 
 export const collectorSetup: CollectorSetup = {
 	collector: "https://stats.example.com",
+	embedded: false,
 	app: {
 		name: "Testify",
 		mode: "privacy",

@@ -3,11 +3,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createShardlens, type Shardlens } from "@shardlens/discordjs";
 import { BaseInteraction, type Interaction, type Message } from "discord.js";
-import { type Env } from "@config/env";
-import { type TestifyClient } from "@core/client";
+import { type LensTarget, type TestifyClient } from "@core/client";
 import { type Command, type GivenOption, subcommandsOf } from "@core/command";
 import { toError } from "@core/errors";
 import { readOptOuts } from "@database/repositories/analyticsOptOutRepository";
+import { startEmbedded } from "@lib/bot/embeddedCollector.util";
 import { botVersion } from "@lib/bot/runtime.util";
 import { collectorOrigin } from "@lib/bot/shardlensReader.util";
 import {
@@ -140,17 +140,27 @@ export function choiceOptions(commands: Iterable<Command>): string[] {
 }
 
 /** Events wait here while the collector is away; one folder per collector and key, so two installs never swap them. */
-export function spoolDir(env: Pick<Env, "SHARDLENS_URL" | "SHARDLENS_INGEST_KEY">): string {
+export function spoolDir(target: Pick<LensTarget, "url" | "ingestKey">): string {
 	const id = createHash("sha256")
-		.update(`${env.SHARDLENS_URL ?? ""}\n${env.SHARDLENS_INGEST_KEY ?? ""}`)
+		.update(`${target.url ?? ""}\n${target.ingestKey ?? ""}`)
 		.digest("hex")
 		.slice(0, 16);
 	return join(tmpdir(), `testify-shardlens-${id}`);
 }
 
+/** `true` runs the collector inside the bot; anything but `false` or blank is said once and read as off. */
+function embeddedAsked(client: TestifyClient): boolean {
+	const value = client.env.SHARDLENS_EMBEDDED;
+	if (value !== undefined && value !== "true" && value !== "false") {
+		client.logger.warn("[SHARDLENS] SHARDLENS_EMBEDDED should be true or false, so it is read as false.");
+	}
+	return value === "true";
+}
+
 export async function startShardlens(client: TestifyClient): Promise<Shardlens | null> {
 	const env = client.env;
-	if (env.SHARDLENS_URL === undefined && env.SHARDLENS_INGEST_KEY === undefined) return null;
+	const embedded = embeddedAsked(client);
+	if (!embedded && env.SHARDLENS_URL === undefined && env.SHARDLENS_INGEST_KEY === undefined) return null;
 
 	let optedOut: string[];
 	try {
@@ -163,13 +173,23 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 		return null;
 	}
 
+	if (embedded) {
+		if (env.SHARDLENS_URL !== undefined || env.SHARDLENS_INGEST_KEY !== undefined) {
+			client.logger.warn("[SHARDLENS] SHARDLENS_EMBEDDED is on, so SHARDLENS_URL and its keys are not used.");
+		}
+		const own = await startEmbedded(client);
+		if (own === null) return null;
+		client.lensTarget = own;
+	}
+
+	const target = client.lensTarget;
 	const choices = choiceOptions(client.commands.values());
 	const lens = createShardlens(client, {
-		endpoint: env.SHARDLENS_URL,
-		apiKey: env.SHARDLENS_INGEST_KEY,
+		endpoint: target.url,
+		apiKey: target.ingestKey,
 		captureOptionValues: choices,
 		// Kept hashed and without who ran them, so a long outage or a restart costs no figures.
-		spool: { dir: spoolDir(env) },
+		spool: { dir: spoolDir(target) },
 		release: botVersion(),
 		environment: env.NODE_ENV,
 		// One server every two seconds, so member counts stay current rather than being read only at start-up.
@@ -198,8 +218,9 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 	return lens;
 }
 
-export function shardlensLine(env: Env): string {
-	const origin = collectorOrigin(env.SHARDLENS_URL);
+export function shardlensLine(target: LensTarget): string {
+	if (target.embedded !== null) return `Shardlens, inside the bot · dashboard at ${target.embedded.dashboardUrl}`;
+	const origin = collectorOrigin(target.url);
 	return origin === null ? "Shardlens" : `Shardlens, sending to ${origin}`;
 }
 
@@ -260,12 +281,14 @@ const stateOf = (lens: Shardlens): ShardlensState => (lens.stats().ready ? "send
 
 export function shardlensStatus(client: TestifyClient): ShardlensStatus {
 	const lens = client.shardlens;
-	const collector = collectorOrigin(client.env.SHARDLENS_URL);
+	const collector = collectorOrigin(client.lensTarget.url);
+	const embedded = client.lensTarget.embedded !== null;
 
 	if (lens === null) {
 		return {
 			state: "off",
 			collector,
+			embedded,
 			mode: null,
 			queued: 0,
 			waitingForResponse: 0,
@@ -280,6 +303,7 @@ export function shardlensStatus(client: TestifyClient): ShardlensStatus {
 	return {
 		state: stateOf(lens),
 		collector,
+		embedded,
 		mode: stats.mode ?? null,
 		queued: stats.queueDepth + stats.pendingSalt,
 		waitingForResponse: stats.pendingInteractions,

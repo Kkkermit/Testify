@@ -3,7 +3,8 @@ import { Hono } from "hono";
 import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { control } from "@api/routes/control";
-import { type TestifyClient } from "@core/client";
+import { type Env } from "@config/env";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
 import { shutdown } from "@core/shutdown";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
@@ -75,6 +76,7 @@ function clientFor(overrides: Partial<TestifyClient> = {}): TestifyClient {
 		paused: false,
 		pausedAt: null,
 		logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+		lensTarget: settingsTarget((overrides.env ?? {}) as Env),
 		...overrides,
 	} as unknown as TestifyClient;
 }

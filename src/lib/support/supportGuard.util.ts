@@ -35,7 +35,10 @@ const ENV_NAME = new RegExp(`\\b(?:${ENV_KEYS.join("|")})\\b`);
 const RULES: { name: string; pattern: RegExp }[] = [
 	{ name: "discord-token", pattern: /[\w-]{23,28}\.[\w-]{6,7}\.[\w-]{27,}/ },
 	{ name: "credentials-in-url", pattern: /\b[a-z][a-z\d+.-]*:\/\/[^\s/@:]+:[^\s/@]+@/i },
-	{ name: "api-key", pattern: /\b(?:sk-(?:ant-)?[\w-]{16,}|gh[opsu]_\w{20,}|github_pat_\w{20,}|AKIA[\dA-Z]{16})/ },
+	{
+		name: "api-key",
+		pattern: /\b(?:sk-(?:ant-)?[\w-]{16,}|gh[opsu]_\w{20,}|github_pat_\w{20,}|AKIA[\dA-Z]{16}|slk_[a-z]+_[\w-]{20,})/,
+	},
 	{ name: "private-key", pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
 	{ name: "email", pattern: /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/ },
 	{ name: "discord-id", pattern: /\b\d{17,20}\b/ },

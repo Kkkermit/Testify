@@ -83,6 +83,23 @@ describe("the collector's setup", () => {
 		await expectNoViolations(container);
 	});
 
+	/** With the collector inside the bot, every missing step is a setting on the bot, never on a collector elsewhere. */
+	it("names the bot's own setting when the collector runs inside it", async () => {
+		server.use(
+			http.get("/api/analytics/setup", () =>
+				HttpResponse.json({ ...collectorSetup, embedded: true, checks: { ...collectorSetup.checks, auditKey: false } }),
+			),
+		);
+		renderAt("/owner?tab=usage&view=setup");
+
+		const checks = await screen.findByRole("list", { name: "Setup" });
+		for (const step of ["The collector records who ran what", "The collector has its audit key"]) {
+			const item = within(checks).getByText(step).closest("li")!;
+			expect(item).toHaveTextContent(/SHARDLENS_AUDIT_KEY in the bot’s settings/);
+			expect(item).not.toHaveTextContent(/SHARDLENS_MODE/);
+		}
+	});
+
 	it("says the bot has not reported rather than leaving the panel blank", async () => {
 		server.use(
 			http.get("/api/analytics/setup", () => HttpResponse.json({ ...collectorSetup, bot: null, instances: [] })),

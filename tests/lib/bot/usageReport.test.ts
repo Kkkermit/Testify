@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
-import { type TestifyClient } from "@core/client";
+import { type Env } from "@config/env";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
 import {
 	commandReport,
@@ -47,8 +48,10 @@ function guild(id: string, name: string): unknown {
 }
 
 function clientFor(): TestifyClient {
+	const env = { SHARDLENS_URL: "https://stats.example.com/v1/ingest", SHARDLENS_READ_KEY: KEY } as unknown as Env;
 	return {
-		env: { SHARDLENS_URL: "https://stats.example.com/v1/ingest", SHARDLENS_READ_KEY: KEY },
+		env,
+		lensTarget: settingsTarget(env),
 		commands: new Collection<string, unknown>([
 			["ban", { name: "ban", category: "moderation" }],
 			["warn", { name: "warn", category: "moderation" }],

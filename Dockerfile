@@ -73,6 +73,9 @@ COPY --from=build /app/dashboard/dist ./dashboard/dist
 # nowhere else to put it. The bracket makes it optional; the legacy builder refuses a pattern that is the only source.
 COPY package.json testify.config.jso[n] ./
 
+# The collector SHARDLENS_EMBEDDED runs keeps its database here; mount a volume on it to keep the history.
+RUN mkdir -p /app/shardlens-data && chown node:node /app/shardlens-data
+
 # `dist/api` resolves the SPA at ../../dashboard/dist, so the two must keep this layout.
 USER node
 EXPOSE 3000

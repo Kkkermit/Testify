@@ -16,8 +16,7 @@ import {
 } from "@shardlens/client";
 import { type ZodType, z } from "zod";
 import { DAY_MS, LIMITS, MINUTE_MS } from "@config/constants";
-import { type Env } from "@config/env";
-import { type TestifyClient } from "@core/client";
+import { type LensTarget, type TestifyClient } from "@core/client";
 import { type AnalyticsProblem } from "@testify/shared";
 
 /** The owner console's analytics, read from Shardlens with keys that never leave this process. */
@@ -347,7 +346,7 @@ interface ReaderOptions {
 	warn?: (message: string) => void;
 }
 
-type Settings = Pick<Env, "SHARDLENS_URL" | "SHARDLENS_READ_KEY" | "SHARDLENS_ACTIVITY_KEY">;
+type Settings = Partial<Pick<LensTarget, "url" | "readKey" | "activityKey">>;
 
 export class ShardlensReader {
 	readonly #endpoint: string | null;
@@ -358,8 +357,8 @@ export class ShardlensReader {
 	readonly #said = new Set<string>();
 	readonly #cache = new Map<string, { at: number; answer: Promise<unknown> }>();
 
-	constructor(env: Settings, options: ReaderOptions = {}) {
-		this.#endpoint = collectorOrigin(env.SHARDLENS_URL);
+	constructor(target: Settings, options: ReaderOptions = {}) {
+		this.#endpoint = collectorOrigin(target.url);
 		this.#now = options.now ?? Date.now;
 		this.#warn = options.warn ?? (() => undefined);
 
@@ -373,8 +372,8 @@ export class ShardlensReader {
 						...(options.fetch === undefined ? {} : { fetch: options.fetch }),
 					});
 		// An activity key can read everything a read key can, so it stands in for a missing one.
-		this.#counts = clientFor(env.SHARDLENS_READ_KEY ?? env.SHARDLENS_ACTIVITY_KEY);
-		this.#activity = clientFor(env.SHARDLENS_ACTIVITY_KEY);
+		this.#counts = clientFor(target.readKey ?? target.activityKey);
+		this.#activity = clientFor(target.activityKey);
 	}
 
 	/** Null until an address a key may go to is set. */
@@ -480,7 +479,7 @@ const readers = new WeakMap<TestifyClient, ShardlensReader>();
 export function readerFor(client: TestifyClient): ShardlensReader {
 	let reader = readers.get(client);
 	if (reader === undefined) {
-		reader = new ShardlensReader(client.env, {
+		reader = new ShardlensReader(client.lensTarget, {
 			warn: (message) => {
 				client.logger.warn(message);
 			},

@@ -77,7 +77,8 @@ docker compose -f docker-compose.yml -f docker-compose.image.yml pull
 docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
 ```
 
-Data lives in the `mongo-data` volume and survives `docker compose down`. `docker compose down -v` deletes it.
+Data lives in the `mongo-data` volume and survives `docker compose down`. `docker compose down -v` deletes it, and the
+`shardlens-data` volume with it, which holds the analytics when `SHARDLENS_EMBEDDED=true` runs them inside the bot.
 
 ---
 
@@ -180,6 +181,13 @@ beside them to put it in, so it gets there one of two ways:
   restart.
 
 Without either, the bot runs with the built-in settings, exactly as a copy with no file does.
+
+### Analytics on Railway
+
+`SHARDLENS_EMBEDDED=true` runs the Shardlens collector inside the bot service, so a push upgrades both at once. Give
+it a volume at `/app/shardlens-data`, so the history outlives each deploy, and set `RAILWAY_RUN_UID=0`, since Railway
+mounts a volume for root and the image runs as `node`. [The analytics guide](analytics.md#-on-railway) has the rest,
+and a collector of your own beside the bot.
 
 ---
 

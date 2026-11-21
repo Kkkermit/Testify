@@ -235,6 +235,8 @@ export interface ShardlensStatus {
 	state: ShardlensState;
 	/** The collector's origin, where its own dashboard opens, or null with no address set. */
 	collector: string | null;
+	/** The collector runs inside the bot, and its dashboard opens only on the machine the bot runs on. */
+	embedded: boolean;
 	/** Privacy unless the bot and the collector both chose audit, and null until the collector has answered. */
 	mode: "privacy" | "audit" | null;
 	queued: number;
@@ -648,6 +650,8 @@ export const latencyBucketEnd = (index: number): number => 60_000 ** ((index + 1
 /** How the collector is set up and whether the bot is reaching it, from the collector's side. */
 export interface CollectorSetup {
 	collector: string;
+	/** The collector runs inside the bot, so what a missing step needs is set on the bot. */
+	embedded: boolean;
 	app: {
 		name: string;
 		mode: "privacy" | "audit";

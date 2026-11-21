@@ -90,11 +90,12 @@ export function ShardlensCard(): React.JSX.Element {
 	} else {
 		const current = status.data;
 		const look = STATES[current.state];
+		const bodyKey = current.embedded && current.state === "sending" ? "owner.shardlensEmbeddedBody" : look.body;
 		const dashboard = current.collector === null ? null : collectorPage(current.collector);
 		body = (
 			<>
 				<div className="flex flex-wrap items-start justify-between gap-3">
-					<p className="text-muted-foreground text-sm">{t(look.body, { collector: current.collector ?? "" })}</p>
+					<p className="text-muted-foreground text-sm">{t(bodyKey, { collector: current.collector ?? "" })}</p>
 					<Badge tone={look.tone}>{t(look.label)}</Badge>
 				</div>
 
@@ -128,6 +129,10 @@ export function ShardlensCard(): React.JSX.Element {
 						{send.data !== undefined && <SendNote flushed={send.data} />}
 					</span>
 				</div>
+
+				{dashboard !== null && current.embedded && (
+					<p className="text-muted-foreground text-xs">{t("owner.shardlensOpenLocal")}</p>
+				)}
 
 				<Refusal error={send.error} fallback="common.didNotWork" />
 			</>

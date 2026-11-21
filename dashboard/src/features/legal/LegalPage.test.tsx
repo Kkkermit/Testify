@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 20 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 21 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -115,16 +115,22 @@ describe("the legal pages", () => {
 			/the names of the options you filled in and, for one with a fixed list, the choice you picked, but never what you typed/,
 		);
 		// The spool holds what the SDK has not sent, which it writes hashed and without an audit identity.
-		expect(lens).toMatch(/spool: \{ dir: spoolDir\(env\) \}/);
+		expect(lens).toMatch(/spool: \{ dir: spoolDir\(target\) \}/);
 		expect(text).toMatch(/kept in a folder on the bot’s own machine, hashed and without who ran it, until it is sent/);
 		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
 		// Who ran what reaches the console only through the activity key, on owner-only routes the collector logs.
 		expect(botSource("src/lib/bot/shardlensReader.util.ts")).toMatch(
-			/this\.#activity = clientFor\(env\.SHARDLENS_ACTIVITY_KEY\)/,
+			/this\.#activity = clientFor\(target\.activityKey\)/,
 		);
 		expect(botSource("src/api/routes/analytics.ts")).toMatch(/analytics\.use\("\*", requireOwner\)/);
 		expect(text).toMatch(/by the bot’s owners in its owner console if the operator has given the bot an activity key/);
 		expect(text).not.toMatch(/only the people who can sign in to it can see who ran what/);
+		// The collector inside the bot keeps its database beside the bot, and names people only with the audit key.
+		const embedded = botSource("src/lib/bot/embeddedCollector.util.ts");
+		expect(embedded).toMatch(/join\(repoRoot\(\), "shardlens-data", env\.NODE_ENV\)/);
+		expect(embedded).toMatch(/auditKey === undefined \? \{\} : \{ mode: "audit" as const, auditKey \}/);
+		expect(text).toMatch(/which can run inside the bot so that nothing leaves its machine/);
+		expect(text).toMatch(/on the operator’s own collector, which can run inside the bot on its own machine/);
 		// A prefix run is the SDK's own message command, sent with its actor in audit mode like any other.
 		expect(lens).toMatch(/trackMessageCommand\(message, \{\s*command: run\.command,/);
 		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);

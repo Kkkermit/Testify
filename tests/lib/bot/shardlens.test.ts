@@ -1,10 +1,11 @@
 import { createShardlens } from "@shardlens/discordjs";
 import { ButtonInteraction, ChannelType, ComponentType, InteractionType, type Message } from "discord.js";
 import { type Env } from "@config/env";
-import { TestifyClient } from "@core/client";
+import { type LensTarget, TestifyClient } from "@core/client";
 import { type Command } from "@core/command";
 import { runButton, runCommand } from "@core/errors";
 import { type Logger } from "@core/logger";
+import { startEmbedded } from "@lib/bot/embeddedCollector.util";
 import {
 	measured,
 	recordAction,
@@ -37,10 +38,22 @@ jest.mock("@database/repositories/analyticsOptOutRepository", () => ({
 	readOptOuts: jest.fn(async () => mockOptedOut),
 }));
 
+let mockEmbedded: LensTarget | null = null;
+jest.mock("@lib/bot/embeddedCollector.util", () => ({
+	startEmbedded: jest.fn(() => Promise.resolve(mockEmbedded)),
+}));
+
 const USER = "111111111111111111";
 const GUILD = "222222222222222222";
 const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
 const CONFIGURED = { SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: KEY };
+const TARGET: LensTarget = {
+	url: "https://stats.example.com",
+	ingestKey: KEY,
+	readKey: undefined,
+	activityKey: undefined,
+	embedded: null,
+};
 const TYPED = "t?bal view secret words";
 
 interface Said {
@@ -102,6 +115,7 @@ const running: TestifyClient[] = [];
 afterEach(async () => {
 	mockPrint = true;
 	mockOptedOut = Promise.resolve([]);
+	mockEmbedded = null;
 	await Promise.all(running.splice(0).map(async (client) => client.shardlens?.shutdown()));
 });
 
@@ -124,7 +138,7 @@ describe("startShardlens", () => {
 
 		await startShardlens(client);
 		expect(shardlensStatus(client)).toMatchObject({ collector: null });
-		expect(shardlensLine(client.env)).toBe("Shardlens");
+		expect(shardlensLine(client.lensTarget)).toBe("Shardlens");
 	});
 
 	it("attaches once configured, and tags what the SDK says", async () => {
@@ -148,6 +162,63 @@ describe("startShardlens", () => {
 	});
 });
 
+describe("the collector inside the bot", () => {
+	const OWN: LensTarget = {
+		url: "http://127.0.0.1:8080",
+		ingestKey: KEY,
+		readKey: `slk_read_${"r".repeat(43)}`,
+		activityKey: `slk_activity_${"a".repeat(43)}`,
+		embedded: { dashboardUrl: "http://localhost:8080", close: () => Promise.resolve() },
+	};
+	const EMBEDDED = { SHARDLENS_EMBEDDED: "true", ...CONFIGURED };
+
+	/** Settings left over for a collector elsewhere must not be sent to or read while the bot runs its own. */
+	it("sends to and reads the collector it started, and says the other settings are not used", async () => {
+		mockEmbedded = OWN;
+		const { client, said } = clientWith(EMBEDDED);
+		running.push(client);
+
+		await startShardlens(client);
+		expect(jest.mocked(createShardlens).mock.calls.at(-1)?.[1]).toMatchObject({ endpoint: OWN.url, apiKey: KEY });
+		expect(client.lensTarget).toBe(OWN);
+		expect(shardlensStatus(client)).toMatchObject({ collector: "http://127.0.0.1:8080", embedded: true });
+		expect(shardlensLine(client.lensTarget)).toBe("Shardlens, inside the bot · dashboard at http://localhost:8080");
+		expect(said.warn).toEqual(["[SHARDLENS] SHARDLENS_EMBEDDED is on, so SHARDLENS_URL and its keys are not used."]);
+	});
+
+	/** A collector that cannot start costs the analytics, never the bot, and never falls back to one elsewhere. */
+	it("stays off when it cannot start", async () => {
+		const { client } = clientWith(EMBEDDED);
+
+		expect(await startShardlens(client)).toBeNull();
+		expect(client.lensTarget).toMatchObject({ url: undefined, ingestKey: undefined, readKey: undefined });
+		expect(client.listenerCount("interactionCreate")).toBe(0);
+		await client.destroy();
+	});
+
+	it("starts nothing while the opt-outs cannot be read", async () => {
+		mockOptedOut = Promise.reject(new Error("database down"));
+		const { client } = clientWith(EMBEDDED);
+
+		expect(await startShardlens(client)).toBeNull();
+		expect(startEmbedded).not.toHaveBeenCalled();
+		await client.destroy();
+	});
+
+	it("reads anything but true as off, and says so for anything but false", async () => {
+		for (const [value, warned] of [
+			["false", false],
+			["yes", true],
+		] as const) {
+			const { client, said } = clientWith({ SHARDLENS_EMBEDDED: value });
+			expect(await startShardlens(client)).toBeNull();
+			expect(said.warn.length > 0).toBe(warned);
+			await client.destroy();
+		}
+		expect(startEmbedded).not.toHaveBeenCalled();
+	});
+});
+
 describe("what the SDK is started with", () => {
 	/** Audit mode names who ran each command once the collector agrees; only a value the bot itself wrote may leave. */
 	it("asks for audit mode, values only of fixed choices, and a spool of its own", async () => {
@@ -162,7 +233,7 @@ describe("what the SDK is started with", () => {
 		expect(options?.mode).toBe("audit");
 		expect(options?.auditIncludeProfile).toBe(true);
 		expect(options?.captureOptionValues).toEqual(["bet", "table"]);
-		expect(options?.spool).toEqual({ dir: spoolDir(CONFIGURED) });
+		expect(options?.spool).toEqual({ dir: spoolDir(TARGET) });
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
 	});
 
@@ -282,12 +353,12 @@ describe("choiceOptions", () => {
 describe("spoolDir", () => {
 	/** Two installs on one machine sending to different collectors must never replay each other's events. */
 	it("gives each collector and key its own folder, named without the key", () => {
-		const other = spoolDir({ ...CONFIGURED, SHARDLENS_URL: "https://elsewhere.example.com" });
+		const other = spoolDir({ ...TARGET, url: "https://elsewhere.example.com" });
 
-		expect(spoolDir(CONFIGURED)).toBe(spoolDir({ ...CONFIGURED }));
-		expect(other).not.toBe(spoolDir(CONFIGURED));
-		expect(spoolDir(CONFIGURED)).not.toContain(KEY);
-		expect(spoolDir(CONFIGURED)).not.toContain(KEY.slice(11, 30));
+		expect(spoolDir(TARGET)).toBe(spoolDir({ ...TARGET }));
+		expect(other).not.toBe(spoolDir(TARGET));
+		expect(spoolDir(TARGET)).not.toContain(KEY);
+		expect(spoolDir(TARGET)).not.toContain(KEY.slice(11, 30));
 	});
 });
 
@@ -483,8 +554,7 @@ describe("shardlensStatus", () => {
 describe("shardlensLine", () => {
 	/** The read key goes where this address points, so one it may not go to is named as nothing at all. */
 	it("names where it sends and never the key, nor an address the key may not go to", () => {
-		const line = (url: string): string =>
-			shardlensLine({ SHARDLENS_URL: url, SHARDLENS_INGEST_KEY: KEY } as unknown as Env);
+		const line = (url: string): string => shardlensLine({ ...TARGET, url });
 
 		expect(line("https://stats.example.com/x")).toBe("Shardlens, sending to https://stats.example.com");
 		expect(line("http://localhost:8080")).toBe("Shardlens, sending to http://localhost:8080");

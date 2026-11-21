@@ -8,6 +8,7 @@ const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
 const sending: ShardlensStatus = {
 	state: "sending",
 	collector: "https://stats.example.com",
+	embedded: false,
 	mode: "privacy",
 	queued: 3,
 	waitingForResponse: 1,
@@ -41,8 +42,16 @@ describe("/shardlens", () => {
 	it("shows only how to switch it on while it is off", () => {
 		const text = textOf({ ...sending, state: "off", collector: null, lastProblem: null });
 
+		expect(text).toContain("SHARDLENS_EMBEDDED=true");
 		expect(text).toContain("SHARDLENS_URL");
 		expect(text).not.toContain("Failed sends");
+	});
+
+	/** The collector inside the bot listens on its own machine, so its address opens nowhere else. */
+	it("says the dashboard of the collector inside the bot opens only where the bot runs", () => {
+		const text = textOf({ ...sending, collector: "http://127.0.0.1:8080", embedded: true });
+
+		expect(text).toContain("http://127.0.0.1:8080, on the machine the bot runs on");
 	});
 
 	/** The status comes from the client, which holds the key, so the reply is checked for it end to end. */
