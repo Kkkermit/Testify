@@ -3,7 +3,7 @@ import { z } from "zod";
 import { type TestifyClient } from "@core/client";
 import { ownHandlerName } from "@lib/bot/shardlens.util";
 import { rangeOf, readerFor } from "@lib/bot/shardlensReader.util";
-import { RUN_OUTCOMES, type RunRow, type RunsBody, type RunsPage, type TopRunners } from "@testify/shared";
+import { RUN_LIMITS, RUN_OUTCOMES, type RunRow, type RunsBody, type RunsPage, type TopRunners } from "@testify/shared";
 
 /** Who ran what, read from a collector in audit mode with the activity key, for the owners alone. */
 
@@ -83,6 +83,7 @@ export async function readRuns(client: TestifyClient, body: RunsBody, now = Date
 	const page = await reader.activityLog(
 		{
 			from: rangeOf(body.days, now).from,
+			limit: RUN_LIMITS.perPage,
 			...(body.before === undefined ? {} : { before: body.before }),
 			...(body.guildId === undefined ? {} : { guild: body.guildId }),
 			...(body.command === undefined ? {} : { command: body.command }),

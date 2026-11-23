@@ -7,19 +7,22 @@ import { pageWindow } from "@/lib/paging";
 const STEP = "min-w-11 px-3";
 const NUMBER = "min-w-11 px-0 tabular-nums";
 
+/** With `more`, a list read a page at a time has pages past `pages` that nobody has reached yet, so it has no end to jump to. */
 export function Pager({
 	page,
 	pages,
 	onChange,
 	label,
+	more = false,
 }: {
 	page: number;
 	pages: number;
 	onChange: (page: number) => void;
 	label?: string;
+	more?: boolean;
 }): React.JSX.Element | null {
 	const { t } = useTranslation();
-	if (pages <= 1) return null;
+	if (pages <= 1 && !more) return null;
 
 	const atStart = page <= 1;
 	const atEnd = page >= pages;
@@ -88,12 +91,12 @@ export function Pager({
 
 				<div className="flex gap-2">
 					{step(page + 1, t("common.next"), <ChevronRight size={16} aria-hidden="true" />, atEnd, true)}
-					{step(pages, t("common.last"), <ChevronsRight size={16} aria-hidden="true" />, atEnd, true)}
+					{step(pages, t("common.last"), <ChevronsRight size={16} aria-hidden="true" />, atEnd || more, true)}
 				</div>
 			</div>
 
 			<p className="text-muted-foreground text-center text-sm tabular-nums" aria-live="polite">
-				{t("common.pageOf", { page, pages })}
+				{t(more ? "common.pageOfMore" : "common.pageOf", { page, pages })}
 			</p>
 		</nav>
 	);

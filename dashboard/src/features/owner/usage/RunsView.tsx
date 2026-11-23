@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FIELD, LABEL, Warning } from "@/components/form";
-import { Avatar, Badge, Button, Card, DividedList, SegmentedControl } from "@/components/primitives";
+import { Avatar, Badge, Button, Card, DividedList, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useCommands } from "@/features/commands/useCommands";
 import { type ProblemWords, ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
@@ -13,6 +13,7 @@ import { formatMs } from "@/features/owner/owner.utils";
 import { CommandSelect } from "@/features/owner/usage/CommandSelect";
 import {
 	choiceOf,
+	FIRST_RUNS_PAGE,
 	idFromLookup,
 	kindLabel,
 	narrowed,
@@ -21,10 +22,14 @@ import {
 	OUTCOME_LABELS,
 	OUTCOME_TONES,
 	runWhat,
+	type RunTrail,
+	trailPages,
+	turnTo,
 } from "@/features/owner/usage/runs.utils";
 import { useRuns, useTopRunners } from "@/features/owner/useOwner";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
+import { currentData } from "@/lib/queries";
 
 /** Read with the activity key, so each reason names that key rather than the read key. */
 const WHY: ProblemWords = {
@@ -43,13 +48,16 @@ export function RunsView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [filters, setFilters] = useState<RunsFilters>({});
 	const [serverName, setServerName] = useState<string | null>(null);
-	const [pages, setPages] = useState<string[]>([]);
-	const runs = useRuns(days, filters, pages.at(-1) ?? null);
+	// A cursor belongs to one window and one set of filters, so changing either starts again from the first page.
+	const trailKey = JSON.stringify([days, filters]);
+	const [kept, setKept] = useState<{ key: string; trail: RunTrail }>({ key: trailKey, trail: FIRST_RUNS_PAGE });
+	const trail = kept.key === trailKey ? kept.trail : FIRST_RUNS_PAGE;
+	const runs = useRuns(days, filters, trail.cursors[trail.at] ?? null);
+	const answer = currentData(runs);
 
 	const narrow: Narrow = (change, name) => {
 		setFilters((current) => narrowed(current, change));
 		if (name !== undefined) setServerName(name);
-		setPages([]);
 	};
 
 	return (
@@ -60,31 +68,21 @@ export function RunsView({ days }: { days: number }): React.JSX.Element {
 			<div className="grid items-start gap-4 lg:grid-cols-3">
 				<div className="flex min-w-0 flex-col gap-3 lg:col-span-2">
 					<AnalyticsState query={runs} why={WHY}>
-						{(page) => (
+						{(latest) => (
 							<>
-								<RunList page={page} onNarrow={narrow} />
-								<div className="flex justify-between gap-3">
-									<Button
-										variant="secondary"
-										disabled={pages.length === 0}
-										onClick={() => {
-											setPages((current) => current.slice(0, -1));
-										}}
-									>
-										{t("owner.runs.newer")}
-									</Button>
-									<Button
-										variant="secondary"
-										disabled={page.next === null}
-										onClick={() => {
-											const next = page.next;
-											if (next !== null) setPages((current) => [...current, next]);
-										}}
-									>
-										{t("owner.runs.older")}
-									</Button>
-								</div>
-								<ShardlensLinks collector={page.collector} />
+								{answer === undefined ? (
+									<Skeleton className="h-96 w-full" />
+								) : (
+									<RunList page={answer} older={trail.at > 0} onNarrow={narrow} />
+								)}
+								<Pager
+									{...trailPages(trail, answer)}
+									label={t("owner.runs.pages")}
+									onChange={(page) => {
+										setKept({ key: trailKey, trail: turnTo(trail, page, answer) });
+									}}
+								/>
+								<ShardlensLinks collector={latest.collector} />
 							</>
 						)}
 					</AnalyticsState>
@@ -216,13 +214,13 @@ function Chip({ label, onClear }: { label: string; onClear: () => void }): React
 	);
 }
 
-function RunList({ page, onNarrow }: { page: RunsPage; onNarrow: Narrow }): React.JSX.Element {
+function RunList({ page, older, onNarrow }: { page: RunsPage; older: boolean; onNarrow: Narrow }): React.JSX.Element {
 	const { t } = useTranslation();
 
 	if (page.rows.length === 0) {
 		return (
 			<Card>
-				<p className="text-muted-foreground text-sm">{t("owner.runs.empty")}</p>
+				<p className="text-muted-foreground text-sm">{t(older ? "owner.runs.noOlder" : "owner.runs.empty")}</p>
 			</Card>
 		);
 	}

@@ -463,7 +463,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                       |
 | `Skeleton`                                                   | What `isPending` returns                                                   |
 | `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike         |
-| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page       |
+| `Pager`                                                      | Numbered pages with First and Last; `more` for a list with no total yet    |
 | `Summary`                                                    | The one sentence under a page's header saying what the feature does now    |
 | `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                            |
 | `ChartReadout`                                               | Wraps a chart's cells; each says what it shows in `data-readout`           |

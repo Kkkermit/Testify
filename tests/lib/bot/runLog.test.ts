@@ -3,7 +3,7 @@ import { type Env } from "@config/env";
 import { settingsTarget, type TestifyClient } from "@core/client";
 import { readRuns, readTopRunners } from "@lib/bot/runLog.util";
 import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
-import { runsBody } from "@testify/shared";
+import { RUN_LIMITS, runsBody } from "@testify/shared";
 
 const ACTIVITY_KEY = `slk_activity_${"a".repeat(43)}`;
 const GUILD = "900000000000000001";
@@ -86,6 +86,7 @@ describe("readRuns", () => {
 			command: "warn",
 			user: USER,
 			outcome: "failed",
+			limit: String(RUN_LIMITS.perPage),
 		});
 		expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
 			method: "GET",

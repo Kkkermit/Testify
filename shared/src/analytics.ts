@@ -708,6 +708,9 @@ export type RunOutcome = (typeof RUN_OUTCOMES)[number];
 /** `failed` is every outcome but `ok`. */
 export const RUN_FILTERS = ["failed", ...RUN_OUTCOMES] as const;
 
+/** Each page of the log is one read the collector records in its access log. */
+export const RUN_LIMITS = { perPage: 25 } as const;
+
 /** A page of the activity log is a time, then `~` and the last row's ID, exactly as the collector hands it back. */
 const RUN_CURSOR =
 	/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z~[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

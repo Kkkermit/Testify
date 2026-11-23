@@ -3,7 +3,14 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
-import { idFromLookup, narrowed, runWhat } from "@/features/owner/usage/runs.utils";
+import {
+	FIRST_RUNS_PAGE,
+	idFromLookup,
+	narrowed,
+	runWhat,
+	trailPages,
+	turnTo,
+} from "@/features/owner/usage/runs.utils";
 import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
 import { runsPage } from "@/test/fixtures/usageSections";
@@ -40,6 +47,23 @@ describe("the run log's rules", () => {
 	it("drops a filter that is cleared rather than sending it empty", () => {
 		expect(narrowed({ userId: PERSON, command: "warn" }, { userId: null })).toEqual({ command: "warn" });
 		expect(narrowed({}, { outcome: "failed", guildId: "" })).toEqual({ outcome: "failed" });
+	});
+
+	/** The collector gives a cursor and never a total, so the end is known only once a page answers with none after it. */
+	it("numbers the pages it has reached, and claims an end only once one has been read", () => {
+		const older = { ...runsPage, next: "older" };
+		const last = { ...runsPage, next: null };
+
+		expect(trailPages(FIRST_RUNS_PAGE, undefined)).toEqual({ page: 1, pages: 1, more: true });
+		expect(trailPages(FIRST_RUNS_PAGE, older)).toEqual({ page: 1, pages: 2, more: true });
+		const second = turnTo(FIRST_RUNS_PAGE, 2, older);
+		expect(second).toEqual({ cursors: [null, "older"], at: 1, ended: false });
+		expect(trailPages(second, last)).toEqual({ page: 2, pages: 2, more: false });
+
+		const backToFirst = turnTo(second, 1, last);
+		expect(backToFirst).toEqual({ cursors: [null, "older"], at: 0, ended: true });
+		expect(trailPages(backToFirst, older)).toEqual({ page: 1, pages: 2, more: false });
+		expect(turnTo(backToFirst, 9, older).at).toBe(1);
 	});
 
 	it("says what ran as somebody would type it", () => {
@@ -93,17 +117,59 @@ describe("Who ran what", () => {
 		expect(sent).toHaveLength(before);
 	});
 
-	it("narrows to somebody from the busiest list, and pages back with the collector's own cursor", async () => {
-		const sent = watchRuns();
-		renderRuns();
-
-		await userEvent.click(
-			await screen.findByRole("button", { name: t("owner.runs.onlyRunsBy", { name: "maple.fox" }) }),
+	/** The collector can follow a full page with an empty one, which is the end rather than a log with nothing in it. */
+	it("pages with the collector's own cursor, numbering the pages and naming the end once it is reached", async () => {
+		const sent: (string | undefined)[] = [];
+		server.use(
+			http.post("/api/analytics/runs", async ({ request }) => {
+				const { before } = (await request.json()) as RunsBody;
+				sent.push(before);
+				return HttpResponse.json(before === undefined ? runsPage : { ...runsPage, rows: [], next: null });
+			}),
 		);
-		expect(sent.at(-1)?.body.userId).toBe("100000000000000002");
+		renderRuns();
+		const pages = await screen.findByRole("navigation", { name: t("owner.runs.pages") });
+		expect(within(pages).getByText(t("common.pageOfMore", { page: 1, pages: 2 }))).toBeInTheDocument();
+		expect(within(pages).getByRole("button", { name: t("common.last") })).toBeDisabled();
 
-		await userEvent.click(await screen.findByRole("button", { name: t("owner.runs.older") }));
-		expect(sent.at(-1)?.body.before).toBe(runsPage.next);
+		await userEvent.click(within(pages).getByRole("button", { name: t("common.next") }));
+		expect(await within(pages).findByText(t("common.pageOf", { page: 2, pages: 2 }))).toBeInTheDocument();
+		expect(sent.at(-1)).toBe(runsPage.next);
+		expect(screen.getByText(t("owner.runs.noOlder"))).toBeInTheDocument();
+		expect(within(pages).getByRole("button", { name: t("common.next") })).toBeDisabled();
+
+		await userEvent.click(within(pages).getByRole("button", { name: t("common.pageNumber", { page: 1 }) }));
+		expect(await within(pages).findByText(t("common.pageOf", { page: 1, pages: 2 }))).toBeInTheDocument();
+		expect(within(pages).getByRole("button", { name: t("common.last") })).toBeEnabled();
+	});
+
+	/** A page still on its way must not show the page before it as though it were the answer. */
+	it("shows a page loading in place of the last page's runs, and narrowing starts again from the first", async () => {
+		let release: () => void = () => undefined;
+		const held = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const sent = watchRuns();
+		server.use(
+			http.post("/api/analytics/runs", async ({ request }) => {
+				const body = (await request.json()) as RunsBody;
+				sent.push({ url: request.url, body });
+				if (body.before !== undefined) await held;
+				return HttpResponse.json(runsPage);
+			}),
+		);
+		renderRuns();
+		const pages = await screen.findByRole("navigation", { name: t("owner.runs.pages") });
+
+		await userEvent.click(within(pages).getByRole("button", { name: t("common.next") }));
+		expect(screen.queryByRole("list", { name: t("owner.runs.listLabel") })).toBeNull();
+		release();
+		expect(await screen.findByRole("list", { name: t("owner.runs.listLabel") })).toBeInTheDocument();
+
+		await userEvent.click(screen.getByRole("button", { name: t("owner.runs.onlyRunsBy", { name: "maple.fox" }) }));
+		expect(await within(pages).findByText(t("common.pageOfMore", { page: 1, pages: 2 }))).toBeInTheDocument();
+		expect(sent.at(-1)?.body).toMatchObject({ userId: "100000000000000002" });
+		expect(sent.at(-1)?.body.before).toBeUndefined();
 	});
 
 	/** The log is read with its own key, so the reason it is missing names that key and not the read key. */

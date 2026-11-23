@@ -3773,7 +3773,10 @@ about it are load-bearing:
   `/v1/audit/top-users` to a Discord session of the application's owner or team or to an activity key, refuses a read
   key with `activity_key_required`, and logs every read, a lookup of one person as `lookup_user` — read out of its
   `requireActivityReader` and `logRead`, not assumed. Without the key the section says how to add one; with it the
-  section reads the log a page of 50 at a time, newest first, and pages with the collector's own `nextBefore`. The
+  section reads the log `RUN_LIMITS.perPage` (25) at a time, newest first, with the collector's own `nextBefore`, under
+  the same numbered `Pager` as Cases and Changes. The collector gives no total, so `Pager`'s `more` reads "of 3 or
+  more" and leaves Last off until a page answers with no cursor after it, and `RunTrail` keeps every cursor met so a
+  page number goes back without asking again; changing the window or a filter starts again from page one. The
   collector's own Activity page and the server's page are still linked with `collectorPage`, which only ever builds a
   link from an `http`/`https` origin.
 
