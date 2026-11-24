@@ -1,29 +1,15 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { Collection, type PermissionResolvable, PermissionsBitField } from "discord.js";
+import { type PermissionResolvable, PermissionsBitField } from "discord.js";
 import { format, resolveConfig } from "prettier";
+import { loadRegistry } from "./registry";
 import { ALL_CATEGORIES, categoryEmoji, categoryLabel, HIDDEN_CATEGORIES } from "@config/categories";
-import { type TestifyClient } from "@core/client";
 import { type Command, subcommandsOf } from "@core/command";
-import { type ContextMenu } from "@core/contextMenu";
-import { loadEverything } from "@core/loader";
-import { createLogger } from "@core/logger";
 import { humanisePermission } from "@lib/format/format.util";
 
 /** Writes docs/commands.md from the commands on disk, so the list cannot go stale. */
 
-const client = {
-	commands: new Collection<string, Command>(),
-	aliases: new Collection<string, string>(),
-	buttons: new Collection(),
-	contextMenus: new Collection<string, ContextMenu>(),
-	messageHandlers: [],
-	logger: createLogger("fatal", false),
-	on: () => undefined,
-	once: () => undefined,
-} as unknown as TestifyClient;
-
-loadEverything(client);
+const client = loadRegistry();
 
 const commands = [...client.commands.values()];
 const shown = ALL_CATEGORIES.filter((category) => !HIDDEN_CATEGORIES.includes(category));

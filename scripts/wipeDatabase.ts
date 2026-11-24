@@ -99,17 +99,15 @@ export function modelOwners(modules: Record<string, Record<string, unknown>>): M
 	return owners;
 }
 
-export async function loadModelOwners(
-	dir = join(repoRoot(), "src", "database", "models"),
-): Promise<Map<string, ModelOwner>> {
+/** Required by path, because `import()` of a bare Windows path such as `C:\…` is refused as an unknown URL scheme. */
+export function loadModelOwners(dir = join(repoRoot(), "src", "database", "models")): Map<string, ModelOwner> {
 	const files = readdirSync(dir)
 		.filter((file) => file.endsWith(".schema.ts"))
 		.sort();
-	const modules = await Promise.all(
-		files.map(async (file) => [file, (await import(join(dir, file))) as Record<string, unknown>] as const),
-	);
 
-	return modelOwners(Object.fromEntries(modules));
+	return modelOwners(
+		Object.fromEntries(files.map((file) => [file, require(join(dir, file)) as Record<string, unknown>])),
+	);
 }
 
 function documents(count: number): string {
@@ -178,7 +176,7 @@ async function wipe(target: Target, file: EnvFile, uri: string): Promise<void> {
 		return;
 	}
 
-	const chosen = await chooseCollections(collections, await loadModelOwners());
+	const chosen = await chooseCollections(collections, loadModelOwners());
 	if (chosen.length === 0) return cancelled();
 
 	const scope =

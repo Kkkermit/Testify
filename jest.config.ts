@@ -47,7 +47,6 @@ const config: Config = {
 		"shared/src/**/*.ts",
 		"!src/**/index.ts",
 		"!shared/src/index.ts",
-		"!src/lib/canvas.util.ts",
 	],
 	coverageThreshold: { global: { statements: 75, lines: 75, functions: 75, branches: 75 } },
 	clearMocks: true,
