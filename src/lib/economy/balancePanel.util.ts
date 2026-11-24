@@ -5,7 +5,7 @@ import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, sectionWithThumbnail, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { BALANCE_PANEL_ID } from "@lib/economy/economy.constants";
-import { formatNumber } from "@lib/format/format.util";
+import { escapeMarkdown, formatNumber } from "@lib/format/format.util";
 
 /** The wallet, and the things you would do next. */
 
@@ -26,7 +26,7 @@ export function balancePanel(view: BalanceView, ownerId: string): ContainerMessa
 	const total = view.wallet + view.bank;
 
 	const body =
-		`## ${view.username}'s balance\n` +
+		`## 💰 ${escapeMarkdown(view.username)}'s balance\n` +
 		`${theme.emoji.wallet} **Wallet** ${formatNumber(view.wallet)}\n` +
 		`${theme.emoji.bank} **Bank** ${formatNumber(view.bank)}\n` +
 		`${theme.emoji.coin} **Total** ${formatNumber(total)}`;

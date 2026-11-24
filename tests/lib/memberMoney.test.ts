@@ -9,7 +9,7 @@ describe("moneyProblem", () => {
 
 	it("refuses an amount that is nothing, a fraction or not a number", () => {
 		const accepted = [0, 1.5, Number.NaN].filter(
-			(delta) => !/enter an amount/i.test(problemText(moneyProblem(delta, "wallet", 500))),
+			(delta) => !/enter an amount/i.test(problemText(moneyProblem(delta, "wallet", 500)) ?? ""),
 		);
 
 		expect(accepted).toEqual([]);

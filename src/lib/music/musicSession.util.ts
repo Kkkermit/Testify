@@ -466,7 +466,7 @@ export class MusicSession {
 	setVolume(volume: number): number {
 		this.#volume = clampVolume(volume);
 
-		// A track already opening reads the level once it is ready, and its stream is the one that knows where it was.
+		// A track still opening picks the new level up when it is ready, at the place it was opening from.
 		if (!this.#reopening && currentTrack(this.queue) !== null && (this.playing || this.paused)) {
 			this.#playSoon(this.queue.index, { seekMs: this.playedMs, resumed: true });
 		}
