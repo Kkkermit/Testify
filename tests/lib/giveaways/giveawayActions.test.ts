@@ -6,6 +6,7 @@ import { Giveaway } from "@database/models/giveaway.schema";
 import {
 	deleteGiveaway,
 	endGiveaway,
+	findGiveaway,
 	listGiveaways,
 	rerollGiveaway,
 	startGiveaway,
@@ -116,6 +117,20 @@ describeWithMongo("listGiveaways", () => {
 
 		expect(rows.map((row) => row.messageId)).toEqual(["500000000000000002", "500000000000000001"]);
 		expect(rows[0]).toMatchObject({ startAt: new Date(3_000).toISOString(), ended: false, hostedBy: null });
+	});
+
+	/** The list stops at fifty, so a command reaching an older giveaway has to find it by its message. */
+	it("finds one giveaway of this server's by its message, and none of another's", async () => {
+		await Giveaway.create([
+			record(MESSAGE, GUILD, 1_000),
+			...Array.from({ length: 50 }, (_, index) =>
+				record(`6000000000000000${String(index).padStart(2, "0")}`, GUILD, 5_000),
+			),
+			record("500000000000000009", OTHER, 2_000),
+		]);
+
+		expect((await findGiveaway(client, GUILD, MESSAGE))?.prize).toBe(`Prize ${MESSAGE}`);
+		expect(await findGiveaway(client, GUILD, "500000000000000009")).toBeNull();
 	});
 
 	it("names the winners it can, and leaves the rest as ids", async () => {

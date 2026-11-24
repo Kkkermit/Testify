@@ -73,6 +73,17 @@ export async function listGiveaways(client: TestifyClient, guildId: string): Pro
 	return rows.map((record) => toRow(record, client));
 }
 
+/** One giveaway of this server's by its message, however long ago it ran. */
+export async function findGiveaway(
+	client: TestifyClient,
+	guildId: string,
+	messageId: string,
+): Promise<GiveawayRow | null> {
+	const record = await Giveaway.findOne({ guildId, messageId }).lean<GiveawayRecord>().exec();
+
+	return record === null ? null : toRow(record, client);
+}
+
 function toRow(record: GiveawayRecord, client: TestifyClient): GiveawayRow {
 	return {
 		messageId: record.messageId,

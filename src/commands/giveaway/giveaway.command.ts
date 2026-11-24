@@ -5,7 +5,14 @@ import { UserFacingError } from "@core/errors";
 import { readerLanguage } from "@core/language";
 import { reply, requirePostable, successEmbed } from "@lib/discord";
 import { discordTime, escapeMarkdown, formatDurationLong, parseDuration, truncate } from "@lib/format";
-import { deleteGiveaway, endGiveaway, listGiveaways, rerollGiveaway, startGiveaway } from "@lib/giveaways";
+import {
+	deleteGiveaway,
+	endGiveaway,
+	findGiveaway,
+	listGiveaways,
+	rerollGiveaway,
+	startGiveaway,
+} from "@lib/giveaways";
 import { type GiveawayRow } from "@testify/shared";
 
 const MESSAGE_ID: CommandOption = {
@@ -19,8 +26,8 @@ const MESSAGE_ID: CommandOption = {
 /** `discord-giveaways` finds a message wherever the bot is, so this keeps a manager inside their own server. */
 async function giveawayHere(interaction: CommandInput, client: TestifyClient): Promise<GiveawayRow> {
 	const messageId = interaction.options.getString("message-id", true).trim();
-	const found = (await listGiveaways(client, inGuild(interaction).id)).find((row) => row.messageId === messageId);
-	if (found === undefined) throw new UserFacingError("There is no giveaway with that message ID in this server.");
+	const found = await findGiveaway(client, inGuild(interaction).id, messageId);
+	if (found === null) throw new UserFacingError("There is no giveaway with that message ID in this server.");
 
 	return found;
 }
