@@ -10,8 +10,6 @@ import { customId } from "@core/button";
 import { renderBoardImage } from "@lib/canvas/boardCard.util";
 import { type BoardRow } from "@lib/canvas/canvas.types";
 import { button, row } from "@lib/discord/components.util";
-import { LEADERBOARD_ID } from "@lib/economy/economy.constants";
-import { type BoardKind } from "@lib/economy/economy.types";
 import {
 	type BoardEntry,
 	boardEntries,
@@ -19,7 +17,9 @@ import {
 	decorateRows,
 	SERVER_TOTALS,
 	standingOnBoard,
-} from "@lib/economy/memberActions.util";
+} from "@lib/economy/boards.util";
+import { LEADERBOARD_ID } from "@lib/economy/economy.constants";
+import { type BoardKind } from "@lib/economy/economy.types";
 import { formatNumber, ordinal } from "@lib/format/format.util";
 import { BOARD_SCOPES, type BoardScope, MONEY_SORT_LABELS, MONEY_SORTS, type MoneySort } from "@testify/shared";
 

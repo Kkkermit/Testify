@@ -9,7 +9,7 @@ import {
 	getLeaderboard,
 } from "@database/repositories/economyRepository";
 import { countRanked, getLevelLeaderboard, getLevelStanding, getRank } from "@database/repositories/levelRepository";
-import { boardEntries, decorateRows, readBoard, standingOnBoard } from "@lib/economy/memberActions.util";
+import { boardEntries, decorateRows, readBoard, standingOnBoard } from "@lib/economy/boards.util";
 
 jest.mock("@database/repositories/economyRepository", () => ({
 	getLeaderboard: jest.fn(() => Promise.resolve([])),

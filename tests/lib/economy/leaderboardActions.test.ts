@@ -2,6 +2,7 @@ import { ButtonStyle, type Guild } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { renderBoardImage } from "@lib/canvas/boardCard.util";
 import { type BoardCard } from "@lib/canvas/canvas.types";
+import { boardEntries, decorateRows, standingOnBoard } from "@lib/economy/boards.util";
 import {
 	BOARD_SIZE,
 	boardControls,
@@ -10,10 +11,9 @@ import {
 	type BoardState,
 	boardSubtitle,
 } from "@lib/economy/leaderboardActions.util";
-import { boardEntries, decorateRows, standingOnBoard } from "@lib/economy/memberActions.util";
 import { BOARD_SCOPES, MONEY_SORTS } from "@testify/shared";
 
-jest.mock("@lib/economy/memberActions.util", () => ({
+jest.mock("@lib/economy/boards.util", () => ({
 	SERVER_TOTALS: { sort: "total", scope: "server", guildIds: [] },
 	boardEntries: jest.fn(),
 	standingOnBoard: jest.fn(),
