@@ -5,7 +5,14 @@ import { type ApiBindings, guildOf } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
-import { deleteGiveaway, endGiveaway, listGiveaways, rerollGiveaway, startGiveaway } from "@lib/giveaways";
+import {
+	deleteGiveaway,
+	endGiveaway,
+	findGiveaway,
+	listGiveaways,
+	rerollGiveaway,
+	startGiveaway,
+} from "@lib/giveaways";
 import { type GiveawayList, giveawayParams, giveawayStart } from "@testify/shared";
 
 export const giveaways = new Hono<ApiBindings>();
@@ -76,8 +83,7 @@ giveaways.delete("/:messageId", async (context) => {
 
 /** `discord-giveaways` looks a message up globally, so this keeps a manager inside their own server. */
 async function requireInGuild(context: Context<ApiBindings>, guild: Guild, messageId: string): Promise<void> {
-	const rows = await listGiveaways(context.get("client"), guild.id);
-	if (!rows.some((row) => row.messageId === messageId)) {
+	if ((await findGiveaway(context.get("client"), guild.id, messageId)) === null) {
 		throw notFound("giveaway_not_found", "There is no giveaway with that id in this server.");
 	}
 }

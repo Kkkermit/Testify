@@ -5,15 +5,19 @@ import { type ApiBindings } from "@api/context";
 import { giveaways } from "@api/routes/giveaways";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { deleteGiveaway, endGiveaway, listGiveaways, rerollGiveaway, startGiveaway } from "@lib/giveaways";
+import { deleteGiveaway, endGiveaway, findGiveaway, rerollGiveaway, startGiveaway } from "@lib/giveaways";
 
 const GUILD = "900000000000000001";
 const ACTOR = "100000000000000002";
 const THEIRS = "500000000000000099";
+const OURS = "500000000000000001";
 const CHANNEL = "400000000000000001";
 
 jest.mock("@lib/giveaways", () => ({
-	listGiveaways: jest.fn(() => Promise.resolve([{ messageId: "500000000000000001" }])),
+	listGiveaways: jest.fn(() => Promise.resolve([])),
+	findGiveaway: jest.fn((_client: unknown, _guildId: string, messageId: string) =>
+		Promise.resolve(messageId === OURS ? { messageId } : null),
+	),
 	startGiveaway: jest.fn(() => Promise.resolve()),
 	endGiveaway: jest.fn(() => Promise.resolve()),
 	rerollGiveaway: jest.fn(() => Promise.resolve()),
@@ -75,7 +79,13 @@ describe("the giveaway routes", () => {
 
 	it("refuses an id that is not a message id before looking anything up", async () => {
 		expect((await send("POST", "/not-an-id/end")).status).toBe(400);
-		expect(listGiveaways).not.toHaveBeenCalled();
+		expect(findGiveaway).not.toHaveBeenCalled();
+	});
+
+	/** The check read only the server's fifty newest giveaways, so an older one could not be ended from here. */
+	it("ends a giveaway of this server's that is not among its newest", async () => {
+		expect((await send("POST", `/${OURS}/end`)).status).toBe(200);
+		expect(endGiveaway).toHaveBeenCalledWith(expect.anything(), GUILD, OURS);
 	});
 
 	it("starts a giveaway hosted by whoever is signed in", async () => {
