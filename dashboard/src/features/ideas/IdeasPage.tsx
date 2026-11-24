@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
+import { postableChannels, Refusal, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import {
 	Card,
 	EmptyState,
@@ -29,7 +29,6 @@ import {
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
-import { refusalText } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { currentData } from "@/lib/queries";
 
@@ -62,12 +61,9 @@ export function IdeasPage(): React.JSX.Element {
 	if (settings.isError) return <ErrorState error={settings.error} onRetry={() => void settings.refetch()} />;
 	if (settings.isPending) return <Skeleton className="h-96 w-full" />;
 
-	const message = (error: Error | null, fallback: string): string | null =>
-		error === null ? null : refusalText(error, fallback);
 	const busy = decide.isPending || remove.isPending;
 	const postable = postableChannels(channels.data ?? []);
 	const channel = channelLabel(postable, settings.data.channelId, t);
-	const saveError = message(save.error, t("common.couldNotSave"));
 	const counts = settings.data.counts;
 	const countOf = (value: IdeaFilter): number =>
 		value === "all" ? counts.open + counts.accepted + counts.declined : counts[value];
@@ -104,7 +100,7 @@ export function IdeasPage(): React.JSX.Element {
 					save.mutate(patch);
 				}}
 			/>
-			{saveError !== null && <Warning>{saveError}</Warning>}
+			<Refusal error={save.error} />
 
 			<section aria-labelledby="ideas-heading" className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center justify-between gap-3">
@@ -145,6 +141,7 @@ export function IdeasPage(): React.JSX.Element {
 									key={idea.id}
 									idea={idea}
 									busy={busy}
+									error={decide.variables?.ideaId === idea.id ? decide.error : null}
 									onDecide={(decision) => {
 										decide.mutate({ ideaId: idea.id, decision });
 									}}
@@ -168,12 +165,6 @@ export function IdeasPage(): React.JSX.Element {
 							showIdeas({ page: next });
 						}}
 					/>
-				)}
-
-				{(decide.error ?? remove.error) !== null && (
-					<Warning>
-						{message(decide.error, t("common.couldNotSave")) ?? message(remove.error, t("common.couldNotRemove"))}
-					</Warning>
 				)}
 			</section>
 		</>

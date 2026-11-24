@@ -2,7 +2,7 @@ import { APPEAL_LIMITS, type AppealDecision, type AppealRow } from "@testify/sha
 import { Check, ExternalLink, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, FIELD, Warning } from "@/components/form";
+import { Field, FIELD, Refusal, Warning } from "@/components/form";
 import { Badge, type BadgeTone, Button, cardClass } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 import { dateAndTime, since } from "@/lib/datetime";
@@ -24,10 +24,12 @@ export const APPEAL_STATUS_LABEL: Record<AppealRow["status"], TranslationKey> = 
 export function AppealItem({
 	appeal,
 	busy,
+	error,
 	onDecide,
 }: {
 	appeal: AppealRow;
 	busy: boolean;
+	error: Error | null;
 	onDecide: (decision: AppealDecision) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -75,6 +77,7 @@ export function AppealItem({
 				</Field>
 			)}
 			{markup !== null && <Warning>{markup}</Warning>}
+			<Refusal error={error} />
 
 			<div className="flex flex-wrap gap-2">
 				{appeal.status === "open" && (

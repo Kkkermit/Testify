@@ -1,6 +1,7 @@
 import { type ChannelSummary, type GiveawayRow as Row } from "@testify/shared";
 import { Dices, Square, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Refusal } from "@/components/form";
 import { Badge, Button, CARD_HEADING, cardClass } from "@/components/primitives";
 import { canReroll } from "@/features/giveaways/giveaways.utils";
 import { channelLabel } from "@/lib/channels";
@@ -10,6 +11,7 @@ export function GiveawayRow({
 	row,
 	channels,
 	busy,
+	error,
 	onEnd,
 	onReroll,
 	onDelete,
@@ -17,6 +19,7 @@ export function GiveawayRow({
 	row: Row;
 	channels: ChannelSummary[];
 	busy: boolean;
+	error: Error | null;
 	onEnd: () => void;
 	onReroll: () => void;
 	onDelete: () => void;
@@ -75,6 +78,7 @@ export function GiveawayRow({
 					<span className="sr-only">{t("giveaways.deleteFor", { prize: row.prize })}</span>
 				</Button>
 			</div>
+			<Refusal error={error} />
 		</li>
 	);
 }

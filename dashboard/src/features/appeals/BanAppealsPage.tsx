@@ -129,6 +129,7 @@ export function BanAppealsPage(): React.JSX.Element {
 								key={appeal.id}
 								appeal={appeal}
 								busy={decide.isPending}
+								error={decide.variables?.appealId === appeal.id ? decide.error : null}
 								onDecide={(decision) => {
 									decide.mutate({ appealId: appeal.id, decision });
 								}}
@@ -146,7 +147,6 @@ export function BanAppealsPage(): React.JSX.Element {
 						}}
 					/>
 				)}
-				<Refusal error={decide.error} />
 			</section>
 		</>
 	);

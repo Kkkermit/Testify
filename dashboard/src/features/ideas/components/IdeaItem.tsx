@@ -2,7 +2,7 @@ import { IDEA_LIMITS, type IdeaDecision, type IdeaRow } from "@testify/shared";
 import { Check, ExternalLink, RotateCcw, ThumbsDown, ThumbsUp, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, FIELD, Warning } from "@/components/form";
+import { Field, FIELD, Refusal, Warning } from "@/components/form";
 import { Badge, type BadgeTone, Button, cardClass } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 import { dateAndTime, since } from "@/lib/datetime";
@@ -19,11 +19,13 @@ const STATUS_LABEL: Record<IdeaRow["status"], TranslationKey> = {
 export function IdeaItem({
 	idea,
 	busy,
+	error,
 	onDecide,
 	onRemove,
 }: {
 	idea: IdeaRow;
 	busy: boolean;
+	error: Error | null;
 	onDecide: (decision: IdeaDecision) => void;
 	onRemove: () => void;
 }): React.JSX.Element {
@@ -83,6 +85,7 @@ export function IdeaItem({
 				</Field>
 			)}
 			{markup !== null && <Warning>{markup}</Warning>}
+			<Refusal error={error} />
 
 			<div className="flex flex-wrap gap-2">
 				{idea.status === "open" ? (

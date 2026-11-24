@@ -44,6 +44,22 @@ describe("the idea board page", () => {
 		});
 	});
 
+	/** A refused decision is said in the idea it was about, where the reason was typed, not under the whole list. */
+	it("shows a refused decision inside that idea", async () => {
+		server.use(
+			http.post(`/api/guilds/${GUILD}/ideas/:ideaId/decision`, () =>
+				HttpResponse.json({ error: { code: "bad_request", message: "That idea was deleted." } }, { status: 400 }),
+			),
+		);
+		renderPage();
+
+		await screen.findByRole("heading", { name: "Idea #2" });
+		await userEvent.click(within(rowFor("Idea #2")).getByRole("button", { name: "Accept" }));
+
+		expect(await within(rowFor("Idea #2")).findByText("That idea was deleted.")).toBeInTheDocument();
+		expect(screen.getAllByText("That idea was deleted.")).toHaveLength(1);
+	});
+
 	/** A failed list read must not look like an empty board. */
 	it("says the list could not be read rather than showing none", async () => {
 		server.use(http.get(`/api/guilds/${GUILD}/ideas/list`, () => HttpResponse.json({}, { status: 500 })));
