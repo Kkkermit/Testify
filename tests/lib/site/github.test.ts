@@ -190,6 +190,14 @@ describe("GitHubReader", () => {
 		expect(await shared.file("a.txt")).toMatchObject({ text: null, withheld: "binary" });
 	});
 
+	/** The request's timeout runs on through the body, so a read that stalls halfway is GitHub's failure, not a bug. */
+	it("reports a file whose body never finished arriving as GitHub failing", async () => {
+		const stalled = new DOMException("The operation was aborted due to timeout", "TimeoutError");
+		jest.mocked(fetchRaw).mockResolvedValue({ text: () => Promise.reject(stalled) } as unknown as Response);
+
+		await expect(reader().file("src/index.ts")).rejects.toBeInstanceOf(ServiceError);
+	});
+
 	/** With a token for its traffic, the bot could otherwise read a private repository out to anybody. */
 	it("shows nothing of a private repository's code", async () => {
 		github({ ...releaseAnswers, "": repo({ private: true }) });

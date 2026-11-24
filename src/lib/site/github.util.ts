@@ -220,7 +220,10 @@ export class GitHubReader {
 			const response = await fetchRaw(SERVICE, `${RAW}/${owner}/${repo}/${source.commit}/${encoded}`, {
 				headers: { "user-agent": `${owner}/${repo}` },
 			});
-			const text = await response.text();
+			// The request's timeout still runs while the body arrives, and a body cut off is GitHub not answering.
+			const text = await response.text().catch((error: unknown) => {
+				throw new ServiceError(SERVICE, error);
+			});
 
 			// A NUL is what every text format lacks, so a file with one is binary whatever its name says.
 			return text.includes("\u0000")
