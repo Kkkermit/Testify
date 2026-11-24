@@ -214,4 +214,21 @@ describe("closeTicket", () => {
 		expect(createTranscript).not.toHaveBeenCalled();
 		expect(deleteTicket).toHaveBeenCalledWith(CHANNEL);
 	});
+
+	/** The transcript renderer is loaded when a ticket first closes rather than at start-up, so closing has to reach it. */
+	it("posts the ticket's transcript before closing it", async () => {
+		const send = jest.fn(() => Promise.resolve());
+
+		await closeTicket(
+			clientWith({ isTextBased: () => true, isSendable: () => true, send }),
+			setup,
+			ticket(),
+			ticketChannel() as unknown as TextChannel,
+			moderator,
+		);
+
+		expect(createTranscript).toHaveBeenCalled();
+		expect(send).toHaveBeenCalledWith(expect.objectContaining({ files: ["transcript"] }));
+		expect(deleteTicket).toHaveBeenCalledWith(CHANNEL);
+	});
 });

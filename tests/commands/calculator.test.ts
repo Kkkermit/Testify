@@ -1,5 +1,6 @@
 import { parse } from "mathjs";
-import { CALCULATOR_FUNCTIONS, unsupportedPart } from "@commands/community/calculator.command";
+import calculate, { CALCULATOR_FUNCTIONS, unsupportedPart } from "@commands/community/calculator.command";
+import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 const refuses = (expression: string): string | null => unsupportedPart(parse(expression));
 
@@ -59,4 +60,13 @@ it("keeps every builder and escape route off the allowlist", () => {
 
 it("names the first unsupported call rather than the whole expression", () => {
 	expect(refuses("sqrt(16) + zeros(2, 2)")).toBe("zeros");
+});
+
+/** mathjs is loaded when the command first runs rather than at start-up, so the run itself has to reach it. */
+it("works an expression out and shows the result", async () => {
+	const interaction = createMockInteraction({ options: { expression: "2 + 2 * 3" } });
+
+	await calculate.run?.(interaction, createMockClient());
+
+	expect(JSON.stringify(interaction.sent[0])).toContain("```\\n8\\n```");
 });

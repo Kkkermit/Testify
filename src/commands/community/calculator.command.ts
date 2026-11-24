@@ -1,4 +1,4 @@
-import { evaluate, format, isFunctionNode, isSymbolNode, type MathNode, parse } from "mathjs";
+import { type FunctionNode, type MathNode, type SymbolNode } from "mathjs";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
@@ -47,6 +47,10 @@ export const CALCULATOR_FUNCTIONS = new Set([
 	"tanh",
 ]);
 
+// The tree comes from mathjs's own parser, so a node's `type` says what it is.
+const isCall = (node: MathNode): node is FunctionNode<MathNode> => node.type === "FunctionNode";
+const isName = (node: MathNode): node is SymbolNode => node.type === "SymbolNode";
+
 export function unsupportedPart(node: MathNode): string | null {
 	let found: string | null = null;
 
@@ -59,9 +63,9 @@ export function unsupportedPart(node: MathNode): string | null {
 			return;
 		}
 
-		if (isFunctionNode(child)) {
+		if (isCall(child)) {
 			// A call through an accessor, `a.b(1)`, has no plain name to check.
-			const name = isSymbolNode(child.fn) ? child.fn.name : "";
+			const name = isName(child.fn) ? child.fn.name : "";
 			if (!CALCULATOR_FUNCTIONS.has(name)) found = name === "" ? "that function" : name;
 		}
 	});
@@ -80,6 +84,9 @@ export default defineCommand({
 		const expression = interaction.options.getString("expression", true).trim();
 
 		if (expression.length > 200) throw new UserFacingError("That expression is too long.");
+
+		// Loaded on first use: mathjs takes half a second to load, and nothing else needs it.
+		const { evaluate, format, parse } = await import("mathjs");
 
 		// Parsing builds a tree without running anything, so the check happens before any of it is evaluated.
 		let tree: MathNode;

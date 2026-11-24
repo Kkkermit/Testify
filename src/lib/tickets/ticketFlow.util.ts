@@ -1,4 +1,3 @@
-import { createTranscript } from "discord-html-transcripts";
 import { ButtonStyle, ChannelType, type Guild, PermissionFlagsBits, type TextChannel, type User } from "discord.js";
 import { TICKET } from "@config/constants";
 import { strings } from "@config/strings";
@@ -183,6 +182,8 @@ async function fileTranscript(
 	const destination = await client.channels.fetch(setup.transcriptChannelId).catch(() => null);
 	if (destination?.isTextBased() !== true || !destination.isSendable()) return;
 
+	// Loaded on first use: the transcript renderer takes half a second to load, and only a closing ticket needs it.
+	const { createTranscript } = await import("discord-html-transcripts");
 	const transcript = await createTranscript(channel, { filename: `ticket-${ticket.ticketId}.html`, poweredBy: false });
 
 	await destination.send({
