@@ -11,7 +11,7 @@ Nothing here is promised or scheduled. Each entry says what exists already to bu
 to respect, so whoever picks one up starts from the code rather than from a blank page. When an entry ships, delete
 it from this file in the same pull request.
 
-Checked against the code and the npm registry on **5 November 2026**.
+Checked against the code and the npm registry on **24 November 2026**.
 
 ---
 
@@ -93,6 +93,17 @@ Found in the November 2026 audit. Each says what is awkward today, what would be
   Name each screen through `config/navigation.ts`'s `labelKey` for its route. Build on `allNavItems` and
   `SCREEN_ROUTES`.
 
+### Installing and running it
+
+- **A guided first run.** `npm run setup` asks one flat question per line, with no summary to check before `.env` is
+  written, on `prompts` 2.4.2, which has had no release since 2021. Group the questions (Discord, database,
+  dashboard, analytics), show what will be written and ask before writing it, and check the token with a spinner.
+  Build on `scripts/setupQuestions.ts`, which is now pure and tested; `@clack/prompts` is maintained and small.
+- **`npm run doctor`.** A first-time host learns about a bad token, an unreachable MongoDB or a missing yt-dlp only
+  by starting the bot. One command could check `.env`, ping the database, ask Discord who the token belongs to and
+  report the music binaries, each with its fix. Build on `loadEnv`, `explainStartupFailure`, `describeDatabase`,
+  `findBinaries` and `stepLine`.
+
 ### In the code
 
 - **One plural helper.** Commands each write `count === 1 ? … : …` by hand. A `plural(count, one, many)` in
@@ -157,18 +168,28 @@ server, and each should be before it is relied on.
 
 ### Dependencies behind their latest release
 
-| Package                    | Here    | Latest | What it takes                                                                                                                                                                                                 |
-| -------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `discord-html-transcripts` | 3.2.0   | 3.3.0  | Not an option: its author has deprecated 3.3.0 as "broken due to a critical bug" and points back to 3.2.0. Wait for the release after it, which should also move to undici 7 and let the `undici` override go |
-| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                                                                             |
-| `mongoose`                 | 8.24.1  | 9.12.0 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                                                                                      |
-| `react-router`             | 7.18.2  | 8.5.1  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                                                                                           |
-| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `docs/dashboard/screenshots/README.md`                                                                                                      |
-| `@anthropic-ai/sdk`        | 0.128.0 | 1.6.0  | Its first major. Only the support assistant's optional model picker uses it                                                                                                                                   |
+| Package                    | Here    | Latest | What it takes                                                                                                                                                                                                              |
+| -------------------------- | ------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `discord-html-transcripts` | 3.2.0   | 3.3.0  | Not an option: its author has deprecated 3.3.0 as "broken due to a critical bug" and points back to 3.2.0. Wait for the release after it, which should also move to undici 7 and let the `undici` override go              |
+| `typescript`               | 6.0.3   | 7.0.2  | The native compiler. It waits for typescript-eslint, whose 8.74 asks for TypeScript below 6.1, and it ships no compiler API, which `tests/core/untranslated.test.ts` parses the dashboard with                             |
+| `mongoose`                 | 8.24.11 | 9.13.0 | A major. It changes `new: true` (66 call sites in 41 files), the `FilterQuery` types, pre-middleware and update pipelines. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1` |
 
 `discord-giveaways` is at its latest, 6.0.1, but that was published in **August 2022** and nothing since. Replacing it
 with a giveaway system of the bot's own — records in MongoDB, a job that ends them, entries counted from a button —
 would follow the shape the starboard and idea board already have, and drop a dependency nobody maintains.
+
+### The dashboard's first load
+
+The first load was held to 200 kB gzipped and is past it: `vendor` alone is about 208 kB after the react-router 8 and
+i18next 27 upgrades, the English dictionary about 60 kB, and two shared chunks another 50. Load the dictionary per
+screen rather than whole (the screens are lazy already), and measure what in `vendor` could move behind a lazy route,
+before anything more is added to it. `npm run build` prints each chunk's gzipped size.
+
+### Start-up
+
+`mathjs` and the transcript renderer now load on first use, which took start-up's module loading from about 2.1 s
+to about 1.2 s. The Anthropic SDK (about 0.1 s, used only with `SUPPORT_AI_API_KEY` set) is the next candidate; its
+`instanceof` check in `blamesAnthropic` is what keeps it loaded at start-up.
 
 ### Overrides to look at again
 

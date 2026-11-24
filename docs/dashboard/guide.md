@@ -739,7 +739,7 @@ request falls through to the SPA catch-all. `tests/api/server.test.ts` reads Hon
 
 **The dashboard's Jest config earns its comments.** Three things there are load-bearing:
 `jest-fixed-jsdom` (plain jsdom deletes the `fetch`/`Request`/stream globals MSW needs), a
-`transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
+`transformIgnorePatterns` allowlist (MSW 3 and react-router 8 ship only ESM, as do several of their dependencies), and a
 `moduleNameMapper` pinning React to the workspace copy.
 
 **Prettier reflows what a script inserted.** When patching a file programmatically, re-read it afterwards —
@@ -1594,8 +1594,9 @@ npm run test:coverage   # the 75/75/75/75 gates
 npm run build           # includes verify:bundle — fails on a second React copy or a compiled light-dark()
 ```
 
-The first load's budget is **200 kB gzipped, and it is met exactly**, so anything added to `vendor` needs a
-measurement rather than an assumption:
+The first load was held to **200 kB gzipped** and is now past it — `vendor` alone is about 208 kB after the
+react-router 8 and i18next 27 upgrades, with the English dictionary another 60 — so anything added to `vendor` needs a
+measurement rather than an assumption, and bringing it back down is on the upkeep list in `docs/future-feature.md`:
 
 ```bash
 for f in dashboard/dist/assets/*.js dashboard/dist/assets/*.css; do

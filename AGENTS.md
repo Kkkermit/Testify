@@ -61,16 +61,16 @@ numbers, which drift):
 | -------------------- | --------------------------------- |
 | Commands             | 98, across 14 categories          |
 | Command files        | 119 (incl. folded-in subcommands) |
-| Subcommands          | 159                               |
+| Subcommands          | 158                               |
 | Prefix aliases       | 107                               |
 | Button handlers      | 53                                |
 | Right-click actions  | 4                                 |
 | Events               | 36, in 6 groups                   |
-| `src/lib` helpers    | 240, in 34 domain folders         |
+| `src/lib` helpers    | 253, in 34 domain folders         |
 | Schemas/repositories | 51 / 52                           |
 | Scheduled jobs       | 11                                |
 | Switchable features  | 17                                |
-| Tests                | 4,230 across 569 suites           |
+| Tests                | 4,283 across 614 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -85,6 +85,10 @@ npm ci                  # ALWAYS ci, never install, unless changing dependencies
 npm run setup           # interactive: writes .env
 npm run setup -- --dev  # writes .env.development instead
 ```
+
+**A dependency that runs an install script is named in `allowScripts`** in `package.json`. npm warns about every one
+that is not, and its own documentation says such scripts will be blocked by default; add the new package there in
+the same change that adds it.
 
 `npm run setup` asks for each value and checks each answer as it is typed, so a malformed ID is caught on its
 own question rather than after the last one. To do it by hand, copy `.env.example` to
@@ -236,7 +240,7 @@ src/
 ├── events/               36 handlers in command, community, create, logging, ready and message
 ├── buttons/              53 component handlers, keyed by custom-ID prefix
 ├── menus/                4 right-click actions, on a member or a message
-├── lib/                  240 helpers in 34 domain folders, each behind its own index.ts barrel
+├── lib/                  253 helpers in 34 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -257,7 +261,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 339 suites; the dashboard's 182 sit beside its code.
+tests/                    Mirrors src/. 411 suites; the dashboard's 203 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -293,7 +297,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                                     |
 | Format a number, duration, time            | `src/lib/format/format.util.ts`                                                     |
 | Query the database                         | `src/database/repositories/*.ts` — never a model directly                           |
-| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`                  |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupQuestions.ts`            |
 | Change user-facing copy                    | `src/config/strings.ts`                                                             |
 | Translate a command's menu text            | `assets/locales/commands/<lang>.json`, after `npm run i18n:commands`                |
 | Change a refusal every command shares      | `src/config/replies.ts`, in all eight languages at once                             |
@@ -860,7 +864,8 @@ IDs) and its default.
   silently ignored by `docker compose up` — which is exactly how the support key went missing.
 
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
-comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
+comment explaining it, and to `scripts/setupQuestions.ts` if it should be prompted for (`scripts/setupEnv.ts` only
+asks the questions it holds).
 
 ### What makes a copy someone's own is `testify.config.json`, not code and not `.env`
 
@@ -1230,7 +1235,9 @@ refactor: Renamed command files from slash to command
 ```
 
 `npm run commit` is a guided wizard. It uses `execFile("git", ["commit", "-m", msg])` with an argv array — never
-interpolate a message into a shell string, or a `"`, backtick or `$` breaks or injects.
+interpolate a message into a shell string, or a `"`, backtick or `$` breaks or injects. It refuses a header past
+100 characters as the subject is typed, from the same rules `commitlint.config.mjs` holds, so a message is never
+written only for the hook to turn it away.
 
 **Hooks:**
 
@@ -3027,7 +3034,8 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
 
 Three things there are load-bearing and non-obvious, all commented in place:
 `jest-fixed-jsdom` (plain jsdom deletes the `fetch`/`Request`/stream globals MSW needs), a
-`transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
+`transformIgnorePatterns` allowlist (MSW 3 and react-router 8 ship only ESM, as do several of their dependencies —
+and swc's optimizer replaces react-router's `import.meta.hot` with `undefined`, which CommonJS could not parse), and a
 `moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
 `node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
 
@@ -3972,8 +3980,9 @@ does not check for a newer one. A self-hosted bot that contacts a server on a ti
 default, and the tab says so in as many words.
 
 **No chart library.** `DayBars` is a `<span>` per day with a height, read out through `ChartReadout`, and the numbers
-behind it are a real `<table>` in a `sr-only` `<figcaption>`. The first load's budget — 200 kB gzipped, and it is met exactly — is the
-reason, and a bar is a div with a width.
+behind it are a real `<table>` in a `sr-only` `<figcaption>`. The first load is already past the 200 kB gzipped it
+was held to — the vendor chunk alone is about 208 kB, and the English dictionary another 60 — which is the reason,
+and a bar is a div with a width.
 
 `UsageBars` puts its bar **behind** the row rather than beside it, so a long label is never squeezed by the
 value — but a proportional fill then ends wherever the number says, which on a short bar is the middle of a
