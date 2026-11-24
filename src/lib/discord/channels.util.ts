@@ -31,6 +31,11 @@ export function missingToPost(
 	return me === null ? new PermissionsBitField(needs).toArray() : channel.permissionsFor(me).missing(needs);
 }
 
+/** What a person lacks to post in a channel themselves, by the rule the bot is held to. */
+export function memberMissingToPost(channel: GuildBasedChannel, member: GuildMember): PermissionsString[] {
+	return channel.permissionsFor(member).missing(postingNeeds(channel, []));
+}
+
 /** Whether the bot could actually post in a channel, which is what lets a picker grey one out before a save. */
 export function canPostIn(guild: Guild, channelId: string): boolean {
 	const channel = guild.channels.cache.get(channelId);

@@ -554,7 +554,9 @@ the bot cannot see passed both and Discord refused the post with 50001, which re
 failure. `requirePostable(channel, readerLanguage(interaction), [what the post needs])` refuses first, naming the
 channel and each permission missing (`iNeedIn`). `missingToPost` is the one rule behind it and behind
 `canPostInChannel` and the panels' `pickedChannelId`: View Channel, then Send Messages, or Send Messages in Threads for
-a thread.
+a thread. A panel's channel picker asks the same of the person choosing (`memberMissingToPost`), because the bot then
+posts there for them: a manager could otherwise aim a greeting or a log into a staff channel they cannot write in,
+which the dashboard's `requireReach` already refuses.
 
 **A reason that reaches Discord's audit log goes through `auditReason`** in `src/lib/moderation/`, which cuts it to
 Discord's 512 characters: past that Discord refuses the kick, ban, timeout or lock itself, and a moderator's name in
