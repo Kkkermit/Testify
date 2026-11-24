@@ -102,20 +102,24 @@ describe("TabBar", () => {
 
 /** A tab strip wider than the screen has to show there is more, and keep the current tab in view. */
 describe("a tab strip wider than its screen", () => {
+	/**
+	 * A strip that fits must fade neither end, or every desktop tab bar wears a gradient for nothing, and a fractional
+	 * scrollLeft, which a trackpad leaves behind, must not read as "more to the right".
+	 */
 	it("knows which ends still have tabs past them", () => {
-		expect(edgesOf({ scrollLeft: 0, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: false, end: true });
-		expect(edgesOf({ scrollLeft: 300, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: true, end: true });
-		expect(edgesOf({ scrollLeft: 580, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: true, end: false });
-	});
+		const cases = [
+			{ name: "at the start", scrollLeft: 0, clientWidth: 320, edges: { start: false, end: true } },
+			{ name: "in the middle", scrollLeft: 300, clientWidth: 320, edges: { start: true, end: true } },
+			{ name: "at the end", scrollLeft: 580, clientWidth: 320, edges: { start: true, end: false } },
+			{ name: "fitting", scrollLeft: 0, clientWidth: 900, edges: { start: false, end: false } },
+			{ name: "a subpixel from the end", scrollLeft: 579.6, clientWidth: 320.4, edges: { start: true, end: false } },
+		];
+		const wrong = cases.filter(({ scrollLeft, clientWidth, edges }) => {
+			const found = edgesOf({ scrollLeft, clientWidth, scrollWidth: 900 });
+			return found.start !== edges.start || found.end !== edges.end;
+		});
 
-	/** A strip that fits must not fade either end, or every desktop tab bar wears a gradient for nothing. */
-	it("fades neither end when every tab fits", () => {
-		expect(edgesOf({ scrollLeft: 0, clientWidth: 900, scrollWidth: 900 })).toEqual({ start: false, end: false });
-	});
-
-	/** A fractional scrollLeft is what a trackpad leaves behind, and it must not read as "more to the right". */
-	it("does not report an end that is one subpixel away", () => {
-		expect(edgesOf({ scrollLeft: 579.6, clientWidth: 320.4, scrollWidth: 900 })).toEqual({ start: true, end: false });
+		expect(wrong.map(({ name }) => name)).toEqual([]);
 	});
 
 	it("brings the active tab into view rather than leaving it off the edge", () => {
