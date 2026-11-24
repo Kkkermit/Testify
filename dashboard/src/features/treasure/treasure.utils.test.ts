@@ -22,25 +22,24 @@ describe("the cooldown conversion", () => {
 describe("draftProblem", () => {
 	const draft = draftOf(SETTINGS);
 
-	/** A range whose floor is above its ceiling picks no number at all, so the drop would never fire. */
-	it("refuses a range the wrong way round", () => {
-		expect(draftProblem({ ...draft, minMessages: 90 }, t)).toMatch(/fewest messages/i);
-		expect(draftProblem({ ...draft, minAmount: 900 }, t)).toMatch(/smallest drop/i);
-	});
+	/**
+	 * A range whose floor is above its ceiling picks no number at all, so the drop would never fire, and an emptied
+	 * number input reads as NaN, which is not a bound failure and must not save either.
+	 */
+	it("refuses a backwards range, a number out of bounds, an emptied field and a fraction", () => {
+		const refused: [Partial<typeof draft>, RegExp][] = [
+			[{ minMessages: 90 }, /fewest messages/i],
+			[{ minAmount: 900 }, /smallest drop/i],
+			[{ minMessages: 0 }, /messages must be between/i],
+			[{ maxAmount: 1_000_000 }, /drop must be between/i],
+			[{ cooldownMinutes: 0 }, /cooldown must be between/i],
+			[{ minAmount: Number.NaN }, /drop must be between/i],
+			[{ cooldownMinutes: 2.5 }, /cooldown must be between/i],
+		];
+		const wrong = refused.filter(([change, said]) => !said.test(draftProblem({ ...draft, ...change }, t) ?? ""));
 
-	it("refuses a number outside its bounds", () => {
-		expect(draftProblem({ ...draft, minMessages: 0 }, t)).toMatch(/messages must be between/i);
-		expect(draftProblem({ ...draft, maxAmount: 1_000_000 }, t)).toMatch(/drop must be between/i);
-		expect(draftProblem({ ...draft, cooldownMinutes: 0 }, t)).toMatch(/cooldown must be between/i);
-	});
-
-	/** An emptied number input reads as NaN, which is not a bound failure and must not save. */
-	it("refuses a field that has been emptied", () => {
-		expect(draftProblem({ ...draft, minAmount: Number.NaN }, t)).not.toBeNull();
-	});
-
-	it("refuses a fractional value", () => {
-		expect(draftProblem({ ...draft, cooldownMinutes: 2.5 }, t)).not.toBeNull();
+		expect(wrong).toEqual([]);
+		expect(draftProblem(draft, t)).toBeNull();
 	});
 });
 

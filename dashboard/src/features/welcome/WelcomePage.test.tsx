@@ -29,16 +29,10 @@ function capturePatch(): { body: unknown } {
 }
 
 describe("insertToken", () => {
-	it("inserts at the caret", () => {
-		expect(insertToken("Hello  there", "{user}", 6)).toBe("Hello {user} there");
-	});
-
 	/** A blurred textarea reports no caret, and dropping the token entirely would look broken. */
-	it("appends when there is no caret", () => {
+	it("inserts at the caret, and appends when there is none or it is out of range", () => {
+		expect(insertToken("Hello  there", "{user}", 6)).toBe("Hello {user} there");
 		expect(insertToken("Hello", "{user}", null)).toBe("Hello{user}");
-	});
-
-	it("appends rather than corrupting the message when the caret is out of range", () => {
 		expect(insertToken("Hi", "{user}", 99)).toBe("Hi{user}");
 	});
 });
