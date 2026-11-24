@@ -31,27 +31,27 @@ describe("/shardlens", () => {
 		expect(await runChecks(stranger, shardlens, client)).not.toBeNull();
 	});
 
-	it("shows where analytics go and what is waiting", () => {
-		const text = textOf(sending);
+	/** The collector inside the bot listens on its own machine, so its address is said to open nowhere else. */
+	it("shows where analytics go and what is waiting, or only how to switch them on", () => {
+		const cases = [
+			{ status: sending, shows: ["https://stats.example.com", "Failed sends", "`network`"], hides: [] },
+			{
+				status: { ...sending, state: "off" as const, collector: null, lastProblem: null },
+				shows: ["SHARDLENS_EMBEDDED=true", "SHARDLENS_URL"],
+				hides: ["Failed sends"],
+			},
+			{
+				status: { ...sending, collector: "http://127.0.0.1:8080", embedded: true },
+				shows: ["http://127.0.0.1:8080, on the machine the bot runs on"],
+				hides: [],
+			},
+		];
 
-		expect(text).toContain("https://stats.example.com");
-		expect(text).toContain("Failed sends");
-		expect(text).toContain("`network`");
-	});
-
-	it("shows only how to switch it on while it is off", () => {
-		const text = textOf({ ...sending, state: "off", collector: null, lastProblem: null });
-
-		expect(text).toContain("SHARDLENS_EMBEDDED=true");
-		expect(text).toContain("SHARDLENS_URL");
-		expect(text).not.toContain("Failed sends");
-	});
-
-	/** The collector inside the bot listens on its own machine, so its address opens nowhere else. */
-	it("says the dashboard of the collector inside the bot opens only where the bot runs", () => {
-		const text = textOf({ ...sending, collector: "http://127.0.0.1:8080", embedded: true });
-
-		expect(text).toContain("http://127.0.0.1:8080, on the machine the bot runs on");
+		const wrong = cases.filter(({ status, shows, hides }) => {
+			const text = textOf(status);
+			return shows.some((part) => !text.includes(part)) || hides.some((part) => text.includes(part));
+		});
+		expect(wrong.map(({ status }) => `${status.state} ${String(status.collector)}`)).toEqual([]);
 	});
 
 	/** The status comes from the client, which holds the key, so the reply is checked for it end to end. */

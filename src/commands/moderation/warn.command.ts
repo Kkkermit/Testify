@@ -12,7 +12,7 @@ import {
 	warnedEmbed,
 	warningActionText,
 } from "@lib/moderation";
-import { warningExpired } from "@testify/shared";
+import { WARNING_LIMITS, warningExpired } from "@testify/shared";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
 const WARN_ID_OPTION = {
@@ -35,7 +35,13 @@ export default defineCommand({
 			description: "Warn a member.",
 			options: [
 				USER_OPTION,
-				{ name: "reason", description: "Why they are being warned.", type: "string", required: true },
+				{
+					name: "reason",
+					description: "Why they are being warned.",
+					type: "string",
+					required: true,
+					maxLength: WARNING_LIMITS.maxReason,
+				},
 			],
 			async run(interaction) {
 				const guild = inGuild(interaction);
@@ -163,7 +169,13 @@ export default defineCommand({
 			options: [
 				USER_OPTION,
 				WARN_ID_OPTION,
-				{ name: "reason", description: "The new reason.", type: "string", required: true },
+				{
+					name: "reason",
+					description: "The new reason.",
+					type: "string",
+					required: true,
+					maxLength: WARNING_LIMITS.maxReason,
+				},
 			],
 			async run(interaction) {
 				const guild = inGuild(interaction);

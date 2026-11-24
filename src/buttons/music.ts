@@ -64,7 +64,7 @@ export default recordsSettings(
 			const guild = interaction.guild;
 			if (guild === null) return;
 
-			// The system settings do not need a player, and refusing them for want of one would be a trap.
+			// The system settings work with nothing playing.
 			if (SYSTEM_ACTIONS.has(context.action)) {
 				await runSystemAction(interaction, context.action);
 				return;
