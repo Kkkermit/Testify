@@ -36,8 +36,12 @@ describe("shop state", () => {
 		expect(decodeShopState(parseCustomId(encoded).args)).toEqual(state);
 	});
 
-	it.each(SHOP_SECTIONS)("round-trips the %s section", (section) => {
-		expect(decodeShopState(parseCustomId(encodeShopState("nav", { section }, OWNER)).args).section).toBe(section);
+	it("round-trips every section", () => {
+		const lost = SHOP_SECTIONS.filter(
+			(section) => decodeShopState(parseCustomId(encodeShopState("nav", { section }, OWNER)).args).section !== section,
+		);
+
+		expect(lost).toEqual([]);
 	});
 
 	it("puts the owner last, so ownerOnly can read it", () => {
@@ -125,10 +129,14 @@ describe("the detail screen", () => {
 
 describe("custom ID uniqueness", () => {
 	/** Discord rejects the entire message when two components share a custom ID, disabled ones included. */
-	it.each(SHOP_SECTIONS)("has no duplicate IDs anywhere in the %s section", (section) => {
-		for (const page of [0, 1, 2, 20]) {
-			expect(duplicateIds(shopScreen({ section, page }, RICH, OWNER))).toEqual([]);
-		}
+	it("has no duplicate IDs on any page of any section", () => {
+		const clashing = SHOP_SECTIONS.flatMap((section) =>
+			[0, 1, 2, 20]
+				.filter((page) => duplicateIds(shopScreen({ section, page }, RICH, OWNER)).length > 0)
+				.map((page) => `${section} page ${String(page)}`),
+		);
+
+		expect(clashing).toEqual([]);
 	});
 
 	it("has no duplicate IDs on the pet rarity tabs", () => {

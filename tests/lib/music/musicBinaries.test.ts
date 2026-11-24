@@ -22,11 +22,13 @@ describe("candidatesFor", () => {
 		expect(candidates).toContain(join("/repo", "bin", exe("yt-dlp")));
 	});
 
-	it.each([
-		["yt-dlp", join("/repo", "node_modules", "youtube-dl-exec", "bin", exe("yt-dlp"))],
-		["ffmpeg", join("/repo", "node_modules", "ffmpeg-static", exe("ffmpeg"))],
-	])("finds %s where its optional npm package puts it", (name, expected) => {
-		expect(candidatesFor(name, undefined, "", "/repo")).toContain(expected);
+	it("finds each binary where its optional npm package puts it", () => {
+		const packaged = [
+			["yt-dlp", join("/repo", "node_modules", "youtube-dl-exec", "bin", exe("yt-dlp"))],
+			["ffmpeg", join("/repo", "node_modules", "ffmpeg-static", exe("ffmpeg"))],
+		] as const;
+
+		expect(packaged.filter(([name, path]) => !candidatesFor(name, undefined, "", "/repo").includes(path))).toEqual([]);
 	});
 
 	/** A copy on PATH beats the bundled one when both are the same release. */
