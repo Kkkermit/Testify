@@ -16,7 +16,7 @@ export function useInvites(guildId: string): UseQueryResult<InviteOverview> {
 	});
 }
 
-/** The answer is the settings alone, so it is merged into the overview rather than replacing it. */
+/** The answer is the settings alone, so the whole overview is read again rather than written into the cache. */
 export function useSaveInvites(guildId: string): UseMutationResult<InviteSettings, Error, InviteSettingsPatch> {
 	const client = useQueryClient();
 

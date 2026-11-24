@@ -139,7 +139,7 @@ export function Sidebar({
 					</Tooltip>
 				)}
 
-				{/* Rows rather than small links, because `hidden` at the icon-only width took these off the page entirely. */}
+				{/* Rows like every other, so the icon-only rail keeps each one with its name read aloud. */}
 				{FOOTER_LINKS.map(({ to, labelKey, hintKey }) => {
 					const Icon = FOOTER_ICON[to];
 					return (

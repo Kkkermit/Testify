@@ -40,7 +40,7 @@ function strip(value: string): string {
 	return current;
 }
 
-/** In the language the page is shown in, read when it is called, since every caller is a component rendering. */
+/** In the page's language, looked up on every call, which each caller makes while rendering. */
 export function markupWarning(value: string): string | null {
 	return containsMarkup(value) ? i18next.t("common.markupRemoved") : null;
 }
