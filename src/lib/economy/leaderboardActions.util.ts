@@ -46,7 +46,7 @@ export function boardSubtitle(state: BoardState, guildName: string): string {
 	return `${where} · Ranked by ${state.sort === "total" ? "wallet and bank together" : state.sort}`;
 }
 
-export function emptyMessage(kind: BoardKind, scope: BoardScope = "server"): string {
+function emptyMessage(kind: BoardKind, scope: BoardScope = "server"): string {
 	if (kind === "levels") return "Nobody has earned any XP here yet.";
 	return scope === "global" ? "Nobody has an account anywhere yet." : "Nobody has an account here yet.";
 }

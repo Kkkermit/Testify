@@ -4,13 +4,12 @@ import { type StoredReminder } from "@database/repositories/reminderRepository";
 import { button, navRow, row } from "@lib/discord/components.util";
 import { container, containerMessage, sectionWithButton, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { discordTime } from "@lib/format/format.util";
 import { REMINDER_ID, REMINDER_LIMITS } from "@lib/reminders/reminders.constants";
 
 /** What `/remind` answers with, the list it keeps, and the message it delivers. */
 
-const seconds = (date: Date): string => String(Math.floor(date.getTime() / 1_000));
-
-export function quoted(value: string): string {
+function quoted(value: string): string {
 	return value
 		.split("\n")
 		.map((line) => `> ${line}`)
@@ -40,9 +39,11 @@ export function reminderConfirm(
 	ownerId: string,
 	note?: string,
 ): ContainerMessage & { allowedMentions: { parse: [] } } {
-	const due = seconds(reminder.dueAt);
+	const due = reminder.dueAt;
 	const parts: ContainerPart[] = [
-		text(`## ⏰ Reminder set\nI will remind you <t:${due}:R> (<t:${due}:f>), ${whereLine(reminder)}.`),
+		text(
+			`## ⏰ Reminder set\nI will remind you ${discordTime(due, "R")} (${discordTime(due, "f")}), ${whereLine(reminder)}.`,
+		),
 		text(quoted(reminder.text)),
 	];
 	if (note !== undefined) parts.push(text(`-# ${note}`));
@@ -77,7 +78,7 @@ export function reminderCancelled(
 	);
 }
 
-export function pageCountOf(total: number): number {
+function pageCountOf(total: number): number {
 	return Math.max(1, Math.ceil(total / REMINDER_LIMITS.perPage));
 }
 
@@ -105,7 +106,7 @@ export function reminderList(
 	for (const reminder of reminders.slice(start, start + REMINDER_LIMITS.perPage)) {
 		parts.push(
 			sectionWithButton(
-				`**<t:${seconds(reminder.dueAt)}:R>** · ${whereLine(reminder)}\n${shortened(reminder.text, 120)}`,
+				`**${discordTime(reminder.dueAt, "R")}** · ${whereLine(reminder)}\n${shortened(reminder.text, 120)}`,
 				button({ id: customId(REMINDER_ID, "drop", reminder.id, shown, ownerId), label: "Cancel" }),
 			),
 		);
@@ -118,7 +119,7 @@ export function reminderList(
 
 /** The delivered reminder; only a channel post mentions anybody, and it mentions only its owner. */
 export function deliveredText(reminder: StoredReminder, where: "channel" | "dm"): string {
-	const set = `<t:${seconds(reminder.createdAt)}:R>`;
+	const set = discordTime(reminder.createdAt, "R");
 	const lines = [
 		where === "channel"
 			? `⏰ <@${reminder.userId}>, you asked me to remind you ${set}:`

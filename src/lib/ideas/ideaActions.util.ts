@@ -14,6 +14,7 @@ import {
 	takeIdeaNumber,
 } from "@database/repositories/ideaRepository";
 import { canPostIn } from "@lib/discord/channels.util";
+import { formatNumber } from "@lib/format/format.util";
 import { decisionText, ideaPost } from "@lib/ideas/ideaPanel.util";
 import { IDEA_PAUSE_MS } from "@lib/ideas/ideas.constants";
 import {
@@ -67,7 +68,7 @@ function ideaText(input: string): string {
 
 	if (value === "") throw new UserFacingError("Say what your idea is.");
 	if (value.length > IDEA_LIMITS.maxText) {
-		throw new UserFacingError(`Keep an idea under ${IDEA_LIMITS.maxText.toLocaleString()} characters.`);
+		throw new UserFacingError(`Keep an idea under ${formatNumber(IDEA_LIMITS.maxText)} characters.`);
 	}
 
 	return value;

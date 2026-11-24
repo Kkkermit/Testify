@@ -10,6 +10,7 @@ import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { type BotFeature, type GuildRoleUses, type RoleUse } from "@testify/shared";
 
 /** What gives or reads each role in a server, one read per feature through the repositories its panels use. */
+
 /** The feature behind each use, so a use a switched-off feature makes is not listed as one deleting the role would stop. */
 const USED_BY: Partial<Record<RoleUse["kind"], BotFeature>> = {
 	levelReward: "levelling",

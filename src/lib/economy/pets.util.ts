@@ -1,3 +1,4 @@
+import { HOUR_MS } from "@config/constants";
 import { type PetRarity, type PetSpecies } from "@lib/economy/economy.types";
 
 export const PETS_BY_RARITY: Record<Lowercase<PetRarity>, readonly PetSpecies[]> = {
@@ -304,7 +305,7 @@ interface PetStatus {
 /** Happiness and hunger both decay one point an hour since the last interaction. */
 export function decayValue(current: number, since: Date | null, now: number = Date.now()): number {
 	if (since === null) return current;
-	const hours = Math.floor((now - since.getTime()) / 3_600_000);
+	const hours = Math.floor((now - since.getTime()) / HOUR_MS);
 	return Math.max(0, Math.min(100, current - hours));
 }
 

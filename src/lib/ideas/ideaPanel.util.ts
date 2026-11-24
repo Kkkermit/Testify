@@ -5,11 +5,10 @@ import { type StoredIdea } from "@database/repositories/ideaRepository";
 import { button, channelSelect, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { discordTime } from "@lib/format/format.util";
 import { IDEA_ID, IDEA_SETTINGS_ID } from "@lib/ideas/ideas.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type IdeaSettings, type IdeaStatus } from "@testify/shared";
-
-const seconds = (date: Date): string => String(Math.floor(date.getTime() / 1_000));
 
 function quoted(value: string): string {
 	return value
@@ -29,7 +28,7 @@ function ideaStatusLine(idea: Pick<StoredIdea, "status" | "reason" | "decidedByN
 	if (idea.status === "open") return "🟡 **Open** — vote with the buttons below.";
 
 	const by = idea.decidedByName === null ? "" : ` by ${idea.decidedByName}`;
-	const when = idea.decidedAt === null ? "" : ` <t:${seconds(idea.decidedAt)}:R>`;
+	const when = idea.decidedAt === null ? "" : ` ${discordTime(idea.decidedAt, "R")}`;
 	const line = `${STATUS_WORD[idea.status]}${by}${when}`;
 
 	return idea.reason === "" ? line : `${line}\n${quoted(idea.reason)}`;
@@ -56,7 +55,7 @@ export function ideaPost(idea: StoredIdea): ContainerMessage & { allowedMentions
 
 	const parts: ContainerPart[] = [
 		text(`## 💡 Idea #${String(idea.number)}\n${idea.text}`),
-		text(`-# From <@${idea.authorId}> (${idea.authorName}) · <t:${seconds(idea.createdAt)}:R>`),
+		text(`-# From <@${idea.authorId}> (${idea.authorName}) · ${discordTime(idea.createdAt, "R")}`),
 		divider(),
 		text(ideaStatusLine(idea)),
 		row(vote("up", idea.upVoters.length, "👍"), vote("down", idea.downVoters.length, "👎"), ...staff),

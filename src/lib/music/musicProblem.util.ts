@@ -1,4 +1,5 @@
 import { type ProblemKind, type DownloadProblem } from "@lib/music/music.types";
+
 /** What a dying downloader said, sorted into the few answers that change what the player should do next. */
 
 const PATTERNS: { kind: ProblemKind; pattern: RegExp; advice: string }[] = [
