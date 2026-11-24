@@ -3,10 +3,9 @@ import { MINUTE_MS } from "@config/constants";
 import { theme } from "@config/theme";
 import { type WarnEntry, type WarnLadderRecord } from "@database/models/moderation.schema";
 import {
-	addWarning,
-	countWarnings,
 	getWarnLadder,
 	listGuildWarnings,
+	recordWarning,
 	saveWarnLadder,
 	setWarningCase,
 	setWarningStep,
@@ -179,15 +178,22 @@ export async function issueWarning(options: {
 }): Promise<Issued> {
 	const { guild, user, member, moderator, reason } = options;
 
-	const entry = await addWarning(guild.id, user.id, user.username, moderator, reason);
+	// The count comes from the write that records the warning, so two warnings at once take two steps.
+	const ladder = await readWarnLadder(guild.id);
+	const { entry, count } = await recordWarning(
+		guild.id,
+		user.id,
+		user.username,
+		moderator,
+		reason,
+		countsSince(ladder.expireAfterDays),
+	);
 	const byModerator = { id: moderator.id, name: moderator.tag };
 	const recorded = await recordCase(guild, { action: "warn", user, moderator: byModerator, reason });
 	if (recorded !== null && recorded.number !== null) {
 		await setWarningCase(guild.id, user.id, entry.warnId, recorded.number);
 		entry.caseNumber = recorded.number;
 	}
-	const ladder = await readWarnLadder(guild.id);
-	const count = await countWarnings(guild.id, user.id, countsSince(ladder.expireAfterDays));
 	const step = stepFor(ladder.steps, count);
 
 	// Sent before the step, because a member who has been kicked or banned can no longer be reached.

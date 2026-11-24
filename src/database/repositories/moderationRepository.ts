@@ -58,16 +58,6 @@ export async function recordWarning(
 	return { entry, count };
 }
 
-export async function addWarning(
-	guildId: string,
-	userId: string,
-	userTag: string,
-	executor: { id: string; tag: string },
-	reason: string,
-): Promise<WarnEntry> {
-	return (await recordWarning(guildId, userId, userTag, executor, reason)).entry;
-}
-
 export async function getWarnings(guildId: string, userId: string): Promise<WarnRecord | null> {
 	return Warnings.findOne({ guildId, userId }).lean<WarnRecord>().exec();
 }
@@ -123,13 +113,6 @@ export async function warningCounts(guildId: string): Promise<Map<string, number
 	]).exec();
 
 	return new Map(rows.map((row) => [row._id, row.count]));
-}
-
-/** Counts only warnings given at or after `since` when it is set. */
-export async function countWarnings(guildId: string, userId: string, since: Date | null = null): Promise<number> {
-	const warnings = (await getWarnings(guildId, userId))?.warnings ?? [];
-
-	return since === null ? warnings.length : warnings.filter((warning) => warning.timestamp >= since).length;
 }
 
 export async function getWarnLadder(guildId: string): Promise<WarnLadderRecord | null> {
