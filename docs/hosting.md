@@ -109,7 +109,10 @@ Discord's end rather than yours.
 
 When you do put one in front, set `DASHBOARD_TRUST_PROXY=true` — without it every request looks like it comes
 from the proxy, and the rate limiter buckets them all together. With it and _no_ proxy, anyone can forge their
-own bucket by setting a header. Set it if and only if something is genuinely terminating TLS in front.
+own bucket by setting a header. Set it if and only if something is genuinely terminating TLS in front. The bot reads
+the **last** address in `X-Forwarded-For`, the one the proxy nearest it added, because a proxy appends to whatever the
+caller sent. With two proxies in a row, have the inner one pass on the outer one's view (nginx's `real_ip` module), or
+every visitor is counted as the outer proxy.
 
 ---
 

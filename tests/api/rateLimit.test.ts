@@ -103,10 +103,11 @@ describe("clientAddress", () => {
 		expect(clientAddress(context, false)).not.toBe("1.2.3.4");
 	});
 
-	it("reads the first hop when a proxy is trusted", async () => {
-		const context = await contextFor({ "x-forwarded-for": "1.2.3.4, 10.0.0.1" });
+	/** A proxy appends the caller's address to whatever they sent, so reading the first entry let anybody pick their own. */
+	it("reads the address the trusted proxy added, never one the caller wrote before it", async () => {
+		const context = await contextFor({ "x-forwarded-for": "6.6.6.6, 203.0.113.7" });
 
-		expect(clientAddress(context, true)).toBe("1.2.3.4");
+		expect(clientAddress(context, true)).toBe("203.0.113.7");
 	});
 
 	it("copes with a trusted proxy that sent nothing", async () => {
