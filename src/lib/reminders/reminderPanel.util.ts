@@ -4,17 +4,10 @@ import { type StoredReminder } from "@database/repositories/reminderRepository";
 import { button, navRow, row } from "@lib/discord/components.util";
 import { container, containerMessage, sectionWithButton, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-import { discordTime } from "@lib/format/format.util";
+import { blockquote, discordTime } from "@lib/format/format.util";
 import { REMINDER_ID, REMINDER_LIMITS } from "@lib/reminders/reminders.constants";
 
 /** What `/remind` answers with, the list it keeps, and the message it delivers. */
-
-function quoted(value: string): string {
-	return value
-		.split("\n")
-		.map((line) => `> ${line}`)
-		.join("\n");
-}
 
 function shortened(value: string, limit: number): string {
 	const line = value.replace(/\s+/g, " ");
@@ -44,7 +37,7 @@ export function reminderConfirm(
 		text(
 			`## ⏰ Reminder set\nI will remind you ${discordTime(due, "R")} (${discordTime(due, "f")}), ${whereLine(reminder)}.`,
 		),
-		text(quoted(reminder.text)),
+		text(blockquote(reminder.text)),
 	];
 	if (note !== undefined) parts.push(text(`-# ${note}`));
 
@@ -73,7 +66,7 @@ export function reminderCancelled(
 ): ContainerMessage & { allowedMentions: { parse: [] } } {
 	return withoutPings(
 		containerMessage(
-			container({ category: "community", parts: [text(`## ⏰ Reminder cancelled\n${quoted(reminder.text)}`)] }),
+			container({ category: "community", parts: [text(`## ⏰ Reminder cancelled\n${blockquote(reminder.text)}`)] }),
 		),
 	);
 }
@@ -124,7 +117,7 @@ export function deliveredText(reminder: StoredReminder, where: "channel" | "dm")
 		where === "channel"
 			? `⏰ <@${reminder.userId}>, you asked me to remind you ${set}:`
 			: `⏰ You asked me to remind you ${set}:`,
-		quoted(reminder.text),
+		blockquote(reminder.text),
 	];
 
 	if (where === "dm" && reminder.guildId !== null && reminder.channelId !== null) {

@@ -4,17 +4,10 @@ import { type StoredConversation } from "@database/repositories/modmailRepositor
 import { button, channelSelect, option, roleSelect, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-import { discordTime } from "@lib/format/format.util";
+import { blockquote, discordTime } from "@lib/format/format.util";
 import { MODMAIL_ID, MODMAIL_SETTINGS_ID } from "@lib/modmail/modmail.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { MODMAIL_NOTE_PREFIX, type ModmailSettings } from "@testify/shared";
-
-function quoted(value: string): string {
-	return value
-		.split("\n")
-		.map((line) => `> ${line}`)
-		.join("\n");
-}
 
 /** The thread's name in the staff channel, inside Discord's 100 characters. */
 export function threadName(username: string): string {
@@ -30,7 +23,7 @@ export function openingPost(
 	const ping = pingRoleId === null ? "" : `<@&${pingRoleId}> `;
 	const parts: ContainerPart[] = [
 		text(`## 📬 Mod mail\n${ping}<@${conversation.userId}> (${conversation.username}) · ${conversation.userId}`),
-		text(quoted(firstMessage)),
+		text(blockquote(firstMessage)),
 		divider(),
 		text(
 			`-# Everything you write in this thread is sent to them, except a message starting with \`${MODMAIL_NOTE_PREFIX}\`, which stays here. Opened ${discordTime(conversation.createdAt, "R")}.`,

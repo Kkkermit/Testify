@@ -101,6 +101,14 @@ export function discordTime(date: Date | number, style: TimestampStyle = "f"): s
 	return `<t:${seconds}:${style}>`;
 }
 
+/** Quotes every line, so a `#` or a list in somebody's text cannot turn into the bot's own heading. */
+export function blockquote(text: string): string {
+	return text
+		.split("\n")
+		.map((line) => `> ${line}`)
+		.join("\n");
+}
+
 export function truncate(text: string, max: number): string {
 	if (text.length <= max) return text;
 	return `${text.slice(0, Math.max(0, max - 1))}…`;

@@ -6,16 +6,9 @@ import { APPEAL_ID, APPEAL_SETTINGS_ID } from "@lib/appeals/appeals.constants";
 import { button, channelSelect, option, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-import { discordTime } from "@lib/format/format.util";
+import { blockquote, discordTime } from "@lib/format/format.util";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { APPEAL_LIMITS, type AppealSettings } from "@testify/shared";
-
-function quoted(value: string): string {
-	return value
-		.split("\n")
-		.map((line) => `> ${line}`)
-		.join("\n");
-}
 
 function statusLine(appeal: StoredAppeal): string {
 	if (appeal.status === "open") return "🟡 **Waiting** for somebody with Ban Members to decide.";
@@ -25,13 +18,13 @@ function statusLine(appeal: StoredAppeal): string {
 	const when = appeal.decidedAt === null ? "" : ` ${discordTime(appeal.decidedAt, "R")}`;
 	const line = `${word}${by}${when}`;
 
-	return appeal.reason === "" ? line : `${line}\n${quoted(appeal.reason)}`;
+	return appeal.reason === "" ? line : `${line}\n${blockquote(appeal.reason)}`;
 }
 
 /** What staff are shown in the appeals channel; the buttons go once it is decided. */
 export function appealPost(appeal: StoredAppeal): ContainerMessage {
 	const parts: ContainerPart[] = [
-		text(`## ⚖️ Ban appeal\n${quoted(appeal.text)}`),
+		text(`## ⚖️ Ban appeal\n${blockquote(appeal.text)}`),
 		text(`-# From <@${appeal.userId}> (${appeal.username}) · ${appeal.userId} · ${discordTime(appeal.createdAt, "R")}`),
 		divider(),
 		text(statusLine(appeal)),
@@ -61,7 +54,7 @@ export function appealDecisionText(appeal: StoredAppeal, guildName: string): str
 			? `⚖️ Your appeal to **${guildName}** was accepted, and your ban has been lifted.`
 			: `⚖️ Your appeal to **${guildName}** was refused.`,
 	];
-	if (appeal.reason !== "") lines.push(quoted(appeal.reason));
+	if (appeal.reason !== "") lines.push(blockquote(appeal.reason));
 
 	return lines.join("\n");
 }

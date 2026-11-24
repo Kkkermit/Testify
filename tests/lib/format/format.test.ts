@@ -1,4 +1,5 @@
 import {
+	blockquote,
 	discordTime,
 	escapeMarkdown,
 	formatClock,
@@ -58,6 +59,10 @@ describe("text", () => {
 	it("truncates with an ellipsis and respects the limit exactly", () => {
 		expect(truncate("abcdefghij", 5)).toHaveLength(5);
 		expect(truncate("abc", 10)).toBe("abc");
+	});
+
+	it("quotes every line of somebody's text", () => {
+		expect(blockquote("# heading\n- item")).toBe("> # heading\n> - item");
 	});
 
 	it("stops user text from formatting the embed around it, and leaves plain text alone", () => {

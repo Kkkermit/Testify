@@ -5,17 +5,10 @@ import { type StoredIdea } from "@database/repositories/ideaRepository";
 import { button, channelSelect, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-import { discordTime } from "@lib/format/format.util";
+import { blockquote, discordTime } from "@lib/format/format.util";
 import { IDEA_ID, IDEA_SETTINGS_ID } from "@lib/ideas/ideas.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type IdeaSettings, type IdeaStatus } from "@testify/shared";
-
-function quoted(value: string): string {
-	return value
-		.split("\n")
-		.map((line) => `> ${line}`)
-		.join("\n");
-}
 
 const STATUS_WORD: Record<Exclude<IdeaStatus, "open">, string> = {
 	accepted: "✅ **Accepted**",
@@ -31,7 +24,7 @@ function ideaStatusLine(idea: Pick<StoredIdea, "status" | "reason" | "decidedByN
 	const when = idea.decidedAt === null ? "" : ` ${discordTime(idea.decidedAt, "R")}`;
 	const line = `${STATUS_WORD[idea.status]}${by}${when}`;
 
-	return idea.reason === "" ? line : `${line}\n${quoted(idea.reason)}`;
+	return idea.reason === "" ? line : `${line}\n${blockquote(idea.reason)}`;
 }
 
 /** The post members vote on, which quotes a member and names its author, so it pings nobody. */
@@ -74,7 +67,7 @@ export function ideaPost(idea: StoredIdea): ContainerMessage & { allowedMentions
 export function decisionText(idea: StoredIdea, guildName: string, link: string | null): string {
 	const verb = idea.status === "accepted" ? "accepted" : idea.status === "declined" ? "declined" : "reopened";
 	const lines = [`💡 Your idea #${String(idea.number)} in **${guildName}** was ${verb}.`];
-	if (idea.reason !== "") lines.push(quoted(idea.reason));
+	if (idea.reason !== "") lines.push(blockquote(idea.reason));
 	if (link !== null) lines.push(`-# ${link}`);
 
 	return lines.join("\n");
