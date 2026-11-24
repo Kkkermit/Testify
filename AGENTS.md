@@ -251,7 +251,8 @@ src/
 ├── database/
 │   ├── connection.ts
 │   ├── models/           51 Mongoose schemas, one file per feature
-│   └── repositories/     52 query layers, one per feature. Commands never touch a model directly.
+│   ├── repositories/     52 query layers, one per feature. Commands never touch a model directly.
+│   └── readCache.util.ts, duplicateKey.util.ts, recordFilter.util.ts — what every repository shares
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
@@ -306,6 +307,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers              |
 | Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in                  |
 | Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                                |
+| Cache a read that many callers share       | `src/lib/infra/timedCache.util.ts`; a setting read per message: `ReadCache`         |
 
 ### The panel renderers in `src/lib`
 
@@ -324,6 +326,7 @@ Each is a pure state→message function paired with a handler in `src/buttons/`.
 | `musicSystemPanel.util.ts`    | `buttons/music.ts`             | A switch and a pre-ticked role select, applied immediately |
 | `casinoPanel.util.ts`         | `buttons/casino.ts`            | A picture per state, re-read from the database every press |
 | `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts`    | A switch, a toggle per game and a pre-filled modal         |
+| `roulettePanel.util.ts`       | `buttons/roulette.ts`          | A shared post anybody presses, redrawn from the round      |
 | `roleMenuPanel.util.ts`       | `buttons/roleMenuAdmin.ts`     | A list of records, each opening its own editor             |
 | `ideaPanel.util.ts`           | `buttons/idea.ts`              | A public post anybody presses, with staff-only buttons     |
 | `tempVoicePanel.util.ts`      | `buttons/tempVoiceSettings.ts` | A setting with a button that makes the thing it points at  |
@@ -482,7 +485,8 @@ build, not assumed.
 `tests/core/conventions.test.ts` pins the layout: nothing loose in `src/lib` but the root barrel, a barrel in
 every folder, every module in its folder's barrel, one level deep and no further. The move itself surfaced two
 different types both called `PetRarity` and two `pageCount` functions — neither had been in the old root barrel,
-so nothing had ever put them side by side.
+so nothing had ever put them side by side. `@core`, `@config` and `@database` likewise name every module of their
+own, which `tests/core/barrels.test.ts` pins.
 
 > [!WARNING]
 > Barrels plus `import-x/no-cycle` still need care — `src/lib/` and `src/core/` reference each other. Let the
@@ -544,6 +548,10 @@ failure. `requirePostable(channel, readerLanguage(interaction), [what the post n
 channel and each permission missing (`iNeedIn`). `missingToPost` is the one rule behind it and behind
 `canPostInChannel` and the panels' `pickedChannelId`: View Channel, then Send Messages, or Send Messages in Threads for
 a thread.
+
+**A reason that reaches Discord's audit log goes through `auditReason`** in `src/lib/moderation/`, which cuts it to
+Discord's 512 characters: past that Discord refuses the kick, ban, timeout or lock itself, and a moderator's name in
+front of a 500-character reason is already past it.
 
 **A bounded option is held on every surface.** Discord refuses a slash command's value outside its `min`, `max`,
 `choices` or `maxLength`, but the prefix and the dashboard's runner read text, so `OptionReader` refuses it there
@@ -723,13 +731,17 @@ Gotchas found the hard way:
 
 - **Type `parts` as `ContainerPart[]` explicitly.** TypeScript otherwise narrows the array from its initial
   literal and rejects sections and rows appended later.
-- `container()` colours itself from `categoryColour`, which returns named colours for embeds; `setAccentColor`
-  needs a number, so anything non-numeric falls back rather than throwing. A colour is never worth failing a
-  message over.
+- `container()` resolves `categoryColour`'s named colour to the number `setAccentColor` needs, so every panel's
+  stripe says which part of the bot it is; a colour discord.js cannot read falls back to `theme.colours.default`
+  rather than throwing. A colour is never worth failing a message over.
+- **Component text is cut to Discord's caps in `components.util.ts`** — button labels, placeholders, option text,
+  modal titles and labels (`CAPS`) — because discord.js throws on longer text and the whole message fails.
 - Discord caps a V2 message at 40 components. Page long lists (the shop uses 5 entries per page), or, for a list
   capped at 25, pick from one select menu (the auto-responder and scheduled message panels).
-- **A panel that shows typed text goes out through `withoutPings`.** A container's text pings whoever it mentions,
-  and a prefix run posts the panel where everybody can see it, so a reply reading `@everyone` would ping them all.
+- **A panel that shows typed text, or names a member or a role, goes out through `withoutPings`.** A container's
+  text pings whoever it mentions, and a prefix run posts the panel where everybody can see it, so a reply reading
+  `@everyone` would ping them all — and so would the music panel's requester, the levelling panel's reward roles, a
+  role menu, an idea or a reminder.
 
 Embeds are still correct for one-shot results — `/beg`, `/rob`, `/work` — where buttons would add noise. Do not
 convert something just to convert it.
@@ -768,7 +780,13 @@ Rules:
 
 1. **Money is atomic.** `$inc`, `findOneAndUpdate`, and `debitWallet()` returning a boolean you must check.
    Never read-modify-`save()` a balance — the original could duplicate money that way. A debit below zero would be
-   a credit, so `debitWallet` and the bank's debit throw on a negative or non-finite amount before the query.
+   a credit, so `debitWallet` and `debitBank` throw on a negative or non-finite amount before the query. A deposit
+   or a withdrawal is one update that moves both sides, and the dashboard's take from a member (`changeMoney`) goes
+   through the same conditional debits, so a balance spent since it was read is refused rather than overdrawn.
+   **A cooldown or a one-of slot is claimed in the update that checks it**: `claimCooldown` for `/beg`, `/work` and
+   `/rob`, `fillSlot` and `emptySlot` for a house or a pet, `addBusiness`, `updatePet` (which writes only while it is
+   the same pet), and a `$ne` guard on the push behind `addInventoryItem` and the lottery's `addEntry`, so two presses
+   at once can neither pay twice nor charge twice.
 2. **Debit before you deliver.** Every purchase branch takes payment first and only writes the goods on success,
    so a failed payment can never hand out the item.
 3. **`getOrCreate*` never returns null.** Use it when absence should mean "start them off"; use `find*` when
@@ -794,6 +812,12 @@ Rules:
    this, and its `StoredLevelSettings` marks the fields added later as optional. That function is also where the
    levelling system's old single `roleId`/`multiplier` pair is folded into the `boosts` array, so no other file
    knows the old shape existed. **Migrate on read, in one place, with a test per field.**
+8. **A setting read on every message or command is cached in a `ReadCache`** (`src/database/readCache.util.ts`):
+   the prefix, the blacklist, the casino, music, tuning, toggles, raid, invites, mod mail, auto-responders, notices
+   and away notes. A repository calls `set` or `forget` **after** its write, never before, and a read that a write
+   overtook is answered but not kept, so a save can never be undone by a slow read putting the old value back.
+   `isDuplicateKey` and `recordIn` (one record in one server) beside it are the other two helpers every repository
+   shares.
 
 ---
 
@@ -902,7 +926,8 @@ Two separate jobs. Keep them apart.
   `warn` buried the single line naming the cause under hundreds of duplicates. Warn on decisive failures; leave
   the rest at `debug`.
 
-**Presentation — `src/core/terminal.ts`, `src/lib/bot/startup.util.ts` and `src/lib/bot/banner.util.ts`.** What
+**Presentation — `src/core/terminal.ts`, `src/lib/bot/startup.util.ts` (the boot report),
+`src/lib/bot/startupFailure.util.ts` (`explainStartupFailure` and `exitOnFatalClose`) and `src/lib/bot/banner.util.ts`.** What
 a person reads while the bot starts is `process.stdout.write`-n directly, **never through the logger**, and every
 script draws with the same `painter`, `box`, `badge` and `stepLine`. Three things about it are load-bearing:
 
@@ -1376,7 +1401,8 @@ handed, so `http://127.0.0.1:27017` or a cloud metadata address was a request th
 channel. Every run passes `--use-extractors default,-generic` (`SITE_EXTRACTORS`), which leaves only the site
 extractors, and a site extractor that hands a link on to the generic one by name finds it missing too — read out of
 `YoutubeDL.py`'s `extract_info` and `add_default_info_extractors`, not assumed. A link whose host is an address
-literal, a bare name or `.local`/`.internal`/`localhost` reads as search text before anything runs, and a link to a
+literal, a bare name or `.local`/`.internal`/`localhost`, with or without the root's trailing dot, reads as search
+text before anything runs (the dot is stripped before the sources check too), and a link to a
 plain file on some other site no longer plays, which is the price. The artwork and avatars the cards draw go through
 `fetchPicture`: `https` only, no redirect, five seconds and 8 MB at most.
 
@@ -1447,6 +1473,9 @@ with `-af volume=`, and FFmpeg is the only thing in the stack that can do it. Fo
   records the level, answers, and re-opens in the background.
 - **The player falling idle mid-swap is not the track ending.** `play` marks itself as re-opening before it
   yields, and `#onIdle` returns while that is set.
+- **Only the newest `play` opens a stream.** An older one still waiting on yt-dlp, or one whose session was destroyed
+  meanwhile, opens nothing, so no download is left blocked on a pipe nobody reads; a level set while a track is
+  opening is read once the open is ready, rather than starting the track again from 0:00.
 
 **A queue where nothing opens ends rather than walking itself.** Each failure to open steps past the track, and
 under `loop: "queue"` that is a circle — so `#failures` bounds it at one pass and then ends the queue. Without
@@ -1467,6 +1496,8 @@ already left it, and a new request asks `session.active` — playing, paused or 
 a track is current. A queue that ended on its own used to keep its last song as the current one, so the next `/play`
 queued behind a song that had already finished while the panel kept counting it down. `addTracks` is the one rule
 for where new tracks go, and `queueRequest` is the one path to it, shared by `/play` and the panel's Add to queue.
+It joins the channel before it decides where the tracks go, so two requests on an idle player start one track and
+queue the other.
 
 **A paused track shows "Paused · 2:13 left", never `<t:…:R>`**, because a relative timestamp keeps counting in every
 reader's client whatever the player is doing.
@@ -1579,7 +1610,8 @@ the dashboard and the link filter all call it — so a second warning mutes whic
 about it are load-bearing:
 
 - **The Nth warning takes the Nth step, and past the end the last step repeats** (`stepFor`). A fifth warning on
-  a four-step list is not a free pass.
+  a four-step list is not a free pass. N is counted by `recordWarning` from the very write that adds the warning,
+  so two warnings given at once count two and three rather than both counting two.
 - **The DM goes before the step**, because a member who has been kicked or banned can no longer be messaged.
 - **A step that cannot be carried out does not fail the warning.** The warning is recorded, and `applyWarnStep`
   answers with a `WarnProblem` code — `left`, `outranked` or `refused` — that each surface words for itself:
@@ -1660,7 +1692,8 @@ left stops counting with nothing to clean up. Somebody on that board who is not 
 
 The same reasoning deleted `/use` (the inventory panel's per-row Use buttons do it better), `/rehome` (now
 `/pet rehome`, with `t?rehome` kept as a prefix alias) and `/pet buy` (the shop sells pets with a button; `/pet
-rename` covers the one thing `/pet buy` could do that the shop could not). A command whose whole body is
+rename` covers the one thing `/pet buy` could do that the shop could not), and `/how smart` (a copy of `/fun iq`).
+A command whose whole body is
 "do what that other command does" should be an alias or a subcommand, not a command.
 
 **`/levelling setup` and `/levelling edit` are the exception, and it is deliberate.** They open the same panel
@@ -1745,8 +1778,9 @@ it. Five things about it are load-bearing:
 
 - **The money moves before anything is drawn.** `takeStake` checks the table's limits, then debits with the
   conditional `debitWallet`, so a bet can never overdraw and a limit is refused before a coin moves. The game is
-  then settled and paid in the same request, and only after that is the animation rendered. A crash between the
-  payout and the picture costs a picture, never a stake.
+  then settled and paid in the same request, before the reply is even deferred, and only after that is the
+  animation rendered. A crash between the payout and the picture, or an interaction that expired, costs a picture,
+  never a stake or a win.
 - **The animation is replaced by the result, not trusted to stop.** A GIF is written to play once (`repeat: -1`),
   but a client that loops it would spin the wheel for ever, so `playInstant` edits the message to the settled
   still once the animation has had `durationMs` plus `CASINO_TIMING.revealMarginMs` to run. The wheel is static and
@@ -2308,7 +2342,9 @@ under it, switching each feature off removes exactly its parts and nothing else,
 
 **The giveaways manager starts with the bot.** `discord-giveaways` only ends a giveaway on a timer its manager starts
 when something creates it, and only `/giveaway` and its route did, so a giveaway running across a restart never ended
-until somebody touched one. The `giveaways` job creates it five seconds after start-up.
+until somebody touched one. The `giveaways` job creates it five seconds after start-up. **It finds a giveaway by
+message id in every server**, so `endGiveaway`, `rerollGiveaway` and `deleteGiveaway` take the guild and refuse a
+giveaway from another one, and `/giveaway` offers this server's giveaways by prize rather than asking for an id.
 
 ### Analytics go to a Shardlens collector the owner runs, and only the owners see how it is doing
 
@@ -2398,8 +2434,9 @@ owner console's Usage tab, its per-server drill-down and the server list's count
   `shardlensReader.util.ts` makes the client's own `createShardlensClient` with `SHARDLENS_READ_KEY` and asks it, so
   the address rule, the key format, `redirect: "manual"` and the timeout are the package's and no request is written
   by hand. The client types the collector's answers but checks none of them, so every answer is checked again with
-  zod: `ANSWERS` holds one schema per query kind, the query's own `kind` picks it, and `takesWhatIsSent` makes a
-  schema that would refuse what the client declares a compile error rather than a blank chart. It shares an answer for
+  zod: `COLLECTOR_ANSWERS` in `shardlensAnswers.util.ts` holds one schema per query kind, the query's own `kind`
+  picks it, and `takesWhatIsSent` makes a
+  schema that would refuse what the client declares a compile error rather than a blank chart. It shares an answer, through `TimedCache`, for
   a minute (`rangeOf` closes each window on the next whole minute, so a minute's reads ask the same question) and keeps
   no failure. A `ShardlensClientError` becomes `AnalyticsUnavailable` with `off` (`invalid_options`: a key or an
   address the client will not send to, which never leaves the process), `refused`, `audit_off` or `unreachable`; a 400
@@ -2568,7 +2605,7 @@ components/
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
 hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced, useDocumentMutation,
-                useOptimisticMutation
+                useOptimisticMutation, useDraft
 lib/            api, cn, datetime and intl, colour and customAccent, paging, queries, redirect, tint, and tokens
                 for reading a colour in JavaScript
 ```
@@ -2910,7 +2947,9 @@ channel, where they can be seen.
 still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/memberDirectory.util.ts` is the read and
 `actOnEach` in `memberBulk.util.ts` the write, and nothing new is stored. Five things about it are load-bearing:
 
-- **Never one big list.** `guild.members.list` is read a thousand at a time from a cursor, a search is
+- **Never one big list, and paged like every cursor list.** The page turns through the numbered `Pager` over a
+  `CursorTrail`, as Who ran what does, and a filter change starts again at page one.
+  `guild.members.list` is read a thousand at a time from a cursor, a search is
   `guild.members.search` (prefix only, at most a thousand, and the page says when it hit that), and a role filter
   reads the members themselves rather than `role.members`, which knows only the cached ones. A filter that matches
   little stops after `DIRECTORY_LIMITS.maxScan` members and hands back a cursor, so no page can stall on a server
@@ -2956,7 +2995,10 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
   stand arrives. Showing the kept answer instead looked as if the filter had done nothing until the new list
   replaced it. `MembersDirectory.test.tsx` holds an answer back and fails on the last filter's rows.
 - **A refused write is drawn by `Refusal`**, which shows the server's own wording when it gave one and the fallback
-  otherwise; `refusalText` is the same rule for a place that needs the string.
+  otherwise; `refusalText` is the same rule for a place that needs the string. It goes beside the row whose action
+  caused it, matched on `mutation.variables`, never at the foot of the page or beside every row.
+- **A draft that edits a saved value is `useDraft(saved)`**, never `useState` copied from the answer in a
+  `useEffect`, which overwrote what was being typed whenever another setting on the page saved and the page refetched.
 - **A control that is typed into does not write the URL per keystroke.** `?q=` is written with `replace: true`,
   or Back walks the user back through every character, and the request behind it is debounced (`useDebounced`) so
   a five-character search is one query rather than five. Confirmed in a real browser, not in jsdom.
@@ -3127,12 +3169,14 @@ and names a deleted channel rather than showing another. A form with several req
 still missing (`ticketMissing`), not only the first, so they can be filled in any order.
 
 **Nor does one format its own dates, numbers or units.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`,
-`dayAndMonth`, `monthName`, `clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
+`dayAndMonth`, `calendarDate`, `monthName`, `clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
 All of them write in the language the reader chose and never in the browser's own region: a bare
 `toLocaleString()` renders `7/30/2026` for one admin and `30/07/2026` for another, and the two are unreadable as
 each other. English is British (`formattingLocale` maps `en` to `en-GB`), so `30 Jul 2026` cannot be misread, and
 every other language gets its own month names, separators and unit symbols — `30. Juli 2026`, `7,2 ko`, `42 мс`.
-The month is always a word, which matters most on an audit trail. Formatters are cached per locale, so switching
+The month is always a word, which matters most on an audit trail. **A stored `YYYY-MM-DD` day goes through
+`calendarDate` or `dayAndMonth`, never `shortDate`**: read as a time it is UTC midnight, which every reader west of
+UTC sees as the day before — the status page, traffic, insights and the privacy notice's date all did. Formatters are cached per locale, so switching
 language never reuses the old one. **No other file builds an `Intl` formatter or calls `toLocaleDateString`**, because
 only `formattingLocale` is guaranteed a tag the browser accepts: four screens passed `i18n.language` instead, which is
 whatever the browser reported, and Chromium's `en-US@posix` made `Intl.DateTimeFormat` throw and took the birthdays page
@@ -3253,7 +3297,8 @@ Five pieces make the common journeys shorter, and four things in them are load-b
   `Outlet`, so the countdown survives moving to another screen; hovering or focusing the notice holds the clock
   (WCAG 2.2.1), a keyboard delete hands focus to Undo, and closing the tab sends it at once — DELETEs go out with
   `keepalive`, the one kind of request that outlives the page. A waiting delete still holds its channel and its
-  place against the limit, so nothing can be added into the gap and then deleted with it. `LeaveGuard` is the
+  place against the limit, so nothing can be added into the gap and then deleted with it. `schedule` takes an
+  optional `refusal(error)`, so a page words its own refusal; AutoMod's rule removal goes through it. `LeaveGuard` is the
   other half: a screen that holds a draft until Save asks before a navigation to another path (`useBlocker`) and
   before a reload or a closed tab (`beforeunload`); a tab on the same screen is not leaving it.
 
@@ -3775,8 +3820,9 @@ about it are load-bearing:
   `requireActivityReader` and `logRead`, not assumed. Without the key the section says how to add one; with it the
   section reads the log `RUN_LIMITS.perPage` (25) at a time, newest first, with the collector's own `nextBefore`, under
   the same numbered `Pager` as Cases and Changes. The collector gives no total, so `Pager`'s `more` reads "of 3 or
-  more" and leaves Last off until a page answers with no cursor after it, and `RunTrail` keeps every cursor met so a
-  page number goes back without asking again; changing the window or a filter starts again from page one. The
+  more" and leaves Last off until a page answers with no cursor after it, and `CursorTrail` in `lib/paging.ts`
+  (`trailPages`, `turnTo`, `cursorAt`) keeps every cursor met so a page number goes back without asking again — the
+  member directory pages through the same trail; changing the window or a filter starts again from page one. The
   collector's own Activity page and the server's page are still linked with `collectorPage`, which only ever builds a
   link from an `http`/`https` origin.
 
@@ -3862,6 +3908,10 @@ because somebody worth blocking is usually in no server the bot can still see, a
 no longer knows still renders: an entry nobody can read is an entry nobody can lift. A link with `?block=<id>`
 opens this tab with the id filled in and the reason focused — it never blocks on its own, because the entry is
 bot-wide and the owner should say why.
+
+**The server list and one server's detail say what is set up the same way**: both call `configuredIn` in
+`routes/owner.ts`, which answers with the overview's feature keys, and the console names them through the overview's
+own labels (`featureLabel`), falling back to the key for one it does not know.
 
 **Leaving a server is confirmed by name, and the server is what compares it.** Rejoining needs a fresh invite
 from somebody still inside, so the browser asking for the name is the warning and `confirm !== guild.name` is

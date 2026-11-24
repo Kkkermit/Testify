@@ -200,6 +200,7 @@ src/
 │   ├── AppShell.tsx    Sidebar + content column. The one `gap-6` that sets vertical rhythm.
 │   ├── RequireAuth.tsx The sign-in gate.
 │   ├── ErrorState.tsx  What a failed query renders.
+│   ├── useStaleReload.ts One reload for a tab left open across a deploy, shared by both route errors
 │   └── layout/         Sidebar, SidebarLink, SidebarSection, MobileNav
 ├── components/
 │   ├── brand/          BotMark, BotBanner, FlagIcon — the bot's own picture and banner
@@ -212,8 +213,8 @@ src/
 │   ├── navigation.ts   The sidebar, as data
 │   └── features.ts     Each bot feature's icon, hue and dashboard path
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
-├── hooks/              usePageTitle usePrefersReducedMotion useDocumentVisible useDebounced
-├── lib/                api cn colour customAccent datetime intl queries redirect sanitise tint tokens
+├── hooks/              usePageTitle usePrefersReducedMotion useDocumentVisible useDebounced useDraft
+├── lib/                api cn colour customAccent datetime intl paging queries redirect sanitise tint tokens
 └── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
 
@@ -441,6 +442,11 @@ server agreed would be claiming a message had been sent that may not have been.
   pair would otherwise store a floor above its own ceiling.
 - **A typed-into control does not write the URL per keystroke.** `?q=` uses `replace: true` or Back walks
   through every character, and the request behind it is debounced with `useDebounced`.
+- **A draft that edits a saved value is `useDraft(saved)`**, never `useState` copied from the answer in a
+  `useEffect`. That copy overwrote whatever was being typed whenever another setting on the page saved, because
+  the save refetched the page's data.
+- **A refusal goes beside the row whose action caused it**, matched on `mutation.variables`, never at the foot of
+  the page or beside every row.
 - **Every mutation writes an audit record**, after the change succeeds. If the audit write itself fails it is
   logged and the request still succeeds — the change did happen.
 
@@ -464,6 +470,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Skeleton`                                                   | What `isPending` returns                                                   |
 | `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike         |
 | `Pager`                                                      | Numbered pages with First and Last; `more` for a list with no total yet    |
+| `CursorTrail` (`lib/paging`)                                 | A cursor list's pages for `Pager`: `trailPages`, `turnTo`, `cursorAt`      |
 | `Summary`                                                    | The one sentence under a page's header saying what the feature does now    |
 | `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                            |
 | `ChartReadout`                                               | Wraps a chart's cells; each says what it shows in `data-readout`           |
@@ -534,6 +541,7 @@ shows one. AGENTS.md §24 has the rules.
 | Piece          | Use it for                                                                                         |
 | -------------- | -------------------------------------------------------------------------------------------------- |
 | `useUndo()`    | Any delete: `schedule({ key, label, commit })`, and filter rows by `isHidden(key)`. Never `mutate` |
+|                | An optional `refusal(error)` words a refusal the page knows better, as AutoMod's rule removal does |
 | `<LeaveGuard>` | Any screen that holds a draft until Save: `<LeaveGuard when={dirty && !saving} />`                 |
 
 A key is unique across the app — `role-menu:${guildId}:${id}` — and a waiting delete still counts against a limit
@@ -824,6 +832,8 @@ Everything behind `requireOwner`, which answers **404** so a manager never learn
 its own data, deliberately: a failing `/owner/stats` used to blank the whole console, and the logs tab is
 precisely the screen you want when something is wrong.
 
+- **A row of figures across a card is `FigureStrip`, and a code-shaped label is `codeLabel`**, so the Usage
+  sections draw both one way.
 - **Ownership is `DISCORD_OWNER_IDS` and nothing else**, read from env on every request — so removing an ID
   revokes the console on that person's next click, and no flag on the session can grant it.
 - **Usage is read from Shardlens, and nothing analytic is kept in MongoDB.** The Usage tab, its per-server
@@ -1032,7 +1042,7 @@ Rules that hold today and are worth keeping:
 
 ### 19.5 Surfaces and elevation
 
-**There are no shadows, highlights or gradients anywhere.** Depth comes from two things:
+**No surface carries a shadow, a highlight or a gradient.** Depth comes from two things:
 
 1. **Surface colour** — `--color-background` → `--color-card` → `--color-popover`, each a step away from the page.
 2. **A 1px `--color-border`** around a card.
@@ -1040,6 +1050,9 @@ Rules that hold today and are worth keeping:
 A card used to carry an inset highlight along its top edge, the page a radial wash in the accent and a WebGL field
 of points, and the screen's one "focal" card a gradient hairline. Together they were what made the dashboard read
 as generated rather than made, and none of them told the reader anything.
+
+The one exception is something that floats over the page — quick search, the undo notice, the leave guard and the
+help desk's typeahead — which wears `shadow-lg` so it reads as above the page rather than part of it.
 
 ### 19.6 Spacing and rhythm
 
