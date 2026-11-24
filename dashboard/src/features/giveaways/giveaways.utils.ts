@@ -17,7 +17,7 @@ export function durationMsOf(amount: number, unit: DurationUnit): number {
 }
 
 export function ordered(rows: GiveawayRow[]): GiveawayRow[] {
-	return [...rows].sort((a, b) => {
+	return rows.toSorted((a, b) => {
 		if (a.ended !== b.ended) return a.ended ? 1 : -1;
 
 		return new Date(b.startAt).getTime() - new Date(a.startAt).getTime();

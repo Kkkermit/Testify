@@ -30,5 +30,5 @@ export function routePattern(pathname: string, params: Readonly<Record<string, s
 		.flatMap(([name, value]) => (value === undefined || value === "" ? [] : [{ name, value }]))
 		.sort((a, b) => b.value.length - a.value.length);
 
-	return named.reduce((path, { name, value }) => path.split(value).join(`:${name}`), pathname);
+	return named.reduce((path, { name, value }) => path.replaceAll(value, `:${name}`), pathname);
 }

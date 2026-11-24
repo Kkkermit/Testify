@@ -18,7 +18,7 @@ import {
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { IdeaItem } from "@/features/ideas/components/IdeaItem";
 import { IdeaSettings } from "@/features/ideas/components/IdeaSettings";
-import { ideaFilterFrom, ideaSummary, pageCount, pageFrom } from "@/features/ideas/ideas.utils";
+import { IDEA_FILTERS, ideaFilterFrom, ideaSummary } from "@/features/ideas/ideas.utils";
 import {
 	useDecideIdea,
 	useIdeaList,
@@ -30,6 +30,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { type TranslationKey } from "@/i18n";
 import { channelLabel } from "@/lib/channels";
+import { pageCount, pageFrom } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
 
 const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
@@ -110,7 +111,7 @@ export function IdeasPage(): React.JSX.Element {
 					<SegmentedControl
 						label={t("ideas.filter")}
 						value={filter}
-						segments={(["all", "open", "accepted", "declined"] as const).map((value) => ({
+						segments={IDEA_FILTERS.map((value) => ({
 							value,
 							label: t(FILTER_LABEL[value], { count: countOf(value) }),
 						}))}

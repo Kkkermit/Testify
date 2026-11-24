@@ -44,7 +44,7 @@ export function AppealItem({
 				<Badge tone={APPEAL_STATUS_TONE[appeal.status]}>{t(APPEAL_STATUS_LABEL[appeal.status])}</Badge>
 			</div>
 
-			<p className="text-sm whitespace-pre-line [overflow-wrap:anywhere]">{appeal.text}</p>
+			<p className="text-sm whitespace-pre-line wrap-anywhere">{appeal.text}</p>
 			<p className="text-muted-foreground text-xs">
 				{t("appeals.from", { id: appeal.userId, when: since(appeal.createdAt) })}
 			</p>

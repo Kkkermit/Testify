@@ -43,7 +43,7 @@ export function IdeaItem({
 				<Badge tone={TONE[idea.status]}>{t(STATUS_LABEL[idea.status])}</Badge>
 			</div>
 
-			<p className="text-sm whitespace-pre-line [overflow-wrap:anywhere]">{idea.text}</p>
+			<p className="text-sm whitespace-pre-line wrap-anywhere">{idea.text}</p>
 
 			<p className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
 				<span>{t("ideas.from", { name: idea.authorName, when: since(idea.createdAt) })}</span>

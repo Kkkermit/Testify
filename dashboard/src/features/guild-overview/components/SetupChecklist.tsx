@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Refusal } from "@/components/form";
-import { Badge, Button, Card } from "@/components/primitives";
+import { Badge, Button, Card, CARD_HEADING } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
 import {
@@ -37,7 +37,7 @@ export function SetupChecklist({ guildId }: { guildId: string }): React.JSX.Elem
 		<Card className="flex flex-col gap-4">
 			<div className="flex items-start justify-between gap-2">
 				<div className="flex min-w-0 flex-1 flex-col gap-1">
-					<h2 id="checklist-heading" className="font-semibold">
+					<h2 id="checklist-heading" className={CARD_HEADING}>
 						{t("checklist.title")}
 					</h2>
 					<p className="text-muted-foreground text-sm">

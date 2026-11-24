@@ -11,10 +11,10 @@ import { ScrollMemory } from "@/app/ScrollMemory";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
+// Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 import { NotFoundPage } from "@/features/not-found/NotFoundPage";
 import { SiteShell } from "@/features/site/SiteShell";
 import { followTrails } from "@/lib/trail";
-// Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 
 const GuildPickerPage = page(async () => import("@/features/guilds/GuildPickerPage"), "GuildPickerPage");
 const ComparePage = page(async () => import("@/features/compare/ComparePage"), "ComparePage");
