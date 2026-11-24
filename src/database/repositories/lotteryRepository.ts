@@ -87,9 +87,23 @@ export async function claimDueDraw(now: Date = new Date()): Promise<LotteryRecor
 		.exec();
 }
 
-export async function recordDraw(guildId: string, draw: LotteryDraw, basePrizePool: number): Promise<void> {
+/** Takes away only the tickets and pot that were drawn, so a ticket bought while the draw ran stays for the next one. */
+export async function recordDraw(drawn: LotteryRecord, draw: LotteryDraw): Promise<void> {
+	const ticketsOf = new Map<string, number>();
+	for (const entry of drawn.entries) ticketsOf.set(entry.userId, (ticketsOf.get(entry.userId) ?? 0) + entry.tickets);
+
+	// A lean read applies no default, and a NaN here would be written into the pot for good.
+	const base = Number.isFinite(drawn.basePrizePool) ? drawn.basePrizePool : 0;
+	const taken: Record<string, number> = { prizePool: base - drawn.prizePool };
+	const arrayFilters = [...ticketsOf].map(([userId, tickets], index) => {
+		taken[`entries.$[e${String(index)}].tickets`] = -tickets;
+		return { [`e${String(index)}.userId`]: userId };
+	});
+
 	await Lottery.updateOne(
-		{ guildId },
-		{ $push: { history: { $each: [draw], $slice: -25 } }, $set: { entries: [], prizePool: basePrizePool } },
+		{ guildId: drawn.guildId },
+		{ $push: { history: { $each: [draw], $slice: -25 } }, $inc: taken },
+		arrayFilters.length === 0 ? {} : { arrayFilters },
 	).exec();
+	await Lottery.updateOne({ guildId: drawn.guildId }, { $pull: { entries: { tickets: { $lte: 0 } } } }).exec();
 }

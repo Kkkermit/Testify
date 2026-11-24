@@ -68,11 +68,12 @@ export async function runLotteryDraws(client: TestifyClient): Promise<void> {
 		const winners = tickets.length === 0 ? [] : pickWinners(lottery, tickets);
 		for (const winner of winners) await adjustWallet(lottery.guildId, winner.userId, winner.prizeAmount);
 
-		await recordDraw(
-			lottery.guildId,
-			{ drawTime: new Date(), totalPrizePool: lottery.prizePool, totalTickets: tickets.length, winners },
-			lottery.basePrizePool,
-		);
+		await recordDraw(lottery, {
+			drawTime: new Date(),
+			totalPrizePool: lottery.prizePool,
+			totalTickets: tickets.length,
+			winners,
+		});
 
 		const channel = await client.channels.fetch(lottery.announcementChannelId).catch(() => null);
 		if (channel?.isTextBased() && channel.isSendable()) {

@@ -71,9 +71,8 @@ describe("the lottery draw", () => {
 		expect(new Set(winners).size).toBe(2);
 		expect(paid.mock.calls.every(([, , amount]) => amount === 450)).toBe(true);
 		expect(recorded).toHaveBeenCalledWith(
-			GUILD_ID,
+			expect.objectContaining({ guildId: GUILD_ID, basePrizePool: 100 }),
 			expect.objectContaining({ totalTickets: 52, winners: expect.any(Array) as unknown }),
-			100,
 		);
 	});
 

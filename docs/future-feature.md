@@ -56,9 +56,9 @@ Found in the November 2026 audit. Each says what is awkward today, what would be
 - **Counting that says who got there first.** The slower of two correct counts is told "You cannot count twice in a
   row". Check `lastUserId` before the write and react quietly when somebody else got there first. Build on
   `advanceCount`.
-- **A lottery draw nobody can interrupt.** A ticket bought during a draw is wiped with the old entries, and a crash
-  between paying and `recordDraw` would draw the same entries again. Claim the draw with a status, pay, then release
-  only the entries drawn. Build on `claimDueDraw` and `recordDraw`.
+- **A lottery draw nobody can interrupt.** `recordDraw` already takes away only the tickets and pot it drew, so a
+  ticket bought while a draw runs stays for the next one, but a crash between paying and `recordDraw` would draw the
+  same entries again. Claim the draw with a status, pay, then record it. Build on `claimDueDraw` and `recordDraw`.
 - **Cards that retry a missing avatar.** When Discord's CDN fails, the rank and leaderboard cards draw an initial for
   good. Note the fallback and draw the picture once more on the next view. Build on `loadAvatar` returning null and
   `drawAvatarImage`.
