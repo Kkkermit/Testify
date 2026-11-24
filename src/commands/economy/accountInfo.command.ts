@@ -2,7 +2,7 @@ import { defineCommand, inGuild } from "@core/command";
 import { getGuildTotals, requireAccount } from "@database/repositories/economyRepository";
 import { embed, reply } from "@lib/discord";
 import { decayValue, petStatus } from "@lib/economy";
-import { discordTime, formatNumber } from "@lib/format";
+import { discordTime, formatNumber, mentionOf } from "@lib/format";
 
 export default defineCommand({
 	name: "economy-info",
@@ -35,13 +35,17 @@ export default defineCommand({
 					embeds: [
 						embed({
 							category: "economy",
-							title: `${target.username}'s account`,
+							title: `👛 ${target.username}'s account`,
 							fields: [
-								{ name: "Wallet", value: formatNumber(account.wallet), inline: true },
-								{ name: "Bank", value: formatNumber(account.bank), inline: true },
-								{ name: "Net worth", value: formatNumber(account.wallet + account.bank), inline: true },
-								{ name: "Job", value: `${account.job} (level ${account.jobLevel})`, inline: true },
-								{ name: "Daily streak", value: `${account.dailyStreak} day(s)`, inline: true },
+								{ name: "Wallet", value: `**${formatNumber(account.wallet)}**`, inline: true },
+								{ name: "Bank", value: `**${formatNumber(account.bank)}**`, inline: true },
+								{ name: "Net worth", value: `**${formatNumber(account.wallet + account.bank)}**`, inline: true },
+								{ name: "Job", value: `${account.job} · level ${String(account.jobLevel)}`, inline: true },
+								{
+									name: "Daily streak",
+									value: `${formatNumber(account.dailyStreak)} ${account.dailyStreak === 1 ? "day" : "days"}`,
+									inline: true,
+								},
 								{ name: "Shifts worked", value: formatNumber(account.worked), inline: true },
 								{
 									name: "Robberies",
@@ -65,7 +69,11 @@ export default defineCommand({
 									inline: true,
 								},
 								{ name: "Pet", value: petLine, inline: true },
-								{ name: "Inventory", value: `${account.inventory.length} item type(s)`, inline: true },
+								{
+									name: "Inventory",
+									value: account.inventory.length === 0 ? "Empty" : `${String(account.inventory.length)} kinds of item`,
+									inline: true,
+								},
 								{ name: "Account opened", value: discordTime(account.createdAt, "D"), inline: true },
 							],
 							thumbnail: target.displayAvatarURL(),
@@ -80,12 +88,13 @@ export default defineCommand({
 			async run(interaction) {
 				const guild = inGuild(interaction);
 				const totals = await getGuildTotals(guild.id);
+				const icon = guild.iconURL();
 
 				await reply(interaction, {
 					embeds: [
 						embed({
 							category: "economy",
-							title: `${guild.name} economy`,
+							title: `🏦 ${guild.name}'s economy`,
 							fields: [
 								{ name: "Accounts", value: formatNumber(totals.accounts), inline: true },
 								{ name: "In wallets", value: formatNumber(totals.wallet), inline: true },
@@ -100,11 +109,11 @@ export default defineCommand({
 								},
 								{
 									name: "Richest",
-									value: totals.richest ? `<@${totals.richest.userId}>` : "Nobody yet",
+									value: totals.richest ? mentionOf(totals.richest.userId) : "Nobody yet",
 									inline: true,
 								},
 							],
-							...(guild.iconURL() !== null ? { thumbnail: guild.iconURL()! } : {}),
+							...(icon === null ? {} : { thumbnail: icon }),
 						}),
 					],
 				});

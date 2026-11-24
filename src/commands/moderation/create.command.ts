@@ -1,8 +1,9 @@
 import { ChannelType, PermissionFlagsBits } from "discord.js";
 import { LIMITS } from "@config/constants";
-import { defineCommand, inTextChannel, type CommandOption } from "@core/command";
+import { type CommandInput, type CommandOption, defineCommand, inTextChannel } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { COLOUR_CHOICES, embed, reply, resolveColour, successEmbed } from "@lib/discord";
+import { readerLanguage } from "@core/language";
+import { COLOUR_CHOICES, embed, reply, requirePostable, resolveColour, successEmbed } from "@lib/discord";
 
 const FIELD_OPTIONS: CommandOption[] = [1, 2, 3].flatMap((index) => [
 	{
@@ -18,6 +19,14 @@ const FIELD_OPTIONS: CommandOption[] = [1, 2, 3].flatMap((index) => [
 		maxLength: LIMITS.embedFieldValue,
 	},
 ]);
+
+/** Discord refuses the whole embed over a picture that is not a web address, so it is refused here first. */
+function pictureOption(interaction: CommandInput, name: string): string | null {
+	const url = interaction.options.getString(name)?.trim() ?? null;
+	if (url === null || (URL.canParse(url) && /^https?:$/.test(new URL(url).protocol))) return url;
+
+	throw new UserFacingError(`\`${name}\` has to be a link to a picture, starting with \`https://\`.`);
+}
 
 export default defineCommand({
 	name: "create",
@@ -46,13 +55,18 @@ export default defineCommand({
 					maxLength: LIMITS.embedDescription,
 				},
 				{ name: "color", description: "The embed colour.", type: "string", choices: COLOUR_CHOICES },
-				{ name: "image", description: "An image URL.", type: "string" },
-				{ name: "thumbnail", description: "A thumbnail URL.", type: "string" },
+				{ name: "image", description: "A link to a picture to show under the text.", type: "string" },
+				{ name: "thumbnail", description: "A link to a small picture for the corner.", type: "string" },
 				{ name: "footer", description: "Footer text.", type: "string", maxLength: LIMITS.embedTitle },
 				...FIELD_OPTIONS,
 			],
 			async run(interaction) {
 				const channel = inTextChannel(interaction);
+				requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
+
+				const image = pictureOption(interaction, "image");
+				const thumbnail = pictureOption(interaction, "thumbnail");
+				const footer = interaction.options.getString("footer");
 
 				const fields = [1, 2, 3]
 					.map((index) => ({
@@ -66,19 +80,13 @@ export default defineCommand({
 					title: interaction.options.getString("title", true),
 					description: interaction.options.getString("description", true),
 					fields,
-					...(interaction.options.getString("image") !== null
-						? { image: interaction.options.getString("image", true) }
-						: {}),
-					...(interaction.options.getString("thumbnail") !== null
-						? { thumbnail: interaction.options.getString("thumbnail", true) }
-						: {}),
-					...(interaction.options.getString("footer") !== null
-						? { footer: interaction.options.getString("footer", true) }
-						: {}),
+					...(image === null ? {} : { image }),
+					...(thumbnail === null ? {} : { thumbnail }),
+					...(footer === null ? {} : { footer }),
 				});
 
 				await channel.send({ embeds: [built] });
-				await reply(interaction, { embeds: [successEmbed("Embed posted.")] });
+				await reply(interaction, { embeds: [successEmbed(`Embed posted in ${channel.toString()}.`)] });
 			},
 		},
 		{

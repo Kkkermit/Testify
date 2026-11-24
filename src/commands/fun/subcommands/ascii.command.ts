@@ -21,7 +21,7 @@ export default defineCommand({
 	],
 
 	async run(interaction) {
-		const text = interaction.options.getString("text", true).slice(0, 15);
+		const text = interaction.options.getString("text", true);
 		if (containsProfanity(text)) throw new UserFacingError(strings.generic.profanity);
 
 		let art: string;

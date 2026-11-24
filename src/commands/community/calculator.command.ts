@@ -4,10 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
 import { truncate } from "@lib/format";
 
-/**
- * An allowlist, because `mathjs` matrix builders can exhaust the heap, and an out-of-memory abort takes the whole bot
- * down.
- */
+/** An allowlist, because a `mathjs` matrix builder can exhaust the heap and take the whole bot down with it. */
 export const CALCULATOR_FUNCTIONS = new Set([
 	"abs",
 	"acos",

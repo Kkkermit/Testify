@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { latestJoinOf, standingOf, topInviters } from "@database/repositories/inviteRepository";
 import { embed, reply } from "@lib/discord";
+import { formatNumber, mentionOf } from "@lib/format";
 import { INVITE_COMMAND, inviteSettingsPanel, readInviteSettings, standingLines } from "@lib/invites";
 import { INVITE_LIMITS } from "@testify/shared";
 
@@ -23,16 +24,26 @@ export default defineCommand({
 					latestJoinOf(guild.id, target.id),
 				]);
 
-				const lines = [
-					`Brought **${String(standing.joins)}** ${standing.joins === 1 ? "member" : "members"}: ${String(standing.joins - standing.left)} still here, ${String(standing.left)} left.`,
-				];
 				const inviterId = joined?.inviterId ?? null;
-				if (joined?.vanity === true) lines.push("Joined with the server's own link.");
-				else if (inviterId !== null) lines.push(`Joined with <@${inviterId}>'s invite.`);
+				const joinedWith =
+					joined?.vanity === true
+						? "The server's own link"
+						: inviterId === null
+							? "Not known"
+							: `${mentionOf(inviterId)}'s invite`;
 
 				await reply(interaction, {
 					embeds: [
-						embed({ category: "community", title: `📨 ${target.username}'s invites`, description: lines.join("\n") }),
+						embed({
+							category: "community",
+							title: `📨 ${target.username}'s invites`,
+							description: `Their invites brought in **${formatNumber(standing.joins)}** ${standing.joins === 1 ? "member" : "members"}.`,
+							fields: [
+								{ name: "Still here", value: formatNumber(standing.joins - standing.left), inline: true },
+								{ name: "Left since", value: formatNumber(standing.left), inline: true },
+								{ name: "They joined with", value: joinedWith, inline: true },
+							],
+						}),
 					],
 					allowedMentions: { parse: [] },
 				});

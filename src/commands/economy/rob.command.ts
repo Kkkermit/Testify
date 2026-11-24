@@ -6,12 +6,12 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import {
 	adjustWallet,
+	claimCooldown,
 	debitWallet,
 	findAccount,
 	getOrCreateAccount,
 	incrementCounters,
 	removeInventoryItem,
-	setCooldown,
 } from "@database/repositories/economyRepository";
 import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
@@ -75,7 +75,9 @@ export default defineCommand({
 			throw new UserFacingError(`${target.username} does not have enough on them to be worth robbing.`);
 		}
 
-		await setCooldown(guild.id, interaction.user.id, "rob", new Date(now));
+		if (!(await claimCooldown(guild.id, interaction.user.id, "rob", account.lastRobbed, new Date(now)))) {
+			throw new UserFacingError("You are already in the middle of a robbery.");
+		}
 		const nextTry = now + ECONOMY_COOLDOWNS.rob;
 		const name = `**${escapeMarkdown(target.displayName)}**`;
 		const send = async (told: Told): Promise<void> => {

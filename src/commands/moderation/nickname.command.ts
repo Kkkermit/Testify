@@ -3,7 +3,7 @@ import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply, successEmbed } from "@lib/discord";
-import { containsProfanity } from "@lib/moderation";
+import { assertModeratable, containsProfanity } from "@lib/moderation";
 
 export default defineCommand({
 	name: "nickname",
@@ -32,6 +32,7 @@ export default defineCommand({
 
 		const member = await guild.members.fetch(target.id).catch(() => null);
 		if (!member) throw new UserFacingError(strings.moderation.memberNotFound);
+		assertModeratable(interaction, member);
 		if (!member.manageable) throw new UserFacingError(strings.moderation.notModeratable);
 
 		await member.setNickname(nickname, `Changed by ${interaction.user.username}`);

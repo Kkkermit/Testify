@@ -13,4 +13,4 @@ related: role-order
 > **Tip:** The bot can only give or take roles that sit below its own highest role.
 
 ### On the dashboard
-Open your server, then **Leaderboards**, then a member. Tick the roles you want them to have and press **Save roles**; only roles you could hand out yourself are listed, so nothing above you changes. Their nickname is beside it, and needs **Manage Nicknames**.
+Open your server, then **Members**, then a member. Tick the roles you want them to have and press **Save roles**; only roles you could hand out yourself are listed, so nothing above you changes. Their nickname is beside it, and needs **Manage Nicknames**.

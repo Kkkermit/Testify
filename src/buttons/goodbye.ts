@@ -1,7 +1,7 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import { applyGoodbye, farewellFor, GOODBYE_PANEL_ID, goodbyePanel, readGoodbye } from "@lib/welcome";
 import { GOODBYE_STYLES, type GoodbyeStyle, sanitiseText, WELCOME_LIMITS } from "@testify/shared";
@@ -80,9 +80,7 @@ export default recordsSettings(
 				return;
 			}
 
-			const panel = goodbyePanel(settings, ownerId, note);
-			if (interaction.isModalSubmit() && !interaction.isFromMessage()) return;
-			await interaction.update(panel);
+			await redrawPanel(interaction, goodbyePanel(settings, ownerId, note));
 		},
 	}),
 );

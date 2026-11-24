@@ -10,7 +10,7 @@ related: voice-stats
 Join to create gives everybody who joins a lobby voice channel a channel of their own. {bot} moves them into it and deletes it once the last person leaves.
 
 ### Setting it up
-Run `/temp-voice`, pick a voice channel to be the lobby or press the button that makes one, and turn it on. You need **Manage Server**, and making a lobby from the dashboard also needs **Manage Channels**. On the dashboard it is **Join to create** under Channels.
+Run `/temp-voice`, pick a voice channel to be the lobby or press the button that makes one, and turn it on. You need **Manage Server**, and making a lobby from the dashboard also needs **Manage Channels**. On the dashboard it is **Join to create** under Community.
 - **Category:** new channels go in the lobby's own category unless you choose another, and take that category's permissions.
 - **Name:** `{user}` becomes the member's name.
 - **People per channel:** 0 for no limit, up to {fact:tempVoice.maxPeople}.

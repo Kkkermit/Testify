@@ -1,10 +1,10 @@
-import { PermissionFlagsBits, MessageFlags } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { readerLanguage } from "@core/language";
 import { type LotteryFrequency } from "@database/models/lottery.schema";
-import { debitWallet, requireAccount } from "@database/repositories/economyRepository";
+import { adjustWallet, debitWallet, requireAccount } from "@database/repositories/economyRepository";
 import {
 	addEntry,
 	deleteLottery,
@@ -13,7 +13,7 @@ import {
 	saveLottery,
 } from "@database/repositories/lotteryRepository";
 import { embed, reply, requirePostable, successEmbed } from "@lib/discord";
-import { discordTime, formatNumber } from "@lib/format";
+import { capitalise, discordTime, formatNumber } from "@lib/format";
 import { recordsSettings } from "@lib/settings";
 
 const FREQUENCIES: LotteryFrequency[] = ["hourly", "daily", "weekly"];
@@ -43,14 +43,18 @@ export default recordsSettings(
 								category: "economy",
 								title: "\u{1f39f}\ufe0f Server lottery",
 								fields: [
-									{ name: "Prize pool", value: formatNumber(lottery.prizePool), inline: true },
+									{ name: "Prize pool", value: `**${formatNumber(lottery.prizePool)}**`, inline: true },
 									{ name: "Entry fee", value: formatNumber(lottery.entryFee), inline: true },
-									{ name: "Winners", value: String(lottery.maxWinners), inline: true },
+									{ name: "Winners per draw", value: formatNumber(lottery.maxWinners), inline: true },
 									{ name: "Tickets sold", value: formatNumber(tickets), inline: true },
 									{ name: "Your tickets", value: formatNumber(mine), inline: true },
-									{ name: "Frequency", value: lottery.frequency, inline: true },
-									{ name: "Next draw", value: discordTime(lottery.nextDrawTime, "R") },
-									{ name: "Status", value: lottery.isFrozen ? "Frozen" : lottery.isActive ? "Running" : "Stopped" },
+									{ name: "Draws", value: capitalise(lottery.frequency), inline: true },
+									{ name: "Next draw", value: discordTime(lottery.nextDrawTime, "R"), inline: true },
+									{
+										name: "Status",
+										value: lottery.isFrozen ? "❄️ Frozen" : lottery.isActive ? "🟢 Running" : "⚪ Stopped",
+										inline: true,
+									},
 								],
 							}),
 						],
@@ -81,13 +85,15 @@ export default recordsSettings(
 						{ userId: interaction.user.id, userTag: interaction.user.username, tickets },
 						cost,
 					);
-					if (!updated)
+					if (!updated) {
+						await adjustWallet(guild.id, interaction.user.id, cost);
 						throw new UserFacingError("The lottery closed before your entry landed. You have been refunded.");
+					}
 
 					await reply(interaction, {
 						embeds: [
 							successEmbed(
-								`You bought **${tickets}** ticket(s) for **${formatNumber(cost)}**.\nPrize pool is now **${formatNumber(updated.prizePool)}**.`,
+								`You bought **${formatNumber(tickets)}** ${tickets === 1 ? "ticket" : "tickets"} for **${formatNumber(cost)}**. The prize pool is now **${formatNumber(updated.prizePool)}**.`,
 							),
 						],
 					});
@@ -118,7 +124,8 @@ export default recordsSettings(
 					}
 					requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
-					const frequency = (interaction.options.getString("frequency") ?? "weekly") as LotteryFrequency;
+					const typed = interaction.options.getString("frequency");
+					const frequency = FREQUENCIES.find((one) => one === typed) ?? "weekly";
 					const basePrizePool = interaction.options.getInteger("base-pool") ?? 0;
 
 					await saveLottery(guild.id, {
@@ -135,7 +142,11 @@ export default recordsSettings(
 					});
 
 					await reply(interaction, {
-						embeds: [successEmbed(`The lottery is running. Draws happen ${frequency} in ${channel}.`)],
+						embeds: [
+							successEmbed(
+								`The lottery is running. It draws ${frequency} in ${channel.toString()}, and the first draw is ${discordTime(Date.now() + intervalFor(frequency), "R")}. Members join with \`/lottery enter\`.`,
+							),
+						],
 					});
 				},
 			},
@@ -172,12 +183,5 @@ export default recordsSettings(
 				},
 			},
 		],
-
-		async run(interaction) {
-			await reply(interaction, {
-				content: "Pick a subcommand: `info`, `enter`, `setup`, `freeze` or `delete`.",
-				flags: MessageFlags.Ephemeral,
-			});
-		},
 	}),
 );

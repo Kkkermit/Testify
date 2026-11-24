@@ -11,7 +11,7 @@ Members enter a giveaway by reacting with 🎉, and winners are drawn when the t
 
 ### In Discord
 - `/giveaway start` takes the prize and how long it runs, such as `1h` or `3d`, plus how many winners and where to post it.
-- `/giveaway end` ends one early, `/giveaway reroll` draws new winners, and `/giveaway delete` removes one. Each takes the giveaway's message ID.
+- `/giveaway end` ends one early, `/giveaway reroll` draws new winners, and `/giveaway delete` removes one. Start typing and each offers this server's giveaways by prize, so there is no message ID to find.
 
 ### On the dashboard
 Open your server, then **Giveaways** under Entertainment. Every giveaway has its own end, reroll and delete buttons, so there is no message ID to copy.

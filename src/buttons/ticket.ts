@@ -1,4 +1,4 @@
-import { MessageFlags, StringSelectMenuOptionBuilder, type TextChannel } from "discord.js";
+import { ChannelType, MessageFlags, StringSelectMenuOptionBuilder } from "discord.js";
 import { strings } from "@config/strings";
 import { customId, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
@@ -39,8 +39,8 @@ export default defineButton({
 		const ticket = await getTicketByChannel(interaction.channelId ?? "");
 		if (!ticket) throw new UserFacingError("This is not a ticket channel.");
 
-		const channel = interaction.channel as TextChannel | null;
-		if (!channel) throw new UserFacingError(strings.ticket.error);
+		const channel = interaction.channel;
+		if (channel?.type !== ChannelType.GuildText) throw new UserFacingError(strings.ticket.error);
 
 		const member = await guild.members.fetch(interaction.user.id).catch(() => null);
 		const isHandler = member?.roles.cache.has(setup.handlerRoleId) === true;
@@ -95,6 +95,7 @@ export default defineButton({
 
 			case "toggle-member": {
 				if (!interaction.isStringSelectMenu()) return;
+				requireHandler();
 
 				const userId = interaction.values[0];
 				if (userId === undefined) return;

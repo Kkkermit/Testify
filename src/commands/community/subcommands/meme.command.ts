@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import { z } from "zod";
 import { botName } from "@core/brand";
 import { defineCommand } from "@core/command";
@@ -25,7 +26,7 @@ const listingSchema = z.object({
 	}),
 });
 
-const SUBREDDITS = ["memes", "dankmemes", "me_irl", "wholesomememes", "ProgrammerHumor"];
+const SUBREDDITS = ["memes", "dankmemes", "me_irl", "wholesomememes", "ProgrammerHumor"] as const;
 
 export default defineCommand({
 	name: "meme",
@@ -45,7 +46,7 @@ export default defineCommand({
 		await interaction.deferReply();
 
 		const subreddit =
-			interaction.options.getString("subreddit") ?? SUBREDDITS[Math.floor(Math.random() * SUBREDDITS.length)]!;
+			interaction.options.getString("subreddit") ?? SUBREDDITS[randomInt(SUBREDDITS.length)] ?? SUBREDDITS[0];
 		const listing = await fetchJson("reddit", `https://www.reddit.com/r/${subreddit}/hot.json`, listingSchema, {
 			query: { limit: 60 },
 			headers: { "User-Agent": `${botName()} Discord bot` },

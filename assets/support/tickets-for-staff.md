@@ -19,4 +19,4 @@ Only the staff role can claim, lock or add members. The member who opened the ti
 > **Tip:** A member can have one ticket open at a time, so they are asked to close it before opening another.
 
 ### On the dashboard
-Open your server, then **Tickets** under Channels. Every open ticket is listed, oldest first, with who opened and who claimed it. **Close** files the transcript and deletes the channel, like the button, and asks for the staff role.
+Open your server, then **Tickets** under Moderation. Every open ticket is listed, oldest first, with who opened and who claimed it. **Close** files the transcript and deletes the channel, like the button, and asks for the staff role.

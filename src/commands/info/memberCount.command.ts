@@ -1,6 +1,6 @@
 import QuickChart from "quickchart-js";
-import { defineCommand } from "@core/command";
-import { ServiceError, UserFacingError } from "@core/errors";
+import { defineCommand, inGuild } from "@core/command";
+import { ServiceError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 import { readMemberCounts } from "@lib/info";
@@ -26,8 +26,7 @@ export default defineCommand({
 	],
 
 	async run(interaction) {
-		const guild = interaction.guild;
-		if (!guild) throw new UserFacingError("This command only works inside a server.");
+		const guild = inGuild(interaction);
 
 		await interaction.deferReply();
 

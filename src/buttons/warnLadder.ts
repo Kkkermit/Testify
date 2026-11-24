@@ -1,4 +1,4 @@
-import { type GuildMember, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import {
@@ -21,7 +21,7 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null || !interaction.isMessageComponent()) return;
 
-		if (!(interaction.member as GuildMember).permissions.has(PermissionFlagsBits.ManageGuild)) {
+		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change warning punishments.");
 		}
 
