@@ -121,6 +121,22 @@ const COOLDOWN_FIELDS = {
 	beg: "lastBegged",
 } as const satisfies Record<EconomyCooldownKey, keyof EconomyAccount>;
 
+/** Either field can be missing on a stored record, since Mongoose adds defaults only when it writes one. */
+type IncomeEarner = Pick<EconomyAccount, "guildId" | "userId"> & Partial<Pick<EconomyAccount, "house" | "businesses">>;
+
+/** Every account that owns a house or a business, in every server, read a batch at a time for the hourly income. */
+export function incomeEarners(): AsyncIterable<IncomeEarner> {
+	return Economy.find({ $or: [{ house: { $ne: null } }, { "businesses.0": { $exists: true } }] })
+		.select({ guildId: 1, userId: 1, house: 1, businesses: 1 })
+		.lean<IncomeEarner[]>()
+		.cursor();
+}
+
+/** For an account already known to exist, so nothing is created and the tuning is not read. */
+export async function creditBank(guildId: string, userId: string, amount: number): Promise<void> {
+	await Economy.updateOne({ guildId, userId }, { $inc: { bank: amount } }).exec();
+}
+
 export async function setCooldown(
 	guildId: string,
 	userId: string,

@@ -80,7 +80,7 @@ export async function checkCommand(
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId, language);
 	if (switchedOff !== null) return switchedOff;
 
-	const subcommand = chosenSubcommand(interaction, command);
+	const subcommand = subcommandRun(interaction, command);
 	if (subcommand === undefined) {
 		const names = subcommandsOf(command).map((sub) => `\`${sub.name}\``);
 		return refused("no_subcommand", say(language, "pickSubcommand", { subcommands: eitherOf(language, names) }));
@@ -220,12 +220,7 @@ export async function checkMusicControl(
 	const refused = await checkOpenControl(client, who, "play");
 	if (refused !== null) return refused;
 
-	const settings = normaliseMusicSettings(await getMusicSettings(who.guildId));
-
-	return musicRefusal(settings, {
-		roleIds: roleIdsOf(who.member),
-		manager: who.member !== null && permissionsOf(who.member).has(PermissionFlagsBits.ManageGuild),
-	});
+	return musicGate(who.guildId, who.member);
 }
 
 export async function checkCasinoPlay(
@@ -258,7 +253,7 @@ async function checkSwitchedOff(name: string, guildId: string | null, language: 
 }
 
 /** Which subcommand was used: null for a command without them, undefined for a prefix run that named none it has. */
-function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null | undefined {
+function subcommandRun(interaction: CommandInput, command: Command): Subcommand | null | undefined {
 	if (command.subcommands === undefined) return null;
 
 	let chosen: string | null;
@@ -288,26 +283,26 @@ function roleIdsOf(member: CommandInput["member"]): string[] {
 	return [...member.roles.cache.keys()];
 }
 
-/**
- * The music system's switch and DJ roles, gated here so no music command can forget them; `/music system` is the way
- * back in.
- */
+/** The music system's switch and DJ roles, which Manage Server always passes. */
+async function musicGate(guildId: string, member: CommandInput["member"]): Promise<CheckFailure> {
+	const settings = normaliseMusicSettings(await getMusicSettings(guildId));
+
+	return musicRefusal(settings, {
+		roleIds: roleIdsOf(member),
+		manager: member !== null && permissionsOf(member).has(PermissionFlagsBits.ManageGuild),
+	});
+}
+
+/** Gated here so no music command can forget it; `/music system` is the way back in. */
 async function checkMusicSystem(
 	interaction: CommandInput,
 	command: Command,
 	subcommand: Subcommand | null,
 ): Promise<CheckFailure> {
 	if (command.category !== "music" || interaction.guildId === null) return null;
-
 	if (subcommand?.name === MUSIC_SYSTEM_SUBCOMMAND) return null;
 
-	const settings = normaliseMusicSettings(await getMusicSettings(interaction.guildId));
-	const member = interaction.member;
-
-	return musicRefusal(settings, {
-		roleIds: roleIdsOf(member),
-		manager: member !== null && permissionsOf(member).has(PermissionFlagsBits.ManageGuild),
-	});
+	return musicGate(interaction.guildId, interaction.member);
 }
 
 /** The casino's switch and its per-game switches; settings and stats stay reachable while it is closed. */
@@ -350,7 +345,7 @@ function checkCooldown(
 	return null;
 }
 
-/** Used by the tests, and by `/reset` when clearing state. */
+/** Used by the tests. */
 export function clearCooldowns(): void {
 	cooldowns.clear();
 }

@@ -1,5 +1,6 @@
 import { isValidObjectId, type Types } from "mongoose";
 import { CACHE } from "@config/constants";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import { AutoResponderEntry, type AutoResponderRecord } from "@database/models/autoResponder.schema";
 import { type AutoResponder, type AutoResponderInput, triggerKey } from "@testify/shared";
 
@@ -10,10 +11,6 @@ const cache = new Map<string, { responders: AutoResponder[]; expiresAt: number }
 
 function toResponder(row: Row): AutoResponder {
 	return { id: row._id.toString(), trigger: row.trigger, match: row.match, reply: row.reply };
-}
-
-function isDuplicateKey(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
 }
 
 /** Oldest first, which is the order the panel and the dashboard list them in and the order they are tried. */

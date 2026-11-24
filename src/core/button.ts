@@ -1,4 +1,5 @@
 import { type MessageComponentInteraction, type ModalSubmitInteraction } from "discord.js";
+import { LIMITS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 
 export type ComponentInteraction = MessageComponentInteraction | ModalSubmitInteraction;
@@ -30,7 +31,9 @@ export function customId(id: string, action: string, ...args: (string | number)[
 	}
 
 	const built = parts.join(SEPARATOR);
-	if (built.length > 100) throw new Error(`Custom ID is too long (${built.length}/100): ${built}`);
+	if (built.length > LIMITS.customIdLength) {
+		throw new Error(`Custom ID is too long (${String(built.length)}/${String(LIMITS.customIdLength)}): ${built}`);
+	}
 
 	return built;
 }

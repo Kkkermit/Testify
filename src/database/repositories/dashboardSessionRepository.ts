@@ -1,8 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
+import { DAY_MS } from "@config/constants";
 import { type DashboardSession, DashboardSessions } from "@database/models/dashboardSession.schema";
 import { type SecretBox } from "@lib/infra/infra.types";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface NewSession {
 	userId: string;

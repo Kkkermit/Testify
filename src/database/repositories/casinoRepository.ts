@@ -1,4 +1,5 @@
 import { CACHE } from "@config/constants";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import { type CasinoHandRecord, CasinoHand } from "@database/models/casinoHand.schema";
 import { type CasinoSettingsRecord, CasinoSettingsConfig } from "@database/models/casinoSettings.schema";
 
@@ -57,10 +58,6 @@ export type HandRecord = Pick<
 	| "messageId"
 	| "expiresAt"
 >;
-
-function isDuplicateKey(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
-}
 
 /** Null when the player already has a hand of this game here: the unique index decides, so two starts cannot race. */
 export async function openHand(

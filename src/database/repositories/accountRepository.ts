@@ -41,7 +41,7 @@ import { TuningConfig } from "@database/models/tuning.schema";
 import { PendingVerify, VerifyConfig } from "@database/models/verification.schema";
 import { DELETED_USER_ID, DELETED_USER_NAME } from "@testify/shared";
 
-/** `delete` drops the record, `remove` takes the id off a list, `anonymise` swaps it for `DELETED_USER_ID`. */
+/** `delete` drops the record, `remove` takes the id off a list, `anonymise` swaps it for `DELETED_USER_ID` or null. */
 type Erasure = "delete" | "remove" | "anonymise" | "keep";
 
 /**

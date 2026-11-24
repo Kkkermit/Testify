@@ -52,7 +52,7 @@ export async function setPrefixEnabled(guildId: string, isEnabled: boolean): Pro
 	return remember(guildId, { prefix: record?.prefix ?? instanceConfig().defaultPrefix, isEnabled });
 }
 
-/** Used by the tests, and after a prefix is changed elsewhere. */
+/** Used by the tests. */
 export function clearPrefixCache(): void {
 	prefixCache.clear();
 }

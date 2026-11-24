@@ -1,10 +1,9 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-const ASSETS = ((): string => {
-	const candidates = [resolve(__dirname, "..", "assets"), resolve(__dirname, "..", "..", "assets")];
-	return candidates.find((candidate) => existsSync(candidate)) ?? candidates[1]!;
-})();
+// The build copies them into `dist/assets`; running from source reads the repository's own.
+const BESIDE_BUILD = resolve(__dirname, "..", "assets");
+const ASSETS = existsSync(BESIDE_BUILD) ? BESIDE_BUILD : resolve(__dirname, "..", "..", "assets");
 
 export function assetPath(...segments: string[]): string {
 	return resolve(ASSETS, ...segments);
