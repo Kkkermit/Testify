@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { CasinoPage } from "@/features/casino/CasinoPage";
@@ -47,6 +47,30 @@ describe("the casino page", () => {
 		await user.click(screen.getByRole("button", { name: /save changes/i }));
 
 		expect(bodies).toEqual([{ minBet: 25, maxBet: 5000 }]);
+	});
+
+	/** A switch answers with the whole settings, which once put the limits being typed back to what was saved. */
+	it("keeps the limits being typed when a game is switched", async () => {
+		const user = userEvent.setup();
+		let stored = casinoSettings;
+		server.use(
+			http.get(`/api/guilds/${GUILD}/casino`, () => HttpResponse.json(stored)),
+			http.patch(`/api/guilds/${GUILD}/casino`, () => {
+				stored = { ...stored, games: { ...stored.games, dice: false } };
+				return HttpResponse.json(stored);
+			}),
+		);
+		renderPage();
+
+		const smallest = await screen.findByLabelText(/smallest bet/i);
+		await user.clear(smallest);
+		await user.type(smallest, "25");
+		await user.click(screen.getByRole("switch", { name: /^Dice/ }));
+
+		await waitFor(() => {
+			expect(screen.getByRole("switch", { name: /^Dice/ })).not.toBeChecked();
+		});
+		expect(screen.getByLabelText(/smallest bet/i)).toHaveValue(25);
 	});
 
 	/** A refusal belongs beside the control that caused it, not in whichever card happens to hold the warning. */
