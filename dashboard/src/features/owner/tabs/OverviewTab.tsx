@@ -53,7 +53,6 @@ export function OverviewTab(): React.JSX.Element {
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* A failed read of the figures leaves the server list below working. */}
 			{health.isError ? (
 				<ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />
 			) : (
