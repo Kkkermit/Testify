@@ -7,7 +7,7 @@ import { TrailBack } from "@/features/site/components/TrailBack";
 import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
-import { shortDate } from "@/lib/datetime";
+import { calendarDate } from "@/lib/datetime";
 
 const PROSE = "text-muted-foreground text-sm leading-relaxed";
 const LINK = "text-accent underline decoration-1 underline-offset-2 hover:decoration-2";
@@ -22,7 +22,9 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 
 			<div className="flex flex-col gap-2">
 				<PageHeader title={t(document.title)} subtitle={t(document.summary)} />
-				<p className="text-muted-foreground text-xs">{t("legal.lastUpdated", { date: shortDate(document.updated) })}</p>
+				<p className="text-muted-foreground text-xs">
+					{t("legal.lastUpdated", { date: calendarDate(document.updated) })}
+				</p>
 				{/* A translated licence is a convenience, never the agreement — say which text wins before it is read. */}
 				{i18n.resolvedLanguage !== "en" && <p className="text-muted-foreground text-xs">{t("legal.englishGoverns")}</p>}
 			</div>

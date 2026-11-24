@@ -8,6 +8,21 @@ import { expectNoViolations } from "@/test/axe";
 import { t } from "@/test/english";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
+const RealDateTimeFormat = Intl.DateTimeFormat;
+
+// A reader in New York: every formatter that names no zone of its own formats in theirs.
+beforeAll(() => {
+	jest
+		.spyOn(Intl, "DateTimeFormat")
+		.mockImplementation(
+			(locale, options) => new RealDateTimeFormat(locale, { timeZone: "America/New_York", ...options }),
+		);
+});
+
+afterAll(() => {
+	jest.restoreAllMocks();
+});
+
 /** The documents are translation keys, so the prose under test is what English resolves them to. */
 function english(key: string): string {
 	return (en.legal as Record<string, string>)[key.replace("legal.", "")] ?? key;
@@ -57,6 +72,7 @@ describe("the legal pages", () => {
 		});
 	});
 
+	/** The date is a stored day, and read as a local moment it showed the day before to anybody west of UTC. */
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
