@@ -1,17 +1,10 @@
+import { relative } from "node:path";
 import { ESLint } from "eslint";
+import { painter } from "@core/terminal";
 
-const colour = {
-	reset: "\u001b[0m",
-	bold: "\u001b[1m",
-	dim: "\u001b[2m",
-	red: "\u001b[31m",
-	yellow: "\u001b[33m",
-	green: "\u001b[32m",
-	cyan: "\u001b[36m",
-};
+/** `npm run lint`: ESLint over the repository, one block per file, failing on errors and never on warnings. */
 
-const paint = (code: string, text: string): string =>
-	process.stdout.isTTY === true ? `${code}${text}${colour.reset}` : text;
+const paint = painter();
 
 export interface LintTotals {
 	files: number;
@@ -37,14 +30,14 @@ export function exitCodeFor(totals: LintTotals): number {
 }
 
 export function summarise(totals: LintTotals): string {
-	if (totals.errors === 0 && totals.warnings === 0) return paint(colour.green, "No problems found.");
+	if (totals.errors === 0 && totals.warnings === 0) return paint.green("No problems found.");
 
 	const parts = [
-		totals.errors > 0 ? paint(colour.red, `${totals.errors} error(s)`) : "",
-		totals.warnings > 0 ? paint(colour.yellow, `${totals.warnings} warning(s)`) : "",
+		totals.errors > 0 ? paint.red(`${totals.errors} error(s)`) : "",
+		totals.warnings > 0 ? paint.yellow(`${totals.warnings} warning(s)`) : "",
 	].filter(Boolean);
 
-	const fixable = totals.fixable > 0 ? paint(colour.dim, ` — ${totals.fixable} fixable with --fix`) : "";
+	const fixable = totals.fixable > 0 ? paint.dim(` — ${totals.fixable} fixable with --fix`) : "";
 	return `${parts.join(", ")} across ${totals.files} file(s)${fixable}`;
 }
 
@@ -58,13 +51,13 @@ async function main(): Promise<void> {
 	for (const result of results) {
 		if (result.errorCount + result.warningCount === 0) continue;
 
-		console.log(`\n${paint(colour.bold, result.filePath.replace(`${process.cwd()}/`, ""))}`);
+		console.log(`\n${paint.bold(relative(process.cwd(), result.filePath))}`);
 
 		for (const message of result.messages) {
-			const level = message.severity === 2 ? paint(colour.red, "error") : paint(colour.yellow, "warn ");
-			const where = paint(colour.dim, `${message.line}:${message.column}`);
-			const rule = paint(colour.cyan, message.ruleId ?? "");
-			console.log(`  ${where.padEnd(18)} ${level}  ${message.message}  ${rule}`);
+			const level = message.severity === 2 ? paint.red("error") : paint.yellow("warn ");
+			// Padded before it is coloured, since the colour codes would count towards the width.
+			const where = paint.dim(`${message.line}:${message.column}`.padEnd(8));
+			console.log(`  ${where} ${level}  ${message.message}  ${paint.cyan(message.ruleId ?? "")}`);
 		}
 	}
 
