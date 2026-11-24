@@ -3001,7 +3001,9 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
 - **A field saved when it is left is left only when focus goes outside it and its own buttons.** `savesOnLeave` goes
   on the element holding the field, its placeholder tokens and its Save and Discard, and holds a press on one of
   those from blurring the field first, which Safari does without focusing the button. Pressing Save once was two
-  writes, and Discard saved what it then threw away. A `MessageEditor` whose `onSave` returns the write puts what was
+  writes, and Discard saved what it then threw away; a button busy with that save swallowed the press. A button in
+  another row takes `holdsFocus` and sends the unsaved value with its own write, as the verification panel's Post
+  does. A `MessageEditor` whose `onSave` returns the write puts what was
   typed back when it is refused, since the rollback puts the stored text back in the field.
 - **A changed filter shows a skeleton where its results go, never the last filter's results.** A list's query keeps
   its previous answer (`keepPreviousData`) so the filters' own options and the pager stay where they are, and the

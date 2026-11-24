@@ -1363,7 +1363,9 @@ feels wrong without looking wrong.
 | **Local, save on blur** | when the field is left, or on Save | A typed field. Per-keystroke would be a write per character                           | Welcome template, prefix |
 
 A field saved on blur puts `savesOnLeave(save)` on the element that holds it and its own buttons, never `onBlur` on
-the input alone: otherwise pressing its Save saves twice, and its Discard saves first.
+the input alone: otherwise pressing its Save saves twice, and its Discard saves first. A button in another row that
+acts on the field takes `onMouseDown={holdsFocus}` and sends the unsaved value with its own write, as the verification
+panel's Post does.
 
 Two corollaries:
 

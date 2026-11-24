@@ -40,6 +40,28 @@ describe("the verification section", () => {
 		});
 	});
 
+	/** Leaving the words for the button saved them, and the button, busy with that save, swallowed the press. */
+	it("posts the panel with the words just typed, at the first press", async () => {
+		const user = userEvent.setup();
+		const sent: unknown[] = [];
+		server.use(
+			http.patch("/api/guilds/:guildId/verification", async ({ request }) => {
+				sent.push(await request.json());
+				return HttpResponse.json(verificationConfig);
+			}),
+		);
+
+		renderPage();
+		const words = await screen.findByLabelText("What the panel says");
+		await user.clear(words);
+		await user.type(words, "Press the button to get in.");
+		await user.click(screen.getByRole("button", { name: /update the posted panel/i }));
+
+		await waitFor(() => {
+			expect(sent).toEqual([{ message: "Press the button to get in.", publish: true }]);
+		});
+	});
+
 	/** A role Discord would refuse is named on the form rather than at the moment somebody tries to verify. */
 	it("warns when the chosen role sits above the bot", async () => {
 		server.use(
