@@ -48,4 +48,19 @@ describe("useDraft", () => {
 
 		expect(result.current[0]).toEqual({ min: "50", max: "" });
 	});
+
+	/** Somebody else putting the old value back revived the edit already saved, as if it had never been. */
+	it("does not bring an edit back when the saved value returns to the one it was made against", () => {
+		const { result, rerender } = renderHook(({ saved }: { saved: Limits }) => useDraft(saved), {
+			initialProps: { saved: { min: "10", max: "" } },
+		});
+
+		act(() => {
+			result.current[1]({ min: "25", max: "" });
+		});
+		rerender({ saved: { min: "25", max: "" } });
+		rerender({ saved: { min: "10", max: "" } });
+
+		expect(result.current[0]).toEqual({ min: "10", max: "" });
+	});
 });

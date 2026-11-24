@@ -13,6 +13,8 @@ export function useDraft<Draft>(saved: Draft | undefined): [draft: Draft | undef
 export function useDraft<Draft>(saved: Draft | undefined): [draft: Draft | undefined, setDraft: SetDraft<Draft>] {
 	const [edit, setEdit] = useState<Edit<Draft> | null>(null);
 	const savedKey = JSON.stringify(saved);
+	// Forgotten once its value is replaced, so a later save that puts that value back cannot bring the edit back with it.
+	if (edit !== null && edit.of !== savedKey) setEdit(null);
 	const current = (held: Edit<Draft> | null): Draft | undefined =>
 		held !== null && held.of === savedKey ? held.value : saved;
 
