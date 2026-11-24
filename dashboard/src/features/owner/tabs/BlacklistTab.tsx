@@ -1,3 +1,4 @@
+import { BLACKLIST_LIMITS } from "@testify/shared";
 import { Ban, ShieldOff, UserX } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -71,7 +72,7 @@ export function BlacklistTab(): React.JSX.Element {
 							autoFocus={prefilled !== null}
 							value={reason}
 							autoComplete="off"
-							maxLength={200}
+							maxLength={BLACKLIST_LIMITS.maxReason}
 							placeholder={t("owner.reasonPlaceholder")}
 							onChange={(event) => {
 								setReason(event.target.value);
