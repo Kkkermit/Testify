@@ -205,9 +205,9 @@ describe("the legal pages", () => {
 		expect(text).toContain(`change records for ${String(retention)} days`);
 		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain("AUDIT.retentionDays * 24 * 60 * 60");
 
-		const analytics = botSource("shared/src/analytics.ts");
-		const starts = /runsKept: (\d+)/.exec(analytics)?.[1];
-		const perRun = Number(/linesPerRun: ([\d_]+)/.exec(analytics)?.[1]?.replace("_", ""));
+		const logs = botSource("shared/src/logs.ts");
+		const starts = /runsKept: (\d+)/.exec(logs)?.[1];
+		const perRun = Number(/linesPerRun: ([\d_]+)/.exec(logs)?.[1]?.replace("_", ""));
 		expect(text).toContain(
 			`for its last ${String(starts)} starts, at most ${perRun.toLocaleString("en-GB")} lines each`,
 		);
