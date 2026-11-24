@@ -1,7 +1,7 @@
 import { type OwnerGuildFilter, type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
-import { countOrDash } from "@/features/owner/owner.utils";
+import { countOrDash, NO_FIGURE } from "@/features/owner/owner.utils";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
@@ -95,7 +95,7 @@ export function OwnerGuildTable({
 					</td>
 					<td className={CELL_NUM}>{formatNumber(guild.memberCount)}</td>
 					<td className={cn(CELL_NUM, "font-sans whitespace-nowrap", shown("joined"))}>
-						{guild.joinedAt === null ? "—" : shortDate(guild.joinedAt)}
+						{guild.joinedAt === null ? NO_FIGURE : shortDate(guild.joinedAt)}
 					</td>
 					<td className={cn(CELL_NUM, shown("commands"))}>{countOrDash(guild.commands)}</td>
 					<td className={cn(CELL_NUM, shown("dashboard"))}>{countOrDash(guild.dashboardViews)}</td>

@@ -3,6 +3,7 @@ import { BarChart3, ExternalLink, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Field, Refusal, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
 import { permissionLabel } from "@/features/commands/permissions.labels";
@@ -17,7 +18,18 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 	const { t } = useTranslation();
 	const detail = useGuildDetail(guildId);
 
-	if (detail.isPending || detail.data === undefined) return <Skeleton className="h-64 w-full" />;
+	if (detail.isError) {
+		return (
+			<div className="flex flex-col items-start gap-2">
+				<ErrorState as="h2" error={detail.error} onRetry={() => void detail.refetch()} />
+				<Button variant="ghost" onClick={onClose}>
+					<X size={15} aria-hidden="true" />
+					{t("owner.closeDetail")}
+				</Button>
+			</div>
+		);
+	}
+	if (detail.data === undefined) return <Skeleton className="h-64 w-full" />;
 
 	const guild = detail.data;
 
