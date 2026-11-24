@@ -6,7 +6,7 @@ export type ComponentInteraction = MessageComponentInteraction | ModalSubmitInte
 
 export interface Button {
 	id: string;
-	/** When true, only the user whose ID is the last argument may use it. */
+	/** When true, only the user whose ID is the last argument may use it, and a custom ID naming nobody admits nobody. */
 	ownerOnly?: boolean;
 	run(interaction: ComponentInteraction, context: ButtonContext): Promise<void>;
 }

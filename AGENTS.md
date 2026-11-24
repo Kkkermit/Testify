@@ -666,7 +666,7 @@ you find out while writing rather than when Discord rejects the whole message.
 ### `ownerOnly`
 
 Set `ownerOnly: true` on the handler and **put the invoking user's ID last** in every custom ID it builds. The
-router compares the last argument. This is a convention the router depends on; test it
+router compares the last argument, and refuses everybody a custom ID with nothing after its action. This is a convention the router depends on; test it
 (`expect(parseCustomId(id).args.at(-1)).toBe(OWNER)`).
 
 ### Re-read before you write

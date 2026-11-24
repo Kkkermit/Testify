@@ -209,8 +209,7 @@ describe("a switched-off feature", () => {
 	});
 });
 
-/** The router compares the last argument, so somebody else's press never reaches the handler, and is told why. */
-it("refuses a press on somebody else's panel, privately and in the presser's language", async () => {
+function pressOwnerPanel(customId: string): { run: jest.Mock; reply: jest.Mock; done: Promise<void> } {
 	const run = jest.fn();
 	const reply = jest.fn(() => Promise.resolve());
 	const client = { buttons: new Collection([["panel", { id: "panel", ownerOnly: true, run }]]), logger };
@@ -220,16 +219,32 @@ it("refuses a press on somebody else's panel, privately and in the presser's lan
 		isContextMenuCommand: () => false,
 		isMessageComponent: () => true,
 		isModalSubmit: () => false,
-		customId: "panel:open:200000000000000002",
+		customId,
 		user: { id: "300000000000000003" },
 		locale: "de",
 		reply,
 	};
+	const done = Promise.resolve(
+		interactionCreate.run(client as unknown as TestifyClient, press as unknown as Interaction),
+	);
+	return { run, reply, done };
+}
 
-	await interactionCreate.run(client as unknown as TestifyClient, press as unknown as Interaction);
+/** The router compares the last argument, so somebody else's press never reaches the handler, and is told why. */
+it("refuses a press on somebody else's panel, privately and in the presser's language", async () => {
+	const { run, reply, done } = pressOwnerPanel("panel:open:200000000000000002");
+	await done;
 
 	const [answer] = reply.mock.calls[0] as unknown as [{ embeds: { data: { description?: string } }[]; flags: number }];
 	expect(run).not.toHaveBeenCalled();
 	expect(answer.flags).toBe(64);
 	expect(answer.embeds[0]?.data.description).toContain("Nur wer den Befehl ausgeführt hat");
+});
+
+/** A custom ID that named nobody skipped the comparison, so anybody could press a panel built without its owner. */
+it("refuses everybody a press on an owner's panel whose custom ID names nobody", async () => {
+	const { run, done } = pressOwnerPanel("panel:open");
+	await done;
+
+	expect(run).not.toHaveBeenCalled();
 });
