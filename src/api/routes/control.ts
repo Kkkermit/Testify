@@ -95,7 +95,8 @@ control.patch("/identity", async (context) => {
 		after: { username: patch.username ?? null, avatar: patch.avatar === undefined ? null : "changed" },
 	});
 
-	const identity = (await botIdentity(client))!;
+	const identity = await botIdentity(client);
+	if (identity === null) throw badRequest(`${botName()} is still connecting. Try again in a moment.`);
 	return context.json(identity);
 });
 
