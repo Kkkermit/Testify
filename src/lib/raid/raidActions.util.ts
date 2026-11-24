@@ -8,6 +8,7 @@ import { canPostIn } from "@lib/discord/channels.util";
 import { embed } from "@lib/discord/embeds.util";
 import { discordTime, formatDurationLong } from "@lib/format/format.util";
 import { holdUntil, joinWatch, type JoinWatch, type Spike, type WatchedJoin } from "@lib/raid/raid.util";
+import { pingProblem } from "@lib/roles/roleReach.util";
 import { accountAgeMinutes, DEFAULT_RAID, type RaidOverview, type RaidPatch, type RaidSettings } from "@testify/shared";
 
 /** A server's raid protection: its settings, the hold on a young account, and what staff are told. */
@@ -59,6 +60,7 @@ export async function applyRaidSettings(
 	guild: Guild,
 	patch: RaidPatch,
 	updatedBy: string | null,
+	mentionsEveryRole: boolean,
 ): Promise<RaidOverview> {
 	const current = normaliseRaid(await getRaidSettings(guild.id));
 	const next: RaidSettings = {
@@ -75,7 +77,10 @@ export async function applyRaidSettings(
 	}
 	if (patch.pingRoleId !== undefined && patch.pingRoleId !== null) {
 		if (patch.pingRoleId === guild.id) throw new UserFacingError("Pick a staff role rather than @everyone.");
-		if (!guild.roles.cache.has(patch.pingRoleId)) throw new UserFacingError("That role is not in this server.");
+		const role = guild.roles.cache.get(patch.pingRoleId);
+		if (role === undefined) throw new UserFacingError("That role is not in this server.");
+		const problem = patch.pingRoleId === current.pingRoleId ? null : pingProblem(role, mentionsEveryRole);
+		if (problem !== null) throw new UserFacingError(problem);
 	}
 	if (patch.enabled === true && !hasWork(next)) {
 		throw new UserFacingError("Set a minimum account age or an alert channel before turning raid protection on.");

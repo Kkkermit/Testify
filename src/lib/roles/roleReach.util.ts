@@ -72,3 +72,9 @@ export function pickProblem(role: Role | undefined, guild: Guild): string | null
 
 	return isPowerful(role) ? `${role.name} now carries moderation or admin permissions.` : null;
 }
+
+/** Why the bot may not ping this role for somebody: Discord lets anybody ping a mentionable role, and the rest only to Mention Everyone. */
+export function pingProblem(role: Role, mentionsEveryRole: boolean): string | null {
+	if (role.mentionable || mentionsEveryRole) return null;
+	return "Members cannot ping that role, so having the bot ping it needs the Mention Everyone permission.";
+}

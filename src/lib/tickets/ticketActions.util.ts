@@ -6,6 +6,7 @@ import { countOpenTickets, getTicketSetup, saveTicketSetup } from "@database/rep
 import { button, row } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
 import { problemText } from "@lib/format/problemText.util";
+import { pingProblem } from "@lib/roles/roleReach.util";
 import { TICKET_ID } from "@lib/tickets/tickets.constants";
 import { type TicketPatch, type TicketSettings, ticketBlocked } from "@testify/shared";
 
@@ -76,13 +77,26 @@ export async function publishTicketPanel(
 	return (await channel.send(payload)).id;
 }
 
+/** The staff role is pinged as each ticket opens, so it is one its chooser could ping, and never @everyone. */
+export function staffRoleProblem(guild: Guild, roleId: string, mentionsEveryRole: boolean): string | null {
+	if (roleId === guild.id) return "Pick a staff role rather than @everyone, or every member would see every ticket.";
+	const role = guild.roles.cache.get(roleId);
+	return role === undefined ? "That role is not in this server." : pingProblem(role, mentionsEveryRole);
+}
+
 /** Merges onto a fresh read, so two admins editing at once cannot overwrite each other's untouched fields. */
 export async function applyTickets(
 	guild: Guild,
 	patch: TicketPatch,
 	everyoneRoleId: string,
+	mentionsEveryRole: boolean,
 ): Promise<{ settings: TicketSettings } | { problem: string }> {
 	const current = await readTickets(guild);
+	if (patch.staffRoleId !== undefined && patch.staffRoleId !== current.staffRoleId) {
+		const problem = staffRoleProblem(guild, patch.staffRoleId, mentionsEveryRole);
+		if (problem !== null) return { problem };
+	}
+
 	const next: TicketSettings = {
 		...current,
 		panelChannelId: patch.panelChannelId ?? current.panelChannelId,

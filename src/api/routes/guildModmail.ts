@@ -3,7 +3,7 @@ import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings, actorOf, guildOf, readerOf } from "@api/context";
 import { forbidden } from "@api/errors";
-import { requirePermission } from "@api/middleware/reach";
+import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { listOpenConversations } from "@database/repositories/modmailRepository";
@@ -21,7 +21,12 @@ guildModmail.get("/settings", async (context) => context.json(await readModmailS
 guildModmail.patch("/settings", async (context) => {
 	const patch = await parseBody(context, modmailSettingsPatch);
 
-	const settings = await applyModmailSettings(guildOf(context), patch, context.get("session")?.userId ?? null);
+	const settings = await applyModmailSettings(
+		guildOf(context),
+		patch,
+		context.get("session")?.userId ?? null,
+		holdsPermission(context, PermissionFlagsBits.MentionEveryone),
+	);
 	await auditChange(context, {
 		action: "modmail.update",
 		summary: patch.enabled === undefined ? "Changed mod mail" : `Turned mod mail ${patch.enabled ? "on" : "off"}`,

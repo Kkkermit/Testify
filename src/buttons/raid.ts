@@ -121,7 +121,8 @@ export default recordsSettings(
 				return;
 			}
 
-			const saved = await applyRaidSettings(guild, patch, ownerId);
+			const mentionsEveryRole = interaction.memberPermissions?.has(PermissionFlagsBits.MentionEveryone) === true;
+			const saved = await applyRaidSettings(guild, patch, ownerId, mentionsEveryRole);
 			await redrawPanel(interaction, raidPanel(saved, ownerId, note));
 		},
 	}),

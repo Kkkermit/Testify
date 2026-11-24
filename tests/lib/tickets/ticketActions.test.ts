@@ -30,7 +30,13 @@ function guildWith(sendable = true, existing: unknown = null): Guild {
 				messages: { fetch: jest.fn().mockResolvedValue(existing) },
 			}),
 		},
-		roles: { everyone: { id: EVERYONE } },
+		roles: {
+			everyone: { id: EVERYONE },
+			cache: new Map([
+				["300000000000000003", { id: "300000000000000003", mentionable: true }],
+				["300000000000000004", { id: "300000000000000004", mentionable: false }],
+			]),
+		},
 	} as unknown as Guild;
 }
 
@@ -121,7 +127,7 @@ describe("applyTickets", () => {
 	};
 
 	it("refuses until all four destinations are chosen", async () => {
-		const result = await applyTickets(guildWith(), { panelChannelId: PANEL }, EVERYONE);
+		const result = await applyTickets(guildWith(), { panelChannelId: PANEL }, EVERYONE, true);
 
 		expect(result).toEqual({ problem: expect.stringMatching(/category/i) });
 		expect(saved).not.toHaveBeenCalled();
@@ -130,24 +136,42 @@ describe("applyTickets", () => {
 	it("keeps the fields the patch did not mention", async () => {
 		configured();
 
-		await applyTickets(guildWith(), { buttonLabel: "Get help" }, EVERYONE);
+		await applyTickets(guildWith(), { buttonLabel: "Get help" }, EVERYONE, true);
 
 		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ buttonLabel: "Get help", channelId: PANEL }));
 	});
 
 	/** Choosing a channel does not post the panel. */
 	it("does not post the panel just because a channel was chosen", async () => {
-		await applyTickets(guildWith(), complete, EVERYONE);
+		await applyTickets(guildWith(), complete, EVERYONE, true);
 
 		expect(send).not.toHaveBeenCalled();
 		expect(saved).toHaveBeenCalled();
+	});
+
+	/** It is pinged as each ticket opens, so Manage Server alone could otherwise ping a role nobody may ping. */
+	it("takes a staff role members cannot ping only from somebody with Mention Everyone, and never @everyone", async () => {
+		const quiet = { ...complete, staffRoleId: "300000000000000004" };
+
+		expect(await applyTickets(guildWith(), quiet, EVERYONE, false)).toEqual({
+			problem: expect.stringMatching(/Mention Everyone/),
+		});
+		expect(await applyTickets(guildWith(), { ...complete, staffRoleId: EVERYONE }, EVERYONE, true)).toEqual({
+			problem: expect.stringMatching(/@everyone/),
+		});
+		expect(saved).not.toHaveBeenCalled();
+
+		await applyTickets(guildWith(), quiet, EVERYONE, true);
+		configured({ handlerRoleId: "300000000000000004" });
+		await applyTickets(guildWith(), quiet, EVERYONE, false);
+		expect(saved).toHaveBeenCalledTimes(2);
 	});
 
 	/** A panel posted in the old channel is not the panel in the new one, so its id cannot carry over. */
 	it("forgets the posted message when the channel changes", async () => {
 		configured();
 
-		await applyTickets(guildWith(), { panelChannelId: "400000000000000007" }, EVERYONE);
+		await applyTickets(guildWith(), { panelChannelId: "400000000000000007" }, EVERYONE, true);
 
 		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ messageId: null }));
 	});

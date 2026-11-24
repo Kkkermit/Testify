@@ -30,6 +30,7 @@ import {
 } from "@database/repositories/modmailRepository";
 import { MODMAIL_COMMAND } from "@lib/modmail/modmail.constants";
 import { offerPanel, openedNotice, openingPost, staffSignature, threadName } from "@lib/modmail/modmailPanel.util";
+import { pingProblem } from "@lib/roles/roleReach.util";
 import {
 	messageChunks,
 	MODMAIL_LIMITS,
@@ -72,11 +73,12 @@ export async function readModmailSettings(guild: Guild): Promise<ModmailSettings
 	};
 }
 
-/** Mod mail cannot be on with nowhere to make threads, and never pings everybody when one opens. */
+/** Mod mail cannot be on with nowhere to make threads, and never pings a role its chooser could not ping themselves. */
 export async function applyModmailSettings(
 	guild: Guild,
 	patch: ModmailSettingsPatch,
 	updatedBy: string | null,
+	mentionsEveryRole: boolean,
 ): Promise<ModmailSettings> {
 	const current = await readModmailSettings(guild);
 	const channelId = patch.channelId === undefined ? current.channelId : patch.channelId;
@@ -95,7 +97,10 @@ export async function applyModmailSettings(
 	}
 	if (patch.pingRoleId !== undefined && patch.pingRoleId !== null) {
 		if (patch.pingRoleId === guild.id) throw new UserFacingError("Mod mail will not ping everybody. Pick a role.");
-		if (!guild.roles.cache.has(patch.pingRoleId)) throw new UserFacingError("That role is not in this server.");
+		const role = guild.roles.cache.get(patch.pingRoleId);
+		if (role === undefined) throw new UserFacingError("That role is not in this server.");
+		const problem = patch.pingRoleId === current.pingRoleId ? null : pingProblem(role, mentionsEveryRole);
+		if (problem !== null) throw new UserFacingError(problem);
 	}
 
 	const changes: Partial<StoredModmailSettings> = {

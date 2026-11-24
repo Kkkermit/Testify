@@ -79,24 +79,40 @@ describe("applyRaidSettings", () => {
 	const guild = guildWith() as unknown as Guild;
 
 	it("refuses to turn on with nothing to do", async () => {
-		await expect(applyRaidSettings(guild, { enabled: true }, null)).rejects.toThrow(/minimum account age or an alert/);
+		await expect(applyRaidSettings(guild, { enabled: true }, null, true)).rejects.toThrow(
+			/minimum account age or an alert/,
+		);
 		expect(saveRaidSettings).not.toHaveBeenCalled();
 	});
 
 	it("refuses a channel it cannot post in, @everyone, and a role from somewhere else", async () => {
 		jest.mocked(canPostIn).mockReturnValue(false);
-		await expect(applyRaidSettings(guild, { alertChannelId: CHANNEL }, null)).rejects.toThrow(/cannot post/);
+		await expect(applyRaidSettings(guild, { alertChannelId: CHANNEL }, null, true)).rejects.toThrow(/cannot post/);
 
-		await expect(applyRaidSettings(guild, { pingRoleId: GUILD }, null)).rejects.toThrow(/@everyone/);
-		await expect(applyRaidSettings(guild, { pingRoleId: "300000000000000999" }, null)).rejects.toThrow(/not in this/);
+		await expect(applyRaidSettings(guild, { pingRoleId: GUILD }, null, true)).rejects.toThrow(/@everyone/);
+		await expect(applyRaidSettings(guild, { pingRoleId: "300000000000000999" }, null, true)).rejects.toThrow(
+			/not in this/,
+		);
 		expect(saveRaidSettings).not.toHaveBeenCalled();
+	});
+
+	/** Manage Server and Moderate Members could otherwise have every spike ping a role members cannot ping. */
+	it("lets only somebody with Mention Everyone make a role members cannot ping the alert, unless it already is", async () => {
+		const quiet = guildWith({ mentionable: false }) as unknown as Guild;
+
+		await expect(applyRaidSettings(quiet, { pingRoleId: ROLE }, null, false)).rejects.toThrow(/Mention Everyone/);
+		await applyRaidSettings(quiet, { pingRoleId: ROLE }, null, true);
+		jest.mocked(getRaidSettings).mockResolvedValue({ ...ON, pingRoleId: ROLE });
+		await applyRaidSettings(quiet, { pingRoleId: ROLE }, null, false);
+
+		expect(saveRaidSettings).toHaveBeenCalledTimes(2);
 	});
 
 	/** On with nothing to do would read as protected while protecting nothing. */
 	it("turns itself off when the last thing it did is taken away", async () => {
 		jest.mocked(getRaidSettings).mockResolvedValue({ ...ON, alertChannelId: null });
 
-		await applyRaidSettings(guild, { minAccountAgeMinutes: 0 }, "100000000000000009");
+		await applyRaidSettings(guild, { minAccountAgeMinutes: 0 }, "100000000000000009", true);
 
 		expect(saveRaidSettings).toHaveBeenCalledWith(
 			GUILD,
@@ -114,7 +130,7 @@ describe("a record kept in days", () => {
 		jest.mocked(getRaidSettings).mockResolvedValue(inDays);
 
 		const read = (await readRaidOverview(guildWith() as unknown as Guild)).minAccountAgeMinutes;
-		await applyRaidSettings(guildWith() as unknown as Guild, { spikeJoins: 5 }, null);
+		await applyRaidSettings(guildWith() as unknown as Guild, { spikeJoins: 5 }, null, true);
 
 		expect(read).toBe(4_320);
 		expect(saveRaidSettings).toHaveBeenCalledWith(

@@ -755,7 +755,9 @@ Gotchas found the hard way:
   `{ parse: ["users"] }`, so a send that names no mentions of its own pings the people it names and nothing else; a
   giveaway's prize once pinged `@everyone` through its win message, which Manage Server alone could not otherwise do.
   A message that pings a role names it in its own `allowedMentions`: a ticket's staff role, mod mail's and a report's
-  chosen role, a raid alert's and an announcement's.
+  chosen role, a raid alert's and an announcement's. Each of those roles is one its chooser could ping themselves: a
+  role members cannot mention needs Mention Everyone (`pingProblem` in `src/lib/roles/`), on Discord and the dashboard
+  alike, and a role already chosen is kept whoever saves the other settings. A ticket's staff role is never @everyone.
 
 Embeds are still correct for one-shot results — `/beg`, `/rob`, `/work` — where buttons would add noise. Do not
 convert something just to convert it.
