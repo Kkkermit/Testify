@@ -19,6 +19,6 @@ Run `/ticket setup`, which asks for four things:
 You can also set the panel's message and the button's wording.
 
 ### On the dashboard
-Open your server, then **Tickets** under Channels. Choose the four destinations, then publish the panel.
+Open your server, then **Tickets** under Moderation. Choose the four destinations, then publish the panel.
 
 `/ticket status` shows the setup, and `/ticket disable` turns tickets off. Open ticket channels are left alone, and the panel message has to be deleted by hand.

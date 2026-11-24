@@ -14,4 +14,4 @@ Three commands post messages for you.
 - `/create embed` builds a custom embed with an image, thumbnail, footer and up to three fields. `/create thread` opens a thread. Both need **Manage Messages**.
 
 ### On the dashboard
-Open your server, then **Announcements** under Channels. Write the message as an embed or plain text, watch the preview, and choose who it pings: nobody, `@everyone` or `@here`. Nobody is the default. Pinging everybody needs **Mention Everyone** in that channel, for you and for {bot}, and `/announce` asks the same.
+Open your server, then **Announcements** under Messages. Write the message as an embed or plain text, watch the preview, and choose who it pings: nobody, `@everyone` or `@here`. Nobody is the default. Pinging everybody needs **Mention Everyone** in that channel, for you and for {bot}, and `/announce` asks the same.

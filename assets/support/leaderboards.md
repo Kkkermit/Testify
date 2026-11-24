@@ -15,4 +15,4 @@ related: levelling, dashboard-members
 
 `/rank` shows your own level, XP and position as an image card, or someone else's if you name them.
 
-On the dashboard, open your server, then **Leaderboards** under Community to see both as tables.
+On the dashboard, open your server, then **Members** and its **Leaderboards** tab to see both as tables.
