@@ -2,7 +2,7 @@ import { type FunctionNode, type MathNode, type SymbolNode } from "mathjs";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
-import { truncate } from "@lib/format";
+import { formatNumber, truncate } from "@lib/format";
 
 /** An allowlist, because a `mathjs` matrix builder can exhaust the heap and take the whole bot down with it. */
 export const CALCULATOR_FUNCTIONS = new Set([
@@ -63,6 +63,12 @@ export function unsupportedPart(node: MathNode): string | null {
 			return;
 		}
 
+		// `1:1e9` is a matrix builder written as an operator.
+		if (child.type === "RangeNode") {
+			found = "a range";
+			return;
+		}
+
 		if (isCall(child)) {
 			// A call through an accessor, `a.b(1)`, has no plain name to check.
 			const name = isName(child.fn) ? child.fn.name : "";
@@ -71,6 +77,21 @@ export function unsupportedPart(node: MathNode): string | null {
 	});
 
 	return found;
+}
+
+/** mathjs counts these out a step at a time on the thread every shard shares, so a larger number holds the whole bot. */
+const COUNTING_LIMIT = 100_000;
+
+function counted(count: (...args: never[]) => unknown): (...args: unknown[]) => unknown {
+	return (...args) => {
+		// A string or a boolean is converted to a number inside mathjs, so only a number in range is let through.
+		if (!args.every((arg) => typeof arg === "number" && Math.abs(arg) <= COUNTING_LIMIT)) {
+			throw new UserFacingError(
+				`I work out combinations and permutations of numbers up to ${formatNumber(COUNTING_LIMIT)}.`,
+			);
+		}
+		return (count as (...given: unknown[]) => unknown)(...args);
+	};
 }
 
 export default defineCommand({
@@ -86,7 +107,7 @@ export default defineCommand({
 		if (expression.length > 200) throw new UserFacingError("That expression is too long.");
 
 		// Loaded on first use: mathjs takes half a second to load, and nothing else needs it.
-		const { evaluate, format, parse } = await import("mathjs");
+		const { combinations, evaluate, format, parse, permutations } = await import("mathjs");
 
 		// Parsing builds a tree without running anything, so the check happens before any of it is evaluated.
 		let tree: MathNode;
@@ -103,8 +124,10 @@ export default defineCommand({
 
 		let result: unknown;
 		try {
-			result = evaluate(expression);
-		} catch {
+			// A name in the scope is called in place of mathjs's own function of that name.
+			result = evaluate(expression, { combinations: counted(combinations), permutations: counted(permutations) });
+		} catch (error) {
+			if (error instanceof UserFacingError) throw error;
 			throw new UserFacingError("I could not work that out. Check the syntax and try again.");
 		}
 

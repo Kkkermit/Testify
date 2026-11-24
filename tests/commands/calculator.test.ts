@@ -1,5 +1,6 @@
 import { parse } from "mathjs";
 import calculate, { CALCULATOR_FUNCTIONS, unsupportedPart } from "@commands/community/calculator.command";
+import { UserFacingError } from "@core/errors";
 import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 const refuses = (expression: string): string | null => unsupportedPart(parse(expression));
@@ -56,6 +57,36 @@ it("keeps every builder and escape route off the allowlist", () => {
 	const never = ["zeros", "ones", "range", "concat", "matrix", "import", "evaluate", "parse", "createUnit"];
 
 	expect(never.filter((name) => CALCULATOR_FUNCTIONS.has(name))).toEqual([]);
+});
+
+/** `1:1e9` builds a billion-number matrix with no function in sight, and the heap running out aborts the process. */
+it("refuses a range, which is a matrix builder written as an operator", () => {
+	expect(["1:1e9", "max(1:1e9)", "[1, 2, 3][1:2]"].map(refuses)).toEqual(["a range", "a range", "a range"]);
+});
+
+/**
+ * mathjs counts combinations and permutations out one step at a time on the thread every shard shares, so
+ * `combinations(1e15, 5e14)` froze the whole bot for good; a number given as text is converted the same way.
+ */
+it("works out combinations and permutations only for numbers it can count out at once", async () => {
+	const sent = async (expression: string): Promise<string> => {
+		const interaction = createMockInteraction({ options: { expression } });
+		await calculate.run?.(interaction, createMockClient());
+		return JSON.stringify(interaction.sent[0]);
+	};
+	const refused = async (expression: string): Promise<boolean> =>
+		sent(expression).then(
+			() => false,
+			(error: unknown) => error instanceof UserFacingError,
+		);
+
+	expect(await sent("combinations(10, 3)")).toContain("```\\n120\\n```");
+	expect(await sent("permutations(5, 2)")).toContain("```\\n20\\n```");
+	expect(
+		await Promise.all(
+			["combinations(200000, 100000)", "permutations(200000, 150000)", 'combinations("200000", "100000")'].map(refused),
+		),
+	).toEqual([true, true, true]);
 });
 
 it("names the first unsupported call rather than the whole expression", () => {
