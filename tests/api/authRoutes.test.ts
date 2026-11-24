@@ -12,7 +12,12 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { accessFor } from "@database/repositories/dashboardAccessRepository";
-import { createSession, deleteSession, deleteSessionsFor } from "@database/repositories/dashboardSessionRepository";
+import {
+	createSession,
+	deleteSession,
+	deleteSessionsFor,
+	readTokens,
+} from "@database/repositories/dashboardSessionRepository";
 import { eraseAccount } from "@lib/account";
 import { type SetupStatus } from "@testify/shared";
 
@@ -443,6 +448,38 @@ describe("GET /auth/me", () => {
 
 		expect(answers.map((response) => response.status)).toEqual([200, 200]);
 		expect(refreshTokens).toHaveBeenCalledTimes(1);
+	});
+
+	/** A refresh is shared only within one sign-in: another session's token must never answer for this one. */
+	it("refreshes each session's own token when two refresh at once, and tries again after a refusal", async () => {
+		const renewed = (refreshToken: string) => ({
+			accessToken: `new-${refreshToken}`,
+			refreshToken: "rt2",
+			expiresAt: new Date(Date.now() + 1),
+		});
+		jest.mocked(refreshTokens).mockImplementation((_oauth, refreshToken) => Promise.resolve(renewed(refreshToken)));
+		jest.mocked(readTokens).mockImplementation((_box, session) => ({
+			accessToken: "old",
+			refreshToken: `of-${(session as { _id: string })._id}`,
+		}));
+		const expiring = (id: string, userId: string) => ({
+			...signedIn(userId),
+			_id: id,
+			tokenExpiresAt: new Date(Date.now() + 60_000),
+		});
+
+		const answers = await Promise.all([
+			app(envFor(), expiring("sid-a", "100000000000000078")).request("/auth/me"),
+			app(envFor(), expiring("sid-b", "100000000000000079")).request("/auth/me"),
+		]);
+
+		expect(answers.map((response) => response.status)).toEqual([200, 200]);
+		expect(guildsFetched.mock.calls.map(([token]) => token).sort()).toEqual(["new-of-sid-a", "new-of-sid-b"]);
+
+		jest.mocked(refreshTokens).mockRejectedValueOnce(new Error("invalid_grant"));
+		expect((await app(envFor(), expiring("sid-c", "100000000000000080")).request("/auth/me")).status).toBe(401);
+		expect((await app(envFor(), expiring("sid-c", "100000000000000081")).request("/auth/me")).status).toBe(200);
+		expect(refreshTokens).toHaveBeenCalledTimes(4);
 	});
 
 	it("carries no token, secret or refresh token", async () => {
