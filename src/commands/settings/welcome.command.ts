@@ -53,15 +53,23 @@ export default recordsSettings(
 
 					await interaction.deferReply();
 
+					const failed = new UserFacingError("I could not download that image. Try uploading it again.");
 					const response = await fetch(file.url, { signal: AbortSignal.timeout(LIMITS.externalApiTimeoutMs) }).catch(
 						() => null,
 					);
-					if (!response?.ok) throw new UserFacingError("I could not download that image. Try uploading it again.");
+					if (!response?.ok) throw failed;
+
+					// The timeout runs on while the body arrives, so a download cut off there is refused the same way.
+					const data = Buffer.from(
+						await response.arrayBuffer().catch(() => {
+							throw failed;
+						}),
+					);
 
 					// Stored as bytes, because Discord's signed attachment URLs expire within hours.
 					await saveWelcome(guild.id, {
 						background: {
-							data: Buffer.from(await response.arrayBuffer()),
+							data,
 							contentType: file.contentType ?? "image/png",
 							name: file.name,
 						},

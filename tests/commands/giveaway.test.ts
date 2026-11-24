@@ -1,12 +1,14 @@
 import giveaway from "@commands/giveaway/giveaway.command";
 import { UserFacingError } from "@core/errors";
-import { endGiveaway, listGiveaways } from "@lib/giveaways";
+import { endGiveaway, findGiveaway, listGiveaways, rerollGiveaway } from "@lib/giveaways";
 import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 jest.mock("@lib/giveaways", () => ({
 	...jest.requireActual<object>("@lib/giveaways"),
 	listGiveaways: jest.fn(),
+	findGiveaway: jest.fn(() => Promise.resolve(null)),
 	endGiveaway: jest.fn(() => Promise.resolve()),
+	rerollGiveaway: jest.fn(() => Promise.resolve()),
 }));
 
 const row = (messageId: string, prize: string, ended: boolean) => ({
@@ -34,6 +36,22 @@ it("refuses a giveaway that is not in this server", async () => {
 
 	await expect(end?.run(interaction, createMockClient())).rejects.toBeInstanceOf(UserFacingError);
 	expect(endGiveaway).not.toHaveBeenCalled();
+});
+
+/** The list stops at a server's fifty newest giveaways, so looking one up there refused to end or reroll an older one. */
+it("finds a giveaway by its message, however many newer ones the server has run", async () => {
+	jest
+		.mocked(listGiveaways)
+		.mockResolvedValue(
+			Array.from({ length: 50 }, (_, index) => row(`8000000000000001${String(index).padStart(2, "0")}`, "New", true)),
+		);
+	jest.mocked(findGiveaway).mockResolvedValue(row("800000000000000999", "Old mug", true));
+	const reroll = giveaway.subcommands?.find((subcommand) => subcommand.name === "reroll");
+	const interaction = createMockInteraction({ subcommand: "reroll", options: { "message-id": "800000000000000999" } });
+
+	await reroll?.run(interaction, createMockClient());
+
+	expect(rerollGiveaway).toHaveBeenCalledWith(expect.anything(), interaction.guild?.id, "800000000000000999");
 });
 
 it("offers this server's giveaways by prize, only the running ones to end", async () => {

@@ -48,6 +48,10 @@ export default defineButton({
 			);
 		}
 
+		// Asked again after the wallet was read, since the heist can play, or the crew fill, meanwhile.
+		if (activeHeists().get(guildId) !== state) throw new UserFacingError("That heist has already finished.");
+		if (state.participants.size >= ECONOMY.heistMaxPlayers) throw new UserFacingError("This crew is already full.");
+
 		state.participants.add(interaction.user.id);
 		await interaction.update({ ...heistForming(state), allowedMentions: { parse: [] } });
 	},

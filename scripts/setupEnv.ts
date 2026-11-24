@@ -13,15 +13,13 @@ import {
 	instanceFileText,
 	newAuditKey,
 	OPERATOR_CONTACT,
+	writeSecretFile,
 } from "./setupQuestions";
 import { box, painter } from "@core/terminal";
 
 /** Asks for the settings the bot needs and writes `.env`, or `.env.development` with `--dev`. */
 
 const paint = painter();
-
-/** The file holds the bot token, so only its owner may read it; Windows ignores the mode. */
-const SECRET_FILE = { encoding: "utf8", mode: 0o600 } as const;
 
 /** One line, because a prompt redrawn over several lines leaves copies of itself behind in some terminals. */
 function question(field: Field): string {
@@ -147,7 +145,7 @@ async function main(): Promise<void> {
 
 	lines.push(...analyticsLines(analytics, collector, auditKey));
 
-	writeFileSync(target, `${lines.join("\n")}\n`, SECRET_FILE);
+	writeSecretFile(target, `${lines.join("\n")}\n`);
 
 	const next = isDev
 		? [`${paint.cyan("➜")} ${paint.bold(wantsDashboard === true ? "npm run dev:all" : "npm run dev")}`]

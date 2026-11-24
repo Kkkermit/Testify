@@ -1,9 +1,17 @@
 import { randomBytes } from "node:crypto";
+import { chmodSync, writeFileSync } from "node:fs";
 import { type z } from "zod";
 import { instanceFileSchema } from "@config/instance";
 import { BOT_FEATURE_KEYS, isBotFeature } from "@testify/shared";
 
 /** What `npm run setup` asks, how each answer is checked, and what each answer writes. */
+
+/** The file holds the bot token, so only its owner may read it; Windows ignores the mode. */
+export function writeSecretFile(path: string, text: string): void {
+	writeFileSync(path, text, { encoding: "utf8", mode: 0o600 });
+	// A write's mode applies only to a file it creates, and `.env` is often copied from the example first.
+	chmodSync(path, 0o600);
+}
 
 export interface Field {
 	key: string;

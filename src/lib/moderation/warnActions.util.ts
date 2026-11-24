@@ -13,7 +13,7 @@ import {
 import { embed } from "@lib/discord/embeds.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
-import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
+import { auditReason, dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 import {
 	countsSince,
 	expiryOf,
@@ -95,9 +95,10 @@ export async function applyWarnStep(
 	user: User,
 	member: GuildMember | null,
 	step: WarnStep | null,
-	auditReason: string,
+	reason: string,
 ): Promise<WarnProblem | null> {
 	if (step === null || step.action === "warn") return null;
+	const fitted = auditReason(reason);
 
 	const attempt = (work: Promise<unknown>): Promise<WarnProblem | null> =>
 		work.then(
@@ -107,14 +108,14 @@ export async function applyWarnStep(
 
 	if (step.action === "ban") {
 		if (member !== null && !member.bannable) return "outranked";
-		return attempt(guild.members.ban(user.id, { reason: auditReason }));
+		return attempt(guild.members.ban(user.id, { reason: fitted }));
 	}
 
 	if (member === null) return "left";
 
-	if (step.action === "kick") return member.kickable ? attempt(member.kick(auditReason)) : "outranked";
+	if (step.action === "kick") return member.kickable ? attempt(member.kick(fitted)) : "outranked";
 
-	return member.moderatable ? attempt(member.timeout(step.minutes * MINUTE_MS, auditReason)) : "outranked";
+	return member.moderatable ? attempt(member.timeout(step.minutes * MINUTE_MS, fitted)) : "outranked";
 }
 
 const PERMISSION: Record<Exclude<WarnStep["action"], "warn">, string> = {

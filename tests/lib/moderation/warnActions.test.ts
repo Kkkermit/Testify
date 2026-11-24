@@ -194,6 +194,25 @@ describe("applyWarnStep", () => {
 		await expect(applyWarnStep(guild as never, user as never, null, { action: "kick" }, "r")).resolves.toBe("left");
 	});
 
+	/** Discord refuses the whole timeout, kick or ban over a reason past 512, and a warning's reason alone can be 500. */
+	it("fits the reason within Discord's 512 characters for every step", async () => {
+		const { user, member, guild } = world();
+		const reason = `mod: ${"x".repeat(600)} (warning 3)`;
+
+		await applyWarnStep(guild as never, user as never, member as never, { action: "timeout", minutes: 5 }, reason);
+		await applyWarnStep(guild as never, user as never, member as never, { action: "kick" }, reason);
+		await applyWarnStep(guild as never, user as never, member as never, { action: "ban" }, reason);
+
+		const argument = (mock: jest.Mock | undefined, index: number): unknown =>
+			(mock?.mock.calls[0] as unknown[] | undefined)?.[index];
+		const sent = [
+			argument(member?.timeout, 1) as string | undefined,
+			argument(member?.kick, 0) as string | undefined,
+			(argument(guild.members.ban, 1) as { reason?: string } | undefined)?.reason,
+		];
+		expect(sent.map((text) => (text ?? "").length > 0 && (text ?? "").length <= 512)).toEqual([true, true, true]);
+	});
+
 	it("reports Discord refusing rather than throwing", async () => {
 		const { user, member, guild } = world();
 		member?.timeout.mockRejectedValue(new Error("Missing Permissions"));

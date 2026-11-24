@@ -8,6 +8,7 @@ import { discordTime, formatDurationLong, parseDuration } from "@lib/format";
 import {
 	actionEmbed,
 	assertModeratable,
+	auditReason,
 	DEFAULT_REASON,
 	dmEmbed,
 	moderatorOf,
@@ -69,7 +70,9 @@ export default defineCommand({
 					}),
 				);
 
-				await guild.members.ban(target.id, { reason: `${interaction.user.username} (softban ${readable}): ${reason}` });
+				await guild.members.ban(target.id, {
+					reason: auditReason(`${interaction.user.username} (softban ${readable}): ${reason}`),
+				});
 				await createSoftban({
 					guildId: guild.id,
 					userId: target.id,
