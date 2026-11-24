@@ -14,26 +14,20 @@ const FACTS = {
 	watching: false,
 	dashboardUrl: null,
 };
-const ESCAPE = "";
+const ESCAPE = "\u001b";
 
 describe("bigText", () => {
-	it("renders six lines whatever the word", () => {
-		expect(bigText("Testify")).toHaveLength(6);
-		expect(bigText("A")).toHaveLength(6);
+	it("renders six lines of one width, skipping characters it has no glyph for", () => {
+		for (const name of ["Testify", "A", "A-B✓"]) {
+			const lines = bigText(name);
+			expect(lines).toHaveLength(6);
+			expect(new Set(lines.map((line) => [...line].length)).size).toBe(1);
+		}
 	});
 
-	it("makes every line the same width, so the block is rectangular", () => {
-		const widths = new Set(bigText("Testify").map((line) => [...line].length));
-		expect(widths.size).toBe(1);
-	});
-
-	it("skips characters it has no glyph for rather than breaking the block", () => {
-		const widths = new Set(bigText("A-B✓").map((line) => [...line].length));
-		expect(widths.size).toBe(1);
-	});
-
-	it("returns nothing for a name it cannot draw at all", () => {
+	it("returns nothing for a name it cannot draw at all, and draws an accented letter as the letter", () => {
 		expect(bigText("✓✓✓")).toEqual([]);
+		expect(bigText("Café")).toEqual(bigText("Cafe"));
 	});
 
 	/** A bot called Fixxer2.0 was drawn as FIXXER20, because the font had no full stop. */
@@ -48,43 +42,22 @@ describe("bigText", () => {
 		expect(broken).toEqual([]);
 		expect(width("Fixxer2.0")).toBe(width("Fixxer20") + width("."));
 	});
-
-	it("draws an accented letter as the letter", () => {
-		expect(bigText("Café")).toEqual(bigText("Cafe"));
-	});
 });
 
 describe("bannerLines", () => {
-	it("reports the facts it was given", () => {
+	/** What the loader found is on it, so a category failing to load is visible. */
+	it("reports the facts it was given and what the loader found, each with an icon", () => {
 		const text = bannerLines(FACTS, false).join("\n");
 
-		expect(text).toContain("Testify");
-		expect(text).toContain("48,213");
-		expect(text).toContain("1,843ms");
-		expect(text).toContain("t?");
-		expect(text).toContain("every server");
-	});
-
-	it("reports what the loader found, so a category failing to load is visible", () => {
-		const text = bannerLines(FACTS, false).join("\n");
-
-		expect(text).toContain("87 loaded");
-		expect(text).toContain("16 loaded");
-		expect(text).toContain("8 loaded");
-	});
-
-	it("labels each fact with an icon", () => {
-		const text = bannerLines(FACTS, false).join("\n");
-
+		for (const fact of ["Testify", "48,213", "1,843ms", "t?", "every server", "87 loaded", "16 loaded", "8 loaded"]) {
+			expect(text).toContain(fact);
+		}
 		expect(text).toContain("🤖");
 		expect(text).toContain("📦 Loaded from disk");
 	});
 
-	it("leaves out colour when the output is not a terminal", () => {
+	it("is coloured only for a terminal", () => {
 		expect(bannerLines(FACTS, false).join("")).not.toContain(ESCAPE);
-	});
-
-	it("colours it when it is", () => {
 		expect(bannerLines(FACTS, true).join("")).toContain(ESCAPE);
 	});
 
@@ -95,11 +68,13 @@ describe("bannerLines", () => {
 
 /** The rows are padded on the assumption that every icon takes two terminal columns. */
 describe("row icons", () => {
-	it.each(Object.entries(ICONS))("%s renders two columns wide", (_name, icon) => {
-		expect(icon).toMatch(/^\p{Emoji_Presentation}$/u);
+	it("are each two columns wide", () => {
+		const narrow = Object.entries(ICONS).filter(([, icon]) => !/^\p{Emoji_Presentation}$/u.test(icon));
+
+		expect(narrow.map(([name]) => name)).toEqual([]);
 	});
 
-	it("lines every colon up in the same column", () => {
+	it("line every colon up in the same column", () => {
 		const rows = bannerLines(FACTS, false).filter((line) => line.includes(" : "));
 		expect(rows.length).toBeGreaterThan(4);
 
@@ -110,30 +85,6 @@ describe("row icons", () => {
 		};
 
 		expect(new Set(rows.map(columnOf)).size).toBe(1);
-	});
-});
-
-describe("the hot reload notice", () => {
-	it("is shown while watching, so a dev knows saving will restart the bot", () => {
-		expect(bannerLines({ ...FACTS, watching: true }, false).join("\n")).toContain("Hot reload is on");
-	});
-
-	it("is absent in production", () => {
-		expect(bannerLines({ ...FACTS, watching: false }, false).join("\n")).not.toContain("Hot reload");
-	});
-});
-
-/** The API logs the port it binds, which in development is not the address anybody opens. */
-describe("the dashboard address", () => {
-	it("is shown, so the page is not confused with the API's port", () => {
-		const text = bannerLines({ ...FACTS, dashboardUrl: "http://localhost:5174" }, false).join("\n");
-
-		expect(text).toContain("Dashboard");
-		expect(text).toContain("http://localhost:5174");
-	});
-
-	it("is absent when the dashboard is off", () => {
-		expect(bannerLines(FACTS, false).join("\n")).not.toContain("Dashboard");
 	});
 });
 
@@ -177,15 +128,7 @@ describe("printBanner", () => {
 		expect(spy).toHaveBeenCalledTimes(1);
 	});
 
-	it("reports the facts it was handed", () => {
-		printBanner(clientFor(), ready, "t?", "every server", loaded);
-
-		expect(written).toContain("Testify");
-		expect(written).toContain("t?");
-		expect(written).toContain("every server");
-		expect(written).toContain("87 loaded");
-	});
-
+	/** The API logs the port it binds, which in development is not the address anybody opens. */
 	it("prints the base URL a browser opens, not the address the API binds", () => {
 		const client = clientFor("development", {
 			DASHBOARD_ENABLED: true,
@@ -217,6 +160,7 @@ describe("printBanner", () => {
 		expect(written).not.toContain("Dashboard");
 	});
 
+	/** Shown while watching, so a developer knows saving will restart the bot. */
 	it("mentions hot reload only in development", () => {
 		printBanner(clientFor("development"), ready, "t?", "every server", loaded);
 		expect(written).toContain("Hot reload");

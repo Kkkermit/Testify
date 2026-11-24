@@ -5,21 +5,22 @@ const SECRET = "a-long-enough-dashboard-session-secret";
 describe("createSecretBox", () => {
 	const box = createSecretBox(SECRET);
 
-	it("returns what it was given", () => {
-		expect(box.open(box.seal("a-discord-access-token"))).toBe("a-discord-access-token");
+	it("returns what it was given, empty or long", () => {
+		for (const value of ["a-discord-access-token", "", "x".repeat(4_096)]) {
+			expect(box.open(box.seal(value))).toBe(value);
+		}
 	});
 
 	/** A deterministic ciphertext would tell anyone reading the collection which sessions share a token. */
-	it("seals the same value differently every time", () => {
+	it("seals the same value differently every time, and never leaves the plaintext in it", () => {
 		expect(box.seal("same")).not.toBe(box.seal("same"));
-	});
-
-	it("does not leave the plaintext anywhere in the sealed value", () => {
 		expect(box.seal("hunter2")).not.toContain("hunter2");
 	});
 
-	it("refuses a value sealed with a different secret", () => {
+	/** The salt is what stops one secret protecting two unrelated things with the same key. */
+	it("refuses a value sealed with a different secret, or the same secret and another salt", () => {
 		expect(createSecretBox("a-completely-different-session-secret").open(box.seal("token"))).toBeNull();
+		expect(createSecretBox(SECRET, "other").open(box.seal("token"))).toBeNull();
 	});
 
 	/** GCM's tag is the whole point: a database someone has edited must fail, not decrypt to something else. */
@@ -36,26 +37,13 @@ describe("createSecretBox", () => {
 		expect(box.open("v1.only.three")).toBeNull();
 		expect(box.open("v2.a.b.c")).toBeNull();
 	});
-
-	/** The salt is what stops one secret protecting two unrelated things with the same key. */
-	it("derives a different key per salt", () => {
-		expect(createSecretBox(SECRET, "other").open(box.seal("token"))).toBeNull();
-	});
-
-	it("handles an empty string and a long one", () => {
-		expect(box.open(box.seal(""))).toBe("");
-		expect(box.open(box.seal("x".repeat(4_096)))).toBe("x".repeat(4_096));
-	});
 });
 
 describe("secretsMatch", () => {
-	it("accepts a match and rejects anything else", () => {
+	/** `timingSafeEqual` throws on a length mismatch, which would be a 500 instead of a 403. */
+	it("accepts a match, and rejects anything else, a different length included, without throwing", () => {
 		expect(secretsMatch("abc", "abc")).toBe(true);
 		expect(secretsMatch("abc", "abd")).toBe(false);
-	});
-
-	/** `timingSafeEqual` throws on a length mismatch, which would be a 500 instead of a 403. */
-	it("rejects a different length rather than throwing", () => {
 		expect(secretsMatch("abc", "abcd")).toBe(false);
 		expect(secretsMatch("", "abc")).toBe(false);
 	});

@@ -84,6 +84,40 @@ describe("quickAmountRow", () => {
 		const components = quickAmountRow("money", "dep", 0, OWNER).components;
 		expect(components.slice(0, 3).every((control) => control.data.disabled === true)).toBe(true);
 	});
+
+	/** The label has to say what pressing it does, not just "25%". */
+	it("resolves each percentage to a real figure, carried with the owner last in its custom ID", () => {
+		const buttons = quickAmountRow("money", "dep", 1_000, OWNER).components.map(
+			(component) => component.toJSON() as unknown as { label: string; custom_id: string },
+		);
+
+		expect(buttons.slice(0, 3).map((built) => built.label)).toEqual(["25% — 250", "50% — 500", "All — 1000"]);
+		expect(parseCustomId(buttons[0]?.custom_id ?? "")).toMatchObject({
+			action: "dep",
+			args: ["250", "quarter", OWNER],
+		});
+		expect(buttons.filter((built) => parseCustomId(built.custom_id).args.at(-1) !== OWNER)).toEqual([]);
+	});
+});
+
+describe("modalForm", () => {
+	/** Pre-filling is what turns a form into an editor, and the custom ID tells the submit what it is editing. */
+	it("carries its own state in the custom ID and pre-fills each field", () => {
+		const modal = modalForm({
+			id: "treasure",
+			action: "save-amount",
+			args: ["guild-1"],
+			title: "Drop size",
+			fields: [
+				{ id: "min", label: "Smallest", value: "10" },
+				{ id: "max", label: "Largest", value: "500", paragraph: true, required: false },
+			],
+		}).toJSON();
+		const [first] = modal.components as unknown as { component: { value?: string } }[];
+
+		expect(parseCustomId(modal.custom_id)).toEqual({ id: "treasure", action: "save-amount", args: ["guild-1"] });
+		expect(first?.component.value).toBe("10");
+	});
 });
 
 describe("confirmRow", () => {

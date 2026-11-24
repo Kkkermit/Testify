@@ -235,6 +235,8 @@ describe("what the SDK is started with", () => {
 		expect(options?.captureOptionValues).toEqual(["bet", "table"]);
 		expect(options?.spool).toEqual({ dir: spoolDir(TARGET) });
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
+		// Member counts are otherwise read only at start-up and when the bot joins a server.
+		expect(options?.refreshGuildCounts).toBe(true);
 	});
 
 	/** An opt-out held only in memory was forgotten at the next start, and the person counted again. */
@@ -259,15 +261,6 @@ describe("what the SDK is started with", () => {
 		expect(client.listenerCount("interactionCreate")).toBe(0);
 		expect(jest.mocked(client.logger.warn).mock.calls[0]?.[1]).toMatch(/opt-outs could not be read/);
 		await client.destroy();
-	});
-
-	/** Member counts are otherwise read only at start-up and when the bot joins a server. */
-	it("keeps each server's member count current", async () => {
-		const { client } = clientWith(CONFIGURED);
-		running.push(client);
-		await startShardlens(client);
-
-		expect(jest.mocked(createShardlens).mock.calls.at(-1)?.[1]?.refreshGuildCounts).toBe(true);
 	});
 });
 

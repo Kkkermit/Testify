@@ -1,7 +1,7 @@
 import {
-	formatClock,
 	discordTime,
 	escapeMarkdown,
+	formatClock,
 	formatDuration,
 	formatDurationLong,
 	humanisePermission,
@@ -10,18 +10,47 @@ import {
 	truncate,
 } from "@lib/format/format.util";
 
-describe("formatDuration", () => {
-	it.each([
-		[500, "0s"],
-		[1_000, "1s"],
-		[65_000, "1m 5s"],
-		[3_661_000, "1h 1m 1s"],
-	])("%ims reads as %s", (ms, expected) => {
-		expect(formatDuration(ms)).toBe(expected);
-	});
+/** Every row whose answer is not the one expected, as `input → got`, so a failure names them all. */
+function wrong<In>(rows: readonly (readonly [In, string])[], read: (input: In) => string): string[] {
+	return rows
+		.filter(([input, expected]) => read(input) !== expected)
+		.map(([input]) => `${String(input)} → ${String(read(input))}`);
+}
 
-	it("never reads as a negative time", () => {
-		expect(formatDuration(-5_000)).toBe("0s");
+describe("formatDuration", () => {
+	it("reads compactly, and never as a negative time", () => {
+		const rows = [
+			[500, "0s"],
+			[1_000, "1s"],
+			[65_000, "1m 5s"],
+			[3_661_000, "1h 1m 1s"],
+			[-5_000, "0s"],
+		] as const;
+
+		expect(wrong(rows, formatDuration)).toEqual([]);
+	});
+});
+
+describe("formatDurationLong", () => {
+	it("collapses anything that is not a length to zero seconds", () => {
+		const rows = [0, -5, Number.NaN, Number.POSITIVE_INFINITY].map((input) => [input, "0 seconds"] as const);
+
+		expect(wrong(rows, formatDurationLong)).toEqual([]);
+	});
+});
+
+describe("formatClock", () => {
+	/** A track that has not started is at the beginning, not at "0s" or "NaN"; 3:07 never renders as 3:7. */
+	it("pads the seconds, and renders anything that is not a position as the start", () => {
+		const rows = [
+			[3 * 60_000 + 7_000, "3:07"],
+			[0, "0:00"],
+			[-1, "0:00"],
+			[Number.NaN, "0:00"],
+			[Number.POSITIVE_INFINITY, "0:00"],
+		] as const;
+
+		expect(wrong(rows, formatClock)).toEqual([]);
 	});
 });
 
@@ -31,8 +60,9 @@ describe("text", () => {
 		expect(truncate("abc", 10)).toBe("abc");
 	});
 
-	it("turns a permission flag into something readable", () => {
-		expect(humanisePermission("ManageGuild")).toBe("manage guild");
+	it("stops user text from formatting the embed around it, and leaves plain text alone", () => {
+		expect(escapeMarkdown("**bold**")).not.toBe("**bold**");
+		expect(escapeMarkdown("hello")).toBe("hello");
 	});
 });
 
@@ -42,77 +72,45 @@ describe("progressBar", () => {
 	});
 });
 
-describe("formatDurationLong", () => {
-	it.each([0, -5, Number.NaN, Number.POSITIVE_INFINITY])("collapses %p to zero seconds", (input) => {
-		expect(formatDurationLong(input)).toBe("0 seconds");
-	});
-});
-
 describe("discordTime", () => {
-	it("renders a Discord timestamp in seconds, not milliseconds", () => {
+	it("renders a Discord timestamp in seconds, from a date or milliseconds, in the style asked for", () => {
 		expect(discordTime(new Date(1_700_000_000_000))).toBe("<t:1700000000:f>");
-	});
-
-	it("accepts a raw millisecond value too", () => {
 		expect(discordTime(1_700_000_000_000)).toBe("<t:1700000000:f>");
-	});
-
-	it("takes a style", () => {
 		expect(discordTime(1_700_000_000_000, "R")).toBe("<t:1700000000:R>");
 	});
 });
 
 describe("ordinal", () => {
-	it.each([
-		[1, "1st"],
-		[2, "2nd"],
-		[3, "3rd"],
-		[4, "4th"],
-		[11, "11th"],
-		[12, "12th"],
-		[13, "13th"],
-		[21, "21st"],
-		[22, "22nd"],
-		[23, "23rd"],
-		[101, "101st"],
-		[111, "111th"],
-	])("renders %i as %s", (input, expected) => {
-		expect(ordinal(input)).toBe(expected);
-	});
-});
+	it("gives every number its English suffix, the teens included", () => {
+		const rows = [
+			[1, "1st"],
+			[2, "2nd"],
+			[3, "3rd"],
+			[4, "4th"],
+			[11, "11th"],
+			[12, "12th"],
+			[13, "13th"],
+			[21, "21st"],
+			[22, "22nd"],
+			[23, "23rd"],
+			[101, "101st"],
+			[111, "111th"],
+		] as const;
 
-describe("escapeMarkdown", () => {
-	it("stops user text from formatting the embed around it", () => {
-		expect(escapeMarkdown("**bold**")).not.toBe("**bold**");
-	});
-
-	it("leaves plain text alone", () => {
-		expect(escapeMarkdown("hello")).toBe("hello");
+		expect(wrong(rows, ordinal)).toEqual([]);
 	});
 });
 
 describe("humanisePermission", () => {
 	// Lower case throughout, because the result is dropped into a sentence.
-	it("splits a camel-case permission flag into words", () => {
-		expect(humanisePermission("BanMembers")).toBe("ban members");
-	});
+	it("splits a camel-case or snake-case flag into words", () => {
+		const rows = [
+			["BanMembers", "ban members"],
+			["ManageGuild", "manage guild"],
+			["MANAGE_ROLES", "manage roles"],
+			["Administrator", "administrator"],
+		] as const;
 
-	it("splits a snake-case flag too", () => {
-		expect(humanisePermission("MANAGE_ROLES")).toBe("manage roles");
-	});
-
-	it("leaves a single word as one word", () => {
-		expect(humanisePermission("Administrator")).toBe("administrator");
-	});
-});
-
-describe("formatClock", () => {
-	it("pads the seconds, so 3:07 never renders as 3:7", () => {
-		expect(formatClock(3 * 60_000 + 7_000)).toBe("3:07");
-	});
-
-	/** A track that has not started is at the beginning, not at "0s" or "NaN". */
-	it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])("renders %p as the start", (ms) => {
-		expect(formatClock(ms)).toBe("0:00");
+		expect(wrong(rows, humanisePermission)).toEqual([]);
 	});
 });
