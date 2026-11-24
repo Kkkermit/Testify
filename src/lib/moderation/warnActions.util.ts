@@ -1,4 +1,5 @@
 import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { theme } from "@config/theme";
 import { type WarnEntry, type WarnLadderRecord } from "@database/models/moderation.schema";
 import {
@@ -73,7 +74,7 @@ export function stepLabel(step: WarnStep): string {
 		case "warn":
 			return "Warning only";
 		case "timeout":
-			return `Time out for ${formatDurationLong(step.minutes * 60_000)}`;
+			return `Time out for ${formatDurationLong(step.minutes * MINUTE_MS)}`;
 		case "kick":
 			return "Kick";
 		case "ban":
@@ -114,7 +115,7 @@ export async function applyWarnStep(
 
 	if (step.action === "kick") return member.kickable ? attempt(member.kick(auditReason)) : "outranked";
 
-	return member.moderatable ? attempt(member.timeout(step.minutes * 60_000, auditReason)) : "outranked";
+	return member.moderatable ? attempt(member.timeout(step.minutes * MINUTE_MS, auditReason)) : "outranked";
 }
 
 const PERMISSION: Record<Exclude<WarnStep["action"], "warn">, string> = {
@@ -232,7 +233,7 @@ export async function issueWarning(options: {
 			user,
 			moderator: byModerator,
 			reason: `Warning ${String(count)}: ${reason}`,
-			durationMs: step.action === "timeout" ? step.minutes * 60_000 : null,
+			durationMs: step.action === "timeout" ? step.minutes * MINUTE_MS : null,
 		});
 	}
 

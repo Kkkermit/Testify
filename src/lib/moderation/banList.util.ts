@@ -1,6 +1,6 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { listActiveSoftbans } from "@database/repositories/moderationRepository";
-import { BAN_LIMITS, type BanEntry, type BanPage } from "@testify/shared";
+import { BAN_LIMITS, type BanEntry, type BanPage, idFromQuery } from "@testify/shared";
 
 /** A server's bans as Discord holds them, newest softbans marked, searched and paged for the dashboard. */
 
@@ -9,7 +9,7 @@ export function banMatches(entry: BanEntry, query: string): boolean {
 	const typed = query.trim().toLowerCase();
 	if (typed === "") return true;
 
-	const id = /^<@!?(\d{17,20})>$/.exec(typed)?.[1] ?? (/^\d{17,20}$/.test(typed) ? typed : null);
+	const id = idFromQuery(typed);
 	if (id !== null) return entry.userId === id;
 
 	return entry.username.toLowerCase().includes(typed) || (entry.reason ?? "").toLowerCase().includes(typed);

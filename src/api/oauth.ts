@@ -1,4 +1,5 @@
 import { type Context } from "hono";
+import { type ApiBindings } from "@api/context";
 import { ApiProblem } from "@api/errors";
 import { type Env } from "@config/env";
 import { createSecretBox, type SecretBox } from "@lib/infra";
@@ -33,8 +34,8 @@ export function oauthConfigFrom(env: Env): OauthConfig | null {
 }
 
 /** 503 rather than 500: nothing is broken, the install is not finished. */
-export function requireOauth(context: Context): OauthConfig {
-	const oauth = context.get("oauth") as OauthConfig | null;
+export function requireOauth(context: Context<ApiBindings>): OauthConfig {
+	const oauth = context.get("oauth");
 
 	if (oauth === null) {
 		throw new ApiProblem(503, "setup_required", "The dashboard has not been configured yet. See /setup.");

@@ -212,12 +212,7 @@ export function startApi(client: TestifyClient, env: Env, options: ListenOptions
 	// After the API and nowhere else: it is a catch-all, so anything registered behind it never runs.
 	serveDashboard(app, dashboardRoot(), (path) => readLinkPreview(client, env, path));
 
-	let listening: (port: number) => void = () => undefined;
-	let failed: (error: Error) => void = () => undefined;
-	const ready = new Promise<number>((resolve, reject) => {
-		listening = resolve;
-		failed = reject;
-	});
+	const { promise: ready, resolve: listening, reject: failed } = Promise.withResolvers<number>();
 
 	let server: Server | null = null;
 	let retry: NodeJS.Timeout | null = null;

@@ -8,7 +8,7 @@ import { parseBody } from "@api/validate";
 import { deleteLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
 import { sortRewards } from "@lib/levelling";
 import { readLevelConfig } from "@lib/settings";
-import { boostsSchema, ignoresSchema, levellingPatchSchema, rewardsSchema } from "@testify/shared";
+import { boostsSchema, ignoresSchema, type LevellingPatch, levellingPatchSchema, rewardsSchema } from "@testify/shared";
 
 export const levelling = new Hono<ApiBindings>();
 
@@ -116,13 +116,13 @@ function count(value: number, noun: string): string {
 	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
 }
 
-function summarisePatch(patch: Record<string, unknown>): string {
+function summarisePatch(patch: LevellingPatch): string {
 	const parts: string[] = [];
 
-	if (patch.enabled !== undefined) parts.push(patch.enabled === true ? "Turned levelling on" : "Turned levelling off");
-	if (patch.announce !== undefined) parts.push(patch.announce === true ? "Announcing level-ups" : "Silenced level-ups");
+	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned levelling on" : "Turned levelling off");
+	if (patch.announce !== undefined) parts.push(patch.announce ? "Announcing level-ups" : "Silenced level-ups");
 	if (patch.stackRewards !== undefined) {
-		parts.push(patch.stackRewards === true ? "Rewards stack" : "Only the highest reward is kept");
+		parts.push(patch.stackRewards ? "Rewards stack" : "Only the highest reward is kept");
 	}
 	if (patch.levelUpChannelId !== undefined) {
 		parts.push(
