@@ -10,6 +10,7 @@ import {
 	MessageFlags,
 	MessageFlagsBitField,
 	type MessageFlagsResolvable,
+	type PermissionsBitField,
 	type Role,
 	type TextBasedChannel,
 	type User,
@@ -281,6 +282,11 @@ export class PrefixInteraction implements CommandInput {
 		this.channel = message.channel;
 		this.client = message.client;
 		this.commandName = command.name;
+	}
+
+	get memberPermissions(): Readonly<PermissionsBitField> | null {
+		if (this.member === null || this.channel === null || this.channel.isDMBased()) return null;
+		return this.member.permissionsIn(this.channel);
 	}
 
 	/** A message has no thinking state, so the channel shows typing instead. */

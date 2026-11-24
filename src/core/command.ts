@@ -37,6 +37,8 @@ import { UserFacingError } from "@core/errors";
 export interface CommandInput {
 	readonly user: User;
 	readonly member: GuildMember | APIInteractionGuildMember | null;
+	/** What the member may do in the channel it ran in, channel overrides included; a slash command has Discord's own. */
+	readonly memberPermissions?: Readonly<PermissionsBitField> | null;
 	readonly guild: Guild | null;
 	readonly guildId: string | null;
 	readonly channel: TextBasedChannel | null;

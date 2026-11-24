@@ -197,6 +197,19 @@ describe("runChecks", () => {
 		expect(refusal).toContain("ban members");
 	});
 
+	/** A role's permission was enough even where the channel takes it away, so the bot did what Discord would not. */
+	it("asks what the member may do in this channel, not what their roles give them everywhere", async () => {
+		const command = { ...plain, permissions: [PermissionFlagsBits.BanMembers] };
+		const interaction = createMockInteraction({
+			overrides: {
+				member: { permissions: String(PermissionFlagsBits.BanMembers) } as never,
+				memberPermissions: new PermissionsBitField(0n),
+			},
+		});
+
+		expect(await runChecks(interaction, command, createMockClient())).toContain("ban members");
+	});
+
 	it("applies a cooldown, then lets it expire", async () => {
 		const command = { ...plain, cooldown: 5_000 };
 		const client = createMockClient();

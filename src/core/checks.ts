@@ -106,7 +106,8 @@ export async function checkCommand(
 	const needed = [...(command.permissions ?? []), ...(subcommand?.permissions ?? [])];
 
 	if (needed.length > 0 && member !== null) {
-		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
+		// The channel's overrides count, as they do in Discord, so a role's permission is not enough where it is taken away.
+		const missing = (interaction.memberPermissions ?? permissionsOf(member)).missing(new PermissionsBitField(needed));
 		if (missing.length > 0) {
 			return refused("you_lack", lacking(language, "youNeed", missing));
 		}

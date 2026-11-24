@@ -536,7 +536,10 @@ Rules:
    them.
 5. **Throw `UserFacingError` for anything the user did wrong.** See [§16](#16-errors).
 6. **Guard with the declarative fields** (`guildOnly`, `permissions`, …) rather than hand-rolled checks in
-   `run`. `checks.ts` handles them uniformly and the failure messages stay consistent.
+   `run`. `checks.ts` handles them uniformly and the failure messages stay consistent. A permission is judged in the
+   channel the command ran in, overrides included, as Discord judges it: `memberPermissions` is Discord's own figure
+   on a slash command and `permissionsIn` on a prefix one, because a role's permission alone let the bot act where the
+   channel had taken it away.
 7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
    to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
 8. Run `npm run docs:commands` afterwards, and `npm run i18n:commands`, then add the new strings to each file in
