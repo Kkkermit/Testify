@@ -2290,8 +2290,7 @@ it back, which both say before the button. Six things about it are load-bearing:
   they are in, and deleting them would let anybody wipe their own record. The privacy notice says so
   (`legal.removalP3`) and `LegalPage.test.tsx` pins the claim to the `keep` lines in the map.
   **A blacklist entry above all:** only `/blacklist` and the owner console's Blacklist tab may add or lift one, both
-  owner-only, and the backup page's program check may add one for the account signed in (below, in §24).
-  `blacklistWriters.test.ts` fails on any other module that touches the model or imports `addToBlacklist` or
+  owner-only. `blacklistWriters.test.ts` fails on any other module that touches the model or imports `addToBlacklist` or
   `removeFromBlacklist`, the deletion included. Each of its guards was proved to go red.
 - **What they did for a server stays, without them.** A case they opened, a ticket, a giveaway they hosted or a
   setting they changed keeps its place in the server's record, with the id replaced by `DELETED_USER_ID` ("0", which
@@ -3681,18 +3680,16 @@ setup, all over the eighteen sections `RESTORABLE` already lists for Put back. F
   because no file reaches it, and sending files to a scanning service would hand somebody's settings to a third party.
   `backup.test.ts` refuses a row of programs, scripts and crafted files, and each of the eleven checks was proved to
   turn it red.
-- **Choosing a program or a script blacklists the account signed in.** The page reads a chosen file's first
+- **Choosing a program or a script tells the owners, and blocks nobody.** The page reads a chosen file's first
   `BACKUP_LIMITS.reportedBytes` (8) before its name or its size, so `setup.exe` or a 100 MB binary is caught as surely
   as one renamed `.json`, and `runsAsProgram` sends those bytes, never the file, to `POST /guilds/:id/backup/program`.
-  The route sits behind `requireGuild` and CSRF, judges the bytes again itself, and blacklists `actorOf` and nobody
-  else: the body holds only `head`, under a strict schema. The owners are never blacklisted (`blacklistProblem`, a
-  204), the audit records it as `blacklist.add`, the owners' log channel is told with how to lift it, and the 403
-  `blacklisted` it answers turns the page into `BlockedPage`. An archive, a document or a picture is refused without
-  it, because those are chosen by mistake. Two limits, said plainly: a page that never runs this code reports
-  nothing, which costs nothing because no file reaches the server either way; and a manager handed a program
-  disguised as a backup blacklists themselves, which is why the page warns against exactly that under the picker
-  (`backup.toldToWarning`) and the owners are told. `backupPentest.test.ts` attacks the
-  route through the real app, and each of its defences was proved to go red.
+  The route sits behind `requireGuild` and CSRF, judges the bytes again itself, and names `actorOf` and nobody else
+  (the body holds only `head`, under a strict schema) in a post to the owners' log channel, at most once a minute per
+  person and server (`AttemptThrottle`). It once blacklisted whoever chose one, which made the page a way to have
+  somebody blocked by talking them into choosing a file, so the owners now decide with `/blacklist add`. An archive, a
+  document or a picture is refused without a report, because those are chosen by mistake. The page says what
+  choosing one does under the picker (`backup.programWarning`, `backup.toldToWarning`). `backupPentest.test.ts` attacks
+  the route through the real app, fails on any blacklist write, and each of its defences was proved to go red.
 - **Ids are moved by name** (`planBackup`): an id this server has is kept, otherwise the name the file stored is
   matched without regard to case against channels the reader can see and roles here, and anything with no match is
   left as it is and named. A list where nothing matched is left alone rather than emptied, and a section with nothing

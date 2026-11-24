@@ -84,7 +84,7 @@ export function useApplyBackup(guildId: string): UseMutationResult<StepResult[],
 	});
 }
 
-/** Tells the server a program or a script was chosen, by its first bytes; the server judges them before blocking anybody. */
+/** Tells the server a program or a script was chosen, by its first bytes; the server judges them before telling the owners. */
 export function useReportProgram(guildId: string): UseMutationResult<void, Error, Uint8Array> {
 	return useMutation({
 		mutationFn: (bytes: Uint8Array) =>

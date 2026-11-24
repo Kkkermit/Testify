@@ -150,7 +150,7 @@ describe("the back up and copy page", () => {
 		server.use(
 			http.post(`/api/guilds/${GUILD}/backup/program`, async ({ request }) => {
 				sent.push(await request.json());
-				return HttpResponse.json({ error: { code: "blacklisted", message: "Blocked." } }, { status: 403 });
+				return new HttpResponse(null, { status: 204 });
 			}),
 		);
 		renderPage();
@@ -165,8 +165,8 @@ describe("the back up and copy page", () => {
 			{ type: "application/x-msdownload" },
 		);
 
-		// Somebody can be talked into choosing a program, so the page says what it costs before anything is chosen.
-		expect(screen.getByText(/Choosing a program or a script here blocks your account/)).toBeInTheDocument();
+		// Somebody can be talked into choosing a program, so the page says what happens before anything is chosen.
+		expect(screen.getByText(/owners are told who chose it/)).toBeInTheDocument();
 		expect(screen.getByText(/If somebody told you to choose a file here, stop/)).toBeInTheDocument();
 
 		await user.upload(picker, zip);

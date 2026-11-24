@@ -3,11 +3,10 @@ import { join, relative, sep } from "node:path";
 import blacklistCommand from "@commands/owner/blacklist.command";
 import { ERASURE } from "@database/repositories/accountRepository";
 
-/** Only the bot's owners, and choosing a program as a backup, put somebody on the blacklist; deleting your data is no way off. */
+/** Only the bot's owners put somebody on the blacklist, and deleting your data is no way off. */
 
 const SRC = join(__dirname, "../../src");
-// The backup route blacklists only the account signed in, and only for bytes it judged a program itself.
-const WRITERS = ["commands/owner/blacklist.command.ts", "api/routes/blacklist.ts", "api/routes/guildBackup.ts"];
+const WRITERS = ["commands/owner/blacklist.command.ts", "api/routes/blacklist.ts"];
 const SOURCES = ["@database", "@database/models/moderation.schema", "@database/repositories/blacklistRepository"];
 
 function modules(dir: string): string[] {
@@ -47,7 +46,7 @@ describe("the blacklist", () => {
 		expect([...reaching, ...raw]).toEqual(["database/models/moderation.schema.ts"]);
 	});
 
-	it("is changed only by the owner command, the owner console and the backup page's program check", () => {
+	it("is changed only by the owner command and the owner console", () => {
 		const changing = files.filter((file) =>
 			databaseImports(file).some((name) => name === "addToBlacklist" || name === "removeFromBlacklist"),
 		);

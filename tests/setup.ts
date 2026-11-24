@@ -1,5 +1,6 @@
 /** Module-level caches the harness empties between tests, so no test inherits another's state. */
 const RESETS: readonly (readonly [module: string, name: string])[] = [
+	["@api/routes/guildBackup", "clearProgramReports"],
 	["@config/env", "resetEnv"],
 	["@config/instance", "resetInstance"],
 	["@core/checks", "clearCooldowns"],
