@@ -15,6 +15,10 @@ import {
 } from "discord.js";
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
+import { truncate } from "@lib/format/format.util";
+
+/** Discord's caps on component text; discord.js throws on anything longer, which fails the whole message. */
+const CAPS = { buttonLabel: 80, placeholder: 150, optionText: 100, modalText: 45, inputPlaceholder: 100 } as const;
 
 interface ButtonOptions {
 	id: string;
@@ -30,13 +34,16 @@ export function button(options: ButtonOptions): ButtonBuilder {
 		.setStyle(options.style ?? ButtonStyle.Secondary)
 		.setDisabled(options.disabled ?? false);
 
-	if (options.label !== undefined) builder.setLabel(options.label);
+	if (options.label !== undefined) builder.setLabel(truncate(options.label, CAPS.buttonLabel));
 	if (options.emoji !== undefined) builder.setEmoji(options.emoji);
 	return builder;
 }
 
 export function linkButton(label: string, url: string, emoji?: string): ButtonBuilder {
-	const builder = new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(label).setURL(url);
+	const builder = new ButtonBuilder()
+		.setStyle(ButtonStyle.Link)
+		.setLabel(truncate(label, CAPS.buttonLabel))
+		.setURL(url);
 	if (emoji !== undefined) builder.setEmoji(emoji);
 	return builder;
 }
@@ -66,7 +73,7 @@ export function select(options: {
 		.setMaxValues(options.maxValues ?? 1)
 		.setDisabled(options.disabled ?? false);
 
-	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	if (options.placeholder !== undefined) builder.setPlaceholder(truncate(options.placeholder, CAPS.placeholder));
 	return builder;
 }
 
@@ -87,7 +94,7 @@ export function channelSelect(options: {
 		.setMinValues(options.minValues ?? 1)
 		.setMaxValues(options.maxValues ?? 1);
 
-	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	if (options.placeholder !== undefined) builder.setPlaceholder(truncate(options.placeholder, CAPS.placeholder));
 	if (options.defaultChannelIds !== undefined) builder.setDefaultChannels(options.defaultChannelIds);
 	return builder;
 }
@@ -106,7 +113,7 @@ export function roleSelect(options: {
 		.setMinValues(options.minValues ?? 1)
 		.setMaxValues(options.maxValues ?? 1);
 
-	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	if (options.placeholder !== undefined) builder.setPlaceholder(truncate(options.placeholder, CAPS.placeholder));
 	if (options.defaultRoleIds !== undefined) builder.setDefaultRoles(options.defaultRoleIds);
 	return builder;
 }
@@ -120,11 +127,11 @@ export function option(config: {
 	selected?: boolean;
 }): StringSelectMenuOptionBuilder {
 	const builder = new StringSelectMenuOptionBuilder()
-		.setLabel(config.label.slice(0, 100))
+		.setLabel(truncate(config.label, CAPS.optionText))
 		.setValue(config.value)
 		.setDefault(config.selected ?? false);
 
-	if (config.description !== undefined) builder.setDescription(config.description.slice(0, 100));
+	if (config.description !== undefined) builder.setDescription(truncate(config.description, CAPS.optionText));
 	if (config.emoji !== undefined) builder.setEmoji(config.emoji);
 	return builder;
 }
@@ -224,7 +231,7 @@ export function modalForm(options: {
 }): ModalBuilder {
 	const modal = new ModalBuilder()
 		.setCustomId(customId(options.id, options.action, ...(options.args ?? [])))
-		.setTitle(options.title.slice(0, 45));
+		.setTitle(truncate(options.title, CAPS.modalText));
 
 	modal.addLabelComponents(
 		options.fields.map((field) => {
@@ -233,11 +240,11 @@ export function modalForm(options: {
 				.setStyle(field.paragraph === true ? TextInputStyle.Paragraph : TextInputStyle.Short)
 				.setRequired(field.required ?? true);
 
-			if (field.placeholder !== undefined) input.setPlaceholder(field.placeholder);
+			if (field.placeholder !== undefined) input.setPlaceholder(truncate(field.placeholder, CAPS.inputPlaceholder));
 			if (field.maxLength !== undefined) input.setMaxLength(field.maxLength);
 			if (field.value !== undefined && field.value !== "") input.setValue(field.value);
 
-			return new LabelBuilder().setLabel(field.label.slice(0, 45)).setTextInputComponent(input);
+			return new LabelBuilder().setLabel(truncate(field.label, CAPS.modalText)).setTextInputComponent(input);
 		}),
 	);
 
