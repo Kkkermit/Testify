@@ -74,7 +74,7 @@ export async function debitWallet(guildId: string, userId: string, amount: numbe
 		.exec();
 }
 
-async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+export async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, bank: { $gte: amount } }, { $inc: { bank: -amount } }, LEAN)
 		.lean<EconomyAccount>()

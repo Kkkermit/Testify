@@ -1,16 +1,25 @@
 import { type Guild, type GuildMember } from "discord.js";
+import { UserFacingError } from "@core/errors";
 import { type Logger } from "@core/logger";
-import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
+import {
+	adjustBank,
+	adjustWallet,
+	debitBank,
+	debitWallet,
+	findAccount,
+	getEconomyRank,
+} from "@database/repositories/economyRepository";
 import { latestJoinOf } from "@database/repositories/inviteRepository";
 import { addXp, getLevelSettings, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
 import { getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { problemText } from "@lib/format/problemText.util";
 import { toInviteJoin } from "@lib/invites/inviteActions.util";
 import { type RewardOutcome } from "@lib/levelling/levelling.types";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 import { blockText, moderationProblem } from "@lib/moderation/moderationActions.util";
 import { memberWarningOf, readWarnLadder } from "@lib/moderation/warnActions.util";
-import { type MemberDetail, type MoneyPurse } from "@testify/shared";
+import { type MemberDetail, type MoneyPurse, problem } from "@testify/shared";
 
 /** One member's page on the dashboard: everything it shows, and the money and level changes made from it. */
 
@@ -115,15 +124,22 @@ export async function changeLevel(
 	return { level: record.level, xp: record.xp, rewards: await applyLevelRewards(member, config, record.level, logger) };
 }
 
-/** Money is `$inc`-ed rather than read and written back, so two managers cannot overwrite each other's change. */
+/** Money moves by `$inc`, and a take only while the balance still covers it, so no change is lost and none overdraws. */
 export async function changeMoney(
 	guildId: string,
 	userId: string,
 	purse: MoneyPurse,
 	delta: number,
 ): Promise<{ wallet: number; bank: number }> {
-	const account =
-		purse === "wallet" ? await adjustWallet(guildId, userId, delta) : await adjustBank(guildId, userId, delta);
+	const add = purse === "wallet" ? adjustWallet : adjustBank;
+	const take = purse === "wallet" ? debitWallet : debitBank;
+	const account = delta >= 0 ? await add(guildId, userId, delta) : await take(guildId, userId, -delta);
+
+	if (account === null) {
+		const held = (await findAccount(guildId, userId))?.[purse] ?? 0;
+		const short = problem(purse === "wallet" ? "money.walletShort" : "money.bankShort", { held });
+		throw new UserFacingError(problemText(short));
+	}
 
 	return { wallet: account.wallet, bank: account.bank };
 }

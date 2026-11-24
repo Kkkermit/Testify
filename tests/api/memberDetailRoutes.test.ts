@@ -6,7 +6,7 @@ import { members } from "@api/routes/members";
 import { type TestifyClient } from "@core/client";
 import { findAccess } from "@database/repositories/dashboardAccessRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
+import { adjustWallet, debitBank, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
 import { addXp, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
 import { deactivateSoftban, getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
@@ -19,6 +19,7 @@ jest.mock("@database/repositories/economyRepository", () => ({
 	getEconomyRank: jest.fn(() => Promise.resolve(null)),
 	adjustWallet: jest.fn(() => Promise.resolve({ wallet: 0, bank: 0 })),
 	adjustBank: jest.fn(() => Promise.resolve({ wallet: 0, bank: 0 })),
+	debitBank: jest.fn(() => Promise.resolve({ wallet: 0, bank: 500 })),
 }));
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelLeaderboard: jest.fn(() => Promise.resolve([])),
@@ -66,7 +67,7 @@ const banned = jest.fn((_id: string, _options: unknown) => Promise.resolve());
 const searched = jest.fn((_options: unknown) => Promise.resolve(new Collection<string, unknown>()));
 const audited = jest.mocked(recordAudit);
 const walletChange = jest.mocked(adjustWallet);
-const bankChange = jest.mocked(adjustBank);
+const bankDebit = jest.mocked(debitBank);
 const levelSet = jest.mocked(setLevel);
 const xpAdded = jest.mocked(addXp);
 const rewarded = jest.mocked(applyLevelRewards);
@@ -235,7 +236,7 @@ beforeEach(() => {
 	warnings.mockResolvedValue(null);
 	softban.mockResolvedValue(null);
 	walletChange.mockResolvedValue({ wallet: 0, bank: 0 } as never);
-	bankChange.mockResolvedValue({ wallet: 0, bank: 0 } as never);
+	bankDebit.mockResolvedValue({ wallet: 0, bank: 500 } as never);
 	levelSet.mockResolvedValue({ level: 10, xp: 5_000 } as never);
 	xpAdded.mockResolvedValue({ level: 3, xp: 400 } as never);
 	rewarded.mockResolvedValue({ added: [], removed: [], skipped: [] });
@@ -390,7 +391,7 @@ describe("PATCH /members/:userId/money", () => {
 
 		await request("PATCH", "/money", { purse: "bank", delta: -400 });
 
-		expect(bankChange).toHaveBeenCalledWith(GUILD, TARGET, -400);
+		expect(bankDebit).toHaveBeenCalledWith(GUILD, TARGET, 400);
 	});
 
 	/** Nothing else in the economy can produce a negative balance, so the API must not either. */
