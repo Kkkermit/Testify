@@ -23,7 +23,7 @@ import { ServerFactsCard } from "@/features/insights/components/ServerFactsCard"
 import { INSIGHT_WINDOW_LABELS } from "@/features/insights/insights.utils";
 import { useInsights } from "@/features/insights/useInsights";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { shortDate } from "@/lib/datetime";
+import { calendarDate } from "@/lib/datetime";
 import { currentData } from "@/lib/queries";
 
 export function InsightsPage(): React.JSX.Element {
@@ -87,7 +87,7 @@ export function InsightsPage(): React.JSX.Element {
 						<p className="text-muted-foreground text-sm">
 							{results.countingSince === null
 								? t("insights.notCountingYet")
-								: t("insights.countingSince", { date: shortDate(results.countingSince) })}
+								: t("insights.countingSince", { date: calendarDate(results.countingSince) })}
 						</p>
 
 						<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

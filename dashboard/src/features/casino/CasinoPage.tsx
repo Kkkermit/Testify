@@ -1,5 +1,5 @@
 import { CASINO_GAMES } from "@testify/shared";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -27,6 +27,7 @@ import {
 } from "@/features/casino/casino.utils";
 import { useCasino, useSaveCasino } from "@/features/casino/useCasino";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { useDraft } from "@/hooks/useDraft";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
@@ -41,16 +42,11 @@ export function CasinoPage(): React.JSX.Element {
 	usePageTitle(t("casino.title"), overview.data?.name);
 
 	const settings = casino.data;
-	const [draft, setDraft] = useState<LimitsDraft | null>(null);
+	const [draft, setDraft] = useDraft<LimitsDraft>(settings === undefined ? undefined : draftOf(settings));
 	const [source, setSource] = useState<"state" | "games" | "limits">("state");
 
-	useEffect(() => {
-		if (settings !== undefined) setDraft(draftOf(settings));
-	}, [settings]);
-
-	// Checked before the draft, which never fills when the read fails.
 	if (casino.isError) return <ErrorState error={casino.error} onRetry={() => void casino.refetch()} />;
-	if (settings === undefined || draft === null) return <Skeleton className="h-96 w-full" />;
+	if (settings === undefined || draft === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const problem = limitsProblem(draft, t);
 	const limits = limitsOf(draft);

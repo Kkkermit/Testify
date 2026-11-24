@@ -51,5 +51,5 @@ export function rowDiffers(cells: readonly (FeatureStatus | null | undefined)[])
 
 export function missingDiffers(overviews: readonly (GuildOverview | undefined)[]): boolean {
 	const known = overviews.filter((overview) => overview !== undefined);
-	return new Set(known.map((overview) => [...overview.missingPermissions].sort().join(","))).size > 1;
+	return new Set(known.map((overview) => overview.missingPermissions.toSorted().join(","))).size > 1;
 }

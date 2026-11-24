@@ -4,7 +4,7 @@ import {
 	autoResponderBlocked,
 	type AutoResponderInput,
 } from "@testify/shared";
-import { MessageSquareReply, Plus, Trash2 } from "lucide-react";
+import { MessageSquareReply, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
@@ -140,13 +140,6 @@ export function AutoRespondersPage(): React.JSX.Element {
 					</Button>
 				</RowActions>
 			</SettingRows>
-
-			{remove.error !== null && (
-				<Warning>
-					<Trash2 size={14} aria-hidden="true" className="mr-1 inline" />
-					{refusalText(remove.error, t("common.couldNotRemove"))}
-				</Warning>
-			)}
 		</>
 	);
 }

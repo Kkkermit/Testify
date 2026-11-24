@@ -88,7 +88,6 @@ export const keys = {
 		restoreRead: (path: string) => ["guild", id, "restore-read", path] as const,
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,
-		audit: (page: number) => ["guild", id, "audit", page] as const,
 		board: (board: string, page: number, sort: string, scope: string) =>
 			["guild", id, "board", board, page, sort, scope] as const,
 		directory: (search: string) => ["guild", id, "directory", search] as const,

@@ -130,6 +130,19 @@ describe("the back up and copy page", () => {
 		expect(await screen.findByText(/one ending in \.json/)).toBeInTheDocument();
 	});
 
+	/** A file moved or deleted after it was picked cannot be read, which once failed with nothing said at all. */
+	it("says so when the chosen file cannot be read", async () => {
+		renderPage();
+		const gone = backupFile(JSON.stringify(elsewhere));
+		Object.defineProperty(gone, "slice", {
+			value: () => ({ arrayBuffer: () => Promise.reject(new Error("NotReadableError")) }),
+		});
+
+		await userEvent.upload(await screen.findByLabelText(/From a backup file/), gone);
+
+		expect(await screen.findByText(/settings could not be read/)).toBeInTheDocument();
+	});
+
 	/** The server judges a program by its first bytes alone, so nothing else of the file ever leaves the browser. */
 	/** A program chosen under its own name, or one past the size limit, was once refused and never reported. */
 	it("reports a program by its first eight bytes whatever it is called, and a mistaken archive not at all", async () => {

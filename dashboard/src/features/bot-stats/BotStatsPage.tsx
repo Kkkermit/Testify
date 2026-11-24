@@ -73,6 +73,7 @@ export function BotStatsPage(): React.JSX.Element {
 						disabled={target === null || busy}
 						onClick={() => {
 							if (target === null) return;
+							remove.reset();
 							post.mutate(
 								{ channelId: target },
 								{
@@ -95,6 +96,7 @@ export function BotStatsPage(): React.JSX.Element {
 							variant="ghost"
 							disabled={busy}
 							onClick={() => {
+								post.reset();
 								remove.mutate();
 							}}
 						>

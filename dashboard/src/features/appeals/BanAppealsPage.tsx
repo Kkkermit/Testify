@@ -14,7 +14,7 @@ import {
 	Skeleton,
 	Summary,
 } from "@/components/primitives";
-import { appealFilterFrom, appealSummary } from "@/features/appeals/appeals.utils";
+import { APPEAL_FILTERS, appealFilterFrom, appealSummary } from "@/features/appeals/appeals.utils";
 import { AppealItem, APPEAL_STATUS_LABEL } from "@/features/appeals/components/AppealItem";
 import { AppealSettingsRows } from "@/features/appeals/components/AppealSettingsRows";
 import {
@@ -32,8 +32,6 @@ import { type TranslationKey } from "@/i18n";
 import { channelLabel } from "@/lib/channels";
 import { pageCount, pageFrom } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
-
-const FILTERS: readonly AppealFilter[] = ["open", "accepted", "refused", "all"];
 
 const FILTER_LABEL: Record<AppealFilter, TranslationKey> = { ...APPEAL_STATUS_LABEL, all: "appeals.filterAll" };
 
@@ -104,7 +102,7 @@ export function BanAppealsPage(): React.JSX.Element {
 						<SegmentedControl
 							label={t("appeals.filter")}
 							value={filter}
-							segments={FILTERS.map((value) => ({ value, label: t(FILTER_LABEL[value]) }))}
+							segments={APPEAL_FILTERS.map((value) => ({ value, label: t(FILTER_LABEL[value]) }))}
 							onChange={(status) => {
 								showAppeals({ status });
 							}}
@@ -129,6 +127,7 @@ export function BanAppealsPage(): React.JSX.Element {
 								key={appeal.id}
 								appeal={appeal}
 								busy={decide.isPending}
+								error={decide.variables?.appealId === appeal.id ? decide.error : null}
 								onDecide={(decision) => {
 									decide.mutate({ appealId: appeal.id, decision });
 								}}
@@ -146,7 +145,6 @@ export function BanAppealsPage(): React.JSX.Element {
 						}}
 					/>
 				)}
-				<Refusal error={decide.error} />
 			</section>
 		</>
 	);

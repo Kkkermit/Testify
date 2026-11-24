@@ -41,6 +41,21 @@ describe("the ban appeals page", () => {
 		});
 	});
 
+	it("shows a refused decision inside that appeal", async () => {
+		server.use(
+			http.post(`/api/guilds/${GUILD}/appeals/:appealId/decision`, () =>
+				HttpResponse.json({ error: { code: "bad_request", message: "Discord refused the unban." } }, { status: 400 }),
+			),
+		);
+		renderPage();
+
+		const row = (await screen.findByRole("heading", { name: "kate" })).closest("li") ?? document.body;
+		await userEvent.click(within(row).getByRole("button", { name: "Accept and unban" }));
+
+		expect(await within(row).findByText("Discord refused the unban.")).toBeInTheDocument();
+		expect(screen.getAllByText("Discord refused the unban.")).toHaveLength(1);
+	});
+
 	/** Reading appeals asks Ban Members; a manager without it must be told, not shown a quiet empty list. */
 	it("says why the list could not be read rather than showing none", async () => {
 		server.use(

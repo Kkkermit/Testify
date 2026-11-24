@@ -6,6 +6,8 @@ export interface UndoableDelete {
 	key: string;
 	label: string;
 	commit: () => Promise<unknown>;
+	/** Words a refusal in the reader's language, where the page knows better than the server's own message. */
+	refusal?: (error: unknown) => string;
 }
 
 export interface Undo {

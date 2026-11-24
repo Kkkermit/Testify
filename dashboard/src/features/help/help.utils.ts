@@ -53,7 +53,7 @@ export function articlesByTopic(entries: readonly SupportCatalogueEntry[]): Topi
 	return SUPPORT_TOPICS.filter((topic) => topic !== "commands").flatMap((topic) => {
 		const articles = entries
 			.filter((entry) => entry.kind === "article" && entry.topic === topic)
-			.sort((left, right) => left.title.localeCompare(right.title));
+			.toSorted((left, right) => left.title.localeCompare(right.title));
 
 		return articles.length === 0 ? [] : [{ topic, articles }];
 	});

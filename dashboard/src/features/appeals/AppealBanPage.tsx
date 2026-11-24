@@ -3,8 +3,7 @@ import { Scale, Send } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, Refusal, Warning } from "@/components/form";
-import { FIELD } from "@/components/form/fieldStyles";
+import { Field, FIELD, Refusal, Warning } from "@/components/form";
 import {
 	Avatar,
 	Badge,
@@ -84,7 +83,7 @@ function AppealLists({ appeals }: { appeals: OwnAppeals }): React.JSX.Element {
 								<p className="text-muted-foreground text-xs">
 									{t("appeals.ownSentOn", { when: shortDate(appeal.createdAt) })}
 								</p>
-								<p className="text-sm whitespace-pre-line [overflow-wrap:anywhere]">{appeal.text}</p>
+								<p className="text-sm whitespace-pre-line wrap-anywhere">{appeal.text}</p>
 								{appeal.reason !== "" && (
 									<blockquote className="border-border border-l-2 pl-3 text-sm">{appeal.reason}</blockquote>
 								)}
@@ -110,13 +109,13 @@ function ServerAppeal({ server }: { server: AppealableServer }): React.JSX.Eleme
 		<li className={cardClass("default", "flex flex-col gap-4")}>
 			<div className="flex items-center gap-3">
 				<Avatar name={server.name} url={server.iconUrl} seed={server.guildId} />
-				<h2 className="min-w-0 text-base font-semibold [overflow-wrap:anywhere]">{server.name}</h2>
+				<h2 className="min-w-0 text-base font-semibold wrap-anywhere">{server.name}</h2>
 			</div>
 
 			{server.open !== null ? (
 				<div className="flex flex-col gap-2">
 					<p className="text-sm">{t("appeals.ownWaiting", { when: dateAndTime(server.open.createdAt) })}</p>
-					<blockquote className="border-border border-l-2 pl-3 text-sm whitespace-pre-line [overflow-wrap:anywhere]">
+					<blockquote className="border-border border-l-2 pl-3 text-sm whitespace-pre-line wrap-anywhere">
 						{server.open.text}
 					</blockquote>
 				</div>

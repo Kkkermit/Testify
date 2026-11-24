@@ -65,7 +65,9 @@ export function ChangesPage(): React.JSX.Element {
 							className={SELECT}
 							value={days}
 							onChange={(event) => {
-								setDays(Number(event.target.value) as ChangeWindow);
+								const chosen = CHANGE_WINDOWS.find((choice) => String(choice) === event.target.value);
+								if (chosen === undefined) return;
+								setDays(chosen);
 								setPage(1);
 							}}
 						>

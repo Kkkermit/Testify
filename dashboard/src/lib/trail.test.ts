@@ -68,4 +68,14 @@ describe("trailFor", () => {
 		expect(trailFor("broken")).toBeNull();
 		expect(trailFor("never")).toBeNull();
 	});
+
+	/** Every link followed out of the docs adds one, so a long reading session must not grow the page's memory for ever. */
+	it("forgets the oldest trails, in memory as well as in storage", () => {
+		for (let index = 0; index < 60; index += 1) {
+			rememberTrail(`page-${String(index)}`, { pathname: "/docs/setup", search: "", hash: "" });
+		}
+
+		expect(trailFor("page-0")).toBeNull();
+		expect(trailFor("page-59")?.pathname).toBe("/docs/setup");
+	});
 });

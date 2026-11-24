@@ -8,6 +8,21 @@ import { server } from "@/test/setup";
 
 const GUILD = "900000000000000001";
 
+const RealDateTimeFormat = Intl.DateTimeFormat;
+
+// A reader in New York: every formatter that names no zone of its own formats in theirs.
+beforeAll(() => {
+	jest
+		.spyOn(Intl, "DateTimeFormat")
+		.mockImplementation(
+			(locale, options) => new RealDateTimeFormat(locale, { timeZone: "America/New_York", ...options }),
+		);
+});
+
+afterAll(() => {
+	jest.restoreAllMocks();
+});
+
 function renderPage(): ReturnType<typeof renderWithProviders> {
 	return renderWithProviders(<InsightsPage />, {
 		route: `/guilds/${GUILD}/insights`,
@@ -32,6 +47,15 @@ describe("the insights page", () => {
 		renderPage();
 
 		expect(await screen.findByText(/Nothing has been counted yet/)).toBeInTheDocument();
+	});
+
+	/** A stored day read as a local moment named every day one day early for anybody west of UTC. */
+	it("names each counted day as the day it is, whatever the reader's time zone", async () => {
+		renderPage();
+
+		expect(await screen.findByText(/^Counted since 21 Sept? 2026\./)).toBeInTheDocument();
+		expect(screen.getByRole("rowheader", { name: /^21 Sept? 2026$/ })).toBeInTheDocument();
+		expect(screen.queryByRole("rowheader", { name: /^20 Sept? 2026$/ })).toBeNull();
 	});
 
 	it("has no automatically detectable accessibility violations", async () => {

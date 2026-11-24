@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { type UseMutationResult, useQuery, type UseQueryResult } from "@tanstack/react-query";
 import {
 	type ChannelSummary,
 	type Ignores,
@@ -37,15 +37,22 @@ export function useRoles(guildId: string): UseQueryResult<RoleSummary[]> {
 	});
 }
 
-function useLevellingMutation<TInput>(
+type LevellingMutation<Input> = UseMutationResult<
+	LevelConfigResponse,
+	Error,
+	Input,
+	{ previous: LevelConfigResponse | undefined }
+>;
+
+function useLevellingMutation<Input>(
 	guildId: string,
-	send: (input: TInput) => Promise<LevelConfigResponse>,
-	optimistic: (current: LevelConfigResponse, input: TInput) => LevelConfigResponse,
-) {
+	send: (input: Input) => Promise<LevelConfigResponse>,
+	optimistic: (current: LevelConfigResponse, input: Input) => LevelConfigResponse,
+): LevellingMutation<Input> {
 	return useOptimisticMutation(keys.guild(guildId).levelling(), send, optimistic, [keys.guild(guildId).overview()]);
 }
 
-export function useUpdateLevelling(guildId: string) {
+export function useUpdateLevelling(guildId: string): LevellingMutation<LevellingPatch> {
 	return useLevellingMutation<LevellingPatch>(
 		guildId,
 		(patch) => api.patch<LevelConfigResponse>(`/guilds/${guildId}/levelling`, patch),
@@ -60,7 +67,7 @@ export function useUpdateLevelling(guildId: string) {
 	);
 }
 
-export function useUpdateBoosts(guildId: string) {
+export function useUpdateBoosts(guildId: string): LevellingMutation<XpBoostInput[]> {
 	return useLevellingMutation<XpBoostInput[]>(
 		guildId,
 		(boosts) => api.put<LevelConfigResponse>(`/guilds/${guildId}/levelling/boosts`, boosts),
@@ -68,15 +75,15 @@ export function useUpdateBoosts(guildId: string) {
 	);
 }
 
-export function useUpdateRewards(guildId: string) {
+export function useUpdateRewards(guildId: string): LevellingMutation<LevelRewardInput[]> {
 	return useLevellingMutation<LevelRewardInput[]>(
 		guildId,
 		(rewards) => api.put<LevelConfigResponse>(`/guilds/${guildId}/levelling/rewards`, rewards),
-		(current, rewards) => ({ ...current, rewards: [...rewards].sort((a, b) => a.level - b.level) }),
+		(current, rewards) => ({ ...current, rewards: rewards.toSorted((a, b) => a.level - b.level) }),
 	);
 }
 
-export function useUpdateIgnores(guildId: string) {
+export function useUpdateIgnores(guildId: string): LevellingMutation<Ignores> {
 	return useLevellingMutation<Ignores>(
 		guildId,
 		(ignores) => api.put<LevelConfigResponse>(`/guilds/${guildId}/levelling/ignores`, ignores),

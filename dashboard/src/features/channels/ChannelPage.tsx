@@ -20,7 +20,7 @@ export function ChannelPage(): React.JSX.Element {
 	const places = usePlaces(guildId);
 	const channel = channels.data?.find((candidate) => candidate.id === channelId && candidate.name !== null);
 
-	usePageTitle(channel?.name ?? t("channel.unknown"));
+	usePageTitle(channel?.name ?? t("channel.unknown"), overview.data?.name);
 
 	const back = { to: `/guilds/${guildId}/channels`, label: t("channel.allChannels") };
 

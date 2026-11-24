@@ -9,7 +9,7 @@ const TINTS = [
 
 export function tintFor(seed: string): string {
 	let hash = 0;
-	for (const character of seed) hash = (hash * 31 + character.codePointAt(0)!) % 100_000;
+	for (const character of seed) hash = (hash * 31 + (character.codePointAt(0) ?? 0)) % 100_000;
 
 	return TINTS[hash % TINTS.length] ?? TINTS[0];
 }

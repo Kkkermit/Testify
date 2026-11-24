@@ -12,7 +12,7 @@ const CLOSE_DELAY_MS = 120;
 const TAP_SLOP_PX = 8;
 const POINTER_FOCUS_MS = 800;
 
-export interface ReadoutMove {
+interface ReadoutMove {
 	at: number;
 	count: number;
 	columns: number | undefined;
@@ -76,7 +76,7 @@ export function ChartReadout({
 
 		let opening: ReturnType<typeof setTimeout> | undefined;
 		let closing: ReturnType<typeof setTimeout> | undefined;
-		let press: { x: number; y: number; sliding: boolean } | null = null;
+		let press: { x: number; sliding: boolean } | null = null;
 		let pointerAt = Number.NEGATIVE_INFINITY;
 		let keyboardFocus = false;
 		let touchOffset = false;
@@ -175,7 +175,7 @@ export function ChartReadout({
 		};
 		const onPointerDown = (event: PointerEvent): void => {
 			pointerAt = event.timeStamp;
-			if (event.pointerType === "touch") press = { x: event.clientX, y: event.clientY, sliding: false };
+			if (event.pointerType === "touch") press = { x: event.clientX, sliding: false };
 		};
 		const onPointerUp = (event: PointerEvent): void => {
 			pointerAt = event.timeStamp;

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { AutomodPage } from "@/features/automod/AutomodPage";
@@ -136,6 +136,36 @@ describe("the automod rule form", () => {
 });
 
 describe("removing an automod rule", () => {
+	/** Escape on the undo notice sends the waiting delete at once, rather than after its window. */
+	async function removeNow(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+		await screen.findByRole("heading", { name: "Block spam" });
+		await user.click(screen.getByRole("button", { name: /remove block spam/i }));
+		screen.getByRole("button", { name: "Undo" }).focus();
+		await user.keyboard("{Escape}");
+	}
+
+	/** A rule Discord deletes cannot be fetched back, so a slip of the mouse must cost nothing until the window closes. */
+	it("removes a rule only once the undo window has passed", async () => {
+		const user = userEvent.setup();
+		const removed: string[] = [];
+		server.use(
+			http.delete(`/api/guilds/${GUILD}/automod/:ruleId`, ({ params }) => {
+				removed.push(String(params.ruleId));
+				return HttpResponse.json({ rules: [], canManage: true });
+			}),
+		);
+		renderPage();
+		await screen.findByRole("heading", { name: "Block spam" });
+
+		await user.click(screen.getByRole("button", { name: /remove block spam/i }));
+		expect(screen.queryByRole("heading", { name: "Block spam" })).toBeNull();
+		expect(removed).toEqual([]);
+
+		await user.click(screen.getByRole("button", { name: "Undo" }));
+		expect(await screen.findByRole("heading", { name: "Block spam" })).toBeInTheDocument();
+		expect(removed).toEqual([]);
+	});
+
 	it("says so when a removal is refused", async () => {
 		const user = userEvent.setup();
 		server.use(
@@ -144,11 +174,11 @@ describe("removing an automod rule", () => {
 			),
 		);
 		renderPage();
-		await screen.findByRole("heading", { name: "Block spam" });
 
-		await user.click(screen.getByRole("button", { name: /remove block spam/i }));
+		await removeNow(user);
 
 		expect(await screen.findByText(/already gone/i)).toBeInTheDocument();
+		expect(await screen.findByRole("heading", { name: "Block spam" })).toBeInTheDocument();
 	});
 
 	/** Discord's refusal is worded on the page, in the reader's language, with where the rule can still be removed. */
@@ -160,11 +190,27 @@ describe("removing an automod rule", () => {
 			),
 		);
 		renderPage();
-		await screen.findByRole("heading", { name: "Block spam" });
 
-		await user.click(screen.getByRole("button", { name: /remove block spam/i }));
+		await removeNow(user);
 
 		expect(await screen.findByText(/remove it in discord under server settings → automod/i)).toBeInTheDocument();
-		expect(screen.queryByText(/something went wrong/i)).toBeNull();
+		expect(screen.queryByText(/English from the server/)).toBeNull();
+	});
+
+	/** The refusal belongs beside the switch that caused it, so it says which rule did not change. */
+	it("shows a refused switch beside its own rule", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.patch(`/api/guilds/${GUILD}/automod/:ruleId`, () =>
+				HttpResponse.json({ error: { code: "automod_refused", message: "English from the server" } }, { status: 409 }),
+			),
+		);
+		renderPage();
+		await screen.findByRole("heading", { name: "Block spam" });
+
+		await user.click(screen.getByRole("switch", { name: /enable block spam/i }));
+
+		const row = screen.getByRole("heading", { name: "Block spam" }).closest("li");
+		expect(await within(row as HTMLElement).findByText(/change it in discord/i)).toBeInTheDocument();
 	});
 });

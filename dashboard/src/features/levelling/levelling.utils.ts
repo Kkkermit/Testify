@@ -11,8 +11,8 @@ export function tabFrom(raw: string | null): Tab {
 	);
 }
 
-export function roleNameOf(roles: { id: string; name: string }[], roleId: string): string {
-	return roles.find((role) => role.id === roleId)?.name ?? "A deleted role";
+export function roleNameOf(roles: { id: string; name: string }[], roleId: string, t: TFunction): string {
+	return roles.find((role) => role.id === roleId)?.name ?? t("roleMenus.deletedRole");
 }
 
 export function multiplierChoices(): number[] {

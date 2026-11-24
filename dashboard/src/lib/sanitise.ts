@@ -1,7 +1,8 @@
 import { containsMarkup, discordTokens } from "@testify/shared";
 import DOMPurify from "dompurify";
+import { i18next } from "@/i18n";
 
-/** DOMPurify over a free-text box, with Discord's own markup kept; the API is the real boundary. */
+// DOMPurify over a free-text box, with Discord's own markup kept; the API is the real boundary.
 
 /** Private-use characters, so a placeholder cannot collide with anything a person can type. */
 const OPEN = "\ue000";
@@ -39,6 +40,7 @@ function strip(value: string): string {
 	return current;
 }
 
+/** In the page's language, looked up on every call, which each caller makes while rendering. */
 export function markupWarning(value: string): string | null {
-	return containsMarkup(value) ? "HTML is not allowed here. It will be removed when this is saved." : null;
+	return containsMarkup(value) ? i18next.t("common.markupRemoved") : null;
 }
