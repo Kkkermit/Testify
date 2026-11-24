@@ -118,7 +118,7 @@ export function roleSelect(options: {
 	return builder;
 }
 
-/** An option for `select()`, with `default: true` making it show as already chosen. */
+/** An option for `select()`; `selected` shows it as already chosen. */
 export function option(config: {
 	label: string;
 	value: string;

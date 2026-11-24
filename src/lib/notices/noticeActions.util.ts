@@ -1,5 +1,5 @@
-import { type Logger } from "pino";
 import { toError, UserFacingError } from "@core/errors";
+import { type Logger } from "@core/logger";
 import {
 	createNotice,
 	deleteNotice,

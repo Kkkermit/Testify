@@ -18,7 +18,6 @@ type Write = (line: string) => void;
 
 const toStdout: Write = (line) => process.stdout.write(`${line}\n`);
 
-/** Prints one line per start-up step as it finishes, so a slow or failing step is visible where it happens. */
 /** Start-up was cut short by a reload or Ctrl+C; shutdown is already on its way out, so nothing is reported. */
 export class StartupStopped extends Error {
 	constructor() {
@@ -27,6 +26,7 @@ export class StartupStopped extends Error {
 	}
 }
 
+/** Prints one line per start-up step as it finishes, so a slow or failing step is visible where it happens. */
 export class BootReport {
 	readonly #write: Write;
 	readonly #paint: Paint;
@@ -101,17 +101,19 @@ const WHERE: Record<string, string> = {
 	DASHBOARD_SESSION_SECRET: "npm run secret -- --write puts one in for you",
 };
 
+const TOKEN_REJECTED: StartupFailure = {
+	title: "Discord rejected the bot token",
+	tone: "error",
+	lines: [
+		"DISCORD_TOKEN is wrong, or was reset after you copied it.",
+		"",
+		`Get a fresh one: ${WHERE.DISCORD_TOKEN ?? ""}`,
+	],
+};
+
 /** Close codes after which Discord will never let this login in, and what to do about each. */
 export const FATAL_CLOSE_CODES: Record<number, StartupFailure> = {
-	4004: {
-		title: "Discord rejected the bot token",
-		tone: "error",
-		lines: [
-			"DISCORD_TOKEN is wrong, or was reset after you copied it.",
-			"",
-			`Get a fresh one: ${WHERE.DISCORD_TOKEN ?? ""}`,
-		],
-	},
+	4004: TOKEN_REJECTED,
 	4014: {
 		title: "Two privileged intents are switched off",
 		tone: "error",
@@ -180,7 +182,7 @@ function instanceFailure(error: InstanceError, paint: Paint): StartupFailure {
 }
 
 function discordFailure(error: DiscordAPIError): StartupFailure | null {
-	if (error.status === 401) return FATAL_CLOSE_CODES[4004] ?? null;
+	if (error.status === 401) return TOKEN_REJECTED;
 
 	if (error.code === 10002) {
 		return {
@@ -282,8 +284,9 @@ function unreachableFailure(error: unknown): StartupFailure | null {
 export function explainStartupFailure(error: unknown, paint: Paint = painter()): StartupFailure {
 	if (error instanceof EnvError) return envFailure(error, paint);
 	if (error instanceof InstanceError) return instanceFailure(error, paint);
-	if (error instanceof SetupError)
+	if (error instanceof SetupError) {
 		return { title: "The bot could not start", tone: "error", lines: error.message.split("\n") };
+	}
 
 	if (error instanceof DiscordAPIError) {
 		const known = discordFailure(error);
@@ -293,9 +296,7 @@ export function explainStartupFailure(error: unknown, paint: Paint = painter()):
 	const unreachable = unreachableFailure(error);
 	if (unreachable !== null) return unreachable;
 
-	if (error instanceof Error && "code" in error && error.code === "TokenInvalid") {
-		return FATAL_CLOSE_CODES[4004] ?? { title: "Discord rejected the bot token", tone: "error", lines: [] };
-	}
+	if (error instanceof Error && "code" in error && error.code === "TokenInvalid") return TOKEN_REJECTED;
 
 	const problem = error instanceof Error ? error : new Error(String(error));
 	return {

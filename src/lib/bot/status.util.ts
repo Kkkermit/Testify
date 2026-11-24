@@ -1,4 +1,5 @@
 import { getHeapStatistics } from "node:v8";
+import { DAY_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { pingDatabase } from "@database/connection";
@@ -26,7 +27,6 @@ import {
 export const DISCORD_API = "Discord API";
 
 const MB = 1024 * 1024;
-const DAY_MS = 86_400_000;
 
 /** A heartbeat vouches for this long after it, which forgives a late timer without hiding a real outage. */
 export const HEARTBEAT_GRACE_MS = STATUS_LIMITS.sampleEveryMs * 1.5;

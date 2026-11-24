@@ -1,6 +1,7 @@
 import { ChannelType, type Guild, type GuildMember, GuildVerificationLevel } from "discord.js";
-import { type Logger } from "pino";
+import { DAY_MS } from "@config/constants";
 import { toError } from "@core/errors";
+import { type Logger } from "@core/logger";
 import { type ServerDay } from "@database/models/insights.schema";
 import {
 	dayKey,
@@ -88,7 +89,7 @@ export function fillDays(rows: readonly ServerDay[], days: number, now: Date): I
 	const byDay = new Map(rows.map((row) => [row.day, row]));
 
 	return Array.from({ length: days }, (_, index) => {
-		const day = dayKey(new Date(now.getTime() - (days - 1 - index) * 24 * 60 * 60 * 1000));
+		const day = dayKey(new Date(now.getTime() - (days - 1 - index) * DAY_MS));
 		const row = byDay.get(day);
 		return { day, messages: row?.messages ?? 0, joins: row?.joins ?? 0, leaves: row?.leaves ?? 0 };
 	});
