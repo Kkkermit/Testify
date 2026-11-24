@@ -90,12 +90,12 @@ export function formatBytes(bytes: number): string {
 
 type TimestampStyle = "t" | "T" | "d" | "D" | "f" | "F" | "R";
 
-/** Discord renders these in each viewer's own locale and timezone, and keeps them live. */
 /** A mention, or the placeholder name for somebody who deleted their data, whose id would render as nobody. */
 export function mentionOf(userId: string): string {
 	return userId === DELETED_USER_ID ? DELETED_USER_NAME : `<@${userId}>`;
 }
 
+/** Discord renders these in each viewer's own locale and timezone, and keeps them live. */
 export function discordTime(date: Date | number, style: TimestampStyle = "f"): string {
 	const seconds = Math.floor((date instanceof Date ? date.getTime() : date) / 1_000);
 	return `<t:${seconds}:${style}>`;

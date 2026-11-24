@@ -1,7 +1,7 @@
 import { ServiceError } from "@core/errors";
 import { keepTrafficDays, readTrafficDays } from "@database/repositories/githubTrafficRepository";
 import { fetchJson, fetchRaw } from "@lib/infra/http.util";
-import { GitHubReader, releaseTags, SiteProblem, TimedCache, trafficDays } from "@lib/site/github.util";
+import { GitHubReader, releaseTags, SiteProblem, trafficDays } from "@lib/site/github.util";
 import { SITE_LIMITS } from "@testify/shared";
 
 jest.mock("@lib/infra/http.util", () => ({ fetchJson: jest.fn(), fetchRaw: jest.fn() }));
@@ -106,40 +106,6 @@ describe("trafficDays", () => {
 			{ date: "2026-10-27", views: 0, uniqueViews: 0, clones: 5, uniqueClones: 3 },
 			{ date: "2026-10-28", views: 9, uniqueViews: 4, clones: 2, uniqueClones: 1 },
 		]);
-	});
-});
-
-describe("TimedCache", () => {
-	it("shares a request on its way, keeps the answer for its time, and asks again after it", async () => {
-		let now = 0;
-		const cache = new TimedCache<number>(1_000, Number.POSITIVE_INFINITY, () => now);
-		const load = jest.fn(() => Promise.resolve(1));
-
-		await Promise.all([cache.get("a", load), cache.get("a", load)]);
-		now = 999;
-		await cache.get("a", load);
-		expect(load).toHaveBeenCalledTimes(1);
-
-		now = 1_000;
-		await cache.get("a", load);
-		expect(load).toHaveBeenCalledTimes(2);
-	});
-
-	/** A failure kept for an hour would refuse every reader for an hour after GitHub recovered. */
-	it("does not keep a failure", async () => {
-		const cache = new TimedCache<number>(1_000);
-
-		await expect(cache.get("a", () => Promise.reject(new Error("down")))).rejects.toThrow("down");
-		await expect(cache.get("a", () => Promise.resolve(2))).resolves.toBe(2);
-	});
-
-	it("lets go of the oldest answer past its size", async () => {
-		const cache = new TimedCache<string>(1_000, 2);
-		const load = jest.fn((key: string) => Promise.resolve(key));
-
-		for (const key of ["a", "b", "c", "a"]) await cache.get(key, () => load(key));
-
-		expect(load.mock.calls.map(([key]) => key)).toEqual(["a", "b", "c", "a"]);
 	});
 });
 

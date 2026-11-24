@@ -1,6 +1,7 @@
 import { ComponentType, MessageFlags } from "discord.js";
 import { button } from "@lib/discord/components.util";
 import { container, containerMessage, sectionWithButton, text } from "@lib/discord/containers.util";
+import { embed } from "@lib/discord/embeds.util";
 
 const json = (builder: { toJSON(): unknown }): Record<string, unknown> => builder.toJSON() as Record<string, unknown>;
 
@@ -35,7 +36,11 @@ describe("container", () => {
 		expect(json(container({ accent: "NotAColour" as never, parts: [text("x")] })).accent_color).toBe(0x5865f2);
 	});
 
+	/** Every category's colour is a name, which was read as unreadable, so every panel wore the same Blurple stripe. */
 	it("colours itself by category, so V2 matches the embeds beside it", () => {
-		expect(json(container({ category: "economy", parts: [text("x")] })).accent_color).toEqual(expect.any(Number));
+		const categories = ["economy", "music", "moderation"] as const;
+		const stripes = categories.map((category) => json(container({ category, parts: [text("x")] })).accent_color);
+
+		expect(stripes).toEqual(categories.map((category) => embed({ category }).data.color));
 	});
 });

@@ -2,19 +2,18 @@ import { parseDuration } from "@lib/format/duration.util";
 
 /** Used by /mute, /softban, /giveaway — anywhere a human types "10m". */
 describe("parseDuration", () => {
-	it.each([
-		["30s", 30_000],
-		["10m", 600_000],
-		["2h", 7_200_000],
-		["1d", 86_400_000],
-		["1w", 604_800_000],
-	])("reads %s", (input, expected) => {
-		expect(parseDuration(input)).toBe(expected);
-	});
+	/** A bare number is deliberate, and surprising enough to pin: `/mute 30` means thirty seconds. */
+	it("reads every unit, and a bare number as seconds", () => {
+		const rows: [string, number][] = [
+			["30s", 30_000],
+			["10m", 600_000],
+			["2h", 7_200_000],
+			["1d", 86_400_000],
+			["1w", 604_800_000],
+			["30", 30_000],
+		];
 
-	/** Deliberate, and surprising enough to pin: `/mute 30` means thirty seconds. */
-	it("reads a bare number as seconds", () => {
-		expect(parseDuration("30")).toBe(30_000);
+		expect(rows.filter(([input, expected]) => parseDuration(input) !== expected).map(([input]) => input)).toEqual([]);
 	});
 
 	it("returns null for something it cannot read", () => {

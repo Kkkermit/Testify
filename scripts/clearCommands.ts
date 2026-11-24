@@ -1,7 +1,7 @@
 import { REST, Routes } from "discord.js";
 import { loadEnv } from "@config/env";
 import { painter, stepLine } from "@core/terminal";
-import { printStartupFailure } from "@lib/bot/startup.util";
+import { printStartupFailure } from "@lib/bot/startupFailure.util";
 
 const paint = painter();
 

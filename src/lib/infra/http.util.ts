@@ -25,9 +25,8 @@ function withQuery(url: string, query: RequestOptions["query"]): string {
 	return target.toString();
 }
 
+/** The timeout covers reading the body too, so a service that stalls halfway through an answer cannot hang a command. */
 export async function fetchRaw(service: string, url: string, options: RequestOptions = {}): Promise<Response> {
-	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? LIMITS.externalApiTimeoutMs);
 	const started = Date.now();
 	const settle = (ok: boolean): void => {
 		if (options.recorded !== false) recordOutcome(service, { ok, at: Date.now(), latencyMs: Date.now() - started });
@@ -38,7 +37,7 @@ export async function fetchRaw(service: string, url: string, options: RequestOpt
 			method: options.method ?? "GET",
 			...(options.headers !== undefined ? { headers: options.headers } : {}),
 			...(options.body !== undefined ? { body: options.body } : {}),
-			signal: controller.signal,
+			signal: AbortSignal.timeout(options.timeoutMs ?? LIMITS.externalApiTimeoutMs),
 		});
 
 		// A 4xx is an answer about the request, so the service still counts as up.
@@ -53,8 +52,6 @@ export async function fetchRaw(service: string, url: string, options: RequestOpt
 		if (error instanceof ServiceError) throw error;
 		settle(false);
 		throw new ServiceError(service, error);
-	} finally {
-		clearTimeout(timeout);
 	}
 }
 

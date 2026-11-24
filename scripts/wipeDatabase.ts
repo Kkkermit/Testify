@@ -8,7 +8,8 @@ import { createLogger } from "@core/logger";
 import { repoRoot } from "@core/paths";
 import { badge, painter, stepLine } from "@core/terminal";
 import { connectDatabase, disconnectDatabase } from "@database/connection";
-import { describeDatabase, printStartupFailure } from "@lib/bot/startup.util";
+import { describeDatabase } from "@lib/bot/startup.util";
+import { printStartupFailure } from "@lib/bot/startupFailure.util";
 
 /** Empties the development or the production database, all of it or the models picked, once its name is typed back. */
 

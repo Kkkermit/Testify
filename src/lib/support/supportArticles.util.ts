@@ -4,6 +4,7 @@ import { PermissionsBitField, type PermissionResolvable } from "discord.js";
 import { z } from "zod";
 import { HIDDEN_CATEGORIES } from "@config/categories";
 import { type Command, type CommandOption } from "@core/command";
+import { allOf } from "@core/language";
 import { assetPath } from "@core/paths";
 import { formatDurationLong, humanisePermission } from "@lib/format/format.util";
 import { type SupportContext, type SupportEntry } from "@lib/support/support.types";
@@ -106,10 +107,6 @@ function permissionList(permissions: PermissionResolvable[] | undefined): string
 	return new PermissionsBitField(permissions).toArray().map((name) => `**${humanisePermission(name)}**`);
 }
 
-function joinWords(words: string[]): string {
-	return words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words.at(-1) ?? ""}`;
-}
-
 function usage(path: string, options: readonly CommandOption[]): string {
 	const parts = options.map((option) => (option.required === true ? `<${option.name}>` : `[${option.name}]`));
 	return `\`${[path, ...parts].join(" ")}\``;
@@ -119,7 +116,10 @@ function optionLine(option: CommandOption): string {
 	const choices =
 		option.choices === undefined || option.choices.length === 0
 			? ""
-			: ` One of ${joinWords(option.choices.map((choice) => `\`${choice.name}\``))}.`;
+			: ` One of ${allOf(
+					"en",
+					option.choices.map((choice) => `\`${choice.name}\``),
+				)}.`;
 
 	return `- **${option.name}**${option.required === true ? " (required)" : ""}: ${option.description}${choices}`;
 }
@@ -137,20 +137,26 @@ export function commandReference(command: Command): string {
 		lines.push(
 			...subcommands.map((sub) => {
 				const extra = permissionList(sub.permissions);
-				const needs = extra.length === 0 ? "" : ` Needs ${joinWords(extra)}.`;
+				const needs = extra.length === 0 ? "" : ` Needs ${allOf("en", extra)}.`;
 				return `- ${usage(`/${command.name} ${sub.name}`, sub.options ?? [])}: ${sub.description}${needs}`;
 			}),
 		);
 	}
 
 	const aliases = [...(command.aliases ?? []), ...subcommands.flatMap((sub) => sub.aliases ?? [])];
-	const alsoAs = aliases.length === 0 ? "" : `, or ${joinWords(aliases.map((alias) => `\`{prefix}${alias}\``))}`;
+	const alsoAs =
+		aliases.length === 0
+			? ""
+			: `, or ${allOf(
+					"en",
+					aliases.map((alias) => `\`{prefix}${alias}\``),
+				)}`;
 	const notes = [`- Works as a prefix command too: \`{prefix}${command.name}\`${alsoAs}.`];
 
 	const yours = permissionList(command.permissions);
-	if (yours.length > 0) notes.push(`- You need ${joinWords(yours)}.`);
+	if (yours.length > 0) notes.push(`- You need ${allOf("en", yours)}.`);
 	const bots = permissionList(command.botPermissions);
-	if (bots.length > 0) notes.push(`- The bot needs ${joinWords(bots)}.`);
+	if (bots.length > 0) notes.push(`- The bot needs ${allOf("en", bots)}.`);
 	if (command.guildOnly === true) notes.push("- Only works in a server, not in direct messages.");
 	if (command.cooldown !== undefined) notes.push(`- Wait ${formatDurationLong(command.cooldown)} between uses.`);
 

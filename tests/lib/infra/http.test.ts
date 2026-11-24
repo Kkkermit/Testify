@@ -52,6 +52,16 @@ describe("fetchRaw", () => {
 		expect(url.searchParams.get("kept")).toBe("yes");
 	});
 
+	/** The timer stopped once the headers arrived, so a body that stalled halfway held the command for ever. */
+	it("keeps the timeout running while the body is read", async () => {
+		const mock = stubFetch(() => response("ok"));
+		await fetchRaw("svc", "https://example.test/a", { timeoutMs: 10 });
+		const signal = (mock.mock.calls[0]?.[1] as RequestInit).signal;
+
+		await new Promise((resolve) => setTimeout(resolve, 40));
+		expect(signal?.aborted).toBe(true);
+	});
+
 	it("wraps a network failure rather than letting it escape raw", async () => {
 		stubFetch(() => {
 			throw new Error("ECONNREFUSED");

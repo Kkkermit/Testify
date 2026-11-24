@@ -18,18 +18,20 @@ const ARTICLE = [
 ].join("\n");
 
 describe("parseArticle", () => {
-	it.each([
-		["no frontmatter", "add-the-bot.md", "Just a body."],
-		["an id that is not the file name", "other.md", ARTICLE],
-		["an id that is not a slug", "Bad Id.md", ARTICLE.replace("id: add-the-bot", "id: Bad Id")],
-		["a topic that does not exist", "add-the-bot.md", ARTICLE.replace("topic: getting-started", "topic: gossip")],
-		["an unknown field", "add-the-bot.md", ARTICLE.replace("featured: true", "secret: yes")],
-		["markup in the title", "add-the-bot.md", ARTICLE.replace("Adding {bot}", "<b>Adding</b>")],
-		["an empty body", "add-the-bot.md", ARTICLE.replace(/---\nPress[\s\S]*$/, "---\n")],
-		["a body past the limit", "add-the-bot.md", ARTICLE.replace("Press **Add**.", "a".repeat(3_001))],
-		["a fact the code does not have", "add-the-bot.md", ARTICLE.replace("economy.dailyBase", "economy.madeUp")],
-	])("refuses %s", (_label, file, source) => {
-		expect(parseArticle(file, source).ok).toBe(false);
+	it("refuses an article that is malformed in any way", () => {
+		const broken: [string, string, string][] = [
+			["no frontmatter", "add-the-bot.md", "Just a body."],
+			["an id that is not the file name", "other.md", ARTICLE],
+			["an id that is not a slug", "Bad Id.md", ARTICLE.replace("id: add-the-bot", "id: Bad Id")],
+			["a topic that does not exist", "add-the-bot.md", ARTICLE.replace("topic: getting-started", "topic: gossip")],
+			["an unknown field", "add-the-bot.md", ARTICLE.replace("featured: true", "secret: yes")],
+			["markup in the title", "add-the-bot.md", ARTICLE.replace("Adding {bot}", "<b>Adding</b>")],
+			["an empty body", "add-the-bot.md", ARTICLE.replace(/---\nPress[\s\S]*$/, "---\n")],
+			["a body past the limit", "add-the-bot.md", ARTICLE.replace("Press **Add**.", "a".repeat(3_001))],
+			["a fact the code does not have", "add-the-bot.md", ARTICLE.replace("economy.dailyBase", "economy.madeUp")],
+		];
+
+		expect(broken.filter(([, file, source]) => parseArticle(file, source).ok).map(([label]) => label)).toEqual([]);
 	});
 });
 

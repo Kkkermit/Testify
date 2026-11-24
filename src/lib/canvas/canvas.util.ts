@@ -1,6 +1,5 @@
 import { type Canvas, createCanvas, type Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { AttachmentBuilder } from "discord.js";
-import { ServiceError } from "@core/errors";
 import { clusters, drawText } from "@lib/canvas/text.util";
 
 export { createCanvas };
@@ -23,16 +22,6 @@ export async function fetchPicture(url: string, timeoutMs = PICTURE_TIMEOUT_MS):
 		return bytes.length > MAX_PICTURE_BYTES ? null : bytes;
 	} catch {
 		return null;
-	}
-}
-
-async function fetchImage(url: string): Promise<Image> {
-	try {
-		const bytes = await fetchPicture(url);
-		if (bytes === null) throw new Error("No picture could be read from that address.");
-		return await loadImage(bytes);
-	} catch (error) {
-		throw new ServiceError("image", error);
 	}
 }
 
@@ -66,17 +55,12 @@ function circleClip(ctx: SKRSContext2D, x: number, y: number, radius: number): v
 	ctx.clip();
 }
 
-export async function drawAvatar(ctx: SKRSContext2D, url: string, x: number, y: number, size: number): Promise<void> {
-	const image = await fetchImage(url);
-	circleClip(ctx, x + size / 2, y + size / 2, size / 2);
-	ctx.drawImage(image, x, y, size, size);
-	ctx.restore();
-}
-
-/** An avatar to draw later, or null when there is none or it cannot be fetched. */
+/** An avatar to draw later, or null when there is none or it cannot be fetched, so a card never fails on the CDN. */
 export async function loadAvatar(url: string | null): Promise<Image | null> {
 	if (url === null || url === "") return null;
-	return fetchImage(url).catch(() => null);
+
+	const bytes = await fetchPicture(url);
+	return bytes === null ? null : loadImage(bytes).catch(() => null);
 }
 
 /** A loaded avatar in a circle, or the first letter of the name on `background` when there is none. */

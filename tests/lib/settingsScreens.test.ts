@@ -16,7 +16,7 @@ import {
 } from "@lib/settings/settings.constants";
 import { channelValue, roleValue, settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
 import { voiceStatsPanel } from "@lib/settings/voiceStatsPanel.util";
-import { DEFAULT_PREFIX } from "@testify/shared";
+import { DEFAULT_PREFIX, SETTINGS_LIMITS } from "@testify/shared";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
@@ -37,29 +37,35 @@ const PANELS: [string, string, ContainerMessage][] = [
 	["prefix, off", PREFIX_PANEL_ID, prefixPanel({ prefix: DEFAULT_PREFIX, isEnabled: false }, OWNER)],
 ];
 
+/** The names of the panels that break a rule, so a failure says which. */
+const breaking = (rule: (id: string, rendered: ContainerMessage) => boolean): string[] =>
+	PANELS.filter(([, id, rendered]) => !rule(id, rendered)).map(([name]) => name);
+
 describe("every settings panel", () => {
-	it.each(PANELS)("renders %s as a Components V2 message", (_name, _id, rendered) => {
-		expect(rendered.flags).toBe(MessageFlags.IsComponentsV2);
+	it("is a Components V2 message", () => {
+		expect(breaking((_id, rendered) => rendered.flags === MessageFlags.IsComponentsV2)).toEqual([]);
 	});
 
 	/** Discord rejects the whole message when two components share a custom ID. */
-	it.each(PANELS)("gives every control on %s a distinct custom ID", (_name, _id, rendered) => {
-		expect(duplicateIds(rendered)).toEqual([]);
+	it("gives every control a distinct custom ID", () => {
+		expect(breaking((_id, rendered) => duplicateIds(rendered).length === 0)).toEqual([]);
 	});
 
-	it.each(PANELS)("namespaces %s to its own handler, with the owner last", (_name, id, rendered) => {
-		const ids = idsOf(rendered);
+	it("namespaces every control to its own handler, with the owner last", () => {
+		const own = (id: string, rendered: ContainerMessage): boolean => {
+			const ids = idsOf(rendered);
+			return (
+				ids.length > 0 &&
+				ids.every((control) => parseCustomId(control).id === id && parseCustomId(control).args.at(-1) === OWNER)
+			);
+		};
 
-		expect(ids.length).toBeGreaterThan(0);
-		for (const control of ids) {
-			expect(parseCustomId(control).id).toBe(id);
-			expect(parseCustomId(control).args.at(-1)).toBe(OWNER);
-		}
+		expect(breaking(own)).toEqual([]);
 	});
 
 	/** The house style: every panel opens with a heading and says what is happening. */
-	it.each(PANELS)("gives %s a heading and a status line", (_name, _id, rendered) => {
-		expect(textOf(rendered)).toMatch(/^## /);
+	it("opens with a heading and a status line", () => {
+		expect(breaking((_id, rendered) => textOf(rendered).startsWith("## "))).toEqual([]);
 	});
 });
 
@@ -102,13 +108,10 @@ describe("settingsScreen", () => {
 });
 
 describe("the shared value formatters", () => {
-	it("never renders an empty cell", () => {
+	it("mentions what is set, and never renders an empty cell", () => {
 		expect(channelValue(null)).toMatch(/not set/i);
 		expect(channelValue(undefined)).toMatch(/not set/i);
 		expect(roleValue([])).toMatch(/none/i);
-	});
-
-	it("mentions what is set", () => {
 		expect(channelValue(CHANNEL)).toBe(`<#${CHANNEL}>`);
 		expect(roleValue([ROLE])).toBe(`<@&${ROLE}>`);
 	});
@@ -145,31 +148,28 @@ describe("the anti-link panel", () => {
 });
 
 describe("checkPrefix", () => {
-	it("rejects an empty one", () => {
-		expect(checkPrefix("   ").ok).toBe(false);
-	});
-
-	/** A prefix with a space in it can never match a message. */
-	it("rejects one containing a space, and says why", () => {
+	/** A prefix with a space in it can never match a message, and one of only whitespace would match every one. */
+	it("refuses an empty one and one containing a space, and says why", () => {
 		const verdict = checkPrefix("t ?");
 
+		expect(checkPrefix("   ").ok).toBe(false);
 		expect(verdict.ok).toBe(false);
 		expect(verdict.ok ? "" : verdict.reason).toMatch(/spaces/i);
 	});
 
-	it("rejects one that is too long", () => {
-		expect(checkPrefix("x".repeat(PREFIX_LIMITS.maxLength + 1)).ok).toBe(false);
+	/** The panel stopped at five while the dashboard took eight, so its form refused to open on a longer prefix. */
+	it("takes exactly as long a prefix as the dashboard does", () => {
+		expect(checkPrefix("x".repeat(SETTINGS_LIMITS.maxPrefix)).ok).toBe(true);
+		expect(checkPrefix("x".repeat(SETTINGS_LIMITS.maxPrefix + 1)).ok).toBe(false);
+		expect(PREFIX_LIMITS.maxLength).toBe(SETTINGS_LIMITS.maxPrefix);
 	});
 });
 
 describe("the voice counter panel", () => {
-	it("explains the rename rate limit, which is why counts lag", () => {
-		expect(textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER))).toMatch(/rate-limit/i);
-	});
-
-	it("labels which counter each menu changes", () => {
+	it("labels which counter each menu changes, and explains the rename rate limit that makes counts lag", () => {
 		const rendered = textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER));
 
+		expect(rendered).toMatch(/rate-limit/i);
 		expect(rendered).toMatch(/member counter/i);
 		expect(rendered).toMatch(/bot counter/i);
 	});

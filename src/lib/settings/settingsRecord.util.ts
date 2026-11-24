@@ -1,6 +1,7 @@
 import { type Guild, type User } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
+import { allOf } from "@core/language";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { capitalise } from "@lib/format/format.util";
 import { SETTING_READERS } from "@lib/settings/settingsReaders.util";
@@ -92,10 +93,6 @@ const WORDS: { [Action in RestorableAction]: { noun: string; fields: Record<Labe
 	},
 };
 
-function listed(words: string[]): string {
-	return words.length <= 1 ? (words[0] ?? "") : `${words.slice(0, -1).join(", ")} and ${words.at(-1) ?? ""}`;
-}
-
 /** What changed between two readings of a setting, as one line; null when nothing did. */
 export function describeChange(
 	action: RestorableAction,
@@ -115,8 +112,9 @@ export function describeChange(
 	}
 
 	const named = changed.filter((field) => !Object.hasOwn(SWITCHES, field)).map((field) => words.fields[field] ?? field);
-	if (named.length > 0)
-		parts.push(`${parts.length > 0 ? "changed" : "Changed"} the ${listed(named)} for ${words.noun}`);
+	if (named.length > 0) {
+		parts.push(`${parts.length > 0 ? "changed" : "Changed"} the ${allOf("en", named)} for ${words.noun}`);
+	}
 
 	return capitalise(parts.join(", "));
 }
@@ -138,10 +136,7 @@ async function readEach(guild: Guild, actions: readonly RestorableAction[]): Pro
 	);
 }
 
-/**
- * Wraps a command's or a panel's `run` so a setting it changes is recorded as the dashboard records its own, with the
- * person who pressed as the actor. A reading that fails, or a change that did not happen, records nothing.
- */
+/** Wraps a `run` so a setting it changes is recorded as the dashboard's are; a failed reading or no change records nothing. */
 export function recordingChanges<Interaction extends Acting, Rest extends unknown[]>(
 	actions: readonly RestorableAction[],
 	run: (interaction: Interaction, ...rest: Rest) => Promise<void>,
