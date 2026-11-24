@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { modalForm } from "@lib/discord";
+import { modalForm, redrawPanel } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import {
 	applyTempVoiceSettings,
@@ -89,8 +89,7 @@ export default recordsSettings(
 				return;
 			}
 
-			if (interaction.isModalSubmit() && !interaction.isFromMessage()) return;
-			await interaction.update(tempVoiceSettingsPanel(settings, ownerId, note));
+			await redrawPanel(interaction, tempVoiceSettingsPanel(settings, ownerId, note));
 		},
 	}),
 );

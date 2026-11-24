@@ -1,3 +1,4 @@
+import { ChannelType } from "discord.js";
 import ticket from "@buttons/ticket";
 import { UserFacingError } from "@core/errors";
 import { toggleTicketMember } from "@lib/tickets";
@@ -20,7 +21,7 @@ it("asks for the staff role when a member is picked, not only when the picker op
 		guild,
 		user: { id: USER_ID },
 		channelId: "500000000000000005",
-		channel: {},
+		channel: { type: ChannelType.GuildText },
 		values: ["300000000000000003"],
 		isStringSelectMenu: () => true,
 		update: jest.fn(),

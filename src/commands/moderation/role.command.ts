@@ -32,10 +32,6 @@ export default defineCommand({
 			run: (interaction) => apply(interaction, "remove"),
 		},
 	],
-
-	async run(interaction) {
-		await apply(interaction, interaction.options.getSubcommand() === "remove" ? "remove" : "add");
-	},
 });
 
 async function apply(interaction: CommandInput, mode: "add" | "remove"): Promise<void> {

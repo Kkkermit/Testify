@@ -56,6 +56,6 @@ export default defineCommand({
 			0,
 		);
 
-		await reply(interaction, { ...page });
+		await reply(interaction, page);
 	},
 });

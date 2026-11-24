@@ -23,8 +23,8 @@ export default defineCommand({
 	],
 
 	async run(interaction) {
-		const yours = interaction.options.getString("move", true) as Move;
-		const mine = MOVES[randomInt(MOVES.length)]!;
+		const yours = MOVES.find((move) => move === interaction.options.getString("move", true)) ?? "rock";
+		const mine = MOVES[randomInt(MOVES.length)] ?? "rock";
 
 		const result = yours === mine ? "It is a draw." : BEATS[yours] === mine ? "You win." : "I win.";
 

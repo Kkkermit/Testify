@@ -9,10 +9,8 @@ import {
 	updatePet,
 } from "@database/repositories/economyRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
-import { balancesOf, decayValue, findPet, isPetRarity, petStatus, shopScreen } from "@lib/economy";
+import { balancesOf, decayValue, findPet, isPetRarity, PET_RARITIES, petStatus, shopScreen } from "@lib/economy";
 import { discordTime, formatNumber, progressBar } from "@lib/format";
-
-const RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
 
 const GONE = "Your pet has just been rehomed, so nothing changed.";
 
@@ -31,7 +29,7 @@ export default defineCommand({
 					name: "rarity",
 					description: "Which tier to browse.",
 					type: "string",
-					choices: RARITIES.map((rarity) => ({ name: rarity, value: rarity })),
+					choices: PET_RARITIES.map((rarity) => ({ name: rarity, value: rarity })),
 				},
 			],
 			async run(interaction) {

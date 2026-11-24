@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
@@ -210,13 +210,6 @@ export default defineCommand({
 			},
 		},
 	],
-
-	async run(interaction) {
-		await reply(interaction, {
-			content: "Pick a subcommand: `create`, `list`, `info`, `edit`, `remove`, `clear` or `punishments`.",
-			flags: MessageFlags.Ephemeral,
-		});
-	},
 
 	async autocomplete(interaction) {
 		const guildId = interaction.guildId;
