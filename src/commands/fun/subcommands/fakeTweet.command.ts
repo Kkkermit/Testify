@@ -1,7 +1,7 @@
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { createCanvas, drawAvatar, drawText, type TextStyle, toAttachment, wrapLines } from "@lib/canvas";
+import { createCanvas, drawAvatarOrInitial, drawText, type TextStyle, toAttachment, wrapLines } from "@lib/canvas";
 import { reply } from "@lib/discord";
 import { containsProfanity } from "@lib/moderation";
 
@@ -37,7 +37,14 @@ export default defineCommand({
 		draw.fillStyle = "#15202b";
 		draw.fillRect(0, 0, WIDTH, height);
 
-		await drawAvatar(draw, user.displayAvatarURL({ extension: "png", size: 128 }), PADDING, PADDING, 64);
+		await drawAvatarOrInitial(
+			draw,
+			user.displayAvatarURL({ extension: "png", size: 128 }),
+			PADDING,
+			PADDING,
+			64,
+			user.displayName,
+		);
 
 		const nameX = PADDING + 84;
 		drawText(draw, user.displayName, nameX, PADDING + 18, {

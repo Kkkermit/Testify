@@ -1,4 +1,4 @@
-import { fetchPicture } from "@lib/canvas/canvas.util";
+import { fetchPicture, loadAvatar } from "@lib/canvas/canvas.util";
 
 describe("fetchPicture", () => {
 	let fetched: jest.SpiedFunction<typeof fetch>;
@@ -28,5 +28,14 @@ describe("fetchPicture", () => {
 		fetched.mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3])));
 
 		expect(await fetchPicture("https://cdn.example/a.png")).toEqual(Buffer.from([1, 2, 3]));
+	});
+
+	/** A card draws an initial in place of an avatar the CDN would not give, rather than failing the command. */
+	it("leaves a card's avatar empty, never throwing, when the CDN fails or sends no picture", async () => {
+		fetched.mockRejectedValueOnce(new Error("ECONNRESET"));
+		fetched.mockResolvedValueOnce(new Response(new Uint8Array([1, 2, 3])));
+
+		await expect(loadAvatar("https://cdn.example/a.png")).resolves.toBeNull();
+		await expect(loadAvatar("https://cdn.example/b.png")).resolves.toBeNull();
 	});
 });
