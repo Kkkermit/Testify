@@ -138,7 +138,7 @@ export default defineEvent({
 
 		if (button.ownerOnly === true && args.at(-1) !== undefined && args.at(-1) !== interaction.user.id) {
 			await interaction.reply({
-				embeds: [errorEmbed("Only the person who ran the command can use these.")],
+				embeds: [errorEmbed(say(readerLanguage(interaction), "notYours"))],
 				flags: MessageFlags.Ephemeral,
 			});
 			return;

@@ -208,3 +208,28 @@ describe("a switched-off feature", () => {
 		expect(interaction.reply).not.toHaveBeenCalled();
 	});
 });
+
+/** The router compares the last argument, so somebody else's press never reaches the handler, and is told why. */
+it("refuses a press on somebody else's panel, privately and in the presser's language", async () => {
+	const run = jest.fn();
+	const reply = jest.fn(() => Promise.resolve());
+	const client = { buttons: new Collection([["panel", { id: "panel", ownerOnly: true, run }]]), logger };
+	const press = {
+		isAutocomplete: () => false,
+		isChatInputCommand: () => false,
+		isContextMenuCommand: () => false,
+		isMessageComponent: () => true,
+		isModalSubmit: () => false,
+		customId: "panel:open:200000000000000002",
+		user: { id: "300000000000000003" },
+		locale: "de",
+		reply,
+	};
+
+	await interactionCreate.run(client as unknown as TestifyClient, press as unknown as Interaction);
+
+	const [answer] = reply.mock.calls[0] as unknown as [{ embeds: { data: { description?: string } }[]; flags: number }];
+	expect(run).not.toHaveBeenCalled();
+	expect(answer.flags).toBe(64);
+	expect(answer.embeds[0]?.data.description).toContain("Nur wer den Befehl ausgeführt hat");
+});
