@@ -10,8 +10,8 @@ import { Badge, Card, DividedList, EmptyState, Pager, Skeleton, Summary } from "
 import { changeLink } from "@/features/account/account.utils";
 import { useAccountHistory } from "@/features/account/useAccount";
 import { useMe } from "@/features/auth/useMe";
-import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { dateAndTime, since } from "@/lib/datetime";
+import { pageCount } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
 
 export function HistoryTab(): React.JSX.Element {
@@ -75,7 +75,7 @@ export function HistoryTab(): React.JSX.Element {
 				</Card>
 			)}
 
-			<Pager page={page} pages={pageCountOf(total, perPage)} onChange={setPage} />
+			<Pager page={page} pages={pageCount(total, perPage)} onChange={setPage} />
 		</>
 	);
 }

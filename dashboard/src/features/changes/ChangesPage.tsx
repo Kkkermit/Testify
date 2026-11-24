@@ -11,9 +11,9 @@ import { ChangeRow } from "@/features/changes/components/ChangeRow";
 import { useServerChanges } from "@/features/changes/useChanges";
 import { permissionLabel } from "@/features/commands/permissions.labels";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
-import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { pageCount } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
 
 export function ChangesPage(): React.JSX.Element {
@@ -117,7 +117,7 @@ export function ChangesPage(): React.JSX.Element {
 			{changes.data !== undefined && !changes.isError && (
 				<Pager
 					page={changes.data.page}
-					pages={pageCountOf(changes.data.total, changes.data.perPage)}
+					pages={pageCount(changes.data.total, changes.data.perPage)}
 					onChange={setPage}
 				/>
 			)}
