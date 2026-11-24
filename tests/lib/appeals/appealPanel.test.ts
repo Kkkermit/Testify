@@ -32,6 +32,11 @@ const SETTINGS: AppealSettings = {
 };
 
 describe("appealPost", () => {
+	/** What a banned person wrote is quoted, so it cannot read as the bot's own words or start a heading. */
+	it("quotes the appeal line by line under its heading", () => {
+		expect(textOf(appealPost({ ...APPEAL, text: "# Unban me\nplease" }))).toContain("> # Unban me\n> please");
+	});
+
 	/** A decided appeal still showing Accept would let a second moderator unban somebody already refused. */
 	it("offers the buttons only while the appeal waits, and says what was decided after", () => {
 		const refused = appealPost({ ...APPEAL, status: "refused", reason: "Not yet.", decidedByName: "mod" });
