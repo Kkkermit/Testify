@@ -3,14 +3,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
-import {
-	FIRST_RUNS_PAGE,
-	idFromLookup,
-	narrowed,
-	runWhat,
-	trailPages,
-	turnTo,
-} from "@/features/owner/usage/runs.utils";
+import { idFromLookup, narrowed, runWhat } from "@/features/owner/usage/runs.utils";
 import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
 import { runsPage } from "@/test/fixtures/usageSections";
@@ -47,23 +40,6 @@ describe("the run log's rules", () => {
 	it("drops a filter that is cleared rather than sending it empty", () => {
 		expect(narrowed({ userId: PERSON, command: "warn" }, { userId: null })).toEqual({ command: "warn" });
 		expect(narrowed({}, { outcome: "failed", guildId: "" })).toEqual({ outcome: "failed" });
-	});
-
-	/** The collector gives a cursor and never a total, so the end is known only once a page answers with none after it. */
-	it("numbers the pages it has reached, and claims an end only once one has been read", () => {
-		const older = { ...runsPage, next: "older" };
-		const last = { ...runsPage, next: null };
-
-		expect(trailPages(FIRST_RUNS_PAGE, undefined)).toEqual({ page: 1, pages: 1, more: true });
-		expect(trailPages(FIRST_RUNS_PAGE, older)).toEqual({ page: 1, pages: 2, more: true });
-		const second = turnTo(FIRST_RUNS_PAGE, 2, older);
-		expect(second).toEqual({ cursors: [null, "older"], at: 1, ended: false });
-		expect(trailPages(second, last)).toEqual({ page: 2, pages: 2, more: false });
-
-		const backToFirst = turnTo(second, 1, last);
-		expect(backToFirst).toEqual({ cursors: [null, "older"], at: 0, ended: true });
-		expect(trailPages(backToFirst, older)).toEqual({ page: 1, pages: 2, more: false });
-		expect(turnTo(backToFirst, 9, older).at).toBe(1);
 	});
 
 	it("says what ran as somebody would type it", () => {

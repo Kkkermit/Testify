@@ -1,4 +1,4 @@
-import { type RunOutcome, type RunRow, type RunsFilters, type RunsPage } from "@testify/shared";
+import { type RunOutcome, type RunRow, type RunsFilters } from "@testify/shared";
 import { type BadgeTone } from "@/components/primitives/Badge";
 import { type TranslationKey } from "@/i18n";
 
@@ -63,37 +63,4 @@ export const kindLabel = (kind: string): TranslationKey | null => KIND_LABELS[ki
 export function runWhat(row: Pick<RunRow, "command" | "sub" | "handler">): string | null {
 	if (row.command !== null) return row.sub === null ? `/${row.command}` : `/${row.command} ${row.sub}`;
 	return row.handler;
-}
-
-/** The log is read a page at a time from the collector's cursor: every page's cursor met so far, and the one showing. */
-export interface RunTrail {
-	cursors: (string | null)[];
-	at: number;
-	/** The furthest page answered with no page after it. */
-	ended: boolean;
-}
-
-export const FIRST_RUNS_PAGE: RunTrail = { cursors: [null], at: 0, ended: false };
-
-/** What the pager offers: every page whose cursor is known, and the one after the page showing once it has answered. */
-export function trailPages(
-	trail: RunTrail,
-	answer: RunsPage | undefined,
-): { page: number; pages: number; more: boolean } {
-	const furthest = trail.at === trail.cursors.length - 1;
-	const page = trail.at + 1;
-	if (!furthest || answer === undefined) return { page, pages: trail.cursors.length, more: !trail.ended };
-	return answer.next === null
-		? { page, pages: trail.cursors.length, more: false }
-		: { page, pages: trail.cursors.length + 1, more: true };
-}
-
-/** Leaving the furthest page keeps what it answered, so its next cursor, or the end, is remembered. */
-export function turnTo(trail: RunTrail, page: number, answer: RunsPage | undefined): RunTrail {
-	let { cursors, ended } = trail;
-	if (trail.at === cursors.length - 1 && answer !== undefined) {
-		if (answer.next === null) ended = true;
-		else cursors = [...cursors, answer.next];
-	}
-	return { cursors, ended, at: Math.min(Math.max(page - 1, 0), cursors.length - 1) };
 }

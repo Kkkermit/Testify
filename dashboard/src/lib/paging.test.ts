@@ -1,4 +1,4 @@
-import { pageCount, pageFrom, pageOf, pageWindow } from "@/lib/paging";
+import { FIRST_CURSOR_PAGE, pageCount, pageFrom, pageOf, pageWindow, trailPages, turnTo } from "@/lib/paging";
 
 describe("pageFrom", () => {
 	/** A page number out of a URL can be anything at all. */
@@ -28,5 +28,24 @@ describe("pageWindow", () => {
 	/** Two either side is what lets a reader skip ahead without stepping one page at a time. */
 	it("offers two pages either side of the current one", () => {
 		expect(pageWindow(6, 12)).toEqual([4, 5, 6, 7, 8]);
+	});
+});
+
+describe("a cursor trail", () => {
+	/** A cursor list gives no total, so the end is known only once a page answers with none after it. */
+	it("numbers the pages it has reached, and claims an end only once one has been read", () => {
+		const older = { next: "older" };
+		const last = { next: null };
+
+		expect(trailPages(FIRST_CURSOR_PAGE, undefined)).toEqual({ page: 1, pages: 1, more: true });
+		expect(trailPages(FIRST_CURSOR_PAGE, older)).toEqual({ page: 1, pages: 2, more: true });
+		const second = turnTo(FIRST_CURSOR_PAGE, 2, older);
+		expect(second).toEqual({ cursors: [null, "older"], at: 1, ended: false });
+		expect(trailPages(second, last)).toEqual({ page: 2, pages: 2, more: false });
+
+		const backToFirst = turnTo(second, 1, last);
+		expect(backToFirst).toEqual({ cursors: [null, "older"], at: 0, ended: true });
+		expect(trailPages(backToFirst, older)).toEqual({ page: 1, pages: 2, more: false });
+		expect(turnTo(backToFirst, 9, older).at).toBe(1);
 	});
 });
