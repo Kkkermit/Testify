@@ -23,6 +23,7 @@ export * from "./projectLinks.util";
 export * from "./runLog.util";
 export * from "./runtime.util";
 export * from "./shardlens.util";
+export * from "./shardlensAnswers.util";
 export * from "./shardlensReader.util";
 export * from "./startup.util";
 export * from "./startupFailure.util";
