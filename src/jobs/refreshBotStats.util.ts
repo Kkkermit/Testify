@@ -19,6 +19,9 @@ export async function refreshBotStats(client: TestifyClient): Promise<void> {
 	const rendered = botStatsEmbed(client);
 
 	for (const entry of entries) {
+		// A server that removed the bot while it was offline sent no leave, so its setup would be asked of Discord every run.
+		if (!client.guilds.cache.has(entry.guildId)) continue;
+
 		try {
 			const channel = await client.channels.fetch(entry.channelId);
 			if (!channel?.isTextBased()) {

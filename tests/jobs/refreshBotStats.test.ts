@@ -1,7 +1,7 @@
 import { DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
 import { listFixedStats, removeFixedStats } from "@database/repositories/botStatsRepository";
 import { refreshBotStats } from "@jobs/refreshBotStats.util";
-import { createMockClient, GUILD_ID } from "@tests/helpers/mocks";
+import { createMockClient, GUILD_ID, mockCollection } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/botStatsRepository", () => ({
 	listFixedStats: jest.fn(),
@@ -11,13 +11,13 @@ jest.mock("@lib/info", () => ({ botStatsEmbed: jest.fn(() => ({})) }));
 
 const removed = jest.mocked(removeFixedStats);
 
-function refreshWith(fetch: jest.Mock): Promise<void> {
+function refreshWith(fetch: jest.Mock, guilds = mockCollection([[GUILD_ID, {}]])): Promise<void> {
 	jest
 		.mocked(listFixedStats)
 		.mockResolvedValue([
 			{ guildId: GUILD_ID, channelId: "c", messageId: "m", userId: "u", createdAt: new Date(), updatedAt: new Date() },
 		]);
-	return refreshBotStats(createMockClient({ channels: { fetch } } as never));
+	return refreshBotStats(createMockClient({ channels: { fetch }, guilds: { cache: guilds } } as never));
 }
 
 beforeEach(() => jest.clearAllMocks());
@@ -42,6 +42,13 @@ describe("refreshing the statistics messages", () => {
 		await refreshWith(jest.fn(() => Promise.reject(gone)));
 
 		expect(removed).toHaveBeenCalledWith(GUILD_ID);
+	});
+
+	it("asks Discord nothing for a server the bot is no longer in", async () => {
+		const fetch = jest.fn();
+		await refreshWith(fetch, mockCollection());
+
+		expect(fetch).not.toHaveBeenCalled();
 	});
 
 	it("edits the message it finds", async () => {
