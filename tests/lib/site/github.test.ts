@@ -67,12 +67,13 @@ const releaseAnswers = {
 	[`/git/trees/${COMMIT}`]: tree,
 };
 
-function reader(options: { token?: string; version?: string } = {}): GitHubReader {
+function reader(options: { token?: string; version?: string; now?: () => number } = {}): GitHubReader {
 	return new GitHubReader({
 		repository: REPOSITORY,
 		version: options.version ?? "2.0.9",
 		token: options.token,
 		logger: { warn: jest.fn() } as never,
+		...(options.now === undefined ? {} : { now: options.now }),
 	});
 }
 
@@ -260,5 +261,49 @@ describe("GitHubReader", () => {
 		});
 
 		await expect(elsewhere.standing()).rejects.toEqual(new SiteProblem("no_repository"));
+	});
+});
+
+describe("what visitors can make it ask GitHub for", () => {
+	/** Each file not already held was a fresh download, so cycling through the repository fetched it without end. */
+	it("fetches at most one cache's worth of files an hour for everybody, and still shows those it holds", async () => {
+		let now = 0;
+		const files = Array.from({ length: SITE_LIMITS.freshFilesPerHour + 1 }, (_, index) => `src/f${String(index)}.ts`);
+		github({
+			...releaseAnswers,
+			[`/git/trees/${COMMIT}`]: { truncated: false, tree: files.map((path) => ({ path, type: "blob", size: 10 })) },
+		});
+		rawFile("export {};");
+		const shared = reader({ now: () => now });
+
+		for (const path of files.slice(0, -1)) await shared.file(path);
+		await expect(shared.file(files.at(-1) ?? "")).rejects.toThrow(new SiteProblem("busy"));
+		await expect(shared.file(files[0] ?? "")).resolves.toMatchObject({ text: "export {};" });
+		expect(fetchRaw).toHaveBeenCalledTimes(SITE_LIMITS.freshFilesPerHour);
+
+		now += 60 * 60_000;
+		await expect(shared.file(files.at(-1) ?? "")).resolves.toMatchObject({ text: "export {};" });
+	});
+
+	/** Every reload during a limit was one more request to a GitHub already refusing them. */
+	it("stops asking GitHub for a while once it answers with a limit, and a token short of a permission pauses nothing", async () => {
+		let now = 0;
+		github({ ...releaseAnswers, "": new ServiceError("GitHub", new Error("HTTP 403"), 403) });
+		const limited = reader({ now: () => now });
+
+		await expect(limited.standing()).rejects.toThrow(ServiceError);
+		const asked = jest.mocked(fetchJson).mock.calls.length;
+		await expect(limited.tree()).rejects.toThrow(ServiceError);
+		expect(fetchJson).toHaveBeenCalledTimes(asked);
+
+		now += SITE_LIMITS.pauseMinutes * 60_000;
+		github(releaseAnswers);
+		await expect(limited.tree()).resolves.toMatchObject({ ref: "release/v2.0.9" });
+
+		const forbidden = new ServiceError("GitHub", new Error("HTTP 403"), 403);
+		github({ ...releaseAnswers, "/traffic/views": forbidden, "/traffic/clones": forbidden });
+		const signedIn = reader({ token: "a-token", now: () => now });
+		await expect(signedIn.traffic()).resolves.toEqual({ available: false, reason: "refused" });
+		await expect(signedIn.standing()).resolves.toMatchObject({ ref: "release/v2.0.9" });
 	});
 });

@@ -3169,6 +3169,7 @@
 		"binaryBody": "Afbeeldingen, lettertypen en andere binaire bestanden worden op GitHub getoond.",
 		"fileFailedTitle": "Dit bestand laadde niet",
 		"fileFailedBody": "GitHub antwoordde niet. Probeer het zo opnieuw.",
+		"fileBusyBody": "{{bot}} heeft voorlopig zoveel bestanden van GitHub gelezen als het toestaat. Probeer het over een paar minuten opnieuw.",
 		"codeOf": "De code in {{path}}",
 		"traffic": "Verkeer",
 		"trafficFailedTitle": "Verkeer laadde niet",

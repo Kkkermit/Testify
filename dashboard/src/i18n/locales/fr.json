@@ -3249,6 +3249,7 @@
 		"binaryBody": "Les images, les polices et les autres fichiers binaires s’affichent sur GitHub.",
 		"fileFailedTitle": "Ce fichier ne s’est pas chargé",
 		"fileFailedBody": "GitHub n’a pas répondu. Réessayez dans un instant.",
+		"fileBusyBody": "{{bot}} a déjà lu sur GitHub autant de fichiers qu’il le permet pour l’instant. Réessayez dans quelques minutes.",
 		"codeOf": "Le code de {{path}}",
 		"traffic": "Trafic",
 		"trafficFailedTitle": "Le trafic ne s’est pas chargé",

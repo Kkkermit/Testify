@@ -4173,7 +4173,13 @@ listener. Five things about it are load-bearing:
   otherwise read it out to anybody. Without `SITE_GITHUB_TOKEN` that is GitHub's 60 requests an hour per address,
   and on a shared host other customers spend the same 60, so the page can be refused before it asks once: the 502's
   log line then names the token (`gitHubAdvice`), as it does when GitHub refuses a token that has expired. The token
-  is never sent anywhere but `api.github.com`, and `findLeak` treats it as a secret.
+  is never sent anywhere but `api.github.com`, and `findLeak` treats it as a secret. **Visitors cannot make it ask
+  GitHub without end.** The answers are shared and kept an hour, but each file not already held is a fresh download,
+  so at most `SITE_LIMITS.freshFilesPerHour` (200, one cache's worth) are fetched an hour for everybody together,
+  judged before the cache is touched so a refusal pushes out no file already held; past it a new file answers 503
+  `source_busy`, and one address reads at most 60 files a minute (`SOURCE_LIMIT`). A 429, or a 403 outside the traffic
+  calls, stops every request to GitHub for `pauseMinutes` (5), so reloads cannot add to a limit GitHub is enforcing; a
+  403 from the traffic calls is a token without Administration read, and pauses nothing.
 - **Traffic needs the token and is kept, the numbers do not.** GitHub holds 14 days of views and clones and wants
   Administration read for them; `githubtraffic` keeps a row per day for `SITE_LIMITS.trafficDaysKept` (365) under a
   TTL, written whenever the page reads them, so the chart reaches past a fortnight. Without a token, or with one

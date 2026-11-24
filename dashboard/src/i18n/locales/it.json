@@ -3249,6 +3249,7 @@
 		"binaryBody": "Immagini, font e altri file binari si vedono su GitHub.",
 		"fileFailedTitle": "Questo file non si è caricato",
 		"fileFailedBody": "GitHub non ha risposto. Riprova tra un momento.",
+		"fileBusyBody": "{{bot}} ha già letto da GitHub tutti i file che consente per ora. Riprova tra qualche minuto.",
 		"codeOf": "Il codice di {{path}}",
 		"traffic": "Traffico",
 		"trafficFailedTitle": "Il traffico non si è caricato",

@@ -3089,6 +3089,7 @@
 		"binaryBody": "画像、フォントなどのバイナリファイルは GitHub で表示されます。",
 		"fileFailedTitle": "このファイルを読み込めませんでした",
 		"fileFailedBody": "GitHub が応答しませんでした。少し待ってからもう一度お試しください。",
+		"fileBusyBody": "{{bot}} は今のところ、GitHub から読める数のファイルを読み終えました。数分後にもう一度お試しください。",
 		"codeOf": "{{path}} のコード",
 		"traffic": "トラフィック",
 		"trafficFailedTitle": "トラフィックを読み込めませんでした",

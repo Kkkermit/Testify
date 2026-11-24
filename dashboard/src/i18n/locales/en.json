@@ -3169,6 +3169,7 @@
 		"binaryBody": "Pictures, fonts and other binary files are shown on GitHub.",
 		"fileFailedTitle": "This file did not load",
 		"fileFailedBody": "GitHub did not answer. Try again in a moment.",
+		"fileBusyBody": "{{bot}} has read as many files from GitHub as it allows for now. Try again in a few minutes.",
 		"codeOf": "The code in {{path}}",
 		"traffic": "Traffic",
 		"trafficFailedTitle": "Traffic did not load",

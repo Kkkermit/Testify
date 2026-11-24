@@ -8,6 +8,12 @@ export class TimedCache<T> {
 		readonly now: () => number = Date.now,
 	) {}
 
+	/** Whether an answer for `key` is held, or on its way, and still fresh. */
+	has(key: string): boolean {
+		const found = this.#entries.get(key);
+		return found !== undefined && this.now() - found.at < this.ttlMs;
+	}
+
 	get(key: string, load: () => Promise<T>): Promise<T> {
 		const found = this.#entries.get(key);
 		if (found !== undefined && this.now() - found.at < this.ttlMs) return found.value;

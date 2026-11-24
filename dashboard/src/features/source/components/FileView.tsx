@@ -11,6 +11,7 @@ import { SiteError } from "@/features/site/components/SiteError";
 import { useSite } from "@/features/site/useSite";
 import { formatBytes, lineCount } from "@/features/source/source.utils";
 import { useSourceFile } from "@/features/source/useSource";
+import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { highlighted, languageOfFile } from "@/lib/highlight";
 
@@ -22,10 +23,12 @@ export function FileView({ path }: { path: string }): React.JSX.Element {
 	const file = useSourceFile(path);
 
 	if (file.isError) {
+		// The hour's files are spent, or this reader is going faster than the page allows anybody.
+		const busy = file.error instanceof ApiError && (file.error.code === "source_busy" || file.error.status === 429);
 		return (
 			<SiteError
 				title={t("source.fileFailedTitle")}
-				body={t("source.fileFailedBody")}
+				body={t(busy ? "source.fileBusyBody" : "source.fileFailedBody")}
 				onRetry={() => {
 					void file.refetch();
 				}}

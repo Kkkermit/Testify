@@ -54,6 +54,9 @@ const ERASE_LIMIT = { limit: 3, windowMs: 60_000 };
 /** Each appeal is a post in a staff channel, so one person cannot send a stream of them. */
 const APPEAL_LIMIT = { limit: APPEAL_LIMITS.perMinute, windowMs: 60_000 };
 
+/** A file not already held is fetched from GitHub, so one visitor cannot spend the hour's budget for everybody. */
+const SOURCE_LIMIT = { limit: 10, windowMs: 60_000 };
+
 /** One address can be a household, an office or a school, so its ceiling is a multiple of one person's. */
 const ADDRESS_MULTIPLIER = 6;
 
@@ -78,6 +81,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const asking = limiterPair(SUPPORT_LIMIT);
 	const erasing = limiterPair(ERASE_LIMIT);
 	const appealing = limiterPair(APPEAL_LIMIT);
+	const reading = limiterPair(SOURCE_LIMIT);
 	const oauth = oauthConfigFrom(env);
 	const github = new GitHubReader({
 		repository: instanceConfig().repository,
@@ -102,6 +106,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/support/ask", rateLimit(asking, { name: "support", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/erase", rateLimit(erasing, { name: "erase", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("/api/site/file", rateLimit(reading, { name: "source", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	// Sending an appeal posts to a staff channel; reading the list does not, so only the send takes this limit.
 	if (env.DASHBOARD_ENABLED) {
 		app.on("POST", "/api/appeals/*", rateLimit(appealing, { name: "appeal", trustProxy: env.DASHBOARD_TRUST_PROXY }));
