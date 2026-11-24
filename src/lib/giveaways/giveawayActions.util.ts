@@ -1,3 +1,4 @@
+import { type GiveawaysManager } from "discord-giveaways";
 import { type Guild, type User } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
@@ -29,28 +30,39 @@ export async function startGiveaway(client: TestifyClient, guild: Guild, draft: 
 	});
 }
 
-/** Every action is keyed by the Discord message id, which is what `discord-giveaways` stores. */
-export async function endGiveaway(client: TestifyClient, messageId: string): Promise<void> {
-	await giveaways(client)
+/** `discord-giveaways` finds a giveaway by message id in every server, so each action first checks it is this one's. */
+function managerFor(client: TestifyClient, guildId: string, messageId: string, missing: string): GiveawaysManager {
+	const manager = giveaways(client);
+	if (!manager.giveaways.some((giveaway) => giveaway.messageId === messageId && giveaway.guildId === guildId)) {
+		throw new UserFacingError(missing);
+	}
+	return manager;
+}
+
+export async function endGiveaway(client: TestifyClient, guildId: string, messageId: string): Promise<void> {
+	const missing = "I could not find a running giveaway with that message id.";
+	await managerFor(client, guildId, messageId, missing)
 		.end(messageId)
 		.catch(() => {
-			throw new UserFacingError("I could not find a running giveaway with that message id.");
+			throw new UserFacingError(missing);
 		});
 }
 
-export async function rerollGiveaway(client: TestifyClient, messageId: string): Promise<void> {
-	await giveaways(client)
+export async function rerollGiveaway(client: TestifyClient, guildId: string, messageId: string): Promise<void> {
+	const missing = "I could not reroll that giveaway. Check the message id.";
+	await managerFor(client, guildId, messageId, missing)
 		.reroll(messageId)
 		.catch(() => {
-			throw new UserFacingError("I could not reroll that giveaway. Check the message id.");
+			throw new UserFacingError(missing);
 		});
 }
 
-export async function deleteGiveaway(client: TestifyClient, messageId: string): Promise<void> {
-	await giveaways(client)
+export async function deleteGiveaway(client: TestifyClient, guildId: string, messageId: string): Promise<void> {
+	const missing = "I could not find a giveaway with that message id.";
+	await managerFor(client, guildId, messageId, missing)
 		.delete(messageId)
 		.catch(() => {
-			throw new UserFacingError("I could not find a giveaway with that message id.");
+			throw new UserFacingError(missing);
 		});
 }
 

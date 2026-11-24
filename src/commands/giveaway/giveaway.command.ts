@@ -62,7 +62,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const messageId = interaction.options.getString("message-id", true).trim();
 
-				await endGiveaway(client, messageId);
+				await endGiveaway(client, inGuild(interaction).id, messageId);
 
 				await reply(interaction, {
 					embeds: [successEmbed("The giveaway has been ended.")],
@@ -76,7 +76,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const messageId = interaction.options.getString("message-id", true).trim();
 
-				await rerollGiveaway(client, messageId);
+				await rerollGiveaway(client, inGuild(interaction).id, messageId);
 
 				await reply(interaction, {
 					embeds: [successEmbed("New winners have been drawn.")],
@@ -90,7 +90,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const messageId = interaction.options.getString("message-id", true).trim();
 
-				await deleteGiveaway(client, messageId);
+				await deleteGiveaway(client, inGuild(interaction).id, messageId);
 
 				await reply(interaction, {
 					embeds: [successEmbed("The giveaway has been deleted.")],

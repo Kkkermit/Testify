@@ -42,7 +42,7 @@ giveaways.post("/:messageId/end", async (context) => {
 	const { messageId } = parseParams(context, giveawayParams);
 
 	await requireInGuild(context, guild, messageId);
-	await endGiveaway(context.get("client"), messageId);
+	await endGiveaway(context.get("client"), guild.id, messageId);
 	await auditChange(context, { action: "giveaway.end", summary: `Ended giveaway ${messageId}` });
 
 	return context.json(await listFor(context, guild));
@@ -53,7 +53,7 @@ giveaways.post("/:messageId/reroll", async (context) => {
 	const { messageId } = parseParams(context, giveawayParams);
 
 	await requireInGuild(context, guild, messageId);
-	await rerollGiveaway(context.get("client"), messageId);
+	await rerollGiveaway(context.get("client"), guild.id, messageId);
 	await auditChange(context, { action: "giveaway.reroll", summary: `Rerolled giveaway ${messageId}` });
 
 	return context.json(await listFor(context, guild));
@@ -64,7 +64,7 @@ giveaways.delete("/:messageId", async (context) => {
 	const { messageId } = parseParams(context, giveawayParams);
 
 	await requireInGuild(context, guild, messageId);
-	await deleteGiveaway(context.get("client"), messageId);
+	await deleteGiveaway(context.get("client"), guild.id, messageId);
 	await auditChange(context, { action: "giveaway.delete", summary: `Deleted giveaway ${messageId}` });
 
 	return context.json(await listFor(context, guild));
