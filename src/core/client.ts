@@ -90,8 +90,15 @@ export class TestifyClient extends Client {
 	pausedAt: number | null = null;
 
 	constructor(env: Env, logger: Logger) {
-		// A reply to a message that has since gone, such as the one `t?clear` deletes, is sent without the quote.
-		super({ intents, partials, shards: "auto", failIfNotExists: false });
+		// A reply to a message that has since gone, such as the one `t?clear` deletes, is sent without the quote, and a
+		// message that names a role or everyone pings them only when it says so, whatever text somebody typed into it.
+		super({
+			intents,
+			partials,
+			shards: "auto",
+			failIfNotExists: false,
+			allowedMentions: { parse: ["users"], repliedUser: true },
+		});
 		this.env = env;
 		this.featuresOff = switchedOff(env.DISABLED_FEATURES).off;
 		this.logger = logger;

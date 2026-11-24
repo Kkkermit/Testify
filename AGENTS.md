@@ -746,6 +746,11 @@ Gotchas found the hard way:
   text pings whoever it mentions, and a prefix run posts the panel where everybody can see it, so a reply reading
   `@everyone` would ping them all — and so would the music panel's requester, the levelling panel's reward roles, a
   role menu, an idea or a reminder.
+- **A message pings a role or everyone only when it says so.** `TestifyClient` sets `allowedMentions` to
+  `{ parse: ["users"] }`, so a send that names no mentions of its own pings the people it names and nothing else; a
+  giveaway's prize once pinged `@everyone` through its win message, which Manage Server alone could not otherwise do.
+  A message that pings a role names it in its own `allowedMentions`: a ticket's staff role, mod mail's and a report's
+  chosen role, a raid alert's and an announcement's.
 
 Embeds are still correct for one-shot results — `/beg`, `/rob`, `/work` — where buttons would add noise. Do not
 convert something just to convert it.

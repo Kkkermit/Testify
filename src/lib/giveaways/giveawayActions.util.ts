@@ -27,6 +27,8 @@ export async function startGiveaway(client: TestifyClient, guild: Guild, draft: 
 		duration: draft.durationMs,
 		hostedBy: draft.hostedBy,
 		messages: GIVEAWAY_POST,
+		// The prize is typed by whoever started it, so its win message pings people and never a role or everyone.
+		allowedMentions: { parse: ["users"] },
 	});
 }
 

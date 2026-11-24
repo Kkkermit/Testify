@@ -108,6 +108,7 @@ async function openTicketChannel(guild: Guild, setup: TicketSetupRecord, owner: 
 	});
 	await channel.send({
 		content: `${owner.toString()} <@&${setup.handlerRoleId}>`,
+		allowedMentions: { users: [owner.id], roles: [setup.handlerRoleId] },
 		embeds: [
 			embed({
 				category: "tickets",

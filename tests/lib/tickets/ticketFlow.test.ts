@@ -105,6 +105,18 @@ describe("openTicket", () => {
 		expect(create).not.toHaveBeenCalled();
 	});
 
+	/** Pings are off unless a message names them, so the staff role has to be named or a new ticket reaches nobody. */
+	it("pings the person who opened it and the staff role, and nobody else", async () => {
+		const channel = ticketChannel();
+		const { guild } = guildMaking(channel);
+
+		await openTicket(guild, setup, owner);
+
+		expect(channel.send).toHaveBeenCalledWith(
+			expect.objectContaining({ allowedMentions: { users: [OWNER], roles: [HANDLER_ROLE] } }),
+		);
+	});
+
 	/** Two presses of Create ticket both passed the check before either was recorded, so one person got two channels. */
 	it("makes one channel for a double press", async () => {
 		const { guild, create } = guildMaking(ticketChannel());

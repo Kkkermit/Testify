@@ -50,6 +50,16 @@ describe("startGiveaway", () => {
 		);
 		expect(manager.start).not.toHaveBeenCalled();
 	});
+
+	/** The prize is typed by whoever started it, and its win message pinged `@everyone` when the prize said so. */
+	it("lets the win message ping people and never a role or everyone", async () => {
+		await startGiveaway(client, guildWith({ isTextBased: () => true }), { ...draft, prize: "@everyone Nitro" });
+
+		expect(manager.start).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ allowedMentions: { parse: ["users"] } }),
+		);
+	});
 });
 
 describe("ending, rerolling and deleting", () => {
