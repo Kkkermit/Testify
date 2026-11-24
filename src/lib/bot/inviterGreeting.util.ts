@@ -47,10 +47,7 @@ interface FindOptions {
 	now?: () => number;
 }
 
-/**
- * Who added the bot. An invite link, the Add App button and the App Directory all write the same audit entry; the
- * integration records it too, for a bot that was not given View Audit Log; the owner is the last resort.
- */
+/** The audit entry every way of adding a bot writes, then the integration for a bot without View Audit Log, then the owner. */
 export async function findInviter(
 	guild: Guild,
 	botId: string,
