@@ -36,6 +36,8 @@ export function followTrails(router: Pick<DataRouter, "state" | "subscribe">): (
 
 export function rememberTrail(key: string, trail: Trail): void {
 	remembered.set(key, trail);
+	const oldest = remembered.keys().next().value;
+	if (remembered.size > KEPT && oldest !== undefined) remembered.delete(oldest);
 	try {
 		const kept = Object.entries({ ...stored(), [key]: trail }).slice(-KEPT);
 		sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(kept)));
