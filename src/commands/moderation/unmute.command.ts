@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, DEFAULT_REASON, moderatorOf, removeTimeout } from "@lib/moderation";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, moderatorOf, removeTimeout } from "@lib/moderation";
 
 export default defineCommand({
 	name: "unmute",
@@ -25,6 +25,8 @@ export default defineCommand({
 
 		const member = await guild.members.fetch(target.id).catch(() => null);
 		if (!member) throw new UserFacingError(strings.moderation.memberNotFound);
+
+		assertModeratable(interaction, member);
 		const { notified: delivered } = await removeTimeout(guild, member, moderatorOf(interaction.user), reason);
 
 		await reply(interaction, {

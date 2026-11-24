@@ -25,6 +25,7 @@ function pressed(inVoice: string | null = "voice-1") {
 	return {
 		user: { id: USER },
 		guild: { id: "guild-1" },
+		inCachedGuild: () => true,
 		member: member(inVoice),
 		isButton: () => true,
 		isModalSubmit: () => false,
@@ -36,6 +37,7 @@ function submitted(query: string) {
 	return {
 		user: { id: USER },
 		guild: { id: "guild-1" },
+		inCachedGuild: () => true,
 		channelId: "text-1",
 		member: member("voice-1"),
 		isButton: () => false,

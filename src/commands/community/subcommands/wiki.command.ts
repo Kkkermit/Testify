@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { botName } from "@core/brand";
 import { defineCommand } from "@core/command";
-import { UserFacingError } from "@core/errors";
+import { ServiceError, UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
-import { truncate } from "@lib/format";
+import { escapeMarkdown, truncate } from "@lib/format";
 import { fetchJson } from "@lib/infra";
 
 const summarySchema = z.object({
@@ -32,10 +32,14 @@ export default defineCommand({
 			`https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`,
 			summarySchema,
 			{ headers: { "User-Agent": `${botName()} Discord bot` } },
-		).catch(() => null);
+		).catch((error: unknown) => {
+			// Only a 404 means there is no such article; anything else is Wikipedia not answering.
+			if (error instanceof ServiceError && error.status === 404) return null;
+			throw error;
+		});
 
 		if (!summary || summary.extract.length === 0) {
-			throw new UserFacingError(`Wikipedia has no article matching **${query}**.`);
+			throw new UserFacingError(`Wikipedia has no article matching **${escapeMarkdown(query)}**.`);
 		}
 
 		await reply(interaction, {

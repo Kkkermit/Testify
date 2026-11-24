@@ -95,6 +95,7 @@ export default defineButton({
 
 			case "toggle-member": {
 				if (!interaction.isStringSelectMenu()) return;
+				requireHandler();
 
 				const userId = interaction.values[0];
 				if (userId === undefined) return;
