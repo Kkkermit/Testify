@@ -2806,6 +2806,9 @@ Rules that are easy to break and silent when broken:
   rate-limit bucket.
 - **Rotating `DASHBOARD_SESSION_SECRET` signs everybody out**, because the sealed tokens no longer open. That
   is the intended behaviour after a leak, and `npm run secret -- --write` is the whole procedure.
+- **A session is stored as a digest of its cookie** (`storedSessionId`, SHA-256 in hex), and `findSession` takes the
+  cookie and hashes it. The cookie was once the document's `_id`, so anybody holding a copy of the database could
+  sign in as anybody, an owner included; every other session function takes the stored id a found session carries.
 
 ### `requireGuild` is the security boundary
 

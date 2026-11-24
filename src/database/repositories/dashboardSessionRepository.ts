@@ -23,6 +23,11 @@ function token(): string {
 	return randomBytes(32).toString("base64url");
 }
 
+/** What the database keeps in place of a session's cookie, so a copy of it signs nobody in, an owner included. */
+export function storedSessionId(cookie: string): string {
+	return createHash("sha256").update(cookie).digest("hex");
+}
+
 /** Tokens are sealed here, so no route can write one in plaintext. */
 export async function createSession(box: SecretBox, session: NewSession, ttlDays: number): Promise<IssuedSession> {
 	const id = token();
@@ -30,7 +35,7 @@ export async function createSession(box: SecretBox, session: NewSession, ttlDays
 	const expiresAt = new Date(Date.now() + ttlDays * DAY_MS);
 
 	await DashboardSessions.create({
-		_id: id,
+		_id: storedSessionId(id),
 		userId: session.userId,
 		username: session.username,
 		avatar: session.avatar,
@@ -46,8 +51,9 @@ export async function createSession(box: SecretBox, session: NewSession, ttlDays
 	return { id, csrfSecret, expiresAt };
 }
 
-export async function findSession(id: string): Promise<DashboardSession | null> {
-	const session = await DashboardSessions.findById(id).lean<DashboardSession>().exec();
+/** Looked up by the cookie's digest; every other function here takes the stored id a found session carries. */
+export async function findSession(cookie: string): Promise<DashboardSession | null> {
+	const session = await DashboardSessions.findById(storedSessionId(cookie)).lean<DashboardSession>().exec();
 	if (session === null) return null;
 
 	// Mongo's TTL sweep runs about once a minute, so an expired document can still be read.
