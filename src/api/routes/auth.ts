@@ -43,6 +43,7 @@ import { ownerContacts } from "@lib/bot";
 import {
 	confirmsName,
 	eraseAccountSchema,
+	isAccessArea,
 	type AccessArea,
 	type ManageableGuild,
 	type MeResponse,
@@ -219,7 +220,8 @@ async function guildsFor(
 	const client = context.get("client");
 	const owner = client.isOwner(session.userId);
 	const [guilds, given] = await Promise.all([rawGuilds(oauth, session), accessFor(session.userId)]);
-	const granted = new Map(given.map((access) => [access.guildId, access.areas]));
+	// A stored grant is data, so a screen this build does not know is dropped here as `requireGuild` drops it.
+	const granted = new Map(given.map((access) => [access.guildId, access.areas.filter(isAccessArea)]));
 
 	return guilds
 		.flatMap((guild) => {

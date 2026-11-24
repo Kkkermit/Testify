@@ -23,6 +23,7 @@ import {
 	accessGrantBody,
 	type AccessList,
 	type AccessPerson,
+	isAccessArea,
 	memberParams,
 } from "@testify/shared";
 
@@ -58,7 +59,7 @@ function toPerson(row: StoredAccess, member: GuildMember | undefined, done: Chan
 		username: member?.user.username ?? row.username,
 		avatarUrl: member?.displayAvatarURL({ size: 64 }) ?? null,
 		inServer: member !== undefined,
-		areas: row.areas,
+		areas: row.areas.filter(isAccessArea),
 		addedBy: { id: row.addedBy, name: row.addedByName },
 		addedAt: row.createdAt.toISOString(),
 		updatedAt: row.updatedAt.toISOString(),

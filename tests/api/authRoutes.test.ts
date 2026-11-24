@@ -364,7 +364,7 @@ describe("GET /auth/me", () => {
 		expect(guildsFetched).not.toHaveBeenCalled();
 	});
 
-	/** Ban Members alone lists nothing; access its admins gave does, and only where the bot is to use it. */
+	/** Ban Members alone lists nothing; access its admins gave does, only where the bot is, and only screens it knows. */
 	it("lists the servers somebody manages, and those with the bot where they were given access, and nothing else", async () => {
 		const at = (id: string, permissions: bigint) => ({ id, name: id, icon: null, permissions: String(permissions) });
 		guildsFetched.mockResolvedValueOnce([
@@ -377,7 +377,7 @@ describe("GET /auth/me", () => {
 		]);
 		jest.mocked(accessFor).mockResolvedValueOnce([
 			{ guildId: "900000000000000004", areas: ["bans"] },
-			{ guildId: "900000000000000006", areas: ["warnings", "cases"] },
+			{ guildId: "900000000000000006", areas: ["warnings", "constructor", "cases"] as never },
 		]);
 		const botIn = new Map(
 			["900000000000000001", "900000000000000003", "900000000000000005", "900000000000000006"].map((id) => [
