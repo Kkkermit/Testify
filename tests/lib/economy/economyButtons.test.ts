@@ -138,6 +138,21 @@ describe("the heist", () => {
 		expect(activeHeists().has(GUILD)).toBe(false);
 	});
 
+	/** A join still reading the wallet when the heist played redrew the finished heist's message with its buttons back. */
+	it("refuses a join that lands after the heist has played, and redraws nothing", async () => {
+		formingHeist();
+		repository.findAccount.mockImplementationOnce(() => {
+			activeHeists().delete(GUILD);
+			return Promise.resolve({ wallet: 1_000, lastHeist: null });
+		});
+		const interaction = pressed({ user: { id: "500000000000000009" } });
+
+		await expect(
+			heist.run(interaction as never, { client: createMockClient(), action: "join", args: [GUILD] }),
+		).rejects.toEqual(new UserFacingError("That heist has already finished."));
+		expect(interaction.update).not.toHaveBeenCalled();
+	});
+
 	/** Joining is a way in to the economy, so it is refused wherever `/heist` itself would be. */
 	it("asks the gates every control anybody may press asks", async () => {
 		formingHeist();
