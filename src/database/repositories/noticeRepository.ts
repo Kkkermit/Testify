@@ -1,6 +1,7 @@
 import { isValidObjectId, type Types } from "mongoose";
-import { CACHE, DAY_MS } from "@config/constants";
+import { DAY_MS } from "@config/constants";
 import { BotNotice, NoticeReader, type NoticeReaderRecord, type NoticeRecord } from "@database/models/notice.schema";
+import { ReadCache } from "@database/readCache.util";
 import { type Notice, NOTICE_LIMITS, type NoticeInput, type NoticePatch } from "@testify/shared";
 
 /** Written before notifications could end, a record has no `endsAt` at all. */
@@ -9,7 +10,8 @@ type Row = Omit<NoticeRecord, "endsAt"> & { _id: Types.ObjectId; endsAt?: Date |
 const READER_KEEP_MS = NOTICE_LIMITS.readerDays * DAY_MS;
 
 /** Asked after every command while any exist, so the list is held in memory and replaced on every write. */
-let cached: { notices: Notice[]; expiresAt: number } | null = null;
+const cache = new ReadCache<Notice[]>();
+const EVERY_NOTICE = "all";
 
 function toNotice(row: Row): Notice {
 	return {
@@ -30,16 +32,14 @@ function notEnded(): Record<string, unknown> {
 
 /** Every one not yet taken down, including those waiting to go up, newest first; readers are shown only the live ones. */
 export async function listNotices(): Promise<Notice[]> {
-	if (cached !== null && cached.expiresAt > Date.now()) return cached.notices;
-
-	const rows = await BotNotice.find(notEnded())
-		.sort({ publishedAt: -1, _id: -1 })
-		.limit(NOTICE_LIMITS.maxActive)
-		.lean<Row[]>()
-		.exec();
-	const notices = rows.map(toNotice);
-	cached = { notices, expiresAt: Date.now() + CACHE.guildSettingsTtlMs };
-	return notices;
+	return cache.read(EVERY_NOTICE, async () => {
+		const rows = await BotNotice.find(notEnded())
+			.sort({ publishedAt: -1, _id: -1 })
+			.limit(NOTICE_LIMITS.maxActive)
+			.lean<Row[]>()
+			.exec();
+		return rows.map(toNotice);
+	});
 }
 
 export async function findNotice(id: string): Promise<Notice | null> {
@@ -61,7 +61,7 @@ export async function createNotice(input: NoticeInput, authorId: string): Promis
 		});
 		return toNotice(row.toObject<Row>());
 	} finally {
-		cached = null;
+		cache.forget(EVERY_NOTICE);
 	}
 }
 
@@ -79,7 +79,7 @@ export async function updateNotice(id: string, change: NoticePatch): Promise<Not
 		const row = await BotNotice.findByIdAndUpdate(id, { $set: set }, { new: true }).lean<Row>().exec();
 		return row === null ? null : toNotice(row);
 	} finally {
-		cached = null;
+		cache.forget(EVERY_NOTICE);
 	}
 }
 
@@ -88,7 +88,7 @@ export async function deleteNotice(id: string): Promise<boolean> {
 	try {
 		return (await BotNotice.deleteOne({ _id: id }).exec()).deletedCount > 0;
 	} finally {
-		cached = null;
+		cache.forget(EVERY_NOTICE);
 	}
 }
 
@@ -121,5 +121,5 @@ export async function markNoticeHinted(userId: string, at: Date): Promise<void> 
 }
 
 export function clearNoticeCache(): void {
-	cached = null;
+	cache.clear();
 }

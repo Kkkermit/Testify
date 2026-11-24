@@ -1,13 +1,13 @@
 import { isValidObjectId, type Types } from "mongoose";
-import { CACHE } from "@config/constants";
 import { isDuplicateKey } from "@database/duplicateKey.util";
 import { AutoResponderEntry, type AutoResponderRecord } from "@database/models/autoResponder.schema";
+import { ReadCache } from "@database/readCache.util";
 import { type AutoResponder, type AutoResponderInput, triggerKey } from "@testify/shared";
 
 type Row = AutoResponderRecord & { _id: Types.ObjectId };
 
 /** Every server's responders, asked on every message, so they are cached and replaced on every write. */
-const cache = new Map<string, { responders: AutoResponder[]; expiresAt: number }>();
+const cache = new ReadCache<AutoResponder[]>();
 
 function toResponder(row: Row): AutoResponder {
 	return { id: row._id.toString(), trigger: row.trigger, match: row.match, reply: row.reply };
@@ -15,14 +15,10 @@ function toResponder(row: Row): AutoResponder {
 
 /** Oldest first, which is the order the panel and the dashboard list them in and the order they are tried. */
 export async function listAutoResponders(guildId: string): Promise<AutoResponder[]> {
-	const cached = cache.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.responders;
-
-	const rows = await AutoResponderEntry.find({ guildId }).sort({ createdAt: 1, _id: 1 }).lean<Row[]>().exec();
-	if (cache.size > CACHE.guildSettingsMaxEntries) cache.clear();
-	const responders = rows.map(toResponder);
-	cache.set(guildId, { responders, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-	return responders;
+	return cache.read(guildId, async () => {
+		const rows = await AutoResponderEntry.find({ guildId }).sort({ createdAt: 1, _id: 1 }).lean<Row[]>().exec();
+		return rows.map(toResponder);
+	});
 }
 
 export async function findAutoResponder(guildId: string, id: string): Promise<AutoResponder | null> {
@@ -44,7 +40,7 @@ export async function createAutoResponder(
 		if (isDuplicateKey(error)) return null;
 		throw error;
 	} finally {
-		cache.delete(guildId);
+		cache.forget(guildId);
 	}
 }
 
@@ -70,14 +66,14 @@ export async function updateAutoResponder(
 		if (isDuplicateKey(error)) return "duplicate";
 		throw error;
 	} finally {
-		cache.delete(guildId);
+		cache.forget(guildId);
 	}
 }
 
 export async function deleteAutoResponder(guildId: string, id: string): Promise<boolean> {
 	if (!isValidObjectId(id)) return false;
 	const { deletedCount } = await AutoResponderEntry.deleteOne({ _id: id, guildId }).exec();
-	cache.delete(guildId);
+	cache.forget(guildId);
 	return deletedCount > 0;
 }
 
@@ -87,6 +83,6 @@ export function clearAutoResponderCache(): void {
 }
 
 export async function purgeAutoResponders(guildId: string): Promise<void> {
-	cache.delete(guildId);
 	await AutoResponderEntry.deleteMany({ guildId }).exec();
+	cache.forget(guildId);
 }

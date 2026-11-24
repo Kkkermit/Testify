@@ -2,6 +2,7 @@
 
 export * from "./connection";
 export * from "./duplicateKey.util";
+export * from "./readCache.util";
 export * from "./recordFilter.util";
 export * from "./models/afk.schema";
 export * from "./models/analyticsOptOut.schema";

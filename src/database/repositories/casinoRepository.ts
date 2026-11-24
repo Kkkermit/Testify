@@ -1,7 +1,7 @@
-import { CACHE } from "@config/constants";
 import { isDuplicateKey } from "@database/duplicateKey.util";
 import { type CasinoHandRecord, CasinoHand } from "@database/models/casinoHand.schema";
 import { type CasinoSettingsRecord, CasinoSettingsConfig } from "@database/models/casinoSettings.schema";
+import { ReadCache } from "@database/readCache.util";
 
 /** The casino's settings, cached like the prefix, and the card hands in play. */
 
@@ -9,25 +9,15 @@ export type StoredCasinoSettings = Pick<CasinoSettingsRecord, "enabled" | "disab
 
 type SettingsFields = Pick<CasinoSettingsRecord, "enabled" | "disabledGames" | "minBet" | "maxBet">;
 
-const cache = new Map<string, { record: StoredCasinoSettings; expiresAt: number }>();
-
-function remember(guildId: string, record: StoredCasinoSettings): StoredCasinoSettings {
-	if (cache.size > CACHE.guildSettingsMaxEntries) cache.clear();
-	cache.set(guildId, { record, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-
-	return record;
-}
+const cache = new ReadCache<StoredCasinoSettings>();
 
 export async function getCasinoSettings(guildId: string): Promise<StoredCasinoSettings> {
-	const cached = cache.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.record;
-
-	const record = await CasinoSettingsConfig.findOne({ guildId })
-		.select("enabled disabledGames minBet maxBet")
-		.lean<SettingsFields>()
-		.exec();
-
-	return remember(guildId, record ?? null);
+	return cache.read(guildId, () =>
+		CasinoSettingsConfig.findOne({ guildId })
+			.select("enabled disabledGames minBet maxBet")
+			.lean<SettingsFields>()
+			.exec(),
+	);
 }
 
 export async function saveCasinoSettings(
@@ -35,13 +25,15 @@ export async function saveCasinoSettings(
 	fields: SettingsFields,
 	updatedBy: string | null,
 ): Promise<void> {
-	await CasinoSettingsConfig.findOneAndUpdate(
-		{ guildId },
-		{ $set: { ...fields, updatedBy } },
-		{ upsert: true, new: true, lean: true, setDefaultsOnInsert: true },
-	).exec();
-
-	cache.delete(guildId);
+	try {
+		await CasinoSettingsConfig.findOneAndUpdate(
+			{ guildId },
+			{ $set: { ...fields, updatedBy } },
+			{ upsert: true, new: true, lean: true, setDefaultsOnInsert: true },
+		).exec();
+	} finally {
+		cache.forget(guildId);
+	}
 }
 
 export type HandRecord = Pick<
@@ -115,6 +107,6 @@ export async function expiredHands(now: Date, limit: number): Promise<HandRecord
 }
 
 export async function purgeCasino(guildId: string): Promise<void> {
-	cache.delete(guildId);
 	await Promise.all([CasinoSettingsConfig.deleteMany({ guildId }).exec(), CasinoHand.deleteMany({ guildId }).exec()]);
+	cache.forget(guildId);
 }
