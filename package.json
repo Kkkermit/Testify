@@ -136,7 +136,7 @@
 		"tsc-alias": "1.9.10",
 		"tsup": "9.0.0",
 		"tsx": "4.23.15",
-		"typescript": "5.9.3",
+		"typescript": "6.0.3",
 		"typescript-eslint": "8.74.0",
 		"yaml": "2.9.1"
 	},
