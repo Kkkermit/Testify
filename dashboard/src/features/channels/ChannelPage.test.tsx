@@ -52,7 +52,7 @@ describe("a channel's page", () => {
 		const box = within(welcome).getByRole("textbox", { name: /Message/ });
 		await user.clear(box);
 		await user.type(box, "Hello {{user}");
-		await user.tab();
+		await user.click(document.body);
 
 		await waitFor(() => {
 			expect(bodies).toEqual([{ message: "Hello {user}" }]);

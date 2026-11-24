@@ -17,11 +17,12 @@ function renderPage() {
 	});
 }
 
-function capturePatch(): { body: unknown } {
-	const captured: { body: unknown } = { body: undefined };
+function capturePatch(): { body: unknown; sent: number } {
+	const captured: { body: unknown; sent: number } = { body: undefined, sent: 0 };
 	server.use(
 		http.patch("/api/guilds/:guildId/welcome", async ({ request }) => {
 			captured.body = await request.json();
+			captured.sent += 1;
 			return HttpResponse.json(welcomeConfig);
 		}),
 	);
@@ -74,6 +75,24 @@ describe("the welcome page", () => {
 		await waitFor(() => {
 			expect(captured.body).toEqual({ message: "Hello!" });
 		});
+		// Pressing Save left the field first, and that saved it too, so every press was two writes.
+		expect(captured.sent).toBe(1);
+	});
+
+	/** Leaving the field for Discard saved what was typed before Discard threw it away. */
+	it("saves nothing when the edit is discarded", async () => {
+		const user = userEvent.setup();
+		const captured = capturePatch();
+
+		renderPage();
+		const box = await screen.findByLabelText("Message");
+		await user.clear(box);
+		await user.type(box, "Hello!");
+		await user.click(screen.getByRole("button", { name: /discard/i }));
+		await user.click(document.body);
+
+		expect(box).toHaveValue(welcomeConfig.message);
+		expect(captured.sent).toBe(0);
 	});
 
 	it("refuses to save a message longer than Discord accepts", async () => {

@@ -117,9 +117,7 @@ export function WelcomePage(): React.JSX.Element {
 					saved={welcome.message}
 					disabled={needsChannel}
 					onDraft={setDraft}
-					onSave={(message) => {
-						update.mutate({ message });
-					}}
+					onSave={(message) => update.mutateAsync({ message })}
 				>
 					<GreetingPreview message={draft} style={welcome.style} guildName={guildName} memberCount={memberCount} />
 					<SendTest test={{ kind: "greeting", message: draft, style: welcome.style }} />

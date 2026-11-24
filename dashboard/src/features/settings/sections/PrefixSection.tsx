@@ -1,7 +1,7 @@
 import { type PrefixPatch, type PrefixSetting } from "@testify/shared";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
+import { Field, FIELD, savesOnLeave, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { prefixProblem } from "@/features/settings/settings.utils";
@@ -43,7 +43,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 			/>
 
 			<Field label={t("settings.prefix")} htmlFor="prefix">
-				<div className="flex flex-wrap items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2" {...savesOnLeave(commit)}>
 					<input
 						id="prefix"
 						value={draft}
@@ -51,7 +51,6 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 						onChange={(event) => {
 							setDraft(event.target.value);
 						}}
-						onBlur={commit}
 						className={cn(FIELD, "max-w-40 font-mono", problem !== null && dirty && "border-destructive")}
 					/>
 					<p className="text-muted-foreground text-sm">

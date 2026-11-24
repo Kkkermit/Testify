@@ -2995,7 +2995,14 @@ still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/membe
   `client.isMutating({ mutationKey }) === 1`, ending the burst in an `invalidateQueries` so a read decides. A
   mutation is counted as pending across `onMutate`, `onSuccess` and `onSettled` — verified in
   `@tanstack/query-core`'s `mutation.ts`, not assumed. `useDocumentMutation.test.tsx` pins both guards, and each
-  was proved to go red without it. A write that shows its change before the answer lands is `useOptimisticMutation`.
+  was proved to go red without it. A write that shows its change before the answer lands is `useOptimisticMutation`,
+  which keys itself the same way: a write started while another was on its way never puts its snapshot back, because
+  that snapshot is the other write's optimistic value, and a refusal at the end of a burst is settled by a read.
+- **A field saved when it is left is left only when focus goes outside it and its own buttons.** `savesOnLeave` goes
+  on the element holding the field, its placeholder tokens and its Save and Discard, and holds a press on one of
+  those from blurring the field first, which Safari does without focusing the button. Pressing Save once was two
+  writes, and Discard saved what it then threw away. A `MessageEditor` whose `onSave` returns the write puts what was
+  typed back when it is refused, since the rollback puts the stored text back in the field.
 - **A changed filter shows a skeleton where its results go, never the last filter's results.** A list's query keeps
   its previous answer (`keepPreviousData`) so the filters' own options and the pager stay where they are, and the
   results read `currentData` from `lib/queries.ts`, which is undefined until the answer for the filters as they now

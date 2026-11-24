@@ -94,6 +94,27 @@ describe("the settings page", () => {
 		});
 	});
 
+	it("sends a prefix once when Save is pressed", async () => {
+		const user = userEvent.setup();
+		const sent: unknown[] = [];
+		server.use(
+			http.patch("/api/guilds/:guildId/settings/prefix", async ({ request }) => {
+				sent.push(await request.json());
+				return HttpResponse.json(serverSettings);
+			}),
+		);
+
+		renderPage();
+		const field = await screen.findByLabelText("Prefix");
+		await user.clear(field);
+		await user.type(field, "!");
+		await user.click(screen.getByRole("button", { name: /save prefix/i }));
+
+		await waitFor(() => {
+			expect(sent).toEqual([{ prefix: "!" }]);
+		});
+	});
+
 	it("refuses to send a prefix the bot would reject", async () => {
 		const user = userEvent.setup();
 		const captured = capture("prefix");

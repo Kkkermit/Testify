@@ -89,9 +89,7 @@ export function BirthdaysPage(): React.JSX.Element {
 					max={BIRTHDAY_LIMITS.maxMessage}
 					tokens={BIRTHDAY_PLACEHOLDERS}
 					onDraft={setDraft}
-					onSave={(message) => {
-						update.mutate({ message });
-					}}
+					onSave={(message) => update.mutateAsync({ message })}
 				>
 					<GreetingPreview
 						message={draft}

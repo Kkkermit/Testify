@@ -1362,6 +1362,9 @@ feels wrong without looking wrong.
 | **Draft then Save**     | once, on an explicit Save          | The controls are **one** decision, and half of it applied is not a state anyone wants | Audit logging            |
 | **Local, save on blur** | when the field is left, or on Save | A typed field. Per-keystroke would be a write per character                           | Welcome template, prefix |
 
+A field saved on blur puts `savesOnLeave(save)` on the element that holds it and its own buttons, never `onBlur` on
+the input alone: otherwise pressing its Save saves twice, and its Discard saves first.
+
 Two corollaries:
 
 - **Re-read before you write.** Every branch that changes data re-reads rather than trusting what the screen was

@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { BirthdaysPage } from "@/features/birthdays/BirthdaysPage";
 import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
@@ -33,6 +33,30 @@ describe("the birthdays page", () => {
 
 		expect(await screen.findByText("I cannot post in that channel.")).toBeInTheDocument();
 		expect(toggle).toBeChecked();
+	});
+
+	/** The rollback of a refused save put the saved text back, so what was typed was lost beside the refusal. */
+	it("keeps a refused message in the editor", async () => {
+		const user = userEvent.setup();
+		server.use(
+			// Held back so the optimistic message is drawn before the rollback, as it is over a real network.
+			http.patch("/api/guilds/:guildId/birthdays", async () => {
+				await delay(50);
+				return HttpResponse.json(
+					{ error: { code: "bad_request", message: "That message is too long." } },
+					{ status: 400 },
+				);
+			}),
+		);
+		renderPage();
+
+		const editor = await screen.findByRole("textbox", { name: /birthday message/i });
+		await user.clear(editor);
+		await user.type(editor, "Many happy returns");
+		await user.click(screen.getByRole("button", { name: /save message/i }));
+
+		expect(await screen.findByText("That message is too long.")).toBeInTheDocument();
+		expect(editor).toHaveValue("Many happy returns");
 	});
 
 	it("has no automatically detectable accessibility violations", async () => {
