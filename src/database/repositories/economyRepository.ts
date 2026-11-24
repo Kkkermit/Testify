@@ -2,7 +2,7 @@ import { type PipelineStage } from "mongoose";
 import { ECONOMY, type EconomyCooldownKey } from "@config/constants";
 import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
-import { Economy, type EconomyAccount, type InventoryItem } from "@database/models/economy.schema";
+import { Economy, type EconomyAccount, type InventoryItem, type Pet } from "@database/models/economy.schema";
 import { getTuning } from "@database/repositories/tuningRepository";
 
 const LEAN = { lean: true as const, new: true as const };
@@ -124,6 +124,19 @@ export async function setCooldown(
 	at: Date = new Date(),
 ): Promise<void> {
 	await Economy.updateOne({ guildId, userId }, { $set: { [COOLDOWN_FIELDS[key]]: at } }).exec();
+}
+
+/** Moves a cooldown on only from the value it was read at, so two runs racing cannot both be paid. */
+export async function claimCooldown(
+	guildId: string,
+	userId: string,
+	key: EconomyCooldownKey,
+	readAt: Date | null,
+	at: Date,
+): Promise<boolean> {
+	const field = COOLDOWN_FIELDS[key];
+	const result = await Economy.updateOne({ guildId, userId, [field]: readAt }, { $set: { [field]: at } }).exec();
+	return result.modifiedCount === 1;
 }
 
 export async function incrementCounters(
@@ -336,6 +349,52 @@ export async function setFields(
 		{ $set: fields },
 		{ ...LEAN, upsert: true },
 	).exec() as Promise<EconomyAccount>;
+}
+
+type Slot = "house" | "pet";
+
+const SLOT_ID = { house: "house.houseId", pet: "pet.petId" } as const satisfies Record<Slot, string>;
+
+/** Fills an empty house or pet slot; false when it was filled meanwhile, so the price can go back. */
+export async function fillSlot<S extends Slot>(
+	guildId: string,
+	userId: string,
+	slot: S,
+	value: NonNullable<EconomyAccount[S]>,
+): Promise<boolean> {
+	const result = await Economy.updateOne({ guildId, userId, [slot]: null }, { $set: { [slot]: value } }).exec();
+	return result.modifiedCount === 1;
+}
+
+/** Empties the slot only while it still holds `id`, so a sale or a rehome pressed twice pays out once. */
+export async function emptySlot(guildId: string, userId: string, slot: Slot, id: string): Promise<boolean> {
+	const result = await Economy.updateOne({ guildId, userId, [SLOT_ID[slot]]: id }, { $set: { [slot]: null } }).exec();
+	return result.modifiedCount === 1;
+}
+
+/** Changes the pet's own fields only while it is still the same pet, so a feed cannot bring back a rehomed one. */
+export async function updatePet(
+	guildId: string,
+	userId: string,
+	petId: string,
+	fields: Partial<Omit<Pet, "petId">>,
+): Promise<boolean> {
+	const changes = Object.fromEntries(Object.entries(fields).map(([field, value]) => [`pet.${field}`, value]));
+	const result = await Economy.updateOne({ guildId, userId, [SLOT_ID.pet]: petId }, { $set: changes }).exec();
+	return result.matchedCount === 1;
+}
+
+/** Adds a business unless it is already owned; false when it is, so the price can go back. */
+export async function addBusiness(
+	guildId: string,
+	userId: string,
+	business: EconomyAccount["businesses"][number],
+): Promise<boolean> {
+	const result = await Economy.updateOne(
+		{ guildId, userId, "businesses.businessId": { $ne: business.businessId } },
+		{ $push: { businesses: business } },
+	).exec();
+	return result.modifiedCount === 1;
 }
 
 /** Moves `lastDaily` on only from the value it was read at, so two claims racing cannot both be paid. */

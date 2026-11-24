@@ -1,13 +1,20 @@
-import { MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { adjustWallet, debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
+import {
+	adjustWallet,
+	debitWallet,
+	emptySlot,
+	requireAccount,
+	updatePet,
+} from "@database/repositories/economyRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { balancesOf, decayValue, findPet, isPetRarity, petStatus, shopScreen } from "@lib/economy";
 import { discordTime, formatNumber, progressBar } from "@lib/format";
 
 const RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
+
+const GONE = "Your pet has just been rehomed, so nothing changed.";
 
 export default defineCommand({
 	name: "pet",
@@ -56,7 +63,7 @@ export default defineCommand({
 				const name = interaction.options.getString("name", true).trim();
 				if (name.length === 0) throw new UserFacingError("Give it an actual name.");
 
-				await setFields(guild.id, interaction.user.id, { pet: { ...pet, name } });
+				if (!(await updatePet(guild.id, interaction.user.id, pet.petId, { name }))) throw new UserFacingError(GONE);
 				await reply(interaction, { embeds: [successEmbed(`${pet.emoji ?? ""} is now called **${name}**.`)] });
 			},
 		},
@@ -74,7 +81,7 @@ export default defineCommand({
 				const species = findPet(pet.petId);
 				const refund = Math.floor((species?.price ?? 0) / 2);
 
-				await setFields(guild.id, interaction.user.id, { pet: null });
+				if (!(await emptySlot(guild.id, interaction.user.id, "pet", pet.petId))) throw new UserFacingError(GONE);
 				if (refund > 0) await adjustWallet(guild.id, interaction.user.id, refund);
 
 				await reply(interaction, {
@@ -139,9 +146,10 @@ export default defineCommand({
 				const paid = await debitWallet(guild.id, interaction.user.id, cost);
 				if (!paid) throw new UserFacingError(strings.economy.insufficientWallet(cost - account.wallet));
 
-				await setFields(guild.id, interaction.user.id, {
-					pet: { ...pet, hunger: 100, lastFed: new Date() },
-				});
+				if (!(await updatePet(guild.id, interaction.user.id, pet.petId, { hunger: 100, lastFed: new Date() }))) {
+					await adjustWallet(guild.id, interaction.user.id, cost);
+					throw new UserFacingError(GONE);
+				}
 
 				await reply(interaction, {
 					embeds: [
@@ -166,9 +174,9 @@ export default defineCommand({
 					decayValue(pet.happiness, pet.lastWalked) + (species?.happinessBoost ?? 2) * 10,
 				);
 
-				await setFields(guild.id, interaction.user.id, {
-					pet: { ...pet, happiness, lastWalked: new Date() },
-				});
+				if (!(await updatePet(guild.id, interaction.user.id, pet.petId, { happiness, lastWalked: new Date() }))) {
+					throw new UserFacingError(GONE);
+				}
 
 				await reply(interaction, {
 					embeds: [
@@ -180,11 +188,4 @@ export default defineCommand({
 			},
 		},
 	],
-
-	async run(interaction) {
-		await reply(interaction, {
-			content: "Pick a subcommand: `shop`, `view`, `feed`, `walk`, `rename` or `rehome`.",
-			flags: MessageFlags.Ephemeral,
-		});
-	},
 });

@@ -1,10 +1,10 @@
-import { PermissionFlagsBits, MessageFlags } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { readerLanguage } from "@core/language";
 import { type LotteryFrequency } from "@database/models/lottery.schema";
-import { debitWallet, requireAccount } from "@database/repositories/economyRepository";
+import { adjustWallet, debitWallet, requireAccount } from "@database/repositories/economyRepository";
 import {
 	addEntry,
 	deleteLottery,
@@ -81,8 +81,10 @@ export default recordsSettings(
 						{ userId: interaction.user.id, userTag: interaction.user.username, tickets },
 						cost,
 					);
-					if (!updated)
+					if (!updated) {
+						await adjustWallet(guild.id, interaction.user.id, cost);
 						throw new UserFacingError("The lottery closed before your entry landed. You have been refunded.");
+					}
 
 					await reply(interaction, {
 						embeds: [
@@ -118,7 +120,8 @@ export default recordsSettings(
 					}
 					requirePostable(channel, readerLanguage(interaction), [PermissionFlagsBits.EmbedLinks]);
 
-					const frequency = (interaction.options.getString("frequency") ?? "weekly") as LotteryFrequency;
+					const typed = interaction.options.getString("frequency");
+					const frequency = FREQUENCIES.find((one) => one === typed) ?? "weekly";
 					const basePrizePool = interaction.options.getInteger("base-pool") ?? 0;
 
 					await saveLottery(guild.id, {
@@ -172,12 +175,5 @@ export default recordsSettings(
 				},
 			},
 		],
-
-		async run(interaction) {
-			await reply(interaction, {
-				content: "Pick a subcommand: `info`, `enter`, `setup`, `freeze` or `delete`.",
-				flags: MessageFlags.Ephemeral,
-			});
-		},
 	}),
 );

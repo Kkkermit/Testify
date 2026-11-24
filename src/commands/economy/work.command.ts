@@ -4,9 +4,9 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import {
 	adjustWallet,
+	claimCooldown,
 	getOrCreateAccount,
 	incrementCounters,
-	setCooldown,
 } from "@database/repositories/economyRepository";
 import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
@@ -41,13 +41,16 @@ export default defineCommand({
 			}
 		}
 
+		if (!(await claimCooldown(guild.id, interaction.user.id, "work", account.lastWorked, new Date(now)))) {
+			throw new UserFacingError("You have only just started a shift.");
+		}
+
 		const job = findJob(account.job.toLowerCase().replace(/\s+/g, "_"));
 		const base = job?.basePay ?? randomInt(ECONOMY.workMinPay, ECONOMY.workMaxPay + 1);
 		const bonus = Math.floor(base * 0.1 * account.jobLevel);
 		const pay = atRate(base + bonus, (await getTuning(guild.id)).payRate);
 
 		await adjustWallet(guild.id, interaction.user.id, pay);
-		await setCooldown(guild.id, interaction.user.id, "work", new Date(now));
 		await incrementCounters(guild.id, interaction.user.id, { worked: 1, hoursWorked: 1 });
 
 		await reply(interaction, {
