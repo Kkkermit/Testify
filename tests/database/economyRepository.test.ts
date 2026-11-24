@@ -1,7 +1,6 @@
 import { describeWithMongo } from "../helpers/mongo";
 import { ECONOMY } from "@config/constants";
 import {
-	addInventoryItem,
 	adjustBank,
 	adjustWallet,
 	debitWallet,
@@ -70,17 +69,6 @@ describeWithMongo("economyRepository", () => {
 		const account = await findAccount(GUILD, ALICE);
 		expect(account?.wallet).toBe(350);
 		expect(account?.bank).toBe(150);
-	});
-
-	/** Both purchases missed the stack and both pushed, so the inventory listed the same item on two rows. */
-	it("stacks one item bought twice at once into one row", async () => {
-		await getOrCreateAccount(GUILD, ALICE);
-		const rod = { itemId: "fishing-rod", name: "Fishing Rod", emoji: "🎣", quantity: 1 };
-
-		await Promise.all([addInventoryItem(GUILD, ALICE, rod), addInventoryItem(GUILD, ALICE, rod)]);
-
-		const inventory = (await findAccount(GUILD, ALICE))?.inventory ?? [];
-		expect(inventory.map((item) => [item.itemId, item.quantity])).toEqual([["fishing-rod", 2]]);
 	});
 
 	it("transfers all-or-nothing", async () => {

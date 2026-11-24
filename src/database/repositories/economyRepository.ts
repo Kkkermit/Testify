@@ -74,6 +74,13 @@ export async function debitWallet(guildId: string, userId: string, amount: numbe
 		.exec();
 }
 
+export async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+	refuseNegative(amount);
+	return Economy.findOneAndUpdate({ guildId, userId, bank: { $gte: amount } }, { $inc: { bank: -amount } }, LEAN)
+		.lean<EconomyAccount>()
+		.exec();
+}
+
 /** Both halves move in one update, so nothing can fail between taking the money and putting it in the bank. */
 export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
@@ -318,19 +325,22 @@ export async function addInventoryItem(
 			.lean<EconomyAccount>()
 			.exec();
 
-	const stacked = await stack();
-	if (stacked) return stacked;
-
 	// Pushed only while the item is still missing, so two first purchases at once cannot make two rows of it.
-	const pushed = await Economy.findOneAndUpdate(
-		{ guildId, userId, "inventory.itemId": { $ne: item.itemId } },
-		{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
-		LEAN,
-	)
-		.lean<EconomyAccount>()
-		.exec();
+	const push = (): Promise<EconomyAccount | null> =>
+		Economy.findOneAndUpdate(
+			{ guildId, userId, "inventory.itemId": { $ne: item.itemId } },
+			{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
+			LEAN,
+		)
+			.lean<EconomyAccount>()
+			.exec();
 
-	return pushed ?? stack();
+	// A push refused because the row now exists, or a stack that missed a row used up meanwhile, lands next round.
+	for (let round = 0; round < 2; round += 1) {
+		const added = (await stack()) ?? (await push());
+		if (added) return added;
+	}
+	return null;
 }
 
 /** Conditional removal, so an item cannot be consumed twice concurrently. */
