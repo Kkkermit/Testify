@@ -326,15 +326,16 @@ await api.delete<StickyList>(`/guilds/${guildId}/sticky/${channelId}`);
 Built before the first screen, deliberately: retrofitting a guard into fifteen routes is much harder than
 writing it once. Every piece has a test proven able to fail.
 
-| Where                     | What it does                                                                   |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS      |
-| `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
-| `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
-| `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
-| `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
-| `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
-| `lib/secretBox.util.ts`   | AES-256-GCM over the OAuth tokens, keyed by HKDF from the session secret       |
+| Where                     | What it does                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS                  |
+| `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`                      |
+| `middleware/host.ts`      | A public name other than `DASHBOARD_BASE_URL`'s is refused, so DNS rebinding reads nothing |
+| `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak              |
+| `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues             |
+| `cookies.ts`              | The only place a cookie is set, so none can be written without its flags                   |
+| `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                                 |
+| `lib/secretBox.util.ts`   | AES-256-GCM over the OAuth tokens, keyed by HKDF from the session secret                   |
 
 ### `requireGuild` is the security boundary
 

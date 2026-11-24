@@ -2774,17 +2774,18 @@ bot is the one case that needs `npm run build:shared` by hand.
 Built before the first screen, deliberately: retrofitting a guard into fifteen routes is much harder than
 writing it once. Every piece has a test proven able to fail.
 
-| Where                     | What it does                                                                   |
-| ------------------------- | ------------------------------------------------------------------------------ |
-| `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS      |
-| `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
-| `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
-| `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach     |
-| `middleware/blacklist.ts` | A blacklisted session reaches only who it is, signing out and Delete my data   |
-| `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
-| `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
-| `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
-| `lib/secretBox.util.ts`   | AES-256-GCM over the OAuth tokens, keyed by HKDF from the session secret       |
+| Where                     | What it does                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS                  |
+| `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`                      |
+| `middleware/host.ts`      | A public name other than `DASHBOARD_BASE_URL`'s is refused, so DNS rebinding reads nothing |
+| `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak              |
+| `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach                 |
+| `middleware/blacklist.ts` | A blacklisted session reaches only who it is, signing out and Delete my data               |
+| `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues             |
+| `cookies.ts`              | The only place a cookie is set, so none can be written without its flags                   |
+| `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                                 |
+| `lib/secretBox.util.ts`   | AES-256-GCM over the OAuth tokens, keyed by HKDF from the session secret                   |
 
 Rules that are easy to break and silent when broken:
 
@@ -2806,6 +2807,11 @@ Rules that are easy to break and silent when broken:
   cookie's name also starts `__Host-` (`cookieName`), which a browser takes only from this host, with no Domain, so a
   site on a subdomain cannot plant a session or a CSRF token. The server reads only the name its environment sets, and
   the page echoes the prefixed CSRF cookie before a plain one.
+- **A request is answered only under a name the bot can vouch for** (`servesHost`): `DASHBOARD_BASE_URL`'s, an
+  address, a one-word name such as a Docker service, or a private suffix like `.local`. A site that points its own
+  domain at the bot's address reaches it through a visitor's browser under that domain, which is DNS rebinding, so
+  any other public name answers 421 `unknown_host`, the first few named once in the log. `/api/health` is exempt,
+  because a host's own check asks by whatever name reaches the port, and with no base URL nothing is refused.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
   admin panel on the internet; trusting `x-forwarded-for` with no proxy in front lets anyone forge their
   rate-limit bucket.

@@ -7,6 +7,7 @@ import { type ApiProblem, asProblem, badRequest, notFound, problemBody, Upstream
 import { refuseBlacklisted } from "@api/middleware/blacklist";
 import { verifyCsrf } from "@api/middleware/csrf";
 import { refuseSwitchedOff } from "@api/middleware/features";
+import { refuseUnknownHost } from "@api/middleware/host";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
 import { loadSession } from "@api/middleware/session";
@@ -93,6 +94,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	});
 
 	app.use("*", securityHeaders(env));
+	app.use("*", refuseUnknownHost(env));
 	app.use("*", rateLimit(general, { name: "general", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("*", bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => raise(badRequest("That request is too large.")) }));
 	// The one flow an unauthenticated caller can reach that costs a Discord round trip.

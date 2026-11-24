@@ -114,6 +114,11 @@ the **last** address in `X-Forwarded-For`, the one the proxy nearest it added, b
 caller sent. With two proxies in a row, have the inner one pass on the outer one's view (nginx's `real_ip` module), or
 every visitor is counted as the outer proxy.
 
+**The bot answers only to the public name in `DASHBOARD_BASE_URL`**, beside addresses, one-word names like a Docker
+service's and `.local` or `.internal` ones. Anything else gets `421`, and the log names it once. A proxy that passes on
+the visitor's `Host`, or rewrites it to the bot's own address, needs nothing; if the dashboard answers 421 at a second
+domain, make that one `DASHBOARD_BASE_URL`.
+
 ---
 
 ## 📦 What is in the image

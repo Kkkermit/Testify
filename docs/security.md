@@ -89,6 +89,7 @@ The dashboard is **off by default**. Turned on, it is guarded in layers, each wi
 | Layer                       | What it does                                                                                                                                               |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Content Security Policy** | `script-src` has no `'unsafe-inline'` or `'unsafe-eval'`, plus `frame-ancestors 'none'`, `nosniff`, `no-referrer` and HSTS                                 |
+| **Addresses**               | Only `DASHBOARD_BASE_URL`'s public name is answered, so a domain pointed at your machine reads nothing                                                     |
 | **CSRF**                    | A double-submit token on every write, compared with `timingSafeEqual`                                                                                      |
 | **Validation**              | Every parameter, query and body goes through zod; nothing reads raw input                                                                                  |
 | **Server access**           | Manage Server is checked against Discord **live, on every request**, so losing it locks you out on your next click                                         |
