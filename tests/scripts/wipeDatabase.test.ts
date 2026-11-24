@@ -82,12 +82,12 @@ describe("loadModelOwners", () => {
 	const dir = join(__dirname, "../../src/database/models");
 
 	/** A model the picker cannot name would show up as "no model", and look safe to wipe as leftovers. */
-	it("finds every model declared in the schema files", async () => {
+	it("finds every model declared in the schema files", () => {
 		const declared = readdirSync(dir)
 			.filter((file) => file.endsWith(".schema.ts"))
 			.reduce((sum, file) => sum + (readFileSync(join(dir, file), "utf8").match(/= model</g) ?? []).length, 0);
 
-		const owners = await loadModelOwners(dir);
+		const owners = loadModelOwners(dir);
 
 		expect(owners.size).toBe(declared);
 		expect(owners.get("warntutorials")).toEqual({ name: "Warnings", file: "moderation.schema.ts" });

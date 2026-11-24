@@ -89,8 +89,8 @@ export default ts.config(
 		},
 	},
 	{
-		// The loader has to require files by path; that is how commands are found.
-		files: ["src/core/loader.ts"],
+		// These require files by path: the loader to find commands, and the wipe to name each collection's model.
+		files: ["src/core/loader.ts", "scripts/wipeDatabase.ts"],
 		rules: { "@typescript-eslint/no-require-imports": "off" },
 	},
 	{
