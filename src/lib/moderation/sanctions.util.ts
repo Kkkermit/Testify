@@ -150,7 +150,7 @@ export async function removeTimeout(
 	const notified = await notifyTarget(
 		member.user,
 		dmEmbed({
-			action: `untimed out in ${guild.name}`,
+			headline: `Your timeout in ${guild.name} was lifted`,
 			emoji: theme.emoji.success,
 			guild,
 			moderator: { username: moderator.name },

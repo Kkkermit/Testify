@@ -45,8 +45,13 @@ guildBackup.post("/program", async (context) => {
 			embeds: [
 				embed({
 					colour: theme.colours.severe,
-					title: "Blacklisted for choosing a program as a backup",
-					description: `${actor.name} (\`${actor.id}\`) chose a program or a script on ${guild.name}'s (\`${guild.id}\`) Back up and copy page. Lift it with \`/blacklist remove\` if it was a mistake.`,
+					title: "🚫 Blacklisted for choosing a program as a backup",
+					description: "They chose a program or a script on the dashboard's Back up and copy page.",
+					fields: [
+						{ name: "Account", value: `${actor.name} (\`${actor.id}\`)`, inline: true },
+						{ name: "Server", value: `${guild.name} (\`${guild.id}\`)`, inline: true },
+					],
+					footer: "Lift it with /blacklist remove if it was a mistake.",
 				}),
 			],
 			allowedMentions: { parse: [] },

@@ -4,11 +4,10 @@ import { type StoredConversation } from "@database/repositories/modmailRepositor
 import { button, channelSelect, option, roleSelect, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { discordTime } from "@lib/format/format.util";
 import { MODMAIL_ID, MODMAIL_SETTINGS_ID } from "@lib/modmail/modmail.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { MODMAIL_NOTE_PREFIX, type ModmailSettings } from "@testify/shared";
-
-const seconds = (date: Date): string => String(Math.floor(date.getTime() / 1_000));
 
 function quoted(value: string): string {
 	return value
@@ -34,7 +33,7 @@ export function openingPost(
 		text(quoted(firstMessage)),
 		divider(),
 		text(
-			`-# Everything you write in this thread is sent to them, except a message starting with \`${MODMAIL_NOTE_PREFIX}\`, which stays here. Opened <t:${seconds(conversation.createdAt)}:R>.`,
+			`-# Everything you write in this thread is sent to them, except a message starting with \`${MODMAIL_NOTE_PREFIX}\`, which stays here. Opened ${discordTime(conversation.createdAt, "R")}.`,
 		),
 		row(button({ id: customId(MODMAIL_ID, "close", conversation.id), label: "Close", style: ButtonStyle.Danger })),
 	];
