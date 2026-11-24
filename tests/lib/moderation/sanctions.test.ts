@@ -46,6 +46,19 @@ describe("kickMember", () => {
 	});
 });
 
+describe("the audit log reason", () => {
+	/** Discord refuses a kick, ban or timeout whose audit log reason passes 512 characters. */
+	it("fits the moderator and a long reason within Discord's 512 characters", async () => {
+		const { member, guild } = world();
+
+		await kickMember(guild as never, member as never, MOD, "x".repeat(600));
+
+		const sent = (member.kick.mock.calls as unknown as [string][])[0]![0];
+		expect(sent).toHaveLength(512);
+		expect(sent.startsWith("mod: x")).toBe(true);
+	});
+});
+
 describe("banUser", () => {
 	/** Somebody who left cannot be messaged, and trying would only fail. */
 	it("bans somebody who has left without trying to message them", async () => {

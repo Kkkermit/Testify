@@ -8,6 +8,7 @@ import {
 } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { readerSees } from "@lib/discord/channels.util";
+import { auditReason } from "@lib/moderation/moderationActions.util";
 import { type ChannelToolList, type ToolChannel } from "@testify/shared";
 
 /** Locking a channel and its slowmode: the one path `/lock`, `/unlock`, `/slowmode` and the dashboard share. */
@@ -27,12 +28,16 @@ export async function setLocked(
 	if (!("permissionOverwrites" in channel)) {
 		throw new UserFacingError(`That channel cannot be ${locked ? "locked" : "unlocked"}.`);
 	}
-	await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: locked ? false : null }, { reason });
+	await channel.permissionOverwrites.edit(
+		guild.roles.everyone,
+		{ SendMessages: locked ? false : null },
+		{ reason: auditReason(reason) },
+	);
 }
 
 export async function setSlowmode(channel: GuildBasedChannel, seconds: number, reason: string): Promise<void> {
 	if (!("setRateLimitPerUser" in channel)) throw new UserFacingError("That channel does not support slowmode.");
-	await channel.setRateLimitPerUser(seconds, reason);
+	await channel.setRateLimitPerUser(seconds, auditReason(reason));
 }
 
 /** No reader means a bot owner, who is held only to what the bot itself can do. */

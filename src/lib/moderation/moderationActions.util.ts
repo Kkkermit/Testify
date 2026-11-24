@@ -4,8 +4,15 @@ import { theme } from "@config/theme";
 import { asMember, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
-import { formatDurationLong } from "@lib/format/format.util";
+import { formatDurationLong, truncate } from "@lib/format/format.util";
 import { type MemberBlock } from "@testify/shared";
+
+/** Discord refuses the whole action when its audit log reason passes 512 characters. */
+const AUDIT_REASON_MAX = 512;
+
+export function auditReason(text: string): string {
+	return truncate(text, AUDIT_REASON_MAX);
+}
 
 /** Why this moderator may not act on this target, as a code, or null; every surface asks here. */
 export function moderationBlock(moderator: GuildMember, target: GuildMember, botId?: string): MemberBlock | null {
