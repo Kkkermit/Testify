@@ -1,4 +1,5 @@
 import nickname from "@commands/moderation/nickname.command";
+import softban from "@commands/moderation/softban.command";
 import unmute from "@commands/moderation/unmute.command";
 import automod from "@commands/settings/automod.command";
 import { type Command } from "@core/command";
@@ -13,8 +14,14 @@ import {
 	mockCollection,
 } from "@tests/helpers/mocks";
 
+jest.mock("@database/repositories/moderationRepository", () => ({
+	createSoftban: jest.fn(() => Promise.resolve()),
+	listActiveSoftbans: jest.fn(() => Promise.resolve([])),
+}));
 jest.mock("@lib/moderation", () => ({
 	...jest.requireActual<object>("@lib/moderation"),
+	notifyTarget: jest.fn(() => Promise.resolve(false)),
+	recordCase: jest.fn(() => Promise.resolve(null)),
 	removeTimeout: jest.fn(() => Promise.resolve({ notified: false })),
 	listAutomodRules: jest.fn(() =>
 		Promise.resolve([
@@ -73,4 +80,19 @@ it("offers the server's rules by name when deleting one", async () => {
 	expect(listAutomodRules).toHaveBeenCalled();
 	expect(respond).toHaveBeenCalledWith([{ name: "Blocked words · Flagged words", value: "900000000000000001" }]);
 	expect(automod.subcommands?.find((sub) => sub.name === "delete")?.options?.[0]?.autocomplete).toBe(true);
+});
+
+/** Discord refuses the ban itself over an audit log reason past 512 characters, and the typed reason has no cap. */
+it("fits a softban's reason within Discord's 512 characters", async () => {
+	const ban = jest.fn(() => Promise.resolve());
+	const guild = createMockGuild({ members: { fetch: jest.fn(() => Promise.resolve(null)), ban } } as never);
+	const interaction = createMockInteraction({
+		options: { user: TARGET, duration: "1h", reason: "x".repeat(600) },
+		overrides: { guild },
+	});
+
+	await softban.subcommands?.find((sub) => sub.name === "add")?.run?.(interaction, createMockClient());
+
+	const sent = (ban.mock.calls[0] as unknown as [string, { reason: string }] | undefined)?.[1].reason ?? "";
+	expect([sent.length > 0, sent.length <= 512]).toEqual([true, true]);
 });

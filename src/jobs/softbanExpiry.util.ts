@@ -3,6 +3,7 @@ import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { claimExpiredSoftban, retrySoftbanAt } from "@database/repositories/moderationRepository";
+import { auditReason } from "@lib/moderation";
 
 const PER_RUN = 25;
 
@@ -18,7 +19,7 @@ export async function processExpiredSoftbans(client: TestifyClient): Promise<voi
 		if (!guild) continue;
 
 		try {
-			await guild.bans.remove(softban.userId, `Softban expired. Original reason: ${softban.reason}`);
+			await guild.bans.remove(softban.userId, auditReason(`Softban expired. Original reason: ${softban.reason}`));
 			client.logger.info(
 				{ guildId: softban.guildId, userId: softban.userId },
 				"[SOFTBAN] A softban expired and was lifted.",

@@ -45,6 +45,18 @@ describe("lifting expired softbans", () => {
 		expect(retried.mock.calls[0]?.[1].getTime()).toBeGreaterThan(Date.now());
 	});
 
+	/** A reason Discord refuses as too long would be refused again every ten minutes, so the member stayed banned. */
+	it("fits the reason it gives Discord within 512 characters", async () => {
+		const unban = jest.fn(() => Promise.resolve());
+		claimed.mockReset();
+		claimed.mockResolvedValueOnce({ ...softban, reason: "x".repeat(500) }).mockResolvedValue(null);
+		const guild = { id: GUILD_ID, bans: { remove: unban } };
+		await processExpiredSoftbans(createMockClient({ guilds: { cache: mockCollection([[GUILD_ID, guild]]) } } as never));
+
+		const sent = (unban.mock.calls[0] as unknown as [string, string] | undefined)?.[1] ?? "";
+		expect([sent.length > 0, sent.length <= 512]).toEqual([true, true]);
+	});
+
 	it("lets one go that was already lifted, or that it lifted", async () => {
 		await expire(jest.fn(() => Promise.reject(discordError(RESTJSONErrorCodes.UnknownBan))));
 		await expire(jest.fn(() => Promise.resolve()));
