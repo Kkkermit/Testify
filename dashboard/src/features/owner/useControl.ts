@@ -102,7 +102,7 @@ export function useLeaveGuild(guildId: string): UseMutationResult<{ left: string
 		mutationFn: (confirm: string) => api.post<{ left: string }>(`/control/guilds/${guildId}/leave`, { confirm }),
 		onSuccess: async () => {
 			await Promise.all([
-				client.invalidateQueries({ queryKey: ["owner", "guilds"] }),
+				client.invalidateQueries({ queryKey: keys.owner.guildsAll() }),
 				client.invalidateQueries({ queryKey: keys.owner.stats() }),
 			]);
 		},

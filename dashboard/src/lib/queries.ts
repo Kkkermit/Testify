@@ -101,6 +101,7 @@ export const keys = {
 	owner: {
 		access: () => ["owner", "access"] as const,
 		stats: () => ["owner", "stats"] as const,
+		guildsAll: () => ["owner", "guilds"] as const,
 		guilds: (page: number, sort: string, filter: string, search: string) =>
 			["owner", "guilds", page, sort, filter, search] as const,
 		usage: (days: number) => ["owner", "usage", days] as const,
@@ -110,7 +111,9 @@ export const keys = {
 		runs: (days: number, filters: string, before: string) => ["owner", "runs", days, filters, before] as const,
 		topRunners: (window: string) => ["owner", "top-runners", window] as const,
 		live: () => ["owner", "live"] as const,
+		logsAll: () => ["owner", "logs"] as const,
 		logs: (run: string, level: string, search: string) => ["owner", "logs", run, level, search] as const,
+		logRunsAll: () => ["owner", "log-runs"] as const,
 		logRuns: (level: string, search: string) => ["owner", "log-runs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,
 		control: () => ["owner", "control"] as const,

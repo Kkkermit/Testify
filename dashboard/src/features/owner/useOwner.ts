@@ -198,8 +198,8 @@ export function useDeleteLogs(): UseMutationResult<void, Error, string> {
 		mutationFn: (runId) => api.delete<void>(`/control/logs/${runId}`),
 		onSettled: () =>
 			Promise.all([
-				client.invalidateQueries({ queryKey: ["owner", "logs"] }),
-				client.invalidateQueries({ queryKey: ["owner", "log-runs"] }),
+				client.invalidateQueries({ queryKey: keys.owner.logsAll() }),
+				client.invalidateQueries({ queryKey: keys.owner.logRunsAll() }),
 			]),
 	});
 }
