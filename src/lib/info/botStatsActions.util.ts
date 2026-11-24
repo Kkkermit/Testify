@@ -1,8 +1,9 @@
-import { type Guild } from "discord.js";
+import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { type FixedStatsMessage } from "@database/models/botStats.schema";
 import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
+import { requirePostable } from "@lib/discord/channels.util";
 import { botStatsEmbed } from "@lib/info/statsEmbed.util";
 import { type BotStatsSettings } from "@testify/shared";
 
@@ -29,6 +30,7 @@ export async function postBotStats(
 	if (channel?.isTextBased() !== true || !channel.isSendable()) {
 		throw new UserFacingError("Pick a text channel I can send messages in.");
 	}
+	requirePostable(channel, "en", [PermissionFlagsBits.EmbedLinks]);
 
 	const previous = await getFixedStats(guild.id);
 	const message = await channel.send({ embeds: [botStatsEmbed(client)] });
