@@ -120,6 +120,17 @@ describe("mentionNewNotices", () => {
 		expect(markNoticeHinted).toHaveBeenCalledTimes(1);
 	});
 
+	/** A read the database refused left the reader marked as told, so they never heard of that notification. */
+	it("tries again on the next command when the reader's record could not be read", async () => {
+		const tell = jest.fn(() => Promise.resolve());
+		jest.mocked(readerState).mockRejectedValueOnce(new Error("database is down"));
+
+		await expect(mentionNewNotices(USER, tell)).rejects.toThrow("database is down");
+		await mentionNewNotices(USER, tell);
+
+		expect(tell).toHaveBeenCalledTimes(1);
+	});
+
 	it("does nothing at all while there are no notifications", async () => {
 		jest.mocked(listNotices).mockResolvedValue([]);
 		const tell = jest.fn(() => Promise.resolve());

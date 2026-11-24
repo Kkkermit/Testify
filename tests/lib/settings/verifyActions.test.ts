@@ -1,4 +1,4 @@
-import { type Guild } from "discord.js";
+import { type Guild, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { type VerifyConfig } from "@lib/settings/settings.types";
 import { publishVerifyPanel, roleTooHigh } from "@lib/settings/verifyActions.util";
@@ -52,15 +52,36 @@ describe("publishVerifyPanel", () => {
 		await expect(publishVerifyPanel(guildWith(channel), config())).rejects.toThrow(/cannot post/i);
 	});
 
+	/** A text channel the bot may see, holding `granted` there. */
+	function channelGranting(granted: bigint[], extra: Record<string, unknown> = {}): unknown {
+		return {
+			isSendable: () => true,
+			isTextBased: () => true,
+			isThread: () => false,
+			toString: () => `<#${CHANNEL}>`,
+			guild: { members: { me: {} } },
+			permissionsFor: () => new PermissionsBitField(granted),
+			...extra,
+		};
+	}
+
 	/** Somebody deleted it, and sending a replacement beats leaving the server with no panel. */
 	it("sends a replacement when the stored message is gone", async () => {
 		const send = jest.fn(() => Promise.resolve({ id: "new" }));
-		const channel = {
-			isSendable: () => true,
-			send,
-			messages: { fetch: jest.fn(() => Promise.reject(new Error("unknown message"))) },
-		};
+		const channel = channelGranting(
+			[PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks],
+			{ send, messages: { fetch: jest.fn(() => Promise.reject(new Error("unknown message"))) } },
+		);
 
 		await expect(publishVerifyPanel(guildWith(channel), config({ messageId: "gone" }))).resolves.toBe("new");
+	});
+
+	/** Access taken away after the channel was picked reached Discord, which refused the post as "Missing Access". */
+	it("names the permission it lost before trying to post", async () => {
+		const send = jest.fn();
+		const channel = channelGranting([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages], { send });
+
+		await expect(publishVerifyPanel(guildWith(channel), config())).rejects.toThrow(/embed links/i);
+		expect(send).not.toHaveBeenCalled();
 	});
 });

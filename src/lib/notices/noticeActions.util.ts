@@ -129,13 +129,13 @@ export async function mentionNewNotices(userId: string, tell: (unread: number) =
 	if (told.size >= TOLD_MAX) told.clear();
 	told.set(userId, latest);
 
-	const { seenAt, hintedAt } = await readerState(userId);
-	if (Math.max(seenAt?.getTime() ?? 0, hintedAt?.getTime() ?? 0) >= latest) return;
-
-	const unread = unreadNotices(notices, seenAt?.toISOString() ?? null);
-	if (unread === 0) return;
-
 	try {
+		const { seenAt, hintedAt } = await readerState(userId);
+		if (Math.max(seenAt?.getTime() ?? 0, hintedAt?.getTime() ?? 0) >= latest) return;
+
+		const unread = unreadNotices(notices, seenAt?.toISOString() ?? null);
+		if (unread === 0) return;
+
 		await tell(unread);
 	} catch (error) {
 		told.delete(userId);
