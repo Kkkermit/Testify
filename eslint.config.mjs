@@ -1,9 +1,10 @@
 import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
 import prettier from "eslint-config-prettier";
 import importX from "eslint-plugin-import-x";
 import ts from "typescript-eslint";
 
-export default ts.config(
+export default defineConfig(
 	// Build output at any depth, and `.claude/skills`, which is vendored.
 	{
 		ignores: [
