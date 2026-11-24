@@ -1,4 +1,4 @@
-import { type Guild, type GuildMember, type Role } from "discord.js";
+import { type Guild, type GuildMember, PermissionFlagsBits, type Role } from "discord.js";
 import { POWERFUL_PERMISSIONS } from "@lib/roles/roles.constants";
 
 /** Who may have the bot hand out which role: the rule the dashboard, `/role-menu` and a member's own pick all share. */
@@ -29,6 +29,23 @@ export function grantProblem(member: GuildMember | undefined, roleId: string, gu
 	}
 
 	return null;
+}
+
+/**
+ * Why `member` may not choose a role the bot then hands out by itself — on joining, on verifying, at a level — or null
+ * when they may: Manage Roles, as Discord asks before anybody gives a role, then `rule`.
+ */
+export function chooserProblem(
+	member: GuildMember,
+	roleId: string,
+	guild: Guild,
+	rule: (member: GuildMember, roleId: string, guild: Guild) => string | null = grantProblem,
+): string | null {
+	if (!member.permissions.has(PermissionFlagsBits.ManageRoles)) {
+		return "You need the Manage Roles permission to choose a role the bot hands out.";
+	}
+
+	return rule(member, roleId, guild);
 }
 
 export function isPowerful(role: Role): boolean {

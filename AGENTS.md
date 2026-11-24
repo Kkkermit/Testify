@@ -1901,6 +1901,13 @@ are load-bearing:
   Members after the menu was made. A role that is not on offer right now is neither given nor taken away.
 - **Every post goes out with `allowedMentions: { parse: [] }`.** The role list is mentions, and pinging them would
   ping every holder of every role on the menu.
+- **The same rule holds wherever the bot hands a role out by itself.** On Discord, choosing a role on join, the
+  verified role or a level reward asks `chooserProblem` — Manage Roles, then the grant rule — exactly as the
+  dashboard's `requireGrantable` does; `/verify` and `/levelling` asked only Manage Server, so somebody without Manage
+  Roles could make Admin the prize for pressing Verify, and `/auto-role` let a role above its chooser go to whoever
+  joined next, an alt included. Roles on join and the verified role go to everybody, so they also refuse a role that
+  moderates (`offerProblem`) and are checked again as they are given (`isPowerful`, `pickProblem`), since a role can
+  gain a permission after it was chosen. A level reward may be a staff role, because it is earned.
 - **A change to a posted menu follows to its post, and a post that cannot follow is a note, not a failure**
   (`changeRoleMenu`), because the change did happen. Moving the channel takes the old post down first, so two
   copies never hand out roles side by side. Deleting a menu takes its post down and takes nobody's role away.

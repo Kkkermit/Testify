@@ -4,6 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { readerLanguage } from "@core/language";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
 import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
+import { chooserProblem, offerProblem } from "@lib/roles";
 import {
 	isReady,
 	normaliseVerify,
@@ -61,6 +62,15 @@ export default recordsSettings(
 
 					const [roleId] = interaction.values;
 					if (roleId === undefined) return;
+
+					// Whoever verifies is given it, so it asks what the dashboard does: Manage Roles, and a role in reach.
+					const member = await guild.members.fetch(ownerId).catch(() => null);
+					if (member === null) throw new UserFacingError("I could not find you in this server.");
+					const problem = chooserProblem(member, roleId, guild, offerProblem);
+					if (problem !== null) {
+						await show(config, problem);
+						return;
+					}
 
 					await saveVerifyConfig(guild.id, { roleId, message: config.message });
 					await show({ ...config, roleId });

@@ -13,6 +13,7 @@ import { setAutoRoles } from "@database/repositories/autoRoleRepository";
 import { disableCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
 import { setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
 import { setVoiceCounter } from "@database/repositories/voiceCounterRepository";
+import { offerProblem } from "@lib/roles";
 import { readServerSettings } from "@lib/settings";
 import {
 	type AntiLinkPatch,
@@ -108,7 +109,8 @@ settings.patch("/anti-link", async (context) => {
 settings.put("/auto-roles", requirePermission(PermissionFlagsBits.ManageRoles), async (context) => {
 	const guildId = guildIdOf(context);
 	const body: AutoRolePut = await parseBody(context, autoRolePut);
-	requireGrantable(context, body.roleIds);
+	// Everybody who joins is given these, so nothing that moderates, as a role menu refuses.
+	requireGrantable(context, body.roleIds, offerProblem);
 	const before = await readServerSettings(guildId);
 
 	await setAutoRoles(guildId, body.roleIds);
