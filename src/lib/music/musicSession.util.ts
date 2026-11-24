@@ -108,8 +108,6 @@ function uploadedUrl(message: unknown, name: string): string | null {
 export class MusicSession {
 	readonly guildId: string;
 	queue: QueueState = EMPTY_QUEUE;
-	/** The channel replies about this session go to, so a track change can announce itself. */
-	textChannelId: string | null = null;
 
 	readonly #player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } });
 	readonly #binaries: MusicBinaries;

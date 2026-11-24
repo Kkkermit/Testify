@@ -33,7 +33,6 @@ function fakeSession(queue: QueueState, active: boolean) {
 	return {
 		queue,
 		active,
-		textChannelId: null as string | null,
 		connect: jest.fn(() => Promise.resolve()),
 		play: jest.fn(() => Promise.resolve()),
 	};
@@ -49,7 +48,6 @@ function request(next = false) {
 		query: requestedQuery("never gonna give you up"),
 		requestedBy: "100000000000000001",
 		next,
-		textChannelId: "text-1",
 	};
 }
 

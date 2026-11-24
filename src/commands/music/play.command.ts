@@ -39,7 +39,6 @@ export default defineCommand({
 			query,
 			requestedBy: interaction.user.id,
 			next: interaction.options.getBoolean("next") === true,
-			textChannelId: interaction.channel?.id ?? null,
 		});
 
 		await showPanel(interaction, session, note);

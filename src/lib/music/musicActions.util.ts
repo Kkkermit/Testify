@@ -63,7 +63,6 @@ interface TrackRequest {
 	query: Query;
 	requestedBy: string;
 	next: boolean;
-	textChannelId: string | null;
 }
 
 const SWITCH_TO_SOUNDCLOUD = "or set /play to SoundCloud only in the owner console's control tab.";
@@ -144,7 +143,6 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 	const added = addTracks(session.queue, tracks, { next: request.next, idle: !session.active });
 
 	session.queue = added.state;
-	session.textChannelId = request.textChannelId;
 
 	if (added.start !== null) await session.play(added.start);
 

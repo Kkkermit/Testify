@@ -63,7 +63,6 @@ export default defineButton({
 			query,
 			requestedBy: interaction.user.id,
 			next: false,
-			textChannelId: interaction.channelId,
 		});
 
 		await session.refreshPanel();
