@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 92](https://img.shields.io/badge/commands-92-8b5cf6?style=for-the-badge) ![subcommands: 154](https://img.shields.io/badge/subcommands-154-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
+![commands: 92](https://img.shields.io/badge/commands-92-8b5cf6?style=for-the-badge) ![subcommands: 153](https://img.shields.io/badge/subcommands-153-0ea5e9?style=for-the-badge) ![prefix aliases: 107](https://img.shields.io/badge/prefix%20aliases-107-16a34a?style=for-the-badge)
 
 </div>
 
@@ -17,7 +17,7 @@
 | [👥 Community](#-community)   |    11    |     17      |
 | [💰 Economy](#-economy)       |    20    |     27      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
-| [🎮 Fun](#-fun)               |    2     |     16      |
+| [🎮 Fun](#-fun)               |    2     |     15      |
 | [🎯 Games](#-games)           |    1     |      6      |
 | [📚 Info](#-info)             |    15    |     12      |
 | [📈 Levelling](#-levelling)   |    2     |      6      |
@@ -80,7 +80,7 @@
 | Command | Description                                                                | Subcommands                                                                                            | Prefix aliases                                                                                                                                                                                                | Needs |
 | ------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
 | `/fun`  | Jokes, generators and other nonsense.                                      | `ascii`, `dad-joke`, `fake-tweet`, `hack`, `iq`, `nitro`, `master-oogway`, `pepe-sign`, `relationship` | `t?ascii`, `t?dad-joke`, `t?dadjoke`, `t?fake-tweet`, `t?faketweet`, `t?tweet`, `t?hack`, `t?iq`, `t?nitro`, `t?master-oogway`, `t?oogway`, `t?pepe-sign`, `t?sign`, `t?pepesign`, `t?relationship`, `t?ship` | —     |
-| `/how`  | Calculates how much of something you are. Results are definitely accurate. | `gay`, `sus`, `stupid`, `simp`, `drunk`, `high`, `smart`                                               | —                                                                                                                                                                                                             | —     |
+| `/how`  | Calculates how much of something you are. Results are definitely accurate. | `gay`, `sus`, `stupid`, `simp`, `drunk`, `high`                                                        | —                                                                                                                                                                                                             | —     |
 
 ## 🎯 Games
 
