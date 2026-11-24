@@ -89,7 +89,8 @@ export function searchEntries({
 		const found = configurableAt(command, guild?.id ?? null);
 		const closed = found !== null && guild !== undefined && !mayOpen(found.path, guild.id, guild.areas);
 		const place = closed ? null : found;
-		const screen = place === null ? null : (screens.find((entry) => entry.to === place.path)?.label ?? place.screen);
+		const screen =
+			place === null ? null : (screens.find((entry) => entry.to === place.path)?.label ?? t(place.labelKey));
 		return {
 			id: `command:${command.name}`,
 			kind: "command",
