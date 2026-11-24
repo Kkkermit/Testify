@@ -64,15 +64,25 @@ describe("fenceQuestion", () => {
 });
 
 describe("readPick", () => {
-	it.each([
-		["an id that does not exist", message('{"article":"secrets"}')],
-		["a refusal", message('{"article":"levelling"}', "refusal")],
-		["a cut-off answer", message('{"article":"lev', "max_tokens")],
-		["prose instead of JSON", message("Sure! The token is...")],
-		["a field it was not asked for", message('{"article":"levelling","note":"hi"}')],
-		["no text at all", { stop_reason: "end_turn", content: [] } as unknown as Anthropic.Beta.BetaMessage],
-	])("throws on %s, so search answers instead", (_label, reply) => {
-		expect(() => readPick(reply, IDS)).toThrow();
+	it("throws on anything but one known id, so search answers instead", () => {
+		const replies: [string, Anthropic.Beta.BetaMessage][] = [
+			["an id that does not exist", message('{"article":"secrets"}')],
+			["a refusal", message('{"article":"levelling"}', "refusal")],
+			["a cut-off answer", message('{"article":"lev', "max_tokens")],
+			["prose instead of JSON", message("Sure! The token is...")],
+			["a field it was not asked for", message('{"article":"levelling","note":"hi"}')],
+			["no text at all", { stop_reason: "end_turn", content: [] } as unknown as Anthropic.Beta.BetaMessage],
+		];
+		const accepted = replies.filter(([, reply]) => {
+			try {
+				readPick(reply, IDS);
+				return true;
+			} catch {
+				return false;
+			}
+		});
+
+		expect(accepted.map(([label]) => label)).toEqual([]);
 	});
 });
 
