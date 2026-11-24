@@ -29,7 +29,7 @@ const prizeOf = (giveaway: GiveawayRow): string => `**${escapeMarkdown(giveaway.
 
 export default defineCommand({
 	name: "giveaway",
-	description: "Starts, ends, rerolls and deletes giveaways.",
+	description: "Runs giveaways.",
 	category: "giveaway",
 	private: true,
 	guildOnly: true,
@@ -38,10 +38,10 @@ export default defineCommand({
 	subcommands: [
 		{
 			name: "start",
-			description: "Starts a giveaway that members enter with a button.",
+			description: "Start a giveaway.",
 			options: [
 				{ name: "prize", description: "What is being given away.", type: "string", required: true, maxLength: 256 },
-				{ name: "duration", description: "How long it runs, like 1h or 3d.", type: "string", required: true },
+				{ name: "duration", description: "How long it runs, for example 1h or 3d.", type: "string", required: true },
 				{
 					name: "winners",
 					description: "How many winners to draw. 1 unless you say.",
@@ -89,7 +89,7 @@ export default defineCommand({
 		},
 		{
 			name: "end",
-			description: "Ends a running giveaway now and draws its winners.",
+			description: "End a running giveaway early.",
 			options: [MESSAGE_ID],
 			async run(interaction, client) {
 				const giveaway = await giveawayHere(interaction, client);
@@ -100,7 +100,7 @@ export default defineCommand({
 		},
 		{
 			name: "reroll",
-			description: "Draws new winners for a giveaway that has ended.",
+			description: "Pick new winners for a finished giveaway.",
 			options: [MESSAGE_ID],
 			async run(interaction, client) {
 				const giveaway = await giveawayHere(interaction, client);

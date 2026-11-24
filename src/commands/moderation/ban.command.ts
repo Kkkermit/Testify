@@ -56,7 +56,11 @@ export default defineCommand({
 					moderator: interaction.user,
 					reason,
 					extra: [
-						{ name: "Messages deleted", value: `${deleteDays} day(s)`, inline: true },
+						{
+							name: "Messages deleted",
+							value: deleteDays === 0 ? "None" : `The last ${deleteDays === 1 ? "day" : `${String(deleteDays)} days`}`,
+							inline: true,
+						},
 						{ name: "Notified", value: delivered ? "Yes" : "No", inline: true },
 					],
 				}),

@@ -17,10 +17,10 @@ export default defineCommand({
 			embeds: [
 				embed({
 					category: "info",
-					title: "Pong",
+					title: "🏓 Pong",
 					fields: [
 						{ name: "Gateway", value: `${Math.max(0, Math.round(client.ws.ping))}ms`, inline: true },
-						{ name: "Round trip", value: `${roundTrip}ms`, inline: true },
+						{ name: "Round trip", value: `${String(roundTrip)}ms`, inline: true },
 					],
 				}),
 			],

@@ -11,7 +11,7 @@ import {
 import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
 import { findJob } from "@lib/economy";
-import { formatDuration, formatNumber } from "@lib/format";
+import { discordTime, formatDuration, formatNumber } from "@lib/format";
 import { atRate } from "@testify/shared";
 
 const SCENARIOS = [
@@ -62,7 +62,7 @@ export default defineCommand({
 					fields: [
 						{ name: "Base pay", value: formatNumber(base), inline: true },
 						{ name: "Level bonus", value: formatNumber(bonus), inline: true },
-						{ name: "Next shift", value: formatDuration(ECONOMY_COOLDOWNS.work), inline: true },
+						{ name: "Next shift", value: discordTime(now + ECONOMY_COOLDOWNS.work, "R"), inline: true },
 					],
 				}),
 			],

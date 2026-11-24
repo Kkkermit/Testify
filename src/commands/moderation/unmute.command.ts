@@ -14,7 +14,7 @@ export default defineCommand({
 	permissions: [PermissionFlagsBits.ModerateMembers],
 	botPermissions: [PermissionFlagsBits.ModerateMembers],
 	options: [
-		{ name: "user", description: "The member to untimeout.", type: "user", required: true },
+		{ name: "user", description: "The member whose timeout to lift.", type: "user", required: true },
 		{ name: "reason", description: "Why the timeout is being lifted.", type: "string" },
 	],
 

@@ -43,7 +43,7 @@ const subcommands: Subcommand[] = METERS.map((meter) => ({
 
 export default defineCommand({
 	name: "how",
-	description: "Measures how much of something somebody is. Results are definitely accurate.",
+	description: "Calculates how much of something you are. Results are definitely accurate.",
 	category: "fun",
 	subcommands,
 	cooldown: 3_000,

@@ -110,7 +110,7 @@ export default defineCommand({
 		},
 		{
 			name: "delete",
-			description: "Delete an AutoMod rule by id.",
+			description: "Deletes one of this server's AutoMod rules.",
 			options: [
 				{
 					name: "rule-id",

@@ -13,6 +13,7 @@ import { balancesOf, decayValue, findPet, isPetRarity, PET_RARITIES, petStatus, 
 import { discordTime, formatNumber, progressBar } from "@lib/format";
 
 const GONE = "Your pet has just been rehomed, so nothing changed.";
+const NO_PET = "You do not have a pet yet. Adopt one with `/pet shop`.";
 
 export default defineCommand({
 	name: "pet",
@@ -56,7 +57,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet. Adopt one from `/shop`.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const name = interaction.options.getString("name", true).trim();
 				if (name.length === 0) throw new UserFacingError("Give it an actual name.");
@@ -98,7 +99,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet. Try `/pet shop`.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const happiness = decayValue(pet.happiness, pet.lastWalked);
 				const hunger = decayValue(pet.hunger, pet.lastFed);
@@ -136,7 +137,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const species = findPet(pet.petId);
 				const cost = species?.feedCost ?? 50;
@@ -164,7 +165,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const species = findPet(pet.petId);
 				const happiness = Math.min(

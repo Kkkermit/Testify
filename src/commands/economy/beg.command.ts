@@ -44,11 +44,12 @@ export default defineCommand({
 			embeds: [
 				embed({
 					category: "economy",
-					title: "Begging",
+					title: "🙏 Begging",
 					description:
 						amount > 0
 							? `Someone took pity on you and handed over **${formatNumber(amount)}**.`
 							: "Nobody gave you anything. Better luck next time.",
+					footer: `You can beg again in ${formatDuration(ECONOMY_COOLDOWNS.beg)}.`,
 				}),
 			],
 		});
