@@ -186,6 +186,17 @@ export async function claimExpiredSoftban(now: Date = new Date()): Promise<Softb
 		.exec();
 }
 
+/** Hands a claimed softban back with a later expiry, for an unban Discord refused for a reason that may pass. */
+export async function retrySoftbanAt(
+	softban: Pick<SoftbanEntry, "guildId" | "userId" | "expiresAt">,
+	at: Date,
+): Promise<void> {
+	await Softban.updateOne(
+		{ guildId: softban.guildId, userId: softban.userId, isActive: false, expiresAt: softban.expiresAt },
+		{ $set: { isActive: true, expiresAt: at } },
+	).exec();
+}
+
 export async function deactivateSoftban(guildId: string, userId: string): Promise<boolean> {
 	const result = await Softban.updateMany({ guildId, userId, isActive: true }, { $set: { isActive: false } }).exec();
 	return result.modifiedCount > 0;

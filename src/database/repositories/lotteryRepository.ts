@@ -41,18 +41,22 @@ export async function addEntry(
 	entry: { userId: string; userTag: string; tickets: number },
 	feePaid: number,
 ): Promise<LotteryRecord | null> {
-	const existing = await Lottery.findOneAndUpdate(
-		{ guildId, isActive: true, isFrozen: false, "entries.userId": entry.userId },
-		{ $inc: { "entries.$.tickets": entry.tickets, prizePool: feePaid } },
-		{ new: true, lean: true },
-	)
-		.lean<LotteryRecord>()
-		.exec();
+	const open = { guildId, isActive: true, isFrozen: false };
+	const stack = (): Promise<LotteryRecord | null> =>
+		Lottery.findOneAndUpdate(
+			{ ...open, "entries.userId": entry.userId },
+			{ $inc: { "entries.$.tickets": entry.tickets, prizePool: feePaid } },
+			{ new: true, lean: true },
+		)
+			.lean<LotteryRecord>()
+			.exec();
 
-	if (existing) return existing;
+	const stacked = await stack();
+	if (stacked) return stacked;
 
-	return Lottery.findOneAndUpdate(
-		{ guildId, isActive: true, isFrozen: false },
+	// Pushed only while the person has no entry, so two first entries at once cannot make two rows for them.
+	const pushed = await Lottery.findOneAndUpdate(
+		{ ...open, "entries.userId": { $ne: entry.userId } },
 		{
 			$push: { entries: { ...entry, enteredAt: new Date() } },
 			$inc: { prizePool: feePaid },
@@ -61,9 +65,11 @@ export async function addEntry(
 	)
 		.lean<LotteryRecord>()
 		.exec();
+
+	return pushed ?? stack();
 }
 
-/** Claims a due draw by pushing `nextDrawTime` forward in the same query that selects it. */
+/** Claims a due draw by moving `nextDrawTime` on only from the time it was read at; the answer carries the new time. */
 export async function claimDueDraw(now: Date = new Date()): Promise<LotteryRecord | null> {
 	const due = await Lottery.findOne({ isActive: true, isFrozen: false, nextDrawTime: { $lte: now } })
 		.lean<LotteryRecord>()
@@ -75,7 +81,7 @@ export async function claimDueDraw(now: Date = new Date()): Promise<LotteryRecor
 	return Lottery.findOneAndUpdate(
 		{ guildId: due.guildId, nextDrawTime: due.nextDrawTime },
 		{ $set: { nextDrawTime } },
-		{ new: false, lean: true },
+		{ new: true, lean: true },
 	)
 		.lean<LotteryRecord>()
 		.exec();

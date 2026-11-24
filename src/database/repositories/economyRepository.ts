@@ -60,13 +60,13 @@ export async function adjustBank(guildId: string, userId: string, delta: number)
 	).exec() as Promise<EconomyAccount>;
 }
 
-/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 /** A negative debit would be a credit, so one is a bug however it arrived, and nothing moves. */
 function refuseNegative(amount: number): void {
 	if (!Number.isFinite(amount) || amount < 0)
 		throw new Error(`Refused to debit ${String(amount)}: a debit is never negative.`);
 }
 
+/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 export async function debitWallet(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, wallet: { $gte: amount } }, { $inc: { wallet: -amount } }, LEAN)
@@ -74,23 +74,27 @@ export async function debitWallet(guildId: string, userId: string, amount: numbe
 		.exec();
 }
 
-async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+/** Both halves move in one update, so nothing can fail between taking the money and putting it in the bank. */
+export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
-	return Economy.findOneAndUpdate({ guildId, userId, bank: { $gte: amount } }, { $inc: { bank: -amount } }, LEAN)
+	return Economy.findOneAndUpdate(
+		{ guildId, userId, wallet: { $gte: amount } },
+		{ $inc: { wallet: -amount, bank: amount } },
+		LEAN,
+	)
 		.lean<EconomyAccount>()
 		.exec();
 }
 
-export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
-	const debited = await debitWallet(guildId, userId, amount);
-	if (!debited) return null;
-	return adjustBank(guildId, userId, amount);
-}
-
 export async function withdraw(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
-	const debited = await debitBank(guildId, userId, amount);
-	if (!debited) return null;
-	return adjustWallet(guildId, userId, amount);
+	refuseNegative(amount);
+	return Economy.findOneAndUpdate(
+		{ guildId, userId, bank: { $gte: amount } },
+		{ $inc: { bank: -amount, wallet: amount } },
+		LEAN,
+	)
+		.lean<EconomyAccount>()
+		.exec();
 }
 
 /** The credit only happens once the debit has landed. */
@@ -283,26 +287,34 @@ export async function getGuildTotals(
 	};
 }
 
+/** Null only when the account does not exist. */
 export async function addInventoryItem(
 	guildId: string,
 	userId: string,
 	item: Omit<InventoryItem, "purchasedAt"> & { purchasedAt?: Date },
-): Promise<EconomyAccount> {
-	const existing = await Economy.findOneAndUpdate(
-		{ guildId, userId, "inventory.itemId": item.itemId },
-		{ $inc: { "inventory.$.quantity": item.quantity } },
+): Promise<EconomyAccount | null> {
+	const stack = (): Promise<EconomyAccount | null> =>
+		Economy.findOneAndUpdate(
+			{ guildId, userId, "inventory.itemId": item.itemId },
+			{ $inc: { "inventory.$.quantity": item.quantity } },
+			LEAN,
+		)
+			.lean<EconomyAccount>()
+			.exec();
+
+	const stacked = await stack();
+	if (stacked) return stacked;
+
+	// Pushed only while the item is still missing, so two first purchases at once cannot make two rows of it.
+	const pushed = await Economy.findOneAndUpdate(
+		{ guildId, userId, "inventory.itemId": { $ne: item.itemId } },
+		{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
 		LEAN,
 	)
 		.lean<EconomyAccount>()
 		.exec();
 
-	if (existing) return existing;
-
-	return Economy.findOneAndUpdate(
-		{ guildId, userId },
-		{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
-		LEAN,
-	).exec() as Promise<EconomyAccount>;
+	return pushed ?? stack();
 }
 
 /** Conditional removal, so an item cannot be consumed twice concurrently. */
