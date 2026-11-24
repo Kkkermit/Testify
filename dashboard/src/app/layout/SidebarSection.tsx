@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
@@ -19,10 +19,12 @@ export function SidebarSection({
 	const listId = useId();
 	const holdsCurrent = sectionHolds(section, pathname);
 	const [open, setOpen] = useState(holdsCurrent);
-
-	useEffect(() => {
+	const [held, setHeld] = useState(holdsCurrent);
+	// A navigation into the section opens it, during render rather than a frame later.
+	if (held !== holdsCurrent) {
+		setHeld(holdsCurrent);
 		if (holdsCurrent) setOpen(true);
-	}, [holdsCurrent]);
+	}
 
 	const Icon = section.icon;
 	const collapsible = expanded || undefined;

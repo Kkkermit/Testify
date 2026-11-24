@@ -1,6 +1,6 @@
 import { isRouteErrorResponse } from "react-router";
 
-type RouteFailure = "stale" | "notFound" | "crash";
+export type RouteFailure = "stale" | "notFound" | "crash";
 
 /** Chrome, Firefox and Safari each word a failed `import()` differently; all three mean the file moved. */
 const STALE_MODULE = [
