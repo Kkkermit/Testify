@@ -25,8 +25,8 @@ export function SettingRows({
 			className="bg-card border-border rounded-card divide-border divide-y border [&>*]:px-6 [&>*]:py-4"
 		>
 			{(title !== undefined || description !== undefined) && (
-				<div data-panel-head="" className="flex items-start justify-between gap-3">
-					<div>
+				<div data-panel-head="" className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+					<div className="min-w-0 grow basis-64">
 						{title !== undefined && (
 							<h2 id={headingId} className={CARD_HEADING}>
 								{title}
