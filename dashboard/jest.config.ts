@@ -7,13 +7,26 @@ const config: Config = {
 	testEnvironment: "jest-fixed-jsdom",
 	setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
 	transform: {
-		"^.+\\.[mc]?[tj]sx?$": ["@swc/jest", { jsc: { transform: { react: { runtime: "automatic" } } } }],
+		"^.+\\.[mc]?[tj]sx?$": [
+			"@swc/jest",
+			{
+				jsc: {
+					transform: {
+						react: { runtime: "automatic" },
+						// react-router reads Vite's `import.meta.hot`, which CommonJS cannot parse; nothing here runs under HMR.
+						optimizer: { globals: { vars: { "import.meta.hot": "undefined" } } },
+					},
+				},
+			},
+		],
 		"\\.(?:md|example)$": "<rootDir>/src/test/rawText.cjs",
 	},
 	// These ship ESM only, so they are transformed rather than skipped with the rest of node_modules.
 	transformIgnorePatterns: [
 		`/node_modules/(?!(${[
 			"react-router",
+			"@remix-run/route-pattern",
+			"cookie-es",
 			"rettime",
 			"until-async",
 			"tagged-tag",
