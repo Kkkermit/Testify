@@ -115,4 +115,15 @@ describe("an instant game", () => {
 			playInstant(responder(), clientRunningTimers(), PLAYER, "100", () => outcome(0)),
 		).resolves.toBeUndefined();
 	});
+
+	/** The stake left the wallet, then a reply that could no longer be deferred lost the winnings with it. */
+	it("pays a win even when the reply can no longer be deferred", async () => {
+		const expired = responder();
+		expired.deferReply = jest.fn(() => Promise.reject(new Error("Unknown interaction")));
+
+		await expect(playInstant(expired, clientRunningTimers(), PLAYER, "100", () => outcome(195))).rejects.toThrow(
+			"Unknown interaction",
+		);
+		expect(wallet).toBe(1_095);
+	});
 });

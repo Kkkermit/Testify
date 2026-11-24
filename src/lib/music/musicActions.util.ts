@@ -138,12 +138,14 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 	if (found.length === 0) throw new UserFacingError("Nothing turned up for that.");
 
 	const tracks = query.kind === "search" ? found.slice(0, 1) : found;
+
+	// Joined first, so whether the player is idle is read in the same turn as the track that starts it.
+	await session.connect(request.channel);
 	const added = addTracks(session.queue, tracks, { next: request.next, idle: !session.active });
 
 	session.queue = added.state;
 	session.textChannelId = request.textChannelId;
 
-	await session.connect(request.channel);
 	if (added.start !== null) await session.play(added.start);
 
 	const title = tracks[0]?.title ?? "a track";

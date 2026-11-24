@@ -36,6 +36,8 @@ describe("musicSystemPanel", () => {
 
 		expect(json).toContain("role-1");
 		expect(json).toContain("role-2");
+		// The DJ roles are listed as mentions, which must not ping everybody holding them.
+		expect(rendered.allowedMentions).toEqual({ parse: [] });
 	});
 });
 

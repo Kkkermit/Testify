@@ -66,13 +66,19 @@ describe("trackFromInfo", () => {
 		});
 	});
 
-	it.each([0, -5, null])("treats a duration of %p as unknown", (duration) => {
-		expect(trackFromInfo({ webpage_url: "u", duration }, USER, "youtube")).toMatchObject({ durationMs: null });
+	it("treats a duration of nothing or less as unknown", () => {
+		const timed = [0, -5, null].filter(
+			(duration) => trackFromInfo({ webpage_url: "u", duration }, USER, "youtube")?.durationMs !== null,
+		);
+
+		expect(timed).toEqual([]);
 	});
 
 	/** An entry with no address is not playable, and queueing it would break the queue one track later. */
-	it.each([{}, { webpage_url: "" }, { title: "No address" }])("refuses %p", (info) => {
-		expect(trackFromInfo(info as TrackInfo, USER, "youtube")).toBeNull();
+	it("refuses an entry with no address", () => {
+		const entries: TrackInfo[] = [{}, { webpage_url: "" }, { title: "No address" }];
+
+		expect(entries.filter((info) => trackFromInfo(info, USER, "youtube") !== null)).toEqual([]);
 	});
 });
 
@@ -223,11 +229,18 @@ describe("openStream", () => {
 		}
 	});
 
-	/** A track that needs a transcoder is refused by name when FFmpeg is missing. */
-	it("refuses a track needing a transcoder when FFmpeg is missing", () => {
-		expect(() =>
-			openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
-		).toThrow(/FFmpeg/);
+	/** Refused only after yt-dlp had started, which left a downloader running with nothing to read it. */
+	it("refuses a track needing a transcoder when FFmpeg is missing, before starting the download", () => {
+		const spawned = jest.spyOn(jest.requireMock<typeof ChildProcesses>("node:child_process"), "spawn");
+
+		try {
+			expect(() =>
+				openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
+			).toThrow(/FFmpeg/);
+			expect(spawned).not.toHaveBeenCalled();
+		} finally {
+			spawned.mockRestore();
+		}
 	});
 });
 

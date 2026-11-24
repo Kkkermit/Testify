@@ -56,8 +56,23 @@ function ticketControls() {
 	);
 }
 
+/** Tickets being opened, keyed `guildId:userId`, so a double press cannot make two channels for one person. */
+const opening = new Set<string>();
+
 /** One open ticket per person, in a private channel only they and the handler role can see. */
 export async function openTicket(guild: Guild, setup: TicketSetupRecord, owner: User): Promise<TextChannel> {
+	const key = `${guild.id}:${owner.id}`;
+	if (opening.has(key)) throw new UserFacingError(strings.ticket.alreadyExists);
+
+	opening.add(key);
+	try {
+		return await openTicketChannel(guild, setup, owner);
+	} finally {
+		opening.delete(key);
+	}
+}
+
+async function openTicketChannel(guild: Guild, setup: TicketSetupRecord, owner: User): Promise<TextChannel> {
 	if (await findOpenTicket(guild.id, owner.id)) throw new UserFacingError(strings.ticket.alreadyExists);
 
 	const channel = await guild.channels.create({
@@ -87,7 +102,11 @@ export async function openTicket(guild: Guild, setup: TicketSetupRecord, owner: 
 		],
 	});
 
-	await createTicket({ guildId: guild.id, ownerId: owner.id, channelId: channel.id });
+	// A channel with no record is one nothing can close, so it goes again if the record cannot be written.
+	await createTicket({ guildId: guild.id, ownerId: owner.id, channelId: channel.id }).catch(async (error: unknown) => {
+		await channel.delete("The ticket could not be recorded").catch(() => undefined);
+		throw error;
+	});
 	await channel.send({
 		content: `${owner.toString()} <@&${setup.handlerRoleId}>`,
 		embeds: [
@@ -115,7 +134,12 @@ export async function lockTicket(channel: TextChannel, ticket: TicketRecord, loc
 
 export async function claimTicketFor(ticket: TicketRecord, moderatorId: string): Promise<void> {
 	if (!(await claimTicket(ticket.channelId, moderatorId))) {
-		throw new UserFacingError(`${strings.ticket.alreadyClaimed} <@${ticket.claimedById ?? "unknown"}>.`);
+		// Read before the claim, so a handler who won the race a moment ago is not named yet.
+		throw new UserFacingError(
+			ticket.claimedById === null
+				? "Somebody else has just claimed this ticket."
+				: `${strings.ticket.alreadyClaimed} <@${ticket.claimedById}>.`,
+		);
 	}
 }
 

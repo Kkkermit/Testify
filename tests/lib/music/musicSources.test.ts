@@ -19,15 +19,17 @@ describe("normaliseMusicSources", () => {
 });
 
 describe("allowsSource", () => {
-	it.each([
-		["both", "youtube", true],
-		["both", "soundcloud", true],
-		["youtube", "soundcloud", false],
-		["soundcloud", "youtube", false],
-		["youtube", "youtube", true],
-		["soundcloud", "soundcloud", true],
-	] as const)("with %s, %s is allowed: %s", (sources, source, allowed) => {
-		expect(allowsSource(sources, source)).toBe(allowed);
+	it("allows each service exactly when the owner's choice includes it", () => {
+		const cases = [
+			["both", "youtube", true],
+			["both", "soundcloud", true],
+			["youtube", "soundcloud", false],
+			["soundcloud", "youtube", false],
+			["youtube", "youtube", true],
+			["soundcloud", "soundcloud", true],
+		] as const;
+
+		expect(cases.filter(([sources, source, allowed]) => allowsSource(sources, source) !== allowed)).toEqual([]);
 	});
 
 	/** The switch is about two services; a link to anywhere else was never the owner's to refuse. */

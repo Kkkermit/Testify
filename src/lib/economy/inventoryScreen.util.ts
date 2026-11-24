@@ -6,7 +6,7 @@ import { container, containerMessage, divider, sectionWithButton, text } from "@
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { INVENTORY_PANEL_ID } from "@lib/economy/economy.constants";
 import { findShopItem } from "@lib/economy/shop.util";
-import { formatNumber } from "@lib/format/format.util";
+import { escapeMarkdown, formatNumber } from "@lib/format/format.util";
 
 /** What you own, with the thing you would do to each item beside it. */
 
@@ -42,10 +42,10 @@ export function inventoryScreen(
 
 	const parts: ContainerPart[] = [
 		text(
-			`## 🎒 ${username}'s inventory\n` +
+			`## 🎒 ${escapeMarkdown(username)}'s inventory\n` +
 				(items.length === 0
 					? "Nothing here yet — buy something from the shop."
-					: `${items.length} kind${items.length === 1 ? "" : "s"} of item · Wallet **${formatNumber(account.wallet)}**`),
+					: `${formatNumber(items.length)} kind${items.length === 1 ? "" : "s"} of item · Wallet **${formatNumber(account.wallet)}**`),
 		),
 		divider(),
 	];

@@ -14,6 +14,7 @@ import { slotsReturnToPlayer } from "@lib/casino/slots.util";
 import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { formatNumber } from "@lib/format/format.util";
 import { type CasinoGame, type CasinoSettings } from "@testify/shared";
 
 /** The casino's switch, its games and its limits, applied the moment each control is used. */
@@ -76,7 +77,7 @@ export function parseLimits(
 		const value = Number(raw.trim().replace(/[,_\s]/g, ""));
 		return Number.isInteger(value) && value >= CASINO_LIMITS.minBet && value <= CASINO_LIMITS.maxBet ? value : null;
 	};
-	const range = `a whole number from ${CASINO_LIMITS.minBet} to ${CASINO_LIMITS.maxBet.toLocaleString("en-GB")}`;
+	const range = `a whole number from ${formatNumber(CASINO_LIMITS.minBet)} to ${formatNumber(CASINO_LIMITS.maxBet)}`;
 
 	const minBet = whole(min);
 	if (minBet === null) return { ok: false, reason: `The smallest bet has to be ${range}.` };

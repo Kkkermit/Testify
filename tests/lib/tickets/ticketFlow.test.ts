@@ -5,6 +5,7 @@ import { type TicketRecord, type TicketSetupRecord } from "@database/models/tick
 import {
 	addTicketMember,
 	claimTicket,
+	createTicket,
 	deleteTicket,
 	findOpenTicket,
 	removeTicketMember,
@@ -104,6 +105,27 @@ describe("openTicket", () => {
 		expect(create).not.toHaveBeenCalled();
 	});
 
+	/** Two presses of Create ticket both passed the check before either was recorded, so one person got two channels. */
+	it("makes one channel for a double press", async () => {
+		const { guild, create } = guildMaking(ticketChannel());
+
+		const results = await Promise.allSettled([openTicket(guild, setup, owner), openTicket(guild, setup, owner)]);
+
+		expect(create).toHaveBeenCalledTimes(1);
+		expect(results.map((result) => result.status)).toEqual(["fulfilled", "rejected"]);
+	});
+
+	/** A channel with no record behind it is one no button can close. */
+	it("takes the channel down again when the ticket cannot be recorded", async () => {
+		const channel = ticketChannel();
+		const { guild } = guildMaking(channel);
+		jest.mocked(createTicket).mockRejectedValueOnce(new Error("database is down"));
+
+		await expect(openTicket(guild, setup, owner)).rejects.toThrow("database is down");
+		expect(channel.delete).toHaveBeenCalled();
+		expect(channel.send).not.toHaveBeenCalled();
+	});
+
 	it("keeps a long username inside Discord's 100-character channel name", async () => {
 		const { guild, create } = guildMaking(ticketChannel());
 
@@ -125,12 +147,13 @@ describe("lockTicket", () => {
 
 describe("claimTicketFor", () => {
 	/** The claim is conditional in the database, so two handlers pressing at once cannot both hold it. */
-	it("names whoever already holds it when the claim loses", async () => {
+	it("names whoever already holds it when the claim loses, and never writes a mention of nobody", async () => {
 		jest.mocked(claimTicket).mockResolvedValue(false as never);
 
 		await expect(claimTicketFor(ticket({ claimedById: "100000000000000003" }), moderator.id)).rejects.toThrow(
 			"<@100000000000000003>",
 		);
+		await expect(claimTicketFor(ticket(), moderator.id)).rejects.toThrow("Somebody else has just claimed");
 	});
 });
 

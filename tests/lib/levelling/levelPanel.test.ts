@@ -40,30 +40,30 @@ function selectsOf(rendered: ReturnType<typeof levelPanel>): Record<string, unkn
 }
 
 describe("the levelling panel", () => {
-	it.each(LEVEL_TABS)("renders the %s tab as a Components V2 message", (tab) => {
-		expect(panel(tab).flags).toBe(MessageFlags.IsComponentsV2);
-	});
+	/** Boost, reward and ignored roles are listed as mentions, which must not ping everybody holding them. */
+	it("draws every tab as a V2 message that pings nobody, each control carrying its tab first and its owner last", () => {
+		const wrong = LEVEL_TABS.filter((tab) => {
+			const rendered = panel(tab, {
+				boosts: [{ roleId: BOOSTER, multiplier: 2 }],
+				rewards: [{ level: 5, roleId: VIP }],
+			});
+			const ids = idsOf(rendered).map((id) => parseCustomId(id));
+			const controls = ids.filter((id) => id.action !== "tab");
 
-	it.each(LEVEL_TABS)("namespaces every control on the %s tab, with the owner last", (tab) => {
-		const rendered = panel(tab, { boosts: [{ roleId: BOOSTER, multiplier: 2 }], rewards: [{ level: 5, roleId: VIP }] });
+			return (
+				rendered.flags !== MessageFlags.IsComponentsV2 ||
+				rendered.allowedMentions.parse.length > 0 ||
+				controls.length === 0 ||
+				ids.some((id) => id.id !== LEVEL_PANEL_ID || id.args.at(-1) !== OWNER) ||
+				controls.some((id) => id.args[0] !== tab)
+			);
+		});
 
-		for (const id of idsOf(rendered)) {
-			expect(parseCustomId(id).id).toBe(LEVEL_PANEL_ID);
-			expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
-		}
-	});
-
-	/** Every control carries its tab as the first argument. */
-	it.each(LEVEL_TABS)("carries the %s tab in the controls it draws", (tab) => {
-		const ids = idsOf(panel(tab)).map((id) => parseCustomId(id));
-		const controls = ids.filter((id) => id.action !== "tab");
-
-		expect(controls.length).toBeGreaterThan(0);
-		for (const control of controls) expect(control.args[0]).toBe(tab);
+		expect(wrong).toEqual([]);
 	});
 
 	/** Discord rejects the whole message when two components share a custom ID. */
-	it.each(LEVEL_TABS)("gives every control on the %s tab a distinct custom ID", (tab) => {
+	it("gives every control on every tab a distinct custom ID, empty or full", () => {
 		const filled = {
 			boosts: Array.from({ length: LEVEL_LIMITS.maxBoosts }, (_, index) => ({
 				roleId: `role${index}`,
@@ -77,8 +77,10 @@ describe("the levelling panel", () => {
 			ignoredRoleIds: [BOOSTER],
 		};
 
-		expect(duplicateIds(panel(tab))).toEqual([]);
-		expect(duplicateIds(panel(tab, filled))).toEqual([]);
+		const clashing = LEVEL_TABS.filter(
+			(tab) => duplicateIds(panel(tab)).length > 0 || duplicateIds(panel(tab, filled)).length > 0,
+		);
+		expect(clashing).toEqual([]);
 	});
 
 	/** Two levels pointing at one role is legal, and must not collide on the role ID. */

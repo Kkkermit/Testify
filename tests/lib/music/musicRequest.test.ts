@@ -82,6 +82,27 @@ describe("queueRequest", () => {
 		expect(note).toBe("Added **new** to the queue.");
 	});
 
+	/** Two requests arriving while nothing played both started their own track, and one cut the other off. */
+	it("starts one of two requests that arrive together, and queues the other behind it", async () => {
+		const session = fakeSession({ tracks: [], index: -1, loop: "off" }, false);
+		let joined: () => void = () => undefined;
+		session.connect.mockImplementationOnce(() => new Promise<void>((resolve) => (joined = resolve)));
+		session.play.mockImplementation(() => {
+			session.active = true;
+			return Promise.resolve();
+		});
+		sessionFor.mockReturnValue(session);
+		resolveTracks.mockResolvedValueOnce([track("first")]).mockResolvedValueOnce([track("second")]);
+
+		const first = queueRequest(request());
+		await new Promise((resolve) => setImmediate(resolve));
+		const second = await queueRequest(request());
+		joined();
+
+		expect(session.play).toHaveBeenCalledTimes(1);
+		expect([(await first).note, second.note]).toEqual(["Added **first** to the queue.", "Playing **second**."]);
+	});
+
 	/** Only the first result is played, so the search asks YouTube for one rather than eight. */
 	it("asks the source for a single result when searching", async () => {
 		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));

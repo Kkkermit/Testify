@@ -55,9 +55,15 @@ describe("fillTemplate", () => {
 });
 
 describe("checkBackground", () => {
-	it("rejects a file that is not an image", () => {
-		expect(checkBackground({ contentType: "application/pdf", size: 100 }).ok).toBe(false);
-		expect(checkBackground({ contentType: null, size: 100 }).ok).toBe(false);
+	it("rejects a file that is not an image or is too large, and accepts one exactly on the limit", () => {
+		const refused = [
+			{ contentType: "application/pdf", size: 100 },
+			{ contentType: null, size: 100 },
+			{ contentType: "image/png", size: WELCOME_LIMITS.maxBackgroundBytes + 1 },
+		];
+
+		expect(refused.filter((file) => checkBackground(file).ok)).toEqual([]);
+		expect(checkBackground({ contentType: "image/png", size: WELCOME_LIMITS.maxBackgroundBytes }).ok).toBe(true);
 	});
 
 	/** The card is a still image, so an animated GIF would only show its first frame. */
@@ -67,14 +73,6 @@ describe("checkBackground", () => {
 		expect(verdict.ok).toBe(false);
 		expect(verdict.reason).toMatch(/still image/i);
 	});
-
-	it("rejects something too large to keep in the settings document", () => {
-		expect(checkBackground({ contentType: "image/png", size: WELCOME_LIMITS.maxBackgroundBytes + 1 }).ok).toBe(false);
-	});
-
-	it("accepts a file exactly on the limit", () => {
-		expect(checkBackground({ contentType: "image/png", size: WELCOME_LIMITS.maxBackgroundBytes }).ok).toBe(true);
-	});
 });
 
 describe("the welcome panel", () => {
@@ -83,8 +81,10 @@ describe("the welcome panel", () => {
 		OWNER,
 	);
 
-	it("is a Components V2 message", () => {
+	/** It quotes the greeting a manager typed, which can mention anybody. */
+	it("is a Components V2 message that pings nobody", () => {
 		expect(configured.flags).toBe(MessageFlags.IsComponentsV2);
+		expect(configured.allowedMentions).toEqual({ parse: [] });
 	});
 
 	it("namespaces every control, with the owner last", () => {

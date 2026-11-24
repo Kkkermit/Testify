@@ -296,6 +296,61 @@ describe("the volume", () => {
 		release(DESCRIBED);
 		await new Promise((resolve) => setImmediate(resolve));
 	});
+
+	/** A second press while the first re-open waited on yt-dlp restarted the track from the beginning. */
+	it("keeps the place in the track when the level changes again while it opens", async () => {
+		const { describeTrack, openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session } = sessionWith(["a"], WITH_FFMPEG);
+		await session.play(0);
+		openStream.mockClear();
+
+		let release: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (release = resolve)));
+		resource.playbackDuration = 100_000;
+		session.setVolume(60);
+		session.setVolume(70);
+		release(DESCRIBED);
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(openStream).toHaveBeenCalledTimes(1);
+		expect(openStream.mock.calls[0]?.[3]).toMatchObject({ seekMs: 100_000, volume: 70 });
+	});
+});
+
+describe("a track still opening", () => {
+	/** Two plays that overlapped both opened a stream, and the older one's downloader was never stopped. */
+	it("opens only the newest of two plays that overlap", async () => {
+		const { describeTrack, openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session } = sessionWith(["a", "b"]);
+
+		let releaseFirst: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (releaseFirst = resolve)));
+		const first = session.play(0);
+		const second = session.play(1);
+		await second;
+		releaseFirst(DESCRIBED);
+		await first;
+
+		expect(openStream).toHaveBeenCalledTimes(1);
+		expect(openStream.mock.calls[0]?.[0]).toBe("https://youtu.be/b");
+		expect(session.queue.index).toBe(1);
+	});
+
+	/** A session that ends while yt-dlp answers has nobody left to play to, so nothing may be downloaded for it. */
+	it("opens nothing for a session that ended while the track was opening", async () => {
+		const { describeTrack, openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session, events } = sessionWith(["a"]);
+
+		let release: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (release = resolve)));
+		const playing = session.play(0);
+		session.destroy();
+		release(DESCRIBED);
+		await playing;
+
+		expect(openStream).not.toHaveBeenCalled();
+		expect(events).toEqual([]);
+	});
 });
 
 describe("a queue where nothing can be opened", () => {

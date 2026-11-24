@@ -12,10 +12,11 @@ import {
 } from "@lib/giveaways/giveawayActions.util";
 
 const manager = {
+	giveaways: [] as { messageId: string; guildId: string }[],
 	start: jest.fn(() => Promise.resolve()),
-	end: jest.fn(() => Promise.resolve()),
-	reroll: jest.fn(() => Promise.resolve()),
-	delete: jest.fn(() => Promise.resolve()),
+	end: jest.fn((_messageId: string) => Promise.resolve()),
+	reroll: jest.fn((_messageId: string) => Promise.resolve()),
+	delete: jest.fn((_messageId: string) => Promise.resolve()),
 };
 
 jest.mock("@lib/giveaways/giveaways.util", () => ({ giveaways: () => manager }));
@@ -51,25 +52,43 @@ describe("startGiveaway", () => {
 });
 
 describe("ending, rerolling and deleting", () => {
-	it.each([
-		["ends", endGiveaway, manager.end],
-		["rerolls", rerollGiveaway, manager.reroll],
-		["deletes", deleteGiveaway, manager.delete],
-	])("%s by message id", async (_name, action, call) => {
-		await action(client, MESSAGE);
-
-		expect(call).toHaveBeenCalledWith(MESSAGE);
-	});
-
-	/** The library's own errors name its internals; the reader gets advice instead. */
-	it.each([
+	const actions = [
 		["end", endGiveaway, manager.end],
 		["reroll", rerollGiveaway, manager.reroll],
 		["delete", deleteGiveaway, manager.delete],
-	])("turns a failed %s into advice", async (_name, action, call) => {
-		call.mockImplementationOnce(() => Promise.reject(new Error("Unknown giveaway 500000000000000001")));
+	] as const;
 
-		await expect(action(client, MESSAGE)).rejects.toThrow(UserFacingError);
+	beforeEach(() => {
+		manager.giveaways = [{ messageId: MESSAGE, guildId: GUILD }];
+	});
+
+	it("acts on this server's giveaway by its message id", async () => {
+		for (const [, action] of actions) await action(client, GUILD, MESSAGE);
+
+		expect(actions.filter(([, , call]) => call.mock.calls[0]?.[0] !== MESSAGE).map(([name]) => name)).toEqual([]);
+	});
+
+	/** `/giveaway end` in one server ended another server's giveaway, because the library looks a message up anywhere. */
+	it("refuses a giveaway that belongs to another server, before the library is asked", async () => {
+		const reached: string[] = [];
+		for (const [name, action] of actions) {
+			await expect(action(client, OTHER, MESSAGE)).rejects.toThrow(UserFacingError);
+			if (manager[name].mock.calls.length > 0) reached.push(name);
+		}
+
+		expect(reached).toEqual([]);
+	});
+
+	/** The library's own errors name its internals; the reader gets advice instead. */
+	it("turns a failure from the library into advice", async () => {
+		const leaked: string[] = [];
+		for (const [name, action, call] of actions) {
+			call.mockImplementationOnce(() => Promise.reject(new Error("Unknown giveaway 500000000000000001")));
+			const error = await action(client, GUILD, MESSAGE).catch((caught: unknown) => caught);
+			if (!(error instanceof UserFacingError) || error.message.includes(MESSAGE)) leaked.push(name);
+		}
+
+		expect(leaked).toEqual([]);
 	});
 });
 

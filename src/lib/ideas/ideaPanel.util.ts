@@ -3,13 +3,12 @@ import { theme } from "@config/theme";
 import { customId } from "@core/button";
 import { type StoredIdea } from "@database/repositories/ideaRepository";
 import { button, channelSelect, row } from "@lib/discord/components.util";
-import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { discordTime } from "@lib/format/format.util";
 import { IDEA_ID, IDEA_SETTINGS_ID } from "@lib/ideas/ideas.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type IdeaSettings, type IdeaStatus } from "@testify/shared";
-
-const seconds = (date: Date): string => String(Math.floor(date.getTime() / 1_000));
 
 function quoted(value: string): string {
 	return value
@@ -29,14 +28,14 @@ function ideaStatusLine(idea: Pick<StoredIdea, "status" | "reason" | "decidedByN
 	if (idea.status === "open") return "🟡 **Open** — vote with the buttons below.";
 
 	const by = idea.decidedByName === null ? "" : ` by ${idea.decidedByName}`;
-	const when = idea.decidedAt === null ? "" : ` <t:${seconds(idea.decidedAt)}:R>`;
+	const when = idea.decidedAt === null ? "" : ` ${discordTime(idea.decidedAt, "R")}`;
 	const line = `${STATUS_WORD[idea.status]}${by}${when}`;
 
 	return idea.reason === "" ? line : `${line}\n${quoted(idea.reason)}`;
 }
 
-/** The post members vote on; the same for everybody, so staff buttons are refused rather than hidden. */
-export function ideaPost(idea: StoredIdea): ContainerMessage {
+/** The post members vote on, which quotes a member and names its author, so it pings nobody. */
+export function ideaPost(idea: StoredIdea): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const open = idea.status === "open";
 	const vote = (side: "up" | "down", count: number, emoji: string): ReturnType<typeof button> =>
 		button({ id: customId(IDEA_ID, side, idea.id), label: String(count), emoji, disabled: !open });
@@ -56,15 +55,17 @@ export function ideaPost(idea: StoredIdea): ContainerMessage {
 
 	const parts: ContainerPart[] = [
 		text(`## 💡 Idea #${String(idea.number)}\n${idea.text}`),
-		text(`-# From <@${idea.authorId}> (${idea.authorName}) · <t:${seconds(idea.createdAt)}:R>`),
+		text(`-# From <@${idea.authorId}> (${idea.authorName}) · ${discordTime(idea.createdAt, "R")}`),
 		divider(),
 		text(ideaStatusLine(idea)),
 		row(vote("up", idea.upVoters.length, "👍"), vote("down", idea.downVoters.length, "👎"), ...staff),
 	];
 
-	return containerMessage(
-		container(
-			idea.status === "open" ? { category: "community", parts } : { accent: STATUS_ACCENT[idea.status], parts },
+	return withoutPings(
+		containerMessage(
+			container(
+				idea.status === "open" ? { category: "community", parts } : { accent: STATUS_ACCENT[idea.status], parts },
+			),
 		),
 	);
 }

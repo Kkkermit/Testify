@@ -93,7 +93,7 @@ export default defineCommand({
 			options: [MESSAGE_ID],
 			async run(interaction, client) {
 				const giveaway = await giveawayHere(interaction, client);
-				await endGiveaway(client, giveaway.messageId);
+				await endGiveaway(client, inGuild(interaction).id, giveaway.messageId);
 
 				await reply(interaction, { embeds: [successEmbed(`Ended the giveaway for ${prizeOf(giveaway)}.`)] });
 			},
@@ -104,7 +104,7 @@ export default defineCommand({
 			options: [MESSAGE_ID],
 			async run(interaction, client) {
 				const giveaway = await giveawayHere(interaction, client);
-				await rerollGiveaway(client, giveaway.messageId);
+				await rerollGiveaway(client, inGuild(interaction).id, giveaway.messageId);
 
 				await reply(interaction, { embeds: [successEmbed(`Drew new winners for ${prizeOf(giveaway)}.`)] });
 			},
@@ -115,7 +115,7 @@ export default defineCommand({
 			options: [MESSAGE_ID],
 			async run(interaction, client) {
 				const giveaway = await giveawayHere(interaction, client);
-				await deleteGiveaway(client, giveaway.messageId);
+				await deleteGiveaway(client, inGuild(interaction).id, giveaway.messageId);
 
 				await reply(interaction, { embeds: [successEmbed(`Deleted the giveaway for ${prizeOf(giveaway)}.`)] });
 			},

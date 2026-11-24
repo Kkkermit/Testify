@@ -241,11 +241,13 @@ export class MusicSession {
 		if (track === undefined) return;
 
 		const seekMs = this.canSetVolume ? Math.max(0, Math.round(options.seekMs ?? 0)) : 0;
-		const filtered = this.canSetVolume && (this.#volume !== UNITY_VOLUME || seekMs > 0);
 
 		this.queue = { ...this.queue, index };
 
 		let failure: { text: string; problem: MusicReason } | null = null;
+		const generation = ++this.#generation;
+		// A later play, or the session ending, takes over while this one waits on yt-dlp, and its stream must never open.
+		const superseded = (): boolean => this.#destroyed || generation !== this.#generation;
 
 		try {
 			// Closing leaves the player idle for as long as yt-dlp takes to answer, which must not advance the queue.
@@ -254,9 +256,12 @@ export class MusicSession {
 
 			this.#problem = null;
 			this.#problemReason = null;
-			const generation = ++this.#generation;
 
 			const info = await describeTrack(track.url, this.#binaries);
+			if (superseded()) return;
+
+			// Read after the wait, so a level changed while the track was opening is the one it opens at.
+			const filtered = this.canSetVolume && (this.#volume !== UNITY_VOLUME || seekMs > 0);
 			const plan = info === null ? null : planStream(info.formats ?? [], { ffmpeg: this.canSetVolume, filtered });
 
 			if (plan === null) {
@@ -283,10 +288,11 @@ export class MusicSession {
 				this.#player.play(resource);
 			}
 		} catch (error) {
+			if (superseded()) return;
 			// One track that will not open is not the end of the queue, so it is stepped over with the reason.
 			failure = this.#openFailure(track, error);
 		} finally {
-			this.#reopening = false;
+			if (generation === this.#generation) this.#reopening = false;
 		}
 
 		if (failure !== null) {
@@ -460,7 +466,8 @@ export class MusicSession {
 	setVolume(volume: number): number {
 		this.#volume = clampVolume(volume);
 
-		if (currentTrack(this.queue) !== null && (this.playing || this.paused)) {
+		// A track still opening picks the new level up when it is ready, at the place it was opening from.
+		if (!this.#reopening && currentTrack(this.queue) !== null && (this.playing || this.paused)) {
 			this.#playSoon(this.queue.index, { seekMs: this.playedMs, resumed: true });
 		}
 

@@ -1,5 +1,6 @@
 import { MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME } from "@lib/music/music.constants";
 import { type RemoteFormat, type StreamShape, type StreamPlan } from "@lib/music/music.types";
+
 /** Choosing which of a track's formats to play, and whether that choice needs a transcoder. */
 
 export function clampVolume(volume: number): number {
@@ -58,10 +59,9 @@ function inOriginalVoice(formats: RemoteFormat[]): RemoteFormat[] {
 function planWithin(audio: RemoteFormat[], options: PlanOptions): StreamPlan | null {
 	if (options.filtered !== true) {
 		const passthrough = bestFirst(audio.filter((format) => isProgressive(format) && shapeOf(format) !== null)).at(0);
+		const shape = passthrough === undefined ? null : shapeOf(passthrough);
 
-		if (passthrough !== undefined) {
-			return { formatId: passthrough.format_id, shape: shapeOf(passthrough)! };
-		}
+		if (passthrough !== undefined && shape !== null) return { formatId: passthrough.format_id, shape };
 	}
 
 	if (!options.ffmpeg) return null;

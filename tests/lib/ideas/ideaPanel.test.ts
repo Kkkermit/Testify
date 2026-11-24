@@ -36,6 +36,11 @@ const actions = (idea: StoredIdea): string[] => idsOf(ideaPost(idea)).map((id) =
 
 describe("a posted idea", () => {
 	/** Everybody sees the same post, so no button carries an owner the router would hold presses to. */
+	/** It quotes what a member wrote and names its author, in a channel everybody reads. */
+	it("pings nobody", () => {
+		expect([ideaPost(IDEA).allowedMentions, ideaPost(DECIDED).allowedMentions]).toEqual([{ parse: [] }, { parse: [] }]);
+	});
+
 	it("carries only the idea's own id in its buttons", () => {
 		for (const id of idsOf(ideaPost(IDEA))) expect(parseCustomId(id).args).toEqual([IDEA.id]);
 	});
