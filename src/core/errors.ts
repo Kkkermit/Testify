@@ -41,9 +41,17 @@ export class SetupError extends Error {
 	}
 }
 
+/** Never throws itself, since it runs inside the handlers that catch everything else. */
 export function toError(value: unknown): Error {
 	if (value instanceof Error) return value;
-	return new Error(typeof value === "string" ? value : JSON.stringify(value));
+	if (typeof value !== "object" || value === null) return new Error(String(value));
+
+	try {
+		return new Error(JSON.stringify(value));
+	} catch {
+		// A cycle or a BigInt inside it, which JSON cannot write.
+		return new Error(Object.prototype.toString.call(value));
+	}
 }
 
 function failureEmbed(message: string, title?: string): EmbedBuilder {

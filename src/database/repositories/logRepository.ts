@@ -1,4 +1,5 @@
 import { type FilterQuery } from "mongoose";
+import { LOG_RANK } from "@core/logRing";
 import { type LogLineRecord, LogLines, type LogRunRecord, LogRuns } from "@database/models/logHistory.schema";
 import { LOG_LIMITS } from "@testify/shared";
 
@@ -22,9 +23,6 @@ export interface StoredLines {
 	matched: number;
 	held: number;
 }
-
-const ERROR_RANK = 50;
-const WARN_RANK = 40;
 
 /** Matched as written, so a search is never read as a pattern. */
 function literally(text: string): RegExp {
@@ -119,8 +117,8 @@ export async function listLogRuns(search?: LineSearch): Promise<RunSummary[]> {
 			$group: {
 				_id: "$run",
 				lines: { $sum: 1 },
-				errors: { $sum: { $cond: [{ $gte: ["$rank", ERROR_RANK] }, 1, 0] } },
-				warnings: { $sum: { $cond: [{ $eq: ["$rank", WARN_RANK] }, 1, 0] } },
+				errors: { $sum: { $cond: [{ $gte: ["$rank", LOG_RANK.error] }, 1, 0] } },
+				warnings: { $sum: { $cond: [{ $eq: ["$rank", LOG_RANK.warn] }, 1, 0] } },
 				matched: { $sum: { $cond: [finds, 1, 0] } },
 			},
 		},

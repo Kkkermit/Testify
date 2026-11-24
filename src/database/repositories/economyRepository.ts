@@ -60,13 +60,13 @@ export async function adjustBank(guildId: string, userId: string, delta: number)
 	).exec() as Promise<EconomyAccount>;
 }
 
-/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 /** A negative debit would be a credit, so one is a bug however it arrived, and nothing moves. */
 function refuseNegative(amount: number): void {
 	if (!Number.isFinite(amount) || amount < 0)
 		throw new Error(`Refused to debit ${String(amount)}: a debit is never negative.`);
 }
 
+/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 export async function debitWallet(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, wallet: { $gte: amount } }, { $inc: { wallet: -amount } }, LEAN)
@@ -81,16 +81,27 @@ export async function debitBank(guildId: string, userId: string, amount: number)
 		.exec();
 }
 
+/** Both halves move in one update, so nothing can fail between taking the money and putting it in the bank. */
 export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
-	const debited = await debitWallet(guildId, userId, amount);
-	if (!debited) return null;
-	return adjustBank(guildId, userId, amount);
+	refuseNegative(amount);
+	return Economy.findOneAndUpdate(
+		{ guildId, userId, wallet: { $gte: amount } },
+		{ $inc: { wallet: -amount, bank: amount } },
+		LEAN,
+	)
+		.lean<EconomyAccount>()
+		.exec();
 }
 
 export async function withdraw(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
-	const debited = await debitBank(guildId, userId, amount);
-	if (!debited) return null;
-	return adjustWallet(guildId, userId, amount);
+	refuseNegative(amount);
+	return Economy.findOneAndUpdate(
+		{ guildId, userId, bank: { $gte: amount } },
+		{ $inc: { bank: -amount, wallet: amount } },
+		LEAN,
+	)
+		.lean<EconomyAccount>()
+		.exec();
 }
 
 /** The credit only happens once the debit has landed. */
@@ -116,6 +127,22 @@ const COOLDOWN_FIELDS = {
 	heist: "lastHeist",
 	beg: "lastBegged",
 } as const satisfies Record<EconomyCooldownKey, keyof EconomyAccount>;
+
+/** Either field can be missing on a stored record, since Mongoose adds defaults only when it writes one. */
+type IncomeEarner = Pick<EconomyAccount, "guildId" | "userId"> & Partial<Pick<EconomyAccount, "house" | "businesses">>;
+
+/** Every account that owns a house or a business, in every server, read a batch at a time for the hourly income. */
+export function incomeEarners(): AsyncIterable<IncomeEarner> {
+	return Economy.find({ $or: [{ house: { $ne: null } }, { "businesses.0": { $exists: true } }] })
+		.select({ guildId: 1, userId: 1, house: 1, businesses: 1 })
+		.lean<IncomeEarner[]>()
+		.cursor();
+}
+
+/** For an account already known to exist, so nothing is created and the tuning is not read. */
+export async function creditBank(guildId: string, userId: string, amount: number): Promise<void> {
+	await Economy.updateOne({ guildId, userId }, { $inc: { bank: amount } }).exec();
+}
 
 export async function setCooldown(
 	guildId: string,
@@ -296,26 +323,37 @@ export async function getGuildTotals(
 	};
 }
 
+/** Null only when the account does not exist. */
 export async function addInventoryItem(
 	guildId: string,
 	userId: string,
 	item: Omit<InventoryItem, "purchasedAt"> & { purchasedAt?: Date },
-): Promise<EconomyAccount> {
-	const existing = await Economy.findOneAndUpdate(
-		{ guildId, userId, "inventory.itemId": item.itemId },
-		{ $inc: { "inventory.$.quantity": item.quantity } },
-		LEAN,
-	)
-		.lean<EconomyAccount>()
-		.exec();
+): Promise<EconomyAccount | null> {
+	const stack = (): Promise<EconomyAccount | null> =>
+		Economy.findOneAndUpdate(
+			{ guildId, userId, "inventory.itemId": item.itemId },
+			{ $inc: { "inventory.$.quantity": item.quantity } },
+			LEAN,
+		)
+			.lean<EconomyAccount>()
+			.exec();
 
-	if (existing) return existing;
+	// Pushed only while the item is still missing, so two first purchases at once cannot make two rows of it.
+	const push = (): Promise<EconomyAccount | null> =>
+		Economy.findOneAndUpdate(
+			{ guildId, userId, "inventory.itemId": { $ne: item.itemId } },
+			{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
+			LEAN,
+		)
+			.lean<EconomyAccount>()
+			.exec();
 
-	return Economy.findOneAndUpdate(
-		{ guildId, userId },
-		{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
-		LEAN,
-	).exec() as Promise<EconomyAccount>;
+	// A push refused because the row now exists, or a stack that missed a row used up meanwhile, lands next round.
+	for (let round = 0; round < 2; round += 1) {
+		const added = (await stack()) ?? (await push());
+		if (added) return added;
+	}
+	return null;
 }
 
 /** Conditional removal, so an item cannot be consumed twice concurrently. */

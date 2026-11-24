@@ -1,5 +1,6 @@
 import { type Types } from "mongoose";
 import { DAY_MS } from "@config/constants";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import {
 	Appeal,
 	type AppealRecord,
@@ -33,7 +34,6 @@ function toAppeal(row: Lean): StoredAppeal {
 	};
 }
 
-/** Every lookup by id is scoped to the server too, so one server's staff can never reach another's appeal. */
 const SETTINGS = "enabled channelId cooldownDays";
 
 export async function getAppealSettings(guildId: string): Promise<StoredAppealSettings | null> {
@@ -69,7 +69,7 @@ export async function createAppeal(
 		const doc = await Appeal.create({ ...fields, status: "open" });
 		return toAppeal(doc.toObject<Lean>());
 	} catch (error) {
-		if ((error as { code?: number }).code === 11_000) return null;
+		if (isDuplicateKey(error)) return null;
 		throw error;
 	}
 }

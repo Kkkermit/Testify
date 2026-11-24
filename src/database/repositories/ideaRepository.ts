@@ -30,7 +30,6 @@ function toIdea(row: Lean): StoredIdea {
 	};
 }
 
-/** Every lookup by id is scoped to the server too, so one server's panel can never reach another's idea. */
 export async function getIdeaSettings(guildId: string): Promise<StoredIdeaSettings | null> {
 	return IdeaSettingsConfig.findOne({ guildId }).select("enabled channelId").lean<StoredIdeaSettings>().exec();
 }

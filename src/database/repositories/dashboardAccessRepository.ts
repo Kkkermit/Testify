@@ -1,4 +1,5 @@
 import { MINUTE_MS } from "@config/constants";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import { DashboardAccess, type DashboardAccessRecord } from "@database/models/dashboardAccess.schema";
 import { type AccessArea } from "@testify/shared";
 
@@ -8,11 +9,6 @@ const FIELDS = "guildId userId username areas addedBy addedByName lastSeenAt cre
 
 /** How stale "last seen" may be, so a person clicking through the screens costs a write every ten minutes at most. */
 const SEEN_EVERY_MS = 10 * MINUTE_MS;
-
-/** 11000 is Mongo's duplicate key: the person already has access here. */
-function isDuplicateKey(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
-}
 
 export async function findAccess(guildId: string, userId: string): Promise<StoredAccess | null> {
 	return DashboardAccess.findOne({ guildId, userId }).select(FIELDS).lean<StoredAccess>().exec();

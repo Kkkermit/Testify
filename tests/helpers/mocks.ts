@@ -14,10 +14,10 @@ import { createLogger } from "@core/logger";
 
 /** Mock factories, one per surface, with every method already stubbed. */
 
-/** Applies overrides so that an explicit `null`, `0` or `false` wins. */
 /** `User`, `Role` and `GuildMember` type `toString()` as a template literal, which an object literal cannot satisfy. */
 export type Overrides<T> = Partial<Omit<T, "toString" | "valueOf">>;
 
+/** Applies overrides so that an explicit `null`, `0` or `false` wins. */
 function merge<T extends object>(defaults: T, overrides: Overrides<T> = {}): T {
 	const result = { ...defaults };
 

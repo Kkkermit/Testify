@@ -24,28 +24,36 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 
 	client.logger.info({ reason }, "[SHUTDOWN] Shutting down.");
 
-	try {
-		client.timers.stopAll();
-		stopEventLoopMonitor();
-		destroyAllSessions();
-		await client.api?.close();
-		closeLiveFeed(client);
+	// In this order, and each on its own, so one that fails cannot leave the database open or a log unflushed.
+	const steps: [step: string, run: () => unknown][] = [
+		["timers", () => client.timers.stopAll()],
+		["eventLoop", stopEventLoopMonitor],
+		["music", destroyAllSessions],
+		["dashboard", () => client.api?.close()],
+		["liveFeed", () => closeLiveFeed(client)],
 		// Counted messages live in memory until a flush, so the last minute's are written before the database goes.
-		await flushActivity(client.logger);
-		await flushCommandLog(client);
+		["insights", () => flushActivity(client.logger)],
+		["commandLog", () => flushCommandLog(client)],
 		// Before the archive closes, so anything it says on the way out is kept, and before the client it listens to goes.
-		await client.shardlens?.shutdown();
-		await logArchive.close(client.logger);
-		await disconnectDatabase();
-		await client.destroy();
+		["shardlens", () => client.shardlens?.shutdown()],
+		["logArchive", () => logArchive.close(client.logger)],
+		["database", disconnectDatabase],
+		["discord", () => client.destroy()],
 		// Last, so everything the SDK flushed above has reached it.
-		await client.lensTarget.embedded?.close();
-	} catch (error) {
-		client.logger.error({ err: toError(error) }, "[SHUTDOWN_ERROR] Something went wrong while shutting down.");
-		code = code === 0 ? 1 : code;
+		["collector", () => client.lensTarget.embedded?.close()],
+	];
+
+	let failed = false;
+	for (const [step, run] of steps) {
+		try {
+			await run();
+		} catch (error) {
+			failed = true;
+			client.logger.error({ err: toError(error), step }, "[SHUTDOWN_ERROR] Something went wrong while shutting down.");
+		}
 	}
 
-	process.exit(code);
+	process.exit(failed && code === 0 ? 1 : code);
 }
 
 /** Makes Ctrl+C and `docker stop` shut down cleanly. */

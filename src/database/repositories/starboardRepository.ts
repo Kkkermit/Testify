@@ -1,4 +1,5 @@
 import { type Types } from "mongoose";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import {
 	StarboardSettingsConfig,
 	type StarboardSettingsRecord,
@@ -13,11 +14,6 @@ export type StoredStarPost = Omit<StarPostRecord, "createdAt" | "updatedAt">;
 type Lean = StarPostRecord & { _id: Types.ObjectId };
 
 const SETTINGS_FIELDS = "enabled channelId threshold selfStar";
-
-/** 11000 is Mongo's duplicate key: another reaction claimed the message first. */
-function isDuplicateKey(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
-}
 
 function toPost(row: Lean): StoredStarPost {
 	return {

@@ -165,20 +165,13 @@ describe("runChecks", () => {
 		);
 	});
 
-	it("records nothing when an owner runs an owner-only command", async () => {
+	it("lets an owner run an owner-only command, and records nothing", async () => {
 		const command = { ...plain, ownerOnly: true };
 		const warn = jest.fn();
 		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });
 
-		await runChecks(interaction, command, createMockClient({ logger: { warn } } as never));
+		expect(await runChecks(interaction, command, createMockClient({ logger: { warn } } as never))).toBeNull();
 		expect(warn).not.toHaveBeenCalled();
-	});
-
-	it("allows an owner-only command for an owner", async () => {
-		const command = { ...plain, ownerOnly: true };
-		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });
-
-		expect(await runChecks(interaction, command, createMockClient())).toBeNull();
 	});
 
 	it("refuses a guild-only command in a direct message", async () => {

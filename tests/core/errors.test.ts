@@ -1,7 +1,8 @@
 import { type APIEmbed, MessageFlags } from "discord.js";
+import { isCategory } from "@config/categories";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
-import { runButton, runCommand, UserFacingError } from "@core/errors";
+import { runButton, runCommand, toError, UserFacingError } from "@core/errors";
 import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 describe("runCommand", () => {
@@ -173,5 +174,32 @@ describe("the error channel", () => {
 			runCommand(createMockInteraction() as unknown as CommandInput, command, client),
 		).resolves.toMatchObject({ ok: false });
 		expect(client.logger.warn).toHaveBeenCalled();
+	});
+});
+
+/** It runs inside every catch-all handler, so a BigInt or a cycle that made it throw escaped the handler too. */
+describe("toError", () => {
+	it("turns anything thrown into an Error without throwing itself", () => {
+		const cyclic: Record<string, unknown> = {};
+		cyclic.self = cyclic;
+		const thrown = [new Error("kept"), "text", 7, 1n, undefined, { code: 1 }, cyclic, { big: 2n }];
+
+		expect(thrown.map((value) => toError(value).message)).toEqual([
+			"kept",
+			"text",
+			"7",
+			"1",
+			"undefined",
+			'{"code":1}',
+			"[object Object]",
+			"[object Object]",
+		]);
+	});
+});
+
+/** `in` reads the prototype too, so a command filed under "constructor" passed as a category. */
+describe("isCategory", () => {
+	it("accepts the categories and nothing an object inherits", () => {
+		expect(["fun", "owner", "constructor", "toString", "hasOwnProperty"].filter(isCategory)).toEqual(["fun", "owner"]);
 	});
 });

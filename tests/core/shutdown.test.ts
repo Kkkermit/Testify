@@ -100,6 +100,23 @@ describe("shutdown", () => {
 		expect(order).toEqual(["shardlens", "destroy", "collector"]);
 	});
 
+	/** One step that threw skipped every step after it, so a listener that would not close left the database open. */
+	it("carries on past a step that fails, and exits with an error", async () => {
+		const { shutdown, disconnectDatabase } = loadShutdown();
+		const client = clientFor();
+		client.api = { close: jest.fn(() => Promise.reject(new Error("port stuck"))) };
+
+		await shutdown(client, "SIGINT");
+
+		expect(disconnectDatabase).toHaveBeenCalled();
+		expect(client.destroy).toHaveBeenCalled();
+		expect(client.logger.error).toHaveBeenCalledWith(
+			expect.objectContaining({ step: "dashboard" }),
+			expect.any(String),
+		);
+		expect(exitSpy).toHaveBeenCalledWith(1);
+	});
+
 	/** Two signals in quick succession must not race two teardowns. */
 	it("ignores a second call", async () => {
 		const { shutdown, disconnectDatabase } = loadShutdown();

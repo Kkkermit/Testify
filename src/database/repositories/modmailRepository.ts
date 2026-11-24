@@ -1,11 +1,13 @@
 import { isValidObjectId, type Types } from "mongoose";
-import { CACHE, DAY_MS } from "@config/constants";
+import { DAY_MS } from "@config/constants";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import {
 	ModmailSettingsConfig,
 	type ModmailSettingsRecord,
 	ModmailThread,
 	type ModmailThreadRecord,
 } from "@database/models/modmail.schema";
+import { ReadCache } from "@database/readCache.util";
 import { recordIn } from "@database/recordFilter.util";
 import { MODMAIL_LIMITS } from "@testify/shared";
 
@@ -18,7 +20,7 @@ type Lean = ModmailThreadRecord & { _id: Types.ObjectId };
 const SETTINGS = "enabled channelId pingRoleId anonymous";
 
 /** Read on every message in a thread, so the answer is cached and replaced on every write. */
-const cache = new Map<string, { settings: StoredModmailSettings | null; expiresAt: number }>();
+const cache = new ReadCache<StoredModmailSettings | null>();
 
 function toConversation(row: Lean): StoredConversation {
 	return {
@@ -36,18 +38,10 @@ function toConversation(row: Lean): StoredConversation {
 	};
 }
 
-/** Every lookup by id is scoped to the server too, so one server's staff can never reach another's conversation. */
 export async function getModmailSettings(guildId: string): Promise<StoredModmailSettings | null> {
-	const cached = cache.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.settings;
-
-	const settings = await ModmailSettingsConfig.findOne({ guildId })
-		.select(SETTINGS)
-		.lean<StoredModmailSettings>()
-		.exec();
-	if (cache.size > CACHE.guildSettingsMaxEntries) cache.clear();
-	cache.set(guildId, { settings, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-	return settings;
+	return cache.read(guildId, () =>
+		ModmailSettingsConfig.findOne({ guildId }).select(SETTINGS).lean<StoredModmailSettings>().exec(),
+	);
 }
 
 export async function saveModmailSettings(
@@ -62,7 +56,7 @@ export async function saveModmailSettings(
 			{ upsert: true, setDefaultsOnInsert: true },
 		).exec();
 	} finally {
-		cache.delete(guildId);
+		cache.forget(guildId);
 	}
 }
 
@@ -83,7 +77,7 @@ export async function claimConversation(
 		const doc = await ModmailThread.create({ ...fields, status: "open", waiting: true, lastMessageAt: new Date() });
 		return toConversation(doc.toObject<Lean>());
 	} catch (error) {
-		if ((error as { code?: number }).code === 11_000) return null;
+		if (isDuplicateKey(error)) return null;
 		throw error;
 	}
 }
@@ -166,7 +160,7 @@ export async function purgeModmail(guildId: string): Promise<void> {
 		ModmailThread.deleteMany({ guildId }).exec(),
 		ModmailSettingsConfig.deleteMany({ guildId }).exec(),
 	]);
-	cache.delete(guildId);
+	cache.forget(guildId);
 }
 
 export function clearModmailCache(): void {
