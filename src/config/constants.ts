@@ -32,8 +32,6 @@ export const ECONOMY = {
 	heistMaxPlayers: 5,
 	heistJoinWindowMs: 60 * SECOND_MS,
 	transferMin: 1,
-	passiveIncomeIntervalMs: HOUR_MS,
-	leaderboardPageSize: 10,
 } as const;
 
 export const LEVELLING = {
@@ -70,13 +68,8 @@ export const LIMITS = {
 	embedDescription: 4_096,
 	embedFieldValue: 1_024,
 	embedTitle: 256,
-	messageContent: 2_000,
-	selectMenuOptions: 25,
-	autocompleteChoices: 25,
 	bulkDeleteMax: 100,
 	bulkDeleteMin: 1,
-	defaultPageSize: 6,
-	componentTimeoutMs: 5 * MINUTE_MS,
 	externalApiTimeoutMs: 10 * SECOND_MS,
 } as const;
 
@@ -106,5 +99,3 @@ export const AFK = {
 	/** How long the notice stays up before it tidies itself away. */
 	noticeShowsMs: 30 * SECOND_MS,
 } as const;
-
-/** Used where a "never expires" sentinel is needed instead of a made-up huge number. */

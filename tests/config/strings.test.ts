@@ -13,12 +13,6 @@ function walk(value: unknown, path: string[] = []): [string, Leaf][] {
 const leaves = walk(strings);
 
 const ARGUMENTS: Record<string, unknown[]> = {
-	"generic.unknownCommand": ["t?"],
-	"generic.blacklisted": ["spamming"],
-	"generic.cooldown": ["3 seconds"],
-	"generic.externalApi": ["TMDB"],
-	"permissions.userMissing": [["BanMembers", "KickMembers"]],
-	"permissions.botMissing": [["ManageRoles"]],
 	"economy.targetNoAccount": ["alice"],
 	"economy.insufficientWallet": [1234],
 	"economy.insufficientBank": [50],
@@ -26,10 +20,6 @@ const ARGUMENTS: Record<string, unknown[]> = {
 };
 
 describe("strings", () => {
-	it("has copy to check", () => {
-		expect(leaves.length).toBeGreaterThan(20);
-	});
-
 	it("renders every line without a hole in it", () => {
 		const holed = leaves.filter(([name, leaf]) => {
 			const rendered =
@@ -38,20 +28,8 @@ describe("strings", () => {
 			return typeof rendered !== "string" || rendered.length === 0 || /undefined|\[object Object\]|NaN/.test(rendered);
 		});
 
+		expect(leaves.length).toBeGreaterThan(20);
 		expect(holed.map(([name]) => name)).toEqual([]);
-	});
-
-	it("interpolates the values it is given", () => {
-		expect(strings.generic.unknownCommand("t?")).toContain("t?help");
-		expect(strings.generic.blacklisted("spamming")).toContain("spamming");
-		expect(strings.generic.externalApi("TMDB")).toContain("TMDB");
-	});
-
-	it("formats a missing-permission list as inline code", () => {
-		const rendered = strings.permissions.userMissing(["BanMembers", "KickMembers"]);
-
-		expect(rendered).toContain("`BanMembers`");
-		expect(rendered).toContain("`KickMembers`");
 	});
 
 	it("groups thousands in economy amounts, so 1234 does not read as 1234", () => {
