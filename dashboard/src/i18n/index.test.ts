@@ -18,6 +18,13 @@ describe("a language tag the browser cannot format in", () => {
 		expect(cases.filter(([reported, read]) => readableTag(reported) !== read)).toEqual([]);
 	});
 
+	/** i18next 27 treats an empty translation as missing, which gave Japanese English's space between sentences. */
+	it("keeps a translation that is deliberately empty", async () => {
+		await i18next.changeLanguage("ja");
+
+		expect(i18next.t("common.sentenceSeparator")).toBe("");
+	});
+
 	it("still groups a count's digits, and marks the page with the language it is written in", async () => {
 		await i18next.changeLanguage("en-US@posix");
 
