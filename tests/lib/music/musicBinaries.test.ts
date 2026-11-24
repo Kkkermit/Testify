@@ -91,11 +91,8 @@ describe("pickNewest", () => {
 });
 
 describe("ageInDays", () => {
-	it("says nothing about a version that is not a date", () => {
+	it("says nothing about a version that is not a date, and never gives a future release a negative age", () => {
 		expect(ageInDays("nightly")).toBeNull();
-	});
-
-	it("never reports a release from the future as a negative age", () => {
 		expect(ageInDays("2026.12.31", Date.UTC(2026, 8, 22))).toBe(0);
 	});
 });

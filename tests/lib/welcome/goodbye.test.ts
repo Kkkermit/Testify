@@ -66,13 +66,10 @@ describe("readGoodbye", () => {
 });
 
 describe("applyGoodbye", () => {
-	it("refuses to turn on with nowhere to post", async () => {
+	it("refuses to turn on with nowhere to post, and refuses a channel the bot cannot post in", async () => {
 		await expect(applyGoodbye(guild, { enabled: true }, OWNER)).rejects.toThrow("Pick a channel for the goodbye");
-		expect(saveGoodbyeSettings).not.toHaveBeenCalled();
-	});
-
-	it("refuses a channel the bot cannot post in", async () => {
 		await expect(applyGoodbye(guild, { channelId: SILENT }, OWNER)).rejects.toThrow("I cannot post in that channel");
+		expect(saveGoodbyeSettings).not.toHaveBeenCalled();
 	});
 
 	/** A goodbye switched on with its channel taken away would be on and silent, which nobody could tell apart from off. */
