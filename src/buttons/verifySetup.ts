@@ -1,6 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
+import { readerLanguage } from "@core/language";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
 import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import {
@@ -92,7 +93,9 @@ export default recordsSettings(
 					await saveVerifyConfig(guild.id, { message });
 					const next = { ...config, message };
 
-					if (next.messageId !== null && isReady(next)) await publishVerifyPanel(guild, next);
+					if (next.messageId !== null && isReady(next)) {
+						await publishVerifyPanel(guild, next, readerLanguage(interaction));
+					}
 					await show(next, "Wording updated.");
 					return;
 				}
@@ -100,7 +103,7 @@ export default recordsSettings(
 				case "post": {
 					if (!isReady(config)) throw new UserFacingError("Pick a channel and a role first.");
 
-					const messageId = await publishVerifyPanel(guild, config);
+					const messageId = await publishVerifyPanel(guild, config, readerLanguage(interaction));
 					await saveVerifyConfig(guild.id, { messageId });
 					await show({ ...config, messageId }, "Panel posted. Members can verify now.");
 					return;
