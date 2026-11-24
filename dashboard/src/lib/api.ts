@@ -1,7 +1,8 @@
 import { type ApiErrorBody, CHANGE_WAY_HEADER, type ChangeWay } from "@testify/shared";
 
 const BASE = "/api";
-const CSRF_COOKIE = "dash_csrf";
+// The server sets the `__Host-` copy outside development and reads only that one there.
+const CSRF_COOKIES = ["__Host-dash_csrf", "dash_csrf"];
 
 export class ApiError extends Error {
 	readonly status: number;
@@ -43,7 +44,7 @@ async function request<T>(method: string, path: string, body?: unknown, options:
 
 	if (method !== "GET") {
 		// Double-submit: the readable cookie echoed in a header the browser cannot set cross-site.
-		const csrf = readCookie(CSRF_COOKIE);
+		const csrf = CSRF_COOKIES.map(readCookie).find((value) => value !== null) ?? null;
 		if (csrf !== null) headers["x-csrf-token"] = csrf;
 	}
 

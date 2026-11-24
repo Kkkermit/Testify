@@ -86,17 +86,17 @@ dashboard.
 
 The dashboard is **off by default**. Turned on, it is guarded in layers, each with a test that was seen to fail:
 
-| Layer                       | What it does                                                                                                               |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Content Security Policy** | `script-src` has no `'unsafe-inline'` or `'unsafe-eval'`, plus `frame-ancestors 'none'`, `nosniff`, `no-referrer` and HSTS |
-| **CSRF**                    | A double-submit token on every write, compared with `timingSafeEqual`                                                      |
-| **Validation**              | Every parameter, query and body goes through zod; nothing reads raw input                                                  |
-| **Server access**           | Manage Server is checked against Discord **live, on every request**, so losing it locks you out on your next click         |
-| **Reach**                   | An action asks what its command asks — Kick Members to kick — and every channel and role named must belong to that server  |
-| **Owner console**           | Answers **404** to anybody not in `DISCORD_OWNER_IDS`, and its code is only ever served to an owner's session              |
-| **Blacklist**               | A blocked account reaches only who it is, signing out and Delete my data; every other route answers 403                    |
-| **Rate limiting**           | A bounded fixed window per session, falling back to the address                                                            |
-| **Cookies**                 | Set in one place, always `HttpOnly` and `SameSite=Lax`, and `Secure` outside development                                   |
+| Layer                       | What it does                                                                                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Content Security Policy** | `script-src` has no `'unsafe-inline'` or `'unsafe-eval'`, plus `frame-ancestors 'none'`, `nosniff`, `no-referrer` and HSTS                                 |
+| **CSRF**                    | A double-submit token on every write, compared with `timingSafeEqual`                                                                                      |
+| **Validation**              | Every parameter, query and body goes through zod; nothing reads raw input                                                                                  |
+| **Server access**           | Manage Server is checked against Discord **live, on every request**, so losing it locks you out on your next click                                         |
+| **Reach**                   | An action asks what its command asks — Kick Members to kick — and every channel and role named must belong to that server                                  |
+| **Owner console**           | Answers **404** to anybody not in `DISCORD_OWNER_IDS`, and its code is only ever served to an owner's session                                              |
+| **Blacklist**               | A blocked account reaches only who it is, signing out and Delete my data; every other route answers 403                                                    |
+| **Rate limiting**           | A bounded fixed window per session, falling back to the address                                                                                            |
+| **Cookies**                 | Set in one place, `SameSite=Lax`, `HttpOnly` but for the CSRF token, and `Secure` and named `__Host-` outside development, so a subdomain cannot plant one |
 
 The full model, and the rules that are easy to break silently, are in [`AGENTS.md` §24](../AGENTS.md#24-the-dashboard).
 

@@ -11,14 +11,22 @@ export const SESSION_COOKIE = "dash_session";
 export const CSRF_COOKIE = "dash_csrf";
 export const OAUTH_COOKIE = "dash_oauth";
 
+type AuthCookie = typeof SESSION_COOKIE | typeof CSRF_COOKIE | typeof OAUTH_COOKIE;
+
+const HOST_ONLY = "__Host-";
 const OAUTH_COOKIE_MAX_AGE = 600;
 
 function secureFor(env: Env): boolean {
 	return env.NODE_ENV !== "development";
 }
 
+/** Outside development the browser takes a `__Host-` cookie only from this host, so a subdomain cannot plant one. */
+export function cookieName(env: Env, cookie: AuthCookie): string {
+	return secureFor(env) ? `${HOST_ONLY}${cookie}` : cookie;
+}
+
 export function setSessionCookie(context: Context, env: Env, id: string, maxAgeSeconds: number): void {
-	setCookie(context, SESSION_COOKIE, id, {
+	setCookie(context, cookieName(env, SESSION_COOKIE), id, {
 		httpOnly: true,
 		secure: secureFor(env),
 		sameSite: "Lax",
@@ -29,7 +37,7 @@ export function setSessionCookie(context: Context, env: Env, id: string, maxAgeS
 
 /** Deliberately readable: the SPA has to echo it in a header, which is the whole double-submit mechanism. */
 export function setCsrfCookie(context: Context, env: Env, secret: string, maxAgeSeconds: number): void {
-	setCookie(context, CSRF_COOKIE, secret, {
+	setCookie(context, cookieName(env, CSRF_COOKIE), secret, {
 		httpOnly: false,
 		secure: secureFor(env),
 		sameSite: "Lax",
@@ -40,7 +48,7 @@ export function setCsrfCookie(context: Context, env: Env, secret: string, maxAge
 
 /** Holds the in-flight OAuth `state` and PKCE verifier, and is cleared whether the callback succeeds or not. */
 export function setOauthCookie(context: Context, env: Env, value: string): void {
-	setCookie(context, OAUTH_COOKIE, value, {
+	setCookie(context, cookieName(env, OAUTH_COOKIE), value, {
 		httpOnly: true,
 		secure: secureFor(env),
 		sameSite: "Lax",
@@ -50,11 +58,17 @@ export function setOauthCookie(context: Context, env: Env, value: string): void 
 }
 
 export function clearAuthCookies(context: Context, env: Env): void {
-	for (const name of [SESSION_COOKIE, CSRF_COOKIE, OAUTH_COOKIE]) {
-		deleteCookie(context, name, { path: "/", secure: secureFor(env), sameSite: "Lax" });
+	for (const cookie of [SESSION_COOKIE, CSRF_COOKIE, OAUTH_COOKIE] as const) {
+		deleteCookie(context, cookieName(env, cookie), { path: "/", secure: secureFor(env), sameSite: "Lax" });
 	}
 }
 
-export function readCookie(context: Context, name: string): string | null {
-	return getCookie(context, name) ?? null;
+/** Only the name this environment sets, so an unprefixed copy planted from a subdomain is never read. */
+export function readCookie(context: Context, env: Env, cookie: AuthCookie): string | null {
+	return getCookie(context, cookieName(env, cookie)) ?? null;
+}
+
+/** Either spelling, for a caller that may only narrow what it allows and never widen it. */
+export function readAnyCookie(context: Context, cookie: AuthCookie): string | null {
+	return getCookie(context, `${HOST_ONLY}${cookie}`) ?? getCookie(context, cookie) ?? null;
 }

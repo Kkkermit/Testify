@@ -131,6 +131,7 @@ describe("CSRF", () => {
 		const app = new Hono<ApiBindings>();
 		app.onError((error, context) => context.json(problemBody(error as ApiProblem), 403));
 		app.use("*", async (context, next) => {
+			context.set("env", { NODE_ENV: "production" } as never);
 			context.set("session", { _id: "s", userId: OWNER, csrfSecret: "secret" } as never);
 			await next();
 		});
@@ -146,7 +147,7 @@ describe("CSRF", () => {
 	it("refuses a write with the cookie but no header", async () => {
 		const response = await csrfApp().request("/write", {
 			method: "POST",
-			headers: { cookie: "dash_csrf=secret" },
+			headers: { cookie: "__Host-dash_csrf=secret" },
 		});
 
 		expect(response.status).toBe(403);
@@ -155,7 +156,7 @@ describe("CSRF", () => {
 	it("refuses a header that does not match the session's own secret", async () => {
 		const response = await csrfApp().request("/write", {
 			method: "POST",
-			headers: { cookie: "dash_csrf=guessed", "x-csrf-token": "guessed" },
+			headers: { cookie: "__Host-dash_csrf=guessed", "x-csrf-token": "guessed" },
 		});
 
 		expect(response.status).toBe(403);

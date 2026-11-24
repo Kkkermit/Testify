@@ -368,7 +368,8 @@ registered behind it silently never runs.
 - **`returnTo` rejects `//evil.example`.** A protocol-relative URL is absolute to a browser. Backslashes go
   too — browsers normalise them.
 - **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
-  `http://localhost` install, the most common self-hosting trip-up there is.
+  `http://localhost` install, the most common self-hosting trip-up there is. Outside development each name also
+  starts `__Host-` (`cookieName`), so a site on a subdomain cannot plant a session or a CSRF token.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1`, `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
   admin panel on the internet; trusting `x-forwarded-for` with no proxy lets anyone forge their rate-limit
   bucket.

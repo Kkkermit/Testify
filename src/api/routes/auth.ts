@@ -202,7 +202,7 @@ auth.get("/me", requireAuth, async (context) => {
 });
 
 function readPending(context: ApiContext): Pending | null {
-	const raw = readCookie(context, OAUTH_COOKIE);
+	const raw = readCookie(context, context.get("env"), OAUTH_COOKIE);
 	if (raw === null) return null;
 
 	try {

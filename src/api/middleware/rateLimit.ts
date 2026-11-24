@@ -2,7 +2,7 @@ import { getConnInfo } from "@hono/node-server/conninfo";
 import { type Context } from "hono";
 import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
-import { SESSION_COOKIE, readCookie } from "@api/cookies";
+import { readAnyCookie, SESSION_COOKIE } from "@api/cookies";
 import { tooManyRequests } from "@api/errors";
 
 interface RateLimitOptions {
@@ -70,7 +70,7 @@ export class RateLimiter {
  */
 export function callerKeys(context: Context, trustProxy: boolean): string[] {
 	const keys = [`i:${clientAddress(context, trustProxy)}`];
-	const session = readCookie(context, SESSION_COOKIE);
+	const session = readAnyCookie(context, SESSION_COOKIE);
 
 	if (session !== null && session !== "") keys.push(`s:${session}`);
 

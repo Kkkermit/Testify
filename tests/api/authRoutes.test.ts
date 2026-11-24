@@ -107,11 +107,11 @@ function app(
 async function beginLogin(instance: Hono<ApiBindings>): Promise<{ state: string; cookie: string }> {
 	const response = await instance.request("/auth/login");
 	const cookie = response.headers.get("set-cookie") ?? "";
-	const pending = JSON.parse(decodeURIComponent(/dash_oauth=([^;]+)/.exec(cookie)?.[1] ?? "{}")) as {
+	const pending = JSON.parse(decodeURIComponent(/__Host-dash_oauth=([^;]+)/.exec(cookie)?.[1] ?? "{}")) as {
 		state: string;
 	};
 
-	return { state: pending.state, cookie: `dash_oauth=${encodeURIComponent(JSON.stringify(pending))}` };
+	return { state: pending.state, cookie: `__Host-dash_oauth=${encodeURIComponent(JSON.stringify(pending))}` };
 }
 
 beforeEach(() => {
@@ -160,7 +160,7 @@ describe("GET /auth/login", () => {
 	it("keeps the pending flow in a short-lived httpOnly cookie", async () => {
 		const cookie = (await app().request("/auth/login")).headers.get("set-cookie") ?? "";
 
-		expect(cookie).toContain("dash_oauth=");
+		expect(cookie).toContain("__Host-dash_oauth=");
 		expect(cookie).toContain("HttpOnly");
 	});
 
@@ -203,7 +203,7 @@ describe("GET /auth/callback", () => {
 		expect(exchanged).toHaveBeenCalled();
 		expect(sessionCreated).toHaveBeenCalled();
 		expect(response.status).toBe(302);
-		expect(response.headers.get("set-cookie")).toContain("dash_session=new-session-id");
+		expect(response.headers.get("set-cookie")).toContain("__Host-dash_session=new-session-id");
 	});
 
 	/** A state with no pending flow behind it is a forged callback. */
@@ -231,7 +231,7 @@ describe("GET /auth/callback", () => {
 
 		const response = await instance.request("/auth/callback?code=abc&state=wrong", { headers: { cookie } });
 
-		expect(response.headers.get("set-cookie")).toContain("dash_oauth=;");
+		expect(response.headers.get("set-cookie")).toContain("__Host-dash_oauth=;");
 	});
 
 	it("sends somebody who pressed Cancel to a friendly page rather than an error", async () => {
@@ -259,7 +259,7 @@ describe("POST /auth/logout", () => {
 
 		expect(sessionDeleted).toHaveBeenCalledWith("sid");
 		expect(response.status).toBe(204);
-		expect(response.headers.get("set-cookie")).toContain("dash_session=;");
+		expect(response.headers.get("set-cookie")).toContain("__Host-dash_session=;");
 	});
 
 	it("refuses an anonymous caller", async () => {

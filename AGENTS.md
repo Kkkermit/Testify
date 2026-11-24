@@ -2802,7 +2802,10 @@ Rules that are easy to break and silent when broken:
   allows `*`, which `URLSearchParams` never encodes, and the sign-in page checks the address with the same schema
   and falls back to `/guilds`, because a character typed raw into the address bar ended the sign-in on a 400.
 - **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
-  `http://localhost` install, which is the most common self-hosting trip-up there is.
+  `http://localhost` install, which is the most common self-hosting trip-up there is. Outside development each
+  cookie's name also starts `__Host-` (`cookieName`), which a browser takes only from this host, with no Domain, so a
+  site on a subdomain cannot plant a session or a CSRF token. The server reads only the name its environment sets, and
+  the page echoes the prefixed CSRF cookie before a plain one.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
   admin panel on the internet; trusting `x-forwarded-for` with no proxy in front lets anyone forge their
   rate-limit bucket.
