@@ -23,7 +23,7 @@ jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudi
 
 const host = { id: ACTOR, username: "someone" };
 
-function app(): Hono<ApiBindings> {
+function app(fetchHost: () => Promise<unknown> = () => Promise.resolve(host)): Hono<ApiBindings> {
 	const actor = { id: ACTOR, permissions: { has: () => true } };
 	const guild = {
 		id: GUILD,
@@ -33,7 +33,7 @@ function app(): Hono<ApiBindings> {
 	} as unknown as Guild;
 	const client = {
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
-		users: { fetch: jest.fn(() => Promise.resolve(host)) },
+		users: { fetch: jest.fn(fetchHost) },
 		isOwner: () => false,
 		logger: { error: jest.fn() },
 	} as unknown as TestifyClient;
@@ -88,6 +88,20 @@ describe("the giveaway routes", () => {
 			expect.objectContaining({ ...draft, hostedBy: host }),
 		);
 		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "giveaway.start" }));
+	});
+
+	/** A lookup of the host that Discord fails must be a refusal, not an unexpected 500. */
+	it("refuses rather than failing when Discord cannot say who the host is", async () => {
+		const draft = { channelId: CHANNEL, prize: "A copy of the game", winnerCount: 1, durationMs: 3_600_000 };
+		const response = await app(() => Promise.reject(new Error("503"))).request(`/guilds/${GUILD}/giveaways`, {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify(draft),
+		});
+
+		expect(response.status).toBe(404);
+		expect(await response.json()).toMatchObject({ error: { code: "user_not_found" } });
+		expect(startGiveaway).not.toHaveBeenCalled();
 	});
 
 	it("refuses to start one in a channel that is not in this server", async () => {

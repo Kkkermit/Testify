@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf, guildOf } from "@api/context";
@@ -62,19 +62,21 @@ settings.patch("/nickname", requirePermission(PermissionFlagsBits.ManageNickname
 		throw badRequest(`${botName()} needs the Change Nickname permission in this server.`);
 	}
 
+	// discord.js patches a copy and leaves `members.me` as it was until Discord's update arrives, so the copy is the answer.
+	let renamed: GuildMember;
 	try {
-		await me.setNickname(nickname === "" ? null : nickname);
+		renamed = await me.setNickname(nickname);
 	} catch (error) {
 		throw badRequest(error instanceof Error ? error.message : "Discord refused that nickname.");
 	}
 
 	await auditChange(context, {
 		action: "settings.nickname",
-		summary: nickname === null || nickname === "" ? "Cleared the bot's nickname" : `Renamed the bot to ${nickname}`,
+		summary: nickname === null ? "Cleared the bot's nickname" : `Renamed the bot to ${nickname}`,
 		after: { nickname },
 	});
 
-	const body: GuildNickname = { nickname: me.nickname, canChange: true };
+	const body: GuildNickname = { nickname: renamed.nickname, canChange: true };
 	return context.json(body);
 });
 

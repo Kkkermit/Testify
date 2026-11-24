@@ -1,7 +1,7 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
-import { UserFacingError } from "@core/errors";
+import { toError, UserFacingError } from "@core/errors";
 import {
 	appealGuildIds,
 	countOpenAppeals,
@@ -239,7 +239,13 @@ export async function decideOnAppeal(
 		}
 	}
 
-	await refreshAppealPost(guild, decided);
+	// The decision and the unban have happened, so a post that cannot be edited is noted rather than failing them.
+	await refreshAppealPost(guild, decided).catch((error: unknown) => {
+		client.logger.warn(
+			{ err: toError(error), guildId: guild.id },
+			"[APPEALS] The appeal's post could not be updated with the decision. Check the bot can still edit messages there.",
+		);
+	});
 	await client.users
 		.fetch(decided.userId)
 		.then((user) => user.send({ content: appealDecisionText(decided, guild.name), ...SILENT }))

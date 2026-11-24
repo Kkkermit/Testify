@@ -44,7 +44,7 @@ const OWNER = "100000000000000001";
 const CHANNEL = "400000000000000001";
 const ROLE = "300000000000000001";
 
-const setNickname = jest.fn(() => Promise.resolve({}));
+const setNickname = jest.fn((nickname: string | null) => Promise.resolve({ nickname }));
 
 function app(canRename = true): Hono<ApiBindings> {
 	const guild = {
@@ -228,6 +228,13 @@ describe("the bot's nickname in this server", () => {
 		setNickname.mockClear();
 		await send("PATCH", "/nickname", { nickname: "" });
 		expect(setNickname).toHaveBeenCalledWith(null);
+	});
+
+	/** discord.js leaves `members.me` unchanged until Discord's member update arrives, so it still held "Testy". */
+	it("answers with the nickname Discord set, not the one the cache still holds", async () => {
+		const body = (await (await send("PATCH", "/nickname", { nickname: "Helper" })).json()) as { nickname: string };
+
+		expect(body.nickname).toBe("Helper");
 	});
 
 	it("rejects one longer than Discord accepts", async () => {

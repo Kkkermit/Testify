@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import type * as discord from "@api/discord";
-import { exchangeCode, fetchGuilds } from "@api/discord";
+import { exchangeCode, fetchGuilds, refreshTokens } from "@api/discord";
 import { UpstreamProblem } from "@api/errors";
 import { guildLists } from "@api/guildCache";
 import { oauthConfigFrom } from "@api/oauth";
@@ -31,6 +31,7 @@ jest.mock("@api/discord", () => {
 		),
 		fetchUser: jest.fn(() => Promise.resolve({ id: "100000000000000001", username: "someone", avatar: null })),
 		fetchGuilds: jest.fn(() => Promise.resolve([])),
+		refreshTokens: jest.fn(),
 	};
 });
 jest.mock("@database/repositories/blacklistRepository", () => ({
@@ -44,7 +45,7 @@ jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	touchSession: jest.fn(() => Promise.resolve()),
 	deleteSession: jest.fn(() => Promise.resolve()),
 	deleteSessionsFor: jest.fn(() => Promise.resolve()),
-	readTokens: jest.fn(() => Promise.resolve(null)),
+	readTokens: jest.fn(() => ({ accessToken: "at", refreshToken: "rt" })),
 	updateTokens: jest.fn(() => Promise.resolve()),
 }));
 
@@ -424,6 +425,24 @@ describe("GET /auth/me", () => {
 		const response = await app(envFor(), signedIn("100000000000000013")).request("/auth/me");
 
 		expect(response.status).toBe(502);
+	});
+
+	/** A refresh spends the refresh token, so a second request refreshing at the same moment would be refused by Discord. */
+	it("refreshes a token about to expire once, however many requests arrive together", async () => {
+		jest.mocked(refreshTokens).mockResolvedValue({
+			accessToken: "new",
+			refreshToken: "rt2",
+			expiresAt: new Date(Date.now() + 604_800_000),
+		});
+		const instance = app(envFor(), {
+			...signedIn("100000000000000077"),
+			tokenExpiresAt: new Date(Date.now() + 60_000),
+		});
+
+		const answers = await Promise.all([instance.request("/auth/me"), instance.request("/auth/me")]);
+
+		expect(answers.map((response) => response.status)).toEqual([200, 200]);
+		expect(refreshTokens).toHaveBeenCalledTimes(1);
 	});
 
 	it("carries no token, secret or refresh token", async () => {

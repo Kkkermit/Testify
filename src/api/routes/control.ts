@@ -4,17 +4,14 @@ import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
+import { configuredIn } from "@api/routes/owner";
 import { parseBody, parseParams } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
 import { botName } from "@core/brand";
 import { toError } from "@core/errors";
 import { logRing } from "@core/logRing";
 import { shutdown } from "@core/shutdown";
-import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
-import { getCounting } from "@database/repositories/countingRepository";
-import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
-import { getWelcome } from "@database/repositories/welcomeRepository";
 import {
 	botIdentity,
 	controlState,
@@ -26,7 +23,6 @@ import {
 	sendShardlensNow,
 	shardlensStatus,
 } from "@lib/bot";
-import { normaliseSettings } from "@lib/levelling";
 import { applyMusicSources, readMusicSources, readMusicSourceSetting, sourcesName } from "@lib/music";
 import {
 	botIdentityPatch,
@@ -163,7 +159,7 @@ control.get("/guilds/:guildId", async (context) => {
 	if (guild === undefined) throw notInGuild();
 
 	const [configured, activity] = await Promise.all([
-		configuredIn(guild),
+		configuredIn(guild.id),
 		orUnavailable(oneGuildActivity(client, guild.id, ANALYTICS.defaultWindowDays)),
 	]);
 
@@ -215,23 +211,6 @@ control.post("/guilds/:guildId/leave", async (context) => {
 
 	return context.json({ left: guild.id });
 });
-
-async function configuredIn(guild: Guild): Promise<string[]> {
-	const [levels, audit, welcome, counting] = await Promise.all([
-		getLevelSettings(guild.id),
-		getAuditLogConfig(guild.id),
-		getWelcome(guild.id),
-		getCounting(guild.id),
-	]);
-
-	const found: string[] = [];
-	if (normaliseSettings(levels).enabled) found.push("levelling");
-	if (audit !== null && audit.enabledLogs.length > 0) found.push("audit logging");
-	if (welcome !== null) found.push("welcome");
-	if (counting !== null) found.push("counting");
-
-	return found;
-}
 
 const WATCHED = [
 	[PermissionFlagsBits.ManageRoles, "Manage Roles"],
