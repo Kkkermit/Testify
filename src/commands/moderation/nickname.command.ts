@@ -32,7 +32,8 @@ export default defineCommand({
 
 		const member = await guild.members.fetch(target.id).catch(() => null);
 		if (!member) throw new UserFacingError(strings.moderation.memberNotFound);
-		assertModeratable(interaction, member);
+		// Renaming yourself is what Discord's own Change Nickname allows, so only somebody else is checked against you.
+		if (member.id !== interaction.user.id) assertModeratable(interaction, member);
 		if (!member.manageable) throw new UserFacingError(strings.moderation.notModeratable);
 
 		await member.setNickname(nickname, `Changed by ${interaction.user.username}`);

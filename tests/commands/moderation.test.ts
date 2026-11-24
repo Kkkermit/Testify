@@ -70,6 +70,23 @@ it("refuses a member ranked above the moderator before changing anything", async
 	expect(reached).toEqual([]);
 });
 
+/** The hierarchy check refused `/nickname` on yourself, which Discord lets anybody with Change Nickname do. */
+it("renames the moderator themselves", async () => {
+	const self = createMockUser({ id: "300000000000000009", username: "mod" });
+	const setNickname = jest.fn(() => Promise.resolve());
+	const member = createMockMember({ id: self.id, user: self, setNickname } as never);
+	const guild = createMockGuild({ members: { fetch: jest.fn(() => Promise.resolve(member)) } } as never);
+	Object.assign(member, { guild });
+	const interaction = createMockInteraction({
+		options: { user: self, nickname: "Boss" },
+		overrides: { guild, user: self, member },
+	});
+
+	await nickname.run?.(interaction, createMockClient());
+
+	expect(setNickname).toHaveBeenCalledWith("Boss", expect.any(String));
+});
+
 /** `/automod delete` asked for a rule's ID, which `/automod list` never shows, so no rule could be deleted with it. */
 it("offers the server's rules by name when deleting one", async () => {
 	const respond = jest.fn();
