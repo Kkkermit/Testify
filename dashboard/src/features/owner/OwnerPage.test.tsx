@@ -98,9 +98,7 @@ describe("the owner console", () => {
 	it("names each feature a server has set up, and shows one it does not know as sent", async () => {
 		useOwnerApi([row({ configured: ["audit-logging", "something-new"] })]);
 		server.use(
-			http.get("/api/control/guilds/:guildId", () =>
-				HttpResponse.json({ ...guildDetail, configured: ["starboard"] }),
-			),
+			http.get("/api/control/guilds/:guildId", () => HttpResponse.json({ ...guildDetail, configured: ["starboard"] })),
 		);
 		renderWithProviders(<OwnerPage />, { path: "/owner", route: "/owner?server=900000000000000001" });
 
