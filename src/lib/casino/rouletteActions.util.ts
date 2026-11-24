@@ -23,14 +23,8 @@ import { type RouletteBet, type Roll } from "@lib/casino/casino.types";
 import { payOut, type Player, takeStake } from "@lib/casino/casinoActions.util";
 import { betLimitRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { spinRoulette, spotKey } from "@lib/casino/roulette.util";
-import {
-	roundResults,
-	roundSettledMessage,
-	roundSpinningMessage,
-	type RoundView,
-	roundView,
-	staked,
-} from "@lib/casino/rouletteRound.util";
+import { roundSettledMessage, roundSpinningMessage } from "@lib/casino/roulettePanel.util";
+import { roundResults, type RoundView, roundView, staked } from "@lib/casino/rouletteRound.util";
 import { resolveAmount } from "@lib/format/amount.util";
 import { escapeMarkdown, formatNumber } from "@lib/format/format.util";
 import { type CasinoSettings } from "@testify/shared";
