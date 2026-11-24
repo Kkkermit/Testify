@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import type * as discord from "@api/discord";
-import { exchangeCode, fetchGuilds } from "@api/discord";
+import { exchangeCode, fetchGuilds, refreshTokens } from "@api/discord";
 import { UpstreamProblem } from "@api/errors";
 import { guildLists } from "@api/guildCache";
 import { oauthConfigFrom } from "@api/oauth";
@@ -31,6 +31,7 @@ jest.mock("@api/discord", () => {
 		),
 		fetchUser: jest.fn(() => Promise.resolve({ id: "100000000000000001", username: "someone", avatar: null })),
 		fetchGuilds: jest.fn(() => Promise.resolve([])),
+		refreshTokens: jest.fn(),
 	};
 });
 jest.mock("@database/repositories/blacklistRepository", () => ({
@@ -44,7 +45,7 @@ jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	touchSession: jest.fn(() => Promise.resolve()),
 	deleteSession: jest.fn(() => Promise.resolve()),
 	deleteSessionsFor: jest.fn(() => Promise.resolve()),
-	readTokens: jest.fn(() => Promise.resolve(null)),
+	readTokens: jest.fn(() => ({ accessToken: "at", refreshToken: "rt" })),
 	updateTokens: jest.fn(() => Promise.resolve()),
 }));
 
@@ -363,7 +364,7 @@ describe("GET /auth/me", () => {
 		expect(guildsFetched).not.toHaveBeenCalled();
 	});
 
-	/** Ban Members alone lists nothing; access its admins gave does, and only where the bot is to use it. */
+	/** Ban Members alone lists nothing; access its admins gave does, only where the bot is, and only screens it knows. */
 	it("lists the servers somebody manages, and those with the bot where they were given access, and nothing else", async () => {
 		const at = (id: string, permissions: bigint) => ({ id, name: id, icon: null, permissions: String(permissions) });
 		guildsFetched.mockResolvedValueOnce([
@@ -376,7 +377,7 @@ describe("GET /auth/me", () => {
 		]);
 		jest.mocked(accessFor).mockResolvedValueOnce([
 			{ guildId: "900000000000000004", areas: ["bans"] },
-			{ guildId: "900000000000000006", areas: ["warnings", "cases"] },
+			{ guildId: "900000000000000006", areas: ["warnings", "constructor", "cases"] as never },
 		]);
 		const botIn = new Map(
 			["900000000000000001", "900000000000000003", "900000000000000005", "900000000000000006"].map((id) => [
@@ -424,6 +425,24 @@ describe("GET /auth/me", () => {
 		const response = await app(envFor(), signedIn("100000000000000013")).request("/auth/me");
 
 		expect(response.status).toBe(502);
+	});
+
+	/** A refresh spends the refresh token, so a second request refreshing at the same moment would be refused by Discord. */
+	it("refreshes a token about to expire once, however many requests arrive together", async () => {
+		jest.mocked(refreshTokens).mockResolvedValue({
+			accessToken: "new",
+			refreshToken: "rt2",
+			expiresAt: new Date(Date.now() + 604_800_000),
+		});
+		const instance = app(envFor(), {
+			...signedIn("100000000000000077"),
+			tokenExpiresAt: new Date(Date.now() + 60_000),
+		});
+
+		const answers = await Promise.all([instance.request("/auth/me"), instance.request("/auth/me")]);
+
+		expect(answers.map((response) => response.status)).toEqual([200, 200]);
+		expect(refreshTokens).toHaveBeenCalledTimes(1);
 	});
 
 	it("carries no token, secret or refresh token", async () => {

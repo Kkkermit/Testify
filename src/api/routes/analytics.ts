@@ -46,7 +46,7 @@ import {
 	topRunnersQuery,
 } from "@testify/shared";
 
-/** The owner console's analytics and logs, read-only. Everything here is behind `requireOwner`. */
+/** The owner console's analytics and logs, read-only. */
 
 export const analytics = new Hono<ApiBindings>();
 

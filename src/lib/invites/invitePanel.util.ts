@@ -2,6 +2,7 @@ import { customId } from "@core/button";
 import { type StoredStanding } from "@database/repositories/inviteRepository";
 import { channelSelect, row } from "@lib/discord/components.util";
 import { type ContainerMessage } from "@lib/discord/discord.types";
+import { formatNumber } from "@lib/format/format.util";
 import { INVITE_SETTINGS_ID } from "@lib/invites/invites.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { type InviteSettings } from "@testify/shared";
@@ -51,7 +52,7 @@ export function standingLines(top: readonly StoredStanding[]): string {
 	return top
 		.map(
 			(standing, index) =>
-				`**${String(index + 1)}.** <@${standing.inviterId}> — ${String(standing.joins - standing.left)} still here, ${String(standing.left)} left`,
+				`**${String(index + 1)}.** <@${standing.inviterId}> — ${formatNumber(standing.joins - standing.left)} still here, ${formatNumber(standing.left)} left`,
 		)
 		.join("\n");
 }

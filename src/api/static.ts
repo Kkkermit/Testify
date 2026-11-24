@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { basename, dirname, extname, join, posix, relative, resolve, sep } from "node:path";
 import { type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
@@ -105,7 +106,7 @@ export function serveDashboard(
 			context.header("Cache-Control", "private, no-store");
 			context.header("Vary", "Cookie");
 			context.header("Content-Type", TYPES[extname(asset)] ?? "application/octet-stream");
-			return context.body(new Uint8Array(readFileSync(asset)));
+			return context.body(new Uint8Array(await readFile(asset)));
 		}
 
 		if (asset !== null) {
@@ -116,7 +117,7 @@ export function serveDashboard(
 			);
 			context.header("Content-Type", TYPES[extname(asset)] ?? "application/octet-stream");
 
-			return context.body(new Uint8Array(readFileSync(asset)));
+			return context.body(new Uint8Array(await readFile(asset)));
 		}
 
 		// A missing file is a 404: answering `/favicon.ico` with the page hands a home-screen icon an HTML document. The

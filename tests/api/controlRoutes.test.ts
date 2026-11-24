@@ -236,10 +236,14 @@ describe("the bot's own profile", () => {
 });
 
 describe("a server's detail", () => {
-	it("reports what that server has configured", async () => {
+	/** "audit logging" here beside "audit-logging" in the server list made one server read as two. */
+	it("reports what that server has configured, by the same keys the server list uses", async () => {
 		jest.mocked(getWelcome).mockResolvedValue({ guildId: GUILD, channelId: "1" } as never);
+		jest.mocked(getAuditLogConfig).mockResolvedValue({ channelId: "1", enabledLogs: ["all"] } as never);
 
-		expect(((await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail).configured).toContain("welcome");
+		const { configured } = (await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail;
+
+		expect(configured).toEqual(["audit-logging", "welcome"]);
 	});
 
 	/** An id straight out of a URL reaches a Mongo filter if nothing checks its shape first. */

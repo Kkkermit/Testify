@@ -29,7 +29,11 @@ giveaways.post("/", async (context) => {
 	// `hostedBy` is rendered into the giveaway embed, so it has to be a real user the bot can resolve.
 	const actorId = context.get("session")?.userId;
 	if (actorId === undefined) throw badRequest("Sign in again to start a giveaway.");
-	const host = await context.get("client").users.fetch(actorId);
+	const host = await context
+		.get("client")
+		.users.fetch(actorId)
+		.catch(() => null);
+	if (host === null) throw notFound("user_not_found", "Discord does not know your account right now. Try again.");
 
 	await startGiveaway(context.get("client"), guild, { ...body, hostedBy: host });
 	await auditChange(context, { action: "giveaway.start", summary: `Started a giveaway for ${body.prize}` });

@@ -1,4 +1,5 @@
 import { type EmbedBuilder, type Guild } from "discord.js";
+import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
 import {
@@ -61,7 +62,7 @@ function toModCase(stored: StoredCase): ModCase {
 export function caseEmbed(modCase: ModCase): EmbedBuilder {
 	return embed({
 		category: "moderation",
-		title: `${modCase.number === null ? "Earlier warning" : `Case ${String(modCase.number)}`} · ${CASE_ACTION_LABELS[modCase.action]}`,
+		title: `${theme.emoji.moderation} ${modCase.number === null ? "Earlier warning" : `Case ${String(modCase.number)}`} · ${CASE_ACTION_LABELS[modCase.action]}`,
 		fields: [
 			{ name: "Member", value: `<@${modCase.userId}> · ${modCase.username} (\`${modCase.userId}\`)`, inline: false },
 			{

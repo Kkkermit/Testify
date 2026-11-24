@@ -105,17 +105,19 @@ export function timedOutEmbed(options: {
 	});
 }
 
-export function dmEmbed(options: {
-	action: string;
-	emoji: string;
-	guild: Guild;
-	moderator: Pick<User, "username">;
-	reason: string;
-	extra?: { name: string; value: string; inline?: boolean }[];
-}): EmbedBuilder {
+/** `action` reads after "You were"; `headline` is a whole title, for news that is not something done to them. */
+export function dmEmbed(
+	options: ({ action: string } | { headline: string }) & {
+		emoji: string;
+		guild: Guild;
+		moderator: Pick<User, "username">;
+		reason: string;
+		extra?: { name: string; value: string; inline?: boolean }[];
+	},
+): EmbedBuilder {
 	return embed({
 		category: "moderation",
-		title: `${options.emoji} You were ${options.action}`,
+		title: `${options.emoji} ${"headline" in options ? options.headline : `You were ${options.action}`}`,
 		fields: [
 			{ name: "Server", value: options.guild.name, inline: true },
 			{ name: "Moderator", value: options.moderator.username, inline: true },

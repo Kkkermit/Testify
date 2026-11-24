@@ -6,10 +6,9 @@ import { APPEAL_ID, APPEAL_SETTINGS_ID } from "@lib/appeals/appeals.constants";
 import { button, channelSelect, option, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { discordTime } from "@lib/format/format.util";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
 import { APPEAL_LIMITS, type AppealSettings } from "@testify/shared";
-
-const seconds = (date: Date): string => String(Math.floor(date.getTime() / 1_000));
 
 function quoted(value: string): string {
 	return value
@@ -23,7 +22,7 @@ function statusLine(appeal: StoredAppeal): string {
 
 	const word = appeal.status === "accepted" ? "✅ **Accepted** — the ban was lifted" : "❌ **Refused**";
 	const by = appeal.decidedByName === null ? "" : ` by ${appeal.decidedByName}`;
-	const when = appeal.decidedAt === null ? "" : ` <t:${seconds(appeal.decidedAt)}:R>`;
+	const when = appeal.decidedAt === null ? "" : ` ${discordTime(appeal.decidedAt, "R")}`;
 	const line = `${word}${by}${when}`;
 
 	return appeal.reason === "" ? line : `${line}\n${quoted(appeal.reason)}`;
@@ -32,8 +31,8 @@ function statusLine(appeal: StoredAppeal): string {
 /** What staff are shown in the appeals channel; the buttons go once it is decided. */
 export function appealPost(appeal: StoredAppeal): ContainerMessage {
 	const parts: ContainerPart[] = [
-		text(`## ⚖️ Ban appeal\n${appeal.text}`),
-		text(`-# From <@${appeal.userId}> (${appeal.username}) · ${appeal.userId} · <t:${seconds(appeal.createdAt)}:R>`),
+		text(`## ⚖️ Ban appeal\n${quoted(appeal.text)}`),
+		text(`-# From <@${appeal.userId}> (${appeal.username}) · ${appeal.userId} · ${discordTime(appeal.createdAt, "R")}`),
 		divider(),
 		text(statusLine(appeal)),
 	];

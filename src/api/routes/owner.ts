@@ -14,6 +14,7 @@ import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { guildActivity, type GuildActivity, orUnavailable } from "@lib/bot";
+import { normaliseSettings } from "@lib/levelling";
 import {
 	ownerGuildQuery,
 	type OwnerGuildPage,
@@ -108,27 +109,32 @@ function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts:
 	);
 }
 
-async function toRow(guild: Guild, counts: GuildActivity | null): Promise<OwnerGuildRow> {
+/** What a server has set up, by the overview's feature keys, read the same for the server list and one server's page. */
+export async function configuredIn(guildId: string): Promise<string[]> {
 	const [levels, audit, welcome, counting] = await Promise.all([
-		getLevelSettings(guild.id),
-		getAuditLogConfig(guild.id),
-		getWelcome(guild.id),
-		getCounting(guild.id),
+		getLevelSettings(guildId),
+		getAuditLogConfig(guildId),
+		getWelcome(guildId),
+		getCounting(guildId),
 	]);
 
 	const configured: string[] = [];
-	if (levels !== null && !levels.isDisabled) configured.push("levelling");
+	if (normaliseSettings(levels).enabled) configured.push("levelling");
 	if (audit !== null && audit.enabledLogs.length > 0) configured.push("audit-logging");
-	if (welcome !== null && welcome.channelId !== "") configured.push("welcome");
+	if (welcome !== null) configured.push("welcome");
 	if (counting !== null) configured.push("counting");
 
+	return configured;
+}
+
+async function toRow(guild: Guild, counts: GuildActivity | null): Promise<OwnerGuildRow> {
 	return {
 		id: guild.id,
 		name: guild.name,
 		iconUrl: guild.iconURL({ size: 64 }),
 		memberCount: guild.memberCount,
 		joinedAt: guild.joinedAt.toISOString(),
-		configured,
+		configured: await configuredIn(guild.id),
 		commands: counts === null ? null : (counts.commands.get(guild.id) ?? 0),
 		dashboardViews: counts === null ? null : (counts.dashboard.get(guild.id) ?? 0),
 	};

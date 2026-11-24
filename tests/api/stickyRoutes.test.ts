@@ -5,24 +5,23 @@ import { STICKY_LIMITS, stickyBlocked, stickyPut } from "@testify/shared";
 describe("stickyPut", () => {
 	const channelId = "400000000000000001";
 
-	it("refuses a cap outside what the bot will count to", () => {
-		expect(stickyPut.safeParse({ channelId, message: "hi", cap: 0 }).success).toBe(false);
-		expect(stickyPut.safeParse({ channelId, message: "hi", cap: STICKY_LIMITS.maxCap + 1 }).success).toBe(false);
+	it("refuses a cap outside what the bot will count to, a channel that is not one, and an empty or long message", () => {
+		const refused = {
+			"a cap of 0": { channelId, message: "hi", cap: 0 },
+			"a cap past the most": { channelId, message: "hi", cap: STICKY_LIMITS.maxCap + 1 },
+			"a channel that is not a snowflake": { channelId: "not-an-id", message: "hi", cap: 5 },
+			"an empty message": { channelId, message: "   ", cap: 5 },
+			"a message past the limit": { channelId, message: "x".repeat(2_001), cap: 5 },
+		};
+
+		const accepted = Object.entries(refused).filter(([, body]) => stickyPut.safeParse(body).success);
+		expect(accepted.map(([name]) => name)).toEqual([]);
 		expect(stickyPut.safeParse({ channelId, message: "hi", cap: 5 }).success).toBe(true);
 	});
 
 	/** The number arrives from a form as a string, so it has to coerce rather than refuse. */
 	it("takes a cap that arrived as text", () => {
 		expect(stickyPut.parse({ channelId, message: "hi", cap: "8" }).cap).toBe(8);
-	});
-
-	it("refuses a channel that is not a snowflake", () => {
-		expect(stickyPut.safeParse({ channelId: "not-an-id", message: "hi", cap: 5 }).success).toBe(false);
-	});
-
-	it("refuses an empty message and one past the limit", () => {
-		expect(stickyPut.safeParse({ channelId, message: "   ", cap: 5 }).success).toBe(false);
-		expect(stickyPut.safeParse({ channelId, message: "x".repeat(2_001), cap: 5 }).success).toBe(false);
 	});
 
 	/** A sticky is posted into a channel, so the same markup refusal as every other free-text field applies. */
