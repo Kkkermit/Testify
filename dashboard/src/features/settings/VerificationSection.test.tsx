@@ -52,4 +52,17 @@ describe("the verification section", () => {
 
 		expect(await screen.findByText(/sits at or above/i)).toBeInTheDocument();
 	});
+
+	/** A failed read once said it was still reading, for ever. */
+	it("offers a retry when the verification settings cannot be read", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/verification", () =>
+				HttpResponse.json({ error: { code: "internal", message: "boom" } }, { status: 500 }),
+			),
+		);
+
+		renderPage();
+
+		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
+	});
 });

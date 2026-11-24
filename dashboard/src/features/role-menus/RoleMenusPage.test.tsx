@@ -44,6 +44,19 @@ describe("the role menus page", () => {
 		expect(await screen.findByText("Saved, but the post was not updated.")).toBeInTheDocument();
 	});
 
+	/** Without the roles every role on every menu was drawn as deleted, so a failed read looked like a broken server. */
+	it("offers a retry when the server's roles cannot be read", async () => {
+		server.use(
+			http.get(`/api/guilds/${GUILD}/roles`, () =>
+				HttpResponse.json({ error: { code: "internal", message: "boom" } }, { status: 500 }),
+			),
+		);
+		renderPage();
+
+		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
+		expect(screen.queryByText(/deleted role/i)).toBeNull();
+	});
+
 	it("stops offering a new menu at the limit", async () => {
 		server.use(http.get(`/api/guilds/${GUILD}/role-menus`, () => HttpResponse.json({ ...roleMenuList, limit: 1 })));
 		renderPage();
