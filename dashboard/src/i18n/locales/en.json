@@ -116,6 +116,7 @@
 		"privacyHint": "Read the privacy notice",
 		"signOut": "Sign out",
 		"signOutHint": "Sign out of the dashboard",
+		"signOutFailed": "Signing out did not go through, so you are still signed in. Try again in a moment.",
 		"skipToContent": "Skip to content",
 		"breadcrumb": "Breadcrumb",
 		"sections": "Sections",

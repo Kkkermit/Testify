@@ -117,6 +117,7 @@
 		"privacyHint": "Leggi l’informativa sulla privacy",
 		"signOut": "Esci",
 		"signOutHint": "Esci dalla dashboard",
+		"signOutFailed": "L’uscita non è andata a buon fine, quindi sei ancora connesso. Riprova tra un momento.",
 		"skipToContent": "Vai al contenuto",
 		"breadcrumb": "Percorso di navigazione",
 		"sections": "Sezioni",

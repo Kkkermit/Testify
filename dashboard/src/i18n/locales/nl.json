@@ -116,6 +116,7 @@
 		"privacyHint": "Lees de privacyverklaring",
 		"signOut": "Uitloggen",
 		"signOutHint": "Uitloggen bij het dashboard",
+		"signOutFailed": "Uitloggen is niet gelukt, dus je bent nog ingelogd. Probeer het zo opnieuw.",
 		"skipToContent": "Naar de inhoud",
 		"breadcrumb": "Kruimelpad",
 		"sections": "Onderdelen",

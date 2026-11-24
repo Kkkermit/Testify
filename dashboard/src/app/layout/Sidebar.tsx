@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { type DashboardUser, type ManageableGuild } from "@testify/shared";
 import { FileText, LogOut, Palette, Search, Settings2, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -9,15 +8,15 @@ import { SidebarSection } from "@/app/layout/SidebarSection";
 import { GROUP_HEADING, ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
 import { BotMark } from "@/components/brand/BotMark";
 import { FlagIcon } from "@/components/brand/FlagIcon";
+import { Warning } from "@/components/form";
 import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
+import { useSignOut } from "@/features/auth/useSignOut";
 import { shortcutLabel } from "@/features/search/quickSearch.utils";
 import { useFeaturesOff } from "@/features/site/useFeaturesOff";
 import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
-import { api } from "@/lib/api";
 import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
-import { hardRedirect } from "@/lib/redirect";
 
 const FOOTER_LINKS = [
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
@@ -51,15 +50,9 @@ export function Sidebar({
 }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
-	const queryClient = useQueryClient();
 	const featuresOff = useFeaturesOff();
+	const signOut = useSignOut();
 	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
-
-	async function signOut(): Promise<void> {
-		await api.post("/auth/logout");
-		queryClient.clear();
-		hardRedirect("/sign-in");
-	}
 
 	return (
 		<nav
@@ -185,7 +178,10 @@ export function Sidebar({
 				<Tooltip label={t("nav.signOutHint")} placement="right">
 					<button
 						type="button"
-						onClick={() => void signOut()}
+						disabled={signOut.busy}
+						onClick={() => {
+							signOut.signOut();
+						}}
 						className={cn(
 							ROW,
 							"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
@@ -195,6 +191,11 @@ export function Sidebar({
 						<span className={label("truncate")}>{t("nav.signOut")}</span>
 					</button>
 				</Tooltip>
+				{signOut.failed && (
+					<Warning>
+						<span className={label()}>{t("nav.signOutFailed")}</span>
+					</Warning>
+				)}
 			</div>
 		</nav>
 	);

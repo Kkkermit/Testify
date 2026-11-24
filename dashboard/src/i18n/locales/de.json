@@ -116,6 +116,7 @@
 		"privacyHint": "Den Datenschutzhinweis lesen",
 		"signOut": "Abmelden",
 		"signOutHint": "Vom Dashboard abmelden",
+		"signOutFailed": "Das Abmelden hat nicht geklappt, du bist also noch angemeldet. Versuch es gleich noch einmal.",
 		"skipToContent": "Zum Inhalt springen",
 		"breadcrumb": "Brotkrümelnavigation",
 		"sections": "Bereiche",

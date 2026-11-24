@@ -115,6 +115,7 @@
 		"privacyHint": "プライバシーに関する通知を読む",
 		"signOut": "ログアウト",
 		"signOutHint": "ダッシュボードからログアウト",
+		"signOutFailed": "ログアウトできなかったため、まだログインしたままです。少し待ってからもう一度お試しください。",
 		"skipToContent": "本文へスキップ",
 		"breadcrumb": "パンくずリスト",
 		"sections": "セクション",

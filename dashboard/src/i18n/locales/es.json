@@ -117,6 +117,7 @@
 		"privacyHint": "Leer el aviso de privacidad",
 		"signOut": "Cerrar sesión",
 		"signOutHint": "Cerrar la sesión del panel",
+		"signOutFailed": "No se ha podido cerrar la sesión, así que sigues dentro. Vuelve a intentarlo en un momento.",
 		"skipToContent": "Saltar al contenido",
 		"breadcrumb": "Ruta de navegación",
 		"sections": "Secciones",

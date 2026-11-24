@@ -117,6 +117,7 @@
 		"privacyHint": "Lire l’avis de confidentialité",
 		"signOut": "Se déconnecter",
 		"signOutHint": "Se déconnecter du tableau de bord",
+		"signOutFailed": "La déconnexion n’a pas abouti, tu es donc toujours connecté. Réessaie dans un instant.",
 		"skipToContent": "Aller au contenu",
 		"breadcrumb": "Fil d’Ariane",
 		"sections": "Sections",
