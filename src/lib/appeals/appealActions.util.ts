@@ -19,8 +19,8 @@ import {
 import { takesAppeals } from "@lib/appeals/appealLink.util";
 import { appealDecisionText, appealPost } from "@lib/appeals/appealPanel.util";
 import { canPostIn } from "@lib/discord/channels.util";
+import { TimedCache } from "@lib/infra/timedCache.util";
 import { moderatorOf, unbanUser } from "@lib/moderation/sanctions.util";
-import { TimedCache } from "@lib/site/github.util";
 import {
 	appealAgainAt,
 	type AppealableServer,

@@ -17,6 +17,7 @@ import {
 import { type ZodType, z } from "zod";
 import { DAY_MS, LIMITS, MINUTE_MS } from "@config/constants";
 import { type LensTarget, type TestifyClient } from "@core/client";
+import { TimedCache } from "@lib/infra/timedCache.util";
 import { type AnalyticsProblem } from "@testify/shared";
 
 /** The owner console's analytics, read from Shardlens with keys that never leave this process. */
@@ -352,14 +353,13 @@ export class ShardlensReader {
 	readonly #endpoint: string | null;
 	readonly #counts: ShardlensClient | null;
 	readonly #activity: ShardlensClient | null;
-	readonly #now: () => number;
 	readonly #warn: (message: string) => void;
 	readonly #said = new Set<string>();
-	readonly #cache = new Map<string, { at: number; answer: Promise<unknown> }>();
+	readonly #cache: TimedCache<unknown>;
 
 	constructor(target: Settings, options: ReaderOptions = {}) {
 		this.#endpoint = collectorOrigin(target.url);
-		this.#now = options.now ?? Date.now;
+		this.#cache = new TimedCache(CACHE_MS, MAX_CACHED, options.now);
 		this.#warn = options.warn ?? (() => undefined);
 
 		const clientFor = (apiKey: string | undefined): ShardlensClient | null =>
@@ -423,15 +423,7 @@ export class ShardlensReader {
 	): Promise<T> {
 		if (client === null) throw new AnalyticsUnavailable("off");
 
-		const kept = this.#cache.get(id);
-		if (kept !== undefined && this.#now() - kept.at < CACHE_MS) return kept.answer as Promise<T>;
-
-		const answer = this.#ask(client, ask, schema);
-		this.#remember(id, answer);
-		answer.catch(() => {
-			if (this.#cache.get(id)?.answer === answer) this.#cache.delete(id);
-		});
-		return answer;
+		return this.#cache.get(id, () => this.#ask(client, ask, schema)) as Promise<T>;
 	}
 
 	async #ask<T>(
@@ -461,16 +453,6 @@ export class ShardlensReader {
 		if (this.#said.has(code)) return;
 		this.#said.add(code);
 		this.#warn(`[SHARDLENS] Could not read the collector: ${message}`);
-	}
-
-	#remember(id: string, answer: Promise<unknown>): void {
-		this.#cache.delete(id);
-		this.#cache.set(id, { at: this.#now(), answer });
-		while (this.#cache.size > MAX_CACHED) {
-			const oldest = this.#cache.keys().next().value;
-			if (oldest === undefined) break;
-			this.#cache.delete(oldest);
-		}
 	}
 }
 
