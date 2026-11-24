@@ -57,7 +57,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 					<p className="text-muted-foreground text-sm">
 						<Trans
 							i18nKey="settings.prefixExample"
-							values={{ example: `${(problem === null ? draft.trim() : value.prefix) || "t?"}ban` }}
+							values={{ example: `${problem === null ? draft.trim() : value.prefix}ban` }}
 							components={{ example: <span className="font-mono" /> }}
 						/>
 					</p>

@@ -1,4 +1,4 @@
-import { SCHEDULE_REPEATS, type ScheduledMessage, type ScheduleRepeat } from "@testify/shared";
+import { type ScheduledMessage, type ScheduleRepeat } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 import { dateAndTime } from "@/lib/datetime";
@@ -8,8 +8,6 @@ export const REPEAT_LABELS: Record<ScheduleRepeat, TranslationKey> = {
 	daily: "scheduled.daily",
 	weekly: "scheduled.weekly",
 };
-
-export const REPEAT_ORDER = SCHEDULE_REPEATS;
 
 const two = (value: number): string => String(value).padStart(2, "0");
 

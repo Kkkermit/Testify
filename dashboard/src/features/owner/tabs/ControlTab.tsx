@@ -6,6 +6,7 @@ import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, Refusal, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, SegmentedControl, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
+import { NO_FIGURE } from "@/features/owner/owner.utils";
 import {
 	useBotControl,
 	useBotIdentity,
@@ -18,7 +19,7 @@ import { useFeatureOn } from "@/features/site/useFeaturesOff";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
-import { formatUnit } from "@/lib/intl";
+import { formatNumber, formatUnit } from "@/lib/intl";
 import { sanitiseInput } from "@/lib/sanitise";
 
 const SOURCE_LABELS: Record<MusicSourceChoice, { label: TranslationKey; hint: TranslationKey }> = {
@@ -105,12 +106,12 @@ export function ControlTab(): React.JSX.Element {
 				<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
 					<div className="flex gap-2">
 						<dt>{t("owner.servers")}</dt>
-						<dd className="text-foreground tabular-nums">{state.guilds}</dd>
+						<dd className="text-foreground tabular-nums">{formatNumber(state.guilds)}</dd>
 					</div>
 					<div className="flex gap-2">
 						<dt>{t("owner.gatewayPing")}</dt>
 						<dd className="text-foreground tabular-nums">
-							{state.pingMs === null ? "—" : formatUnit(state.pingMs, "millisecond")}
+							{state.pingMs === null ? NO_FIGURE : formatUnit(state.pingMs, "millisecond")}
 						</dd>
 					</div>
 					{state.since !== null && (

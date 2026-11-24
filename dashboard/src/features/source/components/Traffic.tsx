@@ -1,10 +1,11 @@
 import { type TrafficDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Card, CARD_HEADING, Skeleton, UsageBars } from "@/components/primitives";
+import { Card, CARD_HEADING, ChartReadout, Skeleton, UsageBars } from "@/components/primitives";
 import { SiteError } from "@/features/site/components/SiteError";
 import { useTraffic } from "@/features/source/useSource";
-import { shortDate } from "@/lib/datetime";
+import { calendarDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 export function Traffic(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -108,19 +109,19 @@ function DayChart({
 				<p className="text-muted-foreground text-sm">{t("source.noTraffic")}</p>
 			) : (
 				<figure className="flex flex-col gap-2">
-					<div className="flex h-28 items-end gap-px" aria-hidden="true">
+					<ChartReadout label={title} column slide className="flex h-28 items-end gap-px">
 						{days.map((day) => (
 							<span
 								key={day.date}
-								title={`${shortDate(day.date)}: ${String(count(day))}`}
-								className="bg-primary/30 hover:bg-primary/60 rounded-t-chip min-h-px flex-1 transition-colors duration-150"
+								data-readout={`${calendarDate(day.date)}: ${formatNumber(count(day))}`}
+								className="bg-primary/30 rounded-t-chip min-h-px flex-1"
 								style={{ height: `${String(Math.round((count(day) / max) * 100))}%` }}
 							/>
 						))}
-					</div>
+					</ChartReadout>
 					<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
-						<span>{shortDate(days[0]?.date ?? "")}</span>
-						<span>{shortDate(days.at(-1)?.date ?? "")}</span>
+						<span>{calendarDate(days[0]?.date ?? "")}</span>
+						<span>{calendarDate(days.at(-1)?.date ?? "")}</span>
 					</div>
 					<figcaption className="sr-only">
 						<table>
@@ -135,9 +136,9 @@ function DayChart({
 							<tbody>
 								{days.map((day) => (
 									<tr key={day.date}>
-										<th scope="row">{shortDate(day.date)}</th>
-										<td>{count(day)}</td>
-										<td>{uniques(day)}</td>
+										<th scope="row">{calendarDate(day.date)}</th>
+										<td>{formatNumber(count(day))}</td>
+										<td>{formatNumber(uniques(day))}</td>
 									</tr>
 								))}
 							</tbody>

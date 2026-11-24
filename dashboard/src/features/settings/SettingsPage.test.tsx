@@ -34,17 +34,14 @@ function capture(section: string, method: "patch" | "put" = "patch"): { body: un
 }
 
 describe("prefixProblem", () => {
-	/** All three rules the API enforces, so the form refuses before the request rather than after it. */
-	it("refuses one that cannot be typed or would match everything", () => {
+	/** Every rule the API enforces, so the form refuses first; a `/` prefix would sit beside Discord's own picker. */
+	it("refuses one that cannot be typed, would match everything or collides with slash commands", () => {
 		expect(prefixProblem("", t)).toMatch(/empty/i);
 		expect(prefixProblem("   ", t)).toMatch(/empty/i);
 		expect(prefixProblem("a b", t)).toMatch(/space/i);
 		expect(prefixProblem("waytoolongprefix", t)).toMatch(/longer/i);
-	});
-
-	/** A `/` prefix would put every command next to Discord's own picker. */
-	it("refuses one that collides with slash commands", () => {
 		expect(prefixProblem("/", t)).toMatch(/collides/i);
+		expect(prefixProblem("t?", t)).toBeNull();
 	});
 });
 

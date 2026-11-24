@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { formBars, handlerName } from "@/features/owner/usage/usageBars";
+import { codeLabel, formBars } from "@/features/owner/usage/usageBars";
 import { usePanels } from "@/features/owner/useOwner";
 
 const ACTIONS_SHOWN = 3;
@@ -21,7 +21,7 @@ export function PanelsView({ days }: { days: number }): React.JSX.Element {
 							empty={t("owner.usageSections.noPresses")}
 							rows={report.buttons.map((row) => ({
 								id: row.id,
-								label: handlerName(row.id),
+								label: codeLabel(row.id),
 								sub: [
 									...row.actions
 										.slice(0, ACTIONS_SHOWN)

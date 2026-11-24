@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card, DataList, Figure } from "@/components/primitives";
 import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
+import { FigureStrip } from "@/features/owner/components/FigureStrip";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { countOrDash, NO_FIGURE } from "@/features/owner/owner.utils";
 import { useCollectorSetup } from "@/features/owner/useOwner";
@@ -54,20 +55,18 @@ function CollectorFigures({ report }: { report: CollectorSetup }): React.JSX.Ele
 	return (
 		<div className="flex flex-col gap-4">
 			<Card padding="none" className="divide-border divide-y">
-				<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
+				<FigureStrip>
 					<Figure
-						className="px-6 py-4"
 						label={t("owner.setup.mode")}
 						value={t(app.mode === "audit" ? "owner.setup.modeAudit" : "owner.setup.modePrivacy")}
 					/>
 					<Figure
-						className="px-6 py-4"
 						label={t("owner.setup.lastEvent")}
 						value={report.lastEventAt === null ? NO_FIGURE : since(report.lastEventAt)}
 					/>
-					<Figure className="px-6 py-4" label={t("owner.setup.servers")} value={formatNumber(report.servers)} />
-					<Figure className="px-6 py-4" label={t("owner.peopleThisMonth")} value={countOrDash(report.people)} />
-				</dl>
+					<Figure label={t("owner.setup.servers")} value={formatNumber(report.servers)} />
+					<Figure label={t("owner.peopleThisMonth")} value={countOrDash(report.people)} />
+				</FigureStrip>
 				<ul className="flex flex-col gap-3 px-6 py-5" aria-label={t("owner.setup.checksLabel")}>
 					{CHECKS.map(({ check, done, missing, ownMissing }) => {
 						const ok = report.checks[check];

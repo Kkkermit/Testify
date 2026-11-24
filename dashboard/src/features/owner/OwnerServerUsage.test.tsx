@@ -89,18 +89,16 @@ describe("the owner's server list", () => {
 
 describe("one server's usage", () => {
 	/** Prefix runs by name and dashboard figures come from raw events, which Shardlens keeps less long than its counts. */
-	it("says how far back the event figures reach when the window is longer", async () => {
+	it("says how far back the event figures reach when the window is longer, and only then", async () => {
+		const shorter = renderAt(DRILL_DOWN);
+		await screen.findByRole("heading", { level: 2, name: aGuild.name });
+		expect(screen.queryByText(/reach back/)).toBeNull();
+		shorter.unmount();
+
 		watch("/api/analytics/guilds/:guildId", { ...guildUsage, days: 90, detailDays: 30 });
 		renderAt(`${DRILL_DOWN}&days=90`);
 
 		expect(await screen.findByText(/reach back 30 days/)).toBeInTheDocument();
-	});
-
-	it("does not mention it when the window fits inside what is kept", async () => {
-		renderAt(DRILL_DOWN);
-		await screen.findByRole("heading", { level: 2, name: aGuild.name });
-
-		expect(screen.queryByText(/reach back/)).toBeNull();
 	});
 
 	/** Who ran what lives on the collector, behind its own sign-in, so the console points there rather than showing it. */

@@ -1,12 +1,13 @@
-import { type ChannelSummary, SCHEDULE_LIMITS, type ScheduleRepeat } from "@testify/shared";
+import { type ChannelSummary, SCHEDULE_LIMITS, SCHEDULE_REPEATS, type ScheduleRepeat } from "@testify/shared";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, SELECT } from "@/components/form";
 import { useRowLayout } from "@/components/form/rowLayout";
-import { REPEAT_LABELS, REPEAT_ORDER, toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
+import { REPEAT_LABELS, toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
 import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
+import { oneOf } from "@/lib/oneOf";
 
 export interface ScheduleDraft {
 	channelId: string | null;
@@ -60,11 +61,11 @@ export function ScheduleFields({
 						id={`${id}-repeat`}
 						value={value.repeat}
 						onChange={(event) => {
-							onChange({ ...value, repeat: event.target.value as ScheduleRepeat });
+							onChange({ ...value, repeat: oneOf(SCHEDULE_REPEATS, event.target.value, value.repeat) });
 						}}
 						className={SELECT}
 					>
-						{REPEAT_ORDER.map((repeat) => (
+						{SCHEDULE_REPEATS.map((repeat) => (
 							<option key={repeat} value={repeat}>
 								{t(REPEAT_LABELS[repeat])}
 							</option>

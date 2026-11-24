@@ -3,8 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Card, DataList, Figure, UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { DayBars } from "@/features/owner/components/DayBars";
+import { FigureStrip } from "@/features/owner/components/FigureStrip";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { formatMs, NO_FIGURE, shareOrDash } from "@/features/owner/owner.utils";
+import { tallyBars } from "@/features/owner/usage/usage.utils";
+import { codeLabel } from "@/features/owner/usage/usageBars";
 import { useReliability } from "@/features/owner/useOwner";
 import { dateAndTime, shortDate } from "@/lib/datetime";
 import { formatNumber, formatPercent, formatUnit } from "@/lib/intl";
@@ -50,31 +53,21 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 				return (
 					<div className="flex flex-col gap-4">
 						<Card padding="none" className="divide-border divide-y">
-							<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
+							<FigureStrip>
 								<Figure
-									className="px-6 py-4"
 									label={t("owner.usageSections.missedDeadlines")}
 									value={formatNumber(totals?.missedDeadlines ?? 0)}
 								/>
+								<Figure label={t("owner.usageSections.noResponse")} value={formatNumber(totals?.noResponse ?? 0)} />
+								<Figure label={t("owner.usageSections.over3s")} value={shareOrDash(totals?.over3sRate ?? null)} />
 								<Figure
-									className="px-6 py-4"
-									label={t("owner.usageSections.noResponse")}
-									value={formatNumber(totals?.noResponse ?? 0)}
-								/>
-								<Figure
-									className="px-6 py-4"
-									label={t("owner.usageSections.over3s")}
-									value={shareOrDash(totals?.over3sRate ?? null)}
-								/>
-								<Figure
-									className="px-6 py-4"
 									label={t("owner.usageSections.answerTimes")}
 									value={t("owner.usageSections.answerTimesValue", {
 										p50: ms(totals?.p50Ms ?? null),
 										p95: ms(totals?.p95Ms ?? null),
 									})}
 								/>
-							</dl>
+							</FigureStrip>
 							<div className="flex flex-col gap-2 px-6 py-5">
 								<p className="text-muted-foreground text-xs">
 									{t("owner.usageSections.totalsSince", { date: shortDate(report.from) })}
@@ -95,11 +88,7 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 									empty={t("owner.nothingRecorded")}
 									rows={report.rest.map((row) => ({
 										id: `${row.method} ${row.route}`,
-										label: (
-											<code className="font-mono text-sm">
-												{row.method} {row.route}
-											</code>
-										),
+										label: codeLabel(`${row.method} ${row.route}`),
 										sub: t("owner.usageSections.routeSub", {
 											failed: row.failures,
 											retried: row.retries,
@@ -161,11 +150,7 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 								<UsageBars
 									tint="bg-destructive/15"
 									empty={t("owner.usageSections.noErrors")}
-									rows={report.errorsByCode.map((row) => ({
-										id: row.key,
-										label: <code className="font-mono text-sm">{row.key}</code>,
-										count: row.count,
-									}))}
+									rows={tallyBars(report.errorsByCode, codeLabel)}
 								/>
 							</Panel>
 
@@ -186,7 +171,7 @@ export function ReliabilityView({ days }: { days: number }): React.JSX.Element {
 									empty={t("owner.usageSections.noRateLimits")}
 									rows={report.rateLimits.routes.map((row) => ({
 										id: `${row.scope} ${row.route}`,
-										label: <code className="font-mono text-sm">{row.route}</code>,
+										label: codeLabel(row.route),
 										sub: row.scope,
 										count: row.count,
 									}))}

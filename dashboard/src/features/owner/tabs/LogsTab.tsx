@@ -188,9 +188,11 @@ export function LogsTab({
 function summarise(feed: LogFeed | undefined, past: boolean, paused: boolean, t: TFunction): string {
 	if (feed === undefined) return t("owner.readingBuffer");
 
-	const shown = t("owner.showing", { shown: feed.lines.length, matched: feed.matched });
-	const held = t("owner.held", { buffered: feed.buffered, capacity: feed.capacity });
-	if (past) return `${shown}, ${held}.`;
+	const counts = t("owner.logsSummary", {
+		shown: t("owner.showing", { shown: feed.lines.length, matched: feed.matched }),
+		held: t("owner.held", { buffered: feed.buffered, capacity: feed.capacity }),
+	});
+	if (past) return counts;
 
-	return `${shown}, ${held}. ${paused ? t("owner.pausedFull") : t("owner.refreshing")}`;
+	return [counts, paused ? t("owner.pausedFull") : t("owner.refreshing")].join(t("common.sentenceSeparator"));
 }

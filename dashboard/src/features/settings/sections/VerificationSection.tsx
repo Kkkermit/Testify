@@ -1,6 +1,7 @@
 import { type ChannelSummary, type RoleSummary, VERIFY_LIMITS, verificationBlocked } from "@testify/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, RowActions, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
@@ -40,7 +41,9 @@ export function VerificationSection({
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
-			{value === undefined ? (
+			{config.isError ? (
+				<ErrorState as="h2" error={config.error} onRetry={() => void config.refetch()} />
+			) : value === undefined ? (
 				<p className="text-muted-foreground text-sm">{t("settings.verifyReading")}</p>
 			) : (
 				<>

@@ -17,6 +17,7 @@ import {
 	tallyBars,
 	type Bars,
 } from "@/features/owner/usage/usage.utils";
+import { codeLabel } from "@/features/owner/usage/usageBars";
 import { useBotActivity } from "@/features/owner/useOwner";
 import { since } from "@/lib/datetime";
 
@@ -96,9 +97,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-blue/20"
 								empty={t("owner.usageSections.noQuestions")}
-								rows={tallyBars(report.support.articles, (key) => (
-									<code className="font-mono text-sm">{key}</code>
-								))}
+								rows={tallyBars(report.support.articles, codeLabel)}
 							/>
 						</Panel>
 
@@ -163,7 +162,7 @@ export function ActivityView({ days }: { days: number }): React.JSX.Element {
 								empty={t("owner.nothingRecorded")}
 								rows={report.events.map((row) => ({
 									id: row.name,
-									label: <code className="font-mono text-sm">{row.name}</code>,
+									label: codeLabel(row.name),
 									sub: t("owner.usageSections.lastSeen", { time: since(row.lastAt) }),
 									count: row.count,
 								}))}
