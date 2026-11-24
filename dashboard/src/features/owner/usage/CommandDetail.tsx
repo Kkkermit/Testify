@@ -8,6 +8,7 @@ import { categoryLabel } from "@/features/commands/categories.labels";
 import { ShardlensLinks } from "@/features/owner/components/AnalyticsNotice";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { ColumnBars } from "@/features/owner/components/DayBars";
+import { FigureStrip } from "@/features/owner/components/FigureStrip";
 import { RunFigures } from "@/features/owner/components/RunFigures";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { countOrDash, formatMs, NO_FIGURE, searchWith, shareOrDash, surfaceBars } from "@/features/owner/owner.utils";
@@ -20,7 +21,7 @@ import {
 	tallyBars,
 	TIER_LABELS,
 } from "@/features/owner/usage/usage.utils";
-import { formBars, guildBar, handlerName } from "@/features/owner/usage/usageBars";
+import { codeLabel, formBars, guildBar } from "@/features/owner/usage/usageBars";
 import { useCommandReport } from "@/features/owner/useOwner";
 import { dateAndTime } from "@/lib/datetime";
 import { languageName } from "@/lib/intl";
@@ -77,35 +78,18 @@ function CommandFigures({ report, params }: { report: CommandReport; params: URL
 					<p className="text-muted-foreground text-xs">{categoryLabel(report.category, t)}</p>
 				</div>
 				<RunFigures runs={totals.runs} failures={failures} daily={report.daily}>
-					<Figure className="px-6 py-4" label={t("owner.commandDetail.late")} value={countOrDash(totals.late)} />
-					<Figure
-						className="px-6 py-4"
-						label={t("owner.commandDetail.noReply")}
-						value={countOrDash(totals.noResponse)}
-					/>
+					<Figure label={t("owner.commandDetail.late")} value={countOrDash(totals.late)} />
+					<Figure label={t("owner.commandDetail.noReply")} value={countOrDash(totals.noResponse)} />
 				</RunFigures>
-				<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
+				<FigureStrip>
+					<Figure label={t("owner.commandDetail.deferred")} value={shareOrDash(totals.deferRate)} />
+					<Figure label={t("owner.commandDetail.private")} value={shareOrDash(totals.ephemeralRate)} />
+					<Figure label={t("owner.usageSections.over3s")} value={shareOrDash(totals.over3sRate)} />
 					<Figure
-						className="px-6 py-4"
-						label={t("owner.commandDetail.deferred")}
-						value={shareOrDash(totals.deferRate)}
-					/>
-					<Figure
-						className="px-6 py-4"
-						label={t("owner.commandDetail.private")}
-						value={shareOrDash(totals.ephemeralRate)}
-					/>
-					<Figure
-						className="px-6 py-4"
-						label={t("owner.usageSections.over3s")}
-						value={shareOrDash(totals.over3sRate)}
-					/>
-					<Figure
-						className="px-6 py-4"
 						label={t("owner.commandDetail.handler")}
 						value={totals.handlerP95Ms === null ? NO_FIGURE : formatMs(totals.handlerP95Ms)}
 					/>
-				</dl>
+				</FigureStrip>
 				<p className="text-muted-foreground px-6 py-3 text-xs">
 					{t("owner.commandDetail.seen", {
 						first: totals.firstAt === null ? NO_FIGURE : dateAndTime(totals.firstAt),
@@ -136,9 +120,7 @@ function CommandFigures({ report, params }: { report: CommandReport; params: URL
 				</Panel>
 
 				<Panel title={t("owner.commandDetail.options")} hint={t("owner.commandDetail.optionsHint")}>
-					{plainBars(report.options, (key) => (
-						<code className="font-mono text-sm">{key}</code>
-					))}
+					{plainBars(report.options, codeLabel)}
 				</Panel>
 
 				<Panel title={t("owner.commandDetail.choices")} hint={t("owner.commandDetail.choicesHint")}>
@@ -196,7 +178,7 @@ function CommandFigures({ report, params }: { report: CommandReport; params: URL
 						empty={t("owner.usageSections.noPresses")}
 						rows={report.components.map((row) => ({
 							id: `${row.kind} ${row.handler}`,
-							label: handlerName(row.handler),
+							label: codeLabel(row.handler),
 							sub: t(kindLabel(row.kind) ?? "owner.runs.kindButton"),
 							count: row.count,
 						}))}

@@ -36,8 +36,8 @@ export function guildBar(row: GuildUsageRow, params: URLSearchParams, t: TFuncti
 	};
 }
 
-/** One of the bot's own handler names, as written in the code. */
-export const handlerName = (id: string): React.JSX.Element => <code className="font-mono text-sm">{id}</code>;
+/** Text as the code writes it: a handler, an option, a route or an error code. */
+export const codeLabel = (text: string): React.JSX.Element => <code className="font-mono text-sm">{text}</code>;
 
 /** Forms by how many were opened and left, which is what a form that puts people off looks like. */
 export function formBars(rows: PanelFormRow[], t: TFunction): Bars {
@@ -45,7 +45,7 @@ export function formBars(rows: PanelFormRow[], t: TFunction): Bars {
 		const abandoned = Math.max(0, row.shown - row.submitted);
 		return {
 			id: row.id,
-			label: handlerName(row.id),
+			label: codeLabel(row.id),
 			sub: t("owner.usageSections.formSub", {
 				shown: formatNumber(row.shown),
 				submitted: formatNumber(Math.min(row.submitted, row.shown)),

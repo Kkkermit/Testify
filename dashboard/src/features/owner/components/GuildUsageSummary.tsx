@@ -25,12 +25,8 @@ export function GuildUsageSummary({ report }: { report: GuildUsageReport }): Rea
 				</div>
 
 				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
-					<Figure className="px-6 py-4" label={t("owner.peopleThisMonth")} value={countOrDash(report.people)} />
-					<Figure
-						className="px-6 py-4"
-						label={t("owner.dashboardScreens")}
-						value={formatNumber(report.dashboardViews)}
-					/>
+					<Figure label={t("owner.peopleThisMonth")} value={countOrDash(report.people)} />
+					<Figure label={t("owner.dashboardScreens")} value={formatNumber(report.dashboardViews)} />
 				</RunFigures>
 			</Card>
 

@@ -4,9 +4,11 @@ import { Card, Figure, UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { CohortTable } from "@/features/owner/components/CohortTable";
 import { DayBars } from "@/features/owner/components/DayBars";
+import { FigureStrip } from "@/features/owner/components/FigureStrip";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { NO_FIGURE, shareOrDash } from "@/features/owner/owner.utils";
 import { labelOf, LIFETIME_LABELS, tallyBars, WEBHOOK_LABELS } from "@/features/owner/usage/usage.utils";
+import { codeLabel } from "@/features/owner/usage/usageBars";
 import { useGrowth } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
@@ -28,16 +30,11 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 					)}
 
 					<Card padding="none" className="divide-border divide-y">
-						<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
-							<Figure className="px-6 py-4" label={t("owner.usageSections.added")} value={formatNumber(report.joins)} />
-							<Figure className="px-6 py-4" label={t("owner.usageSections.left")} value={formatNumber(report.leaves)} />
+						<FigureStrip>
+							<Figure label={t("owner.usageSections.added")} value={formatNumber(report.joins)} />
+							<Figure label={t("owner.usageSections.left")} value={formatNumber(report.leaves)} />
+							<Figure label={t("owner.usageSections.activated")} value={shareOrDash(report.activation.rate)} />
 							<Figure
-								className="px-6 py-4"
-								label={t("owner.usageSections.activated")}
-								value={shareOrDash(report.activation.rate)}
-							/>
-							<Figure
-								className="px-6 py-4"
 								label={t("owner.usageSections.inactive")}
 								value={
 									report.installs === null
@@ -45,7 +42,7 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 										: t("common.partOf", { part: report.installs.inactive, whole: report.installs.active })
 								}
 							/>
-						</dl>
+						</FigureStrip>
 						<div className="grid gap-6 px-6 py-5 sm:grid-cols-2">
 							<div className="flex flex-col gap-2">
 								<p className="text-sm font-medium">{t("owner.usageSections.addedPerDay")}</p>
@@ -81,11 +78,7 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-hue-green/20"
 								empty={t("owner.usageSections.noneAdded")}
-								rows={report.sizeAtInstall.map((row) => ({
-									id: row.key,
-									label: t("owner.usageSections.membersBucket", { bucket: row.key }),
-									count: row.count,
-								}))}
+								rows={tallyBars(report.sizeAtInstall, (key) => t("owner.usageSections.membersBucket", { bucket: key }))}
 							/>
 						</Panel>
 
@@ -93,11 +86,7 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-destructive/15"
 								empty={t("owner.usageSections.noneLeft")}
-								rows={report.lifetimes.map((row) => ({
-									id: row.key,
-									label: labelOf(LIFETIME_LABELS, row.key, t),
-									count: row.count,
-								}))}
+								rows={tallyBars(report.lifetimes, (key) => labelOf(LIFETIME_LABELS, key, t))}
 							/>
 						</Panel>
 
@@ -130,9 +119,7 @@ export function ServersView({ days }: { days: number }): React.JSX.Element {
 							<UsageBars
 								tint="bg-success/20"
 								empty={t("owner.nothingRecorded")}
-								rows={tallyBars(report.installsFromDiscord.scopes, (key) => (
-									<code className="font-mono text-sm">{key}</code>
-								))}
+								rows={tallyBars(report.installsFromDiscord.scopes, codeLabel)}
 							/>
 						</Panel>
 

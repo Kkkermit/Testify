@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Card, Figure, UsageBars } from "@/components/primitives";
 import { AnalyticsState } from "@/features/owner/components/AnalyticsState";
 import { ColumnBars, DayBars } from "@/features/owner/components/DayBars";
+import { FigureStrip } from "@/features/owner/components/FigureStrip";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { shareOrDash, shortDay } from "@/features/owner/owner.utils";
 import { HourHeatmap } from "@/features/owner/usage/HourHeatmap";
@@ -37,23 +38,14 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 				return (
 					<div className="flex flex-col gap-4">
 						<Card padding="none" className="divide-border divide-y">
-							<dl className="grid grid-cols-2 divide-x sm:grid-cols-3 [&>*]:border-border">
+							<FigureStrip columns={3}>
+								<Figure label={t("owner.usageSections.busiestDay")} value={formatNumber(busiest)} />
 								<Figure
-									className="px-6 py-4"
-									label={t("owner.usageSections.busiestDay")}
-									value={formatNumber(busiest)}
-								/>
-								<Figure
-									className="px-6 py-4"
 									label={t("owner.usageSections.newPeople")}
 									value={formatNumber(report.daily.reduce((total, day) => total + day.newUsers, 0))}
 								/>
-								<Figure
-									className="px-6 py-4"
-									label={t("owner.usageSections.stickiness")}
-									value={shareOrDash(report.stickiness)}
-								/>
-							</dl>
+								<Figure label={t("owner.usageSections.stickiness")} value={shareOrDash(report.stickiness)} />
+							</FigureStrip>
 							<div className="px-6 py-5">
 								<DayBars
 									days={report.daily.map((day) => ({ day: day.day, value: day.users }))}
@@ -91,11 +83,7 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 								<UsageBars
 									tint="bg-hue-violet/20"
 									empty={t("owner.nothingRecorded")}
-									rows={report.tiers.map((row) => ({
-										id: row.key,
-										label: labelOf(TIER_LABELS, row.key, t),
-										count: row.count,
-									}))}
+									rows={tallyBars(report.tiers, (key) => labelOf(TIER_LABELS, key, t))}
 								/>
 							</Panel>
 
@@ -103,11 +91,7 @@ export function PeopleView({ days }: { days: number }): React.JSX.Element {
 								<UsageBars
 									tint="bg-hue-violet/20"
 									empty={t("owner.nothingRecorded")}
-									rows={report.contexts.map((row) => ({
-										id: row.key,
-										label: labelOf(CONTEXT_LABELS, row.key, t),
-										count: row.count,
-									}))}
+									rows={tallyBars(report.contexts, (key) => labelOf(CONTEXT_LABELS, key, t))}
 								/>
 							</Panel>
 
