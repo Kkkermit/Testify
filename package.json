@@ -105,6 +105,7 @@
 		"@swc/core": true,
 		"esbuild": true,
 		"ffmpeg-static": true,
+		"fsevents": true,
 		"mongodb-memory-server": true,
 		"unrs-resolver": true,
 		"youtube-dl-exec": true
