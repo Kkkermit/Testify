@@ -1,6 +1,6 @@
 import { loadImage } from "@napi-rs/canvas";
 import { type AttachmentBuilder } from "discord.js";
-import { createCanvas, drawAvatarOrInitial, roundedRect, toAttachment } from "@lib/canvas/canvas.util";
+import { createCanvas, drawAvatarOrInitial, roundedRect, safeToDecode, toAttachment } from "@lib/canvas/canvas.util";
 import { DISPLAY, drawText } from "@lib/canvas/text.util";
 import { formatNumber } from "@lib/format/format.util";
 
@@ -62,7 +62,7 @@ export async function renderWelcomeCard(data: WelcomeCardData): Promise<Attachme
 	const copy = welcomeCardText(data);
 
 	let painted = false;
-	if (data.background) {
+	if (data.background && safeToDecode(data.background)) {
 		try {
 			const image = await loadImage(data.background);
 			const rect = coverRect(image, { width: WIDTH, height: HEIGHT });

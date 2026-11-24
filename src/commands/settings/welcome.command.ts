@@ -3,6 +3,7 @@ import { LIMITS } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
+import { MAX_PICTURE_SIDE, safeToDecode } from "@lib/canvas";
 import { reply, successEmbed } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import { checkBackground, goodbyePanel, greetingFor, normaliseWelcome, readGoodbye, welcomePanel } from "@lib/welcome";
@@ -65,6 +66,12 @@ export default recordsSettings(
 							throw failed;
 						}),
 					);
+
+					if (!safeToDecode(data)) {
+						throw new UserFacingError(
+							`Use a PNG, JPG or WebP no more than ${String(MAX_PICTURE_SIDE)} pixels wide or high.`,
+						);
+					}
 
 					// Stored as bytes, because Discord's signed attachment URLs expire within hours.
 					await saveWelcome(guild.id, {

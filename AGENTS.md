@@ -1416,7 +1416,11 @@ extractors, and a site extractor that hands a link on to the generic one by name
 literal, a bare name or `.local`/`.internal`/`localhost`, with or without the root's trailing dot, reads as search
 text before anything runs (the dot is stripped before the sources check too), and a link to a
 plain file on some other site no longer plays, which is the price. The artwork and avatars the cards draw go through
-`fetchPicture`: `https` only, no redirect, five seconds and 8 MB at most.
+`fetchPicture`: `https` only, no redirect, five seconds and 8 MB at most, counted as the body arrives rather than taken
+from its declared length. **Nothing is decoded until its header says it is small enough** (`safeToDecode`, through
+`image-size`): a PNG, JPEG, WebP or GIF no more than `MAX_PICTURE_SIDE` (4,096) pixels a side. A few kilobytes of PNG
+can claim 50,000 pixels a side, which decodes to gigabytes and ends the process where no handler can catch it, so a
+welcome background is refused on upload and checked again before every card.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
