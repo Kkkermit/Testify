@@ -308,6 +308,7 @@
 		"sticky": "Sticky in {{channel}}",
 		"giveaway": "Verlosung um {{prize}}",
 		"autoResponder": "die Auto-Antwort für „{{trigger}}“",
+		"automodRule": "die AutoMod-Regel „{{name}}“",
 		"scheduled": "die geplante Nachricht in {{channel}}",
 		"reminder": "die Erinnerung „{{text}}“",
 		"profile": "dein Profil",

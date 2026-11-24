@@ -308,6 +308,7 @@
 		"sticky": "the sticky message in {{channel}}",
 		"giveaway": "the giveaway for {{prize}}",
 		"autoResponder": "the auto-responder for “{{trigger}}”",
+		"automodRule": "the AutoMod rule “{{name}}”",
 		"scheduled": "the scheduled message in {{channel}}",
 		"reminder": "the reminder “{{text}}”",
 		"profile": "your profile",

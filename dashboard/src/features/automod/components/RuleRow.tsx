@@ -1,7 +1,7 @@
 import { type AutomodAction, type AutomodRuleSummary } from "@testify/shared";
 import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Toggle } from "@/components/form";
+import { Toggle, Warning } from "@/components/form";
 import { Badge, cardClass, Button } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 
@@ -15,11 +15,13 @@ const ACTION_KEY: Record<AutomodAction, TranslationKey> = {
 export function RuleRow({
 	rule,
 	busy,
+	failure,
 	onToggle,
 	onRemove,
 }: {
 	rule: AutomodRuleSummary;
 	busy: boolean;
+	failure: string | null;
 	onToggle: (enabled: boolean) => void;
 	onRemove: () => void;
 }): React.JSX.Element {
@@ -54,6 +56,11 @@ export function RuleRow({
 			>
 				<Trash2 size={16} aria-hidden="true" />
 			</Button>
+			{failure !== null && (
+				<div className="basis-full">
+					<Warning>{failure}</Warning>
+				</div>
+			)}
 		</li>
 	);
 }

@@ -302,6 +302,7 @@
 		"sticky": "{{channel}} の固定メッセージ",
 		"giveaway": "{{prize}} のギブアウェイ",
 		"autoResponder": "「{{trigger}}」の自動応答",
+		"automodRule": "AutoModルール「{{name}}」",
 		"scheduled": "{{channel}} の予約メッセージ",
 		"reminder": "リマインダー「{{text}}」",
 		"profile": "あなたのプロフィール",

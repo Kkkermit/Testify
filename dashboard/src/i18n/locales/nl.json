@@ -308,6 +308,7 @@
 		"sticky": "het sticky-bericht in {{channel}}",
 		"giveaway": "de giveaway voor {{prize}}",
 		"autoResponder": "het automatische antwoord op “{{trigger}}”",
+		"automodRule": "de AutoMod-regel “{{name}}”",
 		"scheduled": "het geplande bericht in {{channel}}",
 		"reminder": "de herinnering ‘{{text}}’",
 		"profile": "je profiel",

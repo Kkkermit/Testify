@@ -320,6 +320,7 @@
 		"sticky": "закреп в {{channel}}",
 		"giveaway": "розыгрыш «{{prize}}»",
 		"autoResponder": "автоответ на «{{trigger}}»",
+		"automodRule": "правило AutoMod «{{name}}»",
 		"scheduled": "запланированное сообщение в {{channel}}",
 		"reminder": "напоминание «{{text}}»",
 		"profile": "ваш профиль",

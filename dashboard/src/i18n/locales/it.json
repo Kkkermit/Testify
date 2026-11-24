@@ -314,6 +314,7 @@
 		"sticky": "il messaggio fisso in {{channel}}",
 		"giveaway": "il giveaway per {{prize}}",
 		"autoResponder": "la risposta automatica per «{{trigger}}»",
+		"automodRule": "la regola di AutoMod «{{name}}»",
 		"scheduled": "il messaggio programmato in {{channel}}",
 		"reminder": "il promemoria «{{text}}»",
 		"profile": "il tuo profilo",
