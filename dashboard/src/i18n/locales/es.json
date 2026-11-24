@@ -4,6 +4,7 @@
 		"youNeedPermission": "Necesitas el permiso {{permission}} en este servidor para usar esto.",
 		"preview": "Vista previa",
 		"previewEmpty": "Tu mensaje aparece aquí.",
+		"markupRemoved": "Aquí no se permite HTML. Se quitará al guardar.",
 		"saved": "Guardado",
 		"retry": "Reintentar",
 		"couldNotSave": "No se ha podido guardar.",

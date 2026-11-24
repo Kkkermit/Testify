@@ -4,6 +4,7 @@
 		"youNeedPermission": "You need the {{permission}} permission in this server to use this.",
 		"preview": "Preview",
 		"previewEmpty": "Your message appears here.",
+		"markupRemoved": "HTML is not allowed here. It will be removed when this is saved.",
 		"saved": "Saved",
 		"retry": "Try again",
 		"couldNotSave": "That could not be saved.",

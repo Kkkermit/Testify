@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Warning } from "@/components/form";
+import { Refusal } from "@/components/form";
 import { Badge, Button, Card } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
@@ -117,7 +117,7 @@ function StepRow({
 						{step.done && <Badge tone="success">{t("checklist.on")}</Badge>}
 					</p>
 					<p className="text-muted-foreground text-sm">{t(describeStep(step), { channel: step.channelName ?? "" })}</p>
-					{error !== null && <Warning>{error.message}</Warning>}
+					<Refusal error={error} fallback="common.couldNotChange" />
 				</div>
 
 				<div className="flex shrink-0 flex-wrap items-center gap-3">

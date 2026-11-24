@@ -4,6 +4,7 @@
 		"youNeedPermission": "Ti serve il permesso {{permission}} in questo server per usare questa funzione.",
 		"preview": "Anteprima",
 		"previewEmpty": "Qui compare il tuo messaggio.",
+		"markupRemoved": "Qui l’HTML non è consentito. Verrà rimosso al salvataggio.",
 		"saved": "Salvato",
 		"retry": "Riprova",
 		"couldNotSave": "Non è stato possibile salvare.",

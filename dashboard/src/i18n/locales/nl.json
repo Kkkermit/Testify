@@ -4,6 +4,7 @@
 		"youNeedPermission": "Je hebt de machtiging {{permission}} in deze server nodig om dit te gebruiken.",
 		"preview": "Voorbeeld",
 		"previewEmpty": "Je bericht verschijnt hier.",
+		"markupRemoved": "HTML is hier niet toegestaan. Het wordt verwijderd bij het opslaan.",
 		"saved": "Opgeslagen",
 		"retry": "Opnieuw proberen",
 		"couldNotSave": "Dat kon niet worden opgeslagen.",

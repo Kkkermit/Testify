@@ -4,6 +4,7 @@
 		"youNeedPermission": "これを使うには、このサーバーで「{{permission}}」の権限が必要です。",
 		"preview": "プレビュー",
 		"previewEmpty": "ここにメッセージが表示されます。",
+		"markupRemoved": "ここでは HTML は使えません。保存するときに取り除かれます。",
 		"saved": "保存しました",
 		"retry": "もう一度試す",
 		"couldNotSave": "保存できませんでした。",

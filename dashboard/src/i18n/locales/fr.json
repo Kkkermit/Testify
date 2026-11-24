@@ -4,6 +4,7 @@
 		"youNeedPermission": "Il te faut la permission {{permission}} sur ce serveur pour utiliser ceci.",
 		"preview": "Aperçu",
 		"previewEmpty": "Votre message apparaît ici.",
+		"markupRemoved": "Le HTML n’est pas autorisé ici. Il sera retiré à l’enregistrement.",
 		"saved": "Enregistré",
 		"retry": "Réessayer",
 		"couldNotSave": "Cela n’a pas pu être enregistré.",
