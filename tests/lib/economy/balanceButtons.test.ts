@@ -1,11 +1,17 @@
 import { MessageFlags } from "discord.js";
 import balance from "@buttons/balance";
 import money from "@buttons/money";
+import { UserFacingError } from "@core/errors";
 import { deposit, requireAccount } from "@database/repositories/economyRepository";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { BALANCE_PANEL_ID, MONEY_PANEL_ID } from "@lib/economy/economy.constants";
+import { claimDaily } from "@lib/economy/economyActions.util";
 import { idsOf, textOf } from "@tests/helpers/containers";
 
+jest.mock("@lib/economy/economyActions.util", () => ({
+	...jest.requireActual<object>("@lib/economy/economyActions.util"),
+	claimDaily: jest.fn(),
+}));
 jest.mock("@database/repositories/economyRepository", () => ({
 	requireAccount: jest.fn(),
 	deposit: jest.fn(),
@@ -59,6 +65,17 @@ describe("the balance panel's buttons", () => {
 			expect(payload.embeds).toBeUndefined();
 		},
 	);
+
+	/** A second press drew "already claimed" on the panel under a tick, as though it had paid. */
+	it("refuses a daily already claimed privately, leaving the panel as it was", async () => {
+		jest.mocked(claimDaily).mockResolvedValue({ claimed: false, message: "You have already claimed today." });
+		const interaction = pressed();
+
+		await expect(balance.run(interaction as never, { client, action: "daily", args: [OWNER] })).rejects.toEqual(
+			new UserFacingError("You have already claimed today."),
+		);
+		expect(interaction.update).not.toHaveBeenCalled();
+	});
 
 	it("opens the shop with a way back to the balance panel", async () => {
 		const interaction = pressed();
