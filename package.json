@@ -70,17 +70,10 @@
 	},
 	"overrides": {
 		"glob": "$glob",
-		"test-exclude": "^7.0.1",
 		"serialize-javascript": "^7.1.3",
-		"brace-expansion": "^5.0.12",
-		"js-yaml": "^4.3.2",
-		"fast-uri": "^3.1.9",
 		"undici@^5": "^6.29.1",
 		"discord-giveaways": {
 			"deepmerge-ts": "^8.0.1"
-		},
-		"@istanbuljs/load-nyc-config": {
-			"js-yaml": "^3.15.1"
 		},
 		"jsdom": "^29.1.1"
 	},
