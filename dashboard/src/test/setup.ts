@@ -11,7 +11,7 @@ export const server = setupServer(...handlers);
 
 // "error" rather than "warn": a request nothing handles is a test lying about what the API does.
 beforeAll(() => {
-	server.listen({ onUnhandledRequest: "error" });
+	server.listen({ onUnhandledFrame: "error" });
 });
 
 afterEach(() => {
