@@ -1,4 +1,5 @@
 import { type MusicSource, type Query } from "@lib/music/music.types";
+
 /** What a `/play` argument turns out to be, before anything touches the network. */
 
 const HOSTS: { pattern: RegExp; source: MusicSource }[] = [
@@ -13,8 +14,14 @@ const PREFIXES: { prefix: string; source: MusicSource }[] = [
 	{ prefix: "sc:", source: "soundcloud" },
 ];
 
+/** A name may end in the root's dot, which resolvers ignore, so `localhost.` is still `localhost`. */
+function withoutRootDot(hostname: string): string {
+	return hostname.endsWith(".") ? hostname.slice(0, -1) : hostname;
+}
+
 export function sourceOfHost(hostname: string): MusicSource {
-	return HOSTS.find((entry) => entry.pattern.test(hostname))?.source ?? "other";
+	const host = withoutRootDot(hostname);
+	return HOSTS.find((entry) => entry.pattern.test(host))?.source ?? "other";
 }
 
 /** Splits a raw argument into an address to fetch or terms to search for. */
@@ -40,7 +47,8 @@ const LOCAL_NAME = /(?:^|\.)(?:localhost|local|internal|lan|home\.arpa)$/i;
 
 /** An address literal or a bare name is the host's own network rather than a site, whatever its numbers. */
 function isLocalHost(hostname: string): boolean {
-	return hostname.startsWith("[") || /^[\d.]+$/.test(hostname) || !hostname.includes(".") || LOCAL_NAME.test(hostname);
+	const host = withoutRootDot(hostname);
+	return host.startsWith("[") || /^[\d.]+$/.test(host) || !host.includes(".") || LOCAL_NAME.test(host);
 }
 
 /** Only http(s) to a public name: anything else reads as search text rather than as somewhere to fetch. */

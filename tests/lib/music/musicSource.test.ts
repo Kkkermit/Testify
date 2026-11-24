@@ -223,11 +223,18 @@ describe("openStream", () => {
 		}
 	});
 
-	/** A track that needs a transcoder is refused by name when FFmpeg is missing. */
-	it("refuses a track needing a transcoder when FFmpeg is missing", () => {
-		expect(() =>
-			openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
-		).toThrow(/FFmpeg/);
+	/** Refused only after yt-dlp had started, which left a downloader running with nothing to read it. */
+	it("refuses a track needing a transcoder when FFmpeg is missing, before starting the download", () => {
+		const spawned = jest.spyOn(jest.requireMock<typeof ChildProcesses>("node:child_process"), "spawn");
+
+		try {
+			expect(() =>
+				openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
+			).toThrow(/FFmpeg/);
+			expect(spawned).not.toHaveBeenCalled();
+		} finally {
+			spawned.mockRestore();
+		}
 	});
 });
 
