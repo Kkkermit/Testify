@@ -176,6 +176,21 @@ describe("greetInviter", () => {
 		expect(warn).not.toHaveBeenCalled();
 	});
 
+	/** A database that could not answer the blacklist check threw into `guildCreate`, which promises nothing will. */
+	it("sends nothing and throws nothing when the database cannot answer", async () => {
+		const { findBlacklistEntry } = jest.requireMock<{ findBlacklistEntry: jest.Mock }>(
+			"@database/repositories/blacklistRepository",
+		);
+		findBlacklistEntry.mockRejectedValueOnce(new Error("database is down"));
+		const adder = person(ADDER);
+		const bot = client();
+		const warn = jest.spyOn(bot.logger, "warn");
+
+		await expect(greetInviter(bot, audited(adder) as never, noWait)).resolves.toBeUndefined();
+		expect(adder.send).not.toHaveBeenCalled();
+		expect(warn).toHaveBeenCalledTimes(1);
+	});
+
 	it("writes to nobody who is a bot or blacklisted, or when the host has turned it off", async () => {
 		const robot = person(ADDER, true);
 		await greetInviter(client(), audited(robot) as never, noWait);

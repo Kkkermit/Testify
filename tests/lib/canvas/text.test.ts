@@ -1,7 +1,16 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { createCanvas } from "@napi-rs/canvas";
-import { clusters, drawText, fontCovers, measureText, SANS, textRuns, wrapLines } from "@lib/canvas/text.util";
+import {
+	clusters,
+	COVERAGE_KEPT,
+	drawText,
+	fontCovers,
+	measureText,
+	SANS,
+	textRuns,
+	wrapLines,
+} from "@lib/canvas/text.util";
 
 const NO_SYSTEM = { emoji: [], other: [] };
 
@@ -51,6 +60,23 @@ describe("drawing with the bundled fonts", () => {
 
 		expect(fontCovers(draw, SANS, "K")).toBe(true);
 		expect(fontCovers(draw, SANS, "")).toBe(false);
+	});
+
+	/** Every new character in a name added a remembered answer per family tried, with nothing ever let go. */
+	it("forgets what it measured once it holds as many answers as it keeps", () => {
+		const metrics = { width: 1, actualBoundingBoxLeft: 0, actualBoundingBoxRight: 1, actualBoundingBoxAscent: 1 };
+		const measured = jest.fn(() => ({ ...metrics, actualBoundingBoxDescent: 0 }));
+		const fake = { save: jest.fn(), restore: jest.fn(), font: "", measureText: measured } as never;
+
+		fontCovers(fake, "Bounded", "a");
+		const once = measured.mock.calls.length;
+		fontCovers(fake, "Bounded", "a");
+		expect(measured.mock.calls.length).toBe(once);
+
+		for (let point = 0; point < COVERAGE_KEPT; point += 1) fontCovers(fake, "Bounded", `b${String(point)}`);
+		const filled = measured.mock.calls.length;
+		fontCovers(fake, "Bounded", "a");
+		expect(measured.mock.calls.length).toBeGreaterThan(filled);
 	});
 
 	/** A long name ran under the figure beside it. */
