@@ -10,7 +10,7 @@ import {
 	instanceFileText,
 	newAuditKey,
 	OPERATOR_CONTACT,
-} from "../../scripts/setupEnv";
+} from "../../scripts/setupQuestions";
 import { INSTANCE_DEFAULTS, readInstance } from "@config/instance";
 import { isAuditKey } from "@lib/bot/embeddedCollector.util";
 
