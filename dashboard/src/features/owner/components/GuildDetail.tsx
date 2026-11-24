@@ -7,6 +7,7 @@ import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Field, Refusal, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
 import { permissionLabel } from "@/features/commands/permissions.labels";
+import { featureLabel } from "@/features/guild-overview/featureStatus.labels";
 import { CountsUnavailable } from "@/features/owner/components/AnalyticsNotice";
 import { countOrDash } from "@/features/owner/owner.utils";
 import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
@@ -74,7 +75,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 				{guild.configured.length === 0 ? (
 					<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>
 				) : (
-					guild.configured.map((feature) => <Badge key={feature}>{feature}</Badge>)
+					guild.configured.map((feature) => <Badge key={feature}>{featureLabel(feature, feature, t)}</Badge>)
 				)}
 			</div>
 

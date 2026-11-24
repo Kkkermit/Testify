@@ -1,11 +1,12 @@
 import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OWNER_TABS } from "@/features/owner/owner.types";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { formatUptime } from "@/lib/datetime";
 import { expectNoViolations } from "@/test/axe";
+import { guildDetail } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -91,6 +92,23 @@ describe("the owner console", () => {
 
 		expect((await screen.findAllByText(/something went wrong/i)).length).toBeGreaterThan(0);
 		expect(screen.queryByRole("table")).toBeNull();
+	});
+
+	/** The features came through as the overview's keys, so an owner read "audit-logging" where a manager reads its name. */
+	it("names each feature a server has set up, and shows one it does not know as sent", async () => {
+		useOwnerApi([row({ configured: ["audit-logging", "something-new"] })]);
+		server.use(
+			http.get("/api/control/guilds/:guildId", () =>
+				HttpResponse.json({ ...guildDetail, configured: ["starboard"] }),
+			),
+		);
+		renderWithProviders(<OwnerPage />, { path: "/owner", route: "/owner?server=900000000000000001" });
+
+		const table = await screen.findByRole("table");
+		expect(within(table).getByText("Audit logging")).toBeInTheDocument();
+		expect(within(table).getByText("something-new")).toBeInTheDocument();
+		expect(within(table).queryByText("audit-logging")).toBeNull();
+		expect(await screen.findByText("Starboard")).toBeInTheDocument();
 	});
 
 	/** A failed read of the figures once took the server list down with it, though the list reads on its own. */
