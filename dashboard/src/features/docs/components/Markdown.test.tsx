@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
-import { Markdown, prepareDoc } from "@/features/docs/components/Markdown";
+import { Markdown } from "@/features/docs/components/Markdown";
 import { PAGES_BY_FILE, PAGES_BY_SECTION } from "@/features/docs/docs.pages";
+import { prepareDoc } from "@/features/docs/markdownDoc.utils";
 import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
 

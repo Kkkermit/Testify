@@ -9,7 +9,7 @@ import { useBot } from "@/features/auth/useBot";
 import { COMMAND_LIST, withoutSwitchedOff } from "@/features/docs/commandList.utils";
 import { ConfigurationTable } from "@/features/docs/components/ConfigurationTable";
 import { Guides } from "@/features/docs/components/Guides";
-import { Markdown, type MarkdownSource, prepareDoc } from "@/features/docs/components/Markdown";
+import { Markdown } from "@/features/docs/components/Markdown";
 import {
 	type DocPage,
 	docPage,
@@ -22,6 +22,7 @@ import {
 	PAGES_BY_SECTION,
 } from "@/features/docs/docs.pages";
 import { sectionsOf } from "@/features/docs/markdown.utils";
+import { type MarkdownSource, prepareDoc } from "@/features/docs/markdownDoc.utils";
 import { SiteError } from "@/features/site/components/SiteError";
 import { TrailBack } from "@/features/site/components/TrailBack";
 import { useFeaturesOff } from "@/features/site/useFeaturesOff";

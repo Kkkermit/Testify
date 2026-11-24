@@ -1,76 +1,13 @@
-import {
-	Check,
-	Copy,
-	ExternalLink,
-	Info,
-	Lightbulb,
-	MessageSquareWarning,
-	OctagonAlert,
-	TriangleAlert,
-} from "lucide-react";
+import { ExternalLink, Info, Lightbulb, MessageSquareWarning, OctagonAlert, TriangleAlert } from "lucide-react";
 import { Lexer, type Token, type Tokens } from "marked";
-import { type ReactNode, useState } from "react";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import {
-	type Alert,
-	alertOf,
-	decodeEntities,
-	destinationOf,
-	inlineText,
-	type LinkContext,
-	Slugger,
-	withoutMarkup,
-} from "@/features/docs/markdown.utils";
+import { CodeBlock } from "@/features/docs/components/CodeBlock";
+import { type Alert, alertOf, decodeEntities, destinationOf, type LinkContext } from "@/features/docs/markdown.utils";
+import { headingLevel, markedToken, type PreparedDoc } from "@/features/docs/markdownDoc.utils";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
-import { highlighted } from "@/lib/highlight";
-
-interface DocHeading {
-	id: string;
-	text: string;
-	level: number;
-}
-
-export interface MarkdownSource {
-	file: string;
-	markdown: string;
-	dropTitle?: boolean;
-}
-
-interface PreparedDoc {
-	blocks: { file: string; tokens: Token[] }[];
-	headings: DocHeading[];
-	ids: WeakMap<Token, string>;
-}
-
-const level = (depth: number): number => Math.min(6, Math.max(2, depth));
-
-export function prepareDoc(sources: readonly MarkdownSource[]): PreparedDoc {
-	const slugger = new Slugger();
-	const ids = new WeakMap<Token, string>();
-	const headings: DocHeading[] = [];
-
-	const blocks = sources.map((source) => {
-		const tokens = Lexer.lex(withoutMarkup(source.markdown), { gfm: true });
-		const title = tokens.findIndex((token) => token.type === "heading");
-		if (source.dropTitle === true && (tokens[title] as Tokens.Heading | undefined)?.depth === 1)
-			tokens.splice(title, 1);
-
-		for (const token of tokens) {
-			if (token.type !== "heading") continue;
-			const heading = token as Tokens.Heading;
-			const text = decodeEntities(inlineText(heading.text));
-			const id = slugger.slug(text);
-			ids.set(token, id);
-			headings.push({ id, text, level: level(heading.depth) });
-		}
-
-		return { file: source.file, tokens };
-	});
-
-	return { blocks, headings, ids };
-}
 
 interface Scope {
 	link: LinkContext;
@@ -111,45 +48,54 @@ const HEADING = {
 	6: "text-muted-foreground scroll-mt-24 text-sm font-semibold",
 } as const;
 
-function block(token: Token, scope: Scope, key: number): ReactNode {
+function block(raw: Token, scope: Scope, key: number): ReactNode {
+	const token = markedToken(raw);
 	switch (token.type) {
 		case "heading": {
-			const heading = token as Tokens.Heading;
-			const depth = level(heading.depth) as keyof typeof HEADING;
-			const Tag = `h${String(depth)}` as "h2";
+			const depth = headingLevel(token.depth);
+			const Tag = `h${depth}` as const;
 			return (
-				<Tag key={key} id={scope.ids.get(token)} className={HEADING[depth]}>
-					{inline(heading.tokens, scope)}
+				<Tag key={key} id={scope.ids.get(raw)} className={HEADING[depth]}>
+					{inline(token.tokens, scope)}
 				</Tag>
 			);
 		}
 		case "paragraph":
 			return (
 				<p key={key} className="leading-relaxed text-pretty">
-					{inline((token as Tokens.Paragraph).tokens, scope)}
+					{inline(token.tokens, scope)}
 				</p>
 			);
-		case "text": {
-			const text = token as Tokens.Text;
-			return text.tokens === undefined ? (
-				decodeEntities(text.text)
+		case "text":
+			return token.tokens === undefined ? (
+				decodeEntities(token.text)
 			) : (
-				<span key={key}>{inline(text.tokens, scope)}</span>
+				<span key={key}>{inline(token.tokens, scope)}</span>
 			);
-		}
-		case "code": {
-			const code = token as Tokens.Code;
-			return <CodeBlock key={key} code={code.text} language={code.lang} />;
-		}
+		case "code":
+			return <CodeBlock key={key} code={token.text} language={token.lang} />;
 		case "blockquote":
-			return <Quote key={key} quote={token as Tokens.Blockquote} scope={scope} />;
+			return <Quote key={key} quote={token} scope={scope} />;
 		case "list":
-			return <List key={key} list={token as Tokens.List} scope={scope} />;
+			return <List key={key} list={token} scope={scope} />;
 		case "table":
-			return <Table key={key} table={token as Tokens.Table} scope={scope} />;
+			return <Table key={key} table={token} scope={scope} />;
 		case "hr":
 			return <hr key={key} className="border-border" />;
-		default:
+		// Raw HTML is never drawn, and the rest only appear inside a paragraph, a list or a table.
+		case "html":
+		case "space":
+		case "def":
+		case "checkbox":
+		case "list_item":
+		case "br":
+		case "codespan":
+		case "del":
+		case "em":
+		case "escape":
+		case "image":
+		case "link":
+		case "strong":
 			return null;
 	}
 }
@@ -157,33 +103,44 @@ function block(token: Token, scope: Scope, key: number): ReactNode {
 const LINK = "text-accent underline decoration-1 underline-offset-2 hover:decoration-2";
 
 function inline(tokens: readonly Token[] | undefined, scope: Scope): ReactNode {
-	return (tokens ?? []).map((token, key) => {
+	return (tokens ?? []).map((raw, key) => {
+		const token = markedToken(raw);
 		switch (token.type) {
-			case "text": {
-				const text = token as Tokens.Text;
-				return text.tokens === undefined ? decodeEntities(text.text) : inline(text.tokens, scope);
-			}
+			case "text":
+				return token.tokens === undefined ? decodeEntities(token.text) : inline(token.tokens, scope);
 			case "escape":
-				return (token as Tokens.Escape).text;
+				return token.text;
 			case "codespan":
 				return (
 					<code key={key} className="bg-muted rounded-chip px-1 py-0.5 font-mono text-[0.85em]">
-						{(token as Tokens.Codespan).text}
+						{token.text}
 					</code>
 				);
 			case "strong":
-				return <strong key={key}>{inline((token as Tokens.Strong).tokens, scope)}</strong>;
+				return <strong key={key}>{inline(token.tokens, scope)}</strong>;
 			case "em":
-				return <em key={key}>{inline((token as Tokens.Em).tokens, scope)}</em>;
+				return <em key={key}>{inline(token.tokens, scope)}</em>;
 			case "del":
-				return <del key={key}>{inline((token as Tokens.Del).tokens, scope)}</del>;
+				return <del key={key}>{inline(token.tokens, scope)}</del>;
 			case "br":
 				return <br key={key} />;
 			case "link":
-				return <DocLink key={key} link={token as Tokens.Link} scope={scope} />;
+				return <DocLink key={key} link={token} scope={scope} />;
 			case "image":
-				return <DocImage key={key} image={token as Tokens.Image} scope={scope} />;
-			default:
+				return <DocImage key={key} image={token} scope={scope} />;
+			// Raw HTML is never drawn, and a block never sits inside a line of text.
+			case "html":
+			case "blockquote":
+			case "checkbox":
+			case "code":
+			case "def":
+			case "heading":
+			case "hr":
+			case "list_item":
+			case "list":
+			case "paragraph":
+			case "space":
+			case "table":
 				return null;
 		}
 	});
@@ -230,37 +187,6 @@ function DocImage({ image, scope }: { image: Tokens.Image; scope: Scope }): Reac
 			<ExternalLink size={12} aria-hidden="true" />
 			{label}
 		</a>
-	);
-}
-
-function CodeBlock({ code, language }: { code: string; language: string | undefined }): React.JSX.Element {
-	const { t } = useTranslation();
-	const [copied, setCopied] = useState(false);
-
-	return (
-		<div className="relative min-w-0">
-			<pre className="code-tokens bg-card border-border rounded-field overflow-x-auto border p-4 pr-12 font-mono text-[0.8125rem] leading-relaxed">
-				<code>{highlighted(code, language)}</code>
-			</pre>
-			<button
-				type="button"
-				aria-label={copied ? t("docs.copied") : t("docs.copy")}
-				onClick={() => {
-					// Absent on a page served over plain HTTP from another machine, whatever the types say.
-					if (!("clipboard" in navigator)) return;
-					void navigator.clipboard.writeText(code).then(() => {
-						setCopied(true);
-					});
-				}}
-				className={cn(
-					"text-muted-foreground hover:text-foreground hover:bg-muted rounded-chip absolute top-2 right-2",
-					"flex size-8 items-center justify-center transition-colors duration-150",
-					"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
-				)}
-			>
-				{copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
-			</button>
-		</div>
 	);
 }
 
