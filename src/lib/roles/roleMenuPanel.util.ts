@@ -2,7 +2,14 @@ import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { type StoredRoleMenu } from "@database/repositories/roleMenuRepository";
 import { button, channelSelect, option, roleSelect, row, select } from "@lib/discord/components.util";
-import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
+import {
+	container,
+	containerMessage,
+	divider,
+	sectionWithButton,
+	text,
+	withoutPings,
+} from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { ROLE_MENU_ADMIN_ID, ROLE_MENU_ID } from "@lib/roles/roles.constants";
 import { settingsScreen, type ScreenAction, type ScreenRow } from "@lib/settings/settingsScreen.util";
@@ -21,7 +28,8 @@ function holdLine(menu: Pick<StoredRoleMenu, "mode">): string {
 }
 
 /** The message members see in the channel; their own choices happen privately, so it is the same for everybody. */
-export function roleMenuPost(menu: StoredRoleMenu): ContainerMessage {
+/** The role list is mentions, which must render as names without pinging every holder. */
+export function roleMenuPost(menu: StoredRoleMenu): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const parts: ContainerPart[] = [text(`## ${menu.title}`)];
 	if (menu.description !== "") parts.push(text(menu.description));
 
@@ -39,7 +47,7 @@ export function roleMenuPost(menu: StoredRoleMenu): ContainerMessage {
 		text(`-# ${holdLine(menu)} Choosing again changes what you have.`),
 	);
 
-	return containerMessage(container({ category: "settings", parts }));
+	return withoutPings(containerMessage(container({ category: "settings", parts })));
 }
 
 /** What a member gets on pressing the post: the menu pre-ticked with the roles they already hold. */
@@ -87,7 +95,11 @@ export function pickNote(names: { added: string[]; removed: string[]; refused: s
 }
 
 /** Every menu in the server, each with its own Edit button. */
-export function roleMenuHub(menus: StoredRoleMenu[], ownerId: string, note?: string): ContainerMessage {
+export function roleMenuHub(
+	menus: StoredRoleMenu[],
+	ownerId: string,
+	note?: string,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const full = menus.length >= ROLE_MENU_LIMITS.maxPerGuild;
 	const parts: ContainerPart[] = [
 		text(
@@ -129,7 +141,7 @@ export function roleMenuHub(menus: StoredRoleMenu[], ownerId: string, note?: str
 		),
 	);
 
-	return containerMessage(container({ category: "settings", parts }));
+	return withoutPings(containerMessage(container({ category: "settings", parts })));
 }
 
 interface RoleMenuEditorState {
@@ -141,7 +153,10 @@ interface RoleMenuEditorState {
 }
 
 /** One menu: its wording, who may hold what, the roles on offer and where it is posted — each applied on the press. */
-export function roleMenuEditor(state: RoleMenuEditorState, ownerId: string): ContainerMessage {
+export function roleMenuEditor(
+	state: RoleMenuEditorState,
+	ownerId: string,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const { menu } = state;
 	const args = [menu.id];
 	const posted = menu.messageId !== null;
@@ -184,39 +199,41 @@ export function roleMenuEditor(state: RoleMenuEditorState, ownerId: string): Con
 		: `Not posted yet. It goes to <#${menu.channelId}> when you press Post.`;
 	if (state.confirmingDelete) status = "Delete this menu? Its post comes down too, and nobody loses a role they hold.";
 
-	return settingsScreen({
-		id: ROLE_MENU_ADMIN_ID,
-		ownerId,
-		category: "settings",
-		title: `🎭 ${menu.title}`,
-		status,
-		...(state.note !== undefined ? { note: state.note } : {}),
-		rows,
-		pickers: [
-			{
-				label: "Roles on offer",
-				hint: "What is ticked is on the menu. A role above yours or mine, or one that moderates, is refused.",
-				control: row(
-					roleSelect({
-						id: customId(ROLE_MENU_ADMIN_ID, "roles", menu.id, ownerId),
-						placeholder: "Roles members may pick…",
-						minValues: 0,
-						maxValues: ROLE_MENU_LIMITS.maxRoles,
-						defaultRoleIds: menu.roleIds,
-					}),
-				),
-			},
-			{
-				label: "Posted in",
-				control: row(
-					channelSelect({
-						id: customId(ROLE_MENU_ADMIN_ID, "channel", menu.id, ownerId),
-						placeholder: "Channel for the menu…",
-						defaultChannelIds: [menu.channelId],
-					}),
-				),
-			},
-		],
-		actions,
-	});
+	return withoutPings(
+		settingsScreen({
+			id: ROLE_MENU_ADMIN_ID,
+			ownerId,
+			category: "settings",
+			title: `🎭 ${menu.title}`,
+			status,
+			...(state.note !== undefined ? { note: state.note } : {}),
+			rows,
+			pickers: [
+				{
+					label: "Roles on offer",
+					hint: "What is ticked is on the menu. A role above yours or mine, or one that moderates, is refused.",
+					control: row(
+						roleSelect({
+							id: customId(ROLE_MENU_ADMIN_ID, "roles", menu.id, ownerId),
+							placeholder: "Roles members may pick…",
+							minValues: 0,
+							maxValues: ROLE_MENU_LIMITS.maxRoles,
+							defaultRoleIds: menu.roleIds,
+						}),
+					),
+				},
+				{
+					label: "Posted in",
+					control: row(
+						channelSelect({
+							id: customId(ROLE_MENU_ADMIN_ID, "channel", menu.id, ownerId),
+							placeholder: "Channel for the menu…",
+							defaultChannelIds: [menu.channelId],
+						}),
+					),
+				},
+			],
+			actions,
+		}),
+	);
 }

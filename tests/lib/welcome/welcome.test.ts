@@ -83,8 +83,10 @@ describe("the welcome panel", () => {
 		OWNER,
 	);
 
-	it("is a Components V2 message", () => {
+	/** It quotes the greeting a manager typed, which can mention anybody. */
+	it("is a Components V2 message that pings nobody", () => {
 		expect(configured.flags).toBe(MessageFlags.IsComponentsV2);
+		expect(configured.allowedMentions).toEqual({ parse: [] });
 	});
 
 	it("namespaces every control, with the owner last", () => {

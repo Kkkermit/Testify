@@ -90,6 +90,16 @@ describe("musicPanel", () => {
 		expect(add).toBe(`${MUSIC_ADD_ID}:open`);
 	});
 
+	/** It names who asked for the track, and a title is whatever the uploader called it. */
+	it("names who asked for the track without pinging them", () => {
+		const queued = state({
+			queue: { tracks: [track("@everyone", { requestedBy: "100000000000000009" })], index: 0, loop: "off" },
+		});
+
+		expect(textOf(musicPanel(queued, OWNER))).toContain("<@100000000000000009>");
+		expect(musicPanel(queued, OWNER).allowedMentions).toEqual({ parse: [] });
+	});
+
 	it("gives every control its own custom ID", () => {
 		expect(duplicateIds(musicPanel(state(), OWNER))).toEqual([]);
 	});

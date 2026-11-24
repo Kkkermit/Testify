@@ -40,8 +40,10 @@ function selectsOf(rendered: ReturnType<typeof levelPanel>): Record<string, unkn
 }
 
 describe("the levelling panel", () => {
-	it.each(LEVEL_TABS)("renders the %s tab as a Components V2 message", (tab) => {
+	/** Boost, reward and ignored roles are listed as mentions, which must not ping everybody holding them. */
+	it.each(LEVEL_TABS)("renders the %s tab as a Components V2 message that pings nobody", (tab) => {
 		expect(panel(tab).flags).toBe(MessageFlags.IsComponentsV2);
+		expect(panel(tab).allowedMentions).toEqual({ parse: [] });
 	});
 
 	it.each(LEVEL_TABS)("namespaces every control on the %s tab, with the owner last", (tab) => {

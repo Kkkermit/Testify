@@ -3,7 +3,7 @@ import { theme } from "@config/theme";
 import { customId } from "@core/button";
 import { type StoredIdea } from "@database/repositories/ideaRepository";
 import { button, channelSelect, row } from "@lib/discord/components.util";
-import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { IDEA_ID, IDEA_SETTINGS_ID } from "@lib/ideas/ideas.constants";
 import { settingsScreen, statusDot, switchAction } from "@lib/settings/settingsScreen.util";
@@ -35,8 +35,8 @@ function ideaStatusLine(idea: Pick<StoredIdea, "status" | "reason" | "decidedByN
 	return idea.reason === "" ? line : `${line}\n${quoted(idea.reason)}`;
 }
 
-/** The post members vote on; the same for everybody, so staff buttons are refused rather than hidden. */
-export function ideaPost(idea: StoredIdea): ContainerMessage {
+/** The post members vote on, which quotes a member and names its author, so it pings nobody. */
+export function ideaPost(idea: StoredIdea): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const open = idea.status === "open";
 	const vote = (side: "up" | "down", count: number, emoji: string): ReturnType<typeof button> =>
 		button({ id: customId(IDEA_ID, side, idea.id), label: String(count), emoji, disabled: !open });
@@ -62,9 +62,11 @@ export function ideaPost(idea: StoredIdea): ContainerMessage {
 		row(vote("up", idea.upVoters.length, "👍"), vote("down", idea.downVoters.length, "👎"), ...staff),
 	];
 
-	return containerMessage(
-		container(
-			idea.status === "open" ? { category: "community", parts } : { accent: STATUS_ACCENT[idea.status], parts },
+	return withoutPings(
+		containerMessage(
+			container(
+				idea.status === "open" ? { category: "community", parts } : { accent: STATUS_ACCENT[idea.status], parts },
+			),
 		),
 	);
 }

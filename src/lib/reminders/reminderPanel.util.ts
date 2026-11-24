@@ -2,7 +2,7 @@ import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { type StoredReminder } from "@database/repositories/reminderRepository";
 import { button, navRow, row } from "@lib/discord/components.util";
-import { container, containerMessage, sectionWithButton, text } from "@lib/discord/containers.util";
+import { container, containerMessage, sectionWithButton, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { REMINDER_ID, REMINDER_LIMITS } from "@lib/reminders/reminders.constants";
 
@@ -34,7 +34,12 @@ function whereLine(reminder: Pick<StoredReminder, "guildId" | "channelId" | "del
 }
 
 /** The private answer to `/remind me`, with a way to change where it arrives and to call it off. */
-export function reminderConfirm(reminder: StoredReminder, ownerId: string, note?: string): ContainerMessage {
+/** Quotes what was typed, which a prefix run shows in the open, so it pings nobody. */
+export function reminderConfirm(
+	reminder: StoredReminder,
+	ownerId: string,
+	note?: string,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const due = seconds(reminder.dueAt);
 	const parts: ContainerPart[] = [
 		text(`## ⏰ Reminder set\nI will remind you <t:${due}:R> (<t:${due}:f>), ${whereLine(reminder)}.`),
@@ -59,12 +64,16 @@ export function reminderConfirm(reminder: StoredReminder, ownerId: string, note?
 	}
 
 	parts.push(row(...controls), text("-# `/remind list` shows every reminder you have."));
-	return containerMessage(container({ category: "community", parts }));
+	return withoutPings(containerMessage(container({ category: "community", parts })));
 }
 
-export function reminderCancelled(reminder: Pick<StoredReminder, "text">): ContainerMessage {
-	return containerMessage(
-		container({ category: "community", parts: [text(`## ⏰ Reminder cancelled\n${quoted(reminder.text)}`)] }),
+export function reminderCancelled(
+	reminder: Pick<StoredReminder, "text">,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
+	return withoutPings(
+		containerMessage(
+			container({ category: "community", parts: [text(`## ⏰ Reminder cancelled\n${quoted(reminder.text)}`)] }),
+		),
 	);
 }
 
@@ -78,7 +87,7 @@ export function reminderList(
 	page: number,
 	ownerId: string,
 	note?: string,
-): ContainerMessage {
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const pages = pageCountOf(reminders.length);
 	const shown = Math.min(Math.max(0, page), pages - 1);
 	const parts: ContainerPart[] = [
@@ -104,7 +113,7 @@ export function reminderList(
 
 	if (pages > 1) parts.push(navRow(REMINDER_ID, shown, pages, ownerId));
 
-	return containerMessage(container({ category: "community", parts }));
+	return withoutPings(containerMessage(container({ category: "community", parts })));
 }
 
 /** The delivered reminder; only a channel post mentions anybody, and it mentions only its owner. */
