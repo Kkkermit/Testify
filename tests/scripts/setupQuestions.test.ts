@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -10,6 +10,7 @@ import {
 	instanceFileText,
 	newAuditKey,
 	OPERATOR_CONTACT,
+	writeSecretFile,
 } from "../../scripts/setupQuestions";
 import { INSTANCE_DEFAULTS, readInstance } from "@config/instance";
 import { isAuditKey } from "@lib/bot/embeddedCollector.util";
@@ -96,5 +97,20 @@ describe("making it your own", () => {
 			defaultPrefix: "!",
 		});
 		expect(instanceFileText({ repository: " " })).toBeNull();
+	});
+});
+
+describe("writing the answers", () => {
+	/** A mode given to a write applies only to a file it creates, and `.env` is often copied from the example first. */
+	it("leaves the settings file readable by its owner alone, even one that was already there", () => {
+		const path = join(mkdtempSync(join(tmpdir(), "testify-wizard-")), ".env");
+		writeFileSync(path, "OLD=1\n", { mode: 0o644 });
+		chmodSync(path, 0o644);
+
+		writeSecretFile(path, "DISCORD_TOKEN=secret\n");
+
+		expect(readFileSync(path, "utf8")).toBe("DISCORD_TOKEN=secret\n");
+		// Windows keeps no such mode, so there is nothing more to check there.
+		if (process.platform !== "win32") expect(statSync(path).mode & 0o777).toBe(0o600);
 	});
 });
