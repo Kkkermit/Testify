@@ -1,6 +1,6 @@
 import { TICKET_LIMITS } from "@testify/shared";
 import { Power, Send } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -53,15 +53,18 @@ export function TicketsPage(): React.JSX.Element {
 	usePageTitle(t("tickets.title"), overview.data?.name);
 
 	const settings = tickets.data;
-	const [draft, setDraft] = useState<Draft | null>(null);
-
-	useEffect(() => {
-		if (settings !== undefined) setDraft(draftOf(settings));
-	}, [settings]);
+	const saved = settings === undefined ? null : draftOf(settings);
+	const savedKey = JSON.stringify(saved);
+	const [draft, setDraft] = useState<Draft | null>(saved);
+	const [draftFrom, setDraftFrom] = useState(savedKey);
+	// The draft starts again only when what it edits is saved differently, so closing a ticket keeps an edit.
+	if (draftFrom !== savedKey) {
+		setDraftFrom(savedKey);
+		setDraft(saved);
+	}
 
 	if (tickets.isError) return <ErrorState error={tickets.error} onRetry={() => void tickets.refetch()} />;
-	if (tickets.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
-	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
+	if (settings === undefined || draft === null) return <Skeleton className="h-96 w-full" />;
 
 	const problems = draftProblems(draft, t);
 	const blocked = problems.length > 0;
@@ -189,14 +192,14 @@ export function TicketsPage(): React.JSX.Element {
 
 				<FieldGroup label={t("common.preview")}>
 					<PostPreview text={draft.description} empty={t("common.previewEmpty")}>
-						<span className="bg-primary rounded-field mt-2 inline-block px-3 py-1.5 text-sm font-medium text-white">
+						<span className="bg-primary text-primary-foreground rounded-field mt-2 inline-block px-3 py-1.5 text-sm font-medium">
 							{draft.buttonLabel}
 						</span>
 					</PostPreview>
 				</FieldGroup>
 
 				{markupWarning(draft.description) !== null && <Warning>{markupWarning(draft.description)}</Warning>}
-				{blocked && <Warning>{problems.join(" ")}</Warning>}
+				{blocked && <Warning>{problems.join(t("common.sentenceSeparator"))}</Warning>}
 				<Refusal error={save.error} />
 
 				<RowActions>

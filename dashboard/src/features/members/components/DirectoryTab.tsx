@@ -5,7 +5,7 @@ import {
 	type DirectoryPage,
 	type DirectoryRow,
 } from "@testify/shared";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
@@ -20,6 +20,7 @@ import {
 	Card,
 	DividedList,
 	EmptyState,
+	Pager,
 	SegmentedControl,
 	Skeleton,
 	Summary,
@@ -46,6 +47,7 @@ import { useDirectory } from "@/features/members/useDirectory";
 import { useDebounced } from "@/hooks/useDebounced";
 import { cn } from "@/lib/cn";
 import { dateAndTime, shortDate } from "@/lib/datetime";
+import { cursorAt, type CursorTrail, FIRST_CURSOR_PAGE, trailPages, turnTo } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
 
 interface Acting {
@@ -65,11 +67,10 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 	const settled: DirectoryFilters = { ...filters, q: searched };
 	const filterKey = directorySearch(settled, null);
 
-	// Earlier cursors are kept per set of filters, so a change of filter starts again from the first page.
-	const [trail, setTrail] = useState<{ key: string; cursors: (string | null)[] }>({ key: filterKey, cursors: [null] });
-	const cursors = trail.key === filterKey ? trail.cursors : [null];
-	const after = cursors.at(-1) ?? null;
-	const directory = useDirectory(guildId, directorySearch(settled, after));
+	// A cursor belongs to one set of filters, so a change of filter starts again from the first page.
+	const [kept, setKept] = useState<{ key: string; trail: CursorTrail }>({ key: filterKey, trail: FIRST_CURSOR_PAGE });
+	const trail = kept.key === filterKey ? kept.trail : FIRST_CURSOR_PAGE;
+	const directory = useDirectory(guildId, directorySearch(settled, cursorAt(trail)));
 	// The last answer keeps the filters' own options while the next loads; the list waits for its own.
 	const page = directory.data;
 	const results = currentData(directory);
@@ -92,9 +93,10 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 		setActing(null);
 	}
 
-	function move(cursorsNext: (string | null)[]): void {
-		setTrail({ key: filterKey, cursors: cursorsNext });
+	function turn(number: number): void {
+		setKept({ key: filterKey, trail: turnTo(trail, number, results) });
 		setOpen(null);
+		setActing((current) => (current?.from === null ? current : null));
 	}
 
 	return (
@@ -272,27 +274,9 @@ export function DirectoryTab({ guildId }: { guildId: string }): React.JSX.Elemen
 				</Card>
 			)}
 
-			{page !== undefined && (cursors.length > 1 || page.next !== null) && (
-				<nav aria-label={t("directory.pages")} className="flex justify-between gap-2">
-					<Button
-						variant="secondary"
-						disabled={cursors.length <= 1 || directory.isPlaceholderData}
-						onClick={() => {
-							move(cursors.slice(0, -1));
-						}}
-					>
-						<ChevronLeft size={16} aria-hidden="true" /> {t("common.previous")}
-					</Button>
-					<Button
-						variant="secondary"
-						disabled={page.next === null || directory.isPlaceholderData}
-						onClick={() => {
-							move([...cursors, page.next]);
-						}}
-					>
-						{t("common.next")} <ChevronRight size={16} aria-hidden="true" />
-					</Button>
-				</nav>
+			{/* Kept while a later page loads, so the button just pressed is still there to hold focus. */}
+			{!directory.isError && (results !== undefined || trail.cursors.length > 1) && (
+				<Pager {...trailPages(trail, results)} label={t("directory.pages")} onChange={turn} />
 			)}
 		</div>
 	);

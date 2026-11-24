@@ -66,7 +66,7 @@ export function HourHeatmap({ hours }: { hours: AudienceReport["hours"] }): Reac
 							<tr key={weekday}>
 								<th scope="row">{weekdayName(weekday)}</th>
 								{HOURS.map((hour) => (
-									<td key={hour}>{countAt(weekday, hour)}</td>
+									<td key={hour}>{formatNumber(countAt(weekday, hour))}</td>
 								))}
 							</tr>
 						))}

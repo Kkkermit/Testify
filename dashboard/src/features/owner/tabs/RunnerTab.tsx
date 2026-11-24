@@ -162,7 +162,7 @@ function OptionField({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const id = `runner-arg-${option.name}`;
-	const label = option.required ? option.name : `${option.name} (optional)`;
+	const label = option.required ? option.name : t("owner.optionalOption", { name: option.name });
 	const kind = controlFor(option);
 
 	return (
@@ -219,7 +219,7 @@ function OptionField({
 					id={id}
 					value={value}
 					autoComplete="off"
-					{...(kind === "id" ? { inputMode: "numeric" as const, placeholder: "A Discord ID" } : {})}
+					{...(kind === "id" ? { inputMode: "numeric" as const, placeholder: t("owner.idPlaceholder") } : {})}
 					onChange={(event) => {
 						onChange(event.target.value);
 					}}

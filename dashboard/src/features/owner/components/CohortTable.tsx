@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { shortDay } from "@/features/owner/owner.utils";
+import { formatNumber } from "@/lib/intl";
 
 const COLUMNS = 8;
 
@@ -55,7 +56,7 @@ export function CohortTable({
 							<th scope="row" className="py-1.5 text-left font-normal">
 								{shortDay(row.cohort)}
 							</th>
-							<td className="py-1.5 text-right">{row.size}</td>
+							<td className="py-1.5 text-right">{formatNumber(row.size)}</td>
 							{periods.map((period) => (
 								<td key={period} className="py-1.5 text-right">
 									{row.cells[period - 1] ?? ""}

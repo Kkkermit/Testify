@@ -1,6 +1,6 @@
 import { TREASURE_LIMITS } from "@testify/shared";
 import { RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -31,15 +31,18 @@ export function TreasurePage(): React.JSX.Element {
 	usePageTitle(t("treasure.title"), overview.data?.name);
 
 	const settings = treasure.data;
-	const [draft, setDraft] = useState<Draft | null>(null);
-
-	useEffect(() => {
-		if (settings !== undefined) setDraft(draftOf(settings));
-	}, [settings]);
+	const saved = settings === undefined ? null : draftOf(settings);
+	const savedKey = JSON.stringify(saved);
+	const [draft, setDraft] = useState<Draft | null>(saved);
+	const [draftFrom, setDraftFrom] = useState(savedKey);
+	// The draft starts again only when the numbers it edits are saved differently, so the switch keeps an edit.
+	if (draftFrom !== savedKey) {
+		setDraftFrom(savedKey);
+		setDraft(saved);
+	}
 
 	if (treasure.isError) return <ErrorState error={treasure.error} onRetry={() => void treasure.refetch()} />;
-	if (treasure.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
-	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
+	if (settings === undefined || draft === null) return <Skeleton className="h-96 w-full" />;
 
 	const problem = draftProblem(draft, t);
 	const dirty = isDirty(draft, settings);

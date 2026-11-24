@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { StickyPage } from "@/features/sticky/StickyPage";
@@ -153,7 +153,8 @@ describe("adding a sticky", () => {
 		expect(screen.getByRole("button", { name: /add sticky/i })).toBeDisabled();
 	});
 
-	it("shows what the server said when a save is refused", async () => {
+	/** The form was emptied as the request left, so a refused sticky lost everything that had been typed. */
+	it("shows what the server said when a save is refused, and keeps what was typed", async () => {
 		const user = userEvent.setup();
 		server.use(
 			http.put(`/api/guilds/${GUILD}/sticky`, () =>
@@ -171,6 +172,7 @@ describe("adding a sticky", () => {
 		await user.click(screen.getByRole("button", { name: /add sticky/i }));
 
 		expect(await screen.findByText(/not in this server/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/^Message/, { selector: "#sticky-message" })).toHaveValue("Read this first");
 	});
 });
 
@@ -186,5 +188,24 @@ describe("editing a sticky in place", () => {
 		await user.type(screen.getByLabelText(/^Message/, { selector: "#sticky-400000000000000001" }), "!");
 
 		expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+	});
+
+	/** A row's refusal once landed in the form for a new sticky, far below the row whose Save caused it. */
+	it("shows a refused edit in its own row", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.put(`/api/guilds/${GUILD}/sticky`, () =>
+				HttpResponse.json({ error: { code: "bad_request", message: "Discord refused it." } }, { status: 400 }),
+			),
+		);
+		renderPage();
+		const heading = await screen.findByRole("heading", { name: "#general" });
+		await user.type(screen.getByLabelText(/^Message/, { selector: "#sticky-400000000000000001" }), "!");
+		await user.click(screen.getByRole("button", { name: "Save" }));
+
+		const row = heading.closest("li");
+		expect(row).not.toBeNull();
+		expect(await within(row ?? document.body).findByText("Discord refused it.")).toBeInTheDocument();
+		expect(screen.getAllByText("Discord refused it.")).toHaveLength(1);
 	});
 });

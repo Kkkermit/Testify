@@ -48,4 +48,17 @@ describe("the bot's nickname in a server", () => {
 		expect(await screen.findByText(/needs the change nickname permission/i)).toBeInTheDocument();
 		expect(screen.getByLabelText("Nickname")).toBeDisabled();
 	});
+
+	/** A failed read left the field empty and disabled, which looked exactly like a bot that may not rename itself. */
+	it("offers a retry when the nickname cannot be read", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/settings/nickname", () =>
+				HttpResponse.json({ error: { code: "internal", message: "boom" } }, { status: 500 }),
+			),
+		);
+
+		render();
+
+		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
+	});
 });

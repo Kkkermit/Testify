@@ -13,7 +13,6 @@ import { formatMs } from "@/features/owner/owner.utils";
 import { CommandSelect } from "@/features/owner/usage/CommandSelect";
 import {
 	choiceOf,
-	FIRST_RUNS_PAGE,
 	idFromLookup,
 	kindLabel,
 	narrowed,
@@ -22,13 +21,11 @@ import {
 	OUTCOME_LABELS,
 	OUTCOME_TONES,
 	runWhat,
-	type RunTrail,
-	trailPages,
-	turnTo,
 } from "@/features/owner/usage/runs.utils";
 import { useRuns, useTopRunners } from "@/features/owner/useOwner";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
+import { cursorAt, type CursorTrail, FIRST_CURSOR_PAGE, trailPages, turnTo } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
 
 /** Read with the activity key, so each reason names that key rather than the read key. */
@@ -50,9 +47,9 @@ export function RunsView({ days }: { days: number }): React.JSX.Element {
 	const [serverName, setServerName] = useState<string | null>(null);
 	// A cursor belongs to one window and one set of filters, so changing either starts again from the first page.
 	const trailKey = JSON.stringify([days, filters]);
-	const [kept, setKept] = useState<{ key: string; trail: RunTrail }>({ key: trailKey, trail: FIRST_RUNS_PAGE });
-	const trail = kept.key === trailKey ? kept.trail : FIRST_RUNS_PAGE;
-	const runs = useRuns(days, filters, trail.cursors[trail.at] ?? null);
+	const [kept, setKept] = useState<{ key: string; trail: CursorTrail }>({ key: trailKey, trail: FIRST_CURSOR_PAGE });
+	const trail = kept.key === trailKey ? kept.trail : FIRST_CURSOR_PAGE;
+	const runs = useRuns(days, filters, cursorAt(trail));
 	const answer = currentData(runs);
 
 	const narrow: Narrow = (change, name) => {

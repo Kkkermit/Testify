@@ -2,7 +2,7 @@ import { STICKY_LIMITS, type ChannelSummary, type StickyEntry, type StickyPut } 
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, FIELD, Warning } from "@/components/form";
+import { Field, FIELD, Refusal, Warning } from "@/components/form";
 import { Button, cardClass } from "@/components/primitives";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
@@ -12,12 +12,15 @@ export function StickyRow({
 	entry,
 	channels,
 	saving,
+	failure,
 	onSave,
 	onRemove,
 }: {
 	entry: StickyEntry;
 	channels: ChannelSummary[];
 	saving: boolean;
+	/** Why this row's last save was refused, or null. */
+	failure: Error | null;
 	onSave: (next: StickyPut) => void;
 	onRemove: () => void;
 }): React.JSX.Element {
@@ -95,6 +98,7 @@ export function StickyRow({
 
 			{blocked !== null && <Warning>{blocked}</Warning>}
 			{!entry.canSend && <Warning>{t("sticky.cannotPost", { channel: name })}</Warning>}
+			<Refusal error={failure} />
 		</li>
 	);
 }

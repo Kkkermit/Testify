@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tan
 import { NICKNAME_MAX, type GuildNickname, type NicknamePatch } from "@testify/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
@@ -50,6 +51,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
+			{current.isError && <ErrorState as="h2" error={current.error} onRetry={() => void current.refetch()} />}
 			<Field label={t("settings.nickLabel")} htmlFor="nickname">
 				<div className="flex flex-wrap items-center gap-2">
 					<input

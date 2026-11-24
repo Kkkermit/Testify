@@ -116,9 +116,8 @@ function FleetFigures({
 
 			<Card padding="none" className="divide-border divide-y">
 				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
-					<Figure className="px-6 py-4" label={t("owner.activeServers")} value={formatNumber(report.activeGuilds)} />
+					<Figure label={t("owner.activeServers")} value={formatNumber(report.activeGuilds)} />
 					<Figure
-						className="px-6 py-4"
 						label={t("owner.commandsUsed")}
 						value={t("common.partOf", { part: report.commandsUsed, whole: report.commandsTotal })}
 					/>

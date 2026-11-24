@@ -121,7 +121,7 @@ export function BlacklistTab(): React.JSX.Element {
 
 				{rows.data !== undefined && rows.data.length > 0 && (
 					<ul className="flex flex-col gap-3">
-						{/* The reason takes its own line below `sm`, where sharing the row truncated it. */}
+						{/* The reason takes its own line below `sm`, where sharing the row would truncate it. */}
 						{rows.data.map((row) => (
 							<li
 								key={row.userId}

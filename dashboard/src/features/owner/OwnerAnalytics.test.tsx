@@ -30,17 +30,11 @@ describe("levelFrom", () => {
 });
 
 describe("barWidth", () => {
-	it("scales against the busiest row", () => {
+	/** A row with one use is still a row; a 0%-wide bar looks like a rendering failure. */
+	it("scales against the busiest row, keeps a tiny value visible and draws nothing for a zero", () => {
 		expect(barWidth(50, 100)).toBe(50);
 		expect(barWidth(100, 100)).toBe(100);
-	});
-
-	/** A row with one use is still a row; a 0%-wide bar looks like a rendering failure. */
-	it("keeps a tiny value visible", () => {
 		expect(barWidth(1, 10_000)).toBe(2);
-	});
-
-	it("is nothing at all for a zero", () => {
 		expect(barWidth(0, 100)).toBe(0);
 		expect(barWidth(5, 0)).toBe(0);
 	});

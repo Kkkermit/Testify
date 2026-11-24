@@ -1,4 +1,4 @@
-import { OWNER_GUILD_SORTS } from "@testify/shared";
+import { OWNER_GUILD_SORTS, type OwnerStats } from "@testify/shared";
 import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
@@ -8,7 +8,7 @@ import { Card, SectionHeading, Pager, Skeleton, StatTile } from "@/components/pr
 import { CountsUnavailable } from "@/features/owner/components/AnalyticsNotice";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
-import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
+import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom, snowflakeFrom } from "@/features/owner/owner.utils";
 import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { formatUptime } from "@/lib/datetime";
@@ -27,11 +27,8 @@ export function OverviewTab(): React.JSX.Element {
 	const guilds = useOwnerGuilds(page, sort, filter, useDebounced(search));
 	const results = currentData(guilds);
 	const countsProblem = results?.analytics ?? null;
-
-	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
-
-	const selected = params.get("server");
-	const stats = health.data;
+	// Only an id the API would take is asked for, so an edited address cannot aim the request anywhere else.
+	const selected = snowflakeFrom(params.get("server"));
 
 	function emptyNote(): string | null {
 		if (search.trim() !== "") return t("owner.noServersMatch");
@@ -56,42 +53,11 @@ export function OverviewTab(): React.JSX.Element {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<section aria-label={t("owner.health")} className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-				{stats === undefined ? (
-					[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
-				) : (
-					<>
-						<StatTile label={t("owner.servers")} value={stats.guilds} icon={Server} tint="text-hue-blue" />
-						<StatTile
-							label={t("owner.members")}
-							value={stats.users}
-							icon={Users}
-							tint="text-hue-green"
-							hint={t("owner.membersHint")}
-						/>
-						<StatTile label={t("owner.commands")} value={stats.commands} icon={Terminal} tint="text-hue-violet" />
-						<StatTile
-							label={t("owner.uptime")}
-							value={formatUptime(stats.uptimeMs)}
-							icon={Clock}
-							tint="text-hue-amber"
-							hint={t("owner.uptimeHint")}
-						/>
-						<StatTile
-							label={t("owner.memory")}
-							value={formatUnit(stats.memoryMb, "megabyte")}
-							icon={Cpu}
-							tint="text-hue-amber"
-						/>
-						<StatTile
-							label={t("owner.database")}
-							value={stats.database}
-							icon={Database}
-							tint={stats.database === "connected" ? "text-success" : "text-destructive-text"}
-						/>
-					</>
-				)}
-			</section>
+			{health.isError ? (
+				<ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />
+			) : (
+				<HealthTiles stats={health.data} />
+			)}
 
 			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
 				<SectionHeading as="h2" id="servers-heading">
@@ -168,11 +134,55 @@ export function OverviewTab(): React.JSX.Element {
 				<Pager
 					page={page}
 					pages={pageCount(guilds.data?.total ?? 0, PER_PAGE)}
+					label={t("owner.serverPages")}
 					onChange={(next) => {
 						put({ page: String(next) });
 					}}
 				/>
 			</section>
 		</div>
+	);
+}
+
+function HealthTiles({ stats }: { stats: OwnerStats | undefined }): React.JSX.Element {
+	const { t } = useTranslation();
+
+	return (
+		<section aria-label={t("owner.health")} className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+			{stats === undefined ? (
+				[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
+			) : (
+				<>
+					<StatTile label={t("owner.servers")} value={stats.guilds} icon={Server} tint="text-hue-blue" />
+					<StatTile
+						label={t("owner.members")}
+						value={stats.users}
+						icon={Users}
+						tint="text-hue-green"
+						hint={t("owner.membersHint")}
+					/>
+					<StatTile label={t("owner.commands")} value={stats.commands} icon={Terminal} tint="text-hue-violet" />
+					<StatTile
+						label={t("owner.uptime")}
+						value={formatUptime(stats.uptimeMs)}
+						icon={Clock}
+						tint="text-hue-amber"
+						hint={t("owner.uptimeHint")}
+					/>
+					<StatTile
+						label={t("owner.memory")}
+						value={formatUnit(stats.memoryMb, "megabyte")}
+						icon={Cpu}
+						tint="text-hue-amber"
+					/>
+					<StatTile
+						label={t("owner.database")}
+						value={t(stats.database === "connected" ? "owner.databaseConnected" : "owner.databaseDisconnected")}
+						icon={Database}
+						tint={stats.database === "connected" ? "text-success" : "text-destructive-text"}
+					/>
+				</>
+			)}
+		</section>
 	);
 }

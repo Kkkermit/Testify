@@ -1,4 +1,4 @@
-import { type GoodbyeSettings, WELCOME_STYLES, type WelcomeConfigResponse, type WelcomeStyle } from "@testify/shared";
+import { type GoodbyeSettings, type WelcomeConfigResponse, type WelcomeStyle } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 
@@ -7,8 +7,6 @@ export const STYLE_LABELS: Record<WelcomeStyle, { label: TranslationKey; describ
 	embed: { label: "welcome.styleEmbed", describes: "welcome.styleEmbedHint" },
 	card: { label: "welcome.styleCard", describes: "welcome.styleCardHint" },
 };
-
-export const STYLE_ORDER = WELCOME_STYLES;
 
 /** A blurred textarea reports no caret, so the token is appended. */
 export function insertToken(message: string, token: string, caret: number | null): string {
@@ -94,5 +92,5 @@ export function welcomeSummary(
 			: goodbye.enabled
 				? t("goodbye.summaryOn", { channel: goodbyeChannel })
 				: t("goodbye.summaryOff");
-	return `${hello} ${bye}`;
+	return [hello, bye].join(t("common.sentenceSeparator"));
 }
