@@ -256,7 +256,7 @@ export async function decideOnAppeal(
 	return decided;
 }
 
-export function appealLinkOf(appeal: Pick<StoredAppeal, "guildId" | "channelId" | "messageId">): string | null {
+function appealLinkOf(appeal: Pick<StoredAppeal, "guildId" | "channelId" | "messageId">): string | null {
 	return appeal.channelId === null || appeal.messageId === null
 		? null
 		: `https://discord.com/channels/${appeal.guildId}/${appeal.channelId}/${appeal.messageId}`;

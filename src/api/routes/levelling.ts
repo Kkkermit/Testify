@@ -22,7 +22,7 @@ levelling.patch("/", async (context) => {
 	const before = await readLevelConfig(guildId);
 
 	await saveLevelSettings(guildId, {
-		// The stored field is the inverse, and has been since the first version.
+		// The stored field is the inverse.
 		...(patch.enabled === undefined ? {} : { isDisabled: !patch.enabled }),
 		...(patch.announce === undefined ? {} : { announce: patch.announce }),
 		...(patch.stackRewards === undefined ? {} : { stackRewards: patch.stackRewards }),
@@ -94,7 +94,7 @@ levelling.put("/ignores", async (context) => {
 	return context.json(await readLevelConfig(guildId));
 });
 
-/** Clears the configuration only. Everyone keeps the XP they earned, which the response says out loud. */
+/** Clears the configuration only; everybody keeps the XP they earned. */
 levelling.delete("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const before = await readLevelConfig(guildId);

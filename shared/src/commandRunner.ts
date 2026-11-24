@@ -17,7 +17,7 @@ export type RunOutput =
 			fields: { name: string; value: string; inline: boolean }[];
 			footer: string | null;
 	  }
-	/** Something that only works inside Discord. Named rather than silently dropped. */
+	/** Something that only works inside Discord, named rather than silently dropped. */
 	| { kind: "dropped"; what: DroppedOutput };
 
 export interface CommandRunResult {

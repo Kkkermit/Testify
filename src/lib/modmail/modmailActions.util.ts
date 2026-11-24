@@ -351,7 +351,7 @@ export function clearModmailOffers(): void {
 	offered.clear();
 }
 
-export function threadLink(conversation: Pick<StoredConversation, "guildId" | "threadId">): string | null {
+function threadLink(conversation: Pick<StoredConversation, "guildId" | "threadId">): string | null {
 	return conversation.threadId === null
 		? null
 		: `https://discord.com/channels/${conversation.guildId}/${conversation.threadId}`;
