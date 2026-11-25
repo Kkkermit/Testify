@@ -3,26 +3,19 @@ import { type Context, Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { requireAuth } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { toError } from "@core/errors";
-import { recordDashboardView, recordScreenView } from "@database/repositories/usageRepository";
+import { recordScreenView } from "@lib/bot";
 import { screenView } from "@testify/shared";
 
-/** The one write any signed-in manager makes; reading the counts back stays owner-only. */
+/** The one analytics write any signed-in manager makes, sent on to Shardlens; reading it back stays owner-only. */
 export const screens = new Hono<ApiBindings>();
 
 screens.use("*", requireAuth);
 
 screens.post("/", async (context) => {
 	const { route, guildId } = await parseBody(context, screenView);
+	const managed = guildId !== undefined && (await managesGuild(context, guildId)) ? guildId : null;
 
-	// A failed count must never turn a navigation into an error.
-	try {
-		await recordScreenView(route);
-		if (guildId !== undefined && (await managesGuild(context, guildId))) await recordDashboardView(guildId);
-	} catch (error) {
-		context.get("client").logger.debug({ err: toError(error), route }, "[ANALYTICS] Could not record a screen view.");
-	}
-
+	recordScreenView(context.get("client"), route, managed);
 	return context.body(null, 204);
 });
 

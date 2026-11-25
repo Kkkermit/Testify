@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf, guildOf } from "@api/context";
@@ -13,6 +13,7 @@ import { setAutoRoles } from "@database/repositories/autoRoleRepository";
 import { disableCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
 import { setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
 import { setVoiceCounter } from "@database/repositories/voiceCounterRepository";
+import { offerProblem } from "@lib/roles";
 import { readServerSettings } from "@lib/settings";
 import {
 	type AntiLinkPatch,
@@ -62,19 +63,21 @@ settings.patch("/nickname", requirePermission(PermissionFlagsBits.ManageNickname
 		throw badRequest(`${botName()} needs the Change Nickname permission in this server.`);
 	}
 
+	// discord.js patches a copy and leaves `members.me` as it was until Discord's update arrives, so the copy is the answer.
+	let renamed: GuildMember;
 	try {
-		await me.setNickname(nickname === "" ? null : nickname);
+		renamed = await me.setNickname(nickname);
 	} catch (error) {
 		throw badRequest(error instanceof Error ? error.message : "Discord refused that nickname.");
 	}
 
 	await auditChange(context, {
 		action: "settings.nickname",
-		summary: nickname === null || nickname === "" ? "Cleared the bot's nickname" : `Renamed the bot to ${nickname}`,
+		summary: nickname === null ? "Cleared the bot's nickname" : `Renamed the bot to ${nickname}`,
 		after: { nickname },
 	});
 
-	const body: GuildNickname = { nickname: me.nickname, canChange: true };
+	const body: GuildNickname = { nickname: renamed.nickname, canChange: true };
 	return context.json(body);
 });
 
@@ -106,7 +109,8 @@ settings.patch("/anti-link", async (context) => {
 settings.put("/auto-roles", requirePermission(PermissionFlagsBits.ManageRoles), async (context) => {
 	const guildId = guildIdOf(context);
 	const body: AutoRolePut = await parseBody(context, autoRolePut);
-	requireGrantable(context, body.roleIds);
+	// Everybody who joins is given these, so nothing that moderates, as a role menu refuses.
+	requireGrantable(context, body.roleIds, offerProblem);
 	const before = await readServerSettings(guildId);
 
 	await setAutoRoles(guildId, body.roleIds);

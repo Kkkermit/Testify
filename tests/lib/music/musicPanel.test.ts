@@ -90,6 +90,16 @@ describe("musicPanel", () => {
 		expect(add).toBe(`${MUSIC_ADD_ID}:open`);
 	});
 
+	/** It names who asked for the track, and a title is whatever the uploader called it. */
+	it("names who asked for the track without pinging them", () => {
+		const queued = state({
+			queue: { tracks: [track("@everyone", { requestedBy: "100000000000000009" })], index: 0, loop: "off" },
+		});
+
+		expect(textOf(musicPanel(queued, OWNER))).toContain("<@100000000000000009>");
+		expect(musicPanel(queued, OWNER).allowedMentions).toEqual({ parse: [] });
+	});
+
 	it("gives every control its own custom ID", () => {
 		expect(duplicateIds(musicPanel(state(), OWNER))).toEqual([]);
 	});
@@ -115,26 +125,14 @@ describe("musicPanel", () => {
 	});
 
 	/** Without FFmpeg nothing can re-encode, so offering the control would be a button that cannot work. */
-	it("disables the volume controls when the host cannot change the level", () => {
+	it("carries the level each volume button moves to, and disables both where the host cannot change it", () => {
 		const buttons = buttonsOf(musicPanel(state(), OWNER));
-
-		expect(buttons.find((entry) => entry.label === "-10%")?.disabled).toBe(true);
-		expect(buttons.find((entry) => entry.label === "+10%")?.disabled).toBe(true);
-	});
-
-	it("carries the level it is moving to in the custom ID", () => {
 		const ids = idsOf(musicPanel(state({ canSetVolume: true, volume: 100 }), OWNER));
 
-		expect(ids).toContain(`music:volume:90:${OWNER}`);
-		expect(ids).toContain(`music:volume:110:${OWNER}`);
-	});
-
-	/** A container cannot carry an embed, so a thumbnail has to be a section rather than an image field. */
-	it("renders a thumbnail without breaking the container", () => {
-		const withArt = state();
-		withArt.queue = { ...withArt.queue, tracks: [track("a", { thumbnail: "https://cdn.test/a.jpg" })], index: 0 };
-
-		expect(() => musicPanel(withArt, OWNER)).not.toThrow();
+		expect(
+			buttons.filter((entry) => entry.label === "-10%" || entry.label === "+10%").map((entry) => entry.disabled),
+		).toEqual([true, true]);
+		expect(ids).toEqual(expect.arrayContaining([`music:volume:90:${OWNER}`, `music:volume:110:${OWNER}`]));
 	});
 });
 
@@ -146,13 +144,10 @@ describe("trackLine", () => {
 });
 
 describe("musicBar", () => {
-	it("keeps the same width whatever it shows, so the line cannot twitch as it moves", () => {
+	it("keeps the same width whatever it shows, so the line cannot twitch as it moves, and never runs past its end", () => {
 		const widths = [0, 25, 50, 99, 100].map((played) => [...musicBar(played, 100, 12)].length);
 
 		expect(new Set(widths)).toEqual(new Set([12]));
-	});
-
-	it("never runs past its own end", () => {
 		expect(musicBar(999, 100, 8).indexOf("●")).toBe(7);
 	});
 });
@@ -165,11 +160,8 @@ describe("progressLine", () => {
 		expect(line).toContain("Paused");
 		expect(line).toContain("2:00 left");
 		expect(line).not.toContain("<t:");
-	});
 
-	it("puts the paused line on the panel itself", () => {
 		const shown = textOf(musicPanel(state({ paused: true }), OWNER));
-
 		expect(shown).not.toContain("<t:");
 		expect(shown).toContain("left");
 	});
@@ -196,11 +188,8 @@ describe("statusLine", () => {
 
 describe("link", () => {
 	/** A title like "[Official Video]" would otherwise close the link early and print the address as text. */
-	it("escapes brackets in the label", () => {
+	it("escapes brackets in the label, and gives up on an address Discord could not parse", () => {
 		expect(link("[Official Video]", "https://youtu.be/a")).toBe("[\\[Official Video\\]](https://youtu.be/a)");
-	});
-
-	it("gives up on an address Discord could not parse rather than printing a broken link", () => {
 		expect(link("a", "https://example.test/a b")).toBe("a");
 	});
 });

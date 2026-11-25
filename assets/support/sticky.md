@@ -15,6 +15,6 @@ A sticky message stays at the bottom of a channel: after a set number of new mes
 - `/sticky-message disable` removes one.
 
 ### On the dashboard
-Open your server, then **Sticky** under Channels.
+Open your server, then **Sticky** under Messages.
 
 There can be one per channel, and up to {fact:sticky.maxPerServer} in a server.

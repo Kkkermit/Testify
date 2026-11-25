@@ -33,13 +33,14 @@ export default defineMessageHandler({
 			return;
 		}
 
-		const amount = randomInt(config.minAmount, config.maxAmount + 1);
-		await adjustWallet(message.guild.id, message.author.id, amount);
-
+		// Reset before the payout is awaited, so a message arriving meanwhile cannot find the same drop.
 		states.set(message.guild.id, {
 			messagesUntilDrop: randomInt(config.minMessages, config.maxMessages + 1),
 			lastDropAt: Date.now(),
 		});
+
+		const amount = randomInt(config.minAmount, config.maxAmount + 1);
+		await adjustWallet(message.guild.id, message.author.id, amount);
 
 		if (!message.channel.isSendable()) return;
 
@@ -47,7 +48,7 @@ export default defineMessageHandler({
 			embeds: [
 				embed({
 					category: "economy",
-					title: "\u{1f4b0} Treasure found",
+					title: "💰 Treasure found",
 					description: `${message.author} stumbled across **${formatNumber(amount)}** and pocketed it.`,
 				}),
 			],

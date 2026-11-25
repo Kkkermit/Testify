@@ -8,7 +8,8 @@ import { createLogger } from "@core/logger";
 import { repoRoot } from "@core/paths";
 import { badge, painter, stepLine } from "@core/terminal";
 import { connectDatabase, disconnectDatabase } from "@database/connection";
-import { describeDatabase, printStartupFailure } from "@lib/bot/startup.util";
+import { describeDatabase } from "@lib/bot/startup.util";
+import { printStartupFailure } from "@lib/bot/startupFailure.util";
 
 /** Empties the development or the production database, all of it or the models picked, once its name is typed back. */
 
@@ -98,24 +99,29 @@ export function modelOwners(modules: Record<string, Record<string, unknown>>): M
 	return owners;
 }
 
-export async function loadModelOwners(
-	dir = join(repoRoot(), "src", "database", "models"),
-): Promise<Map<string, ModelOwner>> {
+/** Required by path, because `import()` of a bare Windows path such as `C:\…` is refused as an unknown URL scheme. */
+export function loadModelOwners(dir = join(repoRoot(), "src", "database", "models")): Map<string, ModelOwner> {
 	const files = readdirSync(dir)
 		.filter((file) => file.endsWith(".schema.ts"))
 		.sort();
-	const modules = await Promise.all(
-		files.map(async (file) => [file, (await import(join(dir, file))) as Record<string, unknown>] as const),
-	);
 
-	return modelOwners(Object.fromEntries(modules));
+	return modelOwners(
+		Object.fromEntries(files.map((file) => [file, require(join(dir, file)) as Record<string, unknown>])),
+	);
 }
 
 function documents(count: number): string {
 	return `${count.toLocaleString("en-GB")} ${count === 1 ? "document" : "documents"}`;
 }
 
+/** The counts the bot kept itself before Shardlens, still added to the owner console's figures until they expire. */
+const EARLIER_COUNTS = new Set(["commandusages", "screenviews", "dashboardviews"]);
+
 export function collectionTitle(collection: string, count: number, owner: ModelOwner | undefined): string {
+	if (collection.startsWith("shardlens_")) return `Shardlens analytics · ${collection} · ${documents(count)}`;
+	if (EARLIER_COUNTS.has(collection)) {
+		return `Usage from before Shardlens · ${collection}, read until it expires · ${documents(count)}`;
+	}
 	if (owner === undefined) return `${collection} · no model, left by an older version · ${documents(count)}`;
 	return `${owner.name} · ${collection} in ${owner.file} · ${documents(count)}`;
 }
@@ -177,7 +183,7 @@ async function wipe(target: Target, file: EnvFile, uri: string): Promise<void> {
 		return;
 	}
 
-	const chosen = await chooseCollections(collections, await loadModelOwners());
+	const chosen = await chooseCollections(collections, loadModelOwners());
 	if (chosen.length === 0) return cancelled();
 
 	const scope =

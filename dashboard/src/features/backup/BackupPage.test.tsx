@@ -87,9 +87,11 @@ describe("the back up and copy page", () => {
 	/** Nothing is written until the reader has seen the plan, and then only what they left ticked. */
 	it("reads a backup file, matches its channels by name and applies what is ticked", async () => {
 		const sent: { path: string; body: unknown }[] = [];
+		const ways: (string | null)[] = [];
 		server.use(
 			http.patch(`/api/guilds/${GUILD}/:feature`, async ({ params, request }) => {
 				sent.push({ path: String(params.feature), body: await request.json() });
+				ways.push(request.headers.get("x-testify-via"));
 				return HttpResponse.json({});
 			}),
 		);
@@ -108,6 +110,8 @@ describe("the back up and copy page", () => {
 				{ path: "starboard", body: { enabled: true, channelId: "400000000000000001", threshold: 9 } },
 			]);
 		});
+		// Each section's write says it came from a backup, so it is counted as one and not as an ordinary save.
+		expect(ways).toEqual(["backup"]);
 		expect(await screen.findByText("Saved")).toBeInTheDocument();
 	});
 
@@ -126,6 +130,19 @@ describe("the back up and copy page", () => {
 		expect(await screen.findByText(/one ending in \.json/)).toBeInTheDocument();
 	});
 
+	/** A file moved or deleted after it was picked cannot be read, which once failed with nothing said at all. */
+	it("says so when the chosen file cannot be read", async () => {
+		renderPage();
+		const gone = backupFile(JSON.stringify(elsewhere));
+		Object.defineProperty(gone, "slice", {
+			value: () => ({ arrayBuffer: () => Promise.reject(new Error("NotReadableError")) }),
+		});
+
+		await userEvent.upload(await screen.findByLabelText(/From a backup file/), gone);
+
+		expect(await screen.findByText(/settings could not be read/)).toBeInTheDocument();
+	});
+
 	/** The server judges a program by its first bytes alone, so nothing else of the file ever leaves the browser. */
 	/** A program chosen under its own name, or one past the size limit, was once refused and never reported. */
 	it("reports a program by its first eight bytes whatever it is called, and a mistaken archive not at all", async () => {
@@ -133,7 +150,7 @@ describe("the back up and copy page", () => {
 		server.use(
 			http.post(`/api/guilds/${GUILD}/backup/program`, async ({ request }) => {
 				sent.push(await request.json());
-				return HttpResponse.json({ error: { code: "blacklisted", message: "Blocked." } }, { status: 403 });
+				return new HttpResponse(null, { status: 204 });
 			}),
 		);
 		renderPage();
@@ -148,8 +165,8 @@ describe("the back up and copy page", () => {
 			{ type: "application/x-msdownload" },
 		);
 
-		// Somebody can be talked into choosing a program, so the page says what it costs before anything is chosen.
-		expect(screen.getByText(/Choosing a program or a script here blocks your account/)).toBeInTheDocument();
+		// Somebody can be talked into choosing a program, so the page says what happens before anything is chosen.
+		expect(screen.getByText(/owners are told who chose it/)).toBeInTheDocument();
 		expect(screen.getByText(/If somebody told you to choose a file here, stop/)).toBeInTheDocument();
 
 		await user.upload(picker, zip);

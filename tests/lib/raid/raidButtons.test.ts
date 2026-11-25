@@ -72,28 +72,56 @@ describe("the raid protection panel", () => {
 
 	it("saves a minimum age, a spike, a channel, a role, and clears both pickers", async () => {
 		await raidButton.run(pressed("modal", { typed: { age: "7d" } }) as never, context("save-age"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { minAccountAgeMinutes: 10080 }, OWNER);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(
+			expect.anything(),
+			{ minAccountAgeMinutes: 10080 },
+			OWNER,
+			false,
+		);
 		await raidButton.run(pressed("modal", { typed: { age: "1h 30m" } }) as never, context("save-age"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { minAccountAgeMinutes: 90 }, OWNER);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { minAccountAgeMinutes: 90 }, OWNER, false);
 
 		await raidButton.run(pressed("modal", { typed: { joins: "15", minutes: "2" } }) as never, context("save-spike"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { spikeJoins: 15, spikeMinutes: 2 }, OWNER);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(
+			expect.anything(),
+			{ spikeJoins: 15, spikeMinutes: 2 },
+			OWNER,
+			false,
+		);
 
 		await raidButton.run(pressed("channel", { values: ["400000000000000009"] }) as never, context("channel"));
 		expect(applyRaidSettings).toHaveBeenLastCalledWith(
 			expect.anything(),
 			{ alertChannelId: "400000000000000009" },
 			OWNER,
+			false,
 		);
 
 		await raidButton.run(pressed("channel") as never, context("channel"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { alertChannelId: null }, OWNER);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { alertChannelId: null }, OWNER, false);
 
 		await raidButton.run(pressed("role", { values: ["300000000000000001"] }) as never, context("role"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { pingRoleId: "300000000000000001" }, OWNER);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(
+			expect.anything(),
+			{ pingRoleId: "300000000000000001" },
+			OWNER,
+			false,
+		);
+
+		const pings = new PermissionsBitField([STAFF, PermissionFlagsBits.MentionEveryone]);
+		await raidButton.run(
+			pressed("role", { values: ["300000000000000001"], permissions: pings }) as never,
+			context("role"),
+		);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(
+			expect.anything(),
+			{ pingRoleId: "300000000000000001" },
+			OWNER,
+			true,
+		);
 
 		await raidButton.run(pressed("role") as never, context("role"));
-		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { pingRoleId: null }, OWNER);
+		expect(applyRaidSettings).toHaveBeenLastCalledWith(expect.anything(), { pingRoleId: null }, OWNER, false);
 	});
 
 	it("refuses a minimum age past Discord's longest timeout and a spike out of range", async () => {

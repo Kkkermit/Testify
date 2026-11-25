@@ -1,7 +1,8 @@
-import { type ApiErrorBody } from "@testify/shared";
+import { type ApiErrorBody, CHANGE_WAY_HEADER, type ChangeWay } from "@testify/shared";
 
 const BASE = "/api";
-const CSRF_COOKIE = "dash_csrf";
+// The server sets the `__Host-` copy outside development and reads only that one there.
+const CSRF_COOKIES = ["__Host-dash_csrf", "dash_csrf"];
 
 export class ApiError extends Error {
 	readonly status: number;
@@ -31,13 +32,19 @@ function readCookie(name: string): string | null {
 	return match === undefined ? null : decodeURIComponent(match.slice(name.length + 1));
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+/** A write that puts a change back or brings a backup in says so, so the owners can count how settings change. */
+interface WriteOptions {
+	via?: Exclude<ChangeWay, "save" | "setup">;
+}
+
+async function request<T>(method: string, path: string, body?: unknown, options: WriteOptions = {}): Promise<T> {
 	const headers: Record<string, string> = {};
 	if (body !== undefined) headers["content-type"] = "application/json";
+	if (options.via !== undefined) headers[CHANGE_WAY_HEADER] = options.via;
 
 	if (method !== "GET") {
 		// Double-submit: the readable cookie echoed in a header the browser cannot set cross-site.
-		const csrf = readCookie(CSRF_COOKIE);
+		const csrf = CSRF_COOKIES.map(readCookie).find((value) => value !== null) ?? null;
 		if (csrf !== null) headers["x-csrf-token"] = csrf;
 	}
 
@@ -68,7 +75,8 @@ async function errorBody(response: Response): Promise<ApiErrorBody> {
 export const api = {
 	get: <T>(path: string): Promise<T> => request<T>("GET", path),
 	post: <T>(path: string, body?: unknown): Promise<T> => request<T>("POST", path, body),
-	patch: <T>(path: string, body?: unknown): Promise<T> => request<T>("PATCH", path, body),
-	put: <T>(path: string, body?: unknown): Promise<T> => request<T>("PUT", path, body),
+	patch: <T>(path: string, body?: unknown, options?: WriteOptions): Promise<T> =>
+		request<T>("PATCH", path, body, options),
+	put: <T>(path: string, body?: unknown, options?: WriteOptions): Promise<T> => request<T>("PUT", path, body, options),
 	delete: <T>(path: string): Promise<T> => request<T>("DELETE", path),
 };

@@ -7,7 +7,10 @@ describe("COLOUR_CHOICES", () => {
 });
 
 describe("resolveColour", () => {
-	it.each(["red", "#fff", "#gggggg", "#1234567", "", "1a2b3c"])("falls back on %p rather than throwing", (input) => {
-		expect(resolveColour(input)).toBe("#7289da");
+	it("falls back on anything that is not six hex digits, rather than throwing", () => {
+		const unread = ["red", "#fff", "#gggggg", "#1234567", "", "1a2b3c"];
+
+		expect(unread.filter((input) => resolveColour(input) !== "#7289da")).toEqual([]);
+		expect(resolveColour("#ABCDEF")).toBe("#abcdef");
 	});
 });

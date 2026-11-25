@@ -13,5 +13,6 @@ export * from "./hilo.util";
 export * from "./instantGames.util";
 export * from "./roulette.util";
 export * from "./rouletteActions.util";
+export * from "./roulettePanel.util";
 export * from "./rouletteRound.util";
 export * from "./slots.util";

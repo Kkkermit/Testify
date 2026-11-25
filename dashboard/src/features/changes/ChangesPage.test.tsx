@@ -71,9 +71,11 @@ describe("putting a change back", () => {
 	/** It goes through the route that made the change, so its own gates decide, and sends only what that change altered. */
 	it("shows what the setting holds now and goes back to, then sends the old values to the same route", async () => {
 		let sent: unknown = null;
+		let via: string | null = null;
 		server.use(
 			http.patch(`/api/guilds/${GUILD}/levelling`, async ({ request }) => {
 				sent = await request.json();
+				via = request.headers.get("x-testify-via");
 				return HttpResponse.json({ ...levelConfig, enabled: false });
 			}),
 		);
@@ -88,6 +90,8 @@ describe("putting a change back", () => {
 
 		expect(await screen.findByText("Put back. That is now the newest change in the list.")).toBeInTheDocument();
 		expect(sent).toEqual({ enabled: false });
+		// The owners count how settings change, so a put-back says it is one.
+		expect(via).toBe("put_back");
 		expect(screen.queryByRole("button", { name: "Put back" })).not.toBeInTheDocument();
 	});
 

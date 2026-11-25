@@ -336,3 +336,15 @@ describe("a value outside what the command declares", () => {
 		expect(checked).toBeGreaterThan(60);
 	});
 });
+
+/** The prefix took the member's roles alone, so a permission a channel takes away was still enough there. */
+it("judges a prefix run's permissions in the channel it was typed in", () => {
+	const inChannel = { has: () => false };
+	const permissionsIn = jest.fn(() => inChannel);
+	const channel = { isDMBased: () => false, sendTyping: jest.fn() };
+	const message = { ...fakeMessage(), member: { id: ALICE, permissionsIn }, channel } as unknown as Message;
+	const command = defineCommand({ name: "clear", description: "Clears.", category: "moderation", run: jest.fn() });
+
+	expect(new PrefixInteraction(message, command, []).memberPermissions).toBe(inChannel);
+	expect(permissionsIn).toHaveBeenCalledWith(channel);
+});

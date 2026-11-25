@@ -8,6 +8,21 @@ import { expectNoViolations } from "@/test/axe";
 import { t } from "@/test/english";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
+const RealDateTimeFormat = Intl.DateTimeFormat;
+
+// A reader in New York: every formatter that names no zone of its own formats in theirs.
+beforeAll(() => {
+	jest
+		.spyOn(Intl, "DateTimeFormat")
+		.mockImplementation(
+			(locale, options) => new RealDateTimeFormat(locale, { timeZone: "America/New_York", ...options }),
+		);
+});
+
+afterAll(() => {
+	jest.restoreAllMocks();
+});
+
 /** The documents are translation keys, so the prose under test is what English resolves them to. */
 function english(key: string): string {
 	return (en.legal as Record<string, string>)[key.replace("legal.", "")] ?? key;
@@ -57,10 +72,11 @@ describe("the legal pages", () => {
 		});
 	});
 
+	/** The date is a stored day, and read as a local moment it showed the day before to anybody west of UTC. */
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 18 Nov 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 21 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -72,16 +88,12 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/Messages in servers are never stored/);
 		// `directMessageLog.event.ts` writes a DM into the database, so the notice has to say so.
 		expect(text).toMatch(/Direct messages are the exception/);
-		expect(text).toMatch(/No user ids are stored/i);
 		expect(text).toMatch(/encrypted at rest/i);
-		// Screen counts carry neither, which is the whole reason they are safe to keep.
-		expect(text).toMatch(/no user id and no server id is stored/i);
+		// `recordScreenView` sends a route alone, and the server only beside one of its managers, never the person.
+		expect(botSource("src/lib/bot/shardlens.util.ts")).toMatch(/lens\.track\(LENS_EVENTS\.screen, \{ route \}\)/);
+		expect(text).toMatch(/with no user id and no server id/i);
 		expect(text).toMatch(/IP address is not stored/i);
-		// `commandruns` holds who ran what, never the options; `countCommandUse` skips a direct message.
-		expect(text).toMatch(/Who ran a command: .* Never the options you gave it/);
-		expect(text).toMatch(/Commands run in a direct message are not recorded this way/);
-		// `dashboardviews` is a server and a count a day, with no account and no route.
-		expect(text).toMatch(/Server counts: .* No user id is stored with these, and not which screens were opened/);
+		expect(text).toMatch(/Server counts: .* Shardlens is told the server and the screen, never who opened it/);
 		// `/remind me`'s `about` is `unlogged`, and `deliverDueReminders` deletes each one once it is sent.
 		expect(text).toMatch(/A reminder’s text is never posted to the operator’s command logs/);
 		expect(text).toMatch(/Reminders: deleted once delivered or cancelled/);
@@ -110,6 +122,48 @@ describe("the legal pages", () => {
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);
+		// `startShardlens` asks for audit mode and values only of fixed choices, and `eraseAccount` asks the collector to forget.
+		const lens = botSource("src/lib/bot/shardlens.util.ts");
+		expect(lens).toMatch(/mode: "audit"/);
+		expect(lens).toMatch(/captureOptionValues: choices,/);
+		expect(botSource("src/lib/account/accountActions.util.ts")).toContain("shardlens?.forgetUser(userId)");
+		expect(text).toMatch(
+			/the names of the options you filled in and, for one with a fixed list, the choice you picked, but never what you typed/,
+		);
+		// The spool holds what the SDK has not sent, which it writes hashed and without an audit identity.
+		expect(lens).toMatch(/spool: \{ dir: spoolFor\(client, target\) \}/);
+		expect(text).toMatch(/kept in a folder on the bot’s own machine, hashed and without who ran it, until it is sent/);
+		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
+		// Who ran what reaches the console only through the activity key, on owner-only routes the collector logs.
+		expect(botSource("src/lib/bot/shardlensReader.util.ts")).toMatch(
+			/this\.#activity = clientFor\(target\.activityKey\)/,
+		);
+		expect(botSource("src/api/routes/analytics.ts")).toMatch(/analytics\.use\("\*", requireOwner\)/);
+		expect(text).toMatch(/by the bot’s owners in its owner console if the operator has given the bot an activity key/);
+		expect(text).not.toMatch(/only the people who can sign in to it can see who ran what/);
+		// The collector inside the bot keeps everything in the bot's own database, and names people only with the audit key.
+		const inBot = botSource("src/lib/bot/mongoCollector.util.ts");
+		expect(inBot).toMatch(/uri: env\.MONGODB_URI,/);
+		expect(inBot).toMatch(/auditKey === undefined \? \{\} : \{ mode: "audit" as const, auditKey \}/);
+		expect(text).toMatch(/which can run inside the bot and keep them in the bot’s own database\./);
+		expect(text).toMatch(
+			/on the operator’s own collector, which can run inside the bot and keep them in the bot’s own database/,
+		);
+		expect(text).not.toMatch(/nothing leaves its machine/);
+		// A prefix run is the SDK's own message command, sent with its actor in audit mode like any other.
+		expect(lens).toMatch(/trackMessageCommand\(message, \{\s*command: run\.command,/);
+		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);
+		expect(text).not.toMatch(/prefix command is never named/i);
+		expect(text).toMatch(/under your hashed id, and in audit mode under your user id as well/);
+		// `recordPrefixRun` sends a value only for a fixed choice, and `recordEvent` passes the server and never a user.
+		expect(lens).toMatch(/option\.value !== null && choices\.has\(option\.name\)/);
+		expect(text).toMatch(/the names of the options you gave it and, for one with a fixed list, the choice you picked/);
+		expect(lens).toMatch(/track\(event, values, context\(guildId\)\)/);
+		expect(lens).not.toMatch(/userId/);
+		expect(text).toMatch(/counts what the bot does with nobody named: .* but never the question/);
+		expect(text).toMatch(/Each of those carries the server it happened in and never who/);
+		expect(lens).toMatch(/refreshGuildCounts: true/);
+		expect(text).toMatch(/member count, kept current while the bot runs/);
 		// `markNoticesSeen` and `markNoticeHinted` write two times against a user id, in a record tied to no server.
 		expect(text).toMatch(
 			/keeps when you last read them and when it last told you about one, against your user id and nothing else/,
@@ -118,6 +172,11 @@ describe("the legal pages", () => {
 		const erasure = botSource("src/database/repositories/accountRepository.ts");
 		expect(erasure).toMatch(/blacklist: \{ userId: "keep" \}/);
 		expect(erasure).toMatch(/modcases: \{ userId: "keep", moderatorId: "anonymise" \}/);
+		// `startShardlens` hands the stored opt-outs to the SDK, and `ERASURE` keeps them when the rest is deleted.
+		expect(lens).toMatch(/optedOut,/);
+		expect(text).toMatch(/so the bot keeps leaving you out of Shardlens analytics after a restart/);
+		expect(erasure).toMatch(/analyticsoptouts: \{ userId: "keep" \}/);
+		expect(text).toMatch(/Deleting your data keeps it, so you are not counted again/);
 		expect(text).toMatch(/delete their own data at any time.* can’t be undone/);
 		// `recordsSettings` writes a change made with a command to the same audit log, with the person who made it.
 		expect(text).toMatch(/A setting you change with one of .* commands in Discord is recorded the same way/);
@@ -141,8 +200,8 @@ describe("the legal pages", () => {
 		const text = prose(PRIVACY);
 		const constants = botSource("src/config/constants.ts");
 
-		const retention = /retentionDays: (\d+)/.exec(constants)?.[1];
-		expect(text).toContain(`Audit records, command usage, screen counts and server counts: ${String(retention)} days`);
+		const retention = /AUDIT = \{ retentionDays: (\d+) \}/.exec(constants)?.[1];
+		expect(text).toContain(`Audit records: ${String(retention)} days`);
 
 		const away = /keepDays: (\d+)/.exec(constants)?.[1];
 		expect(text).toContain(
@@ -162,14 +221,12 @@ describe("the legal pages", () => {
 		const invites = /keepDays: (\d+)/.exec(botSource("shared/src/invites.ts"))?.[1];
 		expect(text).toContain(`Invite tracking: ${String(invites)} days after each join`);
 
-		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
-		expect(text).toContain(`Who ran a command: ${String(runs)} days`);
-		expect(text).toContain(`logs and counts for ${String(retention)} days`);
-		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain(`${String(retention)} * 24 * 60 * 60`);
+		expect(text).toContain(`change records for ${String(retention)} days`);
+		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain("AUDIT.retentionDays * 24 * 60 * 60");
 
-		const analytics = botSource("shared/src/analytics.ts");
-		const starts = /runsKept: (\d+)/.exec(analytics)?.[1];
-		const perRun = Number(/linesPerRun: ([\d_]+)/.exec(analytics)?.[1]?.replace("_", ""));
+		const logs = botSource("shared/src/logs.ts");
+		const starts = /runsKept: (\d+)/.exec(logs)?.[1];
+		const perRun = Number(/linesPerRun: ([\d_]+)/.exec(logs)?.[1]?.replace("_", ""));
 		expect(text).toContain(
 			`for its last ${String(starts)} starts, at most ${perRun.toLocaleString("en-GB")} lines each`,
 		);

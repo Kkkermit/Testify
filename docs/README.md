@@ -18,6 +18,7 @@
 | -------------------------------------------- | --------------------------------------------------------------------------------------- |
 | 🚀 Running the bot for the first time        | [`../README.md`](../README.md#-quick-start) — install, configure, start                 |
 | 🐳 Hosting it in Docker, Railway or a VPS    | [`hosting.md`](hosting.md) — the image, compose, and the traps                          |
+| 📈 Switching on analytics                    | [`analytics.md`](analytics.md) — one setting inside the bot, or a collector you run     |
 | 📋 Looking for what a command does           | [`commands.md`](commands.md) — every one, generated from the code                       |
 | 🤝 About to contribute a change              | [`contributing.md`](contributing.md), then [`../AGENTS.md`](../AGENTS.md)               |
 | 🔒 Reporting a security problem              | [`security.md`](security.md) — the private route, and how data is handled               |
@@ -41,6 +42,7 @@
 | 📋 [`commands.md`](commands.md)               | Every command, subcommand and alias. **Generated** — run `npm run docs:commands` |
 | 🤝 [`contributing.md`](contributing.md)       | Branches, commit format, house style and what CI will check                      |
 | 🎨 [`customising.md`](customising.md)         | Your links, who runs it and the prefix in `testify.config.json`, and forks       |
+| 📈 [`analytics.md`](analytics.md)             | Shardlens analytics: inside the bot, or a collector you run, and on Railway      |
 | 🐳 [`hosting.md`](hosting.md)                 | Running the bot and dashboard in Docker, and what is deliberately not there      |
 | 🔒 [`security.md`](security.md)               | Reporting a vulnerability, the data model, and every dependency exception        |
 | 🌱 [`code-of-conduct.md`](code-of-conduct.md) | The standard everybody here is held to, and how to report a problem              |

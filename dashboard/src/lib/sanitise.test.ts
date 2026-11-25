@@ -1,3 +1,4 @@
+import { i18next } from "@/i18n";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 /** Discord's own markup survives: mentions, custom emoji and timestamps. */
@@ -58,7 +59,15 @@ describe("markupWarning", () => {
 		expect(markupWarning("Welcome <@123456789012345678> to <#123456789012345678>")).toBeNull();
 	});
 
-	it("warns about a real tag", () => {
-		expect(markupWarning("Hi <b>there</b>")).toMatch(/HTML/);
+	/** The warning is read at render, so a German page once showed it in English. */
+	it("warns about a real tag, in the language the page is shown in", async () => {
+		expect(markupWarning("Hi <b>there</b>")).toMatch(/HTML is not allowed/);
+
+		await i18next.changeLanguage("de");
+		try {
+			expect(markupWarning("Hi <b>there</b>")).toMatch(/nicht erlaubt/);
+		} finally {
+			await i18next.changeLanguage("en");
+		}
 	});
 });

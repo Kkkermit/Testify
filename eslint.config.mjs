@@ -1,9 +1,10 @@
 import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
 import prettier from "eslint-config-prettier";
 import importX from "eslint-plugin-import-x";
 import ts from "typescript-eslint";
 
-export default ts.config(
+export default defineConfig(
 	// Build output at any depth, and `.claude/skills`, which is vendored.
 	{
 		ignores: [
@@ -89,8 +90,8 @@ export default ts.config(
 		},
 	},
 	{
-		// The loader has to require files by path; that is how commands are found.
-		files: ["src/core/loader.ts"],
+		// These require files by path: the loader to find commands, and the wipe to name each collection's model.
+		files: ["src/core/loader.ts", "scripts/wipeDatabase.ts"],
 		rules: { "@typescript-eslint/no-require-imports": "off" },
 	},
 	{

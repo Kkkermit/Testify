@@ -8,6 +8,7 @@ import {
 	gallery,
 	sectionWithThumbnail,
 	text,
+	withoutPings,
 } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { formatClock, formatDuration, truncate } from "@lib/format/format.util";
@@ -230,7 +231,8 @@ function paging(state: PanelState, pageCount: number, userId: string): Container
 	];
 }
 
-export function musicPanel(state: PanelState, userId: string): ContainerMessage {
+/** Names who asked for each track and what the service called it, so nothing on it may ping. */
+export function musicPanel(state: PanelState, userId: string): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const track = currentTrack(state.queue);
 	const parts: ContainerPart[] = [text(state.paused ? "## ⏸️ Paused" : "## 🎵 Now playing")];
 
@@ -257,7 +259,7 @@ export function musicPanel(state: PanelState, userId: string): ContainerMessage 
 					: []),
 			),
 		);
-		return containerMessage(container({ category: "music", parts }));
+		return withoutPings(containerMessage(container({ category: "music", parts })));
 	}
 
 	const progress = `${progressLine(track, state.playedMs, Date.now(), state.paused)}\n${statusLine(state, track)}`;
@@ -290,5 +292,5 @@ export function musicPanel(state: PanelState, userId: string): ContainerMessage 
 		...paging(state, page.pageCount, userId),
 	);
 
-	return containerMessage(container({ category: "music", parts }));
+	return withoutPings(containerMessage(container({ category: "music", parts })));
 }

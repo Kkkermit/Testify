@@ -1,13 +1,12 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { reply } from "@lib/discord";
+import { reply, successEmbed } from "@lib/discord";
 import {
 	applyMusicSettings,
 	clearUpcoming,
 	currentTrack,
 	LOOP_MODES,
-	type LoopMode,
 	loopPlayer,
 	MAX_VOLUME,
 	MIN_VOLUME,
@@ -146,7 +145,7 @@ export default recordsSettings(
 				],
 				async run(interaction) {
 					const session = sessionOf(interaction);
-					const mode = interaction.options.getString("mode", true) as LoopMode;
+					const mode = LOOP_MODES.find((one) => one === interaction.options.getString("mode", true)) ?? "off";
 
 					await showPanel(interaction, session, loopPlayer(session, mode));
 				},
@@ -256,7 +255,7 @@ export default recordsSettings(
 					const session = sessionOf(interaction);
 					session.destroy();
 
-					await reply(interaction, { content: "Left the voice channel." });
+					await reply(interaction, { embeds: [successEmbed("Left the voice channel and cleared the queue.")] });
 				},
 			},
 			{

@@ -13,10 +13,8 @@ import {
 	ThumbnailBuilder,
 } from "discord.js";
 import { type Category } from "@config/categories";
-import { categoryColour } from "@config/theme";
+import { categoryColour, theme } from "@config/theme";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-
-/** Components V2 — layout built from components rather than an embed. */
 
 /** Wraps a container into a payload that is safe to `reply()`, `update()` or `send()`. */
 export function containerMessage(container: ContainerBuilder): ContainerMessage {
@@ -67,8 +65,8 @@ export function container(options: {
 }): ContainerBuilder {
 	const built = new ContainerBuilder();
 
-	if (options.accent !== undefined) built.setAccentColor(resolveNamed(options.accent));
-	else if (options.category !== undefined) built.setAccentColor(resolveAccent(options.category));
+	const accent = options.accent ?? (options.category === undefined ? undefined : categoryColour(options.category));
+	if (accent !== undefined) built.setAccentColor(accentNumber(accent));
 
 	for (const part of options.parts) {
 		if (part instanceof TextDisplayBuilder) built.addTextDisplayComponents(part);
@@ -81,16 +79,11 @@ export function container(options: {
 	return built;
 }
 
-/** `setAccentColor` needs a number, but the theme stores named colours for embeds. */
-function resolveAccent(category: Category): number {
-	const colour = categoryColour(category);
-	return typeof colour === "number" ? colour : 0x5865f2;
-}
-
-function resolveNamed(colour: ColorResolvable): number {
+/** `setAccentColor` takes a number while the theme names its colours; one discord.js cannot read is not worth a throw. */
+function accentNumber(colour: ColorResolvable): number {
 	try {
 		return resolveColor(colour);
 	} catch {
-		return 0x5865f2;
+		return resolveColor(theme.colours.default);
 	}
 }

@@ -1,11 +1,11 @@
 import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { theme } from "@config/theme";
 import { type WarnEntry, type WarnLadderRecord } from "@database/models/moderation.schema";
 import {
-	addWarning,
-	countWarnings,
 	getWarnLadder,
 	listGuildWarnings,
+	recordWarning,
 	saveWarnLadder,
 	setWarningCase,
 	setWarningStep,
@@ -13,7 +13,7 @@ import {
 import { embed } from "@lib/discord/embeds.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
-import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
+import { auditReason, dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 import {
 	countsSince,
 	expiryOf,
@@ -73,7 +73,7 @@ export function stepLabel(step: WarnStep): string {
 		case "warn":
 			return "Warning only";
 		case "timeout":
-			return `Time out for ${formatDurationLong(step.minutes * 60_000)}`;
+			return `Time out for ${formatDurationLong(step.minutes * MINUTE_MS)}`;
 		case "kick":
 			return "Kick";
 		case "ban":
@@ -95,9 +95,10 @@ export async function applyWarnStep(
 	user: User,
 	member: GuildMember | null,
 	step: WarnStep | null,
-	auditReason: string,
+	reason: string,
 ): Promise<WarnProblem | null> {
 	if (step === null || step.action === "warn") return null;
+	const fitted = auditReason(reason);
 
 	const attempt = (work: Promise<unknown>): Promise<WarnProblem | null> =>
 		work.then(
@@ -107,14 +108,14 @@ export async function applyWarnStep(
 
 	if (step.action === "ban") {
 		if (member !== null && !member.bannable) return "outranked";
-		return attempt(guild.members.ban(user.id, { reason: auditReason }));
+		return attempt(guild.members.ban(user.id, { reason: fitted }));
 	}
 
 	if (member === null) return "left";
 
-	if (step.action === "kick") return member.kickable ? attempt(member.kick(auditReason)) : "outranked";
+	if (step.action === "kick") return member.kickable ? attempt(member.kick(fitted)) : "outranked";
 
-	return member.moderatable ? attempt(member.timeout(step.minutes * 60_000, auditReason)) : "outranked";
+	return member.moderatable ? attempt(member.timeout(step.minutes * MINUTE_MS, fitted)) : "outranked";
 }
 
 const PERMISSION: Record<Exclude<WarnStep["action"], "warn">, string> = {
@@ -178,15 +179,22 @@ export async function issueWarning(options: {
 }): Promise<Issued> {
 	const { guild, user, member, moderator, reason } = options;
 
-	const entry = await addWarning(guild.id, user.id, user.username, moderator, reason);
+	// The count comes from the write that records the warning, so two warnings at once take two steps.
+	const ladder = await readWarnLadder(guild.id);
+	const { entry, count } = await recordWarning(
+		guild.id,
+		user.id,
+		user.username,
+		moderator,
+		reason,
+		countsSince(ladder.expireAfterDays),
+	);
 	const byModerator = { id: moderator.id, name: moderator.tag };
 	const recorded = await recordCase(guild, { action: "warn", user, moderator: byModerator, reason });
 	if (recorded !== null && recorded.number !== null) {
 		await setWarningCase(guild.id, user.id, entry.warnId, recorded.number);
 		entry.caseNumber = recorded.number;
 	}
-	const ladder = await readWarnLadder(guild.id);
-	const count = await countWarnings(guild.id, user.id, countsSince(ladder.expireAfterDays));
 	const step = stepFor(ladder.steps, count);
 
 	// Sent before the step, because a member who has been kicked or banned can no longer be reached.
@@ -232,7 +240,7 @@ export async function issueWarning(options: {
 			user,
 			moderator: byModerator,
 			reason: `Warning ${String(count)}: ${reason}`,
-			durationMs: step.action === "timeout" ? step.minutes * 60_000 : null,
+			durationMs: step.action === "timeout" ? step.minutes * MINUTE_MS : null,
 		});
 	}
 

@@ -17,12 +17,13 @@ describe("classifyProblem", () => {
 		expect(aboutTheTrack(problem)).toBe(false);
 	});
 
-	it.each(["Video unavailable", "Private video", "This video has been removed by the uploader"])(
-		"reads %s as a video nobody can have",
-		(message) => {
-			expect(classifyProblem(`ERROR: [youtube] abc: ${message}`)?.kind).toBe("unavailable");
-		},
-	);
+	it("reads an unavailable, private or removed video as one nobody can have", () => {
+		const messages = ["Video unavailable", "Private video", "This video has been removed by the uploader"];
+
+		expect(
+			messages.filter((message) => classifyProblem(`ERROR: [youtube] abc: ${message}`)?.kind !== "unavailable"),
+		).toEqual([]);
+	});
 
 	/** Verbatim from production: a SoundCloud upload only offered encrypted, which nothing here will ever decrypt. */
 	it("reads a DRM-protected track as one that can never play, not as a crash", () => {

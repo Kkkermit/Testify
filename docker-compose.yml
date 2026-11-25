@@ -61,6 +61,14 @@ services:
 
       SUPPORT_AI_API_KEY: ${SUPPORT_AI_API_KEY:-}
       SUPPORT_AI_MODEL: ${SUPPORT_AI_MODEL:-}
+
+      SHARDLENS_URL: ${SHARDLENS_URL:-}
+      SHARDLENS_INGEST_KEY: ${SHARDLENS_INGEST_KEY:-}
+      SHARDLENS_READ_KEY: ${SHARDLENS_READ_KEY:-}
+      SHARDLENS_ACTIVITY_KEY: ${SHARDLENS_ACTIVITY_KEY:-}
+      SHARDLENS_MONGODB: ${SHARDLENS_MONGODB:-}
+      SHARDLENS_PORT: ${SHARDLENS_PORT:-}
+      SHARDLENS_AUDIT_KEY: ${SHARDLENS_AUDIT_KEY:-}
     ports:
       # Bound to the host's loopback: an admin panel reachable from the internet is not a default.
       # Put a reverse proxy in front and set DASHBOARD_TRUST_PROXY=true to expose it deliberately.

@@ -43,6 +43,7 @@ import { ownerContacts } from "@lib/bot";
 import {
 	confirmsName,
 	eraseAccountSchema,
+	isAccessArea,
 	type AccessArea,
 	type ManageableGuild,
 	type MeResponse,
@@ -201,7 +202,7 @@ auth.get("/me", requireAuth, async (context) => {
 });
 
 function readPending(context: ApiContext): Pending | null {
-	const raw = readCookie(context, OAUTH_COOKIE);
+	const raw = readCookie(context, context.get("env"), OAUTH_COOKIE);
 	if (raw === null) return null;
 
 	try {
@@ -219,7 +220,8 @@ async function guildsFor(
 	const client = context.get("client");
 	const owner = client.isOwner(session.userId);
 	const [guilds, given] = await Promise.all([rawGuilds(oauth, session), accessFor(session.userId)]);
-	const granted = new Map(given.map((access) => [access.guildId, access.areas]));
+	// A stored grant is data, so a screen this build does not know is dropped here as `requireGuild` drops it.
+	const granted = new Map(given.map((access) => [access.guildId, access.areas.filter(isAccessArea)]));
 
 	return guilds
 		.flatMap((guild) => {
@@ -250,6 +252,9 @@ async function rawGuilds(oauth: OauthConfig, session: DashboardSession): Promise
 	}
 }
 
+/** A refresh spends the refresh token it sends, so requests arriving together share the one already on its way. */
+const refreshing = new Map<string, Promise<string>>();
+
 async function usableToken(oauth: OauthConfig, session: DashboardSession): Promise<string> {
 	const tokens = readTokens(oauth.box, session);
 	// The session secret has been rotated since they signed in, so the sealed tokens no longer open.
@@ -257,11 +262,19 @@ async function usableToken(oauth: OauthConfig, session: DashboardSession): Promi
 
 	if (session.tokenExpiresAt.getTime() - Date.now() >= REFRESH_WITHIN_MS) return tokens.accessToken;
 
-	const refreshed = await refreshTokens(oauth, tokens.refreshToken).catch(() => null);
+	const pending =
+		refreshing.get(session._id) ??
+		refreshAccess(oauth, session._id, tokens.refreshToken).finally(() => refreshing.delete(session._id));
+	refreshing.set(session._id, pending);
+	return pending;
+}
+
+async function refreshAccess(oauth: OauthConfig, sessionId: string, refreshToken: string): Promise<string> {
+	const refreshed = await refreshTokens(oauth, refreshToken).catch(() => null);
 	// A refusal to refresh means the sign-in is over, and a 401 shows the sign-in screen rather than an error.
 	if (refreshed === null) throw unauthorised();
 
-	await updateTokens(oauth.box, session._id, {
+	await updateTokens(oauth.box, sessionId, {
 		accessToken: refreshed.accessToken,
 		refreshToken: refreshed.refreshToken,
 		tokenExpiresAt: refreshed.expiresAt,

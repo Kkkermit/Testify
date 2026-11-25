@@ -23,6 +23,6 @@ These need **Administrator**.
 - **Robbing** can be turned off, and `/rob` is then refused.
 - **XP** scales what each message earns before any boost role, and **XP cooldown** sets the wait between messages that earn it.
 
-On the dashboard the first three are **Pay and rates** under Economy, and the XP ones are on the Levelling page.
+On the dashboard the first three are **Economy settings** under Economy, and the XP ones are on the Levelling page.
 
 > **Tip:** On the dashboard, a member's page can add or take money and XP too. It asks **Administrator**, just as `/give` does.

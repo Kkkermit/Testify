@@ -57,7 +57,7 @@ export function WarningRow({
 								setDraft(event.target.value);
 							}}
 						/>
-						{problem !== null && <p className="text-destructive text-xs">{problem}</p>}
+						{problem !== null && <p className="text-destructive-text text-xs">{problem}</p>}
 					</div>
 				)}
 

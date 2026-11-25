@@ -1,5 +1,6 @@
-import { type EmbedBuilder, type Guild, SnowflakeUtil } from "discord.js";
+import { type EmbedBuilder, type Guild, PermissionFlagsBits, SnowflakeUtil } from "discord.js";
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
@@ -14,7 +15,7 @@ export async function buildGuildEmbed(
 	const owner = await guild.fetchOwner().catch(() => null);
 	const inviteUrl = kind === "joined" ? await createInvite(guild) : null;
 	const total = client.guilds.cache.size;
-	const botName = client.user?.username ?? "the bot";
+	const bot = botName();
 
 	const fields = [
 		{
@@ -51,8 +52,8 @@ export async function buildGuildEmbed(
 		title: kind === "joined" ? "📥 Joined a new server" : "📤 Left a server",
 		description:
 			kind === "joined"
-				? `**${escapeMarkdown(guild.name)}** added ${botName} to their server.`
-				: `${botName} is no longer in **${escapeMarkdown(guild.name)}**.`,
+				? `**${escapeMarkdown(guild.name)}** added ${bot} to their server.`
+				: `${bot} is no longer in **${escapeMarkdown(guild.name)}**.`,
 		fields,
 		...(icon !== null ? { thumbnail: icon } : {}),
 		...(banner !== null ? { image: banner } : {}),
@@ -61,13 +62,15 @@ export async function buildGuildEmbed(
 }
 
 async function createInvite(guild: Guild): Promise<string | null> {
-	const channel = guild.channels.cache.find(
-		(candidate) =>
-			candidate.isTextBased() &&
-			guild.members.me !== null &&
-			candidate.permissionsFor(guild.members.me).has("CreateInstantInvite"),
-	);
-	if (!channel) return null;
+	const me = guild.members.me;
+	const channel =
+		me === null
+			? undefined
+			: guild.channels.cache.find(
+					(candidate) =>
+						candidate.isTextBased() && candidate.permissionsFor(me).has(PermissionFlagsBits.CreateInstantInvite),
+				);
+	if (channel === undefined) return null;
 
 	try {
 		const invite = await guild.invites.create(channel.id, { maxAge: 0, maxUses: 0 });

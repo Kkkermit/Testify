@@ -5,12 +5,17 @@ import { pickedChannelId, requireSendable } from "@lib/discord/channelPick.util"
 
 /** The one rule for what a postable channel is, shared by every panel. */
 
+const CHOOSER = { id: "100000000000000001" };
+
 function guildWith(channel: unknown): Guild {
-	return { channels: { fetch: jest.fn().mockResolvedValue(channel) } } as unknown as Guild;
+	return {
+		channels: { fetch: jest.fn().mockResolvedValue(channel) },
+		members: { fetch: jest.fn().mockResolvedValue(CHOOSER) },
+	} as unknown as Guild;
 }
 
 function channelSelect(values: string[]): ComponentInteraction {
-	return { isChannelSelectMenu: () => true, values } as unknown as ComponentInteraction;
+	return { isChannelSelectMenu: () => true, values, user: CHOOSER } as unknown as ComponentInteraction;
 }
 
 const sendable = { isSendable: () => true };
@@ -50,6 +55,17 @@ describe("pickedChannelId", () => {
 			"I need these permissions in <#123>: `view channel` and `send messages`",
 		);
 		await expect(pickedChannelId(channelSelect(["123"]), open)).resolves.toBe("123");
+	});
+
+	/** The bot could post where its chooser could not, so a manager could aim their own words into a staff channel. */
+	it("refuses a channel the person choosing it cannot post in themselves", async () => {
+		const both = [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages];
+		const botOnly = guildWith({
+			...(channelGranting(both) as object),
+			permissionsFor: (who: { id: string }) => new PermissionsBitField(who.id === CHOOSER.id ? [] : both),
+		});
+
+		await expect(pickedChannelId(channelSelect(["123"]), botOnly)).rejects.toThrow(/post in yourself/);
 	});
 });
 

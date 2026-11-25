@@ -94,9 +94,7 @@ export function GoodbyeSettings({
 				saved={goodbye.message}
 				disabled={needsChannel}
 				onDraft={setDraft}
-				onSave={(message) => {
-					update.mutate({ message });
-				}}
+				onSave={(message) => update.mutateAsync({ message })}
 			>
 				<GreetingPreview
 					message={draft}

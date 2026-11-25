@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useParams } from "react-router";
 import { MobileNav } from "@/app/layout/MobileNav";
@@ -20,10 +20,18 @@ export function AppShell(): React.JSX.Element {
 	const { guildId } = useParams();
 	const location = useLocation();
 	const { t } = useTranslation();
-	const [menuOpen, setMenuOpen] = useState(false);
+	// Held as the page it was opened on, so the next page arrives with it shut.
+	const [menuOpenOn, setMenuOpenOn] = useState<string | null>(null);
+	const menuOpen = menuOpenOn === location.pathname;
+	const setMenuOpen = useCallback(
+		(open: boolean) => {
+			setMenuOpenOn(open ? location.pathname : null);
+		},
+		[location.pathname],
+	);
 	const [searching, setSearching] = useState(false);
 	const openSearch = useCallback(() => {
-		setMenuOpen(false);
+		setMenuOpenOn(null);
 		setSearching(true);
 	}, []);
 	const closeSearch = useCallback(() => {
@@ -33,7 +41,7 @@ export function AppShell(): React.JSX.Element {
 	useScreenView();
 	useQuickSearchShortcut(
 		useCallback(() => {
-			setMenuOpen(false);
+			setMenuOpenOn(null);
 			setSearching((was) => !was);
 		}, []),
 	);
@@ -49,10 +57,6 @@ export function AppShell(): React.JSX.Element {
 		mayGrant: mayGrant(overview),
 	};
 	const user = me.data?.user ?? null;
-
-	useEffect(() => {
-		setMenuOpen(false);
-	}, [location.pathname]);
 
 	return (
 		<UndoProvider>

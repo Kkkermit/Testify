@@ -1,7 +1,8 @@
 import { type APIEmbed, MessageFlags } from "discord.js";
+import { isCategory } from "@config/categories";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
-import { runButton, runCommand, UserFacingError } from "@core/errors";
+import { runButton, runCommand, toError, UserFacingError } from "@core/errors";
 import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 describe("runCommand", () => {
@@ -25,9 +26,10 @@ describe("runCommand", () => {
 		const interaction = createMockInteraction();
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
+		const failure = new Error("boom");
 		const outcome = await runCommand(
 			interaction,
-			command(() => Promise.reject(new Error("boom"))),
+			command(() => Promise.reject(failure)),
 			client,
 		);
 
@@ -35,7 +37,7 @@ describe("runCommand", () => {
 		expect(reference).toBeDefined();
 		expect(client.logger.error).toHaveBeenCalledWith(expect.objectContaining({ reference }), expect.any(String));
 		// The run log keeps the same reference, which is what links a failed run to its log lines.
-		expect(outcome).toEqual({ ok: false, reference });
+		expect(outcome).toEqual({ ok: false, reference, error: failure });
 	});
 
 	/** The apology and its reference reach a French reader in French, with the reference still the one in the log. */
@@ -57,13 +59,14 @@ describe("runCommand", () => {
 	it("returns no reference for a failure that was not logged as a bug", async () => {
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
+		const refusal = new UserFacingError("You need 500 more coins.");
 		const outcome = await runCommand(
 			createMockInteraction(),
-			command(() => Promise.reject(new UserFacingError("You need 500 more coins."))),
+			command(() => Promise.reject(refusal)),
 			client,
 		);
 
-		expect(outcome).toEqual({ ok: false, reference: null });
+		expect(outcome).toEqual({ ok: false, reference: null, error: refusal });
 	});
 
 	it("answers privately when nothing has been sent yet", async () => {
@@ -171,5 +174,32 @@ describe("the error channel", () => {
 			runCommand(createMockInteraction() as unknown as CommandInput, command, client),
 		).resolves.toMatchObject({ ok: false });
 		expect(client.logger.warn).toHaveBeenCalled();
+	});
+});
+
+/** It runs inside every catch-all handler, so a BigInt or a cycle that made it throw escaped the handler too. */
+describe("toError", () => {
+	it("turns anything thrown into an Error without throwing itself", () => {
+		const cyclic: Record<string, unknown> = {};
+		cyclic.self = cyclic;
+		const thrown = [new Error("kept"), "text", 7, 1n, undefined, { code: 1 }, cyclic, { big: 2n }];
+
+		expect(thrown.map((value) => toError(value).message)).toEqual([
+			"kept",
+			"text",
+			"7",
+			"1",
+			"undefined",
+			'{"code":1}',
+			"[object Object]",
+			"[object Object]",
+		]);
+	});
+});
+
+/** `in` reads the prototype too, so a command filed under "constructor" passed as a category. */
+describe("isCategory", () => {
+	it("accepts the categories and nothing an object inherits", () => {
+		expect(["fun", "owner", "constructor", "toString", "hasOwnProperty"].filter(isCategory)).toEqual(["fun", "owner"]);
 	});
 });

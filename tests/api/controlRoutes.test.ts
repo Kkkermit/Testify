@@ -3,7 +3,8 @@ import { Hono } from "hono";
 import { answerLikeTheApp, withSession } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import { control } from "@api/routes/control";
-import { type TestifyClient } from "@core/client";
+import { type Env } from "@config/env";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
 import { shutdown } from "@core/shutdown";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
@@ -12,8 +13,9 @@ import { getCounting } from "@database/repositories/countingRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
-import { guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
+import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
+import { oneGuildActivity } from "@lib/bot/usageReport.util";
 import { type OwnerGuildDetail } from "@testify/shared";
 
 jest.mock("@core/shutdown", () => ({ shutdown: jest.fn(() => Promise.resolve()) }));
@@ -32,9 +34,9 @@ jest.mock("@database/repositories/countingRepository", () => ({
 jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
-jest.mock("@database/repositories/usageRepository", () => ({
-	guildTallies: jest.fn(() => Promise.resolve([])),
-	dashboardTallies: jest.fn(() => Promise.resolve([])),
+jest.mock("@lib/bot/usageReport.util", () => ({
+	...jest.requireActual<object>("@lib/bot/usageReport.util"),
+	oneGuildActivity: jest.fn(),
 }));
 jest.mock("@database/repositories/logRepository", () => ({
 	clearLogLines: jest.fn(() => Promise.resolve()),
@@ -74,6 +76,7 @@ function clientFor(overrides: Partial<TestifyClient> = {}): TestifyClient {
 		paused: false,
 		pausedAt: null,
 		logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+		lensTarget: settingsTarget((overrides.env ?? {}) as Env),
 		...overrides,
 	} as unknown as TestifyClient;
 }
@@ -105,7 +108,7 @@ beforeEach(() => {
 	jest.mocked(getAuditLogConfig).mockResolvedValue(null);
 	jest.mocked(getCounting).mockResolvedValue(null);
 	jest.mocked(getWelcome).mockResolvedValue(null);
-	jest.mocked(guildTallies).mockResolvedValue([]);
+	jest.mocked(oneGuildActivity).mockResolvedValue({ commands: 12, dashboard: 3 });
 	jest.mocked(getBotSettings).mockResolvedValue(null);
 });
 
@@ -120,6 +123,8 @@ describe("who can control the bot", () => {
 		["GET", "/music"],
 		["PUT", "/music"],
 		["DELETE", `/logs/${logRing.run.id}`],
+		["GET", "/shardlens"],
+		["POST", "/shardlens/send"],
 	])("hides %s %s from a manager", async (method, path) => {
 		const response = await send(path, { method, userId: MANAGER, body: {} });
 
@@ -231,15 +236,40 @@ describe("the bot's own profile", () => {
 });
 
 describe("a server's detail", () => {
-	it("reports what that server has configured", async () => {
+	/** "audit logging" here beside "audit-logging" in the server list made one server read as two. */
+	it("reports what that server has configured, by the same keys the server list uses", async () => {
 		jest.mocked(getWelcome).mockResolvedValue({ guildId: GUILD, channelId: "1" } as never);
+		jest.mocked(getAuditLogConfig).mockResolvedValue({ channelId: "1", enabledLogs: ["all"] } as never);
 
-		expect(((await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail).configured).toContain("welcome");
+		const { configured } = (await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail;
+
+		expect(configured).toEqual(["audit-logging", "welcome"]);
 	});
 
 	/** An id straight out of a URL reaches a Mongo filter if nothing checks its shape first. */
 	it("rejects an id that is not a snowflake", async () => {
 		expect((await send("/guilds/nonsense")).status).toBe(400);
+	});
+
+	it("counts that server's use from Shardlens, and only that server's", async () => {
+		const detail = (await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail;
+
+		expect(jest.mocked(oneGuildActivity).mock.calls[0]?.[1]).toBe(GUILD);
+		expect(detail).toMatchObject({ usage: 12, dashboardViews: 3, analytics: null });
+	});
+
+	/** The page is how the owner leaves or inspects a server, so a missing collector costs only the two counts. */
+	it("still answers while Shardlens cannot be read, saying why", async () => {
+		jest.mocked(oneGuildActivity).mockRejectedValueOnce(new AnalyticsUnavailable("refused"));
+
+		const response = await send(`/guilds/${GUILD}`);
+
+		expect(response.status).toBe(200);
+		expect((await response.json()) as OwnerGuildDetail).toMatchObject({
+			usage: null,
+			dashboardViews: null,
+			analytics: "refused",
+		});
 	});
 });
 
@@ -329,5 +359,65 @@ describe("music sources", () => {
 		await send("/music", { method: "PUT", userId: MANAGER, body: { sources: "youtube" } });
 
 		expect(saveBotSettings).not.toHaveBeenCalled();
+	});
+});
+
+describe("Shardlens", () => {
+	const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
+
+	function withLens(): { client: TestifyClient; flush: jest.Mock } {
+		let queued = 3;
+		const flush = jest.fn(() => {
+			queued = 0;
+			return Promise.resolve();
+		});
+		const lens = {
+			flush,
+			client: { idle: () => Promise.resolve() },
+			stats: () => ({
+				ready: true,
+				mode: "privacy",
+				queueDepth: queued,
+				pendingSalt: 0,
+				pendingInteractions: 0,
+				dropped: {},
+				failedFlushes: 0,
+			}),
+		};
+		const env = { SHARDLENS_URL: "https://stats.example.com/v1", SHARDLENS_INGEST_KEY: KEY };
+		return { client: clientFor({ shardlens: lens, env } as never), flush };
+	}
+
+	it("says it is off, and refuses to send to nothing", async () => {
+		const client = clientFor({ shardlens: null, env: {} } as never);
+
+		const status = await send("/shardlens", { client });
+		expect(await status.json()).toMatchObject({ state: "off", collector: null });
+
+		const sent = await send("/shardlens/send", { method: "POST", client });
+		expect(sent.status).toBe(404);
+		expect(recordAudit).not.toHaveBeenCalled();
+	});
+
+	/** The owner's browser is shown where analytics go and never the key that lets anybody send there. */
+	it("reports the collector by its origin and never the key", async () => {
+		const { client } = withLens();
+
+		const response = await send("/shardlens", { client });
+		const text = await response.text();
+
+		expect(JSON.parse(text)).toMatchObject({ state: "sending", collector: "https://stats.example.com", queued: 3 });
+		expect(text).not.toContain("slk_");
+	});
+
+	it("sends what is waiting and records that it did", async () => {
+		const { client, flush } = withLens();
+
+		const response = await send("/shardlens/send", { method: "POST", client });
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ sent: 3, problem: null, status: { queued: 0 } });
+		expect(flush).toHaveBeenCalledTimes(1);
+		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "bot.shardlensSend" }));
 	});
 });

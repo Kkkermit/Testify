@@ -4,7 +4,7 @@ import { type ApiBindings, guildIdOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { applyMusicSettings, readMusicSettings } from "@lib/music";
-import { musicPatch } from "@testify/shared";
+import { type MusicPatch, musicPatch } from "@testify/shared";
 
 export const music = new Hono<ApiBindings>();
 
@@ -23,7 +23,7 @@ music.patch("/", async (context) => {
 	return context.json(settings);
 });
 
-function summaryOf(patch: Record<string, unknown>): string {
+function summaryOf(patch: MusicPatch): string {
 	if ("enabled" in patch) return patch.enabled === true ? "Turned the music system on" : "Turned the music system off";
 
 	return "Changed which roles may use the music system";

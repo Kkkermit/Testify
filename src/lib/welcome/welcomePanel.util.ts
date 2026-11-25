@@ -1,7 +1,7 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, channelSelect, row } from "@lib/discord/components.util";
-import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { WELCOME_PANEL_ID } from "@lib/welcome/welcome.constants";
 import { type WelcomeConfig } from "@lib/welcome/welcome.types";
@@ -53,7 +53,10 @@ function placeholderHelp(): string {
 	return `**Placeholders**\n${rows}`;
 }
 
-export function welcomePanel(state: WelcomePanelState, ownerId: string): ContainerMessage {
+export function welcomePanel(
+	state: WelcomePanelState,
+	ownerId: string,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const { config } = state;
 	const off = config === null;
 
@@ -128,5 +131,5 @@ export function welcomePanel(state: WelcomePanelState, ownerId: string): Contain
 		);
 	}
 
-	return containerMessage(container({ category: "settings", parts }));
+	return withoutPings(containerMessage(container({ category: "settings", parts })));
 }

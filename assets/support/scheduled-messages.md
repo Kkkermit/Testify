@@ -13,7 +13,7 @@ related: announcements, auto-responders
 `/schedule add` takes the channel, how long from now, how often and the message, such as `/schedule add channel:#news in:2h repeat:once message:Game night starts now!`. `/schedule list` shows them all, soonest first, and changes or deletes any of them. You need **Manage Server**.
 
 ### On the dashboard
-**Scheduled messages** under Channels takes a date and time in your own time zone.
+**Scheduled messages** under Messages takes a date and time in your own time zone.
 
 ### How it behaves
 - A daily message repeats every 24 hours from its first post, and a weekly one every 7 days. It keeps to that moment, so on your clock it moves by an hour when the clocks change.

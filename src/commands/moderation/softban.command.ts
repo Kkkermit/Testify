@@ -8,6 +8,7 @@ import { discordTime, formatDurationLong, parseDuration } from "@lib/format";
 import {
 	actionEmbed,
 	assertModeratable,
+	auditReason,
 	DEFAULT_REASON,
 	dmEmbed,
 	moderatorOf,
@@ -15,6 +16,15 @@ import {
 	recordCase,
 	revokeSoftban,
 } from "@lib/moderation";
+
+/** An autocomplete row is plain text, so the expiry is written out rather than as a Discord timestamp. */
+const UNTIL = new Intl.DateTimeFormat("en-GB", {
+	day: "numeric",
+	month: "short",
+	hour: "2-digit",
+	minute: "2-digit",
+	timeZone: "UTC",
+});
 
 export default defineCommand({
 	name: "softban",
@@ -60,7 +70,9 @@ export default defineCommand({
 					}),
 				);
 
-				await guild.members.ban(target.id, { reason: `${interaction.user.username} (softban ${readable}): ${reason}` });
+				await guild.members.ban(target.id, {
+					reason: auditReason(`${interaction.user.username} (softban ${readable}): ${reason}`),
+				});
 				await createSoftban({
 					guildId: guild.id,
 					userId: target.id,
@@ -97,7 +109,15 @@ export default defineCommand({
 		{
 			name: "remove",
 			description: "Lift a softban immediately.",
-			options: [{ name: "user-id", description: "The ID of the softbanned user.", type: "string", required: true }],
+			options: [
+				{
+					name: "user-id",
+					description: "Pick the softbanned member, or paste their ID.",
+					type: "string",
+					required: true,
+					autocomplete: true,
+				},
+			],
 			async run(interaction) {
 				const guild = inGuild(interaction);
 				const userId = interaction.options.getString("user-id", true).replace(/\D/g, "");
@@ -137,4 +157,23 @@ export default defineCommand({
 			},
 		},
 	],
+
+	async autocomplete(interaction, client) {
+		const guildId = interaction.guildId;
+		if (guildId === null) {
+			await interaction.respond([]);
+			return;
+		}
+
+		const typed = interaction.options.getFocused().trim().toLowerCase();
+		const choices = (await listActiveSoftbans(guildId))
+			.map((entry) => ({
+				name: `${client.users.cache.get(entry.userId)?.username ?? entry.userId} · until ${UNTIL.format(entry.expiresAt)} UTC`,
+				value: entry.userId,
+			}))
+			.filter((choice) => choice.name.toLowerCase().includes(typed))
+			.slice(0, 25);
+
+		await interaction.respond(choices);
+	},
 });

@@ -1,3 +1,4 @@
+import { botName } from "@core/brand";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply, successEmbed } from "@lib/discord";
@@ -13,7 +14,7 @@ export default defineCommand({
 		{ name: "message", description: "What to say.", type: "string", required: true, maxLength: 1_800 },
 	],
 
-	async run(interaction, client) {
+	async run(interaction) {
 		const target = interaction.options.getUser("user", true);
 		const content = interaction.options.getString("message", true);
 
@@ -22,7 +23,7 @@ export default defineCommand({
 				embeds: [
 					embed({
 						category: "owner",
-						title: `A message from ${client.user?.username ?? "the bot"}`,
+						title: `A message from ${botName()}`,
 						description: content,
 						footer: `Sent by ${interaction.user.username}`,
 					}),

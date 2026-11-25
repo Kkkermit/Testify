@@ -43,8 +43,7 @@ export async function publishRoleMenu(guild: Guild, menu: StoredRoleMenu): Promi
 		throw new UserFacingError("I cannot post in that channel. Pick another one, or let me send messages there.");
 	}
 
-	// The role list is mentions, which must render as names without pinging every holder.
-	const payload = { ...roleMenuPost(menu), allowedMentions: { parse: [] } };
+	const payload = roleMenuPost(menu);
 
 	if (menu.messageId !== null) {
 		const existing = await channel.messages.fetch(menu.messageId).catch(() => null);

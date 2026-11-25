@@ -26,6 +26,24 @@ describe("the API client", () => {
 		expect(sent).toBe("a-secret");
 	});
 
+	/** A subdomain can plant an unprefixed copy beside the server's own, and only the `__Host-` one is the server's. */
+	it("sends the __Host- CSRF cookie over a plain one beside it", async () => {
+		const cookies = jest
+			.spyOn(Document.prototype, "cookie", "get")
+			.mockReturnValue("dash_csrf=planted; __Host-dash_csrf=the-real-one");
+		let sent: string | null = null;
+		server.use(
+			http.post("/api/thing", ({ request }) => {
+				sent = request.headers.get("x-csrf-token");
+				return new HttpResponse(null, { status: 204 });
+			}),
+		);
+
+		await api.post("/thing");
+		cookies.mockRestore();
+		expect(sent).toBe("the-real-one");
+	});
+
 	/** A GET can never mutate anything, so sending the token on one would only widen where it leaks. */
 	it("does not send the token on a read", async () => {
 		document.cookie = "dash_csrf=a-secret";

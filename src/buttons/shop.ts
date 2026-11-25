@@ -3,9 +3,12 @@ import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { type EconomyAccount } from "@database/models/economy.schema";
 import {
+	addBusiness,
 	addInventoryItem,
 	adjustWallet,
 	debitWallet,
+	emptySlot,
+	fillSlot,
 	requireAccount,
 	setFields,
 } from "@database/repositories/economyRepository";
@@ -48,15 +51,17 @@ async function purchase(state: ShopState, guild: Guild, userId: string, account:
 				throw new UserFacingError("You cannot afford that any more.");
 			}
 
-			await setFields(guildId, userId, {
-				house: {
-					houseId: house.id,
-					name: house.name,
-					emoji: house.emoji,
-					value: house.price,
-					purchasedAt: new Date(),
-				},
+			const moved = await fillSlot(guildId, userId, "house", {
+				houseId: house.id,
+				name: house.name,
+				emoji: house.emoji,
+				value: house.price,
+				purchasedAt: new Date(),
 			});
+			if (!moved) {
+				await adjustWallet(guildId, userId, house.price);
+				throw new UserFacingError("You already own a house, so your money has gone back.");
+			}
 
 			return `You bought ${house.emoji} **${house.name}**.`;
 		}
@@ -72,20 +77,19 @@ async function purchase(state: ShopState, guild: Guild, userId: string, account:
 				throw new UserFacingError("You cannot afford that any more.");
 			}
 
-			await setFields(guildId, userId, {
-				businesses: [
-					...account.businesses,
-					{
-						businessId: business.id,
-						name: business.name,
-						emoji: business.emoji,
-						level: 1,
-						income: business.income,
-						purchasedAt: new Date(),
-						lastCollected: null,
-					},
-				],
+			const added = await addBusiness(guildId, userId, {
+				businessId: business.id,
+				name: business.name,
+				emoji: business.emoji,
+				level: 1,
+				income: business.income,
+				purchasedAt: new Date(),
+				lastCollected: null,
 			});
+			if (!added) {
+				await adjustWallet(guildId, userId, business.price);
+				throw new UserFacingError("You already own that business, so your money has gone back.");
+			}
 
 			return `You bought ${business.emoji} **${business.name}**.`;
 		}
@@ -111,19 +115,21 @@ async function purchase(state: ShopState, guild: Guild, userId: string, account:
 				throw new UserFacingError("You cannot afford that any more.");
 			}
 
-			await setFields(guildId, userId, {
-				pet: {
-					petId: pet.id,
-					name: pet.name,
-					type: pet.name,
-					emoji: pet.emoji,
-					happiness: 100,
-					hunger: 100,
-					purchasedAt: new Date(),
-					lastFed: null,
-					lastWalked: null,
-				},
+			const adopted = await fillSlot(guildId, userId, "pet", {
+				petId: pet.id,
+				name: pet.name,
+				type: pet.name,
+				emoji: pet.emoji,
+				happiness: 100,
+				hunger: 100,
+				purchasedAt: new Date(),
+				lastFed: null,
+				lastWalked: null,
 			});
+			if (!adopted) {
+				await adjustWallet(guildId, userId, pet.price);
+				throw new UserFacingError("You already have a pet, so your money has gone back.");
+			}
 
 			return `You adopted ${pet.emoji} **${pet.name}**. Look after it with \`/pet view\`.`;
 		}
@@ -218,7 +224,9 @@ export default defineButton({
 			const refund = Math.floor(account.house.value / 2);
 			const name = account.house.name;
 
-			await setFields(guildId, userId, { house: null });
+			if (!(await emptySlot(guildId, userId, "house", account.house.houseId))) {
+				throw new UserFacingError("That house has already been sold.");
+			}
 			await adjustWallet(guildId, userId, refund);
 
 			const updated = await requireAccount(guildId, userId);

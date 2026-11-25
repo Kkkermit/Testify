@@ -20,6 +20,7 @@ export const FAKE = {
 	anthropicKey: ["sk", "ant", "api03", "abcdefghijklmnopqrstuvwxyz"].join("-"),
 	otherAnthropicKey: ["sk", "ant", "api03", "somethinglongenough"].join("-"),
 	githubToken: ["ghp", "abcdefghijklmnopqrstuvwxyz0123"].join("_"),
+	shardlensKey: ["slk", "activity", "a".repeat(43)].join("_"),
 	privateKey: ["-----BEGIN RSA", "PRIVATE KEY-----"].join(" "),
 	databasePassword: ["hunter2", "hunter2"].join(""),
 	mongoUri: ["mongodb+srv://testify", `${["hunter2", "hunter2"].join("")}@cluster0.example.mongodb.net/testify`].join(

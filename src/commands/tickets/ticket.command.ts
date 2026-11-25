@@ -4,7 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { readerLanguage } from "@core/language";
 import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
 import { embed, reply, requirePostable, successEmbed } from "@lib/discord";
-import { normaliseTicketSetup, publishTicketPanel } from "@lib/tickets";
+import { normaliseTicketSetup, publishTicketPanel, staffRoleProblem } from "@lib/tickets";
 
 export default defineCommand({
 	name: "ticket",
@@ -36,6 +36,14 @@ export default defineCommand({
 			async run(interaction) {
 				const guild = inGuild(interaction);
 
+				const staffRole = roleOption(interaction, "staff-role", true);
+				if (!staffRole) throw new UserFacingError("Pick the role that should handle tickets.");
+				if (staffRole.id !== (await getTicketSetup(guild.id))?.handlerRoleId) {
+					const mentionsEveryRole = interaction.memberPermissions?.has(PermissionFlagsBits.MentionEveryone) === true;
+					const problem = staffRoleProblem(guild, staffRole.id, mentionsEveryRole);
+					if (problem !== null) throw new UserFacingError(problem);
+				}
+
 				const panelChannel = textChannelOption(interaction, "panel-channel");
 				if (!panelChannel) throw new UserFacingError("Pick a channel I can post the panel in.");
 				const language = readerLanguage(interaction);
@@ -49,9 +57,6 @@ export default defineCommand({
 				const transcripts = textChannelOption(interaction, "transcripts");
 				if (!transcripts) throw new UserFacingError("Pick a channel I can send transcripts to.");
 				requirePostable(transcripts, language, [PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.AttachFiles]);
-
-				const staffRole = roleOption(interaction, "staff-role", true);
-				if (!staffRole) throw new UserFacingError("Pick the role that should handle tickets.");
 
 				const description =
 					interaction.options.getString("message") ?? "Press the button below and we will be with you shortly.";

@@ -5,13 +5,13 @@ import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { applyTreasure, readTreasure, resetTreasure } from "@lib/economy";
-import { treasurePatch } from "@testify/shared";
+import { type TreasurePatch, treasurePatch } from "@testify/shared";
 
 export const treasure = new Hono<ApiBindings>();
 
 treasure.use("*", requireGuild);
 
-function actorOf(context: Context<ApiBindings>): string {
+function actorIdOf(context: Context<ApiBindings>): string {
 	return context.get("session")?.userId ?? "";
 }
 
@@ -22,7 +22,7 @@ treasure.patch("/", async (context) => {
 	const body = await parseBody(context, treasurePatch);
 	const before = await readTreasure(guildId);
 
-	const result = await applyTreasure(guildId, body, actorOf(context));
+	const result = await applyTreasure(guildId, body, actorIdOf(context));
 	if ("problem" in result) throw badRequest(result.problem);
 
 	await auditSettings(context, { action: "treasure.update", summary: summaryOf(body), before, after: result.settings });
@@ -33,13 +33,13 @@ treasure.patch("/", async (context) => {
 treasure.post("/reset", async (context) => {
 	const guildId = guildIdOf(context);
 
-	const settings = await resetTreasure(guildId, actorOf(context));
+	const settings = await resetTreasure(guildId, actorIdOf(context));
 	await auditChange(context, { action: "treasure.reset", summary: "Reset the treasure settings to their defaults" });
 
 	return context.json(settings);
 });
 
-function summaryOf(patch: Record<string, unknown>): string {
+function summaryOf(patch: TreasurePatch): string {
 	if ("enabled" in patch) return patch.enabled === true ? "Turned treasure drops on" : "Turned treasure drops off";
 
 	return `Changed the treasure ${Object.keys(patch).join(", ")}`;

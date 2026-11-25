@@ -295,6 +295,19 @@ describe("a role a write names", () => {
 		expect(answer.message).toMatch(/moderation or admin permissions/);
 	});
 
+	/** Everybody who joins or verifies is given these, so a role that kicks there would let anybody kick. */
+	it("given to everybody who joins or verifies never moderates, even for the server's owner", async () => {
+		const answers = await Promise.all([
+			asking(SERVER_OWNER, "PUT", "/settings/auto-roles", { roleIds: [MODERATES] }),
+			asking(SERVER_OWNER, "PATCH", "/verification", { roleId: MODERATES }),
+		]);
+
+		expect(answers.map((answer) => [answer.status, answer.code])).toEqual([
+			[403, "role_out_of_reach"],
+			[403, "role_out_of_reach"],
+		]);
+	});
+
 	it("only needs to exist when the bot never hands it out", async () => {
 		passed(await asking(MANAGER, "PUT", "/levelling/boosts", [{ roleId: ABOVE_YOU, multiplier: 2 }]));
 	});

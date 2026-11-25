@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { delimiter, join } from "node:path";
+import { DAY_MS } from "@config/constants";
 import { repoRoot } from "@core/paths";
 import { type MusicBinaries } from "@lib/music/music.types";
 
@@ -99,7 +100,7 @@ export function ageInDays(version: string, now = Date.now()): number | null {
 	const released = releaseDateOf(version);
 	if (released === null) return null;
 
-	return Math.max(0, Math.floor((now - released.getTime()) / 86_400_000));
+	return Math.max(0, Math.floor((now - released.getTime()) / DAY_MS));
 }
 
 export interface Found {

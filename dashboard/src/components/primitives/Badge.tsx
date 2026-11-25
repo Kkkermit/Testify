@@ -13,7 +13,10 @@ export type BadgeTone = keyof typeof TONES;
 export function Badge({ tone = "muted", children }: { tone?: BadgeTone; children: ReactNode }): React.JSX.Element {
 	return (
 		<span
-			className={cn("rounded-chip shrink-0 border px-1.5 py-px text-xs font-medium whitespace-nowrap", TONES[tone])}
+			className={cn(
+				"rounded-chip inline-block max-w-full shrink-0 border px-1.5 py-px text-xs font-medium",
+				TONES[tone],
+			)}
 		>
 			{children}
 		</span>

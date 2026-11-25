@@ -23,6 +23,17 @@ describe("Pager", () => {
 		expect(status).toHaveAttribute("aria-live", "polite");
 	});
 
+	/** A list read a page at a time cannot say how many pages it has until its last one has been read. */
+	it("offers no end and claims no total while more pages lie past the ones reached", () => {
+		const { rerender } = render(<Pager page={1} pages={1} more onChange={jest.fn()} />);
+		expect(screen.getByText("Page 1 of 1 or more")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Last" })).toBeDisabled();
+
+		rerender(<Pager page={2} pages={3} more onChange={jest.fn()} />);
+		expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+		expect(screen.getByRole("button", { name: "Last" })).toBeDisabled();
+	});
+
 	it("jumps straight to a page two either side, and to either end", async () => {
 		const onChange = jest.fn();
 		render(<Pager page={6} pages={12} onChange={onChange} />);

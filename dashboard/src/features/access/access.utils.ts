@@ -4,13 +4,13 @@ import { type NavItem, navigationFor } from "@/config/navigation";
 import { type TranslationKey } from "@/i18n";
 import { ApiError } from "@/lib/api";
 
-export interface AreaChoice {
+interface AreaChoice {
 	area: AccessArea;
 	labelKey: TranslationKey;
 	icon: LucideIcon;
 }
 
-export interface AreaGroup {
+interface AreaGroup {
 	labelKey: TranslationKey;
 	choices: AreaChoice[];
 }

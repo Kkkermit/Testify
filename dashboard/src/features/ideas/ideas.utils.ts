@@ -1,19 +1,10 @@
 import { IDEA_STATUSES, type IdeaFilter, type IdeaSettings } from "@testify/shared";
 import { type TFunction } from "i18next";
 
-const FILTERS: readonly IdeaFilter[] = ["all", ...IDEA_STATUSES];
+export const IDEA_FILTERS: readonly IdeaFilter[] = ["all", ...IDEA_STATUSES];
 
 export function ideaFilterFrom(value: string | null): IdeaFilter {
-	return FILTERS.find((filter) => filter === value) ?? "all";
-}
-
-export function pageFrom(value: string | null): number {
-	const page = Number(value);
-	return Number.isInteger(page) && page >= 1 ? page : 1;
-}
-
-export function pageCount(total: number, perPage: number): number {
-	return Math.max(1, Math.ceil(total / perPage));
+	return IDEA_FILTERS.find((filter) => filter === value) ?? "all";
 }
 
 export function ideaSummary(

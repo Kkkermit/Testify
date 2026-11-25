@@ -10,7 +10,7 @@ import { HOUR_MS } from "@config/constants";
 import { UserFacingError } from "@core/errors";
 import { linkButton, modalForm, row } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
-import { truncate } from "@lib/format/format.util";
+import { discordTime, truncate } from "@lib/format/format.util";
 import { REPORT_FORM_ID, REPORT_LIMITS } from "@lib/modmail/modmail.constants";
 import { readModmailSettings } from "@lib/modmail/modmailActions.util";
 
@@ -106,7 +106,7 @@ export function reportPost(report: {
 					{ name: "Written by", value: `<@${message.author.id}> (${message.author.username})`, inline: true },
 					{ name: "Reported by", value: `<@${reporter.id}> (${reporter.username})`, inline: true },
 					{ name: "Channel", value: `<#${message.channelId}>`, inline: true },
-					{ name: "Sent", value: `<t:${String(Math.floor(message.createdTimestamp / 1_000))}:f>`, inline: true },
+					{ name: "Sent", value: discordTime(message.createdTimestamp, "f"), inline: true },
 					...(files > 0 ? [{ name: "Attachments", value: String(files), inline: true }] : []),
 					{ name: "What is wrong with it", value: report.reason },
 				],

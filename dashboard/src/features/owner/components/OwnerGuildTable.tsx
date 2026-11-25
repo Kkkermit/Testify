@@ -1,6 +1,8 @@
 import { type OwnerGuildFilter, type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
+import { featureLabel } from "@/features/guild-overview/featureStatus.labels";
+import { countOrDash, NO_FIGURE } from "@/features/owner/owner.utils";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
@@ -94,17 +96,17 @@ export function OwnerGuildTable({
 					</td>
 					<td className={CELL_NUM}>{formatNumber(guild.memberCount)}</td>
 					<td className={cn(CELL_NUM, "font-sans whitespace-nowrap", shown("joined"))}>
-						{guild.joinedAt === null ? "—" : shortDate(guild.joinedAt)}
+						{guild.joinedAt === null ? NO_FIGURE : shortDate(guild.joinedAt)}
 					</td>
-					<td className={cn(CELL_NUM, shown("commands"))}>{formatNumber(guild.commands)}</td>
-					<td className={cn(CELL_NUM, shown("dashboard"))}>{formatNumber(guild.dashboardViews)}</td>
+					<td className={cn(CELL_NUM, shown("commands"))}>{countOrDash(guild.commands)}</td>
+					<td className={cn(CELL_NUM, shown("dashboard"))}>{countOrDash(guild.dashboardViews)}</td>
 					<td className={cn(CELL, WIDE_ONLY)}>
 						{guild.configured.length === 0 ? (
 							<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>
 						) : (
 							<span className="flex flex-wrap gap-1">
 								{guild.configured.map((feature) => (
-									<Badge key={feature}>{feature}</Badge>
+									<Badge key={feature}>{featureLabel(feature, feature, t)}</Badge>
 								))}
 							</span>
 						)}

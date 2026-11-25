@@ -5,7 +5,14 @@ import { type ApiBindings, guildOf } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
-import { deleteGiveaway, endGiveaway, listGiveaways, rerollGiveaway, startGiveaway } from "@lib/giveaways";
+import {
+	deleteGiveaway,
+	endGiveaway,
+	findGiveaway,
+	listGiveaways,
+	rerollGiveaway,
+	startGiveaway,
+} from "@lib/giveaways";
 import { type GiveawayList, giveawayParams, giveawayStart } from "@testify/shared";
 
 export const giveaways = new Hono<ApiBindings>();
@@ -29,7 +36,11 @@ giveaways.post("/", async (context) => {
 	// `hostedBy` is rendered into the giveaway embed, so it has to be a real user the bot can resolve.
 	const actorId = context.get("session")?.userId;
 	if (actorId === undefined) throw badRequest("Sign in again to start a giveaway.");
-	const host = await context.get("client").users.fetch(actorId);
+	const host = await context
+		.get("client")
+		.users.fetch(actorId)
+		.catch(() => null);
+	if (host === null) throw notFound("user_not_found", "Discord does not know your account right now. Try again.");
 
 	await startGiveaway(context.get("client"), guild, { ...body, hostedBy: host });
 	await auditChange(context, { action: "giveaway.start", summary: `Started a giveaway for ${body.prize}` });
@@ -42,7 +53,7 @@ giveaways.post("/:messageId/end", async (context) => {
 	const { messageId } = parseParams(context, giveawayParams);
 
 	await requireInGuild(context, guild, messageId);
-	await endGiveaway(context.get("client"), messageId);
+	await endGiveaway(context.get("client"), guild.id, messageId);
 	await auditChange(context, { action: "giveaway.end", summary: `Ended giveaway ${messageId}` });
 
 	return context.json(await listFor(context, guild));
@@ -53,7 +64,7 @@ giveaways.post("/:messageId/reroll", async (context) => {
 	const { messageId } = parseParams(context, giveawayParams);
 
 	await requireInGuild(context, guild, messageId);
-	await rerollGiveaway(context.get("client"), messageId);
+	await rerollGiveaway(context.get("client"), guild.id, messageId);
 	await auditChange(context, { action: "giveaway.reroll", summary: `Rerolled giveaway ${messageId}` });
 
 	return context.json(await listFor(context, guild));
@@ -64,7 +75,7 @@ giveaways.delete("/:messageId", async (context) => {
 	const { messageId } = parseParams(context, giveawayParams);
 
 	await requireInGuild(context, guild, messageId);
-	await deleteGiveaway(context.get("client"), messageId);
+	await deleteGiveaway(context.get("client"), guild.id, messageId);
 	await auditChange(context, { action: "giveaway.delete", summary: `Deleted giveaway ${messageId}` });
 
 	return context.json(await listFor(context, guild));
@@ -72,8 +83,7 @@ giveaways.delete("/:messageId", async (context) => {
 
 /** `discord-giveaways` looks a message up globally, so this keeps a manager inside their own server. */
 async function requireInGuild(context: Context<ApiBindings>, guild: Guild, messageId: string): Promise<void> {
-	const rows = await listGiveaways(context.get("client"), guild.id);
-	if (!rows.some((row) => row.messageId === messageId)) {
+	if ((await findGiveaway(context.get("client"), guild.id, messageId)) === null) {
 		throw notFound("giveaway_not_found", "There is no giveaway with that id in this server.");
 	}
 }

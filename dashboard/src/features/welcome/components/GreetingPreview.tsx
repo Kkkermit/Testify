@@ -17,7 +17,7 @@ export function GreetingPreview({
 	leaving?: boolean;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const person = leaving ? "someone" : "newcomer";
+	const person = leaving ? t("goodbye.previewName") : t("welcome.previewName");
 	const filled = fillTemplate(message, {
 		mention: `@${person}`,
 		username: person,

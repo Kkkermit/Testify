@@ -28,12 +28,9 @@ describe("stepFor", () => {
 
 describe("stepValue and stepFromValue", () => {
 	/** A select menu's value arrives from Discord, so a length nobody offered must not become a timeout. */
-	it("refuses a timeout length that is not on the list", () => {
+	it("refuses a timeout length that is not on the list, and an action that does not exist", () => {
 		expect(stepFromValue("timeout-7")).toBeNull();
 		expect(stepFromValue("timeout-")).toBeNull();
-	});
-
-	it("refuses an action that does not exist", () => {
 		expect(stepFromValue("softban")).toBeNull();
 	});
 });

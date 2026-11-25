@@ -21,6 +21,8 @@ npm-debug.log*
 # Runtime data
 *.pid
 *.seed
+# What an earlier Shardlens collector inside the bot kept: a database, and keys that must never be committed.
+shardlens-data/
 
 # Editors
 .idea/

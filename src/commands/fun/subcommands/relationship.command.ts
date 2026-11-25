@@ -7,7 +7,7 @@ import { progressBar } from "@lib/format";
 function compatibility(firstId: string, secondId: string): number {
 	const key = [firstId, secondId].sort().join(":");
 	const digest = createHash("sha256").update(key).digest();
-	return digest[0]! % 101;
+	return digest.readUInt8(0) % 101;
 }
 
 function verdict(score: number): string {

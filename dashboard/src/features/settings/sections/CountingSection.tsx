@@ -1,7 +1,16 @@
 import { type ChannelSummary, type CountingPatch, type CountingSetting } from "@testify/shared";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { ChannelPicker, Field, FIELD, FieldGroup, savingStateOf, Toggle, Warning } from "@/components/form";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	FieldGroup,
+	savesOnLeave,
+	savingStateOf,
+	Toggle,
+	Warning,
+} from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { countCapProblem, countProgress } from "@/features/settings/settings.utils";
@@ -61,7 +70,7 @@ export function CountingSection({
 			/>
 
 			<Field label={t("settings.countingUpTo")} htmlFor="counting-cap">
-				<div className="flex flex-wrap items-center gap-2">
+				<div className="flex flex-wrap items-center gap-2" {...savesOnLeave(commit)}>
 					<input
 						id="counting-cap"
 						inputMode="numeric"
@@ -70,7 +79,6 @@ export function CountingSection({
 						onChange={(event) => {
 							setCap(event.target.value);
 						}}
-						onBlur={commit}
 						className={cn(FIELD, "max-w-40 tabular-nums", problem !== null && dirty && "border-destructive")}
 					/>
 					{dirty && problem === null && <Button onClick={commit}>{t("settings.countingSave")}</Button>}

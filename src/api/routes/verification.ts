@@ -8,6 +8,7 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { botName } from "@core/brand";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
+import { offerProblem } from "@lib/roles";
 import {
 	isReady,
 	normaliseVerify,
@@ -31,7 +32,8 @@ verification.patch("/", async (context) => {
 	// Refused before anything is read, so a request the caller may not make learns nothing about the stored config.
 	if (typeof patch.roleId === "string") {
 		demandPermission(context, PermissionFlagsBits.ManageRoles);
-		requireGrantable(context, [patch.roleId]);
+		// Whoever verifies is given it, so nothing that moderates, as a role menu refuses.
+		requireGrantable(context, [patch.roleId], offerProblem);
 	}
 	const before = await readVerificationConfig(guild);
 

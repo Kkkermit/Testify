@@ -19,7 +19,7 @@ function pressed(options: { values?: string[]; manager?: boolean } = {}) {
 	return {
 		guild: { id: "900000000000000001" },
 		user: { id: OWNER },
-		member: { permissions: { has: () => options.manager !== false } },
+		memberPermissions: { has: () => options.manager !== false },
 		values: options.values ?? [],
 		isMessageComponent: () => true,
 		isStringSelectMenu: () => options.values !== undefined,

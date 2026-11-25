@@ -1,12 +1,23 @@
 import { type ChannelSummary, type RoleSummary, VERIFY_LIMITS, verificationBlocked } from "@testify/shared";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChannelPicker, Field, FIELD, RowActions, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
+import { ErrorState } from "@/app/ErrorState";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	holdsFocus,
+	RowActions,
+	savingStateOf,
+	SELECT,
+	Toggle,
+	Warning,
+} from "@/components/form";
 import { Button } from "@/components/primitives";
 import { NeedsPermission } from "@/features/guild-overview/components/NeedsPermission";
 import { useLacks } from "@/features/guild-overview/useLacks";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveVerification, useVerification } from "@/features/settings/useVerification";
+import { useDraft } from "@/hooks/useDraft";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
@@ -23,15 +34,12 @@ export function VerificationSection({
 	const config = useVerification(guildId);
 	const save = useSaveVerification(guildId);
 	const mayGiveRoles = !useLacks(guildId)("ManageRoles");
-	const [draft, setDraft] = useState("");
-
-	useEffect(() => {
-		if (config.data !== undefined) setDraft(config.data.message);
-	}, [config.data?.message]);
+	const [draft = "", setDraft] = useDraft(config.data?.message);
 
 	const value = config.data;
 	const blocked = value === undefined ? null : verificationBlocked(value);
 	const dirty = value !== undefined && draft.trim() !== value.message;
+	const unsaved = dirty && draft.trim() !== "" ? { message: sanitiseInput(draft) } : {};
 
 	return (
 		<Section
@@ -40,7 +48,9 @@ export function VerificationSection({
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
-			{value === undefined ? (
+			{config.isError ? (
+				<ErrorState as="h2" error={config.error} onRetry={() => void config.refetch()} />
+			) : value === undefined ? (
 				<p className="text-muted-foreground text-sm">{t("settings.verifyReading")}</p>
 			) : (
 				<>
@@ -95,7 +105,7 @@ export function VerificationSection({
 								setDraft(event.target.value);
 							}}
 							onBlur={() => {
-								if (dirty && draft.trim() !== "") save.mutate({ message: sanitiseInput(draft) });
+								if ("message" in unsaved) save.mutate(unsaved);
 							}}
 							className={cn(FIELD, "resize-y")}
 						/>
@@ -111,8 +121,9 @@ export function VerificationSection({
 						<RowActions>
 							<Button
 								disabled={save.isPending}
+								onMouseDown={holdsFocus}
 								onClick={() => {
-									save.mutate({ publish: true });
+									save.mutate({ ...unsaved, publish: true });
 								}}
 							>
 								{value.posted ? t("settings.updatePanel") : t("settings.postPanel")}

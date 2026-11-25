@@ -61,7 +61,6 @@ import {
 	type ChannelKind,
 	changesQuery,
 	insightsQuery,
-	type InsightWindow,
 	READER_PERMISSIONS,
 	type ChannelSummary,
 	type GuildOverview,
@@ -243,7 +242,7 @@ guilds.get("/:guildId/changes", async (context) => {
 guilds.get("/:guildId/insights", async (context) => {
 	const { days } = parseQuery(context, insightsQuery);
 
-	return context.json(await readInsights(guildOf(context), days as InsightWindow, readerOf(context)));
+	return context.json(await readInsights(guildOf(context), days, readerOf(context)));
 });
 
 /** Moderation records are what `/case list` shows, so they ask what it asks. */

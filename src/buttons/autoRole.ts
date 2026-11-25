@@ -2,6 +2,7 @@ import { type Guild, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
+import { chooserProblem, offerProblem, splitOffer } from "@lib/roles";
 import { AUTOROLE_PANEL_ID, autoRolePanel, MAX_AUTO_ROLES, recordsSettings } from "@lib/settings";
 
 export function unusableRoles(guild: Guild, roleIds: readonly string[]): string[] {
@@ -43,9 +44,15 @@ export default recordsSettings(
 				case "roles": {
 					if (!interaction.isRoleSelectMenu()) return;
 
-					const roleIds = interaction.values.slice(0, MAX_AUTO_ROLES);
-					await setAutoRoles(guild.id, roleIds);
-					await show(roleIds);
+					const member = await guild.members.fetch(ownerId).catch(() => null);
+					if (member === null) throw new UserFacingError("I could not find you in this server.");
+
+					// Everybody who joins is given these, so nothing above the chooser and nothing that moderates.
+					const { kept, refused } = splitOffer(interaction.values.slice(0, MAX_AUTO_ROLES), (roleId) =>
+						chooserProblem(member, roleId, guild, offerProblem),
+					);
+					await setAutoRoles(guild.id, kept);
+					await show(kept, refused.length > 0 ? refused.join("\n") : undefined);
 					return;
 				}
 

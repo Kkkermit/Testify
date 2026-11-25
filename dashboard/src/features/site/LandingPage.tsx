@@ -42,7 +42,8 @@ export function LandingPage(): React.JSX.Element {
 	const features = FEATURES.filter((card) => card.feature === undefined || !featuresOff.has(card.feature));
 	const name = bot.data?.name ?? rememberedBotName() ?? "";
 	const invite = bot.data === undefined ? null : inviteUrl(bot.data.id);
-	const erased = (useLocation().state as { erased?: boolean } | null)?.erased === true;
+	const state: unknown = useLocation().state;
+	const erased = typeof state === "object" && state !== null && "erased" in state && state.erased === true;
 
 	return (
 		<div className="mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6">

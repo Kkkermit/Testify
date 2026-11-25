@@ -15,7 +15,7 @@ import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND, CASINO_STATS_SUBCOMMAND } f
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
-import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
+import { type CasinoGame, isAlwaysEnabled, isCasinoGame, type RefusalReason } from "@testify/shared";
 
 interface TitledRefusal {
 	title: string;
@@ -41,69 +41,86 @@ const cooldowns = new Map<string, number>();
 /** Deleting your own data is not something the blacklist takes away; the blacklist entry itself is never deleted. */
 const OPEN_TO_THE_BLACKLISTED: ReadonlySet<string> = new Set(["delete-my-data"]);
 
+export interface Refusal {
+	failure: string | TitledRefusal;
+	reason: RefusalReason;
+}
+
 export async function runChecks(
 	interaction: CommandInput,
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
+	return (await checkCommand(interaction, command, client))?.failure ?? null;
+}
+
+const refused = (reason: RefusalReason, failure: CheckFailure): Refusal | null =>
+	failure === null ? null : { failure, reason };
+
+export async function checkCommand(
+	interaction: CommandInput,
+	command: Command,
+	client: TestifyClient,
+): Promise<Refusal | null> {
 	const language = readerLanguage(interaction);
 
 	// First, so an attempt is recorded and refused whatever else would have stopped it.
 	if (command.ownerOnly === true && !client.isOwner(interaction.user.id)) {
 		await reportOwnerAttempt(client, interaction, command);
-		return say(language, "ownerOnly");
+		return refused("owner_only", say(language, "ownerOnly"));
 	}
 
-	if (client.paused) return pausedRefusal(language);
+	if (client.paused) return refused("paused", pausedRefusal(language));
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
 	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) {
-		return blacklistRefusal(blacklisted, await ownerNames(client), language);
+		return refused("blacklisted", blacklistRefusal(blacklisted, await ownerNames(client), language));
 	}
 
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId, language);
 	if (switchedOff !== null) return switchedOff;
 
-	const subcommand = chosenSubcommand(interaction, command);
+	const subcommand = subcommandRun(interaction, command);
 	if (subcommand === undefined) {
 		const names = subcommandsOf(command).map((sub) => `\`${sub.name}\``);
-		return say(language, "pickSubcommand", { subcommands: eitherOf(language, names) });
+		return refused("no_subcommand", say(language, "pickSubcommand", { subcommands: eitherOf(language, names) }));
 	}
 
 	const musicOff = await checkMusicSystem(interaction, command, subcommand);
-	if (musicOff !== null) return musicOff;
+	if (musicOff !== null) return refused("music", musicOff);
 
 	const casinoClosed = await checkCasino(interaction, command, subcommand);
-	if (casinoClosed !== null) return casinoClosed;
+	if (casinoClosed !== null) return refused("casino", casinoClosed);
 
 	if (command.guildOnly && !interaction.guild) {
-		return say(language, "guildOnly");
+		return refused("guild_only", say(language, "guildOnly"));
 	}
 
 	if (command.nsfw) {
 		const channel = interaction.channel;
 		const isNsfw = channel !== null && "nsfw" in channel && channel.nsfw;
-		if (!isNsfw) return say(language, "nsfwOnly");
+		if (!isNsfw) return refused("nsfw_only", say(language, "nsfwOnly"));
 	}
 
 	const member = interaction.member;
 	const needed = [...(command.permissions ?? []), ...(subcommand?.permissions ?? [])];
 
 	if (needed.length > 0 && member !== null) {
-		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
+		// The channel's overrides count, as they do in Discord, so a role's permission is not enough where it is taken away.
+		const missing = (interaction.memberPermissions ?? permissionsOf(member)).missing(new PermissionsBitField(needed));
 		if (missing.length > 0) {
-			return lacking(language, "youNeed", missing);
+			return refused("you_lack", lacking(language, "youNeed", missing));
 		}
 	}
 
 	if (command.botPermissions?.length && interaction.guild?.members.me) {
 		const missing = interaction.guild.members.me.permissions.missing(new PermissionsBitField(command.botPermissions));
 		if (missing.length > 0) {
-			return lacking(language, "iNeed", missing);
+			return refused("bot_lacks", lacking(language, "iNeed", missing));
 		}
 	}
 
-	return checkCooldown(interaction, command, client, language);
+	return refused("cooldown", checkCooldown(interaction, command, client, language));
 }
 
 function lacking(language: BotLanguage, who: "youNeed" | "iNeed", missing: string[]): string {
@@ -169,7 +186,7 @@ export async function checkOpenControl(
 	const blacklisted = await findBlacklistEntry(who.userId);
 	if (blacklisted) return blacklistRefusal(blacklisted, await ownerNames(client), language);
 
-	return checkSwitchedOff(command, who.guildId, language);
+	return (await checkSwitchedOff(command, who.guildId, language))?.failure ?? null;
 }
 
 /** The gates a right-click action and its form pass: those of its command, then its own permissions and the bot's. */
@@ -204,12 +221,7 @@ export async function checkMusicControl(
 	const refused = await checkOpenControl(client, who, "play");
 	if (refused !== null) return refused;
 
-	const settings = normaliseMusicSettings(await getMusicSettings(who.guildId));
-
-	return musicRefusal(settings, {
-		roleIds: roleIdsOf(who.member),
-		manager: who.member !== null && permissionsOf(who.member).has(PermissionFlagsBits.ManageGuild),
-	});
+	return musicGate(who.guildId, who.member);
 }
 
 export async function checkCasinoPlay(
@@ -224,25 +236,25 @@ export async function checkCasinoPlay(
 }
 
 /** Nobody bypasses a switch, the bot owner included. */
-async function checkSwitchedOff(name: string, guildId: string | null, language: BotLanguage): Promise<CheckFailure> {
+async function checkSwitchedOff(name: string, guildId: string | null, language: BotLanguage): Promise<Refusal | null> {
 	if (isAlwaysEnabled(name)) return null;
 
 	if ((await disabledGlobally()).includes(name)) {
-		return {
+		return refused("off_everywhere", {
 			title: `${theme.emoji.maintenance} ${say(language, "maintenanceTitle")}`,
 			message: say(language, "maintenance", { name }),
-		};
+		});
 	}
 
 	if (guildId !== null && (await disabledInGuild(guildId)).includes(name)) {
-		return say(language, "offHere");
+		return refused("off_here", say(language, "offHere"));
 	}
 
 	return null;
 }
 
 /** Which subcommand was used: null for a command without them, undefined for a prefix run that named none it has. */
-function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null | undefined {
+function subcommandRun(interaction: CommandInput, command: Command): Subcommand | null | undefined {
 	if (command.subcommands === undefined) return null;
 
 	let chosen: string | null;
@@ -272,26 +284,26 @@ function roleIdsOf(member: CommandInput["member"]): string[] {
 	return [...member.roles.cache.keys()];
 }
 
-/**
- * The music system's switch and DJ roles, gated here so no music command can forget them; `/music system` is the way
- * back in.
- */
+/** The music system's switch and DJ roles, which Manage Server always passes. */
+async function musicGate(guildId: string, member: CommandInput["member"]): Promise<CheckFailure> {
+	const settings = normaliseMusicSettings(await getMusicSettings(guildId));
+
+	return musicRefusal(settings, {
+		roleIds: roleIdsOf(member),
+		manager: member !== null && permissionsOf(member).has(PermissionFlagsBits.ManageGuild),
+	});
+}
+
+/** Gated here so no music command can forget it; `/music system` is the way back in. */
 async function checkMusicSystem(
 	interaction: CommandInput,
 	command: Command,
 	subcommand: Subcommand | null,
 ): Promise<CheckFailure> {
 	if (command.category !== "music" || interaction.guildId === null) return null;
-
 	if (subcommand?.name === MUSIC_SYSTEM_SUBCOMMAND) return null;
 
-	const settings = normaliseMusicSettings(await getMusicSettings(interaction.guildId));
-	const member = interaction.member;
-
-	return musicRefusal(settings, {
-		roleIds: roleIdsOf(member),
-		manager: member !== null && permissionsOf(member).has(PermissionFlagsBits.ManageGuild),
-	});
+	return musicGate(interaction.guildId, interaction.member);
 }
 
 /** The casino's switch and its per-game switches; settings and stats stay reachable while it is closed. */
@@ -334,7 +346,7 @@ function checkCooldown(
 	return null;
 }
 
-/** Used by the tests, and by `/reset` when clearing state. */
+/** Used by the tests. */
 export function clearCooldowns(): void {
 	cooldowns.clear();
 }

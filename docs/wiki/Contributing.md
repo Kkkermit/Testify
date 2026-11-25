@@ -32,15 +32,15 @@ that server only.
 
 ## Where things go
 
-| To change…             | Look in                                                                       |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| A command              | `src/commands/<category>/*.command.ts`: one file serves both slash and prefix |
-| A button, menu or form | `src/buttons/`, with its message drawn in `src/lib/<domain>/`                 |
-| What the bot says      | `src/config/strings.ts`, and `src/config/replies.ts` for the shared replies   |
-| A database query       | `src/database/repositories/`: commands never use a model directly             |
-| A dashboard screen     | `dashboard/src/features/<name>/`, with its API route in `src/api/routes/`     |
-| A help article         | `assets/support/*.md`                                                         |
-| Configuration          | `src/config/env.ts`, both `.env*.example` files and `scripts/setupEnv.ts`     |
+| To change…             | Look in                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| A command              | `src/commands/<category>/*.command.ts`: one file serves both slash and prefix   |
+| A button, menu or form | `src/buttons/`, with its message drawn in `src/lib/<domain>/`                   |
+| What the bot says      | `src/config/strings.ts`, and `src/config/replies.ts` for the shared replies     |
+| A database query       | `src/database/repositories/`: commands never use a model directly               |
+| A dashboard screen     | `dashboard/src/features/<name>/`, with its API route in `src/api/routes/`       |
+| A help article         | `assets/support/*.md`                                                           |
+| Configuration          | `src/config/env.ts`, both `.env*.example` files and `scripts/setupQuestions.ts` |
 
 [The codebase](https://testify.lol/docs/codebase) walks through the layout, and
 [Adding a command](https://testify.lol/docs/adding-a-command) shows a whole command.

@@ -2,6 +2,9 @@ import { z } from "zod";
 
 export const snowflake = z.string().regex(/^\d{17,20}$/, "must be a Discord ID");
 
+/** A command's or subcommand's name as Discord allows one. */
+export const COMMAND_NAME = /^[\w-]{1,32}$/;
+
 /** Long enough that a URL carrying one cannot be used to push megabytes through a redirect. */
 const MAX_RETURN_TO = 512;
 

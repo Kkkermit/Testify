@@ -65,13 +65,14 @@ function appeal(overrides: Partial<StoredAppeal> = {}): StoredAppeal {
 	};
 }
 
-function world(options: { banned?: boolean; sendFails?: boolean; dashboard?: boolean } = {}) {
+function world(options: { banned?: boolean; sendFails?: boolean; dashboard?: boolean; editFails?: boolean } = {}) {
+	const post = { edit: jest.fn(() => Promise.reject(new Error("50013"))) };
 	const channel = {
 		id: CHANNEL,
 		isSendable: () => true,
 		isTextBased: () => true,
 		send: jest.fn(() => (options.sendFails === true ? Promise.reject(new Error("no")) : Promise.resolve({ id: "5" }))),
-		messages: { fetch: jest.fn(() => Promise.resolve(null)) },
+		messages: { fetch: jest.fn(() => Promise.resolve(options.editFails === true ? post : null)) },
 	};
 	const guild = {
 		id: GUILD,
@@ -89,7 +90,7 @@ function world(options: { banned?: boolean; sendFails?: boolean; dashboard?: boo
 		featuresOff: new Set(),
 		guilds: { cache: new Map([[GUILD, guild]]) },
 		users: { fetch: jest.fn(() => Promise.resolve({ send })) },
-		logger: { debug: jest.fn() },
+		logger: { debug: jest.fn(), warn: jest.fn() },
 	};
 
 	return { client: client as never, guild: guild as never, channel, send };
@@ -152,6 +153,18 @@ describe("decideOnAppeal", () => {
 		await expect(decideOnAppeal(client, guild, appeal().id, ACCEPT, MOD)).rejects.toThrow(/Ban Members/);
 		expect(reopenAppeal).toHaveBeenCalledWith(GUILD, appeal().id);
 		expect(send).not.toHaveBeenCalled();
+	});
+
+	/** The unban had already happened, so a post Discord would not let the bot edit must not turn it into a failure. */
+	it("still tells the person when the staff post can no longer be edited", async () => {
+		const { client, guild, send } = world({ editFails: true });
+		decided.mockResolvedValue(appeal({ status: "accepted", messageId: "5" }));
+
+		await expect(decideOnAppeal(client, guild, appeal().id, ACCEPT, MOD)).resolves.toMatchObject({
+			status: "accepted",
+		});
+		expect(unban).toHaveBeenCalled();
+		expect(send).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining("accepted") }));
 	});
 
 	it("refuses a second decision without touching the ban", async () => {

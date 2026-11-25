@@ -80,10 +80,6 @@ export function addStep(steps: readonly WarnStep[]): WarnStep[] {
 	return steps.length >= WARN_LIMITS.maxSteps ? [...steps] : [...steps, { action: "warn" }];
 }
 
-export function pageCountOf(total: number, perPage: number): number {
-	return Math.max(1, Math.ceil(total / perPage));
-}
-
 export function warningsSummary({ steps, expireAfterDays }: WarnLadder, t: TFunction): string {
 	const last = steps.at(-1);
 	const ladder =

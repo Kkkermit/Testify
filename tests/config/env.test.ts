@@ -11,7 +11,7 @@ const VALID = {
 
 function setEnv(values: Record<string, string | undefined>): void {
 	for (const key of Object.keys(process.env)) {
-		const owned = ["DISCORD_", "CHANNEL_", "DASHBOARD_"].some((prefix) => key.startsWith(prefix));
+		const owned = ["DISCORD_", "CHANNEL_", "DASHBOARD_", "SHARDLENS_"].some((prefix) => key.startsWith(prefix));
 		if (owned || key === "MONGODB_URI") delete process.env[key];
 	}
 	for (const [key, value] of Object.entries(values)) {
@@ -171,6 +171,44 @@ describe("the dashboard settings", () => {
 		});
 
 		expect(loadEnv().DASHBOARD_ENABLED).toBe(true);
+	});
+});
+
+describe("the Shardlens settings", () => {
+	const original = { ...process.env };
+	const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
+
+	afterEach(() => {
+		process.env = { ...original };
+		resetEnv();
+	});
+
+	it("is off with nothing set", () => {
+		setEnv(VALID);
+
+		expect(loadEnv().SHARDLENS_URL).toBeUndefined();
+	});
+
+	/** The SDK checks its own settings and warns, so nothing about Shardlens may stop the bot starting. */
+	it("starts with any Shardlens settings, however wrong, alone or together", () => {
+		const read = "slk_read_abcdefghijklmnopqrstuvwxyz0123456789";
+		const cases = [
+			{ SHARDLENS_URL: "http://stats.example.com" },
+			{ SHARDLENS_URL: "not an address", SHARDLENS_INGEST_KEY: read },
+			{ SHARDLENS_INGEST_KEY: "wrong" },
+			{ SHARDLENS_READ_KEY: read },
+			{ SHARDLENS_ACTIVITY_KEY: "slk_read_not_an_activity_key" },
+		];
+
+		for (const settings of cases) {
+			setEnv({ ...VALID, ...settings });
+			expect(() => loadEnv()).not.toThrow();
+		}
+	});
+
+	it("accepts a complete configuration", () => {
+		setEnv({ ...VALID, SHARDLENS_URL: "https://stats.example.com", SHARDLENS_INGEST_KEY: KEY });
+		expect(loadEnv().SHARDLENS_INGEST_KEY).toBe(KEY);
 	});
 });
 

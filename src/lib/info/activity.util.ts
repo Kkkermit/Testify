@@ -1,5 +1,4 @@
-import { type ActivityBatch } from "@database/repositories/insightsRepository";
-import { dayKey } from "@database/repositories/usageRepository";
+import { type ActivityBatch, dayKey } from "@database/repositories/insightsRepository";
 
 /** Message counts held in memory and written in one batch, so a busy server costs no write per message. */
 export class ActivityCounter {

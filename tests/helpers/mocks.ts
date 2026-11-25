@@ -9,15 +9,15 @@ import {
 	type TextChannel,
 	type User,
 } from "discord.js";
-import { type TestifyClient } from "@core/client";
+import { settingsTarget, type TestifyClient } from "@core/client";
 import { createLogger } from "@core/logger";
 
 /** Mock factories, one per surface, with every method already stubbed. */
 
-/** Applies overrides so that an explicit `null`, `0` or `false` wins. */
 /** `User`, `Role` and `GuildMember` type `toString()` as a template literal, which an object literal cannot satisfy. */
 export type Overrides<T> = Partial<Omit<T, "toString" | "valueOf">>;
 
+/** Applies overrides so that an explicit `null`, `0` or `false` wins. */
 function merge<T extends object>(defaults: T, overrides: Overrides<T> = {}): T {
 	const result = { ...defaults };
 
@@ -148,7 +148,7 @@ export function createMockGuild(overrides: Overrides<Guild> = {}): Guild {
 }
 
 export function createMockClient(overrides: Overrides<TestifyClient> = {}): TestifyClient {
-	return merge(
+	const client = merge(
 		{
 			commands: new Collection(),
 			aliases: new Collection(),
@@ -158,6 +158,7 @@ export function createMockClient(overrides: Overrides<TestifyClient> = {}): Test
 			logger: createLogger("fatal", false),
 			env: { DISCORD_OWNER_IDS: [OWNER_ID], DISABLED_FEATURES: [] },
 			featuresOff: new Set(),
+			shardlens: null,
 			isOwner: jest.fn((id: string) => id === OWNER_ID),
 			user: {
 				id: BOT_ID,
@@ -178,6 +179,7 @@ export function createMockClient(overrides: Overrides<TestifyClient> = {}): Test
 		} as unknown as TestifyClient,
 		overrides,
 	);
+	return "lensTarget" in overrides ? client : Object.assign(client, { lensTarget: settingsTarget(client.env) });
 }
 
 /** What the option getters should answer, keyed by option name. */

@@ -181,6 +181,25 @@ describe("a switched-off feature", () => {
 		);
 	});
 
+	/** Discord counts the refused command as answered, so the refusal is counted apart with why. */
+	it("counts a command whose feature is off as refused for that reason", async () => {
+		const track = jest.fn();
+		const interaction = { ...arriving("command", "play"), guildId: "900000000000000001" };
+
+		await interactionCreate.run(
+			{ ...client(), shardlens: { track } } as unknown as TestifyClient,
+			interaction as unknown as Interaction,
+		);
+
+		expect(track.mock.calls).toEqual([
+			[
+				"command_refused",
+				{ command: "play", reason: "feature_off", surface: "slash" },
+				{ guildId: "900000000000000001" },
+			],
+		]);
+	});
+
 	it("still says nothing to a button no feature owns", async () => {
 		const interaction = arriving("button", "nobody:press");
 
@@ -188,4 +207,44 @@ describe("a switched-off feature", () => {
 
 		expect(interaction.reply).not.toHaveBeenCalled();
 	});
+});
+
+function pressOwnerPanel(customId: string): { run: jest.Mock; reply: jest.Mock; done: Promise<void> } {
+	const run = jest.fn();
+	const reply = jest.fn(() => Promise.resolve());
+	const client = { buttons: new Collection([["panel", { id: "panel", ownerOnly: true, run }]]), logger };
+	const press = {
+		isAutocomplete: () => false,
+		isChatInputCommand: () => false,
+		isContextMenuCommand: () => false,
+		isMessageComponent: () => true,
+		isModalSubmit: () => false,
+		customId,
+		user: { id: "300000000000000003" },
+		locale: "de",
+		reply,
+	};
+	const done = Promise.resolve(
+		interactionCreate.run(client as unknown as TestifyClient, press as unknown as Interaction),
+	);
+	return { run, reply, done };
+}
+
+/** The router compares the last argument, so somebody else's press never reaches the handler, and is told why. */
+it("refuses a press on somebody else's panel, privately and in the presser's language", async () => {
+	const { run, reply, done } = pressOwnerPanel("panel:open:200000000000000002");
+	await done;
+
+	const [answer] = reply.mock.calls[0] as unknown as [{ embeds: { data: { description?: string } }[]; flags: number }];
+	expect(run).not.toHaveBeenCalled();
+	expect(answer.flags).toBe(64);
+	expect(answer.embeds[0]?.data.description).toContain("Nur wer den Befehl ausgeführt hat");
+});
+
+/** A custom ID that named nobody skipped the comparison, so anybody could press a panel built without its owner. */
+it("refuses everybody a press on an owner's panel whose custom ID names nobody", async () => {
+	const { run, done } = pressOwnerPanel("panel:open");
+	await done;
+
+	expect(run).not.toHaveBeenCalled();
 });

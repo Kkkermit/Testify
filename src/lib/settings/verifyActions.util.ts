@@ -1,7 +1,9 @@
-import { ButtonStyle, type Guild } from "discord.js";
+import { ButtonStyle, type Guild, PermissionFlagsBits } from "discord.js";
+import { type BotLanguage } from "@config/languages";
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
 import { UserFacingError } from "@core/errors";
+import { requirePostable } from "@lib/discord/channels.util";
 import { button, row } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
 import { type VerifyConfig } from "@lib/settings/settings.types";
@@ -20,13 +22,19 @@ export function roleTooHigh(guild: Guild, roleId: string | null): boolean {
 }
 
 /** Posts the public panel, or edits the one already there, and answers with the message it left behind. */
-export async function publishVerifyPanel(guild: Guild, config: VerifyConfig): Promise<string> {
+export async function publishVerifyPanel(
+	guild: Guild,
+	config: VerifyConfig,
+	language: BotLanguage = "en",
+): Promise<string> {
 	if (config.channelId === null) throw new UserFacingError("Pick a channel first.");
 
 	const channel = await guild.channels.fetch(config.channelId).catch(() => null);
-	if (channel?.isSendable() !== true) {
+	if (channel?.isSendable() !== true || !channel.isTextBased()) {
 		throw new UserFacingError("I cannot post in that channel any more. Pick another one.");
 	}
+	// Access can be taken away after the channel was picked, and Discord would refuse the post with "Missing Access".
+	requirePostable(channel, language, [PermissionFlagsBits.EmbedLinks]);
 
 	const icon = guild.iconURL();
 	const payload = {

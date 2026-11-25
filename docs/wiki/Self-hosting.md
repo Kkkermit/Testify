@@ -98,6 +98,13 @@ Music needs **FFmpeg** and **yt-dlp**. The Docker image includes both. Outside D
 yt-dlp and tells you whether FFmpeg is installed. YouTube changes often, so keep yt-dlp up to date; `/music status`
 says which version the bot is using.
 
+## Analytics
+
+The owner console's **Usage** tab reads its figures from [Shardlens](https://github.com/Kkkermit/Shardlens), which is
+off until you switch it on. `SHARDLENS_MONGODB=true` runs it inside the bot, on its own MongoDB, with nothing else to
+set up; [the analytics guide](https://github.com/Kkkermit/Testify/blob/main/docs/analytics.md) has that, a collector of
+your own for a bigger bot, and both on Railway.
+
 ## Where to host it
 
 Anywhere that runs a long-lived process: a VPS, a Raspberry Pi, Railway, Fly.io, Render, or a machine at home.

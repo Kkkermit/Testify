@@ -1,8 +1,8 @@
 import { RefreshCw, TriangleAlert } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useRouteError } from "react-router";
-import { claimAutoReload, classifyRouteError, errorDetails, reloadPage, sessionStore } from "@/app/routeError.utils";
+import { classifyRouteError, errorDetails, reloadPage } from "@/app/routeError.utils";
+import { useStaleReload } from "@/app/useStaleReload";
 import { Button, Card, Disclosure, EmptyState, PageHeader, PublicPage, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { NotFoundContent } from "@/features/not-found/NotFoundPage";
@@ -14,15 +14,7 @@ const SHOW_DETAILS = typeof __DEV_ERRORS__ === "boolean" && __DEV_ERRORS__;
 export function RouteError({ standalone = false }: { standalone?: boolean }): React.JSX.Element {
 	const error = useRouteError();
 	const failure = classifyRouteError(error);
-	const [reloading, setReloading] = useState(failure === "stale");
-	const decided = useRef(false);
-
-	useEffect(() => {
-		if (failure !== "stale" || decided.current) return;
-		decided.current = true;
-		if (claimAutoReload(sessionStore())) reloadPage();
-		else setReloading(false);
-	}, [failure]);
+	const reloading = useStaleReload(failure);
 
 	const content = reloading ? (
 		<Skeleton className="h-64 w-full" />

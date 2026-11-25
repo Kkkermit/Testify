@@ -1,11 +1,12 @@
 import { type MessageComponentInteraction, type ModalSubmitInteraction } from "discord.js";
+import { LIMITS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 
 export type ComponentInteraction = MessageComponentInteraction | ModalSubmitInteraction;
 
 export interface Button {
 	id: string;
-	/** When true, only the user whose ID is the last argument may use it. */
+	/** When true, only the user whose ID is the last argument may use it, and a custom ID naming nobody admits nobody. */
 	ownerOnly?: boolean;
 	run(interaction: ComponentInteraction, context: ButtonContext): Promise<void>;
 }
@@ -30,7 +31,9 @@ export function customId(id: string, action: string, ...args: (string | number)[
 	}
 
 	const built = parts.join(SEPARATOR);
-	if (built.length > 100) throw new Error(`Custom ID is too long (${built.length}/100): ${built}`);
+	if (built.length > LIMITS.customIdLength) {
+		throw new Error(`Custom ID is too long (${String(built.length)}/${String(LIMITS.customIdLength)}): ${built}`);
+	}
 
 	return built;
 }

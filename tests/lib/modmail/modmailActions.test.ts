@@ -7,6 +7,7 @@ import {
 	modmailGuildIds,
 	noteMessage,
 	openConversationOf,
+	saveModmailSettings,
 	type StoredConversation,
 } from "@database/repositories/modmailRepository";
 import {
@@ -254,8 +255,23 @@ describe("applyModmailSettings", () => {
 		const { guild } = world();
 		settings.mockResolvedValue(null);
 
-		await expect(applyModmailSettings(guild, { pingRoleId: GUILD }, "1")).rejects.toThrow(/everybody/);
-		await expect(applyModmailSettings(guild, { enabled: true }, "1")).rejects.toThrow(/Pick a channel/);
+		await expect(applyModmailSettings(guild, { pingRoleId: GUILD }, "1", true)).rejects.toThrow(/everybody/);
+		await expect(applyModmailSettings(guild, { enabled: true }, "1", true)).rejects.toThrow(/Pick a channel/);
+	});
+});
+
+describe("a ping role members cannot ping", () => {
+	/** Manage Server alone could otherwise have every new conversation ping a role nobody is allowed to ping. */
+	it("is chosen only by somebody with Mention Everyone, unless it already is the one", async () => {
+		const { guild } = world();
+		settings.mockResolvedValue(null);
+
+		await expect(applyModmailSettings(guild, { pingRoleId: ROLE }, "1", false)).rejects.toThrow(/Mention Everyone/);
+		await applyModmailSettings(guild, { pingRoleId: ROLE }, "1", true);
+		settings.mockResolvedValue({ guildId: GUILD, enabled: false, channelId: null, pingRoleId: ROLE } as never);
+		await applyModmailSettings(guild, { pingRoleId: ROLE }, "1", false);
+
+		expect(saveModmailSettings).toHaveBeenCalledTimes(2);
 	});
 });
 

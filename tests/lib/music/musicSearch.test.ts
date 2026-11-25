@@ -33,8 +33,10 @@ function track(overrides: Partial<Track> = {}): Track {
 }
 
 describe("choiceFor", () => {
-	it("shows the title, the artist and the length", () => {
+	it("shows the title, the artist and the length, saying live for a stream and leaving out a missing artist", () => {
 		expect(choiceFor(track())).toEqual({ name: "A Song · An Artist (3:07)", value: "https://youtu.be/dQw4w9WgXcQ" });
+		expect(choiceFor(track({ durationMs: null }))?.name).toContain("live");
+		expect(choiceFor(track({ author: null }))?.name).toBe("A Song (3:07)");
 	});
 
 	/** Discord refuses the whole response if any name is over 100, so one long title must not lose the lot. */
@@ -47,14 +49,6 @@ describe("choiceFor", () => {
 	/** A track whose address will not fit is dropped rather than offered truncated. */
 	it("drops a track whose address will not fit", () => {
 		expect(choiceFor(track({ url: `https://example.com/${"x".repeat(CHOICE_MAX)}` }))).toBeNull();
-	});
-
-	it("says live rather than printing a wrong length", () => {
-		expect(choiceFor(track({ durationMs: null }))?.name).toContain("live");
-	});
-
-	it("omits the artist when there is not one", () => {
-		expect(choiceFor(track({ author: null }))?.name).toBe("A Song (3:07)");
 	});
 });
 
@@ -86,11 +80,8 @@ describe("literalChoice", () => {
 });
 
 describe("shouldSearch", () => {
-	it.each(["", " ", "a", "ab", "  ab  "])("does not search for %p", (query) => {
-		expect(shouldSearch(query)).toBe(false);
-	});
-
-	it("searches once there is enough to go on", () => {
+	it("searches only once there is enough to go on", () => {
+		expect(["", " ", "a", "ab", "  ab  "].filter((query) => shouldSearch(query))).toEqual([]);
 		expect(shouldSearch("abc")).toBe(true);
 	});
 });
@@ -98,11 +89,12 @@ describe("shouldSearch", () => {
 describe("SearchCache", () => {
 	const choices = [{ name: "A Song", value: "https://youtu.be/a" }];
 
-	it("answers a repeated query without another lookup", () => {
+	it("answers a repeated query without another lookup, and misses one it has never seen", () => {
 		const cache = new SearchCache();
 		cache.set("lofi", choices, 0);
 
 		expect(cache.get("lofi", 100)).toEqual(choices);
+		expect(cache.get("nothing", 100)).toBeNull();
 	});
 
 	/** Autocomplete fires per keystroke, and case or spacing changes must not miss a warm entry. */
@@ -118,10 +110,6 @@ describe("SearchCache", () => {
 		cache.set("lofi", choices, 0);
 
 		expect(cache.get("lofi", 5_000)).toBeNull();
-	});
-
-	it("misses a query it has never seen", () => {
-		expect(new SearchCache().get("nothing")).toBeNull();
 	});
 
 	/** Unbounded, this would grow for as long as the process lives — the same leak the rate limiter avoids. */
@@ -148,13 +136,10 @@ describe("SearchCache", () => {
 });
 
 describe("within", () => {
-	it("hands back the answer when it arrives in time", async () => {
-		await expect(within(Promise.resolve("done"), 200)).resolves.toBe("done");
-	});
-
-	it("gives up rather than waiting for a slow answer", async () => {
+	it("hands back an answer that arrives in time, and gives up rather than wait for a slow one", async () => {
 		const slow = new Promise((resolve) => setTimeout(() => resolve("late"), 200));
 
+		await expect(within(Promise.resolve("done"), 200)).resolves.toBe("done");
 		await expect(within(slow, 20)).resolves.toBeNull();
 	});
 });
@@ -285,11 +270,8 @@ describe("the interaction's own clock", () => {
 		expect(interactionAge(CREATED, CREATED + 1_500, CREATED + 2_000)).toBe(2_000);
 	});
 
-	it("leaves room for the answer to travel", () => {
+	it("leaves room for the answer to travel, and gives a search nothing once the window has gone", () => {
 		expect(searchBudget(0)).toBe(INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS);
-	});
-
-	it("gives a search nothing at all once the window is nearly gone", () => {
 		expect(searchBudget(INTERACTION_WINDOW_MS)).toBe(0);
 	});
 

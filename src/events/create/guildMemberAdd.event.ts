@@ -8,6 +8,7 @@ import { countMove } from "@lib/info";
 import { trackJoin } from "@lib/invites";
 import { writeAuditLog } from "@lib/moderation";
 import { guardJoin } from "@lib/raid";
+import { isPowerful } from "@lib/roles";
 import { syncVoiceCounters } from "@lib/settings";
 import { greetingFor, normaliseWelcome } from "@lib/welcome";
 
@@ -33,14 +34,24 @@ export default defineEvent({
 		const autoRoles = await getAutoRoles(member.guild.id);
 		if (autoRoles && autoRoles.roleIds.length > 0) {
 			await Promise.all(
-				autoRoles.roleIds.map((roleId) =>
-					member.roles.add(roleId, "Auto-role").catch((error: unknown) => {
+				autoRoles.roleIds.map(async (roleId) => {
+					// Everybody who joins is given these, so a role given moderation powers since it was chosen is held back.
+					const role = member.guild.roles.cache.get(roleId);
+					if (role !== undefined && isPowerful(role)) {
+						client.logger.warn(
+							{ roleId, guildId: member.guild.id },
+							"[AUTO_ROLE] Did not give a role on join, because it now carries moderation or admin permissions. Choose another with /auto-role.",
+						);
+						return;
+					}
+
+					await member.roles.add(roleId, "Auto-role").catch((error: unknown) => {
 						client.logger.warn(
 							{ err: toError(error), roleId, guildId: member.guild.id },
 							"[AUTO_ROLE] Could not give a role on join. Check the role sits below the bot's highest role.",
 						);
-					}),
-				),
+					});
+				}),
 			);
 		}
 

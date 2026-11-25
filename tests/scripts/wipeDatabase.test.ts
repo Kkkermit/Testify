@@ -82,12 +82,12 @@ describe("loadModelOwners", () => {
 	const dir = join(__dirname, "../../src/database/models");
 
 	/** A model the picker cannot name would show up as "no model", and look safe to wipe as leftovers. */
-	it("finds every model declared in the schema files", async () => {
+	it("finds every model declared in the schema files", () => {
 		const declared = readdirSync(dir)
 			.filter((file) => file.endsWith(".schema.ts"))
 			.reduce((sum, file) => sum + (readFileSync(join(dir, file), "utf8").match(/= model</g) ?? []).length, 0);
 
-		const owners = await loadModelOwners(dir);
+		const owners = loadModelOwners(dir);
 
 		expect(owners.size).toBe(declared);
 		expect(owners.get("warntutorials")).toEqual({ name: "Warnings", file: "moderation.schema.ts" });
@@ -106,5 +106,16 @@ describe("collectionTitle", () => {
 		expect(collectionTitle("oldthings", 1, undefined)).toBe(
 			"oldthings · no model, left by an older version · 1 document",
 		);
+	});
+
+	/** Neither has a model of the bot's, and both are still read, so neither is something an older version left. */
+	it("names Shardlens's own collections and the counts from before it", () => {
+		expect([
+			collectionTitle("shardlens_interactions", 30, undefined),
+			collectionTitle("commandusages", 2, undefined),
+		]).toEqual([
+			"Shardlens analytics · shardlens_interactions · 30 documents",
+			"Usage from before Shardlens · commandusages, read until it expires · 2 documents",
+		]);
 	});
 });

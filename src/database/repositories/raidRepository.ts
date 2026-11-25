@@ -1,5 +1,5 @@
-import { CACHE } from "@config/constants";
 import { RaidSettingsConfig, type RaidSettingsRecord } from "@database/models/raid.schema";
+import { ReadCache } from "@database/readCache.util";
 
 export type StoredRaidSettings = Pick<
 	RaidSettingsRecord,
@@ -13,16 +13,12 @@ export type RaidSettingsOnDisk = Partial<Pick<RaidSettingsRecord, "minAccountAge
 const FIELDS = "enabled alertChannelId pingRoleId minAccountAgeMinutes minAccountAgeDays spikeJoins spikeMinutes";
 
 /** Asked on every join, and a raid is when joins come fastest, so the answer is cached and replaced on every write. */
-const cache = new Map<string, { settings: RaidSettingsOnDisk | null; expiresAt: number }>();
+const cache = new ReadCache<RaidSettingsOnDisk | null>();
 
 export async function getRaidSettings(guildId: string): Promise<RaidSettingsOnDisk | null> {
-	const cached = cache.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.settings;
-
-	const settings = await RaidSettingsConfig.findOne({ guildId }).select(FIELDS).lean<RaidSettingsOnDisk>().exec();
-	if (cache.size > CACHE.guildSettingsMaxEntries) cache.clear();
-	cache.set(guildId, { settings, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-	return settings;
+	return cache.read(guildId, () =>
+		RaidSettingsConfig.findOne({ guildId }).select(FIELDS).lean<RaidSettingsOnDisk>().exec(),
+	);
 }
 
 export async function saveRaidSettings(
@@ -42,13 +38,13 @@ export async function saveRaidSettings(
 			.lean<RaidSettingsOnDisk>()
 			.exec();
 	} finally {
-		cache.delete(guildId);
+		cache.forget(guildId);
 	}
 }
 
 export async function purgeRaidSettings(guildId: string): Promise<void> {
 	await RaidSettingsConfig.deleteMany({ guildId }).exec();
-	cache.delete(guildId);
+	cache.forget(guildId);
 }
 
 export function clearRaidCache(): void {

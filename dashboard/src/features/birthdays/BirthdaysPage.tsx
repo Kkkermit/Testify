@@ -1,6 +1,5 @@
 import { BIRTHDAY_LIMITS, BIRTHDAY_PLACEHOLDERS } from "@testify/shared";
 import { Cake } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -22,6 +21,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { SendTest } from "@/features/test-post/SendTest";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
+import { useDraft } from "@/hooks/useDraft";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { channelLabel } from "@/lib/channels";
 import { monthName } from "@/lib/datetime";
@@ -37,11 +37,7 @@ export function BirthdaysPage(): React.JSX.Element {
 
 	usePageTitle(t("birthdays.title"), overview.data?.name);
 
-	const [draft, setDraft] = useState("");
-
-	useEffect(() => {
-		if (config.data !== undefined) setDraft(config.data.message);
-	}, [config.data?.message]);
+	const [draft = "", setDraft] = useDraft(config.data?.message);
 
 	if (config.isPending) return <Skeleton className="h-96 w-full" />;
 	if (config.isError) return <ErrorState error={config.error} onRetry={() => void config.refetch()} />;
@@ -93,9 +89,7 @@ export function BirthdaysPage(): React.JSX.Element {
 					max={BIRTHDAY_LIMITS.maxMessage}
 					tokens={BIRTHDAY_PLACEHOLDERS}
 					onDraft={setDraft}
-					onSave={(message) => {
-						update.mutate({ message });
-					}}
+					onSave={(message) => update.mutateAsync({ message })}
 				>
 					<GreetingPreview
 						message={draft}

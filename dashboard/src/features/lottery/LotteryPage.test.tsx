@@ -43,6 +43,59 @@ describe("the lottery page", () => {
 		});
 	});
 
+	/** Freezing answers with the whole lottery, which once put the changes being made back to what was saved. */
+	it("keeps unsaved changes when the lottery is frozen", async () => {
+		const user = userEvent.setup();
+		let stored = lotterySettings;
+		server.use(
+			http.get(`/api/guilds/${GUILD}/lottery`, () => HttpResponse.json(stored)),
+			http.patch(`/api/guilds/${GUILD}/lottery`, () => {
+				stored = { ...stored, frozen: true };
+				return HttpResponse.json(stored);
+			}),
+		);
+		renderPage();
+
+		const winners = await screen.findByLabelText(/winners a draw/i);
+		await user.clear(winners);
+		await user.type(winners, "3");
+		await user.click(screen.getByRole("button", { name: /^freeze$/i }));
+
+		expect(await screen.findByRole("button", { name: /unfreeze/i })).toBeInTheDocument();
+		expect(screen.getByLabelText(/winners a draw/i)).toHaveValue(3);
+	});
+
+	/** Ending a lottery puts its settings back, which once revived the change already saved as if it were unsaved. */
+	it("shows what ending the lottery left, not a change saved before it", async () => {
+		const user = userEvent.setup();
+		let stored = lotterySettings;
+		server.use(
+			http.get(`/api/guilds/${GUILD}/lottery`, () => HttpResponse.json(stored)),
+			http.patch(`/api/guilds/${GUILD}/lottery`, async ({ request }) => {
+				stored = { ...stored, ...((await request.json()) as Partial<typeof lotterySettings>) };
+				return HttpResponse.json(stored);
+			}),
+			http.delete(`/api/guilds/${GUILD}/lottery`, () => {
+				stored = { ...lotterySettings, enabled: false };
+				return HttpResponse.json(stored);
+			}),
+		);
+		renderPage();
+
+		const winners = await screen.findByLabelText(/winners a draw/i);
+		await user.clear(winners);
+		await user.type(winners, "3");
+		await user.click(screen.getByRole("button", { name: /save changes/i }));
+		await waitFor(() => {
+			expect(stored.maxWinners).toBe(3);
+		});
+		await user.click(screen.getByRole("button", { name: /end it/i }));
+		await user.click(screen.getByRole("button", { name: /yes, end it/i }));
+
+		expect(await screen.findByRole("button", { name: /start the lottery/i })).toBeInTheDocument();
+		expect(screen.getByLabelText(/winners a draw/i)).toHaveValue(lotterySettings.maxWinners);
+	});
+
 	/** A server with no lottery yet is creating one, and "Save changes" would not say that. */
 	it("offers to start one when none is running", async () => {
 		serve({ enabled: false, announcementChannelId: null, prizePool: 0, ticketsSold: 0, entrants: 0 });

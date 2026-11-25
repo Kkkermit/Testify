@@ -7,6 +7,7 @@ import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptio
 import { readerLanguage, say } from "@core/language";
 import { triageRow } from "@lib/bot/errorTriage.util";
 import { logAuthor, loggedOptionsText, loggedUser, loggedUserText, placeFields } from "@lib/bot/logFields.util";
+import { measured } from "@lib/bot/shardlens.util";
 import { embed } from "@lib/discord/embeds.util";
 
 /** Anything the bot can answer privately: a command on either surface, a button or form, a right-click action. */
@@ -40,9 +41,17 @@ export class SetupError extends Error {
 	}
 }
 
+/** Never throws itself, since it runs inside the handlers that catch everything else. */
 export function toError(value: unknown): Error {
 	if (value instanceof Error) return value;
-	return new Error(typeof value === "string" ? value : JSON.stringify(value));
+	if (typeof value !== "object" || value === null) return new Error(String(value));
+
+	try {
+		return new Error(JSON.stringify(value));
+	} catch {
+		// A cycle or a BigInt inside it, which JSON cannot write.
+		return new Error(Object.prototype.toString.call(value));
+	}
 }
 
 function failureEmbed(message: string, title?: string): EmbedBuilder {
@@ -61,6 +70,8 @@ interface RunOutcome {
 	ok: boolean;
 	/** Set only for an unexpected failure, which is the one kind written to the log with a reference. */
 	reference: string | null;
+	/** What the command threw, undefined when it finished. */
+	error: unknown;
 }
 
 /** Runs a command so the user always gets an answer, and says whether it finished cleanly. */
@@ -70,11 +81,11 @@ export async function runCommand(
 	client: TestifyClient,
 ): Promise<RunOutcome> {
 	try {
-		await dispatch(interaction, command, client);
-		return { ok: true, reference: null };
+		await measured(client, interaction, () => dispatch(interaction, command, client));
+		return { ok: true, reference: null, error: undefined };
 	} catch (error) {
 		const reference = await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
-		return { ok: false, reference };
+		return { ok: false, reference, error };
 	}
 }
 
@@ -85,7 +96,7 @@ export async function runButton(
 	label: string,
 ): Promise<void> {
 	try {
-		await handler();
+		await measured(client, interaction, handler);
 	} catch (error) {
 		await reportFailure(interaction, error, client, label, null);
 	}

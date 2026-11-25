@@ -59,17 +59,16 @@ import {
 import {
 	blacklistRows,
 	botControl,
-	commandRuns,
 	guildDetail,
 	guildUsage,
 	logFeed,
 	logRuns,
 	PAST_RUN,
 	pastLogFeed,
-	memberUsage,
 	runResult,
 	runnable,
 	runtimeInfo,
+	shardlensStatus,
 	usageReport,
 } from "@/test/fixtures/owner";
 import {
@@ -99,6 +98,20 @@ import {
 	me,
 } from "@/test/fixtures/session";
 import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fixtures/site";
+import {
+	activity,
+	audience,
+	collectorSetup,
+	commandReport,
+	funnel,
+	growth,
+	liveRead,
+	panels,
+	reliability,
+	retention,
+	runsPage,
+	topRunners,
+} from "@/test/fixtures/usageSections";
 
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
@@ -267,13 +280,19 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
+	http.get("/api/analytics/audience", () => HttpResponse.json(audience)),
+	http.get("/api/analytics/growth", () => HttpResponse.json(growth)),
+	http.get("/api/analytics/panels", () => HttpResponse.json(panels)),
+	http.get("/api/analytics/activity", () => HttpResponse.json(activity)),
+	http.get("/api/analytics/reliability", () => HttpResponse.json(reliability)),
+	http.get("/api/analytics/setup", () => HttpResponse.json(collectorSetup)),
+	http.get("/api/analytics/commands/:name", () => HttpResponse.json(commandReport)),
+	http.get("/api/analytics/funnel", () => HttpResponse.json(funnel)),
+	http.get("/api/analytics/retention", () => HttpResponse.json(retention)),
+	http.get("/api/analytics/live", () => HttpResponse.json(liveRead)),
+	http.post("/api/analytics/runs", () => HttpResponse.json(runsPage)),
+	http.get("/api/analytics/runs/top", () => HttpResponse.json(topRunners)),
 	http.get("/api/analytics/guilds/:guildId", () => HttpResponse.json(guildUsage)),
-	http.get("/api/analytics/guilds/:guildId/members", () =>
-		HttpResponse.json({ items: memberUsage, total: memberUsage.length, page: 1, perPage: 25 }),
-	),
-	http.get("/api/analytics/guilds/:guildId/runs", () =>
-		HttpResponse.json({ items: commandRuns, total: commandRuns.length, page: 1, perPage: 25 }),
-	),
 	http.get("/api/analytics/logs", ({ request }) =>
 		HttpResponse.json(new URL(request.url).searchParams.get("run") === PAST_RUN ? pastLogFeed : logFeed),
 	),
@@ -282,6 +301,10 @@ export const handlers = [
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 	http.get("/api/control", () => HttpResponse.json(botControl)),
 	http.get("/api/control/music", () => HttpResponse.json({ sources: "both", configured: false })),
+	http.get("/api/control/shardlens", () => HttpResponse.json(shardlensStatus)),
+	http.post("/api/control/shardlens/send", () =>
+		HttpResponse.json({ sent: 3, problem: null, status: { ...shardlensStatus, queued: 0 } }),
+	),
 	http.get("/api/control/guilds/:guildId", () => HttpResponse.json(guildDetail)),
 	http.get("/api/owner/access", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/owner/stats", () =>
@@ -294,7 +317,9 @@ export const handlers = [
 			database: "connected",
 		}),
 	),
-	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
+	http.get("/api/owner/guilds", () =>
+		HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25, analytics: null }),
+	),
 	http.get("/api/owner/blacklist", () => HttpResponse.json(blacklistRows)),
 	http.get("/api/owner/notices", () => HttpResponse.json([musicNotice])),
 	http.post("/api/owner/notices", () => HttpResponse.json(musicNotice, { status: 201 })),

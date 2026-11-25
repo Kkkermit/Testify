@@ -1,10 +1,14 @@
-import { gitHubAdvice } from "@api/routes/site";
+import { Hono } from "hono";
+import { type ApiBindings } from "@api/context";
+import { gitHubAdvice, siteRoutes } from "@api/routes/site";
 import { createApi } from "@api/server";
 import { type Env } from "@config/env";
 import { INSTANCE_DEFAULTS, useInstance } from "@config/instance";
 import { ServiceError } from "@core/errors";
-import { fetchJson } from "@lib/infra/http.util";
+import { fetchJson, fetchRaw } from "@lib/infra/http.util";
+import { type GitHubReader, SiteProblem } from "@lib/site/github.util";
 import { type ApiErrorBody, type SiteInfo } from "@testify/shared";
+import { answerLikeTheApp } from "@tests/helpers/apiHarness";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
@@ -107,6 +111,28 @@ describe("the source browser's routes", () => {
 			expect(response.status).toBe(400);
 		}
 		expect(fetchJson).not.toHaveBeenCalled();
+	});
+
+	/** Each file not already held is fetched from GitHub, so one address may not spend the hour's budget for everybody. */
+	it("limits how fast one address reads files, and says when the hour's files are spent", async () => {
+		github(repo());
+		jest.mocked(fetchRaw).mockResolvedValue({ text: () => Promise.resolve("# Hello") } as Response);
+		const app = api(false);
+
+		const statuses: number[] = [];
+		for (let index = 0; index < 61; index += 1) {
+			statuses.push((await app.request("/api/site/file?path=README.md")).status);
+		}
+
+		const spent = new Hono<ApiBindings>().route(
+			"/",
+			siteRoutes({ signedIn: false, file: () => Promise.reject(new SiteProblem("busy")) } as unknown as GitHubReader),
+		);
+		answerLikeTheApp(spent);
+
+		expect(statuses.filter((status) => status === 200)).toHaveLength(60);
+		expect(statuses.at(-1)).toBe(429);
+		expect(await error(await spent.request("/file?path=README.md"))).toEqual({ status: 503, code: "source_busy" });
 	});
 
 	/** GitHub having a bad hour is a retry for the reader, never a 500 logged as the bot's bug. */

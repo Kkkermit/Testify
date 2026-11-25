@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { applyBirthdaySettings, BIRTHDAY_PANEL_ID, birthdaySettingsPanel, readBirthdayOverview } from "@lib/birthdays";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import { BIRTHDAY_LIMITS, sanitiseText } from "@testify/shared";
 
@@ -62,9 +62,8 @@ export default recordsSettings(
 				return;
 			}
 
-			if (interaction.isModalSubmit() && !interaction.isFromMessage()) return;
 			const overview = await readBirthdayOverview(guild);
-			await interaction.update(birthdaySettingsPanel(overview, overview.shared, ownerId, note));
+			await redrawPanel(interaction, birthdaySettingsPanel(overview, overview.shared, ownerId, note));
 		},
 	}),
 );

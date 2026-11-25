@@ -1,73 +1,87 @@
 import { type CommandSummary, matchesSearch } from "@testify/shared";
+import { type TranslationKey } from "@/i18n";
 
-const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: string }> = {
-	levelling: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
-	rank: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
-	leaderboard: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Leaderboards" },
-	welcome: { path: (guildId) => `/guilds/${guildId}/welcome`, screen: "Welcome" },
-	birthday: { path: (guildId) => `/guilds/${guildId}/birthdays`, screen: "Birthdays" },
-	"audit-logging": { path: (guildId) => `/guilds/${guildId}/audit-log`, screen: "Audit logging" },
-	prefix: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
-	"anti-link": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
-	"auto-role": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
-	counting: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
-	"voice-stats": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
-	verify: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
-	"sticky-message": { path: (guildId) => `/guilds/${guildId}/sticky`, screen: "Sticky messages" },
-	"auto-responder": { path: (guildId) => `/guilds/${guildId}/auto-responders`, screen: "Auto-responders" },
-	schedule: { path: (guildId) => `/guilds/${guildId}/scheduled-messages`, screen: "Scheduled messages" },
-	appeals: { path: (guildId) => `/guilds/${guildId}/appeals`, screen: "Ban appeals" },
-	modmail: { path: (guildId) => `/guilds/${guildId}/modmail`, screen: "Mod mail" },
-	invites: { path: (guildId) => `/guilds/${guildId}/invites`, screen: "Invites" },
-	economy: { path: (guildId) => `/guilds/${guildId}/economy`, screen: "Economy" },
-	idea: { path: (guildId) => `/guilds/${guildId}/ideas`, screen: "Idea board" },
-	starboard: { path: (guildId) => `/guilds/${guildId}/starboard`, screen: "Starboard" },
-	"temp-voice": { path: (guildId) => `/guilds/${guildId}/temp-voice`, screen: "Join to create" },
-	"role-menu": { path: (guildId) => `/guilds/${guildId}/role-menus`, screen: "Role menus" },
-	automod: { path: (guildId) => `/guilds/${guildId}/automod`, screen: "AutoMod" },
-	treasure: { path: (guildId) => `/guilds/${guildId}/treasure`, screen: "Treasure drops" },
-	music: { path: (guildId) => `/guilds/${guildId}/music`, screen: "Music system" },
-	casino: { path: (guildId) => `/guilds/${guildId}/casino`, screen: "Casino" },
-	ticket: { path: (guildId) => `/guilds/${guildId}/tickets`, screen: "Tickets" },
-	lottery: { path: (guildId) => `/guilds/${guildId}/lottery`, screen: "Lottery" },
-	giveaway: { path: (guildId) => `/guilds/${guildId}/giveaways`, screen: "Giveaways" },
-	"bot-stats-channel": { path: (guildId) => `/guilds/${guildId}/bot-stats`, screen: "Bot statistics" },
-	warn: { path: (guildId) => `/guilds/${guildId}/warnings`, screen: "Warnings" },
-	case: { path: (guildId) => `/guilds/${guildId}/cases`, screen: "Moderation cases" },
-	"raid-protection": { path: (guildId) => `/guilds/${guildId}/raid-protection`, screen: "Raid protection" },
-	kick: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	ban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	softban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	mute: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	unmute: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	nickname: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	role: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	give: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
-	unban: { path: (guildId) => `/guilds/${guildId}/bans`, screen: "Bans" },
-	lock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
-	unlock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
-	slowmode: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
-	announce: { path: (guildId) => `/guilds/${guildId}/announcements`, screen: "Announcements" },
-	say: { path: (guildId) => `/guilds/${guildId}/announcements`, screen: "Announcements" },
-	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
-	"bot-notifications": { path: () => "/notifications", screen: "Notifications" },
-	"delete-my-data": { path: () => "/account?tab=data", screen: "Your account" },
-	profile: { path: () => "/account?tab=profile", screen: "Your account" },
-	remind: { path: () => "/account?tab=reminders", screen: "Your account" },
-	blacklist: { path: () => "/owner?tab=blacklist", screen: "Owner console" },
-	"guild-list": { path: () => "/owner?tab=overview", screen: "Owner console" },
+interface Screen {
+	path: (guildId: string) => string;
+	labelKey: TranslationKey;
+}
+
+const inServer = (screen: string, labelKey: TranslationKey): Screen => ({
+	path: (guildId) => `/guilds/${guildId}/${screen}`,
+	labelKey,
+});
+
+const anywhere = (path: string, labelKey: TranslationKey): Screen => ({ path: () => path, labelKey });
+
+/** Every command with a screen of its own here, named as that screen's title names it. */
+const CONFIGURABLE: Record<string, Screen> = {
+	levelling: inServer("levelling", "levelling.title"),
+	rank: inServer("levelling", "levelling.title"),
+	leaderboard: inServer("members", "directory.tabBoards"),
+	welcome: inServer("welcome", "welcome.title"),
+	birthday: inServer("birthdays", "birthdays.title"),
+	"audit-logging": inServer("audit-log", "auditLog.title"),
+	prefix: inServer("settings", "settings.title"),
+	"anti-link": inServer("settings", "settings.title"),
+	"auto-role": inServer("settings", "settings.title"),
+	counting: inServer("settings", "settings.title"),
+	"voice-stats": inServer("settings", "settings.title"),
+	verify: inServer("settings", "settings.title"),
+	"sticky-message": inServer("sticky", "sticky.title"),
+	"auto-responder": inServer("auto-responders", "autoResponders.title"),
+	schedule: inServer("scheduled-messages", "scheduled.title"),
+	appeals: inServer("appeals", "appeals.title"),
+	modmail: inServer("modmail", "modmail.title"),
+	invites: inServer("invites", "invites.title"),
+	economy: inServer("economy", "economy.title"),
+	idea: inServer("ideas", "ideas.title"),
+	starboard: inServer("starboard", "starboard.title"),
+	"temp-voice": inServer("temp-voice", "tempVoice.title"),
+	"role-menu": inServer("role-menus", "roleMenus.title"),
+	automod: inServer("automod", "automod.title"),
+	treasure: inServer("treasure", "treasure.title"),
+	music: inServer("music", "music.title"),
+	casino: inServer("casino", "casino.title"),
+	ticket: inServer("tickets", "tickets.title"),
+	lottery: inServer("lottery", "lottery.title"),
+	giveaway: inServer("giveaways", "giveaways.title"),
+	"bot-stats-channel": inServer("bot-stats", "botStats.title"),
+	warn: inServer("warnings", "warnings.title"),
+	case: inServer("cases", "cases.title"),
+	"raid-protection": inServer("raid-protection", "raid.title"),
+	kick: inServer("members", "members.title"),
+	ban: inServer("members", "members.title"),
+	softban: inServer("members", "members.title"),
+	mute: inServer("members", "members.title"),
+	unmute: inServer("members", "members.title"),
+	nickname: inServer("members", "members.title"),
+	role: inServer("members", "members.title"),
+	give: inServer("members", "members.title"),
+	unban: inServer("bans", "bans.title"),
+	lock: inServer("channel-tools", "channelTools.title"),
+	unlock: inServer("channel-tools", "channelTools.title"),
+	slowmode: inServer("channel-tools", "channelTools.title"),
+	announce: inServer("announcements", "announcements.title"),
+	say: inServer("announcements", "announcements.title"),
+	"member-count": inServer("member-count", "memberCount.title"),
+	"bot-notifications": anywhere("/notifications", "notices.title"),
+	"delete-my-data": anywhere("/account?tab=data", "account.title"),
+	profile: anywhere("/account?tab=profile", "account.title"),
+	remind: anywhere("/account?tab=reminders", "account.title"),
+	blacklist: anywhere("/owner?tab=blacklist", "owner.title"),
+	"guild-list": anywhere("/owner?tab=overview", "owner.title"),
 };
 
 export interface CommandPlace {
 	path: string;
-	screen: string;
+	labelKey: TranslationKey;
 }
 
 export function configurableAt(command: CommandSummary, guildId: string | null): CommandPlace | null {
 	const entry = CONFIGURABLE[command.name];
 	if (entry === undefined || guildId === null) return null;
 
-	return { path: entry.path(guildId), screen: entry.screen };
+	return { path: entry.path(guildId), labelKey: entry.labelKey };
 }
 
 function isConfigurable(command: CommandSummary): boolean {

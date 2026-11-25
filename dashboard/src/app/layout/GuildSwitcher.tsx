@@ -1,6 +1,6 @@
 import { type ManageableGuild } from "@testify/shared";
 import { ChevronsUpDown, LayoutGrid } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router";
 import { switchableGuilds, switchedPath } from "@/app/layout/guildSwitch.utils";
@@ -26,14 +26,12 @@ export function GuildSwitcher({
 	const location = useLocation();
 	const listId = useId();
 	const buttonRef = useRef<HTMLButtonElement>(null);
-	const [open, setOpen] = useState(false);
+	// Held as the page it was opened on, so choosing a server, or any other link, shuts it.
+	const [openOn, setOpenOn] = useState<string | null>(null);
+	const open = openOn === location.pathname;
 	const others = switchableGuilds(guilds, guild.id);
 	const iconUrl = guilds.find((candidate) => candidate.id === guild.id)?.iconUrl ?? null;
 	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
-
-	useEffect(() => {
-		setOpen(false);
-	}, [location.pathname]);
 
 	return (
 		<div
@@ -41,7 +39,7 @@ export function GuildSwitcher({
 				if (event.key !== "Escape" || !open) return;
 				// The drawer closes on Escape too, and this press is only for the list.
 				event.stopPropagation();
-				setOpen(false);
+				setOpenOn(null);
 				buttonRef.current?.focus();
 			}}
 		>
@@ -53,7 +51,7 @@ export function GuildSwitcher({
 					aria-controls={listId}
 					aria-label={t("nav.switchServer", { name: guild.name })}
 					onClick={() => {
-						setOpen((was) => !was);
+						setOpenOn(open ? null : location.pathname);
 					}}
 					className={cn(ROW, "hover:bg-card/60 w-full text-left transition-colors duration-150")}
 				>

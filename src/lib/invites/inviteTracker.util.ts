@@ -2,6 +2,7 @@ import { type Guild, type GuildMember, type Invite, PermissionFlagsBits } from "
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { getInviteSettings, markLeft, recordJoin, standingOf } from "@database/repositories/inviteRepository";
+import { formatNumber } from "@lib/format/format.util";
 import { type InviteSnapshot, usedInvite } from "@testify/shared";
 
 /** Which invite brought each member, told apart by comparing every invite's use count before and after a join. */
@@ -126,7 +127,7 @@ async function postJoin(
 	else if (inviterId === null) line += ", but I could not tell which invite they used.";
 	else {
 		const { joins, left } = await standingOf(guild.id, inviterId);
-		line += ` with <@${inviterId}>'s invite \`${how.code ?? ""}\`, which has brought ${String(joins)} (${String(joins - left)} still here).`;
+		line += ` with <@${inviterId}>'s invite \`${how.code ?? ""}\`, which has brought ${formatNumber(joins)} (${formatNumber(joins - left)} still here).`;
 	}
 
 	await channel.send({ content: line, allowedMentions: { parse: [] } }).catch(() => undefined);

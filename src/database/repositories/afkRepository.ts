@@ -1,20 +1,16 @@
-import { CACHE } from "@config/constants";
 import { AfkStatus, type AfkRecord } from "@database/models/afk.schema";
+import { ReadCache } from "@database/readCache.util";
 
 export type StoredAfk = Pick<AfkRecord, "userId" | "note" | "updatedAt">;
 
-/** Who is away in each server, asked on every message, so it is cached and kept in step with every write. */
-const away = new Map<string, { userIds: Set<string>; expiresAt: number }>();
+/** Who is away in each server, asked on every message, so it is cached and forgotten on every write. */
+const away = new ReadCache<ReadonlySet<string>>();
 
-async function awayIn(guildId: string): Promise<Set<string>> {
-	const cached = away.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.userIds;
-
-	const rows = await AfkStatus.find({ guildId }, { userId: 1 }).lean<Pick<AfkRecord, "userId">[]>().exec();
-	if (away.size > CACHE.guildSettingsMaxEntries) away.clear();
-	const userIds = new Set(rows.map((row) => row.userId));
-	away.set(guildId, { userIds, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-	return userIds;
+async function awayIn(guildId: string): Promise<ReadonlySet<string>> {
+	return away.read(guildId, async () => {
+		const rows = await AfkStatus.find({ guildId }, { userId: 1 }).lean<Pick<AfkRecord, "userId">[]>().exec();
+		return new Set(rows.map((row) => row.userId));
+	});
 }
 
 function toAfk(row: AfkRecord): StoredAfk {
@@ -30,7 +26,7 @@ export async function setAfk(guildId: string, userId: string, note: string): Pro
 		.lean<AfkRecord>()
 		.exec();
 
-	(await awayIn(guildId)).add(userId);
+	away.forget(guildId);
 	return toAfk(row);
 }
 
@@ -53,7 +49,7 @@ export async function clearAfk(guildId: string, userId: string): Promise<StoredA
 	if (!set.has(userId)) return null;
 
 	const row = await AfkStatus.findOneAndDelete({ guildId, userId }).lean<AfkRecord>().exec();
-	set.delete(userId);
+	away.forget(guildId);
 	return row === null ? null : toAfk(row);
 }
 
@@ -63,6 +59,6 @@ export function clearAfkCache(): void {
 }
 
 export async function purgeAfk(guildId: string): Promise<void> {
-	away.delete(guildId);
 	await AfkStatus.deleteMany({ guildId }).exec();
+	away.forget(guildId);
 }

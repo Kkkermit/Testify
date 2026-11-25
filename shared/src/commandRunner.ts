@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { snowflake } from "./schemas";
+import { COMMAND_NAME, snowflake } from "./schemas";
 
 /** Running an owner command from the browser; embed-based owner commands only, never the panel commands. */
 
@@ -17,7 +17,7 @@ export type RunOutput =
 			fields: { name: string; value: string; inline: boolean }[];
 			footer: string | null;
 	  }
-	/** Something that only works inside Discord. Named rather than silently dropped. */
+	/** Something that only works inside Discord, named rather than silently dropped. */
 	| { kind: "dropped"; what: DroppedOutput };
 
 export interface CommandRunResult {
@@ -34,10 +34,7 @@ const argValue = z.union([z.string().max(RUN_LIMITS.maxStringArg), z.number(), z
 export const commandRunRequest = z.object({
 	/** Required by a `guildOnly` command, ignored by the rest. */
 	guildId: snowflake.nullish(),
-	subcommand: z
-		.string()
-		.regex(/^[\w-]{1,32}$/, "is not a subcommand name")
-		.nullish(),
+	subcommand: z.string().regex(COMMAND_NAME, "is not a subcommand name").nullish(),
 	args: z.record(z.string(), argValue).refine((args) => Object.keys(args).length <= RUN_LIMITS.maxArgs, {
 		message: `cannot carry more than ${String(RUN_LIMITS.maxArgs)} arguments`,
 	}),
@@ -46,5 +43,5 @@ export const commandRunRequest = z.object({
 export type CommandRunRequest = z.infer<typeof commandRunRequest>;
 
 export const commandNameParam = z.object({
-	name: z.string().regex(/^[\w-]{1,32}$/, "is not a command name"),
+	name: z.string().regex(COMMAND_NAME, "is not a command name"),
 });

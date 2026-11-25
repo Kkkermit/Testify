@@ -21,7 +21,7 @@ loadEverything(client);
 
 const names = [
 	...readFileSync(resolve(DASHBOARD, "features/commands/commands.utils.ts"), "utf8").matchAll(
-		/^\t"?([a-z-]+)"?: \{ path: \((?:guildId)?\) =>/gm,
+		/^\t"?([a-z-]+)"?: (?:inServer|anywhere)\(/gm,
 	),
 ].map(([, name = ""]) => name);
 

@@ -1,7 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
+import { LIMITS } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
+import { MAX_PICTURE_SIDE, safeToDecode } from "@lib/canvas";
 import { reply, successEmbed } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import { checkBackground, goodbyePanel, greetingFor, normaliseWelcome, readGoodbye, welcomePanel } from "@lib/welcome";
@@ -52,13 +54,29 @@ export default recordsSettings(
 
 					await interaction.deferReply();
 
-					const response = await fetch(file.url).catch(() => null);
-					if (!response?.ok) throw new UserFacingError("I could not download that image. Try uploading it again.");
+					const failed = new UserFacingError("I could not download that image. Try uploading it again.");
+					const response = await fetch(file.url, { signal: AbortSignal.timeout(LIMITS.externalApiTimeoutMs) }).catch(
+						() => null,
+					);
+					if (!response?.ok) throw failed;
+
+					// The timeout runs on while the body arrives, so a download cut off there is refused the same way.
+					const data = Buffer.from(
+						await response.arrayBuffer().catch(() => {
+							throw failed;
+						}),
+					);
+
+					if (!safeToDecode(data)) {
+						throw new UserFacingError(
+							`Use a PNG, JPG or WebP no more than ${String(MAX_PICTURE_SIDE)} pixels wide or high.`,
+						);
+					}
 
 					// Stored as bytes, because Discord's signed attachment URLs expire within hours.
 					await saveWelcome(guild.id, {
 						background: {
-							data: Buffer.from(await response.arrayBuffer()),
+							data,
 							contentType: file.contentType ?? "image/png",
 							name: file.name,
 						},

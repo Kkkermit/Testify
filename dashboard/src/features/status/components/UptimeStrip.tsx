@@ -1,8 +1,9 @@
 import { type StatusDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
+import { ChartReadout } from "@/components/primitives";
 import { dayFill, percent } from "@/features/status/status.utils";
 import { cn } from "@/lib/cn";
-import { shortDate } from "@/lib/datetime";
+import { calendarDate } from "@/lib/datetime";
 
 export function UptimeStrip({ days }: { days: StatusDay[] }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -11,18 +12,18 @@ export function UptimeStrip({ days }: { days: StatusDay[] }): React.JSX.Element 
 
 	return (
 		<figure className="flex flex-col gap-2">
-			<div className="flex h-10 items-stretch gap-px" aria-hidden="true">
+			<ChartReadout label={t("status.perDay")} column slide className="flex h-10 items-stretch gap-px">
 				{days.map((day) => (
 					<span
 						key={day.day}
-						title={`${shortDate(day.day)}: ${label(day)}`}
+						data-readout={`${calendarDate(day.day)}: ${label(day)}`}
 						className={cn("rounded-chip min-w-0 flex-1 opacity-80 hover:opacity-100", dayFill(day.uptime))}
 					/>
 				))}
-			</div>
+			</ChartReadout>
 
 			<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
-				<span>{shortDate(days[0]?.day ?? "")}</span>
+				<span>{calendarDate(days[0]?.day ?? "")}</span>
 				<span>{t("status.today")}</span>
 			</div>
 
@@ -38,7 +39,7 @@ export function UptimeStrip({ days }: { days: StatusDay[] }): React.JSX.Element 
 					<tbody>
 						{days.map((day) => (
 							<tr key={day.day}>
-								<th scope="row">{shortDate(day.day)}</th>
+								<th scope="row">{calendarDate(day.day)}</th>
 								<td>{label(day)}</td>
 							</tr>
 						))}

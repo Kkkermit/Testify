@@ -107,6 +107,18 @@ describe("the source browser", () => {
 		expect(await screen.findByText(/the code is private/i)).toBeInTheDocument();
 	});
 
+	/** "GitHub did not answer" was wrong when it was the bot holding back, and told the reader to retry at once. */
+	it("says to wait a few minutes when the hour's files are spent, rather than that GitHub failed", async () => {
+		server.use(
+			http.get("/api/site/file", () =>
+				HttpResponse.json({ error: { code: "source_busy", message: "x" } }, { status: 503 }),
+			),
+		);
+		open("/source-code/src/core/loader.ts");
+
+		expect(await screen.findByText(/try again in a few minutes/i, {}, { timeout: 5_000 })).toBeInTheDocument();
+	});
+
 	it("passes axe on a file", async () => {
 		const { container } = open("/source-code/src/core/loader.ts");
 

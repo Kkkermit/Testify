@@ -23,7 +23,6 @@ function toMenu(row: Lean): StoredRoleMenu {
 	};
 }
 
-/** Every lookup is scoped to the server as well as the id, so one server can never reach another's menu. */
 export async function listRoleMenus(guildId: string): Promise<StoredRoleMenu[]> {
 	const rows = await RoleMenu.find({ guildId }).sort({ createdAt: 1 }).lean<Lean[]>().exec();
 	return rows.map(toMenu);

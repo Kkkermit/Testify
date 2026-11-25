@@ -1,3 +1,4 @@
+import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
 import { postBotStats, removeBotStats } from "@lib/info/botStatsActions.util";
@@ -18,11 +19,17 @@ const stored = jest.mocked(getFixedStats);
 const saved = jest.mocked(setFixedStats);
 const cleared = jest.mocked(removeFixedStats);
 
-function textChannel(id: string, sendable = true) {
+const CAN_POST = [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks];
+
+function textChannel(id: string, sendable = true, granted: bigint[] = CAN_POST) {
 	return {
 		id,
 		isTextBased: () => true,
 		isSendable: () => sendable,
+		isThread: () => false,
+		toString: () => `<#${id}>`,
+		guild: { members: { me: {} } },
+		permissionsFor: () => new PermissionsBitField(granted),
 		send: jest.fn(() => Promise.resolve({ id: "new-message" })),
 		messages: { delete: jest.fn(() => Promise.resolve()) },
 	};
@@ -75,10 +82,15 @@ describe("postBotStats", () => {
 		expect(saved).not.toHaveBeenCalled();
 	});
 
-	it("refuses a channel the bot cannot send in", async () => {
-		const { client, guild } = world({ [NEW_CHANNEL]: textChannel(NEW_CHANNEL, false) });
+	/** A channel the bot cannot see passed the type check, and Discord refused the post as "Missing Access". */
+	it("refuses a channel the bot cannot send in, naming what it lacks", async () => {
+		const unsendable = world({ [NEW_CHANNEL]: textChannel(NEW_CHANNEL, false) });
+		const unseen = textChannel(NEW_CHANNEL, true, []);
+		const hidden = world({ [NEW_CHANNEL]: unseen });
 
-		await expect(postBotStats(client, guild, NEW_CHANNEL, USER)).rejects.toThrow(/send messages/);
+		await expect(postBotStats(unsendable.client, unsendable.guild, NEW_CHANNEL, USER)).rejects.toThrow(/send messages/);
+		await expect(postBotStats(hidden.client, hidden.guild, NEW_CHANNEL, USER)).rejects.toThrow(/view channel/i);
+		expect(unseen.send).not.toHaveBeenCalled();
 	});
 });
 

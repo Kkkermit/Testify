@@ -8,7 +8,7 @@ import { requireGuild } from "@api/middleware/session";
 import { directory } from "@api/routes/memberDirectory";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail } from "@lib/economy";
-import { problemText } from "@lib/format";
+import { formatNumber, problemText } from "@lib/format";
 import {
 	banUser,
 	blockText,
@@ -170,7 +170,7 @@ members.patch("/:userId/money", requirePermission(PermissionFlagsBits.Administra
 	await changeMoney(guildOf(context).id, member.id, purse, delta);
 	await auditChange(context, {
 		action: "member.money",
-		summary: `${delta > 0 ? "Added" : "Took"} ${Math.abs(delta).toLocaleString()} ${delta > 0 ? "to" : "from"} ${current.username}'s ${purse}`,
+		summary: `${delta > 0 ? "Added" : "Took"} ${formatNumber(Math.abs(delta))} ${delta > 0 ? "to" : "from"} ${current.username}'s ${purse}`,
 		before: { [purse]: held },
 	});
 

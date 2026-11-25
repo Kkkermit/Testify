@@ -7,8 +7,8 @@ import { FIELD } from "@/components/form/fieldStyles";
 import { Card, CARD_HEADING, DividedList, Pager, Skeleton } from "@/components/primitives";
 import { WarningRow } from "@/features/warnings/components/WarningRow";
 import { useEditWarning, useGuildWarnings, useRemoveWarning } from "@/features/warnings/useWarnings";
-import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
+import { pageCount } from "@/lib/paging";
 import { currentData } from "@/lib/queries";
 
 export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.Element | null {
@@ -88,7 +88,7 @@ export function WarningsListCard({ guildId }: { guildId: string }): React.JSX.El
 				</DividedList>
 			)}
 
-			{searching && <Pager page={list.data.page} pages={pageCountOf(total, perPage)} onChange={setPage} />}
+			{searching && <Pager page={list.data.page} pages={pageCount(total, perPage)} onChange={setPage} />}
 		</Card>
 	);
 }

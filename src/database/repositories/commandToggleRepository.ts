@@ -1,32 +1,18 @@
-import { CACHE } from "@config/constants";
 import { CommandToggleConfig, type CommandToggles } from "@database/models/commandToggles.schema";
+import { ReadCache } from "@database/readCache.util";
 
-/** Which commands are switched off; cached like the prefix, and each write clears the entry it touched. */
+/** Which commands are switched off; cached like the prefix, and each write replaces the entry it touched. */
 
 /** The bot-wide row's key. A Discord id is 17-20 digits, so this cannot collide with a real guild. */
 export const GLOBAL_SCOPE = "GLOBAL";
 
-const cache = new Map<string, { disabled: string[]; expiresAt: number }>();
-
-function remember(scope: string, disabled: string[]): string[] {
-	if (cache.size > CACHE.guildSettingsMaxEntries) cache.clear();
-	cache.set(scope, { disabled, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-
-	return disabled;
-}
-
-function clearCommandToggleCache(scope?: string): void {
-	if (scope === undefined) cache.clear();
-	else cache.delete(scope);
-}
+const cache = new ReadCache<string[]>();
 
 async function read(scope: string): Promise<string[]> {
-	const cached = cache.get(scope);
-	if (cached && cached.expiresAt > Date.now()) return cached.disabled;
-
-	const record = await CommandToggleConfig.findOne({ guildId: scope }).lean<CommandToggles>().exec();
-
-	return remember(scope, record?.disabled ?? []);
+	return cache.read(scope, async () => {
+		const record = await CommandToggleConfig.findOne({ guildId: scope }).lean<CommandToggles>().exec();
+		return record?.disabled ?? [];
+	});
 }
 
 export async function disabledGlobally(): Promise<string[]> {
@@ -47,10 +33,10 @@ export async function setDisabled(scope: string, disabled: string[], updatedBy: 
 		{ upsert: true, new: true, lean: true, setDefaultsOnInsert: true },
 	).exec();
 
-	return remember(scope, unique);
+	return cache.set(scope, unique);
 }
 
 export async function purgeCommandToggles(guildId: string): Promise<void> {
-	clearCommandToggleCache(guildId);
 	await CommandToggleConfig.deleteMany({ guildId }).exec();
+	cache.forget(guildId);
 }

@@ -5,6 +5,7 @@ dist
 **/dist
 coverage
 **/coverage
+shardlens-data
 
 # The image is configured through the environment and reads no .env at all. The one template kept is what the
 # website's configuration page is drawn from, and it reaches only the build stage.

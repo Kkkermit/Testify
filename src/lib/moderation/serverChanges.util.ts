@@ -1,4 +1,5 @@
 import { AuditLogEvent, type Guild, PermissionFlagsBits } from "discord.js";
+import { DAY_MS, MINUTE_MS } from "@config/constants";
 import { type DashboardAudit } from "@database/models/dashboardAudit.schema";
 import { type AuditAudience, auditsSince } from "@database/repositories/dashboardAuditRepository";
 import {
@@ -14,9 +15,8 @@ import {
 
 /** One list of a server's changes, from the dashboard's own records and from Discord's audit log. */
 
-const DAY_MS = 24 * 60 * 60_000;
 /** Reading fourteen days of a busy audit log is five requests, so one read serves every search for a minute. */
-const DISCORD_CACHE_MS = 60_000;
+const DISCORD_CACHE_MS = MINUTE_MS;
 const PAGE_SIZE = 100;
 
 /** The parts of a discord.js audit entry this module reads, so a test needs no Discord objects to build one. */

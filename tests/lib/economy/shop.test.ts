@@ -8,15 +8,14 @@ describe("the economy catalogues", () => {
 		JOBS,
 	} as const;
 
-	it.each(Object.entries(catalogues))("%s has unique ids", (_name, items) => {
-		expect(new Set(items.map((item) => item.id)).size).toBe(items.length);
-	});
+	it("gives every entry in every catalogue its own id, a name and an emoji", () => {
+		const faulty = Object.entries(catalogues).filter(
+			([, items]) =>
+				new Set(items.map((item) => item.id)).size !== items.length ||
+				items.some((item) => item.name === "" || item.emoji === ""),
+		);
 
-	it.each(Object.entries(catalogues))("%s gives every entry a name and an emoji", (_name, items) => {
-		for (const item of items) {
-			expect(item.name.length).toBeGreaterThan(0);
-			expect(item.emoji.length).toBeGreaterThan(0);
-		}
+		expect(faulty.map(([name]) => name)).toEqual([]);
 	});
 
 	/** No job requires an item nobody can buy. */

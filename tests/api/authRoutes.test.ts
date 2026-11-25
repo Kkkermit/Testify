@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { answerLikeTheApp } from "../helpers/apiHarness";
 import { type ApiBindings } from "@api/context";
 import type * as discord from "@api/discord";
-import { exchangeCode, fetchGuilds } from "@api/discord";
+import { exchangeCode, fetchGuilds, refreshTokens } from "@api/discord";
 import { UpstreamProblem } from "@api/errors";
 import { guildLists } from "@api/guildCache";
 import { oauthConfigFrom } from "@api/oauth";
@@ -12,7 +12,12 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { accessFor } from "@database/repositories/dashboardAccessRepository";
-import { createSession, deleteSession, deleteSessionsFor } from "@database/repositories/dashboardSessionRepository";
+import {
+	createSession,
+	deleteSession,
+	deleteSessionsFor,
+	readTokens,
+} from "@database/repositories/dashboardSessionRepository";
 import { eraseAccount } from "@lib/account";
 import { type SetupStatus } from "@testify/shared";
 
@@ -31,6 +36,7 @@ jest.mock("@api/discord", () => {
 		),
 		fetchUser: jest.fn(() => Promise.resolve({ id: "100000000000000001", username: "someone", avatar: null })),
 		fetchGuilds: jest.fn(() => Promise.resolve([])),
+		refreshTokens: jest.fn(),
 	};
 });
 jest.mock("@database/repositories/blacklistRepository", () => ({
@@ -44,7 +50,7 @@ jest.mock("@database/repositories/dashboardSessionRepository", () => ({
 	touchSession: jest.fn(() => Promise.resolve()),
 	deleteSession: jest.fn(() => Promise.resolve()),
 	deleteSessionsFor: jest.fn(() => Promise.resolve()),
-	readTokens: jest.fn(() => Promise.resolve(null)),
+	readTokens: jest.fn(() => ({ accessToken: "at", refreshToken: "rt" })),
 	updateTokens: jest.fn(() => Promise.resolve()),
 }));
 
@@ -101,11 +107,11 @@ function app(
 async function beginLogin(instance: Hono<ApiBindings>): Promise<{ state: string; cookie: string }> {
 	const response = await instance.request("/auth/login");
 	const cookie = response.headers.get("set-cookie") ?? "";
-	const pending = JSON.parse(decodeURIComponent(/dash_oauth=([^;]+)/.exec(cookie)?.[1] ?? "{}")) as {
+	const pending = JSON.parse(decodeURIComponent(/__Host-dash_oauth=([^;]+)/.exec(cookie)?.[1] ?? "{}")) as {
 		state: string;
 	};
 
-	return { state: pending.state, cookie: `dash_oauth=${encodeURIComponent(JSON.stringify(pending))}` };
+	return { state: pending.state, cookie: `__Host-dash_oauth=${encodeURIComponent(JSON.stringify(pending))}` };
 }
 
 beforeEach(() => {
@@ -154,7 +160,7 @@ describe("GET /auth/login", () => {
 	it("keeps the pending flow in a short-lived httpOnly cookie", async () => {
 		const cookie = (await app().request("/auth/login")).headers.get("set-cookie") ?? "";
 
-		expect(cookie).toContain("dash_oauth=");
+		expect(cookie).toContain("__Host-dash_oauth=");
 		expect(cookie).toContain("HttpOnly");
 	});
 
@@ -197,7 +203,7 @@ describe("GET /auth/callback", () => {
 		expect(exchanged).toHaveBeenCalled();
 		expect(sessionCreated).toHaveBeenCalled();
 		expect(response.status).toBe(302);
-		expect(response.headers.get("set-cookie")).toContain("dash_session=new-session-id");
+		expect(response.headers.get("set-cookie")).toContain("__Host-dash_session=new-session-id");
 	});
 
 	/** A state with no pending flow behind it is a forged callback. */
@@ -225,7 +231,7 @@ describe("GET /auth/callback", () => {
 
 		const response = await instance.request("/auth/callback?code=abc&state=wrong", { headers: { cookie } });
 
-		expect(response.headers.get("set-cookie")).toContain("dash_oauth=;");
+		expect(response.headers.get("set-cookie")).toContain("__Host-dash_oauth=;");
 	});
 
 	it("sends somebody who pressed Cancel to a friendly page rather than an error", async () => {
@@ -253,7 +259,7 @@ describe("POST /auth/logout", () => {
 
 		expect(sessionDeleted).toHaveBeenCalledWith("sid");
 		expect(response.status).toBe(204);
-		expect(response.headers.get("set-cookie")).toContain("dash_session=;");
+		expect(response.headers.get("set-cookie")).toContain("__Host-dash_session=;");
 	});
 
 	it("refuses an anonymous caller", async () => {
@@ -363,7 +369,7 @@ describe("GET /auth/me", () => {
 		expect(guildsFetched).not.toHaveBeenCalled();
 	});
 
-	/** Ban Members alone lists nothing; access its admins gave does, and only where the bot is to use it. */
+	/** Ban Members alone lists nothing; access its admins gave does, only where the bot is, and only screens it knows. */
 	it("lists the servers somebody manages, and those with the bot where they were given access, and nothing else", async () => {
 		const at = (id: string, permissions: bigint) => ({ id, name: id, icon: null, permissions: String(permissions) });
 		guildsFetched.mockResolvedValueOnce([
@@ -376,7 +382,7 @@ describe("GET /auth/me", () => {
 		]);
 		jest.mocked(accessFor).mockResolvedValueOnce([
 			{ guildId: "900000000000000004", areas: ["bans"] },
-			{ guildId: "900000000000000006", areas: ["warnings", "cases"] },
+			{ guildId: "900000000000000006", areas: ["warnings", "constructor", "cases"] as never },
 		]);
 		const botIn = new Map(
 			["900000000000000001", "900000000000000003", "900000000000000005", "900000000000000006"].map((id) => [
@@ -424,6 +430,56 @@ describe("GET /auth/me", () => {
 		const response = await app(envFor(), signedIn("100000000000000013")).request("/auth/me");
 
 		expect(response.status).toBe(502);
+	});
+
+	/** A refresh spends the refresh token, so a second request refreshing at the same moment would be refused by Discord. */
+	it("refreshes a token about to expire once, however many requests arrive together", async () => {
+		jest.mocked(refreshTokens).mockResolvedValue({
+			accessToken: "new",
+			refreshToken: "rt2",
+			expiresAt: new Date(Date.now() + 604_800_000),
+		});
+		const instance = app(envFor(), {
+			...signedIn("100000000000000077"),
+			tokenExpiresAt: new Date(Date.now() + 60_000),
+		});
+
+		const answers = await Promise.all([instance.request("/auth/me"), instance.request("/auth/me")]);
+
+		expect(answers.map((response) => response.status)).toEqual([200, 200]);
+		expect(refreshTokens).toHaveBeenCalledTimes(1);
+	});
+
+	/** A refresh is shared only within one sign-in: another session's token must never answer for this one. */
+	it("refreshes each session's own token when two refresh at once, and tries again after a refusal", async () => {
+		const renewed = (refreshToken: string) => ({
+			accessToken: `new-${refreshToken}`,
+			refreshToken: "rt2",
+			expiresAt: new Date(Date.now() + 1),
+		});
+		jest.mocked(refreshTokens).mockImplementation((_oauth, refreshToken) => Promise.resolve(renewed(refreshToken)));
+		jest.mocked(readTokens).mockImplementation((_box, session) => ({
+			accessToken: "old",
+			refreshToken: `of-${(session as { _id: string })._id}`,
+		}));
+		const expiring = (id: string, userId: string) => ({
+			...signedIn(userId),
+			_id: id,
+			tokenExpiresAt: new Date(Date.now() + 60_000),
+		});
+
+		const answers = await Promise.all([
+			app(envFor(), expiring("sid-a", "100000000000000078")).request("/auth/me"),
+			app(envFor(), expiring("sid-b", "100000000000000079")).request("/auth/me"),
+		]);
+
+		expect(answers.map((response) => response.status)).toEqual([200, 200]);
+		expect(guildsFetched.mock.calls.map(([token]) => token).sort()).toEqual(["new-of-sid-a", "new-of-sid-b"]);
+
+		jest.mocked(refreshTokens).mockRejectedValueOnce(new Error("invalid_grant"));
+		expect((await app(envFor(), expiring("sid-c", "100000000000000080")).request("/auth/me")).status).toBe(401);
+		expect((await app(envFor(), expiring("sid-c", "100000000000000081")).request("/auth/me")).status).toBe(200);
+		expect(refreshTokens).toHaveBeenCalledTimes(4);
 	});
 
 	it("carries no token, secret or refresh token", async () => {

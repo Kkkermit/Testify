@@ -2,10 +2,11 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { barWidth } from "@/components/primitives/UsageBars";
-import { levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
+import { commandBar, levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
+import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
-import { logFeed, logRuns, PAST_RUN } from "@/test/fixtures/owner";
+import { logFeed, logRuns, PAST_RUN, shardlensStatus, usageReport } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -30,19 +31,25 @@ describe("levelFrom", () => {
 });
 
 describe("barWidth", () => {
-	it("scales against the busiest row", () => {
+	/** A row with one use is still a row; a 0%-wide bar looks like a rendering failure. */
+	it("scales against the busiest row, keeps a tiny value visible and draws nothing for a zero", () => {
 		expect(barWidth(50, 100)).toBe(50);
 		expect(barWidth(100, 100)).toBe(100);
-	});
-
-	/** A row with one use is still a row; a 0%-wide bar looks like a rendering failure. */
-	it("keeps a tiny value visible", () => {
 		expect(barWidth(1, 10_000)).toBe(2);
-	});
-
-	it("is nothing at all for a zero", () => {
 		expect(barWidth(0, 100)).toBe(0);
 		expect(barWidth(5, 0)).toBe(0);
+	});
+});
+
+describe("commandBar", () => {
+	/** A right-click action is named as Discord's menu shows it, with no slash nobody could type. */
+	it("puts a slash before a command and none before a right-click action", () => {
+		const t = i18next.t.bind(i18next);
+		const row = { category: "moderation", count: 1, failures: 0 } as const;
+		expect([
+			commandBar({ ...row, command: "warn", menu: false }, t).label,
+			commandBar({ ...row, command: "Time out", menu: true }, t).label,
+		]).toEqual(["/warn", "Time out"]);
 	});
 });
 
@@ -62,6 +69,19 @@ describe("the usage tab", () => {
 		expect(await screen.findByText("/flush")).toBeInTheDocument();
 	});
 
+	/** A right-click action has no slash and no page of its own, so a link to one opened a refusal. */
+	it("names a right-click action as Discord does, and links only commands", async () => {
+		renderTab("usage");
+
+		expect(await screen.findByText("Time out")).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /time out/i })).not.toBeInTheDocument();
+		expect(screen.queryByText("/Time out")).not.toBeInTheDocument();
+		expect(screen.getAllByRole("link", { name: "/rank" })[0]).toHaveAttribute(
+			"href",
+			expect.stringContaining("command=rank"),
+		);
+	});
+
 	/** Ranked by the slow tail, with the typical time beside it, so one hung run reads differently from a slow command. */
 	it("names the slowest commands with their slow and typical times", async () => {
 		renderTab("usage");
@@ -70,7 +90,21 @@ describe("the usage tab", () => {
 		expect(screen.getByText("4.2s")).toBeInTheDocument();
 		expect(screen.getByText("40 runs · typically 850 ms")).toBeInTheDocument();
 		expect(screen.getByText("1,300 runs · typically 90 ms")).toBeInTheDocument();
-		expect(screen.getByText(/over the last 30 days in servers/)).toBeInTheDocument();
+		expect(screen.getByText(/how long Discord waited for the bot’s first reply/i)).toBeInTheDocument();
+	});
+
+	/** The figures quietly include the bot's own counts from before Shardlens, so the page says how many. */
+	it("says how many runs were counted before Shardlens, and nothing when none were", async () => {
+		server.use(http.get("/api/analytics/usage", () => HttpResponse.json({ ...usageReport, countedBefore: 1_500 })));
+		const { unmount } = renderTab("usage");
+
+		expect(await screen.findByText(/Includes 1,500 runs the bot counted itself before Shardlens/)).toBeInTheDocument();
+		unmount();
+
+		server.resetHandlers();
+		renderTab("usage");
+		expect(await screen.findByText("/flush")).toBeInTheDocument();
+		expect(screen.queryByText(/before Shardlens/)).not.toBeInTheDocument();
 	});
 
 	/** The bars are decoration; the numbers behind them have to be readable without them. */
@@ -248,6 +282,66 @@ describe("the runtime tab", () => {
 
 		expect(link).toHaveAttribute("href", "https://github.com/Kkkermit/Testify/releases");
 		expect(screen.getByText(/never contacts a server to check/i)).toBeInTheDocument();
+	});
+});
+
+describe("the Shardlens card", () => {
+	it("says where the analytics go, links the collector's dashboard and shows what is waiting", async () => {
+		renderTab("runtime");
+
+		expect(await screen.findByText(/sending to https:\/\/stats\.example\.com every five seconds/i)).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /open the shardlens dashboard/i })).toHaveAttribute(
+			"href",
+			"https://stats.example.com",
+		);
+		expect(screen.getByText("network")).toBeInTheDocument();
+	});
+
+	/** A send that went and one that did not look the same unless the card says which. */
+	it("says what Send now did, whether it worked or not", async () => {
+		const user = userEvent.setup();
+		renderTab("runtime");
+
+		await user.click(await screen.findByRole("button", { name: /send now/i }));
+		expect(await screen.findByText("Sent what was waiting.")).toBeInTheDocument();
+
+		server.use(
+			http.post("/api/control/shardlens/send", () =>
+				HttpResponse.json({ sent: 0, problem: "network", status: shardlensStatus }),
+			),
+		);
+		await user.click(screen.getByRole("button", { name: /send now/i }));
+		expect(await screen.findByText(/could not send \(network\)/i)).toBeInTheDocument();
+	});
+
+	/** The collector inside the bot listens on the bot's own machine, so its link has to say it opens nowhere else. */
+	it("says the counting is kept in the bot's own MongoDB, and where its dashboard opens", async () => {
+		server.use(
+			http.get("/api/control/shardlens", () =>
+				HttpResponse.json({ ...shardlensStatus, collector: "http://127.0.0.1:8080", inBot: true }),
+			),
+		);
+		renderTab("runtime");
+
+		expect(await screen.findByText(/inside the bot, kept in the bot’s own MongoDB/i)).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: /open the shardlens dashboard/i })).toHaveAttribute(
+			"href",
+			"http://127.0.0.1:8080",
+		);
+		expect(screen.getByText(/opens only on the machine the bot runs on.*npx shardlens dashboard/i)).toBeInTheDocument();
+	});
+
+	it("offers nothing to press while it is off", async () => {
+		server.use(
+			http.get("/api/control/shardlens", () =>
+				HttpResponse.json({ ...shardlensStatus, state: "off", collector: null, lastProblem: null }),
+			),
+		);
+		renderTab("runtime");
+
+		expect(await screen.findByText(/nothing is attached and nothing is sent/i)).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /send now/i })).not.toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /open the shardlens dashboard/i })).not.toBeInTheDocument();
 	});
 });
 

@@ -17,19 +17,20 @@ export default defineButton({
 		}
 
 		const ownerId = interaction.user.id;
+		const mentionsEveryRole = interaction.memberPermissions.has(PermissionFlagsBits.MentionEveryone);
 
 		if (context.action === "channel") {
 			const channelId = await pickedChannelId(interaction, guild);
 			if (channelId === null) return;
 
-			const settings = await applyModmailSettings(guild, { channelId }, ownerId);
+			const settings = await applyModmailSettings(guild, { channelId }, ownerId, mentionsEveryRole);
 			await interaction.update(modmailSettingsPanel(settings, ownerId, `Threads will be made in <#${channelId}>.`));
 			return;
 		}
 
 		if (context.action === "ping" && interaction.isRoleSelectMenu()) {
 			const pingRoleId = interaction.values[0] ?? null;
-			const settings = await applyModmailSettings(guild, { pingRoleId }, ownerId);
+			const settings = await applyModmailSettings(guild, { pingRoleId }, ownerId, mentionsEveryRole);
 			const note =
 				pingRoleId === null ? "Nobody is pinged when one opens." : `<@&${pingRoleId}> is pinged when one opens.`;
 			await interaction.update(modmailSettingsPanel(settings, ownerId, note));
@@ -38,7 +39,7 @@ export default defineButton({
 
 		if (context.action === "signed" && interaction.isStringSelectMenu()) {
 			const anonymous = interaction.values[0] === "anonymous";
-			const settings = await applyModmailSettings(guild, { anonymous }, ownerId);
+			const settings = await applyModmailSettings(guild, { anonymous }, ownerId, mentionsEveryRole);
 			const note = anonymous ? "Replies are signed as the server's staff." : "Replies are signed with each name.";
 			await interaction.update(modmailSettingsPanel(settings, ownerId, note));
 			return;
@@ -46,7 +47,7 @@ export default defineButton({
 
 		if (context.action === "toggle") {
 			const current = await readModmailSettings(guild);
-			const settings = await applyModmailSettings(guild, { enabled: !current.enabled }, ownerId);
+			const settings = await applyModmailSettings(guild, { enabled: !current.enabled }, ownerId, mentionsEveryRole);
 			await interaction.update(
 				modmailSettingsPanel(settings, ownerId, settings.enabled ? "Mod mail is on." : "Mod mail is off."),
 			);

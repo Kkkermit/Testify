@@ -4,7 +4,8 @@ import { type RoundRecord } from "@database/repositories/rouletteRepository";
 import { BOARD_WIDTH, chipSpot, HISTORY_BAND, historySpots, LAYOUT, spotRect } from "@lib/canvas/rouletteTable.util";
 import { ROULETTE_ID, ROULETTE_ROUND } from "@lib/casino/casino.constants";
 import { ROULETTE_SPOTS } from "@lib/casino/roulette.util";
-import { parseNumbers, roundBettingMessage, roundSettledMessage, roundView } from "@lib/casino/rouletteRound.util";
+import { roundBettingMessage, roundSettledMessage } from "@lib/casino/roulettePanel.util";
+import { parseNumbers, roundView } from "@lib/casino/rouletteRound.util";
 import { customIdsOf, duplicateIds, textOf } from "@tests/helpers/containers";
 
 const ALICE = "222222222222222222";

@@ -1,8 +1,9 @@
 import { type WatchedPermission } from "@testify/shared";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Card } from "@/components/primitives";
+import { Card, CARD_HEADING } from "@/components/primitives";
 import { MISSING_LABELS } from "@/features/guild-overview/featureStatus.labels";
+import { cn } from "@/lib/cn";
 
 export function MissingPermissions({ permissions }: { permissions: WatchedPermission[] }): React.JSX.Element | null {
 	const { t } = useTranslation();
@@ -10,7 +11,7 @@ export function MissingPermissions({ permissions }: { permissions: WatchedPermis
 
 	return (
 		<Card className="border-warning/40 flex flex-col gap-2">
-			<h2 className="flex items-center gap-2 font-semibold">
+			<h2 className={cn(CARD_HEADING, "flex items-center gap-2")}>
 				<AlertTriangle className="text-warning" size={18} aria-hidden="true" />
 				{t("overview.missingTitle")}
 			</h2>

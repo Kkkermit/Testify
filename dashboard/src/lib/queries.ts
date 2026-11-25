@@ -88,7 +88,6 @@ export const keys = {
 		restoreRead: (path: string) => ["guild", id, "restore-read", path] as const,
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,
-		audit: (page: number) => ["guild", id, "audit", page] as const,
 		board: (board: string, page: number, sort: string, scope: string) =>
 			["guild", id, "board", board, page, sort, scope] as const,
 		directory: (search: string) => ["guild", id, "directory", search] as const,
@@ -101,19 +100,24 @@ export const keys = {
 	owner: {
 		access: () => ["owner", "access"] as const,
 		stats: () => ["owner", "stats"] as const,
+		guildsAll: () => ["owner", "guilds"] as const,
 		guilds: (page: number, sort: string, filter: string, search: string) =>
 			["owner", "guilds", page, sort, filter, search] as const,
 		usage: (days: number) => ["owner", "usage", days] as const,
+		usageSection: (section: string, query: string) => ["owner", "usage", section, query] as const,
 		guildUsage: (id: string, days: number) => ["owner", "guild-usage", id, days] as const,
-		guildMembers: (id: string, days: number, page: number, search: string) =>
-			["owner", "guild-usage", id, days, "members", page, search] as const,
-		guildRuns: (id: string, days: number, page: number, userId: string | null, command: string | null) =>
-			["owner", "guild-usage", id, days, "runs", page, userId, command] as const,
+		/** Held in memory only: the person a lookup names never reaches an address. */
+		runs: (days: number, filters: string, before: string) => ["owner", "runs", days, filters, before] as const,
+		topRunners: (window: string) => ["owner", "top-runners", window] as const,
+		live: () => ["owner", "live"] as const,
+		logsAll: () => ["owner", "logs"] as const,
 		logs: (run: string, level: string, search: string) => ["owner", "logs", run, level, search] as const,
+		logRunsAll: () => ["owner", "log-runs"] as const,
 		logRuns: (level: string, search: string) => ["owner", "log-runs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,
 		control: () => ["owner", "control"] as const,
 		musicSources: () => ["owner", "musicSources"] as const,
+		shardlens: () => ["owner", "shardlens"] as const,
 		guildDetail: (id: string) => ["owner", "guild", id] as const,
 		blacklist: () => ["owner", "blacklist"] as const,
 		runner: () => ["owner", "runner"] as const,

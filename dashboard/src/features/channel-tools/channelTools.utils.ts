@@ -11,9 +11,8 @@ export function slowmodeText(seconds: number): string {
 }
 
 export function slowmodeChoices(current: number): number[] {
-	const choices: number[] = [...SLOWMODE_SECONDS];
-	if (!choices.includes(current)) choices.push(current);
-	return choices.sort((a, b) => a - b);
+	const choices: readonly number[] = SLOWMODE_SECONDS;
+	return (choices.includes(current) ? choices : [...choices, current]).toSorted((a, b) => a - b);
 }
 
 export function restricted(channels: readonly ToolChannel[]): ToolChannel[] {

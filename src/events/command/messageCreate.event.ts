@@ -2,9 +2,9 @@ import { Events, type Message } from "discord.js";
 import { defineEvent } from "@core/event";
 import { runMessageHandlers } from "@core/message";
 
-/** The only `messageCreate` listener. */
 let warnedAboutContent = false;
 
+/** The only `messageCreate` listener. */
 export default defineEvent({
 	name: Events.MessageCreate,
 	async run(client, message: Message) {

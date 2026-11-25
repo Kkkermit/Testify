@@ -1,7 +1,7 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
-import { UserFacingError } from "@core/errors";
+import { toError, UserFacingError } from "@core/errors";
 import {
 	appealGuildIds,
 	countOpenAppeals,
@@ -19,8 +19,8 @@ import {
 import { takesAppeals } from "@lib/appeals/appealLink.util";
 import { appealDecisionText, appealPost } from "@lib/appeals/appealPanel.util";
 import { canPostIn } from "@lib/discord/channels.util";
+import { TimedCache } from "@lib/infra/timedCache.util";
 import { moderatorOf, unbanUser } from "@lib/moderation/sanctions.util";
-import { TimedCache } from "@lib/site/github.util";
 import {
 	appealAgainAt,
 	type AppealableServer,
@@ -239,7 +239,13 @@ export async function decideOnAppeal(
 		}
 	}
 
-	await refreshAppealPost(guild, decided);
+	// The decision and the unban have happened, so a post that cannot be edited is noted rather than failing them.
+	await refreshAppealPost(guild, decided).catch((error: unknown) => {
+		client.logger.warn(
+			{ err: toError(error), guildId: guild.id },
+			"[APPEALS] The appeal's post could not be updated with the decision. Check the bot can still edit messages there.",
+		);
+	});
 	await client.users
 		.fetch(decided.userId)
 		.then((user) => user.send({ content: appealDecisionText(decided, guild.name), ...SILENT }))
@@ -250,7 +256,7 @@ export async function decideOnAppeal(
 	return decided;
 }
 
-export function appealLinkOf(appeal: Pick<StoredAppeal, "guildId" | "channelId" | "messageId">): string | null {
+function appealLinkOf(appeal: Pick<StoredAppeal, "guildId" | "channelId" | "messageId">): string | null {
 	return appeal.channelId === null || appeal.messageId === null
 		? null
 		: `https://discord.com/channels/${appeal.guildId}/${appeal.channelId}/${appeal.messageId}`;

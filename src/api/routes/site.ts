@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
-import { type ApiProblem, forbidden, notFound, UpstreamProblem } from "@api/errors";
+import { ApiProblem, forbidden, notFound, UpstreamProblem } from "@api/errors";
 import { parseQuery } from "@api/validate";
 import { instanceConfig } from "@config/instance";
 import { ServiceError } from "@core/errors";
@@ -13,6 +13,8 @@ const REFUSALS: Record<SiteRefusal, () => ApiProblem> = {
 	private_repository: () =>
 		forbidden("private_repository", "The repository is private, so its code is not shown here."),
 	unknown_file: () => notFound("unknown_file", "There is no such file in this release."),
+	busy: () =>
+		new ApiProblem(503, "source_busy", "Enough files have been read from GitHub this hour. Try this one again later."),
 };
 
 /** What the host can change when GitHub refuses; null when waiting is all there is to do. */

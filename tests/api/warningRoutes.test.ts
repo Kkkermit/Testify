@@ -5,26 +5,24 @@ import { type ApiBindings } from "@api/context";
 import { warnings } from "@api/routes/warnings";
 import { type TestifyClient } from "@core/client";
 import {
-	addWarning,
 	clearWarnings,
-	countWarnings,
 	editWarning,
 	getWarnings,
 	getWarnLadder,
 	listGuildWarnings,
+	recordWarning,
 	removeWarning,
 	saveWarnLadder,
 } from "@database/repositories/moderationRepository";
 import { type GuildWarningsPage, type WarningAdded } from "@testify/shared";
 
 jest.mock("@database/repositories/moderationRepository", () => ({
-	addWarning: jest.fn(),
 	clearWarnings: jest.fn(() => Promise.resolve(true)),
-	countWarnings: jest.fn(() => Promise.resolve(1)),
 	editWarning: jest.fn(() => Promise.resolve(true)),
 	getWarnings: jest.fn(() => Promise.resolve(null)),
 	getWarnLadder: jest.fn(() => Promise.resolve(null)),
 	listGuildWarnings: jest.fn(() => Promise.resolve([])),
+	recordWarning: jest.fn(),
 	removeWarning: jest.fn(() => Promise.resolve(true)),
 	saveWarnLadder: jest.fn((_guildId: string, steps: unknown) => Promise.resolve({ steps })),
 	setWarningStep: jest.fn(() => Promise.resolve()),
@@ -40,8 +38,8 @@ const ACTOR = "100000000000000001";
 const TARGET = "100000000000000002";
 const BOT = "100000000000000009";
 
-const added = jest.mocked(addWarning);
-const counted = jest.mocked(countWarnings);
+const warned = jest.mocked(recordWarning);
+const countIs = (count: number) => warned.mockResolvedValue({ entry: entry("abcd1234"), count });
 const edited = jest.mocked(editWarning);
 const stored = jest.mocked(getWarnings);
 const ladder = jest.mocked(getWarnLadder);
@@ -123,13 +121,12 @@ const entry = (warnId: string, reason = "Spamming") => ({
 
 beforeEach(() => {
 	jest.clearAllMocks();
-	counted.mockResolvedValue(1);
+	countIs(1);
 	ladder.mockResolvedValue(null);
 	stored.mockResolvedValue(null);
 	removed.mockResolvedValue(true);
 	cleared.mockResolvedValue(true);
 	edited.mockResolvedValue(true);
-	added.mockResolvedValue(entry("abcd1234"));
 });
 
 describe("GET /warnings", () => {
@@ -169,7 +166,7 @@ describe("POST /warnings", () => {
 	/** The web goes through the same step as `/warn`, so a second warning mutes whichever surface gave it. */
 	it("carries out the step the warning lands on and says so", async () => {
 		ladder.mockResolvedValue({ steps: [{ action: "warn" }, { action: "timeout", minutes: 10 }] } as never);
-		counted.mockResolvedValue(2);
+		countIs(2);
 
 		const body = (await (await send("POST", "", { userId: TARGET, reason: "Again" })).json()) as WarningAdded;
 
@@ -182,14 +179,14 @@ describe("POST /warnings", () => {
 		const response = await send("POST", "", { userId: TARGET, reason: "Spamming" }, { actorPosition: 1 });
 
 		expect(response.status).toBe(403);
-		expect(added).not.toHaveBeenCalled();
+		expect(warned).not.toHaveBeenCalled();
 	});
 
 	it("refuses somebody who is not in the server", async () => {
 		const response = await send("POST", "", { userId: TARGET, reason: "Spamming" }, { targetMissing: true });
 
 		expect(response.status).toBe(404);
-		expect(added).not.toHaveBeenCalled();
+		expect(warned).not.toHaveBeenCalled();
 	});
 
 	it("refuses a bot, as /warn does", async () => {
@@ -199,7 +196,7 @@ describe("POST /warnings", () => {
 	it("refuses an empty reason and one past the cap", async () => {
 		expect((await send("POST", "", { userId: TARGET, reason: "   " })).status).toBe(400);
 		expect((await send("POST", "", { userId: TARGET, reason: "x".repeat(501) })).status).toBe(400);
-		expect(added).not.toHaveBeenCalled();
+		expect(warned).not.toHaveBeenCalled();
 	});
 });
 

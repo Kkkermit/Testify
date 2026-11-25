@@ -17,7 +17,7 @@ export default defineCommand({
 			name: "add",
 			description: "Gives a role to a member.",
 			options: [
-				{ name: "user", description: "The member.", type: "user", required: true },
+				{ name: "user", description: "Who to give the role to.", type: "user", required: true },
 				{ name: "role", description: "The role to add.", type: "role", required: true },
 			],
 			run: (interaction) => apply(interaction, "add"),
@@ -26,16 +26,12 @@ export default defineCommand({
 			name: "remove",
 			description: "Takes a role away from a member.",
 			options: [
-				{ name: "user", description: "The member.", type: "user", required: true },
+				{ name: "user", description: "Who to take the role from.", type: "user", required: true },
 				{ name: "role", description: "The role to remove.", type: "role", required: true },
 			],
 			run: (interaction) => apply(interaction, "remove"),
 		},
 	],
-
-	async run(interaction) {
-		await apply(interaction, interaction.options.getSubcommand() === "remove" ? "remove" : "add");
-	},
 });
 
 async function apply(interaction: CommandInput, mode: "add" | "remove"): Promise<void> {

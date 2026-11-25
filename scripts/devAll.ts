@@ -22,11 +22,19 @@ function label(name: string): string {
 	return colour === undefined || !colourEnabled() ? `[${name}] ` : `${paint.bold(paint[colour](`[${name}]`))} `;
 }
 
-export function prefixLines(name: string, chunk: string): string {
-	const lines = chunk.split("\n");
-	const last = lines.pop() ?? "";
+/** Labels each line a child writes once, though a chunk can end, and the next begin, partway through a line. */
+export function lineLabeller(name: string): (chunk: string) => string {
+	let atLineStart = true;
 
-	return lines.map((line) => `${label(name)}${line}\n`).join("") + (last === "" ? "" : `${label(name)}${last}`);
+	return (chunk) => {
+		let labelled = "";
+		for (const piece of chunk.split(/(?<=\n)/)) {
+			if (piece === "") continue;
+			labelled += atLineStart ? `${label(name)}${piece}` : piece;
+			atLineStart = piece.endsWith("\n");
+		}
+		return labelled;
+	};
 }
 
 function child(script: string, args: string[]): ChildProcess {
@@ -48,10 +56,12 @@ export function syncedFolderRead(chunk: string): boolean {
 let toldAboutSync = false;
 
 function pipe(name: string, process_: ChildProcess): void {
-	process_.stdout?.on("data", (chunk: Buffer) => process.stdout.write(prefixLines(name, chunk.toString())));
+	const out = lineLabeller(name);
+	const err = lineLabeller(name);
+	process_.stdout?.on("data", (chunk: Buffer) => process.stdout.write(out(chunk.toString())));
 	process_.stderr?.on("data", (chunk: Buffer) => {
 		const text = chunk.toString();
-		process.stderr.write(prefixLines(name, text));
+		process.stderr.write(err(text));
 		if (toldAboutSync || !syncedFolderRead(text)) return;
 		toldAboutSync = true;
 		print(

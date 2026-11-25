@@ -1,9 +1,16 @@
 import { ChannelType, type Guild, type GuildMember, GuildVerificationLevel } from "discord.js";
-import { type Logger } from "pino";
+import { DAY_MS } from "@config/constants";
 import { toError } from "@core/errors";
+import { type Logger } from "@core/logger";
 import { type ServerDay } from "@database/models/insights.schema";
-import { readInsightRows, recentMoves, recordMove, saveActivity } from "@database/repositories/insightsRepository";
-import { dayKey, since } from "@database/repositories/usageRepository";
+import {
+	dayKey,
+	readInsightRows,
+	recentMoves,
+	recordMove,
+	saveActivity,
+	since,
+} from "@database/repositories/insightsRepository";
 import { readerSees } from "@lib/discord/channels.util";
 import { activity } from "@lib/info/activity.util";
 import { readMemberCounts } from "@lib/info/memberCount.util";
@@ -82,7 +89,7 @@ export function fillDays(rows: readonly ServerDay[], days: number, now: Date): I
 	const byDay = new Map(rows.map((row) => [row.day, row]));
 
 	return Array.from({ length: days }, (_, index) => {
-		const day = dayKey(new Date(now.getTime() - (days - 1 - index) * 24 * 60 * 60 * 1000));
+		const day = dayKey(new Date(now.getTime() - (days - 1 - index) * DAY_MS));
 		const row = byDay.get(day);
 		return { day, messages: row?.messages ?? 0, joins: row?.joins ?? 0, leaves: row?.leaves ?? 0 };
 	});

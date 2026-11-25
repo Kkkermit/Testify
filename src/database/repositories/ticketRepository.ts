@@ -35,7 +35,6 @@ export async function getTicketByChannel(channelId: string): Promise<TicketRecor
 	return Ticket.findOne({ channelId }).lean<TicketRecord>().exec();
 }
 
-/** Ticket ids are derived from a UUID. */
 export async function createTicket(input: {
 	guildId: string;
 	ownerId: string;

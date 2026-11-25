@@ -75,7 +75,7 @@ export default defineConfig(({ command, mode }) => {
 			cssTarget: ["chrome123", "safari17.5", "firefox120", "edge123"],
 			// A source map hands anybody the source tree in DevTools.
 			sourcemap: false,
-			rollupOptions: {
+			rolldownOptions: {
 				output: {
 					manualChunks: (id) => {
 						if (/node_modules\/(?:marked|lowlight|highlight\.js|devlop|dequal)\//.test(id)) return "markdown";

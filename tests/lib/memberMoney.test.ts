@@ -7,8 +7,12 @@ describe("moneyProblem", () => {
 		expect(problemText(moneyProblem(-501, "wallet", 500))).toMatch(/only have 500/i);
 	});
 
-	it.each([0, 1.5, Number.NaN])("refuses %p as an amount", (delta) => {
-		expect(problemText(moneyProblem(delta, "wallet", 500))).toMatch(/enter an amount/i);
+	it("refuses an amount that is nothing, a fraction or not a number", () => {
+		const accepted = [0, 1.5, Number.NaN].filter(
+			(delta) => !/enter an amount/i.test(problemText(moneyProblem(delta, "wallet", 500)) ?? ""),
+		);
+
+		expect(accepted).toEqual([]);
 	});
 
 	it("refuses a change past the cap", () => {
@@ -17,12 +21,14 @@ describe("moneyProblem", () => {
 });
 
 describe("moneyBody", () => {
-	it.each([
-		{ purse: "pocket", delta: 10 },
-		{ purse: "wallet", delta: 0 },
-		{ purse: "wallet", delta: MEMBER_LIMITS.maxMoneyChange + 1 },
-	])("refuses %p", (body) => {
-		expect(moneyBody.safeParse(body).success).toBe(false);
+	it("refuses a purse that does not exist, nothing, and a change past the cap", () => {
+		const bodies = [
+			{ purse: "pocket", delta: 10 },
+			{ purse: "wallet", delta: 0 },
+			{ purse: "wallet", delta: MEMBER_LIMITS.maxMoneyChange + 1 },
+		];
+
+		expect(bodies.filter((body) => moneyBody.safeParse(body).success)).toEqual([]);
 	});
 });
 
@@ -36,7 +42,9 @@ describe("levelBody", () => {
 		expect(levelBody.safeParse({}).success).toBe(false);
 	});
 
-	it.each([-1, MEMBER_LIMITS.maxLevel + 1, 1.5])("refuses level %p", (level) => {
-		expect(levelBody.safeParse({ level }).success).toBe(false);
+	it("refuses a level below nothing, past the cap or in between two", () => {
+		const levels = [-1, MEMBER_LIMITS.maxLevel + 1, 1.5];
+
+		expect(levels.filter((level) => levelBody.safeParse({ level }).success)).toEqual([]);
 	});
 });

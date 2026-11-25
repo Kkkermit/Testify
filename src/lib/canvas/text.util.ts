@@ -106,12 +106,16 @@ function shapes(point: string): boolean {
 	const code = point.codePointAt(0) ?? 0;
 	return code === 0x200d || code === 0xfe0e || code === 0xfe0f || (code >= 0xe0020 && code <= 0xe007f);
 }
+
 /** Flags, keycaps and anything asking for emoji presentation belong to an emoji font before a symbol font. */
 const EMOJI = /\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3|\ufe0f/u;
 
 function fontString(family: string, size: number, weight: Weight): string {
 	return `${weight} ${size}px "${family}"`;
 }
+
+/** Every family a character was tried in is remembered, and names bring new characters for ever, so it is capped. */
+export const COVERAGE_KEPT = 50_000;
 
 const coverage = new Map<string, boolean>();
 const missingGlyph = new Map<string, string>();
@@ -146,6 +150,7 @@ export function fontCovers(ctx: SKRSContext2D, family: string, cluster: string):
 	const found = [...cluster].filter((point) => !shapes(point)).every((point) => signature(ctx, point) !== missing);
 	ctx.restore();
 
+	if (coverage.size >= COVERAGE_KEPT) coverage.clear();
 	coverage.set(key, found);
 	return found;
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { defineCommand } from "@core/command";
 import { embed, reply } from "@lib/discord";
+import { capitalise } from "@lib/format";
 import { fetchJson } from "@lib/infra";
 
 const factSchema = z.object({ fact: z.string(), image: z.url().optional() });
@@ -31,7 +32,7 @@ export default defineCommand({
 			description: "Which animal.",
 			type: "string",
 			required: true,
-			choices: Object.keys(SOURCES).map((animal) => ({ name: animal, value: animal })),
+			choices: Object.keys(SOURCES).map((animal) => ({ name: capitalise(animal), value: animal })),
 		},
 	],
 
@@ -46,7 +47,7 @@ export default defineCommand({
 			embeds: [
 				embed({
 					category: "community",
-					title: `${source.emoji} ${animal} fact`,
+					title: `${source.emoji} ${capitalise(animal)} fact`,
 					description: `> ${payload.fact}`,
 					...(payload.image !== undefined ? { image: payload.image } : {}),
 				}),

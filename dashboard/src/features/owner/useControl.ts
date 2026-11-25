@@ -16,6 +16,8 @@ import {
 	type NoticeInput,
 	type NoticePatch,
 	type OwnerGuildDetail,
+	type ShardlensFlush,
+	type ShardlensStatus,
 } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
@@ -57,6 +59,25 @@ export function useSetMusicSources(): UseMutationResult<MusicSourceSetting, Erro
 	});
 }
 
+export function useShardlens(): UseQueryResult<ShardlensStatus> {
+	return useQuery({
+		queryKey: keys.owner.shardlens(),
+		queryFn: () => api.get<ShardlensStatus>("/control/shardlens"),
+		refetchInterval: 15_000,
+	});
+}
+
+export function useSendShardlens(): UseMutationResult<ShardlensFlush, Error, void> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: () => api.post<ShardlensFlush>("/control/shardlens/send"),
+		onSuccess: (flushed) => {
+			client.setQueryData(keys.owner.shardlens(), flushed.status);
+		},
+	});
+}
+
 export function useShutdown(): UseMutationResult<{ stopping: boolean }, Error, void> {
 	return useMutation({
 		mutationFn: () => api.post<{ stopping: boolean }>("/control/shutdown", { confirm: "shut down" }),
@@ -81,7 +102,7 @@ export function useLeaveGuild(guildId: string): UseMutationResult<{ left: string
 		mutationFn: (confirm: string) => api.post<{ left: string }>(`/control/guilds/${guildId}/leave`, { confirm }),
 		onSuccess: async () => {
 			await Promise.all([
-				client.invalidateQueries({ queryKey: ["owner", "guilds"] }),
+				client.invalidateQueries({ queryKey: keys.owner.guildsAll() }),
 				client.invalidateQueries({ queryKey: keys.owner.stats() }),
 			]);
 		},

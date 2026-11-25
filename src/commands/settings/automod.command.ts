@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply, successEmbed } from "@lib/discord";
+import { truncate } from "@lib/format";
 import { changeRule, createAutomodRule, listAutomodRules } from "@lib/moderation";
 import { AUTOMOD_LIMITS } from "@testify/shared";
 
@@ -109,8 +110,16 @@ export default defineCommand({
 		},
 		{
 			name: "delete",
-			description: "Delete an AutoMod rule by id.",
-			options: [{ name: "rule-id", description: "The rule id from `/automod list`.", type: "string", required: true }],
+			description: "Deletes one of this server's AutoMod rules.",
+			options: [
+				{
+					name: "rule-id",
+					description: "Pick the rule to delete, or paste its ID.",
+					type: "string",
+					required: true,
+					autocomplete: true,
+				},
+			],
 			async run(interaction, client) {
 				const guild = inGuild(interaction);
 				const ruleId = interaction.options.getString("rule-id", true).trim();
@@ -133,4 +142,22 @@ export default defineCommand({
 			},
 		},
 	],
+
+	async autocomplete(interaction, client) {
+		const guild = interaction.guild;
+		if (guild === null) {
+			await interaction.respond([]);
+			return;
+		}
+
+		const typed = interaction.options.getFocused().trim().toLowerCase();
+		const rules = await listAutomodRules(guild, client.user?.id ?? "");
+
+		await interaction.respond(
+			rules
+				.filter((rule) => rule.name.toLowerCase().includes(typed) || rule.id.startsWith(typed))
+				.slice(0, 25)
+				.map((rule) => ({ name: truncate(`${rule.name} · ${rule.trigger}`, 100), value: rule.id })),
+		);
+	},
 });

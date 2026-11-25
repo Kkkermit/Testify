@@ -2,7 +2,14 @@ import { type Context } from "hono";
 import { type ApiBindings } from "@api/context";
 import { toError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { type RestorableAction, restorableFields } from "@testify/shared";
+import { LENS_EVENTS, recordEvent } from "@lib/bot";
+import {
+	CHANGE_WAY_HEADER,
+	type ChangeWay,
+	isScreenRoute,
+	type RestorableAction,
+	restorableFields,
+} from "@testify/shared";
 
 /**
  * Written after the change succeeds; a failed audit write is logged and the request still succeeds. Keep `before` and
@@ -53,4 +60,46 @@ async function write(
 	} catch (error) {
 		context.get("client").logger.error({ err: toError(error) }, "[API] Could not write a dashboard audit record");
 	}
+
+	countChange(context, entry.action);
+}
+
+/** Routes written to from a screen named otherwise, by the first part of their path after the server. */
+const WRITTEN_FROM: Record<string, string> = {
+	goodbye: "welcome",
+	"shop-roles": "economy",
+	tuning: "economy",
+	verification: "settings",
+	setup: "",
+};
+
+/** Not changes to a server: a test post sends something, and the backup page's program check blocks an account. */
+const NOT_CHANGES = new Set(["test.send", "blacklist.add"]);
+
+/** The screen a server's write came from, as its route pattern. */
+export function changedScreen(path: string): string | null {
+	const match = /^\/api\/guilds\/\d{17,20}(?:\/([a-z-]+))?/.exec(path);
+	if (match === null) return null;
+
+	const part = match[1] ?? "";
+	const screen = WRITTEN_FROM[part] ?? part;
+	const route = screen === "" ? "/guilds/:guildId" : `/guilds/:guildId/${screen}`;
+	return isScreenRoute(route) ? route : null;
+}
+
+/** A write without the page's header, or with anything else in it, is a save. */
+function wayOf(context: Context<ApiBindings>, action: string): ChangeWay {
+	if (action.startsWith("setup.")) return "setup";
+	const via = context.req.header(CHANGE_WAY_HEADER);
+	return via === "put_back" || via === "backup" ? via : "save";
+}
+
+function countChange(context: Context<ApiBindings>, action: string): void {
+	const guild = context.get("guild");
+	if (guild === undefined || NOT_CHANGES.has(action)) return;
+
+	const screen = changedScreen(context.req.path);
+	if (screen === null) return;
+
+	recordEvent(context.get("client"), LENS_EVENTS.dashboardChange, { screen, how: wayOf(context, action) }, guild.id);
 }

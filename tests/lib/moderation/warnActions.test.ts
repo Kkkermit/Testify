@@ -1,7 +1,6 @@
 import {
-	addWarning,
-	countWarnings,
 	getWarnLadder,
+	recordWarning,
 	setWarningCase,
 	setWarningStep,
 } from "@database/repositories/moderationRepository";
@@ -15,10 +14,9 @@ import {
 } from "@lib/moderation/warnActions.util";
 
 jest.mock("@database/repositories/moderationRepository", () => ({
-	addWarning: jest.fn(),
-	countWarnings: jest.fn(() => Promise.resolve(1)),
 	getWarnLadder: jest.fn(() => Promise.resolve(null)),
 	listGuildWarnings: jest.fn(() => Promise.resolve([])),
+	recordWarning: jest.fn(),
 	saveWarnLadder: jest.fn(),
 	setWarningCase: jest.fn(() => Promise.resolve()),
 	setWarningStep: jest.fn(() => Promise.resolve()),
@@ -28,8 +26,9 @@ jest.mock("@lib/moderation/caseActions.util", () => ({ recordCase: jest.fn(() =>
 const GUILD = "900000000000000001";
 const USER = "100000000000000002";
 
-const added = jest.mocked(addWarning);
-const counted = jest.mocked(countWarnings);
+const warned = jest.mocked(recordWarning);
+const ENTRY = { warnId: "abcd1234", reason: "spam", timestamp: new Date(), edits: [] };
+const countIs = (count: number) => warned.mockResolvedValue({ entry: { ...ENTRY }, count } as never);
 const ladder = jest.mocked(getWarnLadder);
 const recorded = jest.mocked(setWarningStep);
 
@@ -59,8 +58,7 @@ function steps(...actions: Record<string, unknown>[]) {
 beforeEach(() => {
 	jest.clearAllMocks();
 	ladder.mockResolvedValue(null);
-	counted.mockResolvedValue(1);
-	added.mockResolvedValue({ warnId: "abcd1234", reason: "spam", timestamp: new Date(), edits: [] } as never);
+	countIs(1);
 });
 
 describe("ladderOf", () => {
@@ -92,7 +90,7 @@ describe("issueWarning", () => {
 
 		await issueWarning({ guild: guild as never, user: user as never, member: member as never, moderator, reason: "x" });
 
-		const since = counted.mock.calls[0]?.[2];
+		const since = warned.mock.calls[0]?.[5];
 		expect(since?.getTime()).toBeGreaterThanOrEqual(before - 30 * 86_400_000);
 		expect(since?.getTime()).toBeLessThanOrEqual(Date.now() - 30 * 86_400_000);
 		expect(JSON.stringify(user.send.mock.calls[0])).toContain("Warnings in the last 30 days");
@@ -101,7 +99,7 @@ describe("issueWarning", () => {
 	/** A second warning mutes for ten minutes. */
 	it("carries out the step the warning's number lands on", async () => {
 		steps({ action: "warn" }, { action: "timeout", minutes: 10 }, { action: "kick" }, { action: "ban" });
-		counted.mockResolvedValue(2);
+		countIs(2);
 		const { user, member, guild } = world();
 
 		const issued = await issueWarning({
@@ -194,6 +192,25 @@ describe("applyWarnStep", () => {
 		const { user, guild } = world({ inServer: false });
 
 		await expect(applyWarnStep(guild as never, user as never, null, { action: "kick" }, "r")).resolves.toBe("left");
+	});
+
+	/** Discord refuses the whole timeout, kick or ban over a reason past 512, and a warning's reason alone can be 500. */
+	it("fits the reason within Discord's 512 characters for every step", async () => {
+		const { user, member, guild } = world();
+		const reason = `mod: ${"x".repeat(600)} (warning 3)`;
+
+		await applyWarnStep(guild as never, user as never, member as never, { action: "timeout", minutes: 5 }, reason);
+		await applyWarnStep(guild as never, user as never, member as never, { action: "kick" }, reason);
+		await applyWarnStep(guild as never, user as never, member as never, { action: "ban" }, reason);
+
+		const argument = (mock: jest.Mock | undefined, index: number): unknown =>
+			(mock?.mock.calls[0] as unknown[] | undefined)?.[index];
+		const sent = [
+			argument(member?.timeout, 1) as string | undefined,
+			argument(member?.kick, 0) as string | undefined,
+			(argument(guild.members.ban, 1) as { reason?: string } | undefined)?.reason,
+		];
+		expect(sent.map((text) => (text ?? "").length > 0 && (text ?? "").length <= 512)).toEqual([true, true, true]);
 	});
 
 	it("reports Discord refusing rather than throwing", async () => {

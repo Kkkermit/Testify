@@ -1,8 +1,9 @@
 import { ButtonStyle, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
-import { confirmRow, errorEmbed, modalForm, type RenderedScreen } from "@lib/discord";
+import { confirmRow, errorEmbed, modalForm, type RenderedScreen, warningEmbed } from "@lib/discord";
 import { normaliseTreasure } from "@lib/economy";
 import { formatDuration, formatNumber } from "@lib/format";
 import { parseRange, parseWholeNumber, settingsPanel, statusValue, recordsSettings } from "@lib/settings";
@@ -54,8 +55,6 @@ async function render(guildId: string): Promise<RenderedScreen> {
 	return treasurePanel(settingsOf(config), config !== null);
 }
 
-const MINUTE = 60_000;
-
 export default recordsSettings(
 	["treasure.update"],
 	defineButton({
@@ -65,7 +64,6 @@ export default recordsSettings(
 			if (interaction.guild === null) return;
 			const guildId = interaction.guild.id;
 
-			// The panel is public, so anyone could press it — the permission is the gate.
 			if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 				throw new UserFacingError("You need the Manage Server permission to change these settings.");
 			}
@@ -121,7 +119,7 @@ export default recordsSettings(
 									{
 										id: "minutes",
 										label: "Minutes between drops",
-										value: String(Math.round(current.cooldownMs / MINUTE)),
+										value: String(Math.round(current.cooldownMs / MINUTE_MS)),
 									},
 								],
 							}),
@@ -130,7 +128,9 @@ export default recordsSettings(
 
 					case "reset":
 						await interaction.update({
-							embeds: [errorEmbed("Reset every treasure setting back to its default?")],
+							embeds: [
+								warningEmbed("Put every treasure setting back to its default? Whether drops are on stays as it is."),
+							],
 							components: [confirmRow(TREASURE_PANEL_ID, "reset", interaction.user.id)],
 						});
 						return;
@@ -181,7 +181,7 @@ export default recordsSettings(
 				});
 
 				if (!minutes.ok) problems.push(minutes.reason);
-				else next.cooldownMs = minutes.value * MINUTE;
+				else next.cooldownMs = minutes.value * MINUTE_MS;
 			} else {
 				return;
 			}

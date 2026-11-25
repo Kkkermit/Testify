@@ -1,10 +1,11 @@
 import { extname } from "node:path";
 import { z } from "zod";
-import { DAY_MS, MINUTE_MS } from "@config/constants";
+import { DAY_MS, HOUR_MS, MINUTE_MS } from "@config/constants";
 import { ServiceError, toError } from "@core/errors";
 import { type Logger } from "@core/logger";
 import { keepTrafficDays, readTrafficDays } from "@database/repositories/githubTrafficRepository";
 import { fetchJson, fetchRaw } from "@lib/infra/http.util";
+import { TimedCache } from "@lib/infra/timedCache.util";
 import {
 	githubFileUrl,
 	type RepositoryStanding,
@@ -23,45 +24,12 @@ const API = "https://api.github.com";
 const RAW = "https://raw.githubusercontent.com";
 
 /** Why a page cannot have what it asked for; the route words each one. */
-export type SiteRefusal = "no_repository" | "private_repository" | "unknown_file";
+export type SiteRefusal = "no_repository" | "private_repository" | "unknown_file" | "busy";
 
 export class SiteProblem extends Error {
 	constructor(readonly reason: SiteRefusal) {
 		super(reason);
 		this.name = "SiteProblem";
-	}
-}
-
-/** One answer per key for a while; a request already on its way is shared, and a failed one is not kept. */
-export class TimedCache<T> {
-	readonly #entries = new Map<string, { at: number; value: Promise<T> }>();
-
-	constructor(
-		readonly ttlMs: number,
-		readonly maxEntries = Number.POSITIVE_INFINITY,
-		readonly now: () => number = Date.now,
-	) {}
-
-	get(key: string, load: () => Promise<T>): Promise<T> {
-		const found = this.#entries.get(key);
-		if (found !== undefined && this.now() - found.at < this.ttlMs) return found.value;
-
-		const value = load();
-		this.#entries.delete(key);
-		this.#entries.set(key, { at: this.now(), value });
-		void value.catch(() => {
-			if (this.#entries.get(key)?.value === value) this.#entries.delete(key);
-		});
-
-		for (const oldest of this.#entries.keys()) {
-			if (this.#entries.size <= this.maxEntries) break;
-			this.#entries.delete(oldest);
-		}
-		return value;
-	}
-
-	clear(): void {
-		this.#entries.clear();
 	}
 }
 
@@ -168,6 +136,9 @@ export class GitHubReader {
 	readonly #options: GitHubReaderOptions;
 	readonly #answers: TimedCache<unknown>;
 	readonly #files: TimedCache<SourceFile>;
+	/** When each file was fetched afresh in the last hour. */
+	readonly #fetched: number[] = [];
+	#pausedUntil = 0;
 
 	constructor(options: GitHubReaderOptions) {
 		this.#options = options;
@@ -243,16 +214,25 @@ export class GitHubReader {
 		const size = entry.size ?? 0;
 		const shown = { path, ref: source.ref, size, githubUrl: githubFileUrl(this.#options.repository, source.ref, path) };
 
-		return this.#files.get(`${source.commit}:${path}`, async () => {
-			if (size > SITE_LIMITS.maxFileBytes) return { ...shown, text: null, withheld: "too_large" as const };
-			if (BINARY.has(extname(path).toLowerCase())) return { ...shown, text: null, withheld: "binary" as const };
+		if (size > SITE_LIMITS.maxFileBytes) return { ...shown, text: null, withheld: "too_large" };
+		if (BINARY.has(extname(path).toLowerCase())) return { ...shown, text: null, withheld: "binary" };
 
+		// Judged before the cache is touched, so a refusal never pushes out a file already held.
+		const key = `${source.commit}:${path}`;
+		if (!this.#files.has(key) && !this.#takeFreshFile()) throw new SiteProblem("busy");
+
+		return this.#files.get(key, async () => {
 			const { owner, repo } = this.#repository();
 			const encoded = path.split("/").map(encodeURIComponent).join("/");
-			const response = await fetchRaw(SERVICE, `${RAW}/${owner}/${repo}/${source.commit}/${encoded}`, {
-				headers: { "user-agent": `${owner}/${repo}` },
+			const response = await this.#asked(() =>
+				fetchRaw(SERVICE, `${RAW}/${owner}/${repo}/${source.commit}/${encoded}`, {
+					headers: { "user-agent": `${owner}/${repo}` },
+				}),
+			);
+			// The request's timeout still runs while the body arrives, and a body cut off is GitHub not answering.
+			const text = await response.text().catch((error: unknown) => {
+				throw new ServiceError(SERVICE, error);
 			});
-			const text = await response.text();
 
 			// A NUL is what every text format lacks, so a file with one is binary whatever its name says.
 			return text.includes("\u0000")
@@ -266,11 +246,12 @@ export class GitHubReader {
 
 		return this.#cached("traffic", async () => {
 			try {
+				// A 403 here is a token without Administration read rather than a limit, so it pauses nothing.
 				const [views, clones, referrers, pages] = await Promise.all([
-					this.#api("/traffic/views", viewsSchema),
-					this.#api("/traffic/clones", clonesSchema),
-					this.#api("/traffic/popular/referrers", referrersSchema),
-					this.#api("/traffic/popular/paths", pagesSchema),
+					this.#api("/traffic/views", viewsSchema, undefined, false),
+					this.#api("/traffic/clones", clonesSchema, undefined, false),
+					this.#api("/traffic/popular/referrers", referrersSchema, undefined, false),
+					this.#api("/traffic/popular/paths", pagesSchema, undefined, false),
 				]);
 
 				return {
@@ -356,20 +337,50 @@ export class GitHubReader {
 		return this.#coordinates;
 	}
 
-	#api<T>(path: string, schema: z.ZodType<T>, query?: Record<string, string | number>): Promise<T> {
+	#now(): number {
+		return (this.#options.now ?? Date.now)();
+	}
+
+	#takeFreshFile(): boolean {
+		const now = this.#now();
+		while (this.#fetched.length > 0 && (this.#fetched[0] ?? now) <= now - HOUR_MS) this.#fetched.shift();
+		if (this.#fetched.length >= SITE_LIMITS.freshFilesPerHour) return false;
+
+		this.#fetched.push(now);
+		return true;
+	}
+
+	/** GitHub is not asked while it is limiting the bot, and a limit it answers with starts that pause. */
+	async #asked<T>(request: () => Promise<T>, limitsPause = true): Promise<T> {
+		if (this.#now() < this.#pausedUntil) throw new ServiceError(SERVICE, new Error("Paused after a limit"), 429);
+
+		try {
+			return await request();
+		} catch (error) {
+			const limited = error instanceof ServiceError && (error.status === 429 || (limitsPause && error.status === 403));
+			if (limited) this.#pausedUntil = this.#now() + SITE_LIMITS.pauseMinutes * MINUTE_MS;
+			throw error;
+		}
+	}
+
+	#api<T>(path: string, schema: z.ZodType<T>, query?: Record<string, string | number>, limitsPause = true): Promise<T> {
 		const { owner, repo } = this.#repository();
 		const token = this.#options.token;
 
-		return fetchJson(SERVICE, `${API}/repos/${owner}/${repo}${path}`, schema, {
-			headers: {
-				accept: "application/vnd.github+json",
-				"x-github-api-version": "2022-11-28",
-				// GitHub refuses a request that does not say who is asking.
-				"user-agent": `${owner}/${repo}`,
-				...(token === undefined ? {} : { authorization: `Bearer ${token}` }),
-			},
-			...(query === undefined ? {} : { query }),
-		});
+		return this.#asked(
+			() =>
+				fetchJson(SERVICE, `${API}/repos/${owner}/${repo}${path}`, schema, {
+					headers: {
+						accept: "application/vnd.github+json",
+						"x-github-api-version": "2022-11-28",
+						// GitHub refuses a request that does not say who is asking.
+						"user-agent": `${owner}/${repo}`,
+						...(token === undefined ? {} : { authorization: `Bearer ${token}` }),
+					},
+					...(query === undefined ? {} : { query }),
+				}),
+			limitsPause,
+		);
 	}
 }
 

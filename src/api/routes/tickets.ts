@@ -1,7 +1,9 @@
+import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
+import { holdsPermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { deleteTicketSetup } from "@database/repositories/ticketRepository";
@@ -18,7 +20,12 @@ tickets.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, ticketPatch);
 
-	const result = await applyTickets(guild, body, guild.roles.everyone.id);
+	const result = await applyTickets(
+		guild,
+		body,
+		guild.roles.everyone.id,
+		holdsPermission(context, PermissionFlagsBits.MentionEveryone),
+	);
 	if ("problem" in result) throw badRequest(result.problem);
 
 	await auditChange(context, {

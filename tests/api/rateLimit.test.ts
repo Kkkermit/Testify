@@ -82,10 +82,12 @@ describe("callerKeys", () => {
 	});
 
 	/** A session identifies a person where an address identifies a household, so it narrows the bucket. */
-	it("adds the session as a second, tighter key", async () => {
-		const context = await contextFor({ cookie: "dash_session=abc123" });
+	it("adds the session as a second, tighter key, under either name", async () => {
+		const plain = await contextFor({ cookie: "dash_session=abc123" });
+		const prefixed = await contextFor({ cookie: "__Host-dash_session=def456" });
 
-		expect(callerKeys(context, false)).toContain("s:abc123");
+		expect(callerKeys(plain, false)).toContain("s:abc123");
+		expect(callerKeys(prefixed, false)).toContain("s:def456");
 	});
 
 	it("counts only the address for anyone not signed in, which is who a sign-in flood is", async () => {
@@ -103,10 +105,11 @@ describe("clientAddress", () => {
 		expect(clientAddress(context, false)).not.toBe("1.2.3.4");
 	});
 
-	it("reads the first hop when a proxy is trusted", async () => {
-		const context = await contextFor({ "x-forwarded-for": "1.2.3.4, 10.0.0.1" });
+	/** A proxy appends the caller's address to whatever they sent, so reading the first entry let anybody pick their own. */
+	it("reads the address the trusted proxy added, never one the caller wrote before it", async () => {
+		const context = await contextFor({ "x-forwarded-for": "6.6.6.6, 203.0.113.7" });
 
-		expect(clientAddress(context, true)).toBe("1.2.3.4");
+		expect(clientAddress(context, true)).toBe("203.0.113.7");
 	});
 
 	it("copes with a trusted proxy that sent nothing", async () => {

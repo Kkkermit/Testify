@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { containsMarkup } from "./markup";
 import { RESTORABLE, type Restorable, type RestorableAction, restorableFields, sameValue } from "./restore";
+import { snowflake } from "./schemas";
 import { plainLine, sanitiseLine } from "./text";
 
 /** A server’s settings as a file to keep, or to copy to another server, over the same writes Put back uses. */
@@ -19,7 +20,6 @@ export const BACKUP_SECTIONS = Object.keys(RESTORABLE) as RestorableAction[];
 
 type Plain = Record<string, unknown>;
 
-const snowflake = z.string().regex(/^\d{17,20}$/);
 const name = plainLine(0, BACKUP_LIMITS.maxName);
 const names = z
 	.record(snowflake, name)
