@@ -107,4 +107,15 @@ describe("collectionTitle", () => {
 			"oldthings · no model, left by an older version · 1 document",
 		);
 	});
+
+	/** Neither has a model of the bot's, and both are still read, so neither is something an older version left. */
+	it("names Shardlens's own collections and the counts from before it", () => {
+		expect([
+			collectionTitle("shardlens_interactions", 30, undefined),
+			collectionTitle("commandusages", 2, undefined),
+		]).toEqual([
+			"Shardlens analytics · shardlens_interactions · 30 documents",
+			"Usage from before Shardlens · commandusages, read until it expires · 2 documents",
+		]);
+	});
 });

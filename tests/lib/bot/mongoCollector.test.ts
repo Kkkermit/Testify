@@ -91,6 +91,19 @@ describe("startInBotCollector", () => {
 		expect(JSON.stringify(wrong.warned)).not.toContain("short");
 	});
 
+	/** The collector listens before the website, so on the website's port it would leave the website none. */
+	it("keeps off the website's port, and only while the website listens", async () => {
+		const shared = await startedWith({ SITE_ENABLED: true, DASHBOARD_PORT: COLLECTOR_PORT });
+		expect(shared.options).toMatchObject({ dashboard: { port: COLLECTOR_PORT + 1 } });
+		expect(shared.warned.map(([message]) => message)).toEqual([
+			"[SHARDLENS] Port 8080 is the website's, so the collector uses 8081. Set SHARDLENS_PORT to choose another.",
+		]);
+
+		const quiet = await startedWith({ SITE_ENABLED: false, DASHBOARD_ENABLED: false, DASHBOARD_PORT: COLLECTOR_PORT });
+		expect(quiet.options).toMatchObject({ dashboard: { port: COLLECTOR_PORT } });
+		expect(quiet.warned).toEqual([]);
+	});
+
 	/** Another process on the port leaves the collector storing events and the console with nothing to read. */
 	it("keeps sending, reads nothing and says how to fix it when the port is taken", async () => {
 		collector.dashboardUrl = undefined;

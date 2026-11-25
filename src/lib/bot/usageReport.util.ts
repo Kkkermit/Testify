@@ -1,6 +1,15 @@
 import { type Filter, type TopQuery } from "@shardlens/client";
 import { type Guild, PermissionsBitField } from "discord.js";
 import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import {
+	earlierDashboardViews,
+	earlierScreenViews,
+	earlierUses,
+	type EarlierTally,
+	type EarlierUses,
+	NO_EARLIER_USES,
+} from "@database/repositories/earlierUsageRepository";
 import { LENS_EVENTS, ownHandlerName, serverKey } from "@lib/bot/shardlens.util";
 import {
 	ALL_ROWS,
@@ -26,7 +35,7 @@ import {
 	type UsageReport,
 } from "@testify/shared";
 
-/** The owner console's usage figures, put together from what Shardlens answers. */
+/** The owner console's usage figures, put together from what Shardlens answers and what the bot counted before it. */
 
 const TOP = 10;
 const PREFIX_KIND = "message_command";
@@ -57,6 +66,51 @@ function rowsOf(rows: { key: string; value: number | null }[]): Counts {
 
 const total = (counts: Counts): number => [...counts.values()].reduce((sum, count) => sum + count, 0);
 
+/** The counts from before Shardlens are history, so one that cannot be read costs its share of a figure, not the page. */
+async function earlier<T>(client: TestifyClient, work: Promise<T>, none: T): Promise<T> {
+	try {
+		return await work;
+	} catch (error) {
+		client.logger.debug({ err: toError(error) }, "[ANALYTICS] The counts from before Shardlens could not be read.");
+		return none;
+	}
+}
+
+/** The first day of the window, as the bot keyed its own counts. */
+const firstDay = (days: number, now: number): string => windowDays(days, now)[0] ?? "";
+
+function addTallies(into: Map<string, Tally>, rows: EarlierTally[]): void {
+	for (const row of rows) {
+		const tally = into.get(row.key) ?? { count: 0, failures: 0 };
+		into.set(row.key, { count: tally.count + row.count, failures: tally.failures + row.failures });
+	}
+}
+
+/** Servers only: a run outside one was counted under a key that is not a server's id. */
+function addGuildCounts(into: Counts, rows: EarlierTally[]): Counts {
+	for (const row of rows) if (SNOWFLAKE.test(row.key)) add(into, row.key, row.count);
+	return into;
+}
+
+function withEarlierDays(days: UsageDay[], rows: EarlierTally[]): UsageDay[] {
+	const byDay = new Map(rows.map((row) => [row.key, row]));
+	return days.map((day) => {
+		const before = byDay.get(day.day);
+		if (before === undefined) return day;
+		return { day: day.day, count: day.count + before.count, failures: day.failures + before.failures };
+	});
+}
+
+function withEarlierSurfaces(
+	surfaces: { slash: number; prefix: number },
+	rows: EarlierTally[],
+): { slash: number; prefix: number } {
+	const count = (surface: string): number => rows.find((row) => row.key === surface)?.count ?? 0;
+	return { slash: surfaces.slash + count("slash"), prefix: surfaces.prefix + count("prefix") };
+}
+
+const countedIn = (uses: EarlierUses): number => uses.byDay.reduce((sum, day) => sum + day.count, 0);
+
 interface Point {
 	t: string;
 	key: string | null;
@@ -83,10 +137,17 @@ function categoryOf(client: TestifyClient, name: string): string {
 	return command?.category ?? "unknown";
 }
 
+const isMenu = (client: TestifyClient, name: string): boolean => client.contextMenus.has(name);
+
 function commandRows(client: TestifyClient, tallies: Map<string, Tally>): CommandUsageRow[] {
 	return [...tallies]
 		.filter(([, tally]) => tally.count > 0)
-		.map(([command, tally]) => ({ command, category: categoryOf(client, command), ...tally }))
+		.map(([command, tally]) => ({
+			command,
+			category: categoryOf(client, command),
+			menu: isMenu(client, command),
+			...tally,
+		}))
 		.sort((a, b) => b.count - a.count || a.command.localeCompare(b.command));
 }
 
@@ -96,6 +157,7 @@ function leastUsed(client: TestifyClient, tallies: Map<string, Tally>): CommandU
 		.map((command) => ({
 			command: command.name,
 			category: command.category,
+			menu: false,
 			count: tallies.get(command.name)?.count ?? 0,
 			failures: tallies.get(command.name)?.failures ?? 0,
 		}))
@@ -149,7 +211,21 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 	const reader = readerFor(client);
 	const ask = askFor(client, days, now);
 
-	const [commands, typical, byDay, kinds, byGuild, screens, dashboardByGuild, meta] = await Promise.all([
+	const since = firstDay(days, now);
+
+	const [
+		commands,
+		typical,
+		byDay,
+		kinds,
+		byGuild,
+		screens,
+		dashboardByGuild,
+		meta,
+		before,
+		screensBefore,
+		viewsBefore,
+	] = await Promise.all([
 		ask({ kind: "commands" }),
 		ask({ kind: "top", metric: "interactions", groupBy: "command", stat: "p50", limit: ALL_ROWS }),
 		ask(dailySeries("interactions", { groupBy: "outcome" })),
@@ -158,6 +234,9 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 		ask(eventProps(LENS_EVENTS.screen, "route")),
 		ask(eventProps(LENS_EVENTS.server, "server")),
 		reader.meta(),
+		earlier(client, earlierUses(since), NO_EARLIER_USES),
+		earlier(client, earlierScreenViews(since), []),
+		earlier(client, earlierDashboardViews(since), []),
 	]);
 
 	const tallies = new Map<string, Tally>();
@@ -165,12 +244,15 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 		if (row.runs === 0) continue;
 		tallies.set(row.command, { count: row.runs, failures: Math.round(row.runs * (row.errorRate ?? 0)) });
 	}
+	addTallies(tallies, before.byCommand);
 
-	const guilds = rowsOf(byGuild.rows.filter((row) => SNOWFLAKE.test(row.key)));
-	const dailyRuns = dailyOf(days, now, byDay.points);
-	const surfaces = surfacesOf(kinds.rows);
+	const guilds = addGuildCounts(rowsOf(byGuild.rows.filter((row) => SNOWFLAKE.test(row.key))), before.byGuild);
+	const dailyRuns = withEarlierDays(dailyOf(days, now, byDay.points), before.byDay);
+	const surfaces = withEarlierSurfaces(surfacesOf(kinds.rows), before.bySurface);
 	const typicalMs = rowsOf(typical.rows);
 	const ranked = commandRows(client, tallies);
+	const screenCounts = countsOf(screens.values);
+	for (const row of screensBefore) add(screenCounts, row.key, row.count);
 
 	return {
 		days,
@@ -184,8 +266,9 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 		mostUsed: ranked.slice(0, TOP),
 		leastUsed: leastUsed(client, tallies),
 		busiestGuilds: knownGuilds(client, guilds),
-		dashboardGuilds: knownGuilds(client, countsOf(dashboardByGuild.values)),
+		dashboardGuilds: knownGuilds(client, addGuildCounts(countsOf(dashboardByGuild.values), viewsBefore)),
 		detailDays: Math.min(days, meta.rawRetentionDays),
+		countedBefore: countedIn(before),
 		// Only an interaction has Discord waiting on a reply, so a command run only with the prefix has no time here.
 		slowest: commands.rows
 			.flatMap((row) =>
@@ -194,6 +277,7 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 							{
 								command: row.command,
 								category: categoryOf(client, row.command),
+								menu: isMenu(client, row.command),
 								runs: row.runs,
 								typicalMs: Math.round(typicalMs.get(row.command) ?? row.p95Ms),
 								slowMs: Math.round(row.p95Ms),
@@ -203,10 +287,11 @@ export async function usageReport(client: TestifyClient, days: number, now = Dat
 			)
 			.sort((a, b) => b.slowMs - a.slowMs || a.command.localeCompare(b.command))
 			.slice(0, TOP),
-		screens: screens.values
-			.filter((row) => isScreenRoute(row.value))
+		screens: [...screenCounts]
+			.filter(([route, count]) => isScreenRoute(route) && count > 0)
+			.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
 			.slice(0, TOP)
-			.map((row) => ({ route: row.value, count: row.count })),
+			.map(([route, count]) => ({ route, count })),
 		collector: reader.collector ?? "",
 	};
 }
@@ -220,8 +305,9 @@ export async function guildUsageReport(
 	const reader = readerFor(client);
 	const ask = askFor(client, days, now);
 	const here = serverFilter(guild.id);
+	const since = firstDay(days, now);
 
-	const [byDay, byCommand, failedByCommand, kinds, dashboard, server, meta] = await Promise.all([
+	const [byDay, byCommand, failedByCommand, kinds, dashboard, server, meta, before, viewsBefore] = await Promise.all([
 		ask(dailySeries("interactions", { groupBy: "outcome", filters: here })),
 		ask({ kind: "top", metric: "interactions", groupBy: "command", filters: here, limit: ALL_ROWS }),
 		ask({
@@ -235,26 +321,30 @@ export async function guildUsageReport(
 		ask(eventProps(LENS_EVENTS.server, serverKey(guild.id))),
 		reader.query({ kind: "server", guild: guild.id }),
 		reader.meta(),
+		earlier(client, earlierUses(since, guild.id), NO_EARLIER_USES),
+		earlier(client, earlierDashboardViews(since, guild.id), []),
 	]);
 
 	const failures = rowsOf(failedByCommand.rows);
 	const tallies = new Map<string, Tally>(
 		[...rowsOf(byCommand.rows)].map(([command, count]) => [command, { count, failures: failures.get(command) ?? 0 }]),
 	);
+	addTallies(tallies, before.byCommand);
 	const commands = commandRows(client, tallies);
-	const surfaces = surfacesOf(kinds.rows);
+	const surfaces = withEarlierSurfaces(surfacesOf(kinds.rows), before.bySurface);
 	const runs = surfaces.slash + surfaces.prefix;
 
 	return {
 		guild: { ...guildRow(guild, runs), joinedAt: guild.joinedAt.toISOString() },
 		days,
 		detailDays: Math.min(days, meta.rawRetentionDays),
+		countedBefore: countedIn(before),
 		runs,
 		failures: commands.reduce((sum, row) => sum + row.failures, 0),
 		surfaces,
-		daily: dailyOf(days, now, byDay.points),
+		daily: withEarlierDays(dailyOf(days, now, byDay.points), before.byDay),
 		commands,
-		dashboardViews: total(countsOf(dashboard.values)),
+		dashboardViews: total(countsOf(dashboard.values)) + viewsBefore.reduce((sum, row) => sum + row.count, 0),
 		people: server.found ? (server.uniqueUsersThisPeriod ?? null) : null,
 		profile: server.found ? profileOf(server) : null,
 		collector: reader.collector ?? "",
@@ -354,15 +444,18 @@ export interface GuildActivity {
 
 export async function guildActivity(client: TestifyClient, days: number, now = Date.now()): Promise<GuildActivity> {
 	const ask = askFor(client, days, now);
+	const since = firstDay(days, now);
 
-	const [commands, dashboard] = await Promise.all([
+	const [commands, dashboard, before, viewsBefore] = await Promise.all([
 		ask({ kind: "top", metric: "interactions", groupBy: "guild", limit: ALL_ROWS }),
 		ask(eventProps(LENS_EVENTS.server, "server")),
+		earlier(client, earlierUses(since), NO_EARLIER_USES),
+		earlier(client, earlierDashboardViews(since), []),
 	]);
 
 	return {
-		commands: rowsOf(commands.rows.filter((row) => SNOWFLAKE.test(row.key))),
-		dashboard: countsOf(dashboard.values),
+		commands: addGuildCounts(rowsOf(commands.rows.filter((row) => SNOWFLAKE.test(row.key))), before.byGuild),
+		dashboard: addGuildCounts(countsOf(dashboard.values), viewsBefore),
 	};
 }
 
@@ -374,13 +467,19 @@ export async function oneGuildActivity(
 	now = Date.now(),
 ): Promise<{ commands: number; dashboard: number }> {
 	const ask = askFor(client, days, now);
+	const since = firstDay(days, now);
 
-	const [commands, dashboard] = await Promise.all([
+	const [commands, dashboard, before, viewsBefore] = await Promise.all([
 		ask({ kind: "top", metric: "interactions", groupBy: "outcome", filters: serverFilter(guildId) }),
 		ask(eventProps(LENS_EVENTS.server, serverKey(guildId))),
+		earlier(client, earlierUses(since, guildId), NO_EARLIER_USES),
+		earlier(client, earlierDashboardViews(since, guildId), []),
 	]);
 
-	return { commands: total(rowsOf(commands.rows)), dashboard: total(countsOf(dashboard.values)) };
+	return {
+		commands: total(rowsOf(commands.rows)) + countedIn(before),
+		dashboard: total(countsOf(dashboard.values)) + viewsBefore.reduce((sum, row) => sum + row.count, 0),
+	};
 }
 
 /** For a figure that is a nicety on its page: the page still loads, and says why the number is missing. */

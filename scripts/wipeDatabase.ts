@@ -114,7 +114,14 @@ function documents(count: number): string {
 	return `${count.toLocaleString("en-GB")} ${count === 1 ? "document" : "documents"}`;
 }
 
+/** The counts the bot kept itself before Shardlens, still added to the owner console's figures until they expire. */
+const EARLIER_COUNTS = new Set(["commandusages", "screenviews", "dashboardviews"]);
+
 export function collectionTitle(collection: string, count: number, owner: ModelOwner | undefined): string {
+	if (collection.startsWith("shardlens_")) return `Shardlens analytics · ${collection} · ${documents(count)}`;
+	if (EARLIER_COUNTS.has(collection)) {
+		return `Usage from before Shardlens · ${collection}, read until it expires · ${documents(count)}`;
+	}
 	if (owner === undefined) return `${collection} · no model, left by an older version · ${documents(count)}`;
 	return `${owner.name} · ${collection} in ${owner.file} · ${documents(count)}`;
 }

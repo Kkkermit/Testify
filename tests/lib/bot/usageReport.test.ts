@@ -1,6 +1,12 @@
 import { Collection } from "discord.js";
 import { type Env } from "@config/env";
 import { settingsTarget, type TestifyClient } from "@core/client";
+import {
+	earlierDashboardViews,
+	earlierUses,
+	type EarlierTally,
+	type EarlierUses,
+} from "@database/repositories/earlierUsageRepository";
 import { AnalyticsUnavailable } from "@lib/bot/shardlensReader.util";
 import {
 	commandReport,
@@ -19,6 +25,23 @@ const GONE = "900000000000000009";
 const NOW = Date.parse("2026-11-15T12:00:00.000Z");
 
 type Spec = Record<string, unknown> & { kind: string };
+
+const NONE: EarlierUses = { byDay: [], byCommand: [], byGuild: [], bySurface: [] };
+let mockEarlier: { uses: EarlierUses | Error; screens: EarlierTally[]; views: EarlierTally[] } = {
+	uses: NONE,
+	screens: [],
+	views: [],
+};
+jest.mock("@database/repositories/earlierUsageRepository", () => ({
+	NO_EARLIER_USES: { byDay: [], byCommand: [], byGuild: [], bySurface: [] },
+	earlierUses: jest.fn(async () =>
+		mockEarlier.uses instanceof Error ? Promise.reject(mockEarlier.uses) : mockEarlier.uses,
+	),
+	earlierScreenViews: jest.fn(() => Promise.resolve(mockEarlier.screens)),
+	earlierDashboardViews: jest.fn(() => Promise.resolve(mockEarlier.views)),
+}));
+
+const tally = (key: string, count: number, failures = 0): EarlierTally => ({ key, count, failures });
 
 // `restoreMocks` undoes a spy before every test, so each test makes its own.
 let fetchMock: jest.SpiedFunction<typeof fetch>;
@@ -51,6 +74,7 @@ function clientFor(): TestifyClient {
 	const env = { SHARDLENS_URL: "https://stats.example.com/v1/ingest", SHARDLENS_READ_KEY: KEY } as unknown as Env;
 	return {
 		env,
+		logger: { debug: jest.fn() },
 		lensTarget: settingsTarget(env),
 		commands: new Collection<string, unknown>([
 			["ban", { name: "ban", category: "moderation" }],
@@ -71,6 +95,7 @@ function clientFor(): TestifyClient {
 beforeEach(() => {
 	fetchMock = jest.spyOn(globalThis, "fetch");
 	collector(empty);
+	mockEarlier = { uses: NONE, screens: [], views: [] };
 });
 
 describe("usageReport", () => {
@@ -92,9 +117,9 @@ describe("usageReport", () => {
 		const report = await usageReport(clientFor(), 7, NOW);
 
 		expect(report.mostUsed).toEqual([
-			{ command: "ban", category: "moderation", count: 15, failures: 3 },
-			// A right-click action is filed under the command it belongs to.
-			{ command: "Warn", category: "moderation", count: 4, failures: 0 },
+			{ command: "ban", category: "moderation", menu: false, count: 15, failures: 3 },
+			// A right-click action is filed under the command it belongs to, and marked, since it has no page of its own.
+			{ command: "Warn", category: "moderation", menu: true, count: 4, failures: 0 },
 		]);
 		expect(report.commandsUsed).toBe(2);
 		expect(report.leastUsed.map((row) => [row.command, row.count])).toEqual([
@@ -197,8 +222,8 @@ describe("usageReport", () => {
 
 		expect(report.screens).toEqual([{ route: "/guilds/:guildId/levelling", count: 9 }]);
 		expect(report.slowest).toEqual([
-			{ command: "ban", category: "moderation", runs: 8, typicalMs: 310, slowMs: 2_401 },
-			{ command: "beg", category: "economy", runs: 3, typicalMs: 120, slowMs: 120 },
+			{ command: "ban", category: "moderation", menu: false, runs: 8, typicalMs: 310, slowMs: 2_401 },
+			{ command: "beg", category: "economy", menu: false, runs: 3, typicalMs: 120, slowMs: 120 },
 		]);
 	});
 
@@ -419,6 +444,107 @@ describe("guildActivity and oneGuildActivity", () => {
 
 		expect([all.commands.get(HERE), all.dashboard.get(HERE)]).toEqual([5, 6]);
 		expect(one).toEqual({ commands: 4, dashboard: 6 });
+	});
+});
+
+describe("the counts from before Shardlens", () => {
+	const BEFORE: EarlierUses = {
+		byDay: [tally("2026-11-14", 7, 1)],
+		byCommand: [tally("ban", 5, 1), tally("beg", 2)],
+		byGuild: [tally(HERE, 4, 1), tally("DIRECT_MESSAGE", 3)],
+		bySurface: [tally("slash", 5, 1), tally("prefix", 2)],
+	};
+
+	function shardlensCounts(spec: Spec): unknown {
+		if (spec.kind === "commands") return { rows: [{ command: "ban", runs: 15, errorRate: 0.2, p95Ms: 900 }] };
+		if (spec.kind === "top" && spec.groupBy === "kind") return { rows: [{ key: "chat_input", value: 15 }] };
+		if (spec.kind === "top" && spec.groupBy === "guild") return { rows: [{ key: THERE, value: 15 }] };
+		if (spec.kind === "eventProps" && spec.name === "dashboard_screen") {
+			return { values: [{ value: "/guilds/:guildId/levelling", count: 9 }] };
+		}
+		return empty(spec);
+	}
+
+	/** Production counted every run itself before Shardlens, and an upgrade must not empty the console of it. */
+	it("adds what the bot counted itself to every figure, from the first day of the window", async () => {
+		mockEarlier = {
+			uses: BEFORE,
+			screens: [tally("/guilds/:guildId/settings", 20), tally("/guilds/:guildId/levelling", 3)],
+			views: [tally(THERE, 6)],
+		};
+		collector(shardlensCounts);
+
+		const report = await usageReport(clientFor(), 7, NOW);
+
+		expect(jest.mocked(earlierUses)).toHaveBeenCalledWith("2026-11-09");
+		expect(report.mostUsed.map((row) => [row.command, row.count, row.failures])).toEqual([
+			["ban", 20, 4],
+			["beg", 2, 0],
+		]);
+		expect(report.daily.find((day) => day.day === "2026-11-14")).toEqual({ day: "2026-11-14", count: 7, failures: 1 });
+		expect(report.surfaces).toEqual({ slash: 20, prefix: 2 });
+		expect(report.runs).toBe(22);
+		expect(report.countedBefore).toBe(7);
+		// A run outside any server was counted under a key that is not a server, and stays out of the servers.
+		expect(report.busiestGuilds.map((row) => [row.guildId, row.count])).toEqual([
+			[THERE, 15],
+			[HERE, 4],
+		]);
+		expect(report.activeGuilds).toBe(2);
+		expect(report.dashboardGuilds.map((row) => [row.guildId, row.count])).toEqual([[THERE, 6]]);
+		expect(report.screens).toEqual([
+			{ route: "/guilds/:guildId/settings", count: 20 },
+			{ route: "/guilds/:guildId/levelling", count: 12 },
+		]);
+	});
+
+	it("adds them to one server's figures, and asks only about that server", async () => {
+		mockEarlier = { uses: { ...BEFORE, byCommand: [tally("ban", 4, 1)] }, screens: [], views: [tally(HERE, 2)] };
+		collector((spec) => {
+			if (spec.kind === "top" && spec.groupBy === "command" && spec.filters !== undefined) {
+				const failed = (spec.filters as { field: string }[]).some((filter) => filter.field === "outcome");
+				return { rows: [{ key: "ban", value: failed ? 1 : 6 }] };
+			}
+			if (spec.kind === "top" && spec.groupBy === "kind") return { rows: [{ key: "chat_input", value: 6 }] };
+			return empty(spec);
+		});
+
+		const report = await guildUsageReport(clientFor(), clientFor().guilds.cache.get(HERE) as never, 7, NOW);
+
+		expect(jest.mocked(earlierUses)).toHaveBeenCalledWith("2026-11-09", HERE);
+		expect(jest.mocked(earlierDashboardViews)).toHaveBeenCalledWith("2026-11-09", HERE);
+		expect(report.commands.map((row) => [row.command, row.count, row.failures])).toEqual([["ban", 10, 2]]);
+		expect(report.runs).toBe(13);
+		expect(report.dashboardViews).toBe(2);
+		expect(report.countedBefore).toBe(7);
+	});
+
+	it("adds them to the server list's counts", async () => {
+		mockEarlier = { uses: BEFORE, screens: [], views: [tally(HERE, 2)] };
+		collector(empty);
+
+		const all = await guildActivity(clientFor(), 30, NOW);
+		const one = await oneGuildActivity(clientFor(), HERE, 30, NOW);
+
+		expect([all.commands.get(HERE), all.commands.has("DIRECT_MESSAGE"), all.dashboard.get(HERE)]).toEqual([
+			4,
+			false,
+			2,
+		]);
+		expect(one).toEqual({ commands: 7, dashboard: 2 });
+	});
+
+	/** They are history: one that cannot be read costs its share of a figure, never the page. */
+	it("leaves them out, quietly, when they cannot be read", async () => {
+		mockEarlier = { uses: new Error("database down"), screens: [], views: [] };
+		collector(shardlensCounts);
+		const client = clientFor();
+
+		const report = await usageReport(client, 7, NOW);
+
+		expect(report.runs).toBe(15);
+		expect(report.countedBefore).toBe(0);
+		expect(client.logger.debug).toHaveBeenCalled();
 	});
 });
 

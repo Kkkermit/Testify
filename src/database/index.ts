@@ -75,6 +75,7 @@ export * from "./repositories/countingRepository";
 export * from "./repositories/dashboardAccessRepository";
 export * from "./repositories/dashboardAuditRepository";
 export * from "./repositories/dashboardSessionRepository";
+export * from "./repositories/earlierUsageRepository";
 export * from "./repositories/economyRepository";
 export * from "./repositories/githubTrafficRepository";
 export * from "./repositories/goodbyeRepository";

@@ -19,6 +19,8 @@ export const analyticsQuery = z.object({
 export interface CommandUsageRow {
 	command: string;
 	category: string;
+	/** A right-click action, named as Discord shows it, with no slash and no page of its own. */
+	menu: boolean;
 	count: number;
 	failures: number;
 }
@@ -35,6 +37,7 @@ export interface GuildUsageRow {
 interface SlowCommandRow {
 	command: string;
 	category: string;
+	menu: boolean;
 	runs: number;
 	typicalMs: number;
 	/** The slowest one in twenty took at least this long. */
@@ -70,6 +73,8 @@ export interface UsageReport {
 	dashboardGuilds: GuildUsageRow[];
 	/** The dashboard's figures come from raw events, which the collector keeps this long. */
 	detailDays: number;
+	/** Runs in the window the bot counted itself before Shardlens, already added to every figure above. */
+	countedBefore: number;
 	slowest: SlowCommandRow[];
 	screens: ScreenTally[];
 	/** The collector's origin, where its own dashboard opens. */
@@ -80,6 +85,8 @@ export interface GuildUsageReport {
 	guild: GuildUsageRow & { joinedAt: string | null };
 	days: number;
 	detailDays: number;
+	/** As in `UsageReport`, for this server. */
+	countedBefore: number;
 	runs: number;
 	failures: number;
 	surfaces: { slash: number; prefix: number };

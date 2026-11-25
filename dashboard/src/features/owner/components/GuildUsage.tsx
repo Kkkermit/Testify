@@ -42,7 +42,19 @@ export function GuildUsage({
 				{(usage) => (
 					<>
 						{usage.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: usage.detailDays })}</Warning>}
+						{usage.countedBefore > 0 && (
+							<p className="text-muted-foreground text-sm">
+								{t("owner.countedBefore", { count: usage.countedBefore })}
+							</p>
+						)}
 						<GuildUsageSummary report={usage} />
+						<Link
+							to={searchWith(params, { guild: null, command: null, view: "runs" })}
+							state={{ runsIn: { guildId, name: usage.guild.name } }}
+							className="text-accent text-sm hover:underline"
+						>
+							{t("owner.runsInServer")}
+						</Link>
 						<ShardlensLinks collector={usage.collector} guildId={guildId} />
 					</>
 				)}

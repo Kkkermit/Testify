@@ -8,17 +8,18 @@ import { formatNumber, formatPercent } from "@/lib/intl";
 
 const LINK = "hover:text-accent transition-colors duration-150";
 
-/** A command's name that opens it in depth, keeping the window. */
-export function commandLink(name: string, params: URLSearchParams): React.JSX.Element {
+/** A command's name that opens it in depth, keeping the window; a right-click action has no page to open. */
+export function commandLink(row: Pick<CommandUsageRow, "command" | "menu">, params: URLSearchParams): React.ReactNode {
+	if (row.menu) return row.command;
 	return (
-		<Link to={searchWith(params, { command: name })} className={LINK}>
-			/{name}
+		<Link to={searchWith(params, { command: row.command })} className={LINK}>
+			/{row.command}
 		</Link>
 	);
 }
 
 export function commandLinkBar(row: CommandUsageRow, params: URLSearchParams, t: TFunction): Bars[number] {
-	return { ...commandBar(row, t), label: commandLink(row.command, params) };
+	return { ...commandBar(row, t), label: commandLink(row, params) };
 }
 
 /** A server as a bar whose name opens its own figures, keeping the window and the view. */

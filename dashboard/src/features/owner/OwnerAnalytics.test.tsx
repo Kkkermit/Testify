@@ -2,10 +2,11 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { barWidth } from "@/components/primitives/UsageBars";
-import { levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
+import { commandBar, levelFrom, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
+import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
-import { logFeed, logRuns, PAST_RUN, shardlensStatus } from "@/test/fixtures/owner";
+import { logFeed, logRuns, PAST_RUN, shardlensStatus, usageReport } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -40,6 +41,18 @@ describe("barWidth", () => {
 	});
 });
 
+describe("commandBar", () => {
+	/** A right-click action is named as Discord's menu shows it, with no slash nobody could type. */
+	it("puts a slash before a command and none before a right-click action", () => {
+		const t = i18next.t.bind(i18next);
+		const row = { category: "moderation", count: 1, failures: 0 } as const;
+		expect([
+			commandBar({ ...row, command: "warn", menu: false }, t).label,
+			commandBar({ ...row, command: "Time out", menu: true }, t).label,
+		]).toEqual(["/warn", "Time out"]);
+	});
+});
+
 describe("shortDay", () => {
 	it("shortens a day key, in UTC so it cannot slip a day", () => {
 		// The format follows the reader's locale, so the assertion is on the parts rather than their order.
@@ -56,6 +69,19 @@ describe("the usage tab", () => {
 		expect(await screen.findByText("/flush")).toBeInTheDocument();
 	});
 
+	/** A right-click action has no slash and no page of its own, so a link to one opened a refusal. */
+	it("names a right-click action as Discord does, and links only commands", async () => {
+		renderTab("usage");
+
+		expect(await screen.findByText("Time out")).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /time out/i })).not.toBeInTheDocument();
+		expect(screen.queryByText("/Time out")).not.toBeInTheDocument();
+		expect(screen.getAllByRole("link", { name: "/rank" })[0]).toHaveAttribute(
+			"href",
+			expect.stringContaining("command=rank"),
+		);
+	});
+
 	/** Ranked by the slow tail, with the typical time beside it, so one hung run reads differently from a slow command. */
 	it("names the slowest commands with their slow and typical times", async () => {
 		renderTab("usage");
@@ -65,6 +91,20 @@ describe("the usage tab", () => {
 		expect(screen.getByText("40 runs · typically 850 ms")).toBeInTheDocument();
 		expect(screen.getByText("1,300 runs · typically 90 ms")).toBeInTheDocument();
 		expect(screen.getByText(/how long Discord waited for the bot’s first reply/i)).toBeInTheDocument();
+	});
+
+	/** The figures quietly include the bot's own counts from before Shardlens, so the page says how many. */
+	it("says how many runs were counted before Shardlens, and nothing when none were", async () => {
+		server.use(http.get("/api/analytics/usage", () => HttpResponse.json({ ...usageReport, countedBefore: 1_500 })));
+		const { unmount } = renderTab("usage");
+
+		expect(await screen.findByText(/Includes 1,500 runs the bot counted itself before Shardlens/)).toBeInTheDocument();
+		unmount();
+
+		server.resetHandlers();
+		renderTab("usage");
+		expect(await screen.findByText("/flush")).toBeInTheDocument();
+		expect(screen.queryByText(/before Shardlens/)).not.toBeInTheDocument();
 	});
 
 	/** The bars are decoration; the numbers behind them have to be readable without them. */

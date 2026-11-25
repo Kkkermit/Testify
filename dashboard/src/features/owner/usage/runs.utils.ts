@@ -64,3 +64,27 @@ export function runWhat(row: Pick<RunRow, "command" | "sub" | "handler">): strin
 	if (row.command !== null) return row.sub === null ? `/${row.command}` : `/${row.command} ${row.sub}`;
 	return row.handler;
 }
+
+/**
+ * A failure in a server is found in the logs by the server's id, which every failure line carries; a person's id never
+ * goes in the address, so a failure outside any server has no link.
+ */
+export function logsFor(row: Pick<RunRow, "outcome" | "guildId">): string | null {
+	if (row.outcome !== "error" || row.guildId === null) return null;
+	return `/owner?${new URLSearchParams({ tab: "logs", level: "error", q: row.guildId }).toString()}`;
+}
+
+export interface RunsIn {
+	guildId: string;
+	name: string;
+}
+
+/** History state is whatever was last written to it, so only a server id and a name are taken from it. */
+export function runsInFrom(state: unknown): RunsIn | null {
+	if (typeof state !== "object" || state === null || !("runsIn" in state)) return null;
+	const given: unknown = state.runsIn;
+	if (typeof given !== "object" || given === null || !("guildId" in given) || !("name" in given)) return null;
+	const { guildId, name } = given;
+	if (typeof guildId !== "string" || !SNOWFLAKE.test(guildId) || typeof name !== "string") return null;
+	return { guildId, name: name.slice(0, 100) };
+}

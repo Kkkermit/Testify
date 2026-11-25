@@ -263,7 +263,13 @@ function usageReport(days: number): UsageReport {
 	const daily = dailyRuns("fleet", days, 1_850);
 	const runs = sumOf(daily.map((day) => day.count));
 	const counts = commandCounts(`fleet:${String(days)}`, runs);
-	const rows = counts.map(([[name, category], count, failures]) => ({ command: name, category, count, failures }));
+	const rows = counts.map(([[name, category], count, failures]) => ({
+		command: name,
+		category,
+		menu: false,
+		count,
+		failures,
+	}));
 	const used = rows.filter((row) => row.count > 0).sort((a, b) => b.count - a.count);
 	const random = seeded(`fleet:slow:${String(days)}`);
 
@@ -283,6 +289,7 @@ function usageReport(days: number): UsageReport {
 			guildRow(server, Math.round((days * 9 * (8 - index)) / 4)),
 		),
 		detailDays: Math.min(days, DETAIL_DAYS),
+		countedBefore: 0,
 		slowest: used
 			.slice(0, 18)
 			.map((row) => {
@@ -293,6 +300,7 @@ function usageReport(days: number): UsageReport {
 				return {
 					command: row.command,
 					category: row.category,
+					menu: false,
 					runs: row.count,
 					typicalMs: Math.round(slowMs / 3.5),
 					slowMs,
@@ -310,7 +318,7 @@ function guildUsage(guildId: string, days: number): GuildUsageReport {
 	const daily = dailyRuns(`guild:${server.id}`, days, Math.max(2, 1_850 * server.share));
 	const runs = sumOf(daily.map((day) => day.count));
 	const commands = commandCounts(`guild:${server.id}:${String(days)}`, runs)
-		.map(([[name, category], count, failures]) => ({ command: name, category, count, failures }))
+		.map(([[name, category], count, failures]) => ({ command: name, category, menu: false, count, failures }))
 		.filter((row) => row.count > 0)
 		.sort((a, b) => b.count - a.count);
 
@@ -318,6 +326,7 @@ function guildUsage(guildId: string, days: number): GuildUsageReport {
 		guild: { ...guildRow(server, runs), joinedAt: joinedAt(server) },
 		days,
 		detailDays: Math.min(days, DETAIL_DAYS),
+		countedBefore: 0,
 		runs,
 		failures: sumOf(daily.map((day) => day.failures)),
 		surfaces: { slash: Math.round(runs * 0.85), prefix: runs - Math.round(runs * 0.85) },

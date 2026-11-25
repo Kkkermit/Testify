@@ -28,6 +28,11 @@ is a warning in the log, and the bot runs without analytics.
 A refusal the bot explains to the person who ran the command, such as having no account yet, counts as a run rather
 than a failure, so the failures it shows are the bot's own.
 
+**Upgrading from a version that counted for itself.** Before Shardlens, the bot counted commands and dashboard screens
+in its own database, and those counts expire 90 days after they were made. Until they have, the Usage tab adds them to
+its figures and says how many runs it added, so switching Shardlens on does not start the console from nothing. Who ran
+what before Shardlens is not carried over: it stays in the bot's database for its last 30 days and goes with it.
+
 ## 🧭 Choose how to run it
 
 |                     | Inside the bot                                      | A collector you run                                |
@@ -60,13 +65,16 @@ keys are made on its first start and kept in the same database.
 
 **Where it is kept.** Every collection it adds starts `shardlens_`, in the database `MONGODB_URI` names, or in one
 called `shardlens` when it names none. Nothing of the bot's own is touched. Single events are kept 35 days, which
-Shardlens's own **Settings → Data retention** changes (7 to 90); counts by hour and day stay small for years. A command
+Shardlens's own **Settings → Data retention** changes (7 to 90); counts by hour and day stay small for years. The
+dashboard's screens and servers in the owner console are read from single events, so they reach back only that far:
+set it to 90 for them to cover the console's longest window. A command
 takes about 150 bytes on disk: Atlas's free 512 MB, if Shardlens had it to itself, would hold roughly 30,000 commands a
 day at 35 days, and the bot's own data shares it. It opens at most 10 connections of its own to the database. To remove it, switch it off and drop the `shardlens_`
 collections.
 
 **Its own dashboard** answers on `http://127.0.0.1:8080`, from the bot's machine only, which is where the owner
-console reads every figure; `SHARDLENS_PORT` moves it. To open Shardlens's own pages, for its settings, alerts and
+console reads every figure; `SHARDLENS_PORT` moves it. On the website's own port it moves itself one along and says so
+at start-up, since it starts first and would otherwise leave the website none. To open Shardlens's own pages, for its settings, alerts and
 reports, run this in the bot's folder on any computer whose `.env` has the bot's `MONGODB_URI`, and open the one-time
 link it prints:
 

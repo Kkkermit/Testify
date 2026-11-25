@@ -10,6 +10,8 @@ const LOOPBACK = "127.0.0.1";
 
 const AUDIT_KEY_BYTES = 32;
 
+const MAX_PORT = 65_535;
+
 /** MongoDB's code for a database user refused what it asked. */
 const UNAUTHORIZED = 13;
 
@@ -17,7 +19,7 @@ const UNAUTHORIZED = 13;
 export function collectorPort(value: string | undefined): number | null {
 	if (value === undefined) return COLLECTOR_PORT;
 	const port = /^\d{1,5}$/.test(value) ? Number(value) : 0;
-	return port >= 1 && port <= 65_535 ? port : null;
+	return port >= 1 && port <= MAX_PORT ? port : null;
 }
 
 /** The collector's own rule for its audit key: 32 bytes once read as base64. */
@@ -42,6 +44,14 @@ export async function startInBotCollector(client: TestifyClient): Promise<LensTa
 	if (port === null) {
 		logger.warn(`[SHARDLENS] SHARDLENS_PORT is not a port, so the collector uses ${String(COLLECTOR_PORT)}.`);
 		port = COLLECTOR_PORT;
+	}
+	// The collector listens before the website does, so sharing its port would cost the website rather than analytics.
+	if ((env.DASHBOARD_ENABLED || env.SITE_ENABLED) && port === env.DASHBOARD_PORT) {
+		const moved = port === MAX_PORT ? port - 1 : port + 1;
+		logger.warn(
+			`[SHARDLENS] Port ${String(port)} is the website's, so the collector uses ${String(moved)}. Set SHARDLENS_PORT to choose another.`,
+		);
+		port = moved;
 	}
 
 	let auditKey = env.SHARDLENS_AUDIT_KEY;

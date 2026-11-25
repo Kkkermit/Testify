@@ -3,7 +3,7 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
-import { idFromLookup, narrowed, runWhat } from "@/features/owner/usage/runs.utils";
+import { idFromLookup, logsFor, narrowed, runsInFrom, runWhat } from "@/features/owner/usage/runs.utils";
 import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
 import { runsPage } from "@/test/fixtures/usageSections";
@@ -42,6 +42,37 @@ describe("the run log's rules", () => {
 		expect(narrowed({}, { outcome: "failed", guildId: "" })).toEqual({ outcome: "failed" });
 	});
 
+	/** A person's id is never put in an address, so only a failure in a server is searched for, by the server. */
+	it("finds a failure in the logs by its server, and nothing else", () => {
+		const guildId = "900000000000000001";
+		expect(logsFor({ outcome: "error", guildId })).toBe(`/owner?tab=logs&level=error&q=${guildId}`);
+		expect([
+			logsFor({ outcome: "error", guildId: null }),
+			logsFor({ outcome: "ok", guildId }),
+			logsFor({ outcome: "timeout", guildId }),
+		]).toEqual([null, null, null]);
+	});
+
+	/** History state outlives the page that wrote it, so anything but a server id and a name is left behind. */
+	it("takes only a server id and its name from history state", () => {
+		const guildId = "900000000000000001";
+		expect(runsInFrom({ runsIn: { guildId, name: "Testify HQ", userId: PERSON } })).toEqual({
+			guildId,
+			name: "Testify HQ",
+		});
+		expect(runsInFrom({ runsIn: { guildId, name: "x".repeat(500) } })?.name).toHaveLength(100);
+		const refused = [
+			null,
+			"runsIn",
+			{},
+			{ runsIn: null },
+			{ runsIn: { guildId: "1", name: "a" } },
+			{ runsIn: { guildId: { $ne: null }, name: "a" } },
+			{ runsIn: { guildId } },
+		].filter((state) => runsInFrom(state) !== null);
+		expect(refused).toEqual([]);
+	});
+
 	it("says what ran as somebody would type it", () => {
 		expect(runWhat({ command: "warn", sub: "create", handler: null })).toBe("/warn create");
 		expect(runWhat({ command: null, sub: null, handler: "shop:buy" })).toBe("shop:buy");
@@ -64,6 +95,14 @@ describe("Who ran what", () => {
 	});
 
 	/** A person looked up must not land in an address, where history, a proxy or a shared link would keep them. */
+	it("links a failure in a server to that server's errors in the logs", async () => {
+		renderRuns();
+
+		const link = await screen.findByRole("link", { name: t("owner.runs.findInLogs", { name: "Testify HQ" }) });
+		expect(link).toHaveAttribute("href", "/owner?tab=logs&level=error&q=900000000000000001");
+		expect(screen.getAllByRole("link", { name: /in the logs/ })).toHaveLength(1);
+	});
+
 	it("looks one person up by id in the request body, and never in an address", async () => {
 		const sent = watchRuns();
 		const view = renderRuns();

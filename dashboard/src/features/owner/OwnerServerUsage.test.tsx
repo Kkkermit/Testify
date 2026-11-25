@@ -113,6 +113,26 @@ describe("one server's usage", () => {
 		expect(activity).toHaveAttribute("rel", "noreferrer");
 	});
 
+	/** The console keeps the run log's filters out of the address, so the server travels in history state. */
+	it("opens who ran what narrowed to this server, with no server id added to the address", async () => {
+		const sent: unknown[] = [];
+		server.use(
+			http.post("/api/analytics/runs", async ({ request }) => {
+				sent.push(await request.json());
+				return HttpResponse.json({ rows: [], next: null, collector: "https://stats.example.com" });
+			}),
+		);
+		const { search } = renderAt(DRILL_DOWN);
+
+		await userEvent.click(await screen.findByRole("link", { name: "Who ran what here" }));
+
+		expect(await screen.findByRole("button", { name: new RegExp(`Only ${aGuild.name}`) })).toBeInTheDocument();
+		await waitFor(() => {
+			expect(sent).toContainEqual(expect.objectContaining({ guildId: aGuild.id }));
+		});
+		expect(search()).toBe("?tab=usage&view=runs");
+	});
+
 	/** A missing key is a setting, not an outage, so only an outage or a refused key offers to try again. */
 	it("says why Shardlens could not be read, and offers a retry only when one could help", async () => {
 		const refuse = (code: string): void => {

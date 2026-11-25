@@ -113,7 +113,7 @@ export function commandBar(row: CommandUsageRow, t: TFunction): UsageBar {
 
 	return {
 		id: row.command,
-		label: `/${row.command}`,
+		label: row.menu ? row.command : `/${row.command}`,
 		sub: row.failures > 0 ? t("owner.categoryFailed", { category, failed: row.failures }) : category,
 		count: row.count,
 	};

@@ -2,6 +2,7 @@ import { type RunRow, type RunsFilters, type RunsPage, TOP_RUNNER_WINDOWS, type 
 import { X } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link, useLocation } from "react-router";
 import { FIELD, LABEL, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DividedList, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
@@ -15,11 +16,13 @@ import {
 	choiceOf,
 	idFromLookup,
 	kindLabel,
+	logsFor,
 	narrowed,
 	OUTCOME_CHOICE_LABELS,
 	OUTCOME_CHOICES,
 	OUTCOME_LABELS,
 	OUTCOME_TONES,
+	runsInFrom,
 	runWhat,
 } from "@/features/owner/usage/runs.utils";
 import { useRuns, useTopRunners } from "@/features/owner/useOwner";
@@ -43,8 +46,11 @@ type Narrow = (change: Partial<Record<keyof RunsFilters, string | null>>, server
 
 export function RunsView({ days }: { days: number }): React.JSX.Element {
 	const { t } = useTranslation();
-	const [filters, setFilters] = useState<RunsFilters>({});
-	const [serverName, setServerName] = useState<string | null>(null);
+	// A server's own page hands its id over in history state, since the console keeps these filters out of the address.
+	const location = useLocation();
+	const [opened] = useState(() => runsInFrom(location.state as unknown));
+	const [filters, setFilters] = useState<RunsFilters>(opened === null ? {} : { guildId: opened.guildId });
+	const [serverName, setServerName] = useState<string | null>(opened?.name ?? null);
 	// A cursor belongs to one window and one set of filters, so changing either starts again from the first page.
 	const trailKey = JSON.stringify([days, filters]);
 	const [kept, setKept] = useState<{ key: string; trail: CursorTrail }>({ key: trailKey, trail: FIRST_CURSOR_PAGE });
@@ -236,6 +242,7 @@ function RunItem({ row, onNarrow }: { row: RunRow; onNarrow: Narrow }): React.JS
 	const who = row.username ?? row.userId ?? t("owner.runs.unknownPerson");
 	const what = runWhat(row);
 	const kind = kindLabel(row.kind);
+	const logs = logsFor(row);
 
 	return (
 		<li className="flex items-start gap-3 px-4 py-3">
@@ -286,7 +293,18 @@ function RunItem({ row, onNarrow }: { row: RunRow; onNarrow: Narrow }): React.JS
 					{row.answerMs !== null && <> · {t("owner.runs.answered", { time: formatMs(row.answerMs) })}</>}
 				</p>
 			</div>
-			<Badge tone={OUTCOME_TONES[row.outcome]}>{t(OUTCOME_LABELS[row.outcome])}</Badge>
+			<div className="flex shrink-0 flex-col items-end gap-1">
+				<Badge tone={OUTCOME_TONES[row.outcome]}>{t(OUTCOME_LABELS[row.outcome])}</Badge>
+				{logs !== null && (
+					<Link
+						to={logs}
+						className={cn(LINK, "text-xs")}
+						aria-label={t("owner.runs.findInLogs", { name: row.guildName ?? row.guildId })}
+					>
+						{t("owner.runs.logs")}
+					</Link>
+				)}
+			</div>
 		</li>
 	);
 }

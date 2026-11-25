@@ -2394,7 +2394,9 @@ collections beside the bot's. These things about it are load-bearing:
   placeholder address and key Shardlens's own runner uses (`IN_PROCESS`), and `said` names MongoDB where the SDK
   would name that placeholder. The collector always answers on `127.0.0.1:SHARDLENS_PORT`, because a read needs a
   socket: the in-process `fetch` signs every request in as the ingest key. A port another process holds leaves it
-  storing events and answering no reads, which is one `warn` and a target with no `url`. `client.lensTarget` is then
+  storing events and answering no reads, which is one `warn` and a target with no `url`. It starts before the website,
+  so on the website's own port it would take it and leave the website none: while the website or the dashboard is on,
+  `DASHBOARD_PORT` moves it one along, with a `warn` naming `SHARDLENS_PORT`. `client.lensTarget` is then
   that collector's address and keys, and it is what the SDK, the reader, the live feed, the status card and the setup
   check all read: `settingsTarget(env)` gives the four settings until then, and none of them while `SHARDLENS_MONGODB`
   is on, so a leftover `SHARDLENS_URL` is warned about and never used. A collector that cannot start is a `warn`
@@ -2511,10 +2513,16 @@ collections beside the bot's. These things about it are load-bearing:
   dashboard opens. `findLeak` treats both keys as secrets. Send now waits for events still being hashed before it
   flushes.
 
-**The old analytics collections are left to expire, not dropped.** `commandusages`, `screenviews` and
+**The old analytics collections are left to expire, and are read until they have.** `commandusages`, `screenviews` and
 `dashboardviews` (90 days) and `commandruns` (30 days) each carry a TTL index, so MongoDB empties them on its own
 after an upgrade; until it has, `eraseUserData` still deletes the person's rows from `commandruns` by collection name.
-Nothing reads them any more, and `npm run db:wipe` removes them sooner for anybody who wants that.
+Nothing writes them. The three counts are read by name, without a model, in `earlierUsageRepository.ts`, and
+`usageReport.util.ts` adds them to every command, server, day, surface and screen figure in the window, so an upgrade
+does not empty the Usage tab of the runs the bot counted before Shardlens; `countedBefore` says how many, and the page
+says so. They are history, so one that cannot be read is a `debug` line and its share of the figure, never the page, and
+the slowest commands stay Shardlens's alone, since the old counts kept no time. `commandruns` is not read: who ran what
+before Shardlens was a log in the bot's own database, and copying it into the collector is the one thing that would
+make a person's earlier runs travel. `npm run db:wipe` names all four and removes them sooner for anybody who wants that.
 
 ### Whoever adds the bot gets one message, and nothing about it can fail the join
 
@@ -3860,8 +3868,9 @@ about it are load-bearing:
 - **Slash runs and prefix runs are one set of figures.** The collector counts the SDK's message commands in the same
   `interactions` rollups as slash commands and right-click actions, so each command's runs and failures, each
   server's runs and each day's, a server's chart included, cover both. The surfaces are told apart by grouping on
-  `kind`, where `message_command` is a prefix run and every other kind is an interaction. A right-click action is
-  filed under the command its `switchedBy` names.
+  `kind`, where `message_command` is a prefix run and every other kind is an interaction. The collector files a
+  right-click action under its own name, in the category of the command its `switchedBy` names, and its row carries
+  `menu`, so it is drawn with no slash and no link: it has no page of its own to open.
 - **Only the dashboard's figures reach no further than raw events.** Its screens and servers are custom events read
   with `eventProps`, top 50 values at a time, for as long as the collector keeps raw events; the rollups behind every
   command figure last much longer. `detailDays` is that shorter reach, and the page says so when the window passes
@@ -3884,7 +3893,10 @@ about it are load-bearing:
   (`trailPages`, `turnTo`, `cursorAt`) keeps every cursor met so a page number goes back without asking again — the
   member directory pages through the same trail; changing the window or a filter starts again from page one. The
   collector's own Activity page and the server's page are still linked with `collectorPage`, which only ever builds a
-  link from an `http`/`https` origin.
+  link from an `http`/`https` origin. A server's own figures open the log narrowed to it, handing the server over in
+  history state (`runsInFrom`, which takes only a snowflake and a name from it) rather than in the address, and a run
+  that failed in a server links the logs searched for that server's id at `error` (`logsFor`). A failure outside any
+  server has no such link, since the only thing to search by would be the person's id.
 
 **The Usage tab has nine sections, and each reads its own owner-only route**, so one the collector cannot answer
 leaves the rest working: Commands, People (`/analytics/audience`), Servers (`/growth`), Buttons and forms (`/panels`),

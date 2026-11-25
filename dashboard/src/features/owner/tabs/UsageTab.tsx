@@ -113,6 +113,9 @@ function FleetFigures({
 			</p>
 
 			{report.detailDays < days && <Warning>{t("owner.detailDaysNote", { days: report.detailDays })}</Warning>}
+			{report.countedBefore > 0 && (
+				<p className="text-muted-foreground text-sm">{t("owner.countedBefore", { count: report.countedBefore })}</p>
+			)}
 
 			<Card padding="none" className="divide-border divide-y">
 				<RunFigures runs={report.runs} failures={report.failures} daily={report.daily}>
@@ -163,7 +166,7 @@ function FleetFigures({
 						empty={t("owner.noSlowRuns")}
 						rows={report.slowest.map((row) => ({
 							id: row.command,
-							label: commandLink(row.command, params),
+							label: commandLink(row, params),
 							sub: t("owner.slowSub", { count: row.runs, typical: formatMs(row.typicalMs) }),
 							count: row.slowMs,
 							value: formatMs(row.slowMs),
