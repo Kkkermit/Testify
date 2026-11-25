@@ -8,7 +8,7 @@ const KEY = "slk_ingest_abcdefghijklmnopqrstuvwxyz0123456789";
 const sending: ShardlensStatus = {
 	state: "sending",
 	collector: "https://stats.example.com",
-	embedded: false,
+	inBot: false,
 	mode: "privacy",
 	queued: 3,
 	waitingForResponse: 1,
@@ -37,11 +37,11 @@ describe("/shardlens", () => {
 			{ status: sending, shows: ["https://stats.example.com", "Failed sends", "`network`"], hides: [] },
 			{
 				status: { ...sending, state: "off" as const, collector: null, lastProblem: null },
-				shows: ["SHARDLENS_EMBEDDED=true", "SHARDLENS_URL"],
+				shows: ["SHARDLENS_MONGODB=true", "SHARDLENS_URL"],
 				hides: ["Failed sends"],
 			},
 			{
-				status: { ...sending, collector: "http://127.0.0.1:8080", embedded: true },
+				status: { ...sending, collector: "http://127.0.0.1:8080", inBot: true },
 				shows: ["http://127.0.0.1:8080, on the machine the bot runs on"],
 				hides: [],
 			},

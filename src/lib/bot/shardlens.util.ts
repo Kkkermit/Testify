@@ -5,9 +5,9 @@ import { createShardlens, type Shardlens } from "@shardlens/discordjs";
 import { BaseInteraction, type Interaction, type Message } from "discord.js";
 import { type LensTarget, type TestifyClient } from "@core/client";
 import { type Command, type GivenOption, subcommandsOf } from "@core/command";
-import { toError } from "@core/errors";
+import { toError, UserFacingError } from "@core/errors";
 import { readOptOuts } from "@database/repositories/analyticsOptOutRepository";
-import { startEmbedded } from "@lib/bot/embeddedCollector.util";
+import { startInBotCollector } from "@lib/bot/mongoCollector.util";
 import { botVersion } from "@lib/bot/runtime.util";
 import { collectorOrigin } from "@lib/bot/shardlensReader.util";
 import {
@@ -21,7 +21,7 @@ import {
 	type SupportWay,
 } from "@testify/shared";
 
-/** Shardlens: analytics the bot sends to a collector its owner runs, attached only once it is configured. */
+/** Shardlens: analytics kept by a collector in the bot or one its owner runs, attached only once it is configured. */
 
 /** One name per thing counted, so each keeps its own total; commands on both surfaces are the SDK's own. */
 export const LENS_EVENTS = {
@@ -121,8 +121,17 @@ interface Watch {
 
 const watches = new WeakMap<Shardlens, Watch>();
 
+/**
+ * The collector in the bot signs every request in with its own ingest key, so these only pass the SDK's checks, and the
+ * SDK's lines name it by this placeholder address.
+ */
+const IN_PROCESS = { endpoint: "http://localhost", apiKey: "slk_ingest_in_process" } as const;
+
 /** The SDK starts its own lines with its name, which the tag already says. */
-const said = (message: string): string => `[SHARDLENS] ${message.replace(/^Shardlens:\s*/, "")}`;
+function said(message: string, inBot: boolean): string {
+	const line = message.replace(/^Shardlens:\s*/, "");
+	return `[SHARDLENS] ${inBot ? line.replace(`the collector at ${IN_PROCESS.endpoint}`, "MongoDB") : line}`;
+}
 
 /**
  * Options that list fixed choices wherever they are declared, so a value is one the bot wrote and never text, a number
@@ -140,27 +149,31 @@ export function choiceOptions(commands: Iterable<Command>): string[] {
 }
 
 /** Events wait here while the collector is away; one folder per collector and key, so two installs never swap them. */
-export function spoolDir(target: Pick<LensTarget, "url" | "ingestKey">): string {
-	const id = createHash("sha256")
-		.update(`${target.url ?? ""}\n${target.ingestKey ?? ""}`)
-		.digest("hex")
-		.slice(0, 16);
+export function spoolDir(...collector: string[]): string {
+	const id = createHash("sha256").update(collector.join("\n")).digest("hex").slice(0, 16);
 	return join(tmpdir(), `testify-shardlens-${id}`);
 }
 
+/** Which collector a target is: its address and key, or for the one in the bot its database and application. */
+function spoolFor(client: TestifyClient, target: LensTarget): string {
+	return target.inBot === null
+		? spoolDir(target.url ?? "", target.ingestKey ?? "")
+		: spoolDir("mongodb", client.env.MONGODB_URI, client.env.DISCORD_CLIENT_ID);
+}
+
 /** `true` runs the collector inside the bot; anything but `false` or blank is said once and read as off. */
-function embeddedAsked(client: TestifyClient): boolean {
-	const value = client.env.SHARDLENS_EMBEDDED;
+function inBotAsked(client: TestifyClient): boolean {
+	const value = client.env.SHARDLENS_MONGODB;
 	if (value !== undefined && value !== "true" && value !== "false") {
-		client.logger.warn("[SHARDLENS] SHARDLENS_EMBEDDED should be true or false, so it is read as false.");
+		client.logger.warn("[SHARDLENS] SHARDLENS_MONGODB should be true or false, so it is read as false.");
 	}
 	return value === "true";
 }
 
 export async function startShardlens(client: TestifyClient): Promise<Shardlens | null> {
 	const env = client.env;
-	const embedded = embeddedAsked(client);
-	if (!embedded && env.SHARDLENS_URL === undefined && env.SHARDLENS_INGEST_KEY === undefined) return null;
+	const inBot = inBotAsked(client);
+	if (!inBot && env.SHARDLENS_URL === undefined && env.SHARDLENS_INGEST_KEY === undefined) return null;
 
 	let optedOut: string[];
 	try {
@@ -173,23 +186,28 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 		return null;
 	}
 
-	if (embedded) {
+	if (inBot) {
 		if (env.SHARDLENS_URL !== undefined || env.SHARDLENS_INGEST_KEY !== undefined) {
-			client.logger.warn("[SHARDLENS] SHARDLENS_EMBEDDED is on, so SHARDLENS_URL and its keys are not used.");
+			client.logger.warn("[SHARDLENS] SHARDLENS_MONGODB is on, so SHARDLENS_URL and its keys are not used.");
 		}
-		const own = await startEmbedded(client);
+		const own = await startInBotCollector(client);
 		if (own === null) return null;
 		client.lensTarget = own;
 	}
 
 	const target = client.lensTarget;
+	const sending =
+		target.inBot === null
+			? { endpoint: target.url, apiKey: target.ingestKey }
+			: { ...IN_PROCESS, fetch: target.inBot.send };
 	const choices = choiceOptions(client.commands.values());
 	const lens = createShardlens(client, {
-		endpoint: target.url,
-		apiKey: target.ingestKey,
+		...sending,
 		captureOptionValues: choices,
+		// A user's mistake, which the bot explains, is a run rather than a failure, so failures are bugs.
+		isExpectedError: (error) => error instanceof UserFacingError,
 		// Kept hashed and without who ran them, so a long outage or a restart costs no figures.
-		spool: { dir: spoolDir(target) },
+		spool: { dir: spoolFor(client, target) },
 		release: botVersion(),
 		environment: env.NODE_ENV,
 		// One server every two seconds, so member counts stay current rather than being read only at start-up.
@@ -199,9 +217,9 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 		auditIncludeProfile: true,
 		optedOut,
 		logger: {
-			debug: (message) => client.logger.debug(said(message)),
-			info: (message) => client.logger.info(said(message)),
-			warn: (message) => client.logger.warn(said(message)),
+			debug: (message) => client.logger.debug(said(message, target.inBot !== null)),
+			info: (message) => client.logger.info(said(message, target.inBot !== null)),
+			warn: (message) => client.logger.warn(said(message, target.inBot !== null)),
 		},
 	});
 
@@ -219,8 +237,9 @@ export async function startShardlens(client: TestifyClient): Promise<Shardlens |
 }
 
 export function shardlensLine(target: LensTarget): string {
-	if (target.embedded !== null) return `Shardlens, inside the bot · dashboard at ${target.embedded.dashboardUrl}`;
 	const origin = collectorOrigin(target.url);
+	if (target.inBot !== null)
+		return `Shardlens, on the bot's MongoDB${origin === null ? "" : ` · dashboard at ${origin}`}`;
 	return origin === null ? "Shardlens" : `Shardlens, sending to ${origin}`;
 }
 
@@ -261,8 +280,8 @@ export function recordPrefixRun(client: TestifyClient, message: Message, run: Pr
 		...(options.length === 0 ? {} : { options }),
 		...(Object.keys(optionValues).length === 0 ? {} : { optionValues }),
 		durationMs: run.durationMs,
-		failed: !run.ok,
-		...(run.error === undefined ? {} : { error: run.error }),
+		// The SDK judges an error itself, and one the bot throws on purpose is not a failure.
+		...(run.error === undefined ? { failed: !run.ok } : { error: run.error }),
 	});
 }
 
@@ -282,13 +301,13 @@ const stateOf = (lens: Shardlens): ShardlensState => (lens.stats().ready ? "send
 export function shardlensStatus(client: TestifyClient): ShardlensStatus {
 	const lens = client.shardlens;
 	const collector = collectorOrigin(client.lensTarget.url);
-	const embedded = client.lensTarget.embedded !== null;
+	const inBot = client.lensTarget.inBot !== null;
 
 	if (lens === null) {
 		return {
 			state: "off",
 			collector,
-			embedded,
+			inBot,
 			mode: null,
 			queued: 0,
 			waitingForResponse: 0,
@@ -303,7 +322,7 @@ export function shardlensStatus(client: TestifyClient): ShardlensStatus {
 	return {
 		state: stateOf(lens),
 		collector,
-		embedded,
+		inBot,
 		mode: stats.mode ?? null,
 		queued: stats.queueDepth + stats.pendingSalt,
 		waitingForResponse: stats.pendingInteractions,

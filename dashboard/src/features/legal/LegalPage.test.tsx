@@ -131,7 +131,7 @@ describe("the legal pages", () => {
 			/the names of the options you filled in and, for one with a fixed list, the choice you picked, but never what you typed/,
 		);
 		// The spool holds what the SDK has not sent, which it writes hashed and without an audit identity.
-		expect(lens).toMatch(/spool: \{ dir: spoolDir\(target\) \}/);
+		expect(lens).toMatch(/spool: \{ dir: spoolFor\(client, target\) \}/);
 		expect(text).toMatch(/kept in a folder on the bot’s own machine, hashed and without who ran it, until it is sent/);
 		expect(text).toMatch(/unless the operator has put their collector in audit mode: then your user id, username/);
 		// Who ran what reaches the console only through the activity key, on owner-only routes the collector logs.
@@ -141,12 +141,15 @@ describe("the legal pages", () => {
 		expect(botSource("src/api/routes/analytics.ts")).toMatch(/analytics\.use\("\*", requireOwner\)/);
 		expect(text).toMatch(/by the bot’s owners in its owner console if the operator has given the bot an activity key/);
 		expect(text).not.toMatch(/only the people who can sign in to it can see who ran what/);
-		// The collector inside the bot keeps its database beside the bot, and names people only with the audit key.
-		const embedded = botSource("src/lib/bot/embeddedCollector.util.ts");
-		expect(embedded).toMatch(/join\(repoRoot\(\), "shardlens-data", env\.NODE_ENV\)/);
-		expect(embedded).toMatch(/auditKey === undefined \? \{\} : \{ mode: "audit" as const, auditKey \}/);
-		expect(text).toMatch(/which can run inside the bot so that nothing leaves its machine/);
-		expect(text).toMatch(/on the operator’s own collector, which can run inside the bot on its own machine/);
+		// The collector inside the bot keeps everything in the bot's own database, and names people only with the audit key.
+		const inBot = botSource("src/lib/bot/mongoCollector.util.ts");
+		expect(inBot).toMatch(/uri: env\.MONGODB_URI,/);
+		expect(inBot).toMatch(/auditKey === undefined \? \{\} : \{ mode: "audit" as const, auditKey \}/);
+		expect(text).toMatch(/which can run inside the bot and keep them in the bot’s own database\./);
+		expect(text).toMatch(
+			/on the operator’s own collector, which can run inside the bot and keep them in the bot’s own database/,
+		);
+		expect(text).not.toMatch(/nothing leaves its machine/);
 		// A prefix run is the SDK's own message command, sent with its actor in audit mode like any other.
 		expect(lens).toMatch(/trackMessageCommand\(message, \{\s*command: run\.command,/);
 		expect(text).toMatch(/sent with each command, button and form, prefix commands included/);

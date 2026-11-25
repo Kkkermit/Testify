@@ -77,8 +77,8 @@ docker compose -f docker-compose.yml -f docker-compose.image.yml pull
 docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
 ```
 
-Data lives in the `mongo-data` volume and survives `docker compose down`. `docker compose down -v` deletes it, and the
-`shardlens-data` volume with it, which holds the analytics when `SHARDLENS_EMBEDDED=true` runs them inside the bot.
+Data lives in the `mongo-data` volume and survives `docker compose down`, the analytics included when
+`SHARDLENS_MONGODB=true` runs them inside the bot. `docker compose down -v` deletes it.
 
 ---
 
@@ -192,10 +192,10 @@ Without either, the bot runs with the built-in settings, exactly as a copy with 
 
 ### Analytics on Railway
 
-`SHARDLENS_EMBEDDED=true` runs the Shardlens collector inside the bot service, so a push upgrades both at once. Give
-it a volume at `/app/shardlens-data`, so the history outlives each deploy, and set `RAILWAY_RUN_UID=0`, since Railway
-mounts a volume for root and the image runs as `node`. [The analytics guide](analytics.md#-on-railway) has the rest,
-and a collector of your own beside the bot.
+`SHARDLENS_MONGODB=true` runs the Shardlens collector inside the bot service and keeps everything in the bot's own
+MongoDB, so a push upgrades both at once and there is no volume to attach. The database must be MongoDB 7.0 or newer,
+which Atlas is. [The analytics guide](analytics.md#-on-railway) has the rest, and a collector of your own beside the
+bot.
 
 ---
 

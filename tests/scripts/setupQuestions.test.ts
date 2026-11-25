@@ -13,7 +13,7 @@ import {
 	writeSecretFile,
 } from "../../scripts/setupQuestions";
 import { INSTANCE_DEFAULTS, readInstance } from "@config/instance";
-import { isAuditKey } from "@lib/bot/embeddedCollector.util";
+import { isAuditKey } from "@lib/bot/mongoCollector.util";
 
 function field(list: Field[], key: string): Field {
 	const found = list.find((candidate) => candidate.key === key);
@@ -53,8 +53,8 @@ describe("the analytics question", () => {
 		const key = newAuditKey();
 
 		expect(analyticsLines("off", {}, null)).toEqual([]);
-		expect(analyticsLines("embedded", {}, null)).toEqual(["", "SHARDLENS_EMBEDDED=true"]);
-		expect(analyticsLines("embedded", {}, key)).toEqual(["", "SHARDLENS_EMBEDDED=true", `SHARDLENS_AUDIT_KEY=${key}`]);
+		expect(analyticsLines("inBot", {}, null)).toEqual(["", "SHARDLENS_MONGODB=true"]);
+		expect(analyticsLines("inBot", {}, key)).toEqual(["", "SHARDLENS_MONGODB=true", `SHARDLENS_AUDIT_KEY=${key}`]);
 		expect(isAuditKey(key)).toBe(true);
 		expect(analyticsLines("collector", { SHARDLENS_URL: "https://stats.example.com" }, null)).toEqual([
 			"",

@@ -161,7 +161,7 @@ export function dashboardFields(isDev: boolean): Field[] {
 	];
 }
 
-export type AnalyticsChoice = "off" | "embedded" | "collector";
+export type AnalyticsChoice = "off" | "inBot" | "collector";
 
 /** The four settings for a collector run elsewhere, asked only when that is the choice. */
 export function collectorFields(): Field[] {
@@ -205,7 +205,7 @@ export function analyticsLines(
 	if (choice === "off") return [];
 	if (choice === "collector")
 		return ["", ...collectorFields().map((field) => `${field.key}=${collector[field.key] ?? ""}`)];
-	return ["", "SHARDLENS_EMBEDDED=true", ...(auditKey === null ? [] : [`SHARDLENS_AUDIT_KEY=${auditKey}`])];
+	return ["", "SHARDLENS_MONGODB=true", ...(auditKey === null ? [] : [`SHARDLENS_AUDIT_KEY=${auditKey}`])];
 }
 
 /** The same rule the bot reads the file with, so a wizard answer can never write a file the bot refuses. */

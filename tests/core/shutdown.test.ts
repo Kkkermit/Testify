@@ -91,7 +91,10 @@ describe("shutdown", () => {
 			ingestKey: undefined,
 			readKey: undefined,
 			activityKey: undefined,
-			embedded: { dashboardUrl: "http://localhost:8080", close: () => Promise.resolve(void order.push("collector")) },
+			inBot: {
+				send: () => Promise.resolve(new Response(null)),
+				close: () => Promise.resolve(void order.push("collector")),
+			},
 		};
 		jest.mocked(client.destroy).mockImplementation(() => Promise.resolve(void order.push("destroy")));
 

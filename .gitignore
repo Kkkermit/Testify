@@ -21,7 +21,7 @@ npm-debug.log*
 # Runtime data
 *.pid
 *.seed
-# The Shardlens collector SHARDLENS_EMBEDDED runs: a database, and keys that must never be committed.
+# What an earlier Shardlens collector inside the bot kept: a database, and keys that must never be committed.
 shardlens-data/
 
 # Editors

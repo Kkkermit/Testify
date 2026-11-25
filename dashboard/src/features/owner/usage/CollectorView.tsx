@@ -20,13 +20,13 @@ const CHECKS: { check: Check; done: TranslationKey; missing: TranslationKey; own
 		check: "auditMode",
 		done: "owner.setup.auditMode",
 		missing: "owner.setup.auditModeMissing",
-		ownMissing: "owner.setup.auditMissingEmbedded",
+		ownMissing: "owner.setup.auditMissingInBot",
 	},
 	{
 		check: "auditKey",
 		done: "owner.setup.auditKey",
 		missing: "owner.setup.auditKeyMissing",
-		ownMissing: "owner.setup.auditMissingEmbedded",
+		ownMissing: "owner.setup.auditMissingInBot",
 	},
 	{ check: "activityKey", done: "owner.setup.activityKey", missing: "owner.setup.activityKeyMissing" },
 	{ check: "receivingEvents", done: "owner.setup.receiving", missing: "owner.setup.receivingMissing" },
@@ -70,7 +70,7 @@ function CollectorFigures({ report }: { report: CollectorSetup }): React.JSX.Ele
 				<ul className="flex flex-col gap-3 px-6 py-5" aria-label={t("owner.setup.checksLabel")}>
 					{CHECKS.map(({ check, done, missing, ownMissing }) => {
 						const ok = report.checks[check];
-						const advice = report.embedded ? (ownMissing ?? missing) : missing;
+						const advice = report.inBot ? (ownMissing ?? missing) : missing;
 						const Icon = ok ? Check : X;
 						return (
 							<li key={check} className="flex gap-3 text-sm">

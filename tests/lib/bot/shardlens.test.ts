@@ -3,9 +3,9 @@ import { ButtonInteraction, ChannelType, ComponentType, InteractionType, type Me
 import { type Env } from "@config/env";
 import { type LensTarget, TestifyClient } from "@core/client";
 import { type Command } from "@core/command";
-import { runButton, runCommand } from "@core/errors";
+import { runButton, runCommand, UserFacingError } from "@core/errors";
 import { type Logger } from "@core/logger";
-import { startEmbedded } from "@lib/bot/embeddedCollector.util";
+import { startInBotCollector } from "@lib/bot/mongoCollector.util";
 import {
 	measured,
 	recordAction,
@@ -38,9 +38,9 @@ jest.mock("@database/repositories/analyticsOptOutRepository", () => ({
 	readOptOuts: jest.fn(async () => mockOptedOut),
 }));
 
-let mockEmbedded: LensTarget | null = null;
-jest.mock("@lib/bot/embeddedCollector.util", () => ({
-	startEmbedded: jest.fn(() => Promise.resolve(mockEmbedded)),
+let mockInBot: LensTarget | null = null;
+jest.mock("@lib/bot/mongoCollector.util", () => ({
+	startInBotCollector: jest.fn(() => Promise.resolve(mockInBot)),
 }));
 
 const USER = "111111111111111111";
@@ -52,7 +52,7 @@ const TARGET: LensTarget = {
 	ingestKey: KEY,
 	readKey: undefined,
 	activityKey: undefined,
-	embedded: null,
+	inBot: null,
 };
 const TYPED = "t?bal view secret words";
 
@@ -115,7 +115,7 @@ const running: TestifyClient[] = [];
 afterEach(async () => {
 	mockPrint = true;
 	mockOptedOut = Promise.resolve([]);
-	mockEmbedded = null;
+	mockInBot = null;
 	await Promise.all(running.splice(0).map(async (client) => client.shardlens?.shutdown()));
 });
 
@@ -163,32 +163,62 @@ describe("startShardlens", () => {
 });
 
 describe("the collector inside the bot", () => {
+	const send = jest.fn<Promise<Response>, Parameters<typeof fetch>>(() => Promise.resolve(new Response(null)));
 	const OWN: LensTarget = {
 		url: "http://127.0.0.1:8080",
-		ingestKey: KEY,
+		ingestKey: undefined,
 		readKey: `slk_read_${"r".repeat(43)}`,
 		activityKey: `slk_activity_${"a".repeat(43)}`,
-		embedded: { dashboardUrl: "http://localhost:8080", close: () => Promise.resolve() },
+		inBot: { send, close: () => Promise.resolve() },
 	};
-	const EMBEDDED = { SHARDLENS_EMBEDDED: "true", ...CONFIGURED };
+	const IN_BOT = { SHARDLENS_MONGODB: "true", MONGODB_URI: "mongodb://localhost/testify", ...CONFIGURED };
 
 	/** Settings left over for a collector elsewhere must not be sent to or read while the bot runs its own. */
-	it("sends to and reads the collector it started, and says the other settings are not used", async () => {
-		mockEmbedded = OWN;
-		const { client, said } = clientWith(EMBEDDED);
+	it("sends through the collector it started, reads it back, and says the other settings are not used", async () => {
+		mockInBot = OWN;
+		mockPrint = false;
+		const { client, said } = clientWith(IN_BOT);
 		running.push(client);
 
 		await startShardlens(client);
-		expect(jest.mocked(createShardlens).mock.calls.at(-1)?.[1]).toMatchObject({ endpoint: OWN.url, apiKey: KEY });
+		const options = jest.mocked(createShardlens).mock.calls.at(-1)?.[1];
+		expect(options).toMatchObject({ endpoint: "http://localhost", fetch: send });
+		expect(options?.apiKey).not.toBe(KEY);
 		expect(client.lensTarget).toBe(OWN);
-		expect(shardlensStatus(client)).toMatchObject({ collector: "http://127.0.0.1:8080", embedded: true });
-		expect(shardlensLine(client.lensTarget)).toBe("Shardlens, inside the bot · dashboard at http://localhost:8080");
-		expect(said.warn).toEqual(["[SHARDLENS] SHARDLENS_EMBEDDED is on, so SHARDLENS_URL and its keys are not used."]);
+		expect(shardlensStatus(client)).toMatchObject({ collector: "http://127.0.0.1:8080", inBot: true });
+		expect(shardlensLine(client.lensTarget)).toBe(
+			"Shardlens, on the bot's MongoDB · dashboard at http://127.0.0.1:8080",
+		);
+		expect(said.warn).toEqual(["[SHARDLENS] SHARDLENS_MONGODB is on, so SHARDLENS_URL and its keys are not used."]);
+		// Nothing goes to the collector elsewhere: every request the SDK makes goes through the one in the bot.
+		await client.shardlens?.flush();
+		expect(send.mock.calls.length).toBeGreaterThan(0);
+		const asked = send.mock.calls.map(([url]) => (url instanceof Request ? url.url : url.toString()));
+		expect(asked.every((url) => url.startsWith("http://localhost/"))).toBe(true);
+	});
+
+	/** The SDK names a collector by the address it sends to, which in the bot is only a placeholder. */
+	it("names MongoDB, not the placeholder address, when it cannot be reached", async () => {
+		mockInBot = { ...OWN, inBot: { send: () => Promise.reject(new Error("down")), close: () => Promise.resolve() } };
+		mockPrint = false;
+		const { client, said } = clientWith(IN_BOT);
+		running.push(client);
+
+		await startShardlens(client);
+		await client.shardlens?.flush();
+		const unreachable = said.warn.find((line) => line.includes("can't reach"));
+		expect(unreachable).toMatch(/^\[SHARDLENS\] can't reach MongoDB /);
+		expect(said.warn.join("\n")).not.toContain("http://localhost");
+	});
+
+	/** A port another process holds still keeps the events, and only reading waits for the next start. */
+	it("says only that it is on the bot's MongoDB when it answers no reads", () => {
+		expect(shardlensLine({ ...OWN, url: undefined })).toBe("Shardlens, on the bot's MongoDB");
 	});
 
 	/** A collector that cannot start costs the analytics, never the bot, and never falls back to one elsewhere. */
 	it("stays off when it cannot start", async () => {
-		const { client } = clientWith(EMBEDDED);
+		const { client } = clientWith(IN_BOT);
 
 		expect(await startShardlens(client)).toBeNull();
 		expect(client.lensTarget).toMatchObject({ url: undefined, ingestKey: undefined, readKey: undefined });
@@ -198,10 +228,10 @@ describe("the collector inside the bot", () => {
 
 	it("starts nothing while the opt-outs cannot be read", async () => {
 		mockOptedOut = Promise.reject(new Error("database down"));
-		const { client } = clientWith(EMBEDDED);
+		const { client } = clientWith(IN_BOT);
 
 		expect(await startShardlens(client)).toBeNull();
-		expect(startEmbedded).not.toHaveBeenCalled();
+		expect(startInBotCollector).not.toHaveBeenCalled();
 		await client.destroy();
 	});
 
@@ -210,12 +240,12 @@ describe("the collector inside the bot", () => {
 			["false", false],
 			["yes", true],
 		] as const) {
-			const { client, said } = clientWith({ SHARDLENS_EMBEDDED: value });
+			const { client, said } = clientWith({ SHARDLENS_MONGODB: value });
 			expect(await startShardlens(client)).toBeNull();
 			expect(said.warn.length > 0).toBe(warned);
 			await client.destroy();
 		}
-		expect(startEmbedded).not.toHaveBeenCalled();
+		expect(startInBotCollector).not.toHaveBeenCalled();
 	});
 });
 
@@ -233,10 +263,25 @@ describe("what the SDK is started with", () => {
 		expect(options?.mode).toBe("audit");
 		expect(options?.auditIncludeProfile).toBe(true);
 		expect(options?.captureOptionValues).toEqual(["bet", "table"]);
-		expect(options?.spool).toEqual({ dir: spoolDir(TARGET) });
+		expect(options?.spool).toEqual({ dir: spoolDir(TARGET.url ?? "", KEY) });
 		expect(options?.release).toMatch(/^\d+\.\d+\.\d+/);
 		// Member counts are otherwise read only at start-up and when the bot joins a server.
 		expect(options?.refreshGuildCounts).toBe(true);
+	});
+
+	/** A refusal the bot explains is the reader's mistake, so failure rates count only what went wrong in the bot. */
+	it("counts a user's mistake as a run and anything else as a failure", async () => {
+		const { client } = clientWith(CONFIGURED);
+		running.push(client);
+		await startShardlens(client);
+
+		const expected = jest.mocked(createShardlens).mock.calls.at(-1)?.[1].isExpectedError;
+		const wrong = [
+			[new UserFacingError("You do not have an account yet."), true],
+			[new TypeError("a bug"), false],
+			["a string", false],
+		].filter(([error, want]) => expected?.(error) !== want);
+		expect(wrong).toEqual([]);
 	});
 
 	/** An opt-out held only in memory was forgotten at the next start, and the person counted again. */
@@ -346,12 +391,38 @@ describe("choiceOptions", () => {
 describe("spoolDir", () => {
 	/** Two installs on one machine sending to different collectors must never replay each other's events. */
 	it("gives each collector and key its own folder, named without the key", () => {
-		const other = spoolDir({ ...TARGET, url: "https://elsewhere.example.com" });
+		const mine = spoolDir("https://stats.example.com", KEY);
+		const other = spoolDir("https://elsewhere.example.com", KEY);
 
-		expect(spoolDir(TARGET)).toBe(spoolDir({ ...TARGET }));
-		expect(other).not.toBe(spoolDir(TARGET));
-		expect(spoolDir(TARGET)).not.toContain(KEY);
-		expect(spoolDir(TARGET)).not.toContain(KEY.slice(11, 30));
+		expect(mine).toBe(spoolDir("https://stats.example.com", KEY));
+		expect(other).not.toBe(mine);
+		expect(mine).not.toContain(KEY);
+		expect(mine).not.toContain(KEY.slice(11, 30));
+	});
+
+	/** The collector in the bot has no key of its own, so its folder is the database and the application. */
+	it("keeps a bot on MongoDB apart from another database or application, naming neither", async () => {
+		const uri = "mongodb+srv://bot:hunter2@cluster0.example.mongodb.net/testify";
+		const { client } = clientWith({
+			SHARDLENS_MONGODB: "true",
+			MONGODB_URI: uri,
+			DISCORD_CLIENT_ID: "123456789012345678",
+		});
+		mockInBot = {
+			url: undefined,
+			ingestKey: undefined,
+			readKey: undefined,
+			activityKey: undefined,
+			inBot: { send: () => Promise.resolve(new Response(null)), close: () => Promise.resolve() },
+		};
+		running.push(client);
+		await startShardlens(client);
+
+		const dir = (jest.mocked(createShardlens).mock.calls.at(-1)?.[1].spool as { dir: string }).dir;
+		expect(dir).toBe(spoolDir("mongodb", uri, "123456789012345678"));
+		expect(dir).not.toBe(spoolDir("mongodb", uri, "876543210987654321"));
+		expect(dir).not.toContain("hunter2");
+		expect(dir).not.toContain("cluster0");
 	});
 });
 
@@ -392,6 +463,29 @@ describe("recordPrefixRun", () => {
 		expect(everything).not.toContain("secret words");
 		expect(everything).not.toContain("the words somebody typed");
 		expect(said.info.some((line) => line.includes('"custom"'))).toBe(false);
+	});
+
+	/** A prefix run that ended in a refusal the bot explained must not be sent as failed beside the error. */
+	it("lets the SDK judge the error, so a user's mistake is a run and not a failure", async () => {
+		const { client, said } = clientWith(CONFIGURED);
+		running.push(client);
+		await startShardlens(client);
+		await salted(client);
+
+		recordPrefixRun(client, prefixMessage(client), {
+			command: "balance",
+			subcommand: null,
+			options: [],
+			durationMs: 2,
+			ok: false,
+			error: new UserFacingError("You do not have an account yet."),
+		});
+		await sendShardlensNow(client);
+
+		const sent = said.info.find((line) => line.includes('"message_command"')) ?? "";
+		const event = JSON.parse(sent.slice(sent.indexOf("{"))) as Record<string, unknown>;
+		expect(event).toMatchObject({ command: "balance", outcome: "ok" });
+		expect(event.errorClass).toBeUndefined();
 	});
 
 	/** A prefix run reads typed text, so a value goes only for a name that is a fixed choice wherever it is declared. */

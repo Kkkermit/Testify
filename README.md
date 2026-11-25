@@ -359,10 +359,10 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `CHANNEL_SUGGESTION_LOG`     |    —     | Where `/suggest` lands                                                                                |
 | `CHANNEL_EVAL_LOG`           |    —     | Every `/eval` run with its code, and anyone else trying an owner command. Else the error channel      |
 | `SUPPORT_AI_API_KEY`         |    —     | Lets `/ask` use Claude to pick the right help article. Without it, search alone answers               |
-| `SHARDLENS_EMBEDDED`         |    —     | `true` runs [Shardlens](docs/analytics.md) analytics inside the bot, with nothing else to set up      |
-| `SHARDLENS_EMBEDDED_PORT`    |    —     | Where that collector's own dashboard listens, on the bot's machine only. Blank is 8080                |
+| `SHARDLENS_MONGODB`          |    —     | `true` runs [Shardlens](docs/analytics.md) analytics inside the bot, kept in its own MongoDB          |
+| `SHARDLENS_PORT`             |    —     | Where that collector answers the owner console, on the bot's machine only. Blank is 8080              |
 | `SHARDLENS_AUDIT_KEY`        |    —     | For who ran what inside the bot: `openssl rand -base64 32`. Keep a copy of it                         |
-| `SHARDLENS_URL`              |    —     | Or a collector you run elsewhere, for a bigger bot. Ignored while `SHARDLENS_EMBEDDED` is true        |
+| `SHARDLENS_URL`              |    —     | Or a collector you run elsewhere, for a bigger bot. Ignored while `SHARDLENS_MONGODB` is true         |
 | `SHARDLENS_INGEST_KEY`       |    —     | That collector's ingest key, `slk_ingest_…`, from the `bot.env` its `init` writes. Never its read key |
 | `SHARDLENS_READ_KEY`         |    —     | Its read key, `slk_read_…`, for the owner console's usage. Kept by the bot, never sent to a browser   |
 | `SHARDLENS_ACTIVITY_KEY`     |    —     | Its activity key, `slk_activity_…`, for who ran what in the owner console. Collector 1.2+, audit mode |

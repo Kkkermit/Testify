@@ -32,19 +32,19 @@ export interface LensTarget {
 	ingestKey: string | undefined;
 	readKey: string | undefined;
 	activityKey: string | undefined;
-	/** The collector this process runs, which shutdown closes last. */
-	embedded: { dashboardUrl: string; close(): Promise<void> } | null;
+	/** The collector this process runs on the bot's MongoDB: events go through it, and shutdown closes it last. */
+	inBot: { send: typeof fetch; close(): Promise<void> } | null;
 }
 
-/** The four settings for a collector run elsewhere; with `SHARDLENS_EMBEDDED=true` they are ignored. */
+/** The four settings for a collector run elsewhere; with `SHARDLENS_MONGODB=true` they are ignored. */
 export function settingsTarget(env: Env): LensTarget {
-	const own = env.SHARDLENS_EMBEDDED === "true";
+	const own = env.SHARDLENS_MONGODB === "true";
 	return {
 		url: own ? undefined : env.SHARDLENS_URL,
 		ingestKey: own ? undefined : env.SHARDLENS_INGEST_KEY,
 		readKey: own ? undefined : env.SHARDLENS_READ_KEY,
 		activityKey: own ? undefined : env.SHARDLENS_ACTIVITY_KEY,
-		embedded: null,
+		inBot: null,
 	};
 }
 

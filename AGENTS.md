@@ -100,7 +100,7 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report, suggestion and eval — see
 [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
-`SHARDLENS_EMBEDDED`, `SHARDLENS_EMBEDDED_PORT` and `SHARDLENS_AUDIT_KEY` (analytics in a collector inside the bot), or
+`SHARDLENS_MONGODB`, `SHARDLENS_PORT` and `SHARDLENS_AUDIT_KEY` (analytics in a collector inside the bot, on its MongoDB), or
 `SHARDLENS_URL`, `SHARDLENS_INGEST_KEY`, `SHARDLENS_READ_KEY` and `SHARDLENS_ACTIVITY_KEY` (to a collector the owner runs
 elsewhere), with the owner console's usage read back from it — see
 [§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)),
@@ -2378,26 +2378,34 @@ giveaway from another one, and `/giveaway` offers this server's giveaways by pri
 ### Analytics go to a Shardlens collector the owner runs, and only the owners see how it is doing
 
 `@shardlens/discordjs` is attached by `startShardlens` in `src/lib/bot/shardlens.util.ts`, before login, and only
-when `SHARDLENS_EMBEDDED=true` or `SHARDLENS_URL` or `SHARDLENS_INGEST_KEY` is set: an install that never asked gains
-no listener, no timer and no warning. [`docs/analytics.md`](docs/analytics.md) is the reader's guide to both ways. **It is the bot's only analytics.** Nothing analytic is written to MongoDB: the
+when `SHARDLENS_MONGODB=true` or `SHARDLENS_URL` or `SHARDLENS_INGEST_KEY` is set: an install that never asked gains
+no listener, no timer and no warning. [`docs/analytics.md`](docs/analytics.md) is the reader's guide to both ways. **It is the bot's only analytics.** No model of the bot's writes anything analytic: the
 owner console's Usage tab, its per-server drill-down and the server list's counts are read back from the collector
-(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)). These things about it are load-bearing:
+(see [§24](#the-owner-console-and-what-it-is-allowed-to-know)), which on MongoDB keeps its own `shardlens_`
+collections beside the bot's. These things about it are load-bearing:
 
-- **The simple way is a collector inside the bot, and everything reads one target.** `SHARDLENS_EMBEDDED=true` makes
-  `startEmbedded` in `embeddedCollector.util.ts` start `@shardlens/collector/embedded` on PGlite, in
-  `shardlens-data/<NODE_ENV>` under the repository root, so a development and a production bot never share one, with
-  its keys generated there; it is a dynamic `import()` because nothing else should load a web server and a database
-  for an install that never asked. `client.lensTarget` is then that collector's address and keys, and it is what the
-  SDK, the reader, the live feed, the status card and the setup check all read: `settingsTarget(env)` gives the four
-  settings until then, and none of them while embedded is on, so a leftover `SHARDLENS_URL` is warned about and never
-  used. A collector that cannot start is a `warn` naming the fix (`startAdvice`: the port, an unwritable folder) and
-  the run goes without analytics rather than falling back. It is closed last on shutdown, after the SDK has flushed
-  into it. Who ran what needs `SHARDLENS_AUDIT_KEY`, which Shardlens wants kept outside the data folder, so it is a
-  setting; without one, or with one that is not 32 bytes, nobody is named. Its own dashboard listens on
-  `127.0.0.1:SHARDLENS_EMBEDDED_PORT`, so the console says it opens only on the bot's machine (`embedded` on the
-  status and the setup answer). The image makes `/app/shardlens-data` for `node`, compose gives it a volume, and on
-  Railway a volume needs `RAILWAY_RUN_UID=0`, because Railway mounts it for root. `findLeak` refuses any `slk_` key
-  shape, so keys generated at run time are caught as well as configured ones.
+- **The simple way is a collector inside the bot, on the bot's own MongoDB, and everything reads one target.**
+  `SHARDLENS_MONGODB=true` makes `startInBotCollector` in `mongoCollector.util.ts` start
+  `@shardlens/collector/mongodb` on `MONGODB_URI` with `DISCORD_CLIENT_ID` as the application, so there is no volume,
+  no folder and no second service, and the history survives every redeploy; it is a dynamic `import()` because nothing
+  else should load a web server for an install that never asked. It needs MongoDB 7.0 or newer. Testify starts it
+  itself rather than through the SDK's `mongodb` option, because only `startMongoCollector` hands back the read and
+  activity keys the owner console reads with: the SDK sends through the collector's in-process `fetch`, with the
+  placeholder address and key Shardlens's own runner uses (`IN_PROCESS`), and `said` names MongoDB where the SDK
+  would name that placeholder. The collector always answers on `127.0.0.1:SHARDLENS_PORT`, because a read needs a
+  socket: the in-process `fetch` signs every request in as the ingest key. A port another process holds leaves it
+  storing events and answering no reads, which is one `warn` and a target with no `url`. `client.lensTarget` is then
+  that collector's address and keys, and it is what the SDK, the reader, the live feed, the status card and the setup
+  check all read: `settingsTarget(env)` gives the four settings until then, and none of them while `SHARDLENS_MONGODB`
+  is on, so a leftover `SHARDLENS_URL` is warned about and never used. A collector that cannot start is a `warn`
+  naming the fix where there is one (`startAdvice`: a database user that may not create collections) and the run
+  goes without analytics rather than falling back. It is closed last on shutdown, after the SDK has flushed into it.
+  Who ran what needs `SHARDLENS_AUDIT_KEY`, which Shardlens never keeps in the database, so it is a setting; without
+  one, or with one that is not 32 bytes, nobody is named. The console says its own dashboard opens only on the bot's
+  machine (`inBot` on the status and the setup answer), and `npx shardlens dashboard` opens it from any computer with
+  the bot's `.env`. The PGlite collector is gone: Shardlens says a bot on MongoDB uses this instead, and it cost a
+  volume and about half a gigabyte of memory. `findLeak` refuses any `slk_` key shape, so keys generated at run time
+  are caught as well as configured ones.
 - **The settings are optional strings and nothing more, and can never stop the bot starting.** The SDK checks its
   own address and key, logs one `[SHARDLENS]` warning and sends nothing when either is wrong, so `env.ts` adds no
   format check and no "both or neither" rule; `env.test.ts` fails if one comes back. The read key is the bot's own, so
@@ -2425,10 +2433,13 @@ owner console's Usage tab, its per-server drill-down and the server list's count
   while the bot's own error handling still answers. A prefix run is not an interaction, so `measured` just runs it,
   and the prefix handler tells the SDK once `runCommand` has answered: `recordPrefixRun` calls
   `lens.trackMessageCommand` with the command's own name after aliases, the subcommand, the time, and what was thrown
-  (`runCommand` hands it back, and the SDK keeps only its class and Discord's code). **Never a custom event for a
-  prefix run** — only the SDK's own message commands are counted with slash commands, by server and by day — and
-  never the message's text, the name typed or an argument. A message that is no command, or one a check refuses, is
-  not a run. A prefix run sends the names of the options given (`givenOptions`), as a slash run already does, and
+  (`runCommand` hands it back, and the SDK keeps only its class and Discord's code). **A `UserFacingError` is a run,
+  not a failure:** `isExpectedError` says so for both surfaces, since it is the reader's mistake the bot explains, so
+  failure rates count only the bot's own; a `SetupError` or a `ServiceError` still fails. `recordPrefixRun` therefore
+  hands over the error alone and sends `failed` only when there is none, or the SDK would count the refusal anyway.
+  **Never a custom event for a prefix run** — only the SDK's own message commands are counted with slash commands, by
+  server and by day — and never the message's text, the name typed or an argument. A message that is no command, or
+  one a check refuses, is not a run. A prefix run sends the names of the options given (`givenOptions`), as a slash run already does, and
   never what was given for them. The dashboard's screen views are custom events: `dashboard_screen` by route pattern
   and `dashboard_server` by server, the second only for one of that server's managers (`recordScreenView`, behind
   `managesGuild`), with the server also as an `in_<id>` property because a custom event keeps no dimensions, and
@@ -3841,7 +3852,7 @@ which reads the env array on every request — so removing an ID revokes the con
 rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the
 whole shape of that, including that a near-miss ID cannot match.
 
-**Usage is read from Shardlens, and nothing analytic is stored here.** `/analytics/usage`, `/analytics/guilds/:id`,
+**Usage is read from Shardlens, and no model of the bot's stores anything analytic.** `/analytics/usage`, `/analytics/guilds/:id`,
 the server list's counts and one server's detail each ask the collector through `ShardlensReader` (see
 [§21](#analytics-go-to-a-shardlens-collector-the-owner-runs-and-only-the-owners-see-how-it-is-doing)). Five things
 about it are load-bearing:

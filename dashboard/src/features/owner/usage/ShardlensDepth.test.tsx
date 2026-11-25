@@ -87,7 +87,7 @@ describe("the collector's setup", () => {
 	it("names the bot's own setting when the collector runs inside it", async () => {
 		server.use(
 			http.get("/api/analytics/setup", () =>
-				HttpResponse.json({ ...collectorSetup, embedded: true, checks: { ...collectorSetup.checks, auditKey: false } }),
+				HttpResponse.json({ ...collectorSetup, inBot: true, checks: { ...collectorSetup.checks, auditKey: false } }),
 			),
 		);
 		renderAt("/owner?tab=usage&view=setup");

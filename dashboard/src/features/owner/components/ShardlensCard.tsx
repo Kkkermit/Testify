@@ -90,7 +90,7 @@ export function ShardlensCard(): React.JSX.Element {
 	} else {
 		const current = status.data;
 		const look = STATES[current.state];
-		const bodyKey = current.embedded && current.state === "sending" ? "owner.shardlensEmbeddedBody" : look.body;
+		const bodyKey = current.inBot && current.state === "sending" ? "owner.shardlensInBotBody" : look.body;
 		const dashboard = current.collector === null ? null : collectorPage(current.collector);
 		body = (
 			<>
@@ -130,7 +130,7 @@ export function ShardlensCard(): React.JSX.Element {
 					</span>
 				</div>
 
-				{dashboard !== null && current.embedded && (
+				{dashboard !== null && current.inBot && (
 					<p className="text-muted-foreground text-xs">{t("owner.shardlensOpenLocal")}</p>
 				)}
 

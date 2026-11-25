@@ -111,7 +111,7 @@ async function main(): Promise<void> {
 				message: `${paint.bold("Analytics for the owner console?")}${paint.dim(" (Shardlens — which commands run, how they end)")}`,
 				choices: [
 					{ title: "Off", value: "off" },
-					{ title: "Inside the bot", description: "Nothing else to run or set", value: "embedded" },
+					{ title: "Inside the bot", description: "Kept in its MongoDB, nothing else to run", value: "inBot" },
 					{
 						title: "A collector I run",
 						description: "Its address and keys, from npx shardlens init",
@@ -121,7 +121,7 @@ async function main(): Promise<void> {
 				initial: 0,
 			},
 			{
-				type: (previous: AnalyticsChoice) => (previous === "embedded" ? "confirm" : null),
+				type: (previous: AnalyticsChoice) => (previous === "inBot" ? "confirm" : null),
 				name: "identify",
 				message: `${paint.bold("Show who ran each command?")}${paint.dim(" (only the bot's owners see it)")}`,
 				initial: true,
@@ -158,11 +158,8 @@ async function main(): Promise<void> {
 		steps.push("", "One more step in the Developer Portal, under OAuth2 → Redirects:", `  ${paint.bold(callback)}`);
 	}
 
-	if (analytics === "embedded") {
-		steps.push(
-			"",
-			`Analytics run inside the bot. Keep the ${paint.bold("shardlens-data")} folder: its keys are there.`,
-		);
+	if (analytics === "inBot") {
+		steps.push("", "Analytics run inside the bot, in collections starting shardlens_ in its own MongoDB.");
 		if (auditKey !== null)
 			steps.push(`Keep a copy of ${paint.bold("SHARDLENS_AUDIT_KEY")}: the names are unreadable without it.`);
 	}

@@ -101,9 +101,9 @@ says which version the bot is using.
 ## Analytics
 
 The owner console's **Usage** tab reads its figures from [Shardlens](https://github.com/Kkkermit/Shardlens), which is
-off until you switch it on. `SHARDLENS_EMBEDDED=true` runs it inside the bot with nothing else to set up;
-[the analytics guide](https://github.com/Kkkermit/Testify/blob/main/docs/analytics.md) has that, a collector of your
-own for a bigger bot, and both on Railway.
+off until you switch it on. `SHARDLENS_MONGODB=true` runs it inside the bot, on its own MongoDB, with nothing else to
+set up; [the analytics guide](https://github.com/Kkkermit/Testify/blob/main/docs/analytics.md) has that, a collector of
+your own for a bigger bot, and both on Railway.
 
 ## Where to host it
 

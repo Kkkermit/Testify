@@ -40,7 +40,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 		["database", disconnectDatabase],
 		["discord", () => client.destroy()],
 		// Last, so everything the SDK flushed above has reached it.
-		["collector", () => client.lensTarget.embedded?.close()],
+		["collector", () => client.lensTarget.inBot?.close()],
 	];
 
 	let failed = false;

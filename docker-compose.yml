@@ -25,8 +25,6 @@ services:
       # This folder, read-only, so testify.config.json is read from beside .env. A missing file means the defaults;
       # mounting the file itself would make Docker create an empty folder in its place when there is none.
       - .:/app/instance:ro
-      # The Shardlens collector SHARDLENS_EMBEDDED runs inside the bot: its database and keys, kept across rebuilds.
-      - shardlens-data:/app/shardlens-data
     environment:
       TESTIFY_CONFIG: /app/instance/testify.config.json
       # `mongo` is this compose network's hostname for the database below.
@@ -68,8 +66,8 @@ services:
       SHARDLENS_INGEST_KEY: ${SHARDLENS_INGEST_KEY:-}
       SHARDLENS_READ_KEY: ${SHARDLENS_READ_KEY:-}
       SHARDLENS_ACTIVITY_KEY: ${SHARDLENS_ACTIVITY_KEY:-}
-      SHARDLENS_EMBEDDED: ${SHARDLENS_EMBEDDED:-}
-      SHARDLENS_EMBEDDED_PORT: ${SHARDLENS_EMBEDDED_PORT:-}
+      SHARDLENS_MONGODB: ${SHARDLENS_MONGODB:-}
+      SHARDLENS_PORT: ${SHARDLENS_PORT:-}
       SHARDLENS_AUDIT_KEY: ${SHARDLENS_AUDIT_KEY:-}
     ports:
       # Bound to the host's loopback: an admin panel reachable from the internet is not a default.
@@ -91,4 +89,3 @@ services:
 
 volumes:
   mongo-data:
-  shardlens-data:

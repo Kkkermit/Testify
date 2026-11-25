@@ -99,7 +99,10 @@ describe("the prefix handler", () => {
 		expect(JSON.stringify(run)).not.toMatch(/setwelcome|t\?|words/);
 	});
 
-	/** Only what the parser matched is a run, and a failure carries what was thrown for the SDK to name by class. */
+	/**
+	 * Only what the parser matched is a run, and a failure carries what was thrown for the SDK to judge and name by
+	 * class: a `failed` beside it would count a refusal the bot explained as a failure.
+	 */
 	it("records a failure with what it threw, and nothing for a message that is no command", async () => {
 		const trackMessageCommand = jest.fn();
 		const client = Object.assign(fakeClient(), { shardlens: { trackMessageCommand }, env: {} });
@@ -113,7 +116,6 @@ describe("the prefix handler", () => {
 		expect(trackMessageCommand.mock.calls[0]?.[1]).toEqual({
 			command: "ping",
 			durationMs: expect.any(Number) as number,
-			failed: true,
 			error: failure,
 		});
 	});
