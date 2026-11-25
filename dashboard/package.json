@@ -1,6 +1,6 @@
 {
 	"name": "@testify/dashboard",
-	"version": "2.4.6",
+	"version": "2.5.1",
 	"private": true,
 	"description": "The web dashboard and public website the bot serves, built with Vite and React.",
 	"license": "MIT",
