@@ -1,5 +1,5 @@
-import { PermissionFlagsBits } from "discord.js";
-import { grantProblem, isPowerful, offerProblem, pickProblem } from "@lib/roles/roleReach.util";
+import { type GuildMember, PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import { chooserProblem, grantProblem, isPowerful, offerProblem, pickProblem } from "@lib/roles/roleReach.util";
 import { fakeGuild, fakeMember, GUILD_ID, SERVER_OWNER } from "@tests/helpers/roles";
 
 const guild = fakeGuild([
@@ -67,5 +67,29 @@ describe("whether a member's pick is honoured", () => {
 	/** A role can be given Kick Members after the menu was made, and the menu must stop handing it out. */
 	it("refuses a role that has since become powerful", () => {
 		expect(pickProblem(guild.roles.cache.get("mods"), guild)).toMatch(/now carries/);
+	});
+});
+
+describe("who may choose a role the bot then hands out by itself", () => {
+	const holding = (...flags: bigint[]): GuildMember =>
+		({ ...manager, permissions: new PermissionsBitField(flags) }) as unknown as GuildMember;
+
+	/** `/verify` and `/levelling` asked only Manage Server, so Admin could be set as a prize for pressing a button. */
+	it("asks for Manage Roles first, then the rule it is given", () => {
+		const cases = [
+			["without Manage Roles", chooserProblem(holding(PermissionFlagsBits.ManageGuild), "low", guild), /Manage Roles/],
+			["a role in reach", chooserProblem(holding(PermissionFlagsBits.ManageRoles), "low", guild), null],
+			["a role above them", chooserProblem(holding(PermissionFlagsBits.ManageRoles), "above-me", guild), /highest/],
+			[
+				"a role that moderates, for everybody",
+				chooserProblem(holding(PermissionFlagsBits.ManageRoles), "mods", guild, offerProblem),
+				/moderation or admin/,
+			],
+		] as const;
+
+		const wrong = cases
+			.filter(([, answer, expected]) => (expected === null ? answer !== null : !expected.test(answer ?? "")))
+			.map(([name]) => name);
+		expect(wrong).toEqual([]);
 	});
 });

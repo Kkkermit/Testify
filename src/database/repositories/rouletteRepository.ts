@@ -1,4 +1,5 @@
 import { isValidObjectId } from "mongoose";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import {
 	type RouletteBetRecord,
 	RouletteRound,
@@ -21,10 +22,6 @@ function normalised(round: StoredRound | null): RoundRecord | null {
 		Object.entries(round.players).map(([userId, seat]) => [userId, { ...seat, bets: seat.bets ?? [] }]),
 	);
 	return { ...round, players };
-}
-
-function isDuplicateKey(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
 }
 
 /** Null when a round is already open on that message. */

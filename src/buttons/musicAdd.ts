@@ -10,10 +10,8 @@ const QUERY_FIELD = "query";
 
 /** Re-checked on the submit as well, because a form can sit open while a role or a switch changes. */
 async function requireMusicAccess(interaction: ComponentInteraction, client: TestifyClient): Promise<GuildMember> {
-	const guild = interaction.guild;
-	if (guild === null) throw new UserFacingError("This only works inside a server.");
-
-	const member = interaction.member as GuildMember;
+	if (!interaction.inCachedGuild()) throw new UserFacingError("This only works inside a server.");
+	const { guild, member } = interaction;
 	const refusal = await checkMusicControl(client, { userId: interaction.user.id, guildId: guild.id, member });
 	if (refusal !== null) throw new UserFacingError(refusalText(refusal));
 
@@ -65,7 +63,6 @@ export default defineButton({
 			query,
 			requestedBy: interaction.user.id,
 			next: false,
-			textChannelId: interaction.channelId,
 		});
 
 		await session.refreshPanel();

@@ -49,7 +49,8 @@ describe("the giveaways page", () => {
 		const running = (await screen.findByRole("heading", { name: "A copy of the game" })).closest("li");
 		await user.click(within(running as HTMLElement).getByRole("button", { name: /end now/i }));
 
-		expect(await screen.findByText("That giveaway already ended.")).toBeInTheDocument();
+		expect(await within(running as HTMLElement).findByText("That giveaway already ended.")).toBeInTheDocument();
+		expect(screen.getAllByText("That giveaway already ended.")).toHaveLength(1);
 	});
 
 	it("says so when the list cannot be loaded", async () => {

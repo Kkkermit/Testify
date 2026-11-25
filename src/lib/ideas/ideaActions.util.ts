@@ -14,6 +14,7 @@ import {
 	takeIdeaNumber,
 } from "@database/repositories/ideaRepository";
 import { canPostIn } from "@lib/discord/channels.util";
+import { formatNumber } from "@lib/format/format.util";
 import { decisionText, ideaPost } from "@lib/ideas/ideaPanel.util";
 import { IDEA_PAUSE_MS } from "@lib/ideas/ideas.constants";
 import {
@@ -67,14 +68,11 @@ function ideaText(input: string): string {
 
 	if (value === "") throw new UserFacingError("Say what your idea is.");
 	if (value.length > IDEA_LIMITS.maxText) {
-		throw new UserFacingError(`Keep an idea under ${IDEA_LIMITS.maxText.toLocaleString()} characters.`);
+		throw new UserFacingError(`Keep an idea under ${formatNumber(IDEA_LIMITS.maxText)} characters.`);
 	}
 
 	return value;
 }
-
-/** The post mentions its author, and a member's text can mention anybody, so nothing it sends may ping. */
-const SILENT = { allowedMentions: { parse: [] } };
 
 export async function submitIdea(
 	guild: Guild,
@@ -107,7 +105,7 @@ export async function submitIdea(
 	});
 
 	try {
-		const sent = await channel.send({ ...ideaPost(idea), ...SILENT });
+		const sent = await channel.send(ideaPost(idea));
 		await setIdeaMessage(guild.id, idea.id, sent.id);
 		return { ...idea, messageId: sent.id };
 	} catch (error) {
@@ -125,7 +123,7 @@ async function refreshIdeaPost(guild: Guild, idea: StoredIdea): Promise<void> {
 	if (channel?.isTextBased() !== true) return;
 
 	const message = await channel.messages.fetch(idea.messageId).catch(() => null);
-	await message?.edit({ ...ideaPost(idea), ...SILENT });
+	await message?.edit(ideaPost(idea));
 }
 
 export function ideaLink(idea: Pick<StoredIdea, "guildId" | "channelId" | "messageId">): string | null {
@@ -150,7 +148,9 @@ export async function decideOnIdea(
 	if (decided.status !== "open") {
 		await client.users
 			.fetch(decided.authorId)
-			.then((user) => user.send({ content: decisionText(decided, guild.name, ideaLink(decided)), ...SILENT }))
+			.then((user) =>
+				user.send({ content: decisionText(decided, guild.name, ideaLink(decided)), allowedMentions: { parse: [] } }),
+			)
 			.catch(() => {
 				client.logger.debug({ guildId: guild.id }, "[IDEAS] Could not tell an idea's author what was decided.");
 			});

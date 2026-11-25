@@ -29,6 +29,29 @@ describe("the treasure page", () => {
 		expect(screen.getByText(/A drop of 10–500 every 15–50 messages/)).toBeInTheDocument();
 	});
 
+	/** The switch writes straight away, and its answer once threw away numbers typed but not yet saved. */
+	it("keeps an unsaved edit when drops are switched off", async () => {
+		const user = userEvent.setup();
+		let stored = treasureSettings;
+		server.use(
+			http.get(`/api/guilds/${GUILD}/treasure`, () => HttpResponse.json(stored)),
+			http.patch(`/api/guilds/${GUILD}/treasure`, () => {
+				stored = { ...stored, enabled: false };
+				return HttpResponse.json(stored);
+			}),
+		);
+		renderPage();
+		await screen.findByLabelText(/smallest drop/i);
+
+		await user.clear(screen.getByLabelText(/smallest drop/i));
+		await user.type(screen.getByLabelText(/smallest drop/i), "25");
+		await user.click(screen.getByRole("switch", { name: /enable treasure drops/i }));
+
+		expect(await screen.findByText(/drops are off/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/smallest drop/i)).toHaveValue(25);
+		expect(screen.getByRole("button", { name: /save changes/i })).toBeEnabled();
+	});
+
 	/** An unconfigured server is showing defaults, and calling them settings would be a lie. */
 	it("says the numbers are only defaults until drops are turned on", async () => {
 		server.use(

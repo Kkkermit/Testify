@@ -1,8 +1,7 @@
 import { type Guild } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseParams } from "@api/validate";
 import { readSetupChecklist, runSetupStep, type SetupActor } from "@lib/settings";
@@ -15,10 +14,10 @@ export const setup = new Hono<ApiBindings>();
 setup.use("*", requireGuild);
 
 function scopeOf(context: ApiContext): { guild: Guild; actor: SetupActor } {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return { guild, actor: { member: context.get("member"), isOwner: context.get("isOwner") === true } };
+	return {
+		guild: guildOf(context),
+		actor: { member: context.get("member"), isOwner: context.get("isOwner") === true },
+	};
 }
 
 const SUMMARY: Record<SetupStep, string> = {

@@ -1,18 +1,24 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
 import { type ApiBindings, actorOf, guildOf } from "@api/context";
-import { badRequest, forbidden } from "@api/errors";
+import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { theme } from "@config/theme";
-import { addToBlacklist } from "@database/repositories/blacklistRepository";
-import { ownerLogChannel, postToLogChannel } from "@lib/bot";
+import { AttemptThrottle, ownerLogChannel, postToLogChannel } from "@lib/bot";
 import { embed } from "@lib/discord";
-import { blacklistProblem } from "@lib/moderation";
 import { programReport, runsAsProgram } from "@testify/shared";
 
-/** Choosing a program or a script as a backup blacklists whoever chose it; the server judges the bytes itself. */
+/**
+ * A program or a script chosen as a backup is refused in the browser and reported here, judged on its bytes again. It
+ * blocks nobody, because somebody can be talked into choosing one; the owners are told who chose it, and decide.
+ */
 export const guildBackup = new Hono<ApiBindings>();
+
+let reports = new AttemptThrottle();
+
+export function clearProgramReports(): void {
+	reports = new AttemptThrottle();
+}
 
 guildBackup.use("*", requireGuild);
 
@@ -23,20 +29,14 @@ guildBackup.post("/program", async (context) => {
 
 	const client = context.get("client");
 	const guild = guildOf(context);
+	// Nobody else can be named: the account reported is the one this session signed in as.
 	const actor = actorOf(context);
-	// Nobody else can be named: the account blacklisted is the one this session signed in as.
-	if (blacklistProblem(client, actor.id) !== null) return context.body(null, 204);
+	const held = reports.admit(`${guild.id}:${actor.id}`, Date.now());
+	if (held === null) return context.body(null, 204);
 
-	const reason = `Chose a program or a script as a settings backup on the dashboard, in ${guild.name}.`;
-	await addToBlacklist(actor.id, reason);
-	await auditChange(context, {
-		action: "blacklist.add",
-		summary: `Blacklisted ${actor.name} for choosing a program or a script as a backup`,
-		after: { userId: actor.id, reason },
-	});
 	client.logger.warn(
 		{ userId: actor.id, guildId: guild.id },
-		"[BACKUP] Blacklisted somebody who chose a program or a script as a backup.",
+		"[BACKUP] Somebody chose a program or a script as a backup. Nothing in it was opened or run.",
 	);
 
 	const channel = ownerLogChannel(client);
@@ -45,13 +45,20 @@ guildBackup.post("/program", async (context) => {
 			embeds: [
 				embed({
 					colour: theme.colours.severe,
-					title: "Blacklisted for choosing a program as a backup",
-					description: `${actor.name} (\`${actor.id}\`) chose a program or a script on ${guild.name}'s (\`${guild.id}\`) Back up and copy page. Lift it with \`/blacklist remove\` if it was a mistake.`,
+					title: "⚠️ A program was chosen as a backup",
+					description:
+						"They chose a program or a script on the dashboard's Back up and copy page. Nothing in it was opened or run, and nothing was blocked: somebody may have talked them into it.",
+					fields: [
+						{ name: "Account", value: `${actor.name} (\`${actor.id}\`)`, inline: true },
+						{ name: "Server", value: `${guild.name} (\`${guild.id}\`)`, inline: true },
+						...(held > 0 ? [{ name: "Held back", value: `${String(held)} more in the minute before this` }] : []),
+					],
+					footer: "Block them with /blacklist add only if it looks deliberate.",
 				}),
 			],
 			allowedMentions: { parse: [] },
 		});
 	}
 
-	throw forbidden("blacklisted", "You are blocked from using this bot. You can still delete your data.");
+	return context.body(null, 204);
 });

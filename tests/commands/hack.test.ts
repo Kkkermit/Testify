@@ -12,37 +12,27 @@ function target(overrides: Parameters<typeof createMockUser>[0] = {}): User {
 }
 
 describe("/fun hack", () => {
-	it("walks every stage, then shows the report", async () => {
+	it("walks every stage with its progress, then shows the report", async () => {
 		const interaction = createMockInteraction({ options: { user: target() } });
 
 		await hack.run?.(interaction, createMockClient());
 
-		expect(interaction.editReply).toHaveBeenCalledTimes(HACK_STAGES.length + 1);
-		expect(interaction.editReply).toHaveBeenLastCalledWith(
+		const edits = jest.mocked(interaction.editReply).mock.calls;
+		expect(edits).toHaveLength(HACK_STAGES.length + 1);
+		expect(edits[HACK_STAGES.length - 1]?.[0]).toEqual({ content: expect.stringContaining("100%") as unknown });
+		expect(edits.at(-1)?.[0]).toEqual(
 			expect.objectContaining({ content: "✅ Mission complete.", embeds: [expect.anything()] }),
 		);
 	});
 
-	it("shows progress on every stage", async () => {
-		const interaction = createMockInteraction({ options: { user: target() } });
-
-		await hack.run?.(interaction, createMockClient());
-
-		const stages = jest.mocked(interaction.editReply).mock.calls.slice(0, HACK_STAGES.length);
-		expect(stages.at(-1)?.[0]).toEqual({ content: expect.stringContaining("100%") as unknown });
-	});
-
-	it("refuses to hack the bot itself", async () => {
+	it("refuses the bot itself and any other bot before starting", async () => {
 		const client = createMockClient();
-		const interaction = createMockInteraction({ options: { user: target({ id: client.user?.id ?? "" }) } });
+		const bots = [target({ id: client.user?.id ?? "" }), target({ bot: true })];
 
-		await expect(hack.run?.(interaction, client)).rejects.toBeInstanceOf(UserFacingError);
-		expect(interaction.editReply).not.toHaveBeenCalled();
-	});
-
-	it("refuses other bots", async () => {
-		const interaction = createMockInteraction({ options: { user: target({ bot: true }) } });
-
-		await expect(hack.run?.(interaction, createMockClient())).rejects.toBeInstanceOf(UserFacingError);
+		for (const bot of bots) {
+			const interaction = createMockInteraction({ options: { user: bot } });
+			await expect(hack.run?.(interaction, client)).rejects.toBeInstanceOf(UserFacingError);
+			expect(interaction.reply).not.toHaveBeenCalled();
+		}
 	});
 });

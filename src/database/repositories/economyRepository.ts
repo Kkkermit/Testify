@@ -2,7 +2,7 @@ import { type PipelineStage } from "mongoose";
 import { ECONOMY, type EconomyCooldownKey } from "@config/constants";
 import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
-import { Economy, type EconomyAccount, type InventoryItem } from "@database/models/economy.schema";
+import { Economy, type EconomyAccount, type InventoryItem, type Pet } from "@database/models/economy.schema";
 import { getTuning } from "@database/repositories/tuningRepository";
 
 const LEAN = { lean: true as const, new: true as const };
@@ -60,13 +60,13 @@ export async function adjustBank(guildId: string, userId: string, delta: number)
 	).exec() as Promise<EconomyAccount>;
 }
 
-/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 /** A negative debit would be a credit, so one is a bug however it arrived, and nothing moves. */
 function refuseNegative(amount: number): void {
 	if (!Number.isFinite(amount) || amount < 0)
 		throw new Error(`Refused to debit ${String(amount)}: a debit is never negative.`);
 }
 
+/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 export async function debitWallet(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, wallet: { $gte: amount } }, { $inc: { wallet: -amount } }, LEAN)
@@ -74,23 +74,34 @@ export async function debitWallet(guildId: string, userId: string, amount: numbe
 		.exec();
 }
 
-async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+export async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	refuseNegative(amount);
 	return Economy.findOneAndUpdate({ guildId, userId, bank: { $gte: amount } }, { $inc: { bank: -amount } }, LEAN)
 		.lean<EconomyAccount>()
 		.exec();
 }
 
+/** Both halves move in one update, so nothing can fail between taking the money and putting it in the bank. */
 export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
-	const debited = await debitWallet(guildId, userId, amount);
-	if (!debited) return null;
-	return adjustBank(guildId, userId, amount);
+	refuseNegative(amount);
+	return Economy.findOneAndUpdate(
+		{ guildId, userId, wallet: { $gte: amount } },
+		{ $inc: { wallet: -amount, bank: amount } },
+		LEAN,
+	)
+		.lean<EconomyAccount>()
+		.exec();
 }
 
 export async function withdraw(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
-	const debited = await debitBank(guildId, userId, amount);
-	if (!debited) return null;
-	return adjustWallet(guildId, userId, amount);
+	refuseNegative(amount);
+	return Economy.findOneAndUpdate(
+		{ guildId, userId, bank: { $gte: amount } },
+		{ $inc: { bank: -amount, wallet: amount } },
+		LEAN,
+	)
+		.lean<EconomyAccount>()
+		.exec();
 }
 
 /** The credit only happens once the debit has landed. */
@@ -117,6 +128,22 @@ const COOLDOWN_FIELDS = {
 	beg: "lastBegged",
 } as const satisfies Record<EconomyCooldownKey, keyof EconomyAccount>;
 
+/** Either field can be missing on a stored record, since Mongoose adds defaults only when it writes one. */
+type IncomeEarner = Pick<EconomyAccount, "guildId" | "userId"> & Partial<Pick<EconomyAccount, "house" | "businesses">>;
+
+/** Every account that owns a house or a business, in every server, read a batch at a time for the hourly income. */
+export function incomeEarners(): AsyncIterable<IncomeEarner> {
+	return Economy.find({ $or: [{ house: { $ne: null } }, { "businesses.0": { $exists: true } }] })
+		.select({ guildId: 1, userId: 1, house: 1, businesses: 1 })
+		.lean<IncomeEarner[]>()
+		.cursor();
+}
+
+/** For an account already known to exist, so nothing is created and the tuning is not read. */
+export async function creditBank(guildId: string, userId: string, amount: number): Promise<void> {
+	await Economy.updateOne({ guildId, userId }, { $inc: { bank: amount } }).exec();
+}
+
 export async function setCooldown(
 	guildId: string,
 	userId: string,
@@ -124,6 +151,19 @@ export async function setCooldown(
 	at: Date = new Date(),
 ): Promise<void> {
 	await Economy.updateOne({ guildId, userId }, { $set: { [COOLDOWN_FIELDS[key]]: at } }).exec();
+}
+
+/** Moves a cooldown on only from the value it was read at, so two runs racing cannot both be paid. */
+export async function claimCooldown(
+	guildId: string,
+	userId: string,
+	key: EconomyCooldownKey,
+	readAt: Date | null,
+	at: Date,
+): Promise<boolean> {
+	const field = COOLDOWN_FIELDS[key];
+	const result = await Economy.updateOne({ guildId, userId, [field]: readAt }, { $set: { [field]: at } }).exec();
+	return result.modifiedCount === 1;
 }
 
 export async function incrementCounters(
@@ -283,26 +323,37 @@ export async function getGuildTotals(
 	};
 }
 
+/** Null only when the account does not exist. */
 export async function addInventoryItem(
 	guildId: string,
 	userId: string,
 	item: Omit<InventoryItem, "purchasedAt"> & { purchasedAt?: Date },
-): Promise<EconomyAccount> {
-	const existing = await Economy.findOneAndUpdate(
-		{ guildId, userId, "inventory.itemId": item.itemId },
-		{ $inc: { "inventory.$.quantity": item.quantity } },
-		LEAN,
-	)
-		.lean<EconomyAccount>()
-		.exec();
+): Promise<EconomyAccount | null> {
+	const stack = (): Promise<EconomyAccount | null> =>
+		Economy.findOneAndUpdate(
+			{ guildId, userId, "inventory.itemId": item.itemId },
+			{ $inc: { "inventory.$.quantity": item.quantity } },
+			LEAN,
+		)
+			.lean<EconomyAccount>()
+			.exec();
 
-	if (existing) return existing;
+	// Pushed only while the item is still missing, so two first purchases at once cannot make two rows of it.
+	const push = (): Promise<EconomyAccount | null> =>
+		Economy.findOneAndUpdate(
+			{ guildId, userId, "inventory.itemId": { $ne: item.itemId } },
+			{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
+			LEAN,
+		)
+			.lean<EconomyAccount>()
+			.exec();
 
-	return Economy.findOneAndUpdate(
-		{ guildId, userId },
-		{ $push: { inventory: { ...item, purchasedAt: item.purchasedAt ?? new Date() } } },
-		LEAN,
-	).exec() as Promise<EconomyAccount>;
+	// A push refused because the row now exists, or a stack that missed a row used up meanwhile, lands next round.
+	for (let round = 0; round < 2; round += 1) {
+		const added = (await stack()) ?? (await push());
+		if (added) return added;
+	}
+	return null;
 }
 
 /** Conditional removal, so an item cannot be consumed twice concurrently. */
@@ -336,6 +387,52 @@ export async function setFields(
 		{ $set: fields },
 		{ ...LEAN, upsert: true },
 	).exec() as Promise<EconomyAccount>;
+}
+
+type Slot = "house" | "pet";
+
+const SLOT_ID = { house: "house.houseId", pet: "pet.petId" } as const satisfies Record<Slot, string>;
+
+/** Fills an empty house or pet slot; false when it was filled meanwhile, so the price can go back. */
+export async function fillSlot<S extends Slot>(
+	guildId: string,
+	userId: string,
+	slot: S,
+	value: NonNullable<EconomyAccount[S]>,
+): Promise<boolean> {
+	const result = await Economy.updateOne({ guildId, userId, [slot]: null }, { $set: { [slot]: value } }).exec();
+	return result.modifiedCount === 1;
+}
+
+/** Empties the slot only while it still holds `id`, so a sale or a rehome pressed twice pays out once. */
+export async function emptySlot(guildId: string, userId: string, slot: Slot, id: string): Promise<boolean> {
+	const result = await Economy.updateOne({ guildId, userId, [SLOT_ID[slot]]: id }, { $set: { [slot]: null } }).exec();
+	return result.modifiedCount === 1;
+}
+
+/** Changes the pet's own fields only while it is still the same pet, so a feed cannot bring back a rehomed one. */
+export async function updatePet(
+	guildId: string,
+	userId: string,
+	petId: string,
+	fields: Partial<Omit<Pet, "petId">>,
+): Promise<boolean> {
+	const changes = Object.fromEntries(Object.entries(fields).map(([field, value]) => [`pet.${field}`, value]));
+	const result = await Economy.updateOne({ guildId, userId, [SLOT_ID.pet]: petId }, { $set: changes }).exec();
+	return result.matchedCount === 1;
+}
+
+/** Adds a business unless it is already owned; false when it is, so the price can go back. */
+export async function addBusiness(
+	guildId: string,
+	userId: string,
+	business: EconomyAccount["businesses"][number],
+): Promise<boolean> {
+	const result = await Economy.updateOne(
+		{ guildId, userId, "businesses.businessId": { $ne: business.businessId } },
+		{ $push: { businesses: business } },
+	).exec();
+	return result.modifiedCount === 1;
 }
 
 /** Moves `lastDaily` on only from the value it was read at, so two claims racing cannot both be paid. */

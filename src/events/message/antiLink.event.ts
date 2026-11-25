@@ -2,6 +2,7 @@ import { PermissionsBitField } from "discord.js";
 import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
 import { getAntiLink } from "@database/repositories/antiLinkRepository";
+import { recordAction } from "@lib/bot";
 import { cleanupFooter, embed, TIDY_AFTER_MS } from "@lib/discord";
 import { containsLink, issueWarning } from "@lib/moderation";
 
@@ -20,7 +21,11 @@ export default defineMessageHandler({
 			: null;
 		if (bypass !== null && message.member.permissions.has(bypass)) return;
 
-		await message.delete().catch(() => null);
+		const deleted = await message.delete().then(
+			() => true,
+			() => false,
+		);
+		if (deleted) recordAction(client, "link_deleted", message.guild.id);
 
 		// Counted like any other warning, so a server's punishment steps apply to repeated links too.
 		await issueWarning({

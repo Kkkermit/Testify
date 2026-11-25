@@ -12,7 +12,7 @@ import { isAccessArea } from "@testify/shared";
 
 /** Attaches the session when there is one; `requireAuth` is what refuses. */
 export const loadSession = createMiddleware<ApiBindings>(async (context, next) => {
-	const id = readCookie(context, SESSION_COOKIE);
+	const id = readCookie(context, context.get("env"), SESSION_COOKIE);
 
 	if (id !== null && id !== "" && context.get("oauth") !== null) {
 		const session = await findSession(id);
@@ -75,7 +75,7 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 
 /** Whether the caller holds a live session belonging to a bot owner, for a path `loadSession` does not run on. */
 export async function signedInOwner(context: Context<ApiBindings>): Promise<boolean> {
-	const id = readCookie(context, SESSION_COOKIE);
+	const id = readCookie(context, context.get("env"), SESSION_COOKIE);
 	if (id === null || id === "" || context.get("oauth") === null) return false;
 
 	// A lookup that fails refuses like any other, so the file never answers differently from one that is missing.

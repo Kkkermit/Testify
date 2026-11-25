@@ -93,3 +93,15 @@ describe("posting due scheduled messages", () => {
 		expect(settled).toHaveBeenCalledTimes(1);
 	});
 });
+
+describe("counting scheduled posts", () => {
+	it("counts a post that went out and none that could not", async () => {
+		const track = jest.fn();
+		queue(due("a", "once"), due("b", "once"));
+		delivered.mockResolvedValueOnce("sent").mockResolvedValueOnce("unreachable");
+
+		await postDueSchedules(createMockClient({ shardlens: { track } } as never), NOW);
+
+		expect(track.mock.calls).toEqual([["schedule_post", {}, { guildId: "900000000000000001" }]]);
+	});
+});

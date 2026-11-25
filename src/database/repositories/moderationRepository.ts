@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { isDuplicateKey } from "@database/duplicateKey.util";
 import {
 	Softban,
 	type SoftbanEntry,
@@ -11,13 +12,18 @@ import {
 
 const LEAN = { lean: true as const, new: true as const };
 
-export async function addWarning(
+/**
+ * Adds a warning and counts the member's warnings given at or after `countsSince` from the write's own answer, so two
+ * warnings at once count two different totals and take two different steps.
+ */
+export async function recordWarning(
 	guildId: string,
 	userId: string,
 	userTag: string,
 	executor: { id: string; tag: string },
 	reason: string,
-): Promise<WarnEntry> {
+	countsSince: Date | null = null,
+): Promise<{ entry: WarnEntry; count: number }> {
 	const entry: WarnEntry = {
 		warnId: randomUUID().slice(0, 8),
 		executorId: executor.id,
@@ -27,13 +33,29 @@ export async function addWarning(
 		edits: [],
 	};
 
-	await Warnings.updateOne(
-		{ guildId, userId },
-		{ $push: { warnings: entry }, $set: { userTag }, $setOnInsert: { guildId, userId } },
-		{ upsert: true, setDefaultsOnInsert: true },
-	).exec();
+	const push = (): Promise<WarnRecord | null> =>
+		Warnings.findOneAndUpdate(
+			{ guildId, userId },
+			{ $push: { warnings: entry }, $set: { userTag }, $setOnInsert: { guildId, userId } },
+			{ upsert: true, new: true, setDefaultsOnInsert: true },
+		)
+			.lean<WarnRecord>()
+			.exec();
 
-	return entry;
+	let record: WarnRecord | null;
+	try {
+		record = await push();
+	} catch (error) {
+		// Two first warnings at once can both try to create the member's record; the one refused finds it made.
+		if (!isDuplicateKey(error)) throw error;
+		record = await push();
+	}
+
+	// The answer is the record straight after this push, so a warning given a moment later is not in it.
+	const warnings = record?.warnings ?? [entry];
+	const count =
+		countsSince === null ? warnings.length : warnings.filter((warning) => warning.timestamp >= countsSince).length;
+	return { entry, count };
 }
 
 export async function getWarnings(guildId: string, userId: string): Promise<WarnRecord | null> {
@@ -91,13 +113,6 @@ export async function warningCounts(guildId: string): Promise<Map<string, number
 	]).exec();
 
 	return new Map(rows.map((row) => [row._id, row.count]));
-}
-
-/** Counts only warnings given at or after `since` when it is set. */
-export async function countWarnings(guildId: string, userId: string, since: Date | null = null): Promise<number> {
-	const warnings = (await getWarnings(guildId, userId))?.warnings ?? [];
-
-	return since === null ? warnings.length : warnings.filter((warning) => warning.timestamp >= since).length;
 }
 
 export async function getWarnLadder(guildId: string): Promise<WarnLadderRecord | null> {
@@ -184,6 +199,17 @@ export async function claimExpiredSoftban(now: Date = new Date()): Promise<Softb
 	return Softban.findOneAndUpdate({ isActive: true, expiresAt: { $lte: now } }, { $set: { isActive: false } }, LEAN)
 		.lean<SoftbanEntry>()
 		.exec();
+}
+
+/** Hands a claimed softban back with a later expiry, for an unban Discord refused for a reason that may pass. */
+export async function retrySoftbanAt(
+	softban: Pick<SoftbanEntry, "guildId" | "userId" | "expiresAt">,
+	at: Date,
+): Promise<void> {
+	await Softban.updateOne(
+		{ guildId: softban.guildId, userId: softban.userId, isActive: false, expiresAt: softban.expiresAt },
+		{ $set: { isActive: true, expiresAt: at } },
+	).exec();
 }
 
 export async function deactivateSoftban(guildId: string, userId: string): Promise<boolean> {

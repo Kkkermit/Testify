@@ -8,7 +8,6 @@ export function inviteSummary(settings: InviteSettings, channel: string, t: TFun
 	return settings.logChannelId === null ? t("invites.summaryOn") : t("invites.summaryOnPosting", { channel });
 }
 
-/** How one member joined, worded for the list of recent joins. */
 export function joinedHow(join: InviteJoin, t: TFunction): string {
 	if (join.vanity) return t("invites.viaVanity");
 	if (join.inviterId === null) return t("invites.viaUnknown");

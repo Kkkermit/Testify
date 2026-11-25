@@ -58,11 +58,21 @@ export function StickyPage(): React.JSX.Element {
 	const blocked = problemText(stickyBlocked({ channelId, message }, taken), t);
 	const full = taken.length >= list.data.limit;
 
+	// A row's save and the add form share one write, so a refusal is shown under whichever channel it was for.
+	const failedFor = save.error === null ? null : save.variables.channelId;
+	const addFailure = failedFor !== null && taken.includes(failedFor) ? null : save.error;
+
 	function add(): void {
 		if (blocked !== null || channelId === null || full) return;
-		save.mutate({ channelId, message: sanitiseInput(message), cap });
-		setChannelId(null);
-		setMessage("");
+		save.mutate(
+			{ channelId, message: sanitiseInput(message), cap },
+			{
+				onSuccess: () => {
+					setChannelId(null);
+					setMessage("");
+				},
+			},
+		);
 	}
 
 	return (
@@ -97,6 +107,7 @@ export function StickyPage(): React.JSX.Element {
 								entry={entry}
 								channels={channels.data ?? []}
 								saving={save.isPending}
+								failure={failedFor === entry.channelId ? save.error : null}
 								onSave={(next) => {
 									save.mutate({ ...next, message: sanitiseInput(next.message) });
 								}}
@@ -162,7 +173,7 @@ export function StickyPage(): React.JSX.Element {
 				{markupWarning(message) !== null && <Warning>{markupWarning(message)}</Warning>}
 				{full && <Warning>{t("sticky.full")}</Warning>}
 				{blocked !== null && message !== "" && <Warning>{blocked}</Warning>}
-				<Refusal error={save.error} />
+				<Refusal error={addFailure} />
 
 				<RowActions>
 					<Button disabled={blocked !== null || full || save.isPending} onClick={add}>

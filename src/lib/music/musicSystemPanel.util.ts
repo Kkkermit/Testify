@@ -1,7 +1,7 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, roleSelect, row } from "@lib/discord/components.util";
-import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { MUSIC_ID } from "@lib/music/music.constants";
 import { MUSIC_LIMITS } from "@lib/music/musicSettings.util";
@@ -15,7 +15,11 @@ export function djLine(settings: MusicSettings): string {
 	return `Only these roles can use the player: ${settings.djRoleIds.map((roleId) => `<@&${roleId}>`).join(" ")}`;
 }
 
-export function musicSystemPanel(settings: MusicSettings, userId: string, note?: string): ContainerMessage {
+export function musicSystemPanel(
+	settings: MusicSettings,
+	userId: string,
+	note?: string,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const parts: ContainerPart[] = [text("## 🎛️ Music system")];
 
 	if (note !== undefined) parts.push(text(`-# ${note}`));
@@ -50,5 +54,5 @@ export function musicSystemPanel(settings: MusicSettings, userId: string, note?:
 		text("-# Anybody with Manage Server can always use the player, whatever is chosen here."),
 	);
 
-	return containerMessage(container({ category: "music", parts }));
+	return withoutPings(containerMessage(container({ category: "music", parts })));
 }

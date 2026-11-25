@@ -20,6 +20,13 @@ describe("the reminder's confirmation", () => {
 		for (const id of idsOf(reminderConfirm(REMINDER, OWNER))) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
 	});
 
+	/** A prefix run answers in the open, and the reminder is whatever somebody typed. */
+	it("pings nobody, however the reminder is worded", () => {
+		const panels = [reminderConfirm(REMINDER, OWNER), reminderList([REMINDER], 0, OWNER)];
+
+		expect(panels.map((panel) => panel.allowedMentions)).toEqual([{ parse: [] }, { parse: [] }]);
+	});
+
 	/** A reminder set in a DM has no channel to ping in, so offering one would be a button that does nothing. */
 	it("offers no choice when it was set in a DM", () => {
 		const direct = { ...REMINDER, guildId: null, channelId: null, deliver: "dm" as const };

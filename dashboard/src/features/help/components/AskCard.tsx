@@ -1,4 +1,9 @@
-import { type SupportArticleLink, type SupportReply, SUPPORT_LIMITS } from "@testify/shared";
+import {
+	type SupportArticleLink,
+	type SupportCatalogueEntry,
+	type SupportReply,
+	SUPPORT_LIMITS,
+} from "@testify/shared";
 import { MessageCircleQuestion, Search } from "lucide-react";
 import { type KeyboardEvent, type SubmitEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -181,7 +186,7 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 				)}
 			</div>
 
-			<Browse onOpen={open} />
+			<Browse entries={entries} onOpen={open} />
 		</Card>
 	);
 }
@@ -249,9 +254,14 @@ function Links({
 	);
 }
 
-function Browse({ onOpen }: { onOpen: (id: string) => void }): React.JSX.Element | null {
+function Browse({
+	entries,
+	onOpen,
+}: {
+	entries: readonly SupportCatalogueEntry[];
+	onOpen: (id: string) => void;
+}): React.JSX.Element | null {
 	const { t } = useTranslation();
-	const { entries } = useSupportSearch();
 	const groups = articlesByTopic(entries);
 	if (groups.length === 0) return null;
 

@@ -5,7 +5,7 @@ import { button, option, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { embed } from "@lib/discord/embeds.util";
-import { escapeMarkdown, truncate } from "@lib/format/format.util";
+import { discordTime, escapeMarkdown } from "@lib/format/format.util";
 import { NOTICE_PANEL_ID } from "@lib/notices/notices.constants";
 import { settingsScreen, type ScreenAction } from "@lib/settings/settingsScreen.util";
 import { isScheduled, type Notice, NOTICE_LIMITS, NOTICE_TONES, type NoticeTone } from "@testify/shared";
@@ -25,9 +25,7 @@ export function nextTone(tone: NoticeTone): NoticeTone {
 	return NOTICE_TONES[(NOTICE_TONES.indexOf(tone) + 1) % NOTICE_TONES.length] ?? "info";
 }
 
-function stamp(iso: string, style: "R" | "f" = "R"): string {
-	return `<t:${String(Math.floor(Date.parse(iso) / 1_000))}:${style}>`;
-}
+const stamp = (iso: string, style: "R" | "f" = "R"): string => discordTime(Date.parse(iso), style);
 
 const fullStamp = (iso: string): string => `${stamp(iso, "f")} (${stamp(iso)})`;
 
@@ -77,12 +75,9 @@ export function noticeBoard(
 						placeholder: "Choose one to change or remove…",
 						options: notices.map((notice) =>
 							option({
-								label: truncate(notice.title, 100),
+								label: notice.title,
 								value: notice.id,
-								description: truncate(
-									`${isScheduled(notice, now) ? "Goes up later · " : ""}${notice.body.replace(/\s+/g, " ")}`,
-									100,
-								),
+								description: `${isScheduled(notice, now) ? "Goes up later · " : ""}${notice.body.replace(/\s+/g, " ")}`,
 								emoji: NOTICE_TONE_LOOK[notice.tone].emoji,
 							}),
 						),

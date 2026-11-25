@@ -18,11 +18,12 @@ describe("planStream", () => {
 		});
 	});
 
-	it.each(["opus", "ogg"])("passes a progressive .%s file straight through", (ext) => {
-		expect(planStream([format({ format_id: "hls_opus", ext })], WITHOUT_FFMPEG)).toEqual({
-			formatId: "hls_opus",
-			shape: "ogg-opus",
-		});
+	it("passes a progressive .opus or .ogg file straight through", () => {
+		const transcoded = ["opus", "ogg"].filter(
+			(ext) => planStream([format({ format_id: "hls_opus", ext })], WITHOUT_FFMPEG)?.shape !== "ogg-opus",
+		);
+
+		expect(transcoded).toEqual([]);
 	});
 
 	/** A video stream would carry a whole picture track into a voice channel. */
@@ -43,12 +44,11 @@ describe("planStream", () => {
 		expect(planStream([format({ format_id: "mp3_0", acodec: "mp3", ext: "mp3" })], WITHOUT_FFMPEG)).toBeNull();
 	});
 
-	it.each([[[] as RemoteFormat[]], [[format({ format_id: "v", vcodec: "avc1", acodec: "none" })]]])(
-		"returns nothing for %p",
-		(formats) => {
-			expect(planStream(formats, WITH_FFMPEG)).toBeNull();
-		},
-	);
+	it("returns nothing when no format carries audio", () => {
+		const offers: RemoteFormat[][] = [[], [format({ format_id: "v", vcodec: "avc1", acodec: "none" })]];
+
+		expect(offers.filter((formats) => planStream(formats, WITH_FFMPEG) !== null)).toEqual([]);
+	});
 });
 
 describe("planStream with no bitrate stated", () => {

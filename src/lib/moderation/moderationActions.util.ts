@@ -4,8 +4,15 @@ import { theme } from "@config/theme";
 import { asMember, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
-import { formatDurationLong } from "@lib/format/format.util";
+import { formatDurationLong, truncate } from "@lib/format/format.util";
 import { type MemberBlock } from "@testify/shared";
+
+/** Discord refuses the whole action when its audit log reason passes 512 characters. */
+const AUDIT_REASON_MAX = 512;
+
+export function auditReason(text: string): string {
+	return truncate(text, AUDIT_REASON_MAX);
+}
 
 /** Why this moderator may not act on this target, as a code, or null; every surface asks here. */
 export function moderationBlock(moderator: GuildMember, target: GuildMember, botId?: string): MemberBlock | null {
@@ -105,17 +112,19 @@ export function timedOutEmbed(options: {
 	});
 }
 
-export function dmEmbed(options: {
-	action: string;
-	emoji: string;
-	guild: Guild;
-	moderator: Pick<User, "username">;
-	reason: string;
-	extra?: { name: string; value: string; inline?: boolean }[];
-}): EmbedBuilder {
+/** `action` reads after "You were"; `headline` is a whole title, for news that is not something done to them. */
+export function dmEmbed(
+	options: ({ action: string } | { headline: string }) & {
+		emoji: string;
+		guild: Guild;
+		moderator: Pick<User, "username">;
+		reason: string;
+		extra?: { name: string; value: string; inline?: boolean }[];
+	},
+): EmbedBuilder {
 	return embed({
 		category: "moderation",
-		title: `${options.emoji} You were ${options.action}`,
+		title: `${options.emoji} ${"headline" in options ? options.headline : `You were ${options.action}`}`,
 		fields: [
 			{ name: "Server", value: options.guild.name, inline: true },
 			{ name: "Moderator", value: options.moderator.username, inline: true },

@@ -23,7 +23,7 @@ export const ALL_CATEGORIES = Object.keys(CATEGORIES) as Category[];
 export const HIDDEN_CATEGORIES: Category[] = ["owner"];
 
 export function isCategory(value: string): value is Category {
-	return value in CATEGORIES;
+	return Object.hasOwn(CATEGORIES, value);
 }
 
 export function categoryLabel(category: Category): string {

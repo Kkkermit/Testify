@@ -1,4 +1,3 @@
-import { createTranscript } from "discord-html-transcripts";
 import { ButtonStyle, ChannelType, type Guild, PermissionFlagsBits, type TextChannel, type User } from "discord.js";
 import { TICKET } from "@config/constants";
 import { strings } from "@config/strings";
@@ -56,8 +55,23 @@ function ticketControls() {
 	);
 }
 
+/** Tickets being opened, keyed `guildId:userId`, so a double press cannot make two channels for one person. */
+const opening = new Set<string>();
+
 /** One open ticket per person, in a private channel only they and the handler role can see. */
 export async function openTicket(guild: Guild, setup: TicketSetupRecord, owner: User): Promise<TextChannel> {
+	const key = `${guild.id}:${owner.id}`;
+	if (opening.has(key)) throw new UserFacingError(strings.ticket.alreadyExists);
+
+	opening.add(key);
+	try {
+		return await openTicketChannel(guild, setup, owner);
+	} finally {
+		opening.delete(key);
+	}
+}
+
+async function openTicketChannel(guild: Guild, setup: TicketSetupRecord, owner: User): Promise<TextChannel> {
 	if (await findOpenTicket(guild.id, owner.id)) throw new UserFacingError(strings.ticket.alreadyExists);
 
 	const channel = await guild.channels.create({
@@ -87,9 +101,14 @@ export async function openTicket(guild: Guild, setup: TicketSetupRecord, owner: 
 		],
 	});
 
-	await createTicket({ guildId: guild.id, ownerId: owner.id, channelId: channel.id });
+	// A channel with no record is one nothing can close, so it goes again if the record cannot be written.
+	await createTicket({ guildId: guild.id, ownerId: owner.id, channelId: channel.id }).catch(async (error: unknown) => {
+		await channel.delete("The ticket could not be recorded").catch(() => undefined);
+		throw error;
+	});
 	await channel.send({
 		content: `${owner.toString()} <@&${setup.handlerRoleId}>`,
+		allowedMentions: { users: [owner.id], roles: [setup.handlerRoleId] },
 		embeds: [
 			embed({
 				category: "tickets",
@@ -115,7 +134,12 @@ export async function lockTicket(channel: TextChannel, ticket: TicketRecord, loc
 
 export async function claimTicketFor(ticket: TicketRecord, moderatorId: string): Promise<void> {
 	if (!(await claimTicket(ticket.channelId, moderatorId))) {
-		throw new UserFacingError(`${strings.ticket.alreadyClaimed} <@${ticket.claimedById ?? "unknown"}>.`);
+		// Read before the claim, so a handler who won the race a moment ago is not named yet.
+		throw new UserFacingError(
+			ticket.claimedById === null
+				? "Somebody else has just claimed this ticket."
+				: `${strings.ticket.alreadyClaimed} <@${ticket.claimedById}>.`,
+		);
 	}
 }
 
@@ -159,6 +183,8 @@ async function fileTranscript(
 	const destination = await client.channels.fetch(setup.transcriptChannelId).catch(() => null);
 	if (destination?.isTextBased() !== true || !destination.isSendable()) return;
 
+	// Loaded on first use: the transcript renderer takes half a second to load, and only a closing ticket needs it.
+	const { createTranscript } = await import("discord-html-transcripts");
 	const transcript = await createTranscript(channel, { filename: `ticket-${ticket.ticketId}.html`, poweredBy: false });
 
 	await destination.send({

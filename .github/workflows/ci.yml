@@ -9,8 +9,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+# Read-only: nothing here writes to the repository.
+permissions:
+  contents: read
 
 jobs:
   check:
@@ -87,11 +91,12 @@ jobs:
           test -d dist/assets   || { echo "dist/assets missing"; exit 1; }
           test -f dist/index.js || { echo "dist/index.js missing"; exit 1; }
           test -d dist/commands || { echo "dist/commands missing"; exit 1; }
+          test -f dist/healthcheck.js || { echo "dist/healthcheck.js missing, which the image's HEALTHCHECK runs"; exit 1; }
 
       # tsc-alias rewrites the @-aliases in tsup's onSuccess; if it breaks, dist/ compiles and then fails to start.
       - name: Verify no unrewritten import aliases
         run: |
-          if grep -rlE 'require\("@(core|lib|config|commands|events|buttons|database|jobs|root|api)/' dist; then
+          if grep -rlE 'require\("@(core|lib|config|commands|events|buttons|menus|database|jobs|root|api)/' dist; then
             echo "dist/ still contains unrewritten aliases"; exit 1
           fi
 

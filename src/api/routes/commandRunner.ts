@@ -107,7 +107,7 @@ function resolveGuild(client: TestifyClient, command: Command, guildId: string |
 	return guild;
 }
 
-/** A command switched off is off here too. Nobody bypasses a toggle, the bot owner included. */
+/** A command switched off is off here too, for the bot owner as for anybody. */
 async function assertEnabled(name: string, guildId: string | null): Promise<void> {
 	const [globally, inGuild] = await Promise.all([
 		disabledGlobally(),

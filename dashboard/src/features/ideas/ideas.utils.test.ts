@@ -1,12 +1,5 @@
-import { ideaSummary, pageCount } from "@/features/ideas/ideas.utils";
+import { ideaSummary } from "@/features/ideas/ideas.utils";
 import { i18next } from "@/i18n";
-
-describe("the idea board's URL", () => {
-	it("never counts fewer than one page", () => {
-		expect(pageCount(0, 10)).toBe(1);
-		expect(pageCount(21, 10)).toBe(3);
-	});
-});
 
 describe("ideaSummary", () => {
 	const t = i18next.getFixedT("en");

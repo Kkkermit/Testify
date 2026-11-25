@@ -33,7 +33,7 @@ export function UndoProvider({ children }: { children: ReactNode }): React.JSX.E
 			setWaiting(null);
 			entry.commit().catch((error: unknown) => {
 				setHidden((was) => without(was, entry.key));
-				setFailure({ label: entry.label, message: refusalText(error, "") });
+				setFailure({ label: entry.label, message: entry.refusal?.(error) ?? refusalText(error, "") });
 			});
 		},
 		[stopClock],

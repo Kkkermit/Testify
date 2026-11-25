@@ -1,7 +1,7 @@
 import { WELCOME_LIMITS, WELCOME_PLACEHOLDERS, type WelcomePlaceholder } from "@testify/shared";
 import { type ReactNode, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, FIELD, Warning } from "@/components/form";
+import { Field, FIELD, savesOnLeave, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { PlaceholderHelp } from "@/features/welcome/components/PlaceholderHelp";
 import { insertToken } from "@/features/welcome/welcome.utils";
@@ -28,7 +28,8 @@ export function MessageEditor({
 	saved: string;
 	disabled: boolean;
 	onDraft: (draft: string) => void;
-	onSave: (message: string) => void;
+	/** Return the write, and a refusal puts what was typed back over the rollback. */
+	onSave: (message: string) => Promise<unknown> | undefined;
 	max?: number;
 	tokens?: readonly WelcomePlaceholder[];
 	children?: ReactNode;
@@ -41,54 +42,59 @@ export function MessageEditor({
 
 	function save(): void {
 		if (!dirty || tooLong || draft.trim() === "") return;
-		onSave(sanitiseInput(draft));
+		const message = sanitiseInput(draft);
+		void onSave(message)?.catch(() => {
+			onDraft(message);
+		});
 	}
 
 	return (
 		<Field label={label} htmlFor={id}>
-			<textarea
-				id={id}
-				ref={textarea}
-				rows={3}
-				value={draft}
-				disabled={disabled}
-				onChange={(event) => {
-					onDraft(event.target.value);
-				}}
-				onBlur={save}
-				className={cn(FIELD, "resize-y font-mono", tooLong && "border-destructive")}
-			/>
-			{/* The counter is a status, not part of the field's name, so it sits after the control. */}
-			<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-				{t("common.partOf", { part: draft.length, whole: max })}
-			</span>
+			{/* The tokens, Save and Discard are part of the field, so moving to one of them is not leaving it. */}
+			<div className="contents" {...savesOnLeave(save)}>
+				<textarea
+					id={id}
+					ref={textarea}
+					rows={3}
+					value={draft}
+					disabled={disabled}
+					onChange={(event) => {
+						onDraft(event.target.value);
+					}}
+					className={cn(FIELD, "resize-y font-mono", tooLong && "border-destructive")}
+				/>
+				{/* The counter is a status, not part of the field's name, so it sits after the control. */}
+				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
+					{t("common.partOf", { part: draft.length, whole: max })}
+				</span>
 
-			<PlaceholderHelp
-				disabled={disabled}
-				tokens={tokens}
-				onInsert={(token) => {
-					onDraft(insertToken(draft, token, textarea.current?.selectionStart ?? null));
-					textarea.current?.focus();
-				}}
-			/>
+				<PlaceholderHelp
+					disabled={disabled}
+					tokens={tokens}
+					onInsert={(token) => {
+						onDraft(insertToken(draft, token, textarea.current?.selectionStart ?? null));
+						textarea.current?.focus();
+					}}
+				/>
 
-			{warning !== null && <Warning>{warning}</Warning>}
-			{tooLong && <Warning>{t("welcome.tooLong")}</Warning>}
-			{dirty && !tooLong && (
-				<div className="flex items-center gap-3">
-					<Button onClick={save} disabled={draft.trim() === ""}>
-						{saveLabel}
-					</Button>
-					<Button
-						variant="ghost"
-						onClick={() => {
-							onDraft(saved);
-						}}
-					>
-						{t("common.discard")}
-					</Button>
-				</div>
-			)}
+				{warning !== null && <Warning>{warning}</Warning>}
+				{tooLong && <Warning>{t("welcome.tooLong")}</Warning>}
+				{dirty && !tooLong && (
+					<div className="flex items-center gap-3">
+						<Button onClick={save} disabled={draft.trim() === ""}>
+							{saveLabel}
+						</Button>
+						<Button
+							variant="ghost"
+							onClick={() => {
+								onDraft(saved);
+							}}
+						>
+							{t("common.discard")}
+						</Button>
+					</div>
+				)}
+			</div>
 			{children}
 		</Field>
 	);

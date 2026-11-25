@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import { recordsSettings } from "@lib/settings";
 import {
 	applyStarboardSettings,
@@ -71,9 +71,7 @@ export default recordsSettings(
 				return;
 			}
 
-			const panel = starboardSettingsPanel(settings, ownerId, note);
-			if (interaction.isModalSubmit() && !interaction.isFromMessage()) return;
-			await interaction.update(panel);
+			await redrawPanel(interaction, starboardSettingsPanel(settings, ownerId, note));
 		},
 	}),
 );

@@ -4,20 +4,25 @@ import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
+import { configuredIn } from "@api/routes/owner";
 import { parseBody, parseParams } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
 import { botName } from "@core/brand";
 import { toError } from "@core/errors";
 import { logRing } from "@core/logRing";
 import { shutdown } from "@core/shutdown";
-import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
-import { getCounting } from "@database/repositories/countingRepository";
-import { getLevelSettings } from "@database/repositories/levelRepository";
 import { clearLogLines, deleteLogRun } from "@database/repositories/logRepository";
-import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
-import { getWelcome } from "@database/repositories/welcomeRepository";
-import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
-import { normaliseSettings } from "@lib/levelling";
+import {
+	botIdentity,
+	controlState,
+	forgetBotIdentity,
+	oneGuildActivity,
+	orUnavailable,
+	pause,
+	resume,
+	sendShardlensNow,
+	shardlensStatus,
+} from "@lib/bot";
 import { applyMusicSources, readMusicSources, readMusicSourceSetting, sourcesName } from "@lib/music";
 import {
 	botIdentityPatch,
@@ -90,7 +95,8 @@ control.patch("/identity", async (context) => {
 		after: { username: patch.username ?? null, avatar: patch.avatar === undefined ? null : "changed" },
 	});
 
-	const identity = (await botIdentity(client))!;
+	const identity = await botIdentity(client);
+	if (identity === null) throw badRequest(`${botName()} is still connecting. Try again in a moment.`);
 	return context.json(identity);
 });
 
@@ -131,6 +137,21 @@ control.put("/music", async (context) => {
 	return context.json(setting);
 });
 
+control.get("/shardlens", (context) => context.json(shardlensStatus(context.get("client"))));
+
+control.post("/shardlens/send", async (context) => {
+	const flushed = await sendShardlensNow(context.get("client"));
+	if (flushed === null) throw notFound("shardlens_off", "Shardlens is off, so there is nothing to send.");
+
+	await auditChange(context, {
+		action: "bot.shardlensSend",
+		summary: "Sent the queued analytics to Shardlens",
+		after: { sent: flushed.sent, problem: flushed.problem },
+	});
+
+	return context.json(flushed);
+});
+
 control.get("/guilds/:guildId", async (context) => {
 	const client = context.get("client");
 	const { guildId } = parseParams(context, guildIdParam);
@@ -138,10 +159,9 @@ control.get("/guilds/:guildId", async (context) => {
 
 	if (guild === undefined) throw notInGuild();
 
-	const [configured, tallies, dashboard] = await Promise.all([
-		configuredIn(guild),
-		guildTallies(ANALYTICS.defaultWindowDays, 0),
-		dashboardTallies(ANALYTICS.defaultWindowDays, 0, undefined, guild.id),
+	const [configured, activity] = await Promise.all([
+		configuredIn(guild.id),
+		orUnavailable(oneGuildActivity(client, guild.id, ANALYTICS.defaultWindowDays)),
 	]);
 
 	const me = guild.members.me;
@@ -159,8 +179,9 @@ control.get("/guilds/:guildId", async (context) => {
 		highestRole: me?.roles.highest.name ?? null,
 		missingPermissions: missingIn(guild),
 		configured,
-		usage: tallies.find((row) => row.guildId === guild.id)?.count ?? 0,
-		dashboardViews: dashboard[0]?.count ?? 0,
+		usage: activity.value?.commands ?? null,
+		dashboardViews: activity.value?.dashboard ?? null,
+		analytics: activity.problem,
 	};
 
 	return context.json(body);
@@ -191,23 +212,6 @@ control.post("/guilds/:guildId/leave", async (context) => {
 
 	return context.json({ left: guild.id });
 });
-
-async function configuredIn(guild: Guild): Promise<string[]> {
-	const [levels, audit, welcome, counting] = await Promise.all([
-		getLevelSettings(guild.id),
-		getAuditLogConfig(guild.id),
-		getWelcome(guild.id),
-		getCounting(guild.id),
-	]);
-
-	const found: string[] = [];
-	if (normaliseSettings(levels).enabled) found.push("levelling");
-	if (audit !== null && audit.enabledLogs.length > 0) found.push("audit logging");
-	if (welcome !== null) found.push("welcome");
-	if (counting !== null) found.push("counting");
-
-	return found;
-}
 
 const WATCHED = [
 	[PermissionFlagsBits.ManageRoles, "Manage Roles"],

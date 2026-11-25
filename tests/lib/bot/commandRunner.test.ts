@@ -37,13 +37,10 @@ function optionsFrom(args: Record<string, string | number | boolean>, guild: unk
 
 describe("the allowlist", () => {
 	/** Opt-in, so a command added later does not become web-reachable by accident. */
-	it("refuses a command that is not on it", () => {
+	it("runs only what is on it", () => {
+		expect(ALLOWED_IN_DASHBOARD.filter((name) => !runnableInDashboard(name))).toEqual([]);
 		expect(runnableInDashboard("ban")).toBe(false);
 		expect(runnableInDashboard("levelling")).toBe(false);
-	});
-
-	it("allows the ones that are", () => {
-		for (const name of ALLOWED_IN_DASHBOARD) expect(runnableInDashboard(name)).toBe(true);
 	});
 
 	/** The never-list still refuses `/eval` if something adds it to the allowlist. */
@@ -57,22 +54,16 @@ describe("the allowlist", () => {
 });
 
 describe("reading arguments", () => {
-	it("reads a string", () => {
+	it("reads each type it declares, and null for one not given", () => {
 		expect(optionsFrom({ text: "hello" }).getString("text")).toBe("hello");
-	});
-
-	it("reads an integer", () => {
 		expect(optionsFrom({ count: 7 }).getInteger("count")).toBe(7);
+		expect(optionsFrom({}).getString("text")).toBeNull();
 	});
 
 	it("reads a boolean sent either as JSON or as a string", () => {
 		expect(optionsFrom({ yes: true }).getBoolean("yes")).toBe(true);
 		expect(optionsFrom({ yes: "true" }).getBoolean("yes")).toBe(true);
 		expect(optionsFrom({ yes: "no" }).getBoolean("yes")).toBe(false);
-	});
-
-	it("answers null for something that was not given", () => {
-		expect(optionsFrom({}).getString("text")).toBeNull();
 	});
 
 	it("refuses a missing required option with a sentence", () => {
@@ -87,11 +78,8 @@ describe("reading arguments", () => {
 		expect(options.declaredNames).not.toContain("sneaky");
 	});
 
-	it("refuses a number that is not one", () => {
+	it("refuses a number that is not one, and an integer given as a decimal", () => {
 		expect(() => optionsFrom({ count: "abc" }).getInteger("count")).toThrow(UserFacingError);
-	});
-
-	it("refuses an integer given as a decimal", () => {
 		expect(() => optionsFrom({ count: 1.5 }).getInteger("count")).toThrow(UserFacingError);
 	});
 
@@ -100,12 +88,13 @@ describe("reading arguments", () => {
 		expect(() => optionsFrom({ who: "nonsense" }).getUser("who")).toThrow(UserFacingError);
 	});
 
-	it("resolves a user from the cache", () => {
+	it("resolves a user from the cache, and answers null for one Discord has not cached", () => {
 		const client = createMockClient();
 		client.users.cache.set(OWNER.id, OWNER as never);
 		const options = new DashboardOptions(client, null, commandWith().options ?? [], null, { who: OWNER.id });
 
 		expect(options.getUser("who")).toBe(OWNER);
+		expect(optionsFrom({ who: "100000000000000099" }).getUser("who")).toBeNull();
 	});
 
 	it("resolves a channel and a role out of the guild it was given", () => {
@@ -139,16 +128,9 @@ describe("reading arguments", () => {
 		expect(() => options.getChannel("where", true)).toThrow(UserFacingError);
 	});
 
-	it("answers null for a user Discord has not cached", () => {
-		expect(optionsFrom({ who: "100000000000000099" }).getUser("who")).toBeNull();
-	});
-
 	/** There is no upload over this endpoint, and a command needing one should say so rather than get nothing. */
-	it("refuses a required attachment plainly", () => {
+	it("refuses a required attachment plainly, and answers null for an optional one", () => {
 		expect(() => optionsFrom({}).getAttachment("file", true)).toThrow(/cannot be sent from here/);
-	});
-
-	it("answers null for an optional attachment", () => {
 		expect(optionsFrom({}).getAttachment("file")).toBeNull();
 	});
 });
@@ -166,16 +148,13 @@ describe("optionsFor", () => {
 		],
 	} as never);
 
-	it("reads a subcommand's own options", () => {
+	it("reads a subcommand's own options, or the top-level ones when none is named", () => {
 		expect(optionsFor(parent, "info").map((option) => option.name)).toEqual(["deep"]);
+		expect(optionsFor(commandWith(), null).map((option) => option.name)).toContain("text");
 	});
 
 	it("refuses a subcommand the command does not have", () => {
 		expect(() => optionsFor(parent, "nope")).toThrow(UserFacingError);
-	});
-
-	it("reads the top-level options when no subcommand is named", () => {
-		expect(optionsFor(commandWith(), null).map((option) => option.name)).toContain("text");
 	});
 });
 
@@ -184,11 +163,12 @@ describe("the interaction adapter", () => {
 		return new DashboardInteraction(createMockClient(), commandWith(), OWNER as never, null, request);
 	}
 
-	it("captures a reply instead of sending it", async () => {
+	it("captures a reply and a follow-up instead of sending them", async () => {
 		const interaction = interactionFor();
-		await interaction.reply({ content: "done" });
+		await interaction.reply({ content: "first" });
+		await interaction.followUp({ content: "second" });
 
-		expect(interaction.captured).toEqual([{ content: "done" }]);
+		expect(interaction.captured).toEqual([{ content: "first" }, { content: "second" }]);
 		expect(interaction.replied).toBe(true);
 	});
 
@@ -199,14 +179,6 @@ describe("the interaction adapter", () => {
 
 		expect(interaction.deferred).toBe(true);
 		expect(interaction.captured).toEqual([{ content: "eventually" }]);
-	});
-
-	it("captures a follow-up as another block", async () => {
-		const interaction = interactionFor();
-		await interaction.reply({ content: "first" });
-		await interaction.followUp({ content: "second" });
-
-		expect(interaction.captured).toHaveLength(2);
 	});
 
 	/** A modal is a second Discord round trip with nowhere to go here, so it says so. */
@@ -221,12 +193,10 @@ describe("the interaction adapter", () => {
 });
 
 describe("serialising what a command replied with", () => {
-	it("turns content into a text block", () => {
+	it("turns content or a bare string into a text block, and an empty reply into nothing", () => {
 		expect(serialiseReply({ content: "pong" })).toEqual([{ kind: "text", content: "pong" }]);
-	});
-
-	it("accepts a bare string, which `editReply` allows", () => {
 		expect(serialiseReply("pong")).toEqual([{ kind: "text", content: "pong" }]);
+		expect(serialiseReply({ content: "" })).toEqual([]);
 	});
 
 	it("flattens an embed built by the bot into fields a browser can draw", () => {
@@ -248,26 +218,17 @@ describe("serialising what a command replied with", () => {
 	});
 
 	/** Dropped buttons are named, so the reply does not look like less than it was. */
-	it("names dropped buttons rather than hiding them", () => {
-		const outputs = serialiseReply({ content: "pick one", components: [{ type: 1 }] });
+	it("names what it dropped: buttons, a Components V2 panel or an attachment", () => {
+		const dropped = [
+			serialiseReply({ content: "pick one", components: [{ type: 1 }] }),
+			serialiseReply({ components: [{ type: 17 } as never], flags: MessageFlags.IsComponentsV2 } as never),
+			serialiseReply({ files: ["card.png"] }),
+		].map((outputs) => outputs.find((output) => output.kind === "dropped"));
 
-		expect(outputs).toContainEqual({ kind: "dropped", what: "buttons" });
-	});
-
-	it("says when what was dropped was a Components V2 panel", () => {
-		const outputs = serialiseReply({
-			components: [{ type: 17 } as never],
-			flags: MessageFlags.IsComponentsV2,
-		} as never);
-
-		expect(outputs).toContainEqual({ kind: "dropped", what: "panel" });
-	});
-
-	it("names a dropped attachment", () => {
-		expect(serialiseReply({ files: ["card.png"] })).toContainEqual({ kind: "dropped", what: "attachment" });
-	});
-
-	it("yields nothing for an empty reply rather than an empty block", () => {
-		expect(serialiseReply({ content: "" })).toEqual([]);
+		expect(dropped).toEqual([
+			{ kind: "dropped", what: "buttons" },
+			{ kind: "dropped", what: "panel" },
+			{ kind: "dropped", what: "attachment" },
+		]);
 	});
 });

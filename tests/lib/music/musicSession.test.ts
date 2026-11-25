@@ -296,6 +296,61 @@ describe("the volume", () => {
 		release(DESCRIBED);
 		await new Promise((resolve) => setImmediate(resolve));
 	});
+
+	/** A second press while the first re-open waited on yt-dlp restarted the track from the beginning. */
+	it("keeps the place in the track when the level changes again while it opens", async () => {
+		const { describeTrack, openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session } = sessionWith(["a"], WITH_FFMPEG);
+		await session.play(0);
+		openStream.mockClear();
+
+		let release: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (release = resolve)));
+		resource.playbackDuration = 100_000;
+		session.setVolume(60);
+		session.setVolume(70);
+		release(DESCRIBED);
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(openStream).toHaveBeenCalledTimes(1);
+		expect(openStream.mock.calls[0]?.[3]).toMatchObject({ seekMs: 100_000, volume: 70 });
+	});
+});
+
+describe("a track still opening", () => {
+	/** Two plays that overlapped both opened a stream, and the older one's downloader was never stopped. */
+	it("opens only the newest of two plays that overlap", async () => {
+		const { describeTrack, openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session } = sessionWith(["a", "b"]);
+
+		let releaseFirst: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (releaseFirst = resolve)));
+		const first = session.play(0);
+		const second = session.play(1);
+		await second;
+		releaseFirst(DESCRIBED);
+		await first;
+
+		expect(openStream).toHaveBeenCalledTimes(1);
+		expect(openStream.mock.calls[0]?.[0]).toBe("https://youtu.be/b");
+		expect(session.queue.index).toBe(1);
+	});
+
+	/** A session that ends while yt-dlp answers has nobody left to play to, so nothing may be downloaded for it. */
+	it("opens nothing for a session that ended while the track was opening", async () => {
+		const { describeTrack, openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session, events } = sessionWith(["a"]);
+
+		let release: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (release = resolve)));
+		const playing = session.play(0);
+		session.destroy();
+		release(DESCRIBED);
+		await playing;
+
+		expect(openStream).not.toHaveBeenCalled();
+		expect(events).toEqual([]);
+	});
 });
 
 describe("a queue where nothing can be opened", () => {
@@ -322,6 +377,33 @@ describe("a queue where nothing can be opened", () => {
 
 		expect(events).toContainEqual(expect.objectContaining({ kind: "failed" }));
 		expect(session.queue.index).toBe(1);
+	});
+});
+
+describe("what the session says about each track", () => {
+	/** Played is counted from these, so a retry or a volume change must not count the same song twice. */
+	it("marks a track opened again where it was as resumed, and a fresh start as not", async () => {
+		const { session, events } = sessionWith(["song"]);
+
+		await session.play(0);
+		await session.play(0, { seekMs: 30_000, resumed: true });
+
+		expect(events.filter((event) => event.kind === "track").map((event) => event.resumed)).toEqual([false, true]);
+	});
+
+	/** The reason a track was given up on is what tells a flagged host from a broken track. */
+	it("gives each failure the reason it was given up for", async () => {
+		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
+		describeTrack
+			.mockResolvedValueOnce({ formats: [] })
+			.mockRejectedValueOnce(new Error("ERROR: Sign in to confirm you’re not a bot"))
+			.mockRejectedValueOnce(new Error("something nobody has seen"));
+
+		const { session, events } = sessionWith(["a", "b", "c", "fine"]);
+		await session.play(0);
+
+		const failed = events.flatMap((event) => (event.kind === "failed" ? [event.problem] : []));
+		expect(failed).toEqual(["unplayable", "bot-check", "error"]);
 	});
 });
 

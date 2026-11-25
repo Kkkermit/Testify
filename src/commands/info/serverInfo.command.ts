@@ -1,6 +1,5 @@
 import { ChannelType, GuildExplicitContentFilter, GuildNSFWLevel, GuildVerificationLevel } from "discord.js";
-import { defineCommand } from "@core/command";
-import { UserFacingError } from "@core/errors";
+import { defineCommand, inGuild } from "@core/command";
 import { embed, reply } from "@lib/discord";
 import { discordTime, formatNumber, titleCase, truncate } from "@lib/format";
 
@@ -17,8 +16,7 @@ export default defineCommand({
 	guildOnly: true,
 
 	async run(interaction) {
-		const guild = interaction.guild;
-		if (!guild) throw new UserFacingError("This command only works inside a server.");
+		const guild = inGuild(interaction);
 
 		await interaction.deferReply();
 		await guild.members.fetch().catch(() => null);

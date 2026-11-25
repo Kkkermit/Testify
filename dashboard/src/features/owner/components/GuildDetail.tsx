@@ -3,9 +3,13 @@ import { BarChart3, ExternalLink, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Field, Refusal, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
 import { permissionLabel } from "@/features/commands/permissions.labels";
+import { featureLabel } from "@/features/guild-overview/featureStatus.labels";
+import { CountsUnavailable } from "@/features/owner/components/AnalyticsNotice";
+import { countOrDash } from "@/features/owner/owner.utils";
 import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
@@ -15,7 +19,18 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 	const { t } = useTranslation();
 	const detail = useGuildDetail(guildId);
 
-	if (detail.isPending || detail.data === undefined) return <Skeleton className="h-64 w-full" />;
+	if (detail.isError) {
+		return (
+			<div className="flex flex-col items-start gap-2">
+				<ErrorState as="h2" error={detail.error} onRetry={() => void detail.refetch()} />
+				<Button variant="ghost" onClick={onClose}>
+					<X size={15} aria-hidden="true" />
+					{t("owner.closeDetail")}
+				</Button>
+			</div>
+		);
+	}
+	if (detail.data === undefined) return <Skeleton className="h-64 w-full" />;
 
 	const guild = detail.data;
 
@@ -35,9 +50,10 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			<dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 				<Figure size="md" label={t("owner.members")} value={formatNumber(guild.memberCount)} />
 				<Figure size="md" label={t("overview.channels")} value={String(guild.channelCount)} />
-				<Figure size="md" label={t("owner.commands30d")} value={formatNumber(guild.usage)} />
-				<Figure size="md" label={t("owner.dashboard30d")} value={formatNumber(guild.dashboardViews)} />
+				<Figure size="md" label={t("owner.commands30d")} value={countOrDash(guild.usage)} />
+				<Figure size="md" label={t("owner.dashboard30d")} value={countOrDash(guild.dashboardViews)} />
 			</dl>
+			{guild.analytics !== null && <CountsUnavailable problem={guild.analytics} />}
 
 			<DataList
 				dense
@@ -59,7 +75,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 				{guild.configured.length === 0 ? (
 					<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>
 				) : (
-					guild.configured.map((feature) => <Badge key={feature}>{feature}</Badge>)
+					guild.configured.map((feature) => <Badge key={feature}>{featureLabel(feature, feature, t)}</Badge>)
 				)}
 			</div>
 

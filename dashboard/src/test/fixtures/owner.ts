@@ -3,13 +3,12 @@ import {
 	type BotControlState,
 	type CommandCatalogue,
 	type CommandRunResult,
-	type CommandRunRow,
 	type GuildUsageReport,
 	type LogFeed,
 	type LogRuns,
-	type MemberUsageRow,
 	type OwnerGuildDetail,
 	type RuntimeInfo,
+	type ShardlensStatus,
 	type UsageReport,
 } from "@testify/shared";
 import { aGuild } from "@/test/fixtures/session";
@@ -32,6 +31,7 @@ export const guildDetail: OwnerGuildDetail = {
 	configured: ["levelling"],
 	usage: 900,
 	dashboardViews: 12,
+	analytics: null,
 };
 
 export const runnable: CommandCatalogue = {
@@ -138,21 +138,24 @@ export const usageReport: UsageReport = {
 		{ day: "2026-08-01", count: 740, failures: 8 },
 	],
 	mostUsed: [
-		{ command: "rank", category: "levelling", count: 800, failures: 2 },
-		{ command: "ban", category: "moderation", count: 440, failures: 10 },
+		{ command: "rank", category: "levelling", menu: false, count: 800, failures: 2 },
+		{ command: "ban", category: "moderation", menu: false, count: 440, failures: 10 },
+		{ command: "Time out", category: "moderation", menu: true, count: 120, failures: 0 },
 	],
-	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
+	leastUsed: [{ command: "flush", category: "developer", menu: false, count: 0, failures: 0 }],
 	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
 	dashboardGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 12 }],
-	runDays: 30,
+	detailDays: 30,
+	countedBefore: 0,
 	slowest: [
-		{ command: "music", category: "music", runs: 40, typicalMs: 850, slowMs: 4_200 },
-		{ command: "rank", category: "levelling", runs: 1_300, typicalMs: 90, slowMs: 310 },
+		{ command: "music", category: "music", menu: false, runs: 40, typicalMs: 850, slowMs: 4_200 },
+		{ command: "rank", category: "levelling", menu: false, runs: 1_300, typicalMs: 90, slowMs: 310 },
 	],
 	screens: [
 		{ route: "/guilds/:guildId/levelling", count: 42 },
 		{ route: "/guilds/:guildId/settings", count: 18 },
 	],
+	collector: "https://stats.example.com",
 };
 
 export const guildUsage: GuildUsageReport = {
@@ -165,7 +168,8 @@ export const guildUsage: GuildUsageReport = {
 		joinedAt: "2026-01-01T00:00:00.000Z",
 	},
 	days: 30,
-	memberDays: 30,
+	detailDays: 30,
+	countedBefore: 0,
 	runs: 900,
 	failures: 9,
 	surfaces: { slash: 800, prefix: 100 },
@@ -174,70 +178,20 @@ export const guildUsage: GuildUsageReport = {
 		{ day: "2026-08-01", count: 500, failures: 5 },
 	],
 	commands: [
-		{ command: "rank", category: "levelling", count: 600, failures: 1 },
-		{ command: "music", category: "music", count: 300, failures: 8 },
+		{ command: "rank", category: "levelling", menu: false, count: 600, failures: 1 },
+		{ command: "music", category: "music", menu: false, count: 300, failures: 8 },
 	],
 	dashboardViews: 12,
-	members: 2,
+	people: 2,
+	profile: {
+		sizeAtJoin: 900,
+		firstCommandAt: "2026-01-01T00:05:00.000Z",
+		lastCommandAt: "2026-08-01T11:00:00.000Z",
+		missingPermissions: ["ManageRoles"],
+		history: [{ at: "2026-01-01T00:00:00.000Z", kind: "join", atStartup: false }],
+	},
+	collector: "https://stats.example.com",
 };
-
-export const memberUsage: MemberUsageRow[] = [
-	{
-		userId: "800000000000000001",
-		username: "alice",
-		avatarUrl: null,
-		runs: 700,
-		failures: 3,
-		prefix: 50,
-		commandCount: 4,
-		topCommands: [
-			{ command: "rank", count: 500 },
-			{ command: "music", count: 150 },
-			{ command: "balance", count: 40 },
-		],
-		lastAt: "2026-08-01T12:00:00.000Z",
-	},
-	{
-		userId: "800000000000000002",
-		username: "bob",
-		avatarUrl: null,
-		runs: 200,
-		failures: 0,
-		prefix: 0,
-		commandCount: 1,
-		topCommands: [{ command: "rank", count: 200 }],
-		lastAt: "2026-07-31T09:00:00.000Z",
-	},
-];
-
-export const commandRuns: CommandRunRow[] = [
-	{
-		at: "2026-08-01T12:00:00.000Z",
-		userId: "800000000000000001",
-		username: "alice",
-		command: "music",
-		subcommand: "play",
-		surface: "slash",
-		failed: true,
-		reference: "AB12CD",
-		durationMs: 1_200,
-		channelId: "400000000000000001",
-		channelName: "general",
-	},
-	{
-		at: "2026-08-01T11:00:00.000Z",
-		userId: "800000000000000002",
-		username: "bob",
-		command: "rank",
-		subcommand: null,
-		surface: "prefix",
-		failed: false,
-		reference: null,
-		durationMs: 85,
-		channelId: null,
-		channelName: null,
-	},
-];
 
 const CURRENT_RUN = "6f0d7c1e-2a4b-4c8d-9e1f-0a2b3c4d5e6f";
 export const PAST_RUN = "1b2c3d4e-5f60-4718-8a9b-0c1d2e3f4a5b";
@@ -335,4 +289,16 @@ export const runtimeInfo: RuntimeInfo = {
 	shards: 1,
 	cachedUsers: 4200,
 	cachedChannels: 120,
+};
+
+export const shardlensStatus: ShardlensStatus = {
+	state: "sending",
+	collector: "https://stats.example.com",
+	inBot: false,
+	mode: "privacy",
+	queued: 3,
+	waitingForResponse: 1,
+	dropped: 0,
+	failedSends: 2,
+	lastProblem: { name: "network", at: "2026-07-31T12:05:00.000Z" },
 };

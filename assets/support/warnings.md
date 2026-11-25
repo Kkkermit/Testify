@@ -27,6 +27,6 @@ Warnings can also stop counting after a while: pick a window from seven days to 
 The member is told the reason and what happens next before it happens. If the bot cannot carry out a step, because its role is not above the member's or it lacks the permission, the warning is still recorded and whoever issued it is told why.
 
 ### On the dashboard
-**Warnings**, under Moderation, shows the five most recent warnings with their reason, who gave them, when, and what each one did, and each can be edited or removed. Search by a member's name or Discord ID to see all of theirs. You can warn somebody by finding them by name or by pasting their Discord ID, and set the punishments there too. A member's page, reached through **Leaderboards**, has the same controls for that one person.
+**Warnings**, under Moderation, shows the five most recent warnings with their reason, who gave them, when, and what each one did, and each can be edited or removed. Search by a member's name or Discord ID to see all of theirs. You can warn somebody by finding them by name or by pasting their Discord ID, and set the punishments there too. A member's page, reached through **Members**, has the same controls for that one person.
 
 > **Tip:** Link filtering records every link it removes as a warning, so its warnings count towards the punishments too.

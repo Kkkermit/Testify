@@ -11,6 +11,7 @@ export { RoleChecklist } from "@/components/form/RoleChecklist";
 export { RowActions } from "@/components/form/RowActions";
 export { RowLayout } from "@/components/form/rowLayout";
 export { SavingIndicator, savingStateOf, type SavingState } from "@/components/form/SavingIndicator";
+export { holdsFocus, savesOnLeave } from "@/components/form/savesOnLeave";
 export { SearchField } from "@/components/form/SearchField";
 export { SettingRows } from "@/components/form/SettingRows";
 export { SwitchTrack } from "@/components/form/SwitchTrack";

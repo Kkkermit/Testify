@@ -32,10 +32,10 @@ function requireManager(member: GuildMember): void {
 }
 
 async function runSystemAction(interaction: ComponentInteraction, action: string): Promise<void> {
+	if (!interaction.inCachedGuild() || !interaction.isMessageComponent()) return;
 	const guild = interaction.guild;
-	if (guild === null || !interaction.isMessageComponent()) return;
 
-	requireManager(interaction.member as GuildMember);
+	requireManager(interaction.member);
 
 	let note: string;
 
@@ -64,16 +64,16 @@ export default recordsSettings(
 			const guild = interaction.guild;
 			if (guild === null) return;
 
-			// The system settings do not need a player, and refusing them for want of one would be a trap.
+			// The system settings work with nothing playing.
 			if (SYSTEM_ACTIONS.has(context.action)) {
 				await runSystemAction(interaction, context.action);
 				return;
 			}
 
-			if (!interaction.isButton()) return;
+			if (!interaction.isButton() || !interaction.inCachedGuild()) return;
 
 			const session = requireSession(guild);
-			sameChannelAs(session, interaction.member as GuildMember);
+			sameChannelAs(session, interaction.member);
 
 			let note: string | undefined;
 			let page = 0;

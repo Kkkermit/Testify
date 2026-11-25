@@ -32,8 +32,6 @@ export const ECONOMY = {
 	heistMaxPlayers: 5,
 	heistJoinWindowMs: 60 * SECOND_MS,
 	transferMin: 1,
-	passiveIncomeIntervalMs: HOUR_MS,
-	leaderboardPageSize: 10,
 } as const;
 
 export const LEVELLING = {
@@ -70,13 +68,8 @@ export const LIMITS = {
 	embedDescription: 4_096,
 	embedFieldValue: 1_024,
 	embedTitle: 256,
-	messageContent: 2_000,
-	selectMenuOptions: 25,
-	autocompleteChoices: 25,
 	bulkDeleteMax: 100,
 	bulkDeleteMin: 1,
-	defaultPageSize: 6,
-	componentTimeoutMs: 5 * MINUTE_MS,
 	externalApiTimeoutMs: 10 * SECOND_MS,
 } as const;
 
@@ -90,11 +83,12 @@ export { TREASURE_DEFAULTS } from "@testify/shared";
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 
 export const ANALYTICS = {
-	/** Long enough to see a month-on-month trend, short enough that the collection stays small. */
-	retentionDays: 90,
+	/** What the owner's list of servers counts commands and dashboard use over. */
 	defaultWindowDays: 30,
-	maxWindowDays: 90,
 } as const;
+
+/** How long the record of who changed what, on the dashboard or with a command, is kept. */
+export const AUDIT = { retentionDays: 90 } as const;
 
 export const AFK = {
 	maxNote: 100,
@@ -105,5 +99,3 @@ export const AFK = {
 	/** How long the notice stays up before it tidies itself away. */
 	noticeShowsMs: 30 * SECOND_MS,
 } as const;
-
-/** Used where a "never expires" sentinel is needed instead of a made-up huge number. */

@@ -1,4 +1,5 @@
 import { type APIUser, type ClientUser, Routes } from "discord.js";
+import { HOUR_MS, MINUTE_MS } from "@config/constants";
 import { instanceConfig } from "@config/instance";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
@@ -8,7 +9,7 @@ import { type BotIdentity } from "@testify/shared";
 /** The bot's public profile; the banner only arrives over REST, so the fetch is cached. */
 
 /** Long enough that a busy dashboard makes one call an hour; short enough that a rebrand shows up the same day. */
-const TTL_MS = 60 * 60 * 1000;
+const TTL_MS = HOUR_MS;
 
 const SIZE = 256;
 
@@ -16,7 +17,7 @@ let cached: { value: BotIdentity; at: number } | null = null;
 let connecting: { value: BotIdentity; at: number } | null = null;
 
 /** The sign-in screen polls every two seconds while the bot connects, and one REST read a minute answers all of it. */
-const CONNECTING_TTL_MS = 60 * 1000;
+const CONNECTING_TTL_MS = MINUTE_MS;
 
 /** Exported for tests, which must not inherit a previous case's answer. */
 export function forgetBotIdentity(): void {

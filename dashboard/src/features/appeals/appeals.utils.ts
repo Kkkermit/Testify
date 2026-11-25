@@ -1,11 +1,11 @@
 import { APPEAL_STATUSES, type AppealFilter, type AppealSettings } from "@testify/shared";
 import { type TFunction } from "i18next";
 
-const FILTERS: readonly AppealFilter[] = [...APPEAL_STATUSES, "all"];
+export const APPEAL_FILTERS: readonly AppealFilter[] = [...APPEAL_STATUSES, "all"];
 
 /** The page opens on what is waiting, since that is the only part anybody has to act on. */
 export function appealFilterFrom(value: string | null): AppealFilter {
-	return FILTERS.find((filter) => filter === value) ?? "open";
+	return APPEAL_FILTERS.find((filter) => filter === value) ?? "open";
 }
 
 export function appealSummary(

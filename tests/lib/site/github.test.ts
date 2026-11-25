@@ -1,7 +1,7 @@
 import { ServiceError } from "@core/errors";
 import { keepTrafficDays, readTrafficDays } from "@database/repositories/githubTrafficRepository";
 import { fetchJson, fetchRaw } from "@lib/infra/http.util";
-import { GitHubReader, releaseTags, SiteProblem, TimedCache, trafficDays } from "@lib/site/github.util";
+import { GitHubReader, releaseTags, SiteProblem, trafficDays } from "@lib/site/github.util";
 import { SITE_LIMITS } from "@testify/shared";
 
 jest.mock("@lib/infra/http.util", () => ({ fetchJson: jest.fn(), fetchRaw: jest.fn() }));
@@ -67,12 +67,13 @@ const releaseAnswers = {
 	[`/git/trees/${COMMIT}`]: tree,
 };
 
-function reader(options: { token?: string; version?: string } = {}): GitHubReader {
+function reader(options: { token?: string; version?: string; now?: () => number } = {}): GitHubReader {
 	return new GitHubReader({
 		repository: REPOSITORY,
 		version: options.version ?? "2.0.9",
 		token: options.token,
 		logger: { warn: jest.fn() } as never,
+		...(options.now === undefined ? {} : { now: options.now }),
 	});
 }
 
@@ -106,40 +107,6 @@ describe("trafficDays", () => {
 			{ date: "2026-10-27", views: 0, uniqueViews: 0, clones: 5, uniqueClones: 3 },
 			{ date: "2026-10-28", views: 9, uniqueViews: 4, clones: 2, uniqueClones: 1 },
 		]);
-	});
-});
-
-describe("TimedCache", () => {
-	it("shares a request on its way, keeps the answer for its time, and asks again after it", async () => {
-		let now = 0;
-		const cache = new TimedCache<number>(1_000, Number.POSITIVE_INFINITY, () => now);
-		const load = jest.fn(() => Promise.resolve(1));
-
-		await Promise.all([cache.get("a", load), cache.get("a", load)]);
-		now = 999;
-		await cache.get("a", load);
-		expect(load).toHaveBeenCalledTimes(1);
-
-		now = 1_000;
-		await cache.get("a", load);
-		expect(load).toHaveBeenCalledTimes(2);
-	});
-
-	/** A failure kept for an hour would refuse every reader for an hour after GitHub recovered. */
-	it("does not keep a failure", async () => {
-		const cache = new TimedCache<number>(1_000);
-
-		await expect(cache.get("a", () => Promise.reject(new Error("down")))).rejects.toThrow("down");
-		await expect(cache.get("a", () => Promise.resolve(2))).resolves.toBe(2);
-	});
-
-	it("lets go of the oldest answer past its size", async () => {
-		const cache = new TimedCache<string>(1_000, 2);
-		const load = jest.fn((key: string) => Promise.resolve(key));
-
-		for (const key of ["a", "b", "c", "a"]) await cache.get(key, () => load(key));
-
-		expect(load.mock.calls.map(([key]) => key)).toEqual(["a", "b", "c", "a"]);
 	});
 });
 
@@ -224,6 +191,14 @@ describe("GitHubReader", () => {
 		expect(await shared.file("a.txt")).toMatchObject({ text: null, withheld: "binary" });
 	});
 
+	/** The request's timeout runs on through the body, so a read that stalls halfway is GitHub's failure, not a bug. */
+	it("reports a file whose body never finished arriving as GitHub failing", async () => {
+		const stalled = new DOMException("The operation was aborted due to timeout", "TimeoutError");
+		jest.mocked(fetchRaw).mockResolvedValue({ text: () => Promise.reject(stalled) } as unknown as Response);
+
+		await expect(reader().file("src/index.ts")).rejects.toBeInstanceOf(ServiceError);
+	});
+
 	/** With a token for its traffic, the bot could otherwise read a private repository out to anybody. */
 	it("shows nothing of a private repository's code", async () => {
 		github({ ...releaseAnswers, "": repo({ private: true }) });
@@ -286,5 +261,49 @@ describe("GitHubReader", () => {
 		});
 
 		await expect(elsewhere.standing()).rejects.toEqual(new SiteProblem("no_repository"));
+	});
+});
+
+describe("what visitors can make it ask GitHub for", () => {
+	/** Each file not already held was a fresh download, so cycling through the repository fetched it without end. */
+	it("fetches at most one cache's worth of files an hour for everybody, and still shows those it holds", async () => {
+		let now = 0;
+		const files = Array.from({ length: SITE_LIMITS.freshFilesPerHour + 1 }, (_, index) => `src/f${String(index)}.ts`);
+		github({
+			...releaseAnswers,
+			[`/git/trees/${COMMIT}`]: { truncated: false, tree: files.map((path) => ({ path, type: "blob", size: 10 })) },
+		});
+		rawFile("export {};");
+		const shared = reader({ now: () => now });
+
+		for (const path of files.slice(0, -1)) await shared.file(path);
+		await expect(shared.file(files.at(-1) ?? "")).rejects.toThrow(new SiteProblem("busy"));
+		await expect(shared.file(files[0] ?? "")).resolves.toMatchObject({ text: "export {};" });
+		expect(fetchRaw).toHaveBeenCalledTimes(SITE_LIMITS.freshFilesPerHour);
+
+		now += 60 * 60_000;
+		await expect(shared.file(files.at(-1) ?? "")).resolves.toMatchObject({ text: "export {};" });
+	});
+
+	/** Every reload during a limit was one more request to a GitHub already refusing them. */
+	it("stops asking GitHub for a while once it answers with a limit, and a token short of a permission pauses nothing", async () => {
+		let now = 0;
+		github({ ...releaseAnswers, "": new ServiceError("GitHub", new Error("HTTP 403"), 403) });
+		const limited = reader({ now: () => now });
+
+		await expect(limited.standing()).rejects.toThrow(ServiceError);
+		const asked = jest.mocked(fetchJson).mock.calls.length;
+		await expect(limited.tree()).rejects.toThrow(ServiceError);
+		expect(fetchJson).toHaveBeenCalledTimes(asked);
+
+		now += SITE_LIMITS.pauseMinutes * 60_000;
+		github(releaseAnswers);
+		await expect(limited.tree()).resolves.toMatchObject({ ref: "release/v2.0.9" });
+
+		const forbidden = new ServiceError("GitHub", new Error("HTTP 403"), 403);
+		github({ ...releaseAnswers, "/traffic/views": forbidden, "/traffic/clones": forbidden });
+		const signedIn = reader({ token: "a-token", now: () => now });
+		await expect(signedIn.traffic()).resolves.toEqual({ available: false, reason: "refused" });
+		await expect(signedIn.standing()).resolves.toMatchObject({ ref: "release/v2.0.9" });
 	});
 });

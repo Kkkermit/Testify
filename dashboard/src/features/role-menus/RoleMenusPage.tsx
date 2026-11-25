@@ -44,6 +44,8 @@ export function RoleMenusPage(): React.JSX.Element {
 	usePageTitle(t("roleMenus.title"), overview.data?.name);
 
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
+	// Without the server's roles every menu would read as offering deleted ones.
+	if (roles.isError) return <ErrorState error={roles.error} onRetry={() => void roles.refetch()} />;
 	if (list.isPending || roles.isPending) return <Skeleton className="h-96 w-full" />;
 
 	const keyOf = (menuId: string): string => `role-menu:${guildId}:${menuId}`;
@@ -73,7 +75,7 @@ export function RoleMenusPage(): React.JSX.Element {
 		);
 	}
 
-	const roleList = roles.data ?? [];
+	const roleList = roles.data;
 	const formError = message(editingMenu === null ? create.error : update.error, t("common.couldNotSave"));
 	const actionError =
 		message(publish.error, t("common.didNotWork")) ?? message(remove.error, t("common.couldNotRemove"));

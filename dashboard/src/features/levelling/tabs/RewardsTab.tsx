@@ -44,7 +44,7 @@ export function RewardsTab({
 								<span className="bg-muted rounded-chip px-2 py-0.5 text-xs font-medium tabular-nums">
 									{t("levelling.levelN", { level: reward.level })}
 								</span>
-								<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId)}</span>
+								<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId, t)}</span>
 								{!blocked && (
 									<Button
 										variant="ghost"

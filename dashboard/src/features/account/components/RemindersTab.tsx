@@ -35,7 +35,6 @@ export function RemindersTab(): React.JSX.Element {
 	return (
 		<>
 			<Summary>{t("account.remindersSummary", { count: shown.length })}</Summary>
-			{route.error !== null && <Warning>{t("account.reminderRouteFailed")}</Warning>}
 
 			{shown.length === 0 ? (
 				<EmptyState
@@ -51,6 +50,7 @@ export function RemindersTab(): React.JSX.Element {
 								key={reminder.id}
 								reminder={reminder}
 								busy={route.isPending && route.variables.id === reminder.id}
+								routeFailed={route.isError && route.variables.id === reminder.id}
 								onRoute={(deliver) => {
 									route.mutate({ id: reminder.id, deliver });
 								}}
@@ -73,11 +73,13 @@ export function RemindersTab(): React.JSX.Element {
 function ReminderRow({
 	reminder,
 	busy,
+	routeFailed,
 	onRoute,
 	onCancel,
 }: {
 	reminder: AccountReminder;
 	busy: boolean;
+	routeFailed: boolean;
 	onRoute: (deliver: AccountReminder["deliver"]) => void;
 	onCancel: () => void;
 }): React.JSX.Element {
@@ -147,6 +149,7 @@ function ReminderRow({
 					}}
 				/>
 			)}
+			{routeFailed && <Warning>{t("account.reminderRouteFailed")}</Warning>}
 		</li>
 	);
 }

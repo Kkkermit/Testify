@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
-import { requirePermission } from "@api/middleware/reach";
+import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { applyRaidSettings, readRaidOverview } from "@lib/raid";
@@ -31,7 +31,12 @@ raid.patch("/", requirePermission(PermissionFlagsBits.ModerateMembers), async (c
 	const patch = await parseBody(context, raidPatch);
 	const before = await readRaidOverview(guild);
 
-	const saved = await applyRaidSettings(guild, patch, context.get("session")?.userId ?? null);
+	const saved = await applyRaidSettings(
+		guild,
+		patch,
+		context.get("session")?.userId ?? null,
+		holdsPermission(context, PermissionFlagsBits.MentionEveryone),
+	);
 	await auditSettings(context, { action: "raid.update", summary: summarise(patch), before, after: saved });
 
 	return context.json(saved);

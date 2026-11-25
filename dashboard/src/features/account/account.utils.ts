@@ -27,7 +27,7 @@ export function changeLink(change: Pick<AccountChange, "guildId">, guilds: reado
 
 /** The browser asking first, then the rest by when each was last used. */
 export function sessionsInOrder(sessions: readonly AccountSession[]): AccountSession[] {
-	return [...sessions].sort(
+	return sessions.toSorted(
 		(a, b) => Number(b.current) - Number(a.current) || Date.parse(b.lastSeenAt) - Date.parse(a.lastSeenAt),
 	);
 }

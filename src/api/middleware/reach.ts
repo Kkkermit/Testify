@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { type Context } from "hono";
 import { createMiddleware } from "hono/factory";
-import { type ApiBindings } from "@api/context";
+import { type ApiBindings, readerOf } from "@api/context";
 import { badRequest, forbidden, notInGuild } from "@api/errors";
 import { humanisePermission } from "@lib/format";
 import { grantProblem } from "@lib/roles";
@@ -80,7 +80,7 @@ export const requireReach = createMiddleware<ApiBindings>(async (context, next) 
 	}
 
 	const named = collect(body, "", { channels: [], targets: [], roles: [] });
-	const member = context.get("isOwner") === true ? undefined : context.get("member");
+	const member = readerOf(context);
 
 	for (const id of named.channels) {
 		const channel = guild.channels.cache.get(id);
@@ -118,7 +118,7 @@ export function requireGrantable(
 ): void {
 	const guild = context.get("guild");
 	if (guild === undefined) throw notInGuild();
-	const member = context.get("isOwner") === true ? undefined : context.get("member");
+	const member = readerOf(context);
 
 	for (const roleId of roleIds) {
 		const problem = rule(member, roleId, guild);

@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import { TREASURE_DEFAULTS } from "@testify/shared";
 
 export interface TreasureConfigSettings {
 	guildId: string;
@@ -18,11 +19,11 @@ const treasureSchema = new Schema<TreasureConfigSettings>(
 	{
 		guildId: { type: String, required: true, unique: true },
 		isEnabled: { type: Boolean, required: true, default: true },
-		minMessages: { type: Number, required: true, default: 15 },
-		maxMessages: { type: Number, required: true, default: 50 },
-		minAmount: { type: Number, required: true, default: 10 },
-		maxAmount: { type: Number, required: true, default: 500 },
-		cooldownMs: { type: Number, required: true, default: 300_000 },
+		minMessages: { type: Number, required: true, default: TREASURE_DEFAULTS.minMessages },
+		maxMessages: { type: Number, required: true, default: TREASURE_DEFAULTS.maxMessages },
+		minAmount: { type: Number, required: true, default: TREASURE_DEFAULTS.minAmount },
+		maxAmount: { type: Number, required: true, default: TREASURE_DEFAULTS.maxAmount },
+		cooldownMs: { type: Number, required: true, default: TREASURE_DEFAULTS.cooldownMs },
 		createdBy: { type: String, required: true },
 		lastModifiedBy: { type: String, required: true },
 	},

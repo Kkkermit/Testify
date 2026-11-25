@@ -5,11 +5,13 @@ import {
 	type AutomodCreate,
 	type AutomodPreset,
 } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { Plus, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useUndo } from "@/app/undo";
 import {
 	Field,
 	FIELD,
@@ -28,7 +30,7 @@ import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { ApiError } from "@/lib/api";
+import { ApiError, refusalText } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { oneOf } from "@/lib/oneOf";
 import { problemText } from "@/lib/problemText";
@@ -43,6 +45,7 @@ export function AutomodPage(): React.JSX.Element {
 	const add = useAddRule(guildId);
 	const toggle = useToggleRule(guildId);
 	const remove = useRemoveRule(guildId);
+	const undo = useUndo();
 
 	usePageTitle(t("automod.title"), overview.data?.name);
 
@@ -53,7 +56,9 @@ export function AutomodPage(): React.JSX.Element {
 	if (rules.isPending) return <Skeleton className="h-96 w-full" />;
 	if (rules.isError) return <ErrorState error={rules.error} onRetry={() => void rules.refetch()} />;
 
-	const { rules: list, canManage } = rules.data;
+	const { rules: all, canManage } = rules.data;
+	const keyOf = (ruleId: string): string => `automod:${guildId}:${ruleId}`;
+	const list = all.filter((rule) => !undo.isHidden(keyOf(rule.id)));
 	const blocked = problemText(automodBlocked({ preset, word, limit }), t);
 	const busy = add.isPending || toggle.isPending || remove.isPending;
 
@@ -95,11 +100,18 @@ export function AutomodPage(): React.JSX.Element {
 								key={rule.id}
 								rule={rule}
 								busy={busy}
+								failure={toggle.variables?.ruleId === rule.id ? changeRefusal(toggle.error, t) : null}
 								onToggle={(enabled) => {
 									toggle.mutate({ ruleId: rule.id, enabled });
 								}}
 								onRemove={() => {
-									remove.mutate({ ruleId: rule.id });
+									undo.schedule({
+										key: keyOf(rule.id),
+										label: t("undo.automodRule", { name: rule.name }),
+										commit: () => remove.mutateAsync({ ruleId: rule.id }),
+										refusal: (error) =>
+											refusedByDiscord(error) ? t("automod.discordRefusedRemove") : refusalText(error, ""),
+									});
 								}}
 							/>
 						))}
@@ -175,17 +187,6 @@ export function AutomodPage(): React.JSX.Element {
 					</RowActions>
 				</SettingRows>
 			)}
-
-			{refusedByDiscord(toggle.error) ? (
-				<Warning>{t("automod.discordRefusedChange")}</Warning>
-			) : (
-				<Refusal error={toggle.error} fallback="common.couldNotChange" />
-			)}
-			{refusedByDiscord(remove.error) ? (
-				<Warning>{t("automod.discordRefusedRemove")}</Warning>
-			) : (
-				<Refusal error={remove.error} fallback="common.couldNotRemove" />
-			)}
 		</>
 	);
 }
@@ -193,4 +194,9 @@ export function AutomodPage(): React.JSX.Element {
 /** Discord's own refusal, worded in the reader's language rather than the server's English. */
 function refusedByDiscord(error: unknown): boolean {
 	return error instanceof ApiError && error.code === "automod_refused";
+}
+
+function changeRefusal(error: Error | null, t: TFunction): string | null {
+	if (error === null) return null;
+	return refusedByDiscord(error) ? t("automod.discordRefusedChange") : refusalText(error, t("common.couldNotChange"));
 }

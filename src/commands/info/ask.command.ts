@@ -4,8 +4,17 @@ import { UserFacingError } from "@core/errors";
 import { getPrefix } from "@database/repositories/prefixRepository";
 import { dashboardUrl } from "@lib/bot";
 import { reply } from "@lib/discord";
-import { choiceName, suggestionName, supportContext, supportDesk, supportScreen } from "@lib/support";
-import { SUPPORT_LIMITS, supportQuestion, type SupportReply } from "@testify/shared";
+import {
+	choiceName,
+	countAnswer,
+	type SupportContext,
+	type SupportDesk,
+	suggestionName,
+	supportContext,
+	supportDesk,
+	supportScreen,
+} from "@lib/support";
+import { SUPPORT_LIMITS, supportQuestion, type SupportReply, type SupportWay } from "@testify/shared";
 
 /** An autocomplete choice's value is capped at 100 characters, so a longer question could not survive being picked. */
 const QUESTION_MAX = 100;
@@ -49,12 +58,10 @@ export default defineCommand({
 		const desk = supportDesk(client);
 		const { question } = parsed.data;
 
-		const answer: SupportReply = question.startsWith(ARTICLE_CHOICE)
-			? {
-					answer: desk.article(question.slice(ARTICLE_CHOICE.length), help),
-					related: desk.relatedTo(question.slice(ARTICLE_CHOICE.length), help),
-				}
-			: await desk.ask(question, help);
+		const { reply: answer, by } = question.startsWith(ARTICLE_CHOICE)
+			? picked(desk, question.slice(ARTICLE_CHOICE.length), help)
+			: await desk.answer(question, help);
+		countAnswer(client, "discord", answer, by, interaction.guildId);
 
 		await reply(
 			interaction,
@@ -80,3 +87,8 @@ export default defineCommand({
 		await interaction.respond(choices.slice(0, CHOICES_MAX));
 	},
 });
+
+/** A suggestion picked from the menu opens its article without a search. */
+function picked(desk: SupportDesk, id: string, help: SupportContext): { reply: SupportReply; by: SupportWay } {
+	return { reply: { answer: desk.article(id, help), related: desk.relatedTo(id, help) }, by: "picked" };
+}

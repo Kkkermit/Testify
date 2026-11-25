@@ -8,6 +8,8 @@ export const BOARD_KINDS = ["economy", "levels"] as const;
 
 export const LEADERBOARD_ID = "board";
 
+export const HEIST_ID = "heist";
+
 export const SHOP_ID = "shop";
 
 export const SHOP_SECTIONS = ["items", "houses", "businesses", "jobs", "pets", "roles"] as const;

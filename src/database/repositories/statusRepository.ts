@@ -1,9 +1,10 @@
+import { DAY_MS } from "@config/constants";
 import { type StatusSample, StatusSamples } from "@database/models/statusSample.schema";
 import { STATUS_LIMITS } from "@testify/shared";
 
 export type SampleInput = Omit<StatusSample, "expiresAt">;
 
-const RETENTION_MS = STATUS_LIMITS.historyDays * 86_400_000;
+const RETENTION_MS = STATUS_LIMITS.historyDays * DAY_MS;
 
 export async function recordStatusSample(sample: SampleInput): Promise<void> {
 	await StatusSamples.create({ ...sample, expiresAt: new Date(sample.at.getTime() + RETENTION_MS) });

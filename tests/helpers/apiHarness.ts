@@ -1,6 +1,6 @@
 import { type Env as HonoEnv, type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
-import { CSRF_COOKIE, SESSION_COOKIE } from "@api/cookies";
+import { cookieName, CSRF_COOKIE, SESSION_COOKIE } from "@api/cookies";
 import { asProblem, problemBody } from "@api/errors";
 import { type createApi } from "@api/server";
 import { type Env } from "@config/env";
@@ -22,6 +22,10 @@ export const API_ENV = {
 	DASHBOARD_TRUST_PROXY: false,
 	NODE_ENV: "test",
 } as unknown as Env;
+
+/** The names the app reads under `API_ENV`, which is not development, so both carry `__Host-`. */
+export const SESSION_NAME = cookieName(API_ENV, SESSION_COOKIE);
+export const CSRF_NAME = cookieName(API_ENV, CSRF_COOKIE);
 
 /** A live session document for `findSession` to hand back, keyed by the user it belongs to. */
 export function sessionOf(userId: string): never {
@@ -53,7 +57,7 @@ export async function askRaw(
 	path: string,
 	text: string | null,
 ): Promise<Answer> {
-	const cookie = [`${CSRF_COOKIE}=${CSRF}`, ...(who === null ? [] : [`${SESSION_COOKIE}=${who}`])].join("; ");
+	const cookie = [`${CSRF_NAME}=${CSRF}`, ...(who === null ? [] : [`${SESSION_NAME}=${who}`])].join("; ");
 	const response = await app.request(path, {
 		method,
 		headers: { cookie, "x-csrf-token": CSRF, "content-type": "application/json" },

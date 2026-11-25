@@ -10,7 +10,7 @@ related: sticky, scheduled-messages
 An auto-responder answers words you choose with a reply you write. Somebody asking "how do I get roles" can be pointed at your roles channel without anybody typing it again.
 
 ### Setting one up
-Run `/auto-responder` and press **New auto-responder**, or open **Auto-responders** under Channels on the dashboard. You need **Manage Server**.
+Run `/auto-responder` and press **New auto-responder**, or open **Auto-responders** under Messages on the dashboard. You need **Manage Server**.
 
 ### How the words are matched
 - **Anywhere, as whole words:** "roles" answers "where are the roles?" but not "roleplay".

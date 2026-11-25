@@ -20,7 +20,7 @@ export const verifyCsrf = createMiddleware<ApiBindings>(async (context, next) =>
 	}
 
 	const header = context.req.header(CSRF_HEADER) ?? "";
-	const cookie = readCookie(context, CSRF_COOKIE) ?? "";
+	const cookie = readCookie(context, context.get("env"), CSRF_COOKIE) ?? "";
 	const session = context.get("session");
 
 	// A session's stored secret is the authority when there is one; the cookie alone covers the unauthenticated

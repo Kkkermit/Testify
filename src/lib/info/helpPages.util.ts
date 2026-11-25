@@ -1,4 +1,9 @@
-import { ButtonStyle, type EmbedBuilder, StringSelectMenuOptionBuilder } from "discord.js";
+import {
+	type ActionRowBuilder,
+	ButtonStyle,
+	type EmbedBuilder,
+	type MessageActionRowComponentBuilder,
+} from "discord.js";
 import {
 	ALL_CATEGORIES,
 	type Category,
@@ -14,14 +19,17 @@ import { type TestifyClient } from "@core/client";
 import { type Command, subcommandsOf } from "@core/command";
 import { dashboardUrl } from "@lib/bot/dashboard.util";
 import { projectLinkButtons } from "@lib/bot/projectLinks.util";
-import { button, row, select, selectRow } from "@lib/discord/components.util";
+import { button, option, row, select, selectRow } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
-import { truncate } from "@lib/format/format.util";
+import { formatDuration, truncate } from "@lib/format/format.util";
 import { HELP_HOME } from "@lib/info/info.constants";
 
 export type Surface = "slash" | "prefix";
 
+type Row = ActionRowBuilder<MessageActionRowComponentBuilder>;
+
 const HELP_PAGE_SIZE = 6;
+
 function visibleCommands(client: TestifyClient): Command[] {
 	return [...client.commands.values()].filter((command) => !HIDDEN_CATEGORIES.includes(command.category));
 }
@@ -55,8 +63,8 @@ function usage(command: Command, surface: Surface, prefix: string): string {
 /** The front page: what the bot is, how many commands, and where to get help. */
 export function helpHome(client: TestifyClient, surface: Surface, prefix: string): EmbedBuilder {
 	const categories = populatedCategories(client);
-	const total = visibleCommands(client).length;
-	const subcommands = visibleCommands(client).reduce((count, command) => count + subcommandsOf(command).length, 0);
+	const visible = visibleCommands(client);
+	const subcommands = visible.reduce((count, command) => count + subcommandsOf(command).length, 0);
 
 	return embed({
 		category: "info",
@@ -70,7 +78,7 @@ export function helpHome(client: TestifyClient, surface: Surface, prefix: string
 		fields: [
 			{
 				name: "📊 Commands",
-				value: `> **${total}** commands and **${subcommands}** subcommands across **${categories.length}** categories.`,
+				value: `> **${visible.length}** commands and **${subcommands}** subcommands across **${categories.length}** categories.`,
 			},
 			{
 				name: "🔤 Prefix here",
@@ -149,7 +157,7 @@ export function commandPage(command: Command, surface: Surface, prefix: string):
 			{ name: "Category", value: categoryLabel(command.category), inline: true },
 			{ name: "Usage", value: `\`/${command.name}\` or \`${prefix}${command.name}\``, inline: true },
 			...(command.cooldown !== undefined
-				? [{ name: "Cooldown", value: `${Math.round(command.cooldown / 1_000)}s`, inline: true }]
+				? [{ name: "Cooldown", value: formatDuration(command.cooldown), inline: true }]
 				: []),
 			...(command.aliases?.length
 				? [{ name: "Aliases", value: command.aliases.map((alias) => `\`${prefix}${alias}\``).join(", ") }]
@@ -176,21 +184,23 @@ export function commandPage(command: Command, surface: Surface, prefix: string):
 	});
 }
 
-export function categoryMenu(client: TestifyClient, surface: Surface, chosen: Category | null, ownerId: string) {
+export function categoryMenu(client: TestifyClient, surface: Surface, chosen: Category | null, ownerId: string): Row {
 	const options = [
-		new StringSelectMenuOptionBuilder()
-			.setLabel("Help centre")
-			.setDescription("Back to the front page.")
-			.setValue(HELP_HOME)
-			.setEmoji("📚")
-			.setDefault(chosen === null),
+		option({
+			label: "Help centre",
+			description: "Back to the front page.",
+			value: HELP_HOME,
+			emoji: "📚",
+			selected: chosen === null,
+		}),
 		...populatedCategories(client).map((category) =>
-			new StringSelectMenuOptionBuilder()
-				.setLabel(categoryLabel(category))
-				.setDescription(`${commandsInCategory(client, category).length} commands`)
-				.setValue(category)
-				.setEmoji(categoryEmoji(category))
-				.setDefault(category === chosen),
+			option({
+				label: categoryLabel(category),
+				description: `${String(commandsInCategory(client, category).length)} commands`,
+				value: category,
+				emoji: categoryEmoji(category),
+				selected: category === chosen,
+			}),
 		),
 	];
 
@@ -205,7 +215,7 @@ export function categoryControls(
 	totalPages: number,
 	surface: Surface,
 	ownerId: string,
-) {
+): Row {
 	const other: Surface = surface === "slash" ? "prefix" : "slash";
 
 	return row(
@@ -233,7 +243,7 @@ export function categoryControls(
 	);
 }
 
-export function helpLinks() {
+export function helpLinks(): Row {
 	return row(...projectLinkButtons());
 }
 

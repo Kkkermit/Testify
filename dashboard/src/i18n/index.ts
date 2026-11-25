@@ -53,6 +53,8 @@ void i18next
 		// The bundled English stays authoritative while a lazy dictionary is still in flight.
 		partialBundledLanguages: true,
 		fallbackLng: "en",
+		// Japanese joins sentences with nothing, so an empty translation is a translation, not a gap.
+		returnEmptyString: true,
 		supportedLngs: [...LOCALES],
 		// `es-419` and `de-AT` should get Spanish and German rather than falling through to English.
 		nonExplicitSupportedLngs: true,

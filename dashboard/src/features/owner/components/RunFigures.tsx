@@ -1,7 +1,8 @@
 import { errorRate, type UsageDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Figure } from "@/components/primitives";
-import { UsageChart } from "@/features/owner/components/UsageChart";
+import { DayBars } from "@/features/owner/components/DayBars";
+import { FigureStrip } from "@/features/owner/components/FigureStrip";
 import { percent } from "@/features/owner/owner.utils";
 import { formatNumber } from "@/lib/intl";
 
@@ -21,19 +22,24 @@ export function RunFigures({
 
 	return (
 		<>
-			<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
-				<Figure className="px-6 py-4" label={t("owner.commandsRun")} value={formatNumber(runs)} />
+			<FigureStrip>
+				<Figure label={t("owner.commandsRun")} value={formatNumber(runs)} />
 				<Figure
-					className="px-6 py-4"
 					label={t("owner.failed")}
 					value={percent(failures, runs)}
 					{...(errorRate({ runs, failures }) > 0.05 ? { tone: "text-destructive-text" } : {})}
 				/>
 				{children}
-			</dl>
+			</FigureStrip>
 
 			<div className="px-6 py-5">
-				<UsageChart days={daily} />
+				<DayBars
+					tall
+					days={daily.map((day) => ({ day: day.day, value: day.count }))}
+					caption={t("owner.perDay")}
+					valueLabel={t("owner.commands")}
+					also={{ label: t("owner.failures"), values: daily.map((day) => day.failures) }}
+				/>
 			</div>
 		</>
 	);

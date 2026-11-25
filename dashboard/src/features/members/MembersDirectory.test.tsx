@@ -2,12 +2,14 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { MembersPage } from "@/features/members/MembersPage";
+import { i18next } from "@/i18n";
 import { expectNoViolations } from "@/test/axe";
 import { memberDirectory } from "@/test/fixtures/moderation";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
 const GUILD = "900000000000000001";
+const t = i18next.t.bind(i18next);
 
 function renderPage(route = `/guilds/${GUILD}/members`): ReturnType<typeof renderWithProviders> {
 	return renderWithProviders(<MembersPage />, { route, path: "/guilds/:guildId/members" });
@@ -68,6 +70,42 @@ describe("the member directory", () => {
 
 		answer();
 		expect(await screen.findByRole("link", { name: "Kate" })).toBeInTheDocument();
+	});
+
+	/** The directory is read from Discord's cursor like the run log, so it pages alike and a new filter starts at page one. */
+	it("numbers the pages it has reached from the cursor, and starts again at page one for a new filter", async () => {
+		const asked: URL[] = [];
+		const kate = memberDirectory.rows[1];
+		server.use(
+			http.get(`/api/guilds/${GUILD}/members`, ({ request }) => {
+				const url = new URL(request.url);
+				asked.push(url);
+				return HttpResponse.json(
+					url.searchParams.has("after")
+						? { ...memberDirectory, rows: kate === undefined ? [] : [kate], next: null }
+						: { ...memberDirectory, next: "100000000000000004" },
+				);
+			}),
+		);
+		renderPage();
+		const pages = await screen.findByRole("navigation", { name: t("directory.pages") });
+		expect(within(pages).getByText(t("common.pageOfMore", { page: 1, pages: 2 }))).toBeInTheDocument();
+		expect(within(pages).getByRole("button", { name: t("common.last") })).toBeDisabled();
+
+		await userEvent.click(within(pages).getByRole("button", { name: t("common.next") }));
+		expect(await within(pages).findByText(t("common.pageOf", { page: 2, pages: 2 }))).toBeInTheDocument();
+		expect(asked.at(-1)?.searchParams.get("after")).toBe("100000000000000004");
+		expect(screen.queryByRole("link", { name: "Sam" })).not.toBeInTheDocument();
+
+		await userEvent.click(within(pages).getByRole("button", { name: t("common.pageNumber", { page: 1 }) }));
+		expect(await screen.findByRole("link", { name: "Sam" })).toBeInTheDocument();
+		await userEvent.click(within(pages).getByRole("button", { name: t("common.next") }));
+		await screen.findByText(t("common.pageOf", { page: 2, pages: 2 }));
+
+		await userEvent.selectOptions(screen.getByLabelText("Role"), "Regulars");
+		expect(await screen.findByText(t("common.pageOfMore", { page: 1, pages: 2 }))).toBeInTheDocument();
+		expect(asked.at(-1)?.searchParams.get("roleId")).toBe("300000000000000001");
+		expect(asked.at(-1)?.searchParams.has("after")).toBe(false);
 	});
 
 	it("offers on each row only what the reader may do to that member", async () => {

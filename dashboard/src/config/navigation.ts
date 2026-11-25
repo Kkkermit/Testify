@@ -246,23 +246,13 @@ export function navigationFor({ guild, isOwner, mayGrant = false, featuresOff }:
 	}
 
 	if (guild?.areas !== null && guild?.areas !== undefined) {
-		const open = (item: NavItem): boolean => mayOpen(item.to, guild.id, guild.areas);
-		for (const group of groups.filter((candidate) => candidate.guildId === guild.id)) {
-			group.items = group.items.filter(open);
-			group.sections = (group.sections ?? [])
-				.map((section) => ({ ...section, items: section.items.filter(open) }))
-				.filter((section) => section.items.length > 0);
-		}
+		const areas = guild.areas;
+		const own = groups.filter((candidate) => candidate.guildId === guild.id);
+		keepOnly(own, (item) => mayOpen(item.to, guild.id, areas));
 	}
 
 	if (featuresOff !== undefined && featuresOff.size > 0) {
-		const on = (item: NavItem): boolean => screenIsOff(featuresOff, item.to) === null;
-		for (const group of groups) {
-			group.items = group.items.filter(on);
-			group.sections = (group.sections ?? [])
-				.map((section) => ({ ...section, items: section.items.filter(on) }))
-				.filter((section) => section.items.length > 0);
-		}
+		keepOnly(groups, (item) => screenIsOff(featuresOff, item.to) === null);
 	}
 
 	if (isOwner) {
@@ -273,6 +263,16 @@ export function navigationFor({ guild, isOwner, mayGrant = false, featuresOff }:
 	}
 
 	return groups;
+}
+
+/** Drops every item `keep` refuses, and any section left empty by it. */
+function keepOnly(groups: readonly NavGroup[], keep: (item: NavItem) => boolean): void {
+	for (const group of groups) {
+		group.items = group.items.filter(keep);
+		group.sections = (group.sections ?? [])
+			.map((section) => ({ ...section, items: section.items.filter(keep) }))
+			.filter((section) => section.items.length > 0);
+	}
 }
 
 export function allNavItems(groups: NavGroup[]): NavItem[] {

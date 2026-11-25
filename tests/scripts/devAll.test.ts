@@ -1,26 +1,17 @@
 import { type ChildProcess } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { BOT_WATCH, prefixLines, stopTree, syncedFolderRead } from "../../scripts/devAll";
+import { BOT_WATCH, lineLabeller, stopTree, syncedFolderRead } from "../../scripts/devAll";
 
 /** How a child's output is prefixed; the Windows interrupt behaviour itself needs a Windows terminal. */
 
-describe("prefixing a child's output", () => {
-	it("labels every line", () => {
-		expect(prefixLines("bot", "one\ntwo\n")).toBe("[bot] one\n[bot] two\n");
-	});
+describe("labelling a child's output", () => {
+	/** A chunk can end partway through a line, and a label in the middle of a sentence is worse than none. */
+	it("labels each line once, however the chunks split it", () => {
+		const label = lineLabeller("web");
+		const written = ["ready in ", "300 ms\n", "one\n\ntwo\n", "", "par", "tial"].map(label);
 
-	/** A chunk can split mid-line, and a prefix in the middle of a sentence is worse than none. */
-	it("labels a trailing partial line without inventing a newline", () => {
-		expect(prefixLines("web", "ready in ")).toBe("[web] ready in ");
-	});
-
-	it("leaves a blank chunk alone", () => {
-		expect(prefixLines("bot", "")).toBe("");
-	});
-
-	it("keeps blank lines inside a chunk", () => {
-		expect(prefixLines("bot", "one\n\ntwo\n")).toBe("[bot] one\n[bot] \n[bot] two\n");
+		expect(written).toEqual(["[web] ready in ", "300 ms\n", "[web] one\n[web] \n[web] two\n", "", "[web] par", "tial"]);
 	});
 });
 

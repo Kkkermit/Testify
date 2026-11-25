@@ -77,7 +77,8 @@ docker compose -f docker-compose.yml -f docker-compose.image.yml pull
 docker compose -f docker-compose.yml -f docker-compose.image.yml up -d
 ```
 
-Data lives in the `mongo-data` volume and survives `docker compose down`. `docker compose down -v` deletes it.
+Data lives in the `mongo-data` volume and survives `docker compose down`, the analytics included when
+`SHARDLENS_MONGODB=true` runs them inside the bot. `docker compose down -v` deletes it.
 
 ---
 
@@ -108,7 +109,15 @@ Discord's end rather than yours.
 
 When you do put one in front, set `DASHBOARD_TRUST_PROXY=true` — without it every request looks like it comes
 from the proxy, and the rate limiter buckets them all together. With it and _no_ proxy, anyone can forge their
-own bucket by setting a header. Set it if and only if something is genuinely terminating TLS in front.
+own bucket by setting a header. Set it if and only if something is genuinely terminating TLS in front. The bot reads
+the **last** address in `X-Forwarded-For`, the one the proxy nearest it added, because a proxy appends to whatever the
+caller sent. With two proxies in a row, have the inner one pass on the outer one's view (nginx's `real_ip` module), or
+every visitor is counted as the outer proxy.
+
+**The bot answers only to the public name in `DASHBOARD_BASE_URL`**, beside addresses, one-word names like a Docker
+service's and `.local` or `.internal` ones. Anything else gets `421`, and the log names it once. A proxy that passes on
+the visitor's `Host`, or rewrites it to the bot's own address, needs nothing; if the dashboard answers 421 at a second
+domain, make that one `DASHBOARD_BASE_URL`.
 
 ---
 
@@ -180,6 +189,13 @@ beside them to put it in, so it gets there one of two ways:
   restart.
 
 Without either, the bot runs with the built-in settings, exactly as a copy with no file does.
+
+### Analytics on Railway
+
+`SHARDLENS_MONGODB=true` runs the Shardlens collector inside the bot service and keeps everything in the bot's own
+MongoDB, so a push upgrades both at once and there is no volume to attach. The database must be MongoDB 7.0 or newer,
+which Atlas is. [The analytics guide](analytics.md#-on-railway) has the rest, and a collector of your own beside the
+bot.
 
 ---
 

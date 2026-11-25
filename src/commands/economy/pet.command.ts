@@ -1,13 +1,19 @@
-import { MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { adjustWallet, debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
+import {
+	adjustWallet,
+	debitWallet,
+	emptySlot,
+	requireAccount,
+	updatePet,
+} from "@database/repositories/economyRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
-import { balancesOf, decayValue, findPet, isPetRarity, petStatus, shopScreen } from "@lib/economy";
+import { balancesOf, decayValue, findPet, isPetRarity, PET_RARITIES, petStatus, shopScreen } from "@lib/economy";
 import { discordTime, formatNumber, progressBar } from "@lib/format";
 
-const RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
+const GONE = "Your pet has just been rehomed, so nothing changed.";
+const NO_PET = "You do not have a pet yet. Adopt one with `/pet shop`.";
 
 export default defineCommand({
 	name: "pet",
@@ -24,7 +30,7 @@ export default defineCommand({
 					name: "rarity",
 					description: "Which tier to browse.",
 					type: "string",
-					choices: RARITIES.map((rarity) => ({ name: rarity, value: rarity })),
+					choices: PET_RARITIES.map((rarity) => ({ name: rarity, value: rarity })),
 				},
 			],
 			async run(interaction) {
@@ -51,12 +57,12 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet. Adopt one from `/shop`.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const name = interaction.options.getString("name", true).trim();
 				if (name.length === 0) throw new UserFacingError("Give it an actual name.");
 
-				await setFields(guild.id, interaction.user.id, { pet: { ...pet, name } });
+				if (!(await updatePet(guild.id, interaction.user.id, pet.petId, { name }))) throw new UserFacingError(GONE);
 				await reply(interaction, { embeds: [successEmbed(`${pet.emoji ?? ""} is now called **${name}**.`)] });
 			},
 		},
@@ -74,7 +80,7 @@ export default defineCommand({
 				const species = findPet(pet.petId);
 				const refund = Math.floor((species?.price ?? 0) / 2);
 
-				await setFields(guild.id, interaction.user.id, { pet: null });
+				if (!(await emptySlot(guild.id, interaction.user.id, "pet", pet.petId))) throw new UserFacingError(GONE);
 				if (refund > 0) await adjustWallet(guild.id, interaction.user.id, refund);
 
 				await reply(interaction, {
@@ -93,7 +99,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet. Try `/pet shop`.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const happiness = decayValue(pet.happiness, pet.lastWalked);
 				const hunger = decayValue(pet.hunger, pet.lastFed);
@@ -131,7 +137,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const species = findPet(pet.petId);
 				const cost = species?.feedCost ?? 50;
@@ -139,9 +145,10 @@ export default defineCommand({
 				const paid = await debitWallet(guild.id, interaction.user.id, cost);
 				if (!paid) throw new UserFacingError(strings.economy.insufficientWallet(cost - account.wallet));
 
-				await setFields(guild.id, interaction.user.id, {
-					pet: { ...pet, hunger: 100, lastFed: new Date() },
-				});
+				if (!(await updatePet(guild.id, interaction.user.id, pet.petId, { hunger: 100, lastFed: new Date() }))) {
+					await adjustWallet(guild.id, interaction.user.id, cost);
+					throw new UserFacingError(GONE);
+				}
 
 				await reply(interaction, {
 					embeds: [
@@ -158,7 +165,7 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
 				const pet = account.pet;
-				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet.");
+				if (!pet?.petId) throw new UserFacingError(NO_PET);
 
 				const species = findPet(pet.petId);
 				const happiness = Math.min(
@@ -166,9 +173,9 @@ export default defineCommand({
 					decayValue(pet.happiness, pet.lastWalked) + (species?.happinessBoost ?? 2) * 10,
 				);
 
-				await setFields(guild.id, interaction.user.id, {
-					pet: { ...pet, happiness, lastWalked: new Date() },
-				});
+				if (!(await updatePet(guild.id, interaction.user.id, pet.petId, { happiness, lastWalked: new Date() }))) {
+					throw new UserFacingError(GONE);
+				}
 
 				await reply(interaction, {
 					embeds: [
@@ -180,11 +187,4 @@ export default defineCommand({
 			},
 		},
 	],
-
-	async run(interaction) {
-		await reply(interaction, {
-			content: "Pick a subcommand: `shop`, `view`, `feed`, `walk`, `rename` or `rehome`.",
-			flags: MessageFlags.Ephemeral,
-		});
-	},
 });

@@ -1,9 +1,17 @@
+import { DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
-import { claimExpiredSoftban } from "@database/repositories/moderationRepository";
+import { claimExpiredSoftban, retrySoftbanAt } from "@database/repositories/moderationRepository";
+import { auditReason } from "@lib/moderation";
+
+const PER_RUN = 25;
+
+/** How long an unban Discord refused waits before the next try, so a missing permission is not retried every minute. */
+const RETRY_AFTER_MS = 10 * MINUTE_MS;
 
 export async function processExpiredSoftbans(client: TestifyClient): Promise<void> {
-	for (let processed = 0; processed < 25; processed += 1) {
+	for (let processed = 0; processed < PER_RUN; processed += 1) {
 		const softban = await claimExpiredSoftban();
 		if (!softban) return;
 
@@ -11,20 +19,20 @@ export async function processExpiredSoftbans(client: TestifyClient): Promise<voi
 		if (!guild) continue;
 
 		try {
-			await guild.bans.remove(softban.userId, `Softban expired. Original reason: ${softban.reason}`);
+			await guild.bans.remove(softban.userId, auditReason(`Softban expired. Original reason: ${softban.reason}`));
 			client.logger.info(
 				{ guildId: softban.guildId, userId: softban.userId },
 				"[SOFTBAN] A softban expired and was lifted.",
 			);
 		} catch (error) {
-			// 10026 is "unknown ban" — already unbanned, which is not a failure.
-			const code = (error as { code?: number }).code;
-			if (code !== 10_026) {
-				client.logger.warn(
-					{ err: toError(error), guildId: softban.guildId, userId: softban.userId },
-					"[SOFTBAN_ERROR] Could not lift an expired softban. It is tried again on the next run.",
-				);
-			}
+			// Already unbanned, which is not a failure.
+			if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownBan) continue;
+
+			await retrySoftbanAt(softban, new Date(Date.now() + RETRY_AFTER_MS));
+			client.logger.warn(
+				{ err: toError(error), guildId: softban.guildId, userId: softban.userId },
+				"[SOFTBAN_ERROR] Could not lift an expired softban. Check the bot has Ban Members there; it is tried again in ten minutes.",
+			);
 		}
 	}
 }

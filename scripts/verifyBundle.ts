@@ -89,11 +89,12 @@ export function evalProbeProblem(files: Record<string, string>): string | null {
 		: `${chunk[0]} lets zod probe for eval, which the CSP refuses on every load.`;
 }
 
-function assetsMatching(extension: string): string {
-	return readdirSync(ASSETS)
-		.filter((file) => file.endsWith(extension))
-		.map((file) => readFileSync(join(ASSETS, file), "utf8"))
-		.join("\n");
+function assetsMatching(extension: string): Record<string, string> {
+	return Object.fromEntries(
+		readdirSync(ASSETS)
+			.filter((file) => file.endsWith(extension))
+			.map((file) => [file, readFileSync(join(ASSETS, file), "utf8")]),
+	);
 }
 
 function main(): void {
@@ -102,7 +103,8 @@ function main(): void {
 		process.exit(1);
 	}
 
-	const versions = reactVersionsIn(assetsMatching(".js"));
+	const scripts = assetsMatching(".js");
+	const versions = reactVersionsIn(Object.values(scripts).join("\n"));
 
 	if (versions.length > 1) {
 		console.error(`The dashboard bundles ${String(versions.length)} copies of React: ${versions.join(", ")}.`);
@@ -110,7 +112,7 @@ function main(): void {
 		process.exit(1);
 	}
 
-	const scheme = schemeProblem(assetsMatching(".css"));
+	const scheme = schemeProblem(Object.values(assetsMatching(".css")).join("\n"));
 
 	if (scheme !== null) {
 		console.error(scheme);
@@ -118,13 +120,7 @@ function main(): void {
 		process.exit(1);
 	}
 
-	const owner = ownerChunkProblem(
-		Object.fromEntries(
-			readdirSync(ASSETS)
-				.filter((file) => file.endsWith(".js"))
-				.map((file) => [file, readFileSync(join(ASSETS, file), "utf8")]),
-		),
-	);
+	const owner = ownerChunkProblem(scripts);
 
 	if (owner !== null) {
 		console.error(owner);
@@ -132,13 +128,7 @@ function main(): void {
 		process.exit(1);
 	}
 
-	const probe = evalProbeProblem(
-		Object.fromEntries(
-			readdirSync(ASSETS)
-				.filter((file) => file.endsWith(".js"))
-				.map((file) => [file, readFileSync(join(ASSETS, file), "utf8")]),
-		),
-	);
+	const probe = evalProbeProblem(scripts);
 
 	if (probe !== null) {
 		console.error(probe);

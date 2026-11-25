@@ -46,8 +46,12 @@ describe("removeAt", () => {
 		expect(currentTrack(state)?.title).toBe("c");
 	});
 
-	it.each([-1, 3, 99])("ignores position %p", (position) => {
-		expect(removeAt(queueOf(["a", "b", "c"], 0), position).tracks).toHaveLength(3);
+	it("ignores a position outside the queue", () => {
+		const removed = [-1, 3, 99].filter(
+			(position) => removeAt(queueOf(["a", "b", "c"], 0), position).tracks.length !== 3,
+		);
+
+		expect(removed).toEqual([]);
 	});
 });
 
@@ -62,8 +66,8 @@ describe("shuffleUpcoming", () => {
 
 describe("endedEarly", () => {
 	/** A live stream has no length, so nothing about it can be judged short. */
-	it.each([null, 0, -1])("takes a track of length %p at its word", (expected) => {
-		expect(endedEarly(1_000, expected)).toBe(false);
+	it("takes a track with no length at its word", () => {
+		expect([null, 0, -1].filter((expected) => endedEarly(1_000, expected))).toEqual([]);
 	});
 });
 
@@ -96,8 +100,8 @@ describe("decideOnIdle", () => {
 describe("upcomingPage", () => {
 	const ten = queueOf(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"], 0);
 
-	it.each([5, 99])("clamps page %p to the last one", (page) => {
-		expect(upcomingPage(ten, page, 5).page).toBe(1);
+	it("clamps a page past the end to the last one", () => {
+		expect([5, 99].filter((page) => upcomingPage(ten, page, 5).page !== 1)).toEqual([]);
 	});
 });
 

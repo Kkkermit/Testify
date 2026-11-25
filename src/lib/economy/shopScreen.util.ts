@@ -220,14 +220,14 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 
 	for (const entry of shown) {
 		const owned = entry.owned === true;
-		const note = owned
+		const hint = owned
 			? `You own this · sells for **${formatNumber(entry.refund ?? 0)}**`
 			: (entry.blocked ?? entry.detail);
 
 		parts.push(
 			sectionWithButton(
 				`**${entry.emoji} ${entry.name}** — ${priceLabel(entry)}\n` +
-					`${entry.description}${note !== undefined ? `\n-# ${note}` : ""}`,
+					`${entry.description}${hint !== undefined ? `\n-# ${hint}` : ""}`,
 				owned
 					? button({
 							id: encodeShopState("sell", { ...state, selectedId: entry.id, page }, ownerId),

@@ -1,7 +1,14 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, channelSelect, roleSelect, row } from "@lib/discord/components.util";
-import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
+import {
+	container,
+	containerMessage,
+	divider,
+	sectionWithButton,
+	text,
+	withoutPings,
+} from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { LEVEL_TABS, LEVEL_PANEL_ID } from "@lib/levelling/levelling.constants";
 import { type LevelPanelState, type LevelTab } from "@lib/levelling/levelling.types";
@@ -229,11 +236,14 @@ const TABS: Record<LevelTab, (state: LevelPanelState, ownerId: string) => Contai
 	ignores,
 };
 
-export function levelPanel(state: LevelPanelState, ownerId: string): ContainerMessage {
+export function levelPanel(
+	state: LevelPanelState,
+	ownerId: string,
+): ContainerMessage & { allowedMentions: { parse: [] } } {
 	const parts: ContainerPart[] = [text(heading(state))];
 
 	if (state.note !== undefined) parts.push(text(`-# ${state.note}`));
 	parts.push(divider(), ...TABS[state.tab](state, ownerId), divider(), tabRow(state, ownerId));
 
-	return containerMessage(container({ category: "levelling", parts }));
+	return withoutPings(containerMessage(container({ category: "levelling", parts })));
 }

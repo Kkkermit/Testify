@@ -47,10 +47,7 @@ interface FindOptions {
 	now?: () => number;
 }
 
-/**
- * Who added the bot. An invite link, the Add App button and the App Directory all write the same audit entry; the
- * integration records it too, for a bot that was not given View Audit Log; the owner is the last resort.
- */
+/** The audit entry every way of adding a bot writes, then the integration for a bot without View Audit Log, then the owner. */
 export async function findInviter(
 	guild: Guild,
 	botId: string,
@@ -127,17 +124,19 @@ export async function greetInviter(client: TestifyClient, guild: Guild, options:
 	if (botId === undefined || !instanceConfig().greetInviter) return;
 
 	const found = await findInviter(guild, botId, options);
-	if (found === null || found.user.bot || (await findBlacklistEntry(found.user.id)) !== null) return;
-
-	const dashboard = dashboardUrl(client.env);
-	const message = inviterGreeting({
-		bot: botName(),
-		server: guild.name,
-		prefix: await getPrefix(guild.id),
-		setupUrl: dashboard === null ? null : `${dashboard}/guilds/${guild.id}`,
-	});
+	if (found === null || found.user.bot) return;
 
 	try {
+		if ((await findBlacklistEntry(found.user.id)) !== null) return;
+
+		const dashboard = dashboardUrl(client.env);
+		const message = inviterGreeting({
+			bot: botName(),
+			server: guild.name,
+			prefix: await getPrefix(guild.id),
+			setupUrl: dashboard === null ? null : `${dashboard}/guilds/${guild.id}`,
+		});
+
 		await found.user.send(message);
 		client.logger.debug({ guildId: guild.id, source: found.source }, "[GUILD] Sent the getting-started message.");
 	} catch (error) {

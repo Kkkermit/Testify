@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { FIELD, Field, Refusal, SELECT, Warning } from "@/components/form";
+import { FIELD, Field, Refusal, savesOnLeave, SELECT, Warning } from "@/components/form";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
 import { Button, Card, DividedList, SectionHeading, Skeleton } from "@/components/primitives";
 import { useRemoveShopRole, useSellShopRole, useShopRoles } from "@/features/economy/useShopRoles";
@@ -145,7 +145,12 @@ function ShopRoleRow({
 	const id = `shop-price-${entry.roleId}`;
 
 	return (
-		<li className="flex flex-wrap items-center gap-x-4 gap-y-2 px-6 py-3">
+		<li
+			className="flex flex-wrap items-center gap-x-4 gap-y-2 px-6 py-3"
+			{...savesOnLeave(() => {
+				if (amount !== null && amount !== entry.price) onPrice(amount);
+			})}
+		>
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
 				<RoleSwatch name={name} colour={entry.colour} />
 				{entry.problem !== null && <span className="text-warning text-xs">{entry.problem}</span>}
@@ -164,9 +169,6 @@ function ShopRoleRow({
 						aria-invalid={amount === null}
 						onChange={(event) => {
 							setText(event.target.value);
-						}}
-						onBlur={() => {
-							if (amount !== null && amount !== entry.price) onPrice(amount);
 						}}
 						className={cn(FIELD, "max-w-32 font-mono tabular-nums", amount === null && "border-destructive")}
 					/>

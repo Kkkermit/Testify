@@ -55,7 +55,7 @@ export function canChangeWarnings(detail: MemberDetail): boolean {
 
 export function statsOf(detail: MemberDetail, t: TFunction): { label: string; value: string }[] {
 	const rows: { label: string; value: string }[] = [];
-	const rank = (value: number | null): string => (value === null ? t("members.unranked") : `#${String(value)}`);
+	const rank = (value: number | null): string => (value === null ? t("members.unranked") : `#${formatNumber(value)}`);
 
 	if (detail.economy !== null) {
 		rows.push(

@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import * as configBarrel from "@config";
 import * as coreBarrel from "@core";
 import * as databaseBarrel from "@database";
@@ -31,5 +33,20 @@ describe("the directory barrels", () => {
 		expect(coreBarrel.defineCommand).toBeDefined();
 		expect(coreBarrel.loadEverything).toBeDefined();
 		expect(coreBarrel.UserFacingError).toBeDefined();
+	});
+
+	/** The database barrel had stopped at twenty of its fifty-one models, so what it offered depended on its age. */
+	it("names every module in @core, @config and @database", () => {
+		const forgotten = ["core", "config", "database"].flatMap((folder) => {
+			const root = join(__dirname, "../../src", folder);
+			const barrel = readFileSync(join(root, "index.ts"), "utf8");
+			const modules = readdirSync(root, { recursive: true, encoding: "utf8" })
+				.filter((file) => file.endsWith(".ts") && !file.endsWith(".d.ts") && file !== "index.ts")
+				.map((file) => file.replace(/\\/g, "/").replace(/\.ts$/, ""));
+
+			return modules.filter((module) => !barrel.includes(`"./${module}"`)).map((module) => `${folder}/${module}`);
+		});
+
+		expect(forgotten).toEqual([]);
 	});
 });

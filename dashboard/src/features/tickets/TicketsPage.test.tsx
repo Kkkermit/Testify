@@ -137,4 +137,29 @@ describe("open tickets", () => {
 		});
 		expect(await screen.findByText("No tickets are open")).toBeInTheDocument();
 	});
+
+	/** Closing a ticket changes the count the settings carry, and that once threw away the panel's unsaved wording. */
+	it("keeps the panel's unsaved wording when a ticket is closed", async () => {
+		const user = userEvent.setup();
+		let open = ticketSettings.openTickets;
+		server.use(
+			http.get(`/api/guilds/${GUILD}/tickets`, () => HttpResponse.json({ ...ticketSettings, openTickets: open })),
+			http.post("/api/guilds/:guildId/tickets/open/:channelId/close", () => {
+				open -= 1;
+				return HttpResponse.json({ canClose: true, tickets: [] });
+			}),
+		);
+		renderPage();
+		await user.clear(await screen.findByLabelText(/button label/i));
+		await user.type(screen.getByLabelText(/button label/i), "Ask for help");
+
+		await user.click(await screen.findByRole("button", { name: "Close #ticket-a1b2c3" }));
+		await user.click(screen.getByRole("button", { name: "Close the ticket" }));
+
+		expect(await screen.findByText("No tickets are open")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(screen.getByText(/2 are open right now/)).toBeInTheDocument();
+		});
+		expect(screen.getByLabelText(/button label/i)).toHaveValue("Ask for help");
+	});
 });

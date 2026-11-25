@@ -1,5 +1,4 @@
 import { AUDIT_EVENTS, AUDIT_GROUPS, type AuditLogPut, auditLogChanged } from "@testify/shared";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -27,6 +26,7 @@ import { EventGroup } from "@/features/audit-log/components/EventGroup";
 import { useAuditLog, useSaveAuditLog } from "@/features/audit-log/useAuditLog";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { useDraft } from "@/hooks/useDraft";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { channelLabel } from "@/lib/channels";
 
@@ -41,14 +41,10 @@ export function AuditLogPage(): React.JSX.Element {
 
 	usePageTitle(t("auditLog.title"), overview.data?.name);
 
-	const [draft, setDraft] = useState<AuditLogPut | null>(null);
-
-	useEffect(() => {
-		if (config.data !== undefined) setDraft(draftFrom(config.data));
-	}, [config.data]);
+	const [draft, setDraft] = useDraft<AuditLogPut>(config.data === undefined ? undefined : draftFrom(config.data));
 
 	if (config.isError) return <ErrorState error={config.error} onRetry={() => void config.refetch()} />;
-	if (config.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
+	if (config.isPending || draft === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const saved = config.data;
 	const dirty = auditLogChanged(saved, draft);
@@ -56,7 +52,7 @@ export function AuditLogPage(): React.JSX.Element {
 	const notice = draft.events.length === AUDIT_EVENTS.length ? t("auditLog.allSelected") : null;
 
 	function edit(change: Partial<AuditLogPut>): void {
-		setDraft((current) => (current === null ? current : { ...current, ...change }));
+		setDraft((current) => ({ ...current, ...change }));
 	}
 
 	return (

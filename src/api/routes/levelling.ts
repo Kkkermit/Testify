@@ -8,7 +8,7 @@ import { parseBody } from "@api/validate";
 import { deleteLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
 import { sortRewards } from "@lib/levelling";
 import { readLevelConfig } from "@lib/settings";
-import { boostsSchema, ignoresSchema, levellingPatchSchema, rewardsSchema } from "@testify/shared";
+import { boostsSchema, ignoresSchema, type LevellingPatch, levellingPatchSchema, rewardsSchema } from "@testify/shared";
 
 export const levelling = new Hono<ApiBindings>();
 
@@ -22,7 +22,7 @@ levelling.patch("/", async (context) => {
 	const before = await readLevelConfig(guildId);
 
 	await saveLevelSettings(guildId, {
-		// The stored field is the inverse, and has been since the first version.
+		// The stored field is the inverse.
 		...(patch.enabled === undefined ? {} : { isDisabled: !patch.enabled }),
 		...(patch.announce === undefined ? {} : { announce: patch.announce }),
 		...(patch.stackRewards === undefined ? {} : { stackRewards: patch.stackRewards }),
@@ -94,7 +94,7 @@ levelling.put("/ignores", async (context) => {
 	return context.json(await readLevelConfig(guildId));
 });
 
-/** Clears the configuration only. Everyone keeps the XP they earned, which the response says out loud. */
+/** Clears the configuration only; everybody keeps the XP they earned. */
 levelling.delete("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const before = await readLevelConfig(guildId);
@@ -116,13 +116,13 @@ function count(value: number, noun: string): string {
 	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
 }
 
-function summarisePatch(patch: Record<string, unknown>): string {
+function summarisePatch(patch: LevellingPatch): string {
 	const parts: string[] = [];
 
-	if (patch.enabled !== undefined) parts.push(patch.enabled === true ? "Turned levelling on" : "Turned levelling off");
-	if (patch.announce !== undefined) parts.push(patch.announce === true ? "Announcing level-ups" : "Silenced level-ups");
+	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned levelling on" : "Turned levelling off");
+	if (patch.announce !== undefined) parts.push(patch.announce ? "Announcing level-ups" : "Silenced level-ups");
 	if (patch.stackRewards !== undefined) {
-		parts.push(patch.stackRewards === true ? "Rewards stack" : "Only the highest reward is kept");
+		parts.push(patch.stackRewards ? "Rewards stack" : "Only the highest reward is kept");
 	}
 	if (patch.levelUpChannelId !== undefined) {
 		parts.push(

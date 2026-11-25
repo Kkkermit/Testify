@@ -7,6 +7,10 @@ export const SITE_LIMITS = {
 	/** Larger files are listed and linked, never shown, because a browser tab is not the place to read them. */
 	maxFileBytes: 512 * 1024,
 	filesCached: 200,
+	/** Files fetched afresh in an hour, by every visitor together: one full cache, however many addresses ask. */
+	freshFilesPerHour: 200,
+	/** After GitHub limits the bot, it is not asked again for this long, so reloads cannot add to the limit. */
+	pauseMinutes: 5,
 	/** GitHub keeps 14 days of traffic, so each day it reports is kept here for this long. */
 	trafficDaysKept: 365,
 	trafficDaysShown: 90,

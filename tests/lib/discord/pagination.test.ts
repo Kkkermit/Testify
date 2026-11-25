@@ -10,13 +10,15 @@ function render(page: number[]): ReturnType<typeof embed> {
 }
 
 describe("pageCount", () => {
-	it.each([
-		[0, 10, 1],
-		[10, 10, 1],
-		[11, 10, 2],
-		[25, 10, 3],
-	])("%i items at %i per page is %i pages", (total, size, expected) => {
-		expect(pageCount(total, size)).toBe(expected);
+	it("rounds up, and is never less than one page", () => {
+		const rows: [number, number, number][] = [
+			[0, 10, 1],
+			[10, 10, 1],
+			[11, 10, 2],
+			[25, 10, 3],
+		];
+
+		expect(rows.map(([total, size]) => pageCount(total, size))).toEqual(rows.map(([, , pages]) => pages));
 	});
 });
 

@@ -48,20 +48,15 @@ describe("the blacklist tab", () => {
 	});
 
 	/** The form refuses anything that is not 17–20 digits before the API has to. */
-	it("will not submit something that is not a user ID", async () => {
+	it("will not submit an empty form, or something that is not a user ID", async () => {
 		const user = userEvent.setup();
 		renderTab();
+		expect(await screen.findByRole("button", { name: /Block them/ })).toBeDisabled();
 
-		await user.type(await screen.findByLabelText("User ID"), "nonsense");
+		await user.type(screen.getByLabelText("User ID"), "nonsense");
 
 		expect(screen.getByRole("button", { name: /Block them/ })).toBeDisabled();
 		expect(screen.getByText(/17 to 20 digits/)).toBeInTheDocument();
-	});
-
-	it("will not submit an empty form", async () => {
-		renderTab();
-
-		expect(await screen.findByRole("button", { name: /Block them/ })).toBeDisabled();
 	});
 
 	it("unblocks somebody", async () => {

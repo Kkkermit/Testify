@@ -6,7 +6,7 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteLottery } from "@database/repositories/lotteryRepository";
 import { applyLottery, normaliseLottery, readLottery } from "@lib/economy";
-import { lotteryPatch } from "@testify/shared";
+import { type LotteryPatch, lotteryPatch } from "@testify/shared";
 
 export const lottery = new Hono<ApiBindings>();
 
@@ -36,7 +36,7 @@ lottery.delete("/", async (context) => {
 	return context.json(normaliseLottery(null));
 });
 
-function summaryOf(patch: Record<string, unknown>): string {
+function summaryOf(patch: LotteryPatch): string {
 	if ("frozen" in patch) return patch.frozen === true ? "Froze the lottery" : "Unfroze the lottery";
 
 	return `Changed the lottery ${Object.keys(patch).join(", ")}`;

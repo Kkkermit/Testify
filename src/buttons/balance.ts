@@ -1,4 +1,5 @@
 import { defineButton } from "@core/button";
+import { UserFacingError } from "@core/errors";
 import { requireAccount } from "@database/repositories/economyRepository";
 import {
 	amountPanel,
@@ -36,6 +37,7 @@ export default defineButton({
 		switch (context.action) {
 			case "daily": {
 				const result = await claimDaily(guildId, userId);
+				if (!result.claimed) throw new UserFacingError(result.message);
 				const updated = await requireAccount(guildId, userId);
 
 				await interaction.update(

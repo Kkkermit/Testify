@@ -4,6 +4,12 @@ import { defineEvent } from "@core/event";
 import { truncate } from "@lib/format";
 import { writeAuditLog } from "@lib/moderation";
 
+/** Discord refuses an empty field, which is all a message of only an attachment or a sticker has. */
+function shown(content: string | null): string {
+	if (content === null) return "*Not cached.*";
+	return content === "" ? "*No text.*" : truncate(content, 900);
+}
+
 export default defineEvent({
 	name: Events.MessageUpdate,
 	async run(client: TestifyClient, before: Message | PartialMessage, after: Message | PartialMessage) {
@@ -17,8 +23,8 @@ export default defineEvent({
 			fields: [
 				{ name: "Author", value: after.author ? `${after.author}` : "Unknown", inline: true },
 				{ name: "Channel", value: `<#${after.channelId}>`, inline: true },
-				{ name: "Before", value: truncate(before.content ?? "*Not cached.*", 900) },
-				{ name: "After", value: truncate(after.content ?? "*Not cached.*", 900) },
+				{ name: "Before", value: shown(before.content) },
+				{ name: "After", value: shown(after.content) },
 			],
 		});
 	},

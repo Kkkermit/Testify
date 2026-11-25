@@ -17,4 +17,4 @@ A timeout stops a member sending messages, reacting or joining voice until it en
 > **Tip:** Discord will not let anyone time out a member whose highest role is above their own, or above the bot's.
 
 ### On the dashboard
-Open your server, then **Leaderboards**, then a member. **Time out** asks for a length and a reason, then their username typed back, and **Lift the timeout** ends one early. Both need **Moderate Members**, and each is a numbered case.
+Open your server, then **Members**, then a member. **Time out** asks for a length and a reason, then their username typed back, and **Lift the timeout** ends one early. Both need **Moderate Members**, and each is a numbered case.

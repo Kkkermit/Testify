@@ -23,12 +23,9 @@ function envWith(overrides: Partial<Env> = {}): Env {
 }
 
 describe("callbackUrl", () => {
-	it("is the base URL plus the callback path", () => {
-		expect(callbackUrl("https://dash.example.com")).toBe("https://dash.example.com/api/auth/callback");
-	});
-
 	/** A trailing slash in the env would make the redirect URI stop matching what Discord has registered. */
-	it("does not double the slash when the base URL has one", () => {
+	it("is the base URL plus the callback path, without doubling a trailing slash", () => {
+		expect(callbackUrl("https://dash.example.com")).toBe("https://dash.example.com/api/auth/callback");
 		expect(callbackUrl("https://dash.example.com/")).toBe("https://dash.example.com/api/auth/callback");
 	});
 });
@@ -65,12 +62,9 @@ describe("authoriseUrl", () => {
 		expect(built.toString()).not.toContain(pending.verifier);
 	});
 
-	it("names the redirect URI Discord will be asked to match", () => {
-		expect(url.searchParams.get("redirect_uri")).toBe("https://dash.example.com/api/auth/callback");
-	});
-
 	/** Skipping the consent screen for anyone who has authorised before is what makes returning feel instant. */
-	it("does not re-prompt someone who has already authorised", () => {
+	it("names the redirect URI Discord will match, and does not re-prompt someone who has authorised", () => {
+		expect(url.searchParams.get("redirect_uri")).toBe("https://dash.example.com/api/auth/callback");
 		expect(url.searchParams.get("prompt")).toBe("none");
 	});
 });
@@ -96,12 +90,9 @@ describe("statesMatch", () => {
 describe("canManage", () => {
 	const MANAGE_GUILD = 1n << 5n;
 
-	it("reads the Manage Server bit out of the permission string", () => {
+	it("reads the Manage Server bit out of the permission string, and is false without it", () => {
 		expect(canManage(MANAGE_GUILD.toString())).toBe(true);
 		expect(canManage((MANAGE_GUILD | 1n).toString())).toBe(true);
-	});
-
-	it("is false without it", () => {
 		expect(canManage("0")).toBe(false);
 		expect(canManage("1")).toBe(false);
 	});

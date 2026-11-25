@@ -1,11 +1,11 @@
 import { type AutoResponder, autoResponderBlocked, type AutoResponderInput } from "@testify/shared";
 import { Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Button, cardClass } from "@/components/primitives";
 import { MATCH_LABELS } from "@/features/auto-responders/autoResponders.utils";
 import { ResponderFields } from "@/features/auto-responders/components/ResponderFields";
+import { useDraft } from "@/hooks/useDraft";
 import { problemText } from "@/lib/problemText";
 import { markupWarning } from "@/lib/sanitise";
 
@@ -25,12 +25,8 @@ export function ResponderRow({
 	onRemove: () => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const [draft, setDraft] = useState<AutoResponderInput>(responder);
-
-	useEffect(() => {
-		setDraft({ trigger: responder.trigger, match: responder.match, reply: responder.reply });
-	}, [responder.trigger, responder.match, responder.reply]);
-
+	const saved: AutoResponderInput = { trigger: responder.trigger, match: responder.match, reply: responder.reply };
+	const [draft, setDraft] = useDraft(saved);
 	const dirty =
 		draft.trigger !== responder.trigger || draft.match !== responder.match || draft.reply !== responder.reply;
 	const blocked = problemText(autoResponderBlocked(draft, others), t) ?? markupWarning(draft.reply);

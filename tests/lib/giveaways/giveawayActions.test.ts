@@ -6,16 +6,18 @@ import { Giveaway } from "@database/models/giveaway.schema";
 import {
 	deleteGiveaway,
 	endGiveaway,
+	findGiveaway,
 	listGiveaways,
 	rerollGiveaway,
 	startGiveaway,
 } from "@lib/giveaways/giveawayActions.util";
 
 const manager = {
+	giveaways: [] as { messageId: string; guildId: string }[],
 	start: jest.fn(() => Promise.resolve()),
-	end: jest.fn(() => Promise.resolve()),
-	reroll: jest.fn(() => Promise.resolve()),
-	delete: jest.fn(() => Promise.resolve()),
+	end: jest.fn((_messageId: string) => Promise.resolve()),
+	reroll: jest.fn((_messageId: string) => Promise.resolve()),
+	delete: jest.fn((_messageId: string) => Promise.resolve()),
 };
 
 jest.mock("@lib/giveaways/giveaways.util", () => ({ giveaways: () => manager }));
@@ -48,28 +50,56 @@ describe("startGiveaway", () => {
 		);
 		expect(manager.start).not.toHaveBeenCalled();
 	});
+
+	/** The prize is typed by whoever started it, and its win message pinged `@everyone` when the prize said so. */
+	it("lets the win message ping people and never a role or everyone", async () => {
+		await startGiveaway(client, guildWith({ isTextBased: () => true }), { ...draft, prize: "@everyone Nitro" });
+
+		expect(manager.start).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ allowedMentions: { parse: ["users"] } }),
+		);
+	});
 });
 
 describe("ending, rerolling and deleting", () => {
-	it.each([
-		["ends", endGiveaway, manager.end],
-		["rerolls", rerollGiveaway, manager.reroll],
-		["deletes", deleteGiveaway, manager.delete],
-	])("%s by message id", async (_name, action, call) => {
-		await action(client, MESSAGE);
-
-		expect(call).toHaveBeenCalledWith(MESSAGE);
-	});
-
-	/** The library's own errors name its internals; the reader gets advice instead. */
-	it.each([
+	const actions = [
 		["end", endGiveaway, manager.end],
 		["reroll", rerollGiveaway, manager.reroll],
 		["delete", deleteGiveaway, manager.delete],
-	])("turns a failed %s into advice", async (_name, action, call) => {
-		call.mockImplementationOnce(() => Promise.reject(new Error("Unknown giveaway 500000000000000001")));
+	] as const;
 
-		await expect(action(client, MESSAGE)).rejects.toThrow(UserFacingError);
+	beforeEach(() => {
+		manager.giveaways = [{ messageId: MESSAGE, guildId: GUILD }];
+	});
+
+	it("acts on this server's giveaway by its message id", async () => {
+		for (const [, action] of actions) await action(client, GUILD, MESSAGE);
+
+		expect(actions.filter(([, , call]) => call.mock.calls[0]?.[0] !== MESSAGE).map(([name]) => name)).toEqual([]);
+	});
+
+	/** `/giveaway end` in one server ended another server's giveaway, because the library looks a message up anywhere. */
+	it("refuses a giveaway that belongs to another server, before the library is asked", async () => {
+		const reached: string[] = [];
+		for (const [name, action] of actions) {
+			await expect(action(client, OTHER, MESSAGE)).rejects.toThrow(UserFacingError);
+			if (manager[name].mock.calls.length > 0) reached.push(name);
+		}
+
+		expect(reached).toEqual([]);
+	});
+
+	/** The library's own errors name its internals; the reader gets advice instead. */
+	it("turns a failure from the library into advice", async () => {
+		const leaked: string[] = [];
+		for (const [name, action, call] of actions) {
+			call.mockImplementationOnce(() => Promise.reject(new Error("Unknown giveaway 500000000000000001")));
+			const error = await action(client, GUILD, MESSAGE).catch((caught: unknown) => caught);
+			if (!(error instanceof UserFacingError) || error.message.includes(MESSAGE)) leaked.push(name);
+		}
+
+		expect(leaked).toEqual([]);
 	});
 });
 
@@ -97,6 +127,20 @@ describeWithMongo("listGiveaways", () => {
 
 		expect(rows.map((row) => row.messageId)).toEqual(["500000000000000002", "500000000000000001"]);
 		expect(rows[0]).toMatchObject({ startAt: new Date(3_000).toISOString(), ended: false, hostedBy: null });
+	});
+
+	/** The list stops at fifty, so a command reaching an older giveaway has to find it by its message. */
+	it("finds one giveaway of this server's by its message, and none of another's", async () => {
+		await Giveaway.create([
+			record(MESSAGE, GUILD, 1_000),
+			...Array.from({ length: 50 }, (_, index) =>
+				record(`6000000000000000${String(index).padStart(2, "0")}`, GUILD, 5_000),
+			),
+			record("500000000000000009", OTHER, 2_000),
+		]);
+
+		expect((await findGiveaway(client, GUILD, MESSAGE))?.prize).toBe(`Prize ${MESSAGE}`);
+		expect(await findGiveaway(client, GUILD, "500000000000000009")).toBeNull();
 	});
 
 	it("names the winners it can, and leaves the rest as ids", async () => {

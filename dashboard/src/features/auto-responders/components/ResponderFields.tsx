@@ -1,12 +1,13 @@
-import { AUTO_RESPONDER_LIMITS, type AutoResponderInput } from "@testify/shared";
+import { AUTO_RESPONDER_LIMITS, AUTO_RESPONDER_MATCHES, type AutoResponderInput } from "@testify/shared";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, SELECT } from "@/components/form";
 import { useRowLayout } from "@/components/form/rowLayout";
-import { MATCH_LABELS, MATCH_ORDER } from "@/features/auto-responders/autoResponders.utils";
+import { MATCH_LABELS } from "@/features/auto-responders/autoResponders.utils";
 import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
+import { oneOf } from "@/lib/oneOf";
 
 export function ResponderFields({
 	id,
@@ -41,11 +42,11 @@ export function ResponderFields({
 						id={`${id}-match`}
 						value={value.match}
 						onChange={(event) => {
-							onChange({ ...value, match: event.target.value as AutoResponderInput["match"] });
+							onChange({ ...value, match: oneOf(AUTO_RESPONDER_MATCHES, event.target.value, value.match) });
 						}}
 						className={SELECT}
 					>
-						{MATCH_ORDER.map((match) => (
+						{AUTO_RESPONDER_MATCHES.map((match) => (
 							<option key={match} value={match}>
 								{t(MATCH_LABELS[match])}
 							</option>

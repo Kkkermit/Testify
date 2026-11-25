@@ -1,3 +1,4 @@
+import { type Shardlens } from "@shardlens/discordjs";
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 import { type Env } from "@config/env";
 import { nameBot } from "@core/brand";
@@ -24,6 +25,28 @@ const intents = [
 ];
 
 const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
+
+/** Where Shardlens sends and where the owner console reads it back. */
+export interface LensTarget {
+	url: string | undefined;
+	ingestKey: string | undefined;
+	readKey: string | undefined;
+	activityKey: string | undefined;
+	/** The collector this process runs on the bot's MongoDB: events go through it, and shutdown closes it last. */
+	inBot: { send: typeof fetch; close(): Promise<void> } | null;
+}
+
+/** The four settings for a collector run elsewhere; with `SHARDLENS_MONGODB=true` they are ignored. */
+export function settingsTarget(env: Env): LensTarget {
+	const own = env.SHARDLENS_MONGODB === "true";
+	return {
+		url: own ? undefined : env.SHARDLENS_URL,
+		ingestKey: own ? undefined : env.SHARDLENS_INGEST_KEY,
+		readKey: own ? undefined : env.SHARDLENS_READ_KEY,
+		activityKey: own ? undefined : env.SHARDLENS_ACTIVITY_KEY,
+		inBot: null,
+	};
+}
 
 export class TestifyClient extends Client {
 	readonly commands = new Collection<string, Command>();
@@ -52,6 +75,12 @@ export class TestifyClient extends Client {
 	/** The dashboard listener once `startApi()` opens one; typed structurally because `src/api` imports this file. */
 	api: { close(): Promise<void> } | null = null;
 
+	/** Shardlens once `startShardlens()` attaches it, which it does only when its settings are set. */
+	shardlens: Shardlens | null = null;
+
+	/** The settings, until `startShardlens()` starts a collector inside the bot and points this at it. */
+	lensTarget: LensTarget;
+
 	/**
 	 * True while the owner has paused the bot: commands are refused, message handlers skipped and the bot shown
 	 * invisible. A flag rather than `destroy()`, which nulls the token.
@@ -61,12 +90,20 @@ export class TestifyClient extends Client {
 	pausedAt: number | null = null;
 
 	constructor(env: Env, logger: Logger) {
-		// A reply to a message that has since gone, such as the one `t?clear` deletes, is sent without the quote.
-		super({ intents, partials, shards: "auto", failIfNotExists: false });
+		// A reply to a message that has since gone, such as the one `t?clear` deletes, is sent without the quote, and a
+		// message that names a role or everyone pings them only when it says so, whatever text somebody typed into it.
+		super({
+			intents,
+			partials,
+			shards: "auto",
+			failIfNotExists: false,
+			allowedMentions: { parse: ["users"], repliedUser: true },
+		});
 		this.env = env;
 		this.featuresOff = switchedOff(env.DISABLED_FEATURES).off;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);
+		this.lensTarget = settingsTarget(env);
 		nameBot(() => this.user?.username ?? this.restName);
 	}
 

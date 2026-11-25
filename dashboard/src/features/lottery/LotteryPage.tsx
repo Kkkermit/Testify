@@ -1,6 +1,6 @@
 import { LOTTERY_FREQUENCIES, LOTTERY_LIMITS } from "@testify/shared";
 import { Coins, Snowflake, Ticket, Trash2, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -30,6 +30,7 @@ import {
 	winnersWarning,
 } from "@/features/lottery/lottery.utils";
 import { useEndLottery, useLottery, useSaveLottery } from "@/features/lottery/useLottery";
+import { useDraft } from "@/hooks/useDraft";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
@@ -49,16 +50,11 @@ export function LotteryPage(): React.JSX.Element {
 	usePageTitle(t("lottery.title"), overview.data?.name);
 
 	const settings = lottery.data;
-	const [draft, setDraft] = useState<Draft | null>(null);
+	const [draft, setDraft] = useDraft<Draft>(settings === undefined ? undefined : draftOf(settings));
 	const [confirming, setConfirming] = useState(false);
 
-	useEffect(() => {
-		if (settings !== undefined) setDraft(draftOf(settings));
-	}, [settings]);
-
 	if (lottery.isError) return <ErrorState error={lottery.error} onRetry={() => void lottery.refetch()} />;
-	if (lottery.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
-	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
+	if (settings === undefined || draft === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const problem = draftProblem(draft, t);
 	const dirty = isDirty(draft, settings);
@@ -66,7 +62,7 @@ export function LotteryPage(): React.JSX.Element {
 	const warning = winnersWarning(draft, settings, t);
 
 	function set<K extends keyof Draft>(field: K, value: Draft[K]): void {
-		setDraft((current) => (current === null ? current : { ...current, [field]: value }));
+		setDraft((current) => ({ ...current, [field]: value }));
 	}
 
 	return (
@@ -243,10 +239,9 @@ export function LotteryPage(): React.JSX.Element {
 							</Button>
 						</RowActions>
 					)}
+					<Refusal error={end.error} fallback="common.couldNotEnd" />
 				</SettingRows>
 			)}
-
-			<Refusal error={end.error} fallback="common.couldNotEnd" />
 		</>
 	);
 }

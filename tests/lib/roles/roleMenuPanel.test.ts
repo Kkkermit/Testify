@@ -77,6 +77,13 @@ describe("the posted menu", () => {
 	it("is the same for everybody", () => {
 		expect(idsOf(roleMenuPost(MENU)).every((id) => !id.includes(OWNER))).toBe(true);
 	});
+
+	/** The roles are listed as mentions, and a mentionable one would ping every member holding it. */
+	it("pings nobody, on the post or on any panel that shows what a manager typed", () => {
+		const panels = [roleMenuPost(MENU), roleMenuHub([MENU], OWNER), roleMenuEditor({ menu: MENU }, OWNER)];
+
+		expect(panels.map((panel) => panel.allowedMentions)).toEqual([{ parse: [] }, { parse: [] }, { parse: [] }]);
+	});
 });
 
 describe("the private picker", () => {

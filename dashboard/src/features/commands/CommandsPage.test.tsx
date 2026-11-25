@@ -41,18 +41,16 @@ describe("groupByCategory", () => {
 });
 
 describe("configurableAt", () => {
-	it("gives nothing for a command the dashboard cannot configure", () => {
-		expect(configurableAt(discordOnly, GUILD)).toBeNull();
-	});
-
 	/** Outside a server there is nothing to configure, so the link would have no guild to point at. */
-	it("gives nothing when no server is open", () => {
-		expect(
-			configurableAt(
-				commands.find((c) => c.name === "levelling")!,
-				null,
-			),
-		).toBeNull();
+	it("points at the command's screen in the open server, and nowhere without one", () => {
+		const levelling = commands.find((c) => c.name === "levelling")!;
+
+		expect(configurableAt(levelling, GUILD)).toEqual({
+			path: `/guilds/${GUILD}/levelling`,
+			labelKey: "levelling.title",
+		});
+		expect(configurableAt(levelling, null)).toBeNull();
+		expect(configurableAt(discordOnly, GUILD)).toBeNull();
 	});
 });
 

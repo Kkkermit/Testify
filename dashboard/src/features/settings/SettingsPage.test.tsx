@@ -34,17 +34,14 @@ function capture(section: string, method: "patch" | "put" = "patch"): { body: un
 }
 
 describe("prefixProblem", () => {
-	/** All three rules the API enforces, so the form refuses before the request rather than after it. */
-	it("refuses one that cannot be typed or would match everything", () => {
+	/** Every rule the API enforces, so the form refuses first; a `/` prefix would sit beside Discord's own picker. */
+	it("refuses one that cannot be typed, would match everything or collides with slash commands", () => {
 		expect(prefixProblem("", t)).toMatch(/empty/i);
 		expect(prefixProblem("   ", t)).toMatch(/empty/i);
 		expect(prefixProblem("a b", t)).toMatch(/space/i);
 		expect(prefixProblem("waytoolongprefix", t)).toMatch(/longer/i);
-	});
-
-	/** A `/` prefix would put every command next to Discord's own picker. */
-	it("refuses one that collides with slash commands", () => {
 		expect(prefixProblem("/", t)).toMatch(/collides/i);
+		expect(prefixProblem("t?", t)).toBeNull();
 	});
 });
 
@@ -94,6 +91,27 @@ describe("the settings page", () => {
 
 		await waitFor(() => {
 			expect(captured.body).toEqual({ enabled: false });
+		});
+	});
+
+	it("sends a prefix once when Save is pressed", async () => {
+		const user = userEvent.setup();
+		const sent: unknown[] = [];
+		server.use(
+			http.patch("/api/guilds/:guildId/settings/prefix", async ({ request }) => {
+				sent.push(await request.json());
+				return HttpResponse.json(serverSettings);
+			}),
+		);
+
+		renderPage();
+		const field = await screen.findByLabelText("Prefix");
+		await user.clear(field);
+		await user.type(field, "!");
+		await user.click(screen.getByRole("button", { name: /save prefix/i }));
+
+		await waitFor(() => {
+			expect(sent).toEqual([{ prefix: "!" }]);
 		});
 	});
 

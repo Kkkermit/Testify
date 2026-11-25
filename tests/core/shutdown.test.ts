@@ -67,6 +67,59 @@ describe("shutdown", () => {
 		expect(client.destroy).toHaveBeenCalled();
 	});
 
+	/** Shardlens sends every five seconds, so what it holds when the bot stops is lost unless it is told first. */
+	it("sends what Shardlens holds before the client goes", async () => {
+		const { shutdown } = loadShutdown();
+		const client = clientFor();
+		const order: string[] = [];
+		client.shardlens = { shutdown: jest.fn(() => Promise.resolve(void order.push("shardlens"))) } as never;
+		jest.mocked(client.destroy).mockImplementation(() => Promise.resolve(void order.push("destroy")));
+
+		await shutdown(client, "SIGINT");
+
+		expect(order).toEqual(["shardlens", "destroy"]);
+	});
+
+	/** The collector inside the bot is where the SDK flushes to, so it has to outlast everything that sends. */
+	it("closes the collector inside the bot last", async () => {
+		const { shutdown } = loadShutdown();
+		const client = clientFor();
+		const order: string[] = [];
+		client.shardlens = { shutdown: jest.fn(() => Promise.resolve(void order.push("shardlens"))) } as never;
+		client.lensTarget = {
+			url: undefined,
+			ingestKey: undefined,
+			readKey: undefined,
+			activityKey: undefined,
+			inBot: {
+				send: () => Promise.resolve(new Response(null)),
+				close: () => Promise.resolve(void order.push("collector")),
+			},
+		};
+		jest.mocked(client.destroy).mockImplementation(() => Promise.resolve(void order.push("destroy")));
+
+		await shutdown(client, "SIGINT");
+
+		expect(order).toEqual(["shardlens", "destroy", "collector"]);
+	});
+
+	/** One step that threw skipped every step after it, so a listener that would not close left the database open. */
+	it("carries on past a step that fails, and exits with an error", async () => {
+		const { shutdown, disconnectDatabase } = loadShutdown();
+		const client = clientFor();
+		client.api = { close: jest.fn(() => Promise.reject(new Error("port stuck"))) };
+
+		await shutdown(client, "SIGINT");
+
+		expect(disconnectDatabase).toHaveBeenCalled();
+		expect(client.destroy).toHaveBeenCalled();
+		expect(client.logger.error).toHaveBeenCalledWith(
+			expect.objectContaining({ step: "dashboard" }),
+			expect.any(String),
+		);
+		expect(exitSpy).toHaveBeenCalledWith(1);
+	});
+
 	/** Two signals in quick succession must not race two teardowns. */
 	it("ignores a second call", async () => {
 		const { shutdown, disconnectDatabase } = loadShutdown();

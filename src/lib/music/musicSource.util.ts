@@ -94,10 +94,10 @@ export class MusicProblemError extends UserFacingError {
 	}
 }
 
-/** What yt-dlp is asked for, given what the person typed. */
 /** yt-dlp's generic extractor fetches whatever address it is handed, so only the site extractors run. */
 const SITE_EXTRACTORS = ["--use-extractors", "default,-generic"];
 
+/** What yt-dlp is asked for, given what the person typed. */
 export function argumentsFor(query: Query, results = SEARCH_RESULTS): string[] {
 	if (query.kind === "url") return [query.url];
 
@@ -317,7 +317,7 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 
 const SCRATCH_PREFIX = "testify-music-";
 
-/** yt-dlp writes a fragmented stream's pieces to `--Frag<n>.part` in its working directory whatever `--paths` says, so each download gets a folder of its own. */
+/** yt-dlp writes a fragmented stream's `--Frag<n>.part` pieces where it runs, whatever `--paths` says. */
 function scratchFolder(): string | undefined {
 	try {
 		// The process id is how a later start tells a stranded folder from one another running bot is using.
@@ -414,6 +414,8 @@ export function openStream(
 	options: StreamOptions = {},
 ): OpenStream {
 	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
+	const ffmpeg = plan.shape === "transcode" ? binaries.ffmpeg : undefined;
+	if (ffmpeg === null) throw new UserFacingError("That track needs FFmpeg to play, and it is not installed.");
 
 	const scratch = scratchFolder();
 	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url), {
@@ -432,7 +434,7 @@ export function openStream(
 			options.onProblem?.(complaint.trim() === "" ? `yt-dlp exited ${String(code)}` : complaint.trim());
 	});
 
-	if (plan.shape !== "transcode") {
+	if (ffmpeg === undefined) {
 		const stream = buffer(source.stdout);
 
 		return {
@@ -447,9 +449,7 @@ export function openStream(
 		};
 	}
 
-	if (binaries.ffmpeg === null) throw new UserFacingError("That track needs FFmpeg to play, and it is not installed.");
-
-	const transcoder = spawn(binaries.ffmpeg, ffmpegArgs(options), {
+	const transcoder = spawn(ffmpeg, ffmpegArgs(options), {
 		stdio: ["pipe", "pipe", "ignore"],
 		windowsHide: true,
 	});

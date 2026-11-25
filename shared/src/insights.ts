@@ -16,7 +16,7 @@ export const insightsQuery = z.object({
 	days: z.coerce
 		.number()
 		.int()
-		.refine((days) => INSIGHT_WINDOWS.some((window) => window === days), "must be 7 or 30")
+		.refine((days): days is InsightWindow => INSIGHT_WINDOWS.some((window) => window === days), "must be 7 or 30")
 		.default(7),
 });
 

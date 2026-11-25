@@ -34,7 +34,7 @@ function apiFor(env: Env = envFor(), client: TestifyClient = createMockClient({ 
 
 /** Both halves of the double-submit, as a browser running the SPA would send them. */
 function signed(method: string, extra: Record<string, string> = {}): RequestInit {
-	return { method, headers: { cookie: `dash_csrf=${CSRF}`, "x-csrf-token": CSRF, ...extra } };
+	return { method, headers: { cookie: `__Host-dash_csrf=${CSRF}`, "x-csrf-token": CSRF, ...extra } };
 }
 
 describe("security headers", () => {
@@ -113,7 +113,7 @@ describe("CSRF protection", () => {
 	it("refuses a write carrying the cookie but no header", async () => {
 		const response = await withPost().request("/api/thing", {
 			method: "POST",
-			headers: { cookie: `dash_csrf=${CSRF}` },
+			headers: { cookie: `__Host-dash_csrf=${CSRF}` },
 		});
 
 		expect(response.status).toBe(403);
@@ -123,7 +123,7 @@ describe("CSRF protection", () => {
 	it("refuses a header that does not match the cookie", async () => {
 		const response = await withPost().request("/api/thing", {
 			method: "POST",
-			headers: { cookie: `dash_csrf=${CSRF}`, "x-csrf-token": "not-the-secret-at-all-no" },
+			headers: { cookie: `__Host-dash_csrf=${CSRF}`, "x-csrf-token": "not-the-secret-at-all-no" },
 		});
 
 		expect(response.status).toBe(403);
@@ -225,7 +225,7 @@ describe("rate limiting", () => {
 	/** One signed-in caller spends their own bucket long before the looser ceiling their address gets. */
 	it("eventually refuses a caller hammering the API, and says when to come back", async () => {
 		const app = apiFor();
-		const headers = { cookie: "dash_session=one-caller" };
+		const headers = { cookie: "__Host-dash_session=one-caller" };
 
 		let last = await app.request("/api/health", { headers });
 		for (let attempt = 0; attempt < 400 && last.status !== 429; attempt += 1) {
@@ -240,7 +240,7 @@ describe("rate limiting", () => {
 	/** A question can cost the owner a model call, so ten a minute is the allowance, and reading pages is unaffected. */
 	it("counts questions to the support assistant apart, and far more tightly", async () => {
 		const app = apiFor();
-		const headers = { cookie: "dash_session=asker" };
+		const headers = { cookie: "__Host-dash_session=asker" };
 
 		const statuses: number[] = [];
 		for (let attempt = 0; attempt < 11; attempt += 1) {
@@ -281,7 +281,7 @@ describe("the CSRF check and the session it reads", () => {
 	it("refuses a matched cookie and header that are not the session's secret", async () => {
 		const response = await apiFor(oauthEnv(), withSession()).request("/api/auth/logout", {
 			method: "POST",
-			headers: { cookie: `dash_session=session-id; dash_csrf=${CSRF}`, "x-csrf-token": CSRF },
+			headers: { cookie: `__Host-dash_session=session-id; __Host-dash_csrf=${CSRF}`, "x-csrf-token": CSRF },
 		});
 
 		expect(response.status).toBe(403);
@@ -291,7 +291,7 @@ describe("the CSRF check and the session it reads", () => {
 		const response = await apiFor(oauthEnv(), withSession()).request("/api/auth/logout", {
 			method: "POST",
 			headers: {
-				cookie: `dash_session=session-id; dash_csrf=${SESSION_SECRET}`,
+				cookie: `__Host-dash_session=session-id; __Host-dash_csrf=${SESSION_SECRET}`,
 				"x-csrf-token": SESSION_SECRET,
 			},
 		});

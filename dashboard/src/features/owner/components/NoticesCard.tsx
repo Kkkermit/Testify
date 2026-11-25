@@ -139,7 +139,10 @@ function NoticeForm({
 						value={String(timing.upFor)}
 						onChange={(event) => {
 							const value = event.target.value;
-							const upFor: UpFor = value === "keep" || value === "forever" ? value : (Number(value) as UpFor);
+							const upFor: UpFor =
+								value === "keep" || value === "forever"
+									? value
+									: (UP_FOR_HOURS.find((hours) => String(hours) === value) ?? timing.upFor);
 							setTiming({ ...timing, upFor });
 						}}
 						className={SELECT}

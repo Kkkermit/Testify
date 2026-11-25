@@ -1,6 +1,7 @@
 import { type Context, Hono } from "hono";
 import {
 	clearAuthCookies,
+	cookieName,
 	CSRF_COOKIE,
 	OAUTH_COOKIE,
 	readCookie,
@@ -100,25 +101,58 @@ describe("clearing", () => {
 			clearAuthCookies(context, PRODUCTION);
 		});
 
-		for (const name of [SESSION_COOKIE, CSRF_COOKIE, OAUTH_COOKIE]) {
-			expect(cookies.some((cookie) => cookie.startsWith(`${name}=`))).toBe(true);
+		for (const name of [SESSION_COOKIE, CSRF_COOKIE, OAUTH_COOKIE] as const) {
+			expect(cookies.some((cookie) => cookie.startsWith(`${cookieName(PRODUCTION, name)}=`))).toBe(true);
 		}
 		expect(cookies.every((cookie) => cookie.includes("Max-Age=0"))).toBe(true);
 	});
 });
 
+describe("the names", () => {
+	/** A site on a subdomain could plant a session or CSRF cookie for the whole domain; one named `__Host-` it cannot. */
+	it("carry __Host- outside development, with no Domain and the root path", async () => {
+		const cookies = await headersFrom((context) => {
+			setSessionCookie(context, PRODUCTION, "id", 60);
+			setCsrfCookie(context, PRODUCTION, "secret", 60);
+			setOauthCookie(context, PRODUCTION, "state");
+		});
+
+		expect(cookies.map((cookie) => cookie.split("=")[0])).toEqual([
+			"__Host-dash_session",
+			"__Host-dash_csrf",
+			"__Host-dash_oauth",
+		]);
+		expect(cookies.every((cookie) => cookie.includes("Path=/") && !cookie.includes("Domain"))).toBe(true);
+	});
+
+	/** `__Host-` needs Secure, which development leaves off for `http://localhost`. */
+	it("stay plain in development", async () => {
+		const [cookie = ""] = await headersFrom((context) => {
+			setSessionCookie(context, DEVELOPMENT, "id", 60);
+		});
+
+		expect(cookie.startsWith(`${SESSION_COOKIE}=`)).toBe(true);
+	});
+});
+
 describe("readCookie", () => {
-	it("finds one that was sent and returns null for one that was not", async () => {
+	/** An unprefixed copy is what a subdomain can plant, so outside development it is never read. */
+	it("reads only the name its environment sets", async () => {
 		const app = new Hono();
 		app.get("/", (context) =>
 			context.json({
-				session: readCookie(context, SESSION_COOKIE),
-				missing: readCookie(context, "nope"),
+				production: readCookie(context, PRODUCTION, SESSION_COOKIE),
+				development: readCookie(context, DEVELOPMENT, SESSION_COOKIE),
+				missing: readCookie(context, PRODUCTION, OAUTH_COOKIE),
 			}),
 		);
 
-		const response = await app.request("/", { headers: { cookie: `${SESSION_COOKIE}=abc` } });
+		const planted = await app.request("/", { headers: { cookie: `${SESSION_COOKIE}=planted` } });
+		const both = await app.request("/", {
+			headers: { cookie: `${SESSION_COOKIE}=planted; __Host-${SESSION_COOKIE}=real` },
+		});
 
-		expect(await response.json()).toEqual({ session: "abc", missing: null });
+		expect(await planted.json()).toEqual({ production: null, development: "planted", missing: null });
+		expect(await both.json()).toEqual({ production: "real", development: "planted", missing: null });
 	});
 });

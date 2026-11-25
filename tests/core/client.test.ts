@@ -1,4 +1,4 @@
-import { Message, type MessagePayload } from "discord.js";
+import { Message, MessagePayload } from "discord.js";
 import { type Env } from "@config/env";
 import { TestifyClient } from "@core/client";
 import { createLogger } from "@core/logger";
@@ -25,5 +25,18 @@ it("replies without the quote when the message being answered has gone", async (
 	await Message.prototype.reply.call({ channel: { send }, client } as unknown as Message, { content: "Deleted 36" });
 
 	expect((send.mock.calls[0]?.[0] as MessagePayload).options).toMatchObject({ reply: { failIfNotExists: false } });
+	await client.destroy();
+});
+
+/** A message sent with no mentions of its own pinged whatever its text named, so a giveaway's prize could ping everyone. */
+it("lets only the people a message names be pinged unless it says otherwise", async () => {
+	const client = new TestifyClient(
+		{ DISCORD_OWNER_IDS: [], DISABLED_FEATURES: [] } as unknown as Env,
+		createLogger("fatal", false),
+	);
+
+	const payload = MessagePayload.create({ client } as never, { content: "@everyone <@&1> <@2>" }).resolveBody();
+
+	expect(payload.body).toMatchObject({ allowed_mentions: { parse: ["users"] } });
 	await client.destroy();
 });

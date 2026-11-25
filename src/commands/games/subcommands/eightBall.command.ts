@@ -16,7 +16,7 @@ const ANSWERS = [
 	"My reply is no.",
 	"Very doubtful.",
 	"Absolutely not.",
-];
+] as const;
 
 export default defineCommand({
 	name: "8ball",
@@ -32,7 +32,7 @@ export default defineCommand({
 					title: "\u{1f3b1} Magic eight ball",
 					fields: [
 						{ name: "Question", value: truncate(interaction.options.getString("question", true), 500) },
-						{ name: "Answer", value: ANSWERS[randomInt(ANSWERS.length)]! },
+						{ name: "Answer", value: ANSWERS[randomInt(ANSWERS.length)] ?? ANSWERS[0] },
 					],
 				}),
 			],

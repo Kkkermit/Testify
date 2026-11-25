@@ -10,6 +10,7 @@ import {
 	readTokens,
 	sessionHandleOf,
 	sessionsFor,
+	storedSessionId,
 	touchSession,
 	updateTokens,
 } from "@database/repositories/dashboardSessionRepository";
@@ -41,10 +42,20 @@ describeWithMongo("the dashboard session repository", () => {
 		expect(issued.expiresAt.getTime()).toBeGreaterThan(Date.now());
 	});
 
+	/** A copy of the database held every cookie as it was, so anybody reading it could sign in as anybody, an owner too. */
+	it("keeps a digest of the cookie, never the cookie, and finds the session by the cookie alone", async () => {
+		const issued = await createSession(box, details(), 7);
+
+		expect(await DashboardSessions.findById(issued.id).lean().exec()).toBeNull();
+		expect(await DashboardSessions.findById(storedSessionId(issued.id)).lean().exec()).not.toBeNull();
+		expect(await findSession(storedSessionId(issued.id))).toBeNull();
+		expect((await findSession(issued.id))?._id).toBe(storedSessionId(issued.id));
+	});
+
 	/** A database dump must not hand over live OAuth tokens for everyone who has ever signed in. */
 	it("never writes a Discord token in plaintext", async () => {
 		const issued = await createSession(box, details(), 7);
-		const stored = await DashboardSessions.findById(issued.id).lean().exec();
+		const stored = await DashboardSessions.findById(storedSessionId(issued.id)).lean().exec();
 
 		expect(stored?.accessToken).not.toContain("access-token");
 		expect(stored?.refreshToken).not.toContain("refresh-token");
@@ -82,14 +93,17 @@ describeWithMongo("the dashboard session repository", () => {
 	/** An expired session is refused before Mongo's TTL sweep removes it. */
 	it("refuses a session that has expired but not yet been swept", async () => {
 		const issued = await createSession(box, details(), 7);
-		await DashboardSessions.updateOne({ _id: issued.id }, { $set: { expiresAt: new Date(Date.now() - 1_000) } }).exec();
+		await DashboardSessions.updateOne(
+			{ _id: storedSessionId(issued.id) },
+			{ $set: { expiresAt: new Date(Date.now() - 1_000) } },
+		).exec();
 
 		expect(await findSession(issued.id)).toBeNull();
 	});
 
 	it("rolls the window forward so a long edit does not sign someone out", async () => {
 		const issued = await createSession(box, details(), 1);
-		await touchSession(issued.id, 7);
+		await touchSession(storedSessionId(issued.id), 7);
 
 		const session = await findSession(issued.id);
 		expect(session!.expiresAt.getTime()).toBeGreaterThan(issued.expiresAt.getTime());
@@ -98,9 +112,13 @@ describeWithMongo("the dashboard session repository", () => {
 	it("re-seals refreshed tokens rather than storing them as they arrived", async () => {
 		const issued = await createSession(box, details(), 7);
 		const tokenExpiresAt = new Date(Date.now() + 604_800_000);
-		await updateTokens(box, issued.id, { accessToken: "newer", refreshToken: "newer-refresh", tokenExpiresAt });
+		await updateTokens(box, storedSessionId(issued.id), {
+			accessToken: "newer",
+			refreshToken: "newer-refresh",
+			tokenExpiresAt,
+		});
 
-		const stored = await DashboardSessions.findById(issued.id).lean().exec();
+		const stored = await DashboardSessions.findById(storedSessionId(issued.id)).lean().exec();
 		expect(stored?.accessToken).not.toContain("newer");
 		expect(readTokens(box, (await findSession(issued.id))!)?.accessToken).toBe("newer");
 	});
@@ -108,7 +126,7 @@ describeWithMongo("the dashboard session repository", () => {
 	it("deletes one session without touching the others", async () => {
 		const first = await createSession(box, details(), 7);
 		const second = await createSession(box, details(), 7);
-		await deleteSession(first.id);
+		await deleteSession(storedSessionId(first.id));
 
 		expect(await findSession(first.id)).toBeNull();
 		expect(await findSession(second.id)).not.toBeNull();
@@ -130,13 +148,13 @@ describeWithMongo("the dashboard session repository", () => {
 		const there = await createSession(box, details(), 7);
 		await createSession(box, details({ userId: "200000000000000002" }), 7);
 
-		const listed = await sessionsFor(USER, here.id);
+		const listed = await sessionsFor(USER, storedSessionId(here.id));
 
 		expect(listed.map((row) => row.handle).sort()).toEqual(
-			[sessionHandleOf(here.id), sessionHandleOf(there.id)].sort(),
+			[sessionHandleOf(storedSessionId(here.id)), sessionHandleOf(storedSessionId(there.id))].sort(),
 		);
 		expect(JSON.stringify(listed)).not.toContain(here.id);
-		expect(listed.find((row) => row.current)?.handle).toBe(sessionHandleOf(here.id));
+		expect(listed.find((row) => row.current)?.handle).toBe(sessionHandleOf(storedSessionId(here.id)));
 	});
 
 	/** A handle from somebody else's list, or the reader's own browser, must end nothing. */
@@ -145,9 +163,12 @@ describeWithMongo("the dashboard session repository", () => {
 		const there = await createSession(box, details(), 7);
 		const stranger = await createSession(box, details({ userId: "200000000000000002" }), 7);
 
-		expect(await endSessionByHandle(USER, sessionHandleOf(stranger.id), here.id)).toBe(false);
-		expect(await endSessionByHandle(USER, sessionHandleOf(here.id), here.id)).toBe(false);
-		expect(await endSessionByHandle(USER, sessionHandleOf(there.id), here.id)).toBe(true);
+		const asking = storedSessionId(here.id);
+		const handleOf = (cookie: string): string => sessionHandleOf(storedSessionId(cookie));
+
+		expect(await endSessionByHandle(USER, handleOf(stranger.id), asking)).toBe(false);
+		expect(await endSessionByHandle(USER, handleOf(here.id), asking)).toBe(false);
+		expect(await endSessionByHandle(USER, handleOf(there.id), asking)).toBe(true);
 
 		expect(await findSession(here.id)).not.toBeNull();
 		expect(await findSession(there.id)).toBeNull();
@@ -159,7 +180,7 @@ describeWithMongo("the dashboard session repository", () => {
 		await createSession(box, details(), 7);
 		const stranger = await createSession(box, details({ userId: "200000000000000002" }), 7);
 
-		expect(await endOtherSessions(USER, here.id)).toBe(1);
+		expect(await endOtherSessions(USER, storedSessionId(here.id))).toBe(1);
 		expect(await findSession(here.id)).not.toBeNull();
 		expect(await findSession(stranger.id)).not.toBeNull();
 	});

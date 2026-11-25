@@ -1,10 +1,14 @@
 import { describeWithMongo } from "../helpers/mongo";
 import { ECONOMY } from "@config/constants";
 import {
+	addBusiness,
 	adjustBank,
 	adjustWallet,
+	claimCooldown,
 	debitWallet,
 	deposit,
+	emptySlot,
+	fillSlot,
 	findAccount,
 	countGlobalAccounts,
 	getEconomyRank,
@@ -16,6 +20,7 @@ import {
 	getOrCreateAccount,
 	resetGuild,
 	transfer,
+	updatePet,
 	withdraw,
 } from "@database/repositories/economyRepository";
 
@@ -97,6 +102,90 @@ describeWithMongo("economyRepository", () => {
 
 		expect(await resetGuild(GUILD)).toBe(1);
 		expect(await findAccount("444444444444444444", ALICE)).not.toBeNull();
+	});
+
+	/** Two `/beg` runs at once both read an expired cooldown, and both were paid. */
+	it("lets only one of two runs racing claim a cooldown", async () => {
+		const account = await getOrCreateAccount(GUILD, ALICE);
+		const at = new Date();
+
+		const claims = await Promise.all([
+			claimCooldown(GUILD, ALICE, "beg", account.lastBegged, at),
+			claimCooldown(GUILD, ALICE, "beg", account.lastBegged, at),
+		]);
+
+		expect(claims.filter(Boolean)).toHaveLength(1);
+		expect((await findAccount(GUILD, ALICE))?.lastBegged).toEqual(at);
+	});
+
+	/** Pressing Sell twice refunded the house twice, and buying two houses at once kept one and charged for both. */
+	it("fills a slot only while it is empty and empties it only while it holds what was read", async () => {
+		await getOrCreateAccount(GUILD, ALICE);
+		const house = { houseId: "cabin", name: "Cabin", emoji: "🏠", value: 100, purchasedAt: new Date() };
+
+		const fills = await Promise.all([
+			fillSlot(GUILD, ALICE, "house", house),
+			fillSlot(GUILD, ALICE, "house", { ...house, houseId: "manor" }),
+		]);
+		expect(fills.filter(Boolean)).toHaveLength(1);
+
+		const owned = (await findAccount(GUILD, ALICE))?.house?.houseId ?? "";
+		const empties = await Promise.all([
+			emptySlot(GUILD, ALICE, "house", owned),
+			emptySlot(GUILD, ALICE, "house", owned),
+		]);
+		expect(empties.filter(Boolean)).toHaveLength(1);
+		expect((await findAccount(GUILD, ALICE))?.house).toBeNull();
+	});
+
+	/** Feeding a pet while rehoming it wrote the whole pet back after the refund, so both were kept. */
+	it("changes a pet only while it is still the same pet", async () => {
+		await getOrCreateAccount(GUILD, ALICE);
+		const pet = {
+			petId: "cat",
+			name: "Cat",
+			type: "Cat",
+			emoji: "🐱",
+			happiness: 50,
+			hunger: 50,
+			purchasedAt: new Date(),
+			lastFed: null,
+			lastWalked: null,
+		};
+		await fillSlot(GUILD, ALICE, "pet", pet);
+
+		expect(await updatePet(GUILD, ALICE, "cat", { hunger: 100 })).toBe(true);
+		expect((await findAccount(GUILD, ALICE))?.pet).toMatchObject({ hunger: 100, happiness: 50 });
+
+		await emptySlot(GUILD, ALICE, "pet", "cat");
+		expect(await updatePet(GUILD, ALICE, "cat", { hunger: 100 })).toBe(false);
+		expect((await findAccount(GUILD, ALICE))?.pet).toBeNull();
+	});
+
+	/** Two businesses bought at once each wrote the list as it was read, so one of them vanished after being paid for. */
+	it("adds each business once and keeps every one bought at the same time", async () => {
+		await getOrCreateAccount(GUILD, ALICE);
+		const business = (businessId: string) => ({
+			businessId,
+			name: businessId,
+			emoji: "🏢",
+			level: 1,
+			income: 10,
+			purchasedAt: new Date(),
+			lastCollected: null,
+		});
+
+		const added = await Promise.all([
+			addBusiness(GUILD, ALICE, business("bakery")),
+			addBusiness(GUILD, ALICE, business("garage")),
+			addBusiness(GUILD, ALICE, business("bakery")),
+		]);
+
+		expect(added.filter(Boolean)).toHaveLength(2);
+		expect((await findAccount(GUILD, ALICE))?.businesses.map((owned) => owned.businessId).sort()).toEqual([
+			"bakery",
+			"garage",
+		]);
 	});
 
 	describe("the bot-wide board", () => {

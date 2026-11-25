@@ -1,3 +1,4 @@
+import { WELCOME_STYLES } from "@testify/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
@@ -22,7 +23,7 @@ import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { StyleChoice } from "@/features/welcome/components/StyleChoice";
 import { useGoodbye } from "@/features/welcome/useGoodbye";
 import { useUpdateWelcome, useWelcome } from "@/features/welcome/useWelcome";
-import { STYLE_ORDER, welcomeSummary } from "@/features/welcome/welcome.utils";
+import { welcomeSummary } from "@/features/welcome/welcome.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { channelLabel } from "@/lib/channels";
 
@@ -94,7 +95,7 @@ export function WelcomePage(): React.JSX.Element {
 				/>
 
 				<FieldGroup label={t("welcome.sentAs")}>
-					{STYLE_ORDER.map((style) => (
+					{WELCOME_STYLES.map((style) => (
 						<StyleChoice
 							key={style}
 							group="welcome-style"
@@ -116,9 +117,7 @@ export function WelcomePage(): React.JSX.Element {
 					saved={welcome.message}
 					disabled={needsChannel}
 					onDraft={setDraft}
-					onSave={(message) => {
-						update.mutate({ message });
-					}}
+					onSave={(message) => update.mutateAsync({ message })}
 				>
 					<GreetingPreview message={draft} style={welcome.style} guildName={guildName} memberCount={memberCount} />
 					<SendTest test={{ kind: "greeting", message: draft, style: welcome.style }} />

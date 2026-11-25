@@ -74,12 +74,12 @@ export async function playInstant(
 
 	const deal = async (): Promise<{ outcome: InstantOutcome; bet: number; wallet: number; durationMs: number }> => {
 		const stake = await takeStake(player, amount);
-		if (!responder.deferred && !responder.replied) await responder.deferReply();
-
 		const outcome = settle(stake.bet);
 		const wallet = (await payOut(player, outcome.returned)) ?? stake.wallet;
 		await recordCasinoPlays([{ ...player, game: outcome.game, staked: stake.bet, returned: outcome.returned }]);
 
+		// Paid before the reply is deferred, so an interaction that has already expired costs the picture, not the winnings.
+		if (!responder.deferred && !responder.replied) await responder.deferReply();
 		const spin = outcome.animate();
 		await responder.editReply(instantSpinningMessage(outcome, stake.bet, spin.gif));
 

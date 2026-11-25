@@ -69,6 +69,32 @@ describe("the economy settings page", () => {
 		expect(screen.queryByLabelText(/Price of Regulars/)).not.toBeInTheDocument();
 	});
 
+	/** Leaving the price for its remove button saved the price, and the button, busy with that save, swallowed the press. */
+	it("takes a role off sale at the first press, without saving the price typed beside it", async () => {
+		const user = userEvent.setup();
+		const writes: string[] = [];
+		server.use(
+			http.put(`/api/guilds/${GUILD}/shop-roles/:roleId`, () => {
+				writes.push("put");
+				return HttpResponse.json(shopRoles);
+			}),
+			http.delete(`/api/guilds/${GUILD}/shop-roles/:roleId`, () => {
+				writes.push("delete");
+				return HttpResponse.json({ ...shopRoles, roles: [] });
+			}),
+		);
+		renderPage();
+
+		const price = await screen.findByLabelText(/Price of Regulars/);
+		await user.clear(price);
+		await user.type(price, "6000");
+		await user.click(screen.getByRole("button", { name: /Take Regulars off sale/ }));
+
+		await waitFor(() => {
+			expect(writes).toEqual(["delete"]);
+		});
+	});
+
 	it("saves a new starting wallet when the field is left, and refuses one out of range", async () => {
 		const sent = capture();
 		renderPage();

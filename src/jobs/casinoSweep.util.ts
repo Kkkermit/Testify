@@ -11,14 +11,12 @@ export async function settleIdleHands(client: TestifyClient): Promise<void> {
 
 	// One at a time, so a burst of expiries is a trickle of payouts rather than a spike of writes.
 	for (const hand of hands) {
-		let settled;
-		try {
-			settled = await settleAbandoned(hand);
-		} catch (error) {
+		const settled = await settleAbandoned(hand).catch((error: unknown) => {
 			// The player pressed a button between the listing and the claim, which settled it their way instead.
-			if (error instanceof UserFacingError) continue;
+			if (error instanceof UserFacingError) return null;
 			throw error;
-		}
+		});
+		if (settled === null) continue;
 
 		client.logger.debug({ guildId: hand.guildId, game: hand.game }, "[CASINO] Settled an idle hand");
 		if (hand.channelId === null || hand.messageId === null) continue;

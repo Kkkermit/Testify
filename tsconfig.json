@@ -9,6 +9,7 @@
 		// which resolves and runs perfectly well under require().
 		"module": "Preserve",
 		"moduleResolution": "Bundler",
+		// tsc-alias resolves the paths below from rootDir when there is no baseUrl.
 		"rootDir": ".",
 		"noEmit": true,
 
@@ -50,14 +51,10 @@
 		"allowUnusedLabels": false,
 		"useUnknownInCatchVariables": true,
 
-		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"sourceMap": true,
-		"declaration": false,
 		"isolatedModules": true,
-		"verbatimModuleSyntax": false,
 
 		"types": ["node", "jest"]
 	},

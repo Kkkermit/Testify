@@ -1,5 +1,6 @@
-import { isValidObjectId, type Types } from "mongoose";
+import { type Types } from "mongoose";
 import { ScheduledPost, type ScheduledMessageRecord } from "@database/models/scheduledMessage.schema";
+import { recordIn } from "@database/recordFilter.util";
 
 export type StoredSchedule = Pick<ScheduledMessageRecord, "guildId" | "channelId" | "message" | "repeat" | "nextAt"> & {
 	id: string;
@@ -20,11 +21,6 @@ function toSchedule(row: Lean): StoredSchedule {
 	};
 }
 
-/** Every lookup by id is the server's too, so one server can never see or change another's. */
-function inGuild(guildId: string, id: string): { guildId: string; _id: string } | null {
-	return isValidObjectId(id) ? { guildId, _id: id } : null;
-}
-
 export async function listSchedules(guildId: string): Promise<StoredSchedule[]> {
 	const rows = await ScheduledPost.find({ guildId }).sort({ nextAt: 1, _id: 1 }).lean<Lean[]>().exec();
 	return rows.map(toSchedule);
@@ -35,7 +31,7 @@ export async function countSchedules(guildId: string): Promise<number> {
 }
 
 export async function findSchedule(guildId: string, id: string): Promise<StoredSchedule | null> {
-	const filter = inGuild(guildId, id);
+	const filter = recordIn(guildId, id);
 	if (filter === null) return null;
 	const row = await ScheduledPost.findOne(filter).lean<Lean>().exec();
 	return row === null ? null : toSchedule(row);
@@ -57,7 +53,7 @@ export async function updateSchedule(
 	fields: Partial<ScheduleFields>,
 	updatedBy: string | null,
 ): Promise<StoredSchedule | null> {
-	const filter = inGuild(guildId, id);
+	const filter = recordIn(guildId, id);
 	if (filter === null) return null;
 
 	const row = await ScheduledPost.findOneAndUpdate(
@@ -71,7 +67,7 @@ export async function updateSchedule(
 }
 
 export async function deleteSchedule(guildId: string, id: string): Promise<boolean> {
-	const filter = inGuild(guildId, id);
+	const filter = recordIn(guildId, id);
 	if (filter === null) return false;
 	return (await ScheduledPost.deleteOne(filter).exec()).deletedCount > 0;
 }

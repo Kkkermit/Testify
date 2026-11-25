@@ -1,11 +1,14 @@
-import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { findBinaries } from "../src/lib/music/musicBinaries.util";
 import { box, painter, stepLine } from "@core/terminal";
+import { findBinaries } from "@lib/music/musicBinaries.util";
 
 /** Fetches yt-dlp into `bin/`; opt-in, so `npm ci` never depends on GitHub being reachable. */
 
 const RELEASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
+
+/** Generous, since the build is around 30 MB, but a connection that stalls should still end. */
+const DOWNLOAD_TIMEOUT_MS = 300_000;
 
 /** The build published for this machine, checked against the release page; 32-bit ARM has none. */
 export function assetFor(platform: NodeJS.Platform, arch: string): string | null {
@@ -44,13 +47,17 @@ async function main(): Promise<void> {
 	say(stepLine("working", "yt-dlp", `downloading ${asset}…`, undefined, paint));
 
 	const started = performance.now();
-	const response = await fetch(`${RELEASE}/${asset}`, { redirect: "follow" });
+	const response = await fetch(`${RELEASE}/${asset}`, {
+		redirect: "follow",
+		signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+	});
 	if (!response.ok) throw new Error(`GitHub answered ${String(response.status)}`);
 
 	writeFileSync(target, Buffer.from(await response.arrayBuffer()));
 	if (process.platform !== "win32") chmodSync(target, 0o755);
 
 	const fetched = findBinaries({ MUSIC_YTDLP_PATH: target });
+	if (fetched.ytDlp === null) process.exitCode = 1;
 	say(
 		fetched.ytDlp === null
 			? stepLine("failed", "yt-dlp", `saved to ${target}, but it would not run`, undefined, paint)
@@ -100,13 +107,12 @@ async function main(): Promise<void> {
 
 	say(`  ${paint.cyan("➜")} Restart the bot to pick this up. ${paint.bold("/music status")} shows what it found.`);
 	say();
-
-	if (!existsSync(target)) process.exitCode = 1;
 }
 
 if (require.main === module) {
 	main().catch((error: unknown) => {
-		const lines = [(error as Error).message, "", "Check this machine can reach github.com, then run it again."];
+		const reason = error instanceof Error ? error.message : String(error);
+		const lines = [reason, "", "Check this machine can reach github.com, then run it again."];
 		process.stderr.write(`\n${box("Could not set music up", lines, "error", paint).join("\n")}\n\n`);
 		process.exitCode = 1;
 	});

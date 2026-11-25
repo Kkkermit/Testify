@@ -1,7 +1,8 @@
 import { type InsightDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
+import { ChartReadout } from "@/components/primitives";
 import { barHeight } from "@/features/insights/insights.utils";
-import { shortDate } from "@/lib/datetime";
+import { calendarDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 
 export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Element {
@@ -10,19 +11,19 @@ export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Eleme
 
 	return (
 		<figure className="flex flex-col gap-2">
-			<div className="flex h-32 items-end gap-px" aria-hidden="true">
+			<ChartReadout label={t("insights.perDay")} column slide className="flex h-32 items-end gap-px">
 				{days.map((day) => (
 					<span
 						key={day.day}
-						title={`${shortDate(day.day)}: ${formatNumber(day.messages)}`}
+						data-readout={`${calendarDate(day.day)}: ${formatNumber(day.messages)}`}
 						className="bg-primary/30 hover:bg-primary/60 min-h-px flex-1 rounded-t-chip transition-colors duration-150"
 						style={{ height: `${String(barHeight(day.messages, max))}%` }}
 					/>
 				))}
-			</div>
+			</ChartReadout>
 			<div className="text-muted-foreground flex justify-between text-xs" aria-hidden="true">
-				<span>{shortDate(days[0]?.day ?? "")}</span>
-				<span>{shortDate(days.at(-1)?.day ?? "")}</span>
+				<span>{calendarDate(days[0]?.day ?? "")}</span>
+				<span>{calendarDate(days.at(-1)?.day ?? "")}</span>
 			</div>
 			<figcaption className="sr-only">
 				<table>
@@ -38,10 +39,10 @@ export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Eleme
 					<tbody>
 						{days.map((day) => (
 							<tr key={day.day}>
-								<th scope="row">{shortDate(day.day)}</th>
-								<td>{day.messages}</td>
-								<td>{day.joins}</td>
-								<td>{day.leaves}</td>
+								<th scope="row">{calendarDate(day.day)}</th>
+								<td>{formatNumber(day.messages)}</td>
+								<td>{formatNumber(day.joins)}</td>
+								<td>{formatNumber(day.leaves)}</td>
 							</tr>
 						))}
 					</tbody>

@@ -9,7 +9,7 @@ const SENTENCES = [
 	"Every bug you fix today is a support ticket you never receive",
 	"Consistency in a codebase beats brilliance in any single file",
 	"Reading code carefully is the fastest way to write it correctly",
-];
+] as const;
 
 /** Zero-width spaces stop a copy-paste from matching the prompt exactly. */
 function obfuscate(sentence: string): string {
@@ -25,7 +25,7 @@ export default defineCommand({
 
 	async run(interaction) {
 		const channel = inTextChannel(interaction);
-		const sentence = SENTENCES[randomInt(SENTENCES.length)]!;
+		const sentence = SENTENCES[randomInt(SENTENCES.length)] ?? SENTENCES[0];
 
 		await reply(interaction, {
 			embeds: [

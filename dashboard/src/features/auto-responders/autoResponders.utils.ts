@@ -1,4 +1,4 @@
-import { AUTO_RESPONDER_MATCHES, type AutoResponderMatch } from "@testify/shared";
+import { type AutoResponderMatch } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
 export const MATCH_LABELS: Record<AutoResponderMatch, TranslationKey> = {
@@ -6,5 +6,3 @@ export const MATCH_LABELS: Record<AutoResponderMatch, TranslationKey> = {
 	exact: "autoResponders.matchExact",
 	starts: "autoResponders.matchStarts",
 };
-
-export const MATCH_ORDER = AUTO_RESPONDER_MATCHES;

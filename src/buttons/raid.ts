@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { MINUTE_MS } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { modalForm, pickedChannelId } from "@lib/discord";
+import { modalForm, pickedChannelId, redrawPanel } from "@lib/discord";
 import { formatDuration } from "@lib/format";
 import { ageFromText, applyRaidSettings, RAID_PANEL_ID, raidPanel, readRaidOverview, wholeNumber } from "@lib/raid";
 import { recordsSettings } from "@lib/settings";
@@ -121,9 +121,9 @@ export default recordsSettings(
 				return;
 			}
 
-			const saved = await applyRaidSettings(guild, patch, ownerId);
-			if (interaction.isModalSubmit() && !interaction.isFromMessage()) return;
-			await interaction.update(raidPanel(saved, ownerId, note));
+			const mentionsEveryRole = interaction.memberPermissions?.has(PermissionFlagsBits.MentionEveryone) === true;
+			const saved = await applyRaidSettings(guild, patch, ownerId, mentionsEveryRole);
+			await redrawPanel(interaction, raidPanel(saved, ownerId, note));
 		},
 	}),
 );

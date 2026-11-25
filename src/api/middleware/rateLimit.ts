@@ -2,7 +2,7 @@ import { getConnInfo } from "@hono/node-server/conninfo";
 import { type Context } from "hono";
 import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
-import { SESSION_COOKIE, readCookie } from "@api/cookies";
+import { readAnyCookie, SESSION_COOKIE } from "@api/cookies";
 import { tooManyRequests } from "@api/errors";
 
 interface RateLimitOptions {
@@ -70,7 +70,7 @@ export class RateLimiter {
  */
 export function callerKeys(context: Context, trustProxy: boolean): string[] {
 	const keys = [`i:${clientAddress(context, trustProxy)}`];
-	const session = readCookie(context, SESSION_COOKIE);
+	const session = readAnyCookie(context, SESSION_COOKIE);
 
 	if (session !== null && session !== "") keys.push(`s:${session}`);
 
@@ -79,10 +79,10 @@ export function callerKeys(context: Context, trustProxy: boolean): string[] {
 
 export function clientAddress(context: Context, trustProxy: boolean): string {
 	if (trustProxy) {
-		// Only meaningful behind a proxy that overwrites it, hence DASHBOARD_TRUST_PROXY defaulting to false.
-		const forwarded = context.req.header("x-forwarded-for");
-		const first = forwarded?.split(",")[0]?.trim();
-		if (first !== undefined && first !== "") return first;
+		// The last entry is the one the proxy itself added; a proxy appends to whatever the caller sent, so an earlier
+		// entry is anything somebody typed and would give them a fresh bucket on every request.
+		const nearest = context.req.header("x-forwarded-for")?.split(",").at(-1)?.trim();
+		if (nearest !== undefined && nearest !== "") return nearest;
 	}
 
 	try {

@@ -80,6 +80,20 @@ const fields = z.object({
 	SUPPORT_AI_API_KEY: z.string().min(1).optional(),
 	SUPPORT_AI_MODEL: z.string().min(1).default("claude-opus-5"),
 
+	// Shardlens: analytics for the bot's owner, in a collector inside the bot on its MongoDB or one they run elsewhere.
+	// Off while all are blank, and never a reason not to start: the SDK and the bot check them and warn.
+	SHARDLENS_URL: z.string().optional(),
+	SHARDLENS_INGEST_KEY: z.string().optional(),
+	// Read-only, for the owner console's analytics. Held by the bot and never sent to a browser.
+	SHARDLENS_READ_KEY: z.string().optional(),
+	// Reads who ran what, from a collector in audit mode, for the owner console alone.
+	SHARDLENS_ACTIVITY_KEY: z.string().optional(),
+	// `true` runs the collector inside the bot on MONGODB_URI, in place of the four above. Read by the bot, which warns
+	// on anything else.
+	SHARDLENS_MONGODB: z.string().optional(),
+	SHARDLENS_PORT: z.string().optional(),
+	// 32 random bytes in base64, for who ran what from the collector inside the bot.
+	SHARDLENS_AUDIT_KEY: z.string().optional(),
 	// Where `testify.config.json` is, when it is not beside `.env`. Only docker-compose.yml sets it.
 	TESTIFY_CONFIG: z.string().min(1).optional(),
 });

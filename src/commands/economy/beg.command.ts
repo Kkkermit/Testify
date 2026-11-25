@@ -4,9 +4,9 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import {
 	adjustWallet,
+	claimCooldown,
 	getOrCreateAccount,
 	incrementCounters,
-	setCooldown,
 } from "@database/repositories/economyRepository";
 import { getTuning } from "@database/repositories/tuningRepository";
 import { embed, reply } from "@lib/discord";
@@ -32,20 +32,24 @@ export default defineCommand({
 			}
 		}
 
+		if (!(await claimCooldown(guild.id, interaction.user.id, "beg", account.lastBegged, new Date(now)))) {
+			throw new UserFacingError("You only just asked. Give it a few minutes.");
+		}
+
 		const amount = atRate(randomInt(ECONOMY.begMin, ECONOMY.begMax + 1), (await getTuning(guild.id)).payRate);
 		if (amount > 0) await adjustWallet(guild.id, interaction.user.id, amount);
-		await setCooldown(guild.id, interaction.user.id, "beg", new Date(now));
 		await incrementCounters(guild.id, interaction.user.id, { begged: 1 });
 
 		await reply(interaction, {
 			embeds: [
 				embed({
 					category: "economy",
-					title: "Begging",
+					title: "🙏 Begging",
 					description:
 						amount > 0
 							? `Someone took pity on you and handed over **${formatNumber(amount)}**.`
 							: "Nobody gave you anything. Better luck next time.",
+					footer: `You can beg again in ${formatDuration(ECONOMY_COOLDOWNS.beg)}.`,
 				}),
 			],
 		});

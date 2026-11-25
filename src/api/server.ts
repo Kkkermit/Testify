@@ -7,6 +7,7 @@ import { type ApiProblem, asProblem, badRequest, notFound, problemBody, Upstream
 import { refuseBlacklisted } from "@api/middleware/blacklist";
 import { verifyCsrf } from "@api/middleware/csrf";
 import { refuseSwitchedOff } from "@api/middleware/features";
+import { refuseUnknownHost } from "@api/middleware/host";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
 import { loadSession } from "@api/middleware/session";
@@ -53,6 +54,9 @@ const ERASE_LIMIT = { limit: 3, windowMs: 60_000 };
 /** Each appeal is a post in a staff channel, so one person cannot send a stream of them. */
 const APPEAL_LIMIT = { limit: APPEAL_LIMITS.perMinute, windowMs: 60_000 };
 
+/** A file not already held is fetched from GitHub, so one visitor cannot spend the hour's budget for everybody. */
+const SOURCE_LIMIT = { limit: 10, windowMs: 60_000 };
+
 /** One address can be a household, an office or a school, so its ceiling is a multiple of one person's. */
 const ADDRESS_MULTIPLIER = 6;
 
@@ -77,6 +81,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const asking = limiterPair(SUPPORT_LIMIT);
 	const erasing = limiterPair(ERASE_LIMIT);
 	const appealing = limiterPair(APPEAL_LIMIT);
+	const reading = limiterPair(SOURCE_LIMIT);
 	const oauth = oauthConfigFrom(env);
 	const github = new GitHubReader({
 		repository: instanceConfig().repository,
@@ -93,6 +98,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	});
 
 	app.use("*", securityHeaders(env));
+	app.use("*", refuseUnknownHost(env));
 	app.use("*", rateLimit(general, { name: "general", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("*", bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => raise(badRequest("That request is too large.")) }));
 	// The one flow an unauthenticated caller can reach that costs a Discord round trip.
@@ -100,6 +106,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/support/ask", rateLimit(asking, { name: "support", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/erase", rateLimit(erasing, { name: "erase", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("/api/site/file", rateLimit(reading, { name: "source", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	// Sending an appeal posts to a staff channel; reading the list does not, so only the send takes this limit.
 	if (env.DASHBOARD_ENABLED) {
 		app.on("POST", "/api/appeals/*", rateLimit(appealing, { name: "appeal", trustProxy: env.DASHBOARD_TRUST_PROXY }));
@@ -212,12 +219,7 @@ export function startApi(client: TestifyClient, env: Env, options: ListenOptions
 	// After the API and nowhere else: it is a catch-all, so anything registered behind it never runs.
 	serveDashboard(app, dashboardRoot(), (path) => readLinkPreview(client, env, path));
 
-	let listening: (port: number) => void = () => undefined;
-	let failed: (error: Error) => void = () => undefined;
-	const ready = new Promise<number>((resolve, reject) => {
-		listening = resolve;
-		failed = reject;
-	});
+	const { promise: ready, resolve: listening, reject: failed } = Promise.withResolvers<number>();
 
 	let server: Server | null = null;
 	let retry: NodeJS.Timeout | null = null;

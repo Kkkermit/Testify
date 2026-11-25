@@ -75,7 +75,6 @@ export function GiveawaysPage(): React.JSX.Element {
 	const durationMs = durationMsOf(amount, unit);
 	const blocked = problemText(giveawayProblem({ channelId, prize, winnerCount: winners, durationMs }), t);
 	const busy = start.isPending || end.isPending || reroll.isPending || remove.isPending;
-	const failure = start.error ?? end.error ?? reroll.error ?? remove.error;
 	const next = nextDraw(rows);
 	const post = giveawayPost({ winnerCount: winners, durationMs }, me.data?.user.username ?? null);
 
@@ -185,7 +184,7 @@ export function GiveawaysPage(): React.JSX.Element {
 				</FieldGroup>
 
 				{blocked !== null && prize !== "" && <Warning>{blocked}</Warning>}
-				<Refusal error={failure} />
+				<Refusal error={start.error} />
 
 				<RowActions>
 					<Button disabled={blocked !== null || busy} onClick={create}>
@@ -216,6 +215,10 @@ export function GiveawaysPage(): React.JSX.Element {
 								row={row}
 								channels={channels.data ?? []}
 								busy={busy}
+								error={
+									(end.variables === row.messageId ? end.error : null) ??
+									(reroll.variables === row.messageId ? reroll.error : null)
+								}
 								onEnd={() => end.mutate(row.messageId)}
 								onReroll={() => reroll.mutate(row.messageId)}
 								onDelete={() => {

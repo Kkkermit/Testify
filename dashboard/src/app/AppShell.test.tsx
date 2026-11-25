@@ -147,6 +147,24 @@ describe("the app shell", () => {
 		expect(client.getQueryCache().getAll()).toHaveLength(0);
 	});
 
+	/** A sign-out that failed once did nothing at all, which on a shared computer reads as having signed out. */
+	it("says the reader is still signed in when signing out fails", async () => {
+		jest.mocked(hardRedirect).mockClear();
+		const user = userEvent.setup();
+		server.use(
+			http.post("/api/auth/logout", () =>
+				HttpResponse.json({ error: { code: "internal", message: "boom" } }, { status: 500 }),
+			),
+		);
+		renderWithProviders(<AppShell />, { path: "/guilds" });
+		await screen.findByText("someone");
+
+		await user.click(within(screen.getByTestId("sidebar")).getByRole("button", { name: /sign out/i }));
+
+		expect(await screen.findByText(/you are still signed in/i)).toBeInTheDocument();
+		expect(jest.mocked(hardRedirect)).not.toHaveBeenCalled();
+	});
+
 	/** `hidden` is `display: none`, which would leave every nav link named nothing; jsdom computes no styles, so the class is what is asserted. */
 	it("hides the nav labels visually rather than removing them", async () => {
 		server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, isOwner: true })));

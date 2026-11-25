@@ -1,4 +1,4 @@
-import { levellingSummary } from "@/features/levelling/levelling.utils";
+import { levellingSummary, roleNameOf } from "@/features/levelling/levelling.utils";
 import { i18next } from "@/i18n";
 
 describe("levellingSummary", () => {
@@ -17,5 +17,15 @@ describe("levellingSummary", () => {
 		expect(levellingSummary(on, "#levels", t)).toBe(
 			"Members earn XP as they talk, and each level-up is announced in #levels.",
 		);
+	});
+});
+
+describe("roleNameOf", () => {
+	/** A reward for a deleted role once named it in English whatever language the page was in. */
+	it("names a deleted role in the reader's language", async () => {
+		await i18next.loadLanguages("de");
+
+		expect(roleNameOf([{ id: "1", name: "Regulars" }], "1", i18next.getFixedT("de"))).toBe("Regulars");
+		expect(roleNameOf([], "1", i18next.getFixedT("de"))).not.toMatch(/deleted/i);
 	});
 });

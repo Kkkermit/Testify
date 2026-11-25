@@ -23,4 +23,4 @@ Each of these is a numbered case you can look up later with `/case`, and `/raid-
 - `/slowmode` limits how often people can post.
 
 ### On the dashboard
-Open your server, then **Leaderboards**, then a member. Their warnings and any softban are on their page, and you can manage both there.
+Open your server, then **Members**, then a member. Their warnings and any softban are on their page, and you can manage both there.

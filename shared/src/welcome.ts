@@ -29,7 +29,7 @@ export interface GreetingContext {
 	memberCount: number;
 }
 
-/** Fills the placeholders. The dashboard's preview and the message the bot posts come from this one function. */
+/** Fills the placeholders; the dashboard's preview and the bot's own post both come from here. */
 export function fillTemplate(template: string, context: GreetingContext): string {
 	return template
 		.replaceAll("{user}", context.mention)

@@ -10,11 +10,8 @@ import {
 
 /** Every free-text field's sanitiser, which guards against a stored string reading differently from what was typed. */
 describe("sanitiseText", () => {
-	it("leaves ordinary text alone, including the angle brackets Discord needs", () => {
+	it("leaves ordinary text alone, with the angle brackets Discord needs and a template's newlines and tabs", () => {
 		expect(sanitiseText("Welcome <@123>, you are member <#456>!")).toBe("Welcome <@123>, you are member <#456>!");
-	});
-
-	it("keeps the newlines and tabs a multi-line template is written with", () => {
 		expect(sanitiseText("one\ntwo\tthree")).toBe("one\ntwo\tthree");
 	});
 
@@ -63,16 +60,10 @@ describe("the schemas that carry free text", () => {
 
 /** The page reads this to decide whether a Post button would work, so it has to name what is missing. */
 describe("verificationBlocked", () => {
-	it("names both when neither is chosen", () => {
+	it("names what is missing, both when neither is chosen, and nothing when both are", () => {
 		expect(verificationBlocked({ channelId: null, roleId: null })).toMatch(/a channel and a role/i);
-	});
-
-	it("names only the one that is missing", () => {
 		expect(verificationBlocked({ channelId: "1", roleId: null })).toMatch(/a role to grant/i);
 		expect(verificationBlocked({ channelId: null, roleId: "1" })).toMatch(/a channel/i);
-	});
-
-	it("says nothing when both are chosen", () => {
 		expect(verificationBlocked({ channelId: "1", roleId: "2" })).toBeNull();
 	});
 });

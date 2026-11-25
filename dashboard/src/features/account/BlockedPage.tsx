@@ -1,19 +1,17 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { type BlacklistNotice, type DashboardUser } from "@testify/shared";
 import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Button, Card, DataList, PageHeader, PublicPage } from "@/components/primitives";
 import { DataTab } from "@/features/account/components/DataTab";
+import { useSignOut } from "@/features/auth/useSignOut";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { api } from "@/lib/api";
 import { shortDate } from "@/lib/datetime";
-import { hardRedirect } from "@/lib/redirect";
 
 /** All a blocked account is shown once signed in: why, whom to ask, and the one thing it may still do. */
 export function BlockedPage({ user, notice }: { user: DashboardUser; notice: BlacklistNotice }): React.JSX.Element {
 	const { t } = useTranslation();
-	const queryClient = useQueryClient();
+	const signOut = useSignOut();
 	usePageTitle(t("blocked.title"));
 
 	return (
@@ -24,11 +22,9 @@ export function BlockedPage({ user, notice }: { user: DashboardUser; notice: Bla
 				action={
 					<Button
 						variant="ghost"
+						disabled={signOut.busy}
 						onClick={() => {
-							void api.post("/auth/logout").finally(() => {
-								queryClient.clear();
-								hardRedirect("/sign-in");
-							});
+							signOut.signOut();
 						}}
 					>
 						<LogOut size={16} aria-hidden="true" /> {t("nav.signOut")}
@@ -36,6 +32,7 @@ export function BlockedPage({ user, notice }: { user: DashboardUser; notice: Bla
 				}
 			/>
 
+			{signOut.failed && <Warning>{t("nav.signOutFailed")}</Warning>}
 			<Warning>{t("blocked.body")}</Warning>
 
 			<Card padding="none">

@@ -106,7 +106,7 @@ export function InvitesPage(): React.JSX.Element {
 									<span className="text-muted-foreground w-6 text-sm tabular-nums">{formatNumber(index + 1)}</span>
 									<Link
 										to={memberLink(standing.userId)}
-										className={cn(INLINE_TARGET, "min-w-0 flex-1 text-sm font-medium [overflow-wrap:anywhere]")}
+										className={cn(INLINE_TARGET, "min-w-0 flex-1 text-sm font-medium wrap-anywhere")}
 									>
 										{personName(standing.name, t)}
 									</Link>
@@ -132,7 +132,7 @@ export function InvitesPage(): React.JSX.Element {
 									<div className="flex flex-wrap items-center gap-2">
 										<Link
 											to={memberLink(join.memberId)}
-											className={cn(INLINE_TARGET, "text-sm font-medium [overflow-wrap:anywhere]")}
+											className={cn(INLINE_TARGET, "text-sm font-medium wrap-anywhere")}
 										>
 											{personName(join.memberName, t)}
 										</Link>

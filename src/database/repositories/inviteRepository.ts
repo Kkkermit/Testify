@@ -1,10 +1,11 @@
-import { CACHE, DAY_MS } from "@config/constants";
+import { DAY_MS } from "@config/constants";
 import {
 	InviteJoin,
 	type InviteJoinRecord,
 	InviteSettingsConfig,
 	type InviteSettingsRecord,
 } from "@database/models/invite.schema";
+import { ReadCache } from "@database/readCache.util";
 import { INVITE_LIMITS } from "@testify/shared";
 
 export type StoredInviteSettings = Pick<InviteSettingsRecord, "enabled" | "logChannelId">;
@@ -12,21 +13,14 @@ export type StoredInviteSettings = Pick<InviteSettingsRecord, "enabled" | "logCh
 export type StoredInviteJoin = Omit<InviteJoinRecord, "expiresAt">;
 
 /** Read on every join, so the answer is cached and replaced on every write. */
-const cache = new Map<string, { settings: StoredInviteSettings | null; expiresAt: number }>();
+const cache = new ReadCache<StoredInviteSettings | null>();
 
 const JOIN_FIELDS = "guildId memberId memberName inviterId inviterName code vanity joinedAt leftAt";
 
 export async function getInviteSettings(guildId: string): Promise<StoredInviteSettings | null> {
-	const cached = cache.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.settings;
-
-	const settings = await InviteSettingsConfig.findOne({ guildId })
-		.select("enabled logChannelId")
-		.lean<StoredInviteSettings>()
-		.exec();
-	if (cache.size > CACHE.guildSettingsMaxEntries) cache.clear();
-	cache.set(guildId, { settings, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
-	return settings;
+	return cache.read(guildId, () =>
+		InviteSettingsConfig.findOne({ guildId }).select("enabled logChannelId").lean<StoredInviteSettings>().exec(),
+	);
 }
 
 export async function saveInviteSettings(
@@ -41,7 +35,7 @@ export async function saveInviteSettings(
 			{ upsert: true, setDefaultsOnInsert: true },
 		).exec();
 	} finally {
-		cache.delete(guildId);
+		cache.forget(guildId);
 	}
 }
 
@@ -125,7 +119,7 @@ export async function standingOf(guildId: string, inviterId: string): Promise<{ 
 
 export async function purgeInvites(guildId: string): Promise<void> {
 	await Promise.all([InviteJoin.deleteMany({ guildId }).exec(), InviteSettingsConfig.deleteMany({ guildId }).exec()]);
-	cache.delete(guildId);
+	cache.forget(guildId);
 }
 
 export function clearInviteCache(): void {

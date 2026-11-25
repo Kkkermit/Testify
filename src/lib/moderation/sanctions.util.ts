@@ -8,7 +8,7 @@ import { deactivateSoftban, getActiveSoftban } from "@database/repositories/mode
 import { appealLink } from "@lib/appeals/appealLink.util";
 import { formatDurationLong } from "@lib/format/format.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
-import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
+import { auditReason, dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 
 /** Kicking, banning and timing out, shared by the commands and the dashboard so each checks, notifies and records the same way. */
 
@@ -48,7 +48,7 @@ export async function kickMember(
 		}),
 	);
 
-	await member.kick(`${moderator.name}: ${reason}`);
+	await member.kick(auditReason(`${moderator.name}: ${reason}`));
 	await recordCase(guild, { action: "kick", user: member.user, moderator, reason });
 
 	return { notified };
@@ -87,7 +87,7 @@ export async function banUser(
 				);
 
 	await guild.members.ban(user.id, {
-		reason: `${moderator.name}: ${reason}`,
+		reason: auditReason(`${moderator.name}: ${reason}`),
 		deleteMessageSeconds: deleteDays * 86_400,
 	});
 	await recordCase(guild, { action: "ban", user, moderator, reason });
@@ -100,7 +100,7 @@ export async function unbanUser(guild: Guild, userId: string, moderator: Moderat
 	const ban = await guild.bans.fetch(userId).catch(() => null);
 	if (ban === null) throw new UserFacingError("That user is not banned in this server.");
 
-	await guild.bans.remove(userId, `${moderator.name}: ${reason}`);
+	await guild.bans.remove(userId, auditReason(`${moderator.name}: ${reason}`));
 	await recordCase(guild, { action: "unban", user: ban.user, moderator, reason });
 
 	return ban.user;
@@ -129,7 +129,7 @@ export async function timeoutMember(
 		}),
 	);
 
-	await member.timeout(durationMs, `${moderator.name}: ${reason}`);
+	await member.timeout(durationMs, auditReason(`${moderator.name}: ${reason}`));
 	await recordCase(guild, { action: "timeout", user: member.user, moderator, reason, durationMs });
 
 	return { notified };
@@ -146,11 +146,11 @@ export async function removeTimeout(
 	}
 	if (!member.moderatable) throw new UserFacingError(strings.moderation.notModeratable);
 
-	await member.timeout(null, `${moderator.name}: ${reason}`);
+	await member.timeout(null, auditReason(`${moderator.name}: ${reason}`));
 	const notified = await notifyTarget(
 		member.user,
 		dmEmbed({
-			action: `untimed out in ${guild.name}`,
+			headline: `Your timeout in ${guild.name} was lifted`,
 			emoji: theme.emoji.success,
 			guild,
 			moderator: { username: moderator.name },

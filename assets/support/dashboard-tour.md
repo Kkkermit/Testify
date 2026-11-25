@@ -17,14 +17,16 @@ Everything you change applies to the one server you have open, and its name sits
 - **Servers**: every server you can configure, or add the bot to.
 - **Commands**: every command, and the switches that turn them off for a server.
 - **Status**: whether the bot is online and how quickly it answers.
+- **Notifications**: what the bot's owners want everybody to know.
 - **Help**: this assistant and a tour of every screen.
 
 ### Inside a server
-- **Overview** and **Settings** sit at the top.
-- **Community**: Welcome, Levelling, Role menus, Idea board and Leaderboards.
-- **Moderation**: AutoMod, Audit log, Warnings and Changes.
-- **Economy**: Treasure, Lottery and Casino.
+- **Overview**, **Inbox**, **This week**, **Channels**, **Members**, **Roles**, **Settings** and **Back up and copy** sit at the top. The leaderboards are a tab on **Members**.
+- **Community**: Welcome, Birthdays, Levelling, Role menus, Idea board, Starboard and Join to create.
+- **Messages**: Announcements, Scheduled messages, Sticky and Auto-responders.
+- **Moderation**: AutoMod, Raid protection, Warnings, Cases, Bans, Appeals, Mod mail, Channel tools, Tickets, Audit log and Changes.
+- **Stats**: Insights, Invites, Member count and Bot statistics.
+- **Economy**: Economy settings, Treasure, Lottery and Casino.
 - **Entertainment**: Music and Giveaways.
-- **Channels**: Sticky, Tickets, Bot statistics and Member count.
 
 > **Tip:** Sections fold away. The one holding the page you are on always opens itself.

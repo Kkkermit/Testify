@@ -1,6 +1,4 @@
 import { ButtonStyle } from "discord.js";
-import { parseCustomId } from "@core/button";
-import { modalForm, quickAmountRow } from "@lib/discord/components.util";
 import { parseRange, parseWholeNumber, settingsPanel, statusValue } from "@lib/settings/settingsPanel.util";
 
 describe("settingsPanel", () => {
@@ -45,108 +43,32 @@ describe("settingsPanel", () => {
 describe("parseWholeNumber", () => {
 	const bounds = { min: 5, max: 500 };
 
-	/** Returned rather than thrown, so a form can report every bad field at once. */
-	it("names the field when the value is not a number", () => {
-		const result = parseWholeNumber("lots", "Messages", bounds);
+	/** Returned rather than thrown, so a form can report every bad field at once; an empty field is not zero. */
+	it("refuses anything but a whole number inside the bounds, naming the field and the bounds", () => {
+		const refused = ["lots", "4.5", "9000", ""].map((raw) => parseWholeNumber(raw, "Messages", bounds));
+		const reasons = refused.map((result) => (result.ok ? null : result.reason));
 
-		expect(result.ok).toBe(false);
-		expect(result.ok ? "" : result.reason).toContain("Messages");
-	});
-
-	it("rejects a fraction", () => {
-		expect(parseWholeNumber("4.5", "Messages", bounds).ok).toBe(false);
-	});
-
-	it("rejects a value outside the bounds, and says what they are", () => {
-		const result = parseWholeNumber("9000", "Messages", bounds);
-
-		expect(result.ok).toBe(false);
-		expect(result.ok ? "" : result.reason).toContain("500");
-	});
-
-	it("rejects an empty field rather than reading it as zero", () => {
-		expect(parseWholeNumber("", "Messages", bounds).ok).toBe(false);
-	});
-});
-
-describe("modalForm", () => {
-	const modal = modalForm({
-		id: "treasure",
-		action: "save-amount",
-		args: ["guild-1"],
-		title: "Drop size",
-		fields: [
-			{ id: "min", label: "Smallest", value: "10" },
-			{ id: "max", label: "Largest", value: "500", paragraph: true, required: false },
-		],
-	});
-
-	/** Each field is a label holding one text input, and the union needs narrowing before the input can be read. */
-	const inputAt = (index: number): { value?: string; style?: number; required?: boolean } => {
-		const label = modal.toJSON().components[index] as unknown as { component: unknown };
-		return label.component as { value?: string; style?: number; required?: boolean };
-	};
-
-	it("carries its own state in the custom ID", () => {
-		const parsed = parseCustomId(modal.toJSON().custom_id);
-
-		expect(parsed.id).toBe("treasure");
-		expect(parsed.action).toBe("save-amount");
-		expect(parsed.args).toEqual(["guild-1"]);
-	});
-
-	/** Pre-filling is what turns a form into an editor. */
-	it("pre-fills each field with the current value", () => {
-		expect(inputAt(0).value).toBe("10");
-	});
-
-	it("truncates a title past Discord's limit rather than being rejected", () => {
-		const long = modalForm({ id: "x", action: "y", title: "T".repeat(80), fields: [{ id: "a", label: "A" }] });
-		expect(long.toJSON().title.length).toBeLessThanOrEqual(45);
-	});
-});
-
-describe("quickAmountRow", () => {
-	const row = quickAmountRow("money", "dep", 1_000, "user-1");
-	const buttons = row.components.map((component) => component.toJSON() as unknown as Record<string, unknown>);
-
-	/** The label has to say what pressing it does, not just "25%". */
-	it("resolves each percentage to a real figure in the label", () => {
-		expect(buttons[0]?.label).toBe("25% — 250");
-		expect(buttons[1]?.label).toBe("50% — 500");
-		expect(buttons[2]?.label).toBe("All — 1000");
-	});
-
-	it("puts the amount and owner in the custom ID", () => {
-		const parsed = parseCustomId(buttons[0]?.custom_id as string);
-
-		// The slot name keeps the three buttons distinct when the amounts coincide.
-		expect(parsed.action).toBe("dep");
-		expect(parsed.args[0]).toBe("250");
-		expect(parsed.args.at(-1)).toBe("user-1");
-	});
-
-	it("puts the owner last so ownerOnly can read it", () => {
-		for (const built of buttons) {
-			expect(parseCustomId(built.custom_id as string).args.at(-1)).toBe("user-1");
-		}
+		expect(reasons.filter((reason) => reason === null)).toEqual([]);
+		expect(reasons[0]).toContain("Messages");
+		expect(reasons[2]).toContain("500");
+		expect(parseWholeNumber("1,000", "Messages", { min: 5, max: 5_000 })).toEqual({ ok: true, value: 1_000 });
 	});
 });
 
 describe("parseRange", () => {
 	const labels = { min: "Smallest", max: "Largest", order: "The smallest cannot be more than the largest." };
-	const bounds = { min: 1, max: 100 };
+	const rangeBounds = { min: 1, max: 100 };
 
 	/** Both halves are named at once, so somebody fixing the form does not find the second mistake on the next try. */
 	it("names every field that is wrong, in order", () => {
-		expect(parseRange({ min: "x", max: "500" }, labels, bounds)).toEqual({
+		expect(parseRange({ min: "x", max: "500" }, labels, rangeBounds)).toEqual({
 			ok: false,
 			problems: ["**Smallest** has to be a whole number.", "**Largest** has to be between 1 and 100."],
 		});
 	});
 
 	it("refuses a range that runs backwards, with the caller's own words", () => {
-		expect(parseRange({ min: "9", max: "3" }, labels, bounds)).toEqual({ ok: false, problems: [labels.order] });
-		expect(parseRange({ min: "3", max: "3" }, labels, bounds)).toEqual({ ok: true, min: 3, max: 3 });
+		expect(parseRange({ min: "9", max: "3" }, labels, rangeBounds)).toEqual({ ok: false, problems: [labels.order] });
+		expect(parseRange({ min: "3", max: "3" }, labels, rangeBounds)).toEqual({ ok: true, min: 3, max: 3 });
 	});
 });

@@ -16,6 +16,7 @@ import {
 	withBoost,
 	withReward,
 } from "@lib/levelling";
+import { chooserProblem } from "@lib/roles";
 import { parseWholeNumber, recordsSettings } from "@lib/settings";
 
 async function currentConfig(guildId: string): Promise<LevelConfig> {
@@ -54,6 +55,15 @@ export default recordsSettings(
 			const [first] = context.args;
 			const tab: LevelTab = first !== undefined && isLevelTab(first) ? first : "overview";
 			const config = await currentConfig(guildId);
+
+			/** A reward is handed to whoever reaches the level, so it asks what the dashboard does of whoever chooses it. */
+			const refuseReward = async (roleId: string): Promise<void> => {
+				const guild = interaction.guild;
+				const member = guild === null ? null : await guild.members.fetch(ownerId).catch(() => null);
+				if (guild === null || member === null) throw new UserFacingError("I could not find you in this server.");
+				const problem = chooserProblem(member, roleId, guild);
+				if (problem !== null) throw new UserFacingError(problem);
+			};
 
 			const show = async (next: LevelConfig, note?: string): Promise<void> => {
 				const state: LevelPanelState = { tab, config: next, ...(note !== undefined ? { note } : {}) };
@@ -128,6 +138,7 @@ export default recordsSettings(
 
 					const [roleId] = interaction.values;
 					if (roleId === undefined) return;
+					await refuseReward(roleId);
 
 					await interaction.showModal(
 						modalForm({
@@ -153,6 +164,7 @@ export default recordsSettings(
 
 					const [, roleId] = context.args;
 					if (roleId === undefined) return;
+					await refuseReward(roleId);
 
 					const parsed = parseWholeNumber(interaction.fields.getTextInputValue("level"), "Level", {
 						min: 1,
