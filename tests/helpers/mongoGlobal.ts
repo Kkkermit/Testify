@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import type { GlobalConfig } from "jest";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { MongoMemoryServer } from "mongodb-memory-server-core";
 
 /** One in-memory MongoDB for the run, started before suites are built so `describeWithMongo` can decide synchronously. */
 const HANDLE = Symbol.for("testify.test.mongo");

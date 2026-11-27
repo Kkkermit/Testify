@@ -41,9 +41,18 @@ export function summarise(totals: LintTotals): string {
 	return `${parts.join(", ")} across ${totals.files} file(s)${fixable}`;
 }
 
+/** By content, because a fresh checkout gives every file a new modification time. */
+export const LINT_CACHE: ESLint.Options = {
+	cache: true,
+	cacheLocation: "node_modules/.cache/eslint/",
+	cacheStrategy: "content",
+};
+
 async function main(): Promise<void> {
 	const fix = process.argv.includes("--fix");
-	const eslint = new ESLint({ fix });
+	// Off unless asked: a file's cached result ignores types from other files, so only an identical tree may reuse it.
+	const cached = process.argv.includes("--cache") ? LINT_CACHE : {};
+	const eslint = new ESLint({ fix, ...cached });
 	const results = await eslint.lintFiles(["."]);
 
 	if (fix) await ESLint.outputFixes(results);

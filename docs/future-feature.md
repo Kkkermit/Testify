@@ -23,6 +23,58 @@ tab is a worse tool than doing it in the channel, where you can see them.
 
 ---
 
+## ✨ Features worth adding
+
+Added on 27 November 2026. Each one can be built from what the bot already has, works for a self-hoster with no account,
+key or paid service, and fits Discord's limit of 100 top-level commands, of which the bot registers 98: three of them
+are subcommands of commands that exist, so only tags would take a new name.
+
+Each still needs what every feature here has: a declaration in `shared/src/botFeatures.ts` so a host can switch it off,
+a `purge…` in `purgeGuild`, a line in `ERASURE` for any field that names a person, the privacy notice saying what is
+kept, the eight languages, a help article, `npm run docs:commands`, and tests proved able to fail.
+
+- **Feed alerts: new YouTube videos, releases and blog posts, posted to a channel.** Every YouTube channel has an Atom
+  feed (`https://www.youtube.com/feeds/videos.xml?channel_id=…`), as do GitHub releases (`…/releases.atom`) and most
+  blogs, so nothing needs a key. A job reads each feed every 15 minutes, with `If-None-Match` and `If-Modified-Since` so
+  an unchanged feed costs one small request, and posts each item it has not seen, pinging nobody unless a manager chose
+  a role.
+  - **A feed address is somebody else's URL that the bot fetches.** It needs what `/play` and `fetchPicture` already
+    have: `https` only, no redirects, a size cap, and no host that is an address, a bare name or a local suffix
+    (`isLocalHost` in `musicQuery.util.ts`, moved into `src/lib/infra`). It also needs the resolved address checked,
+    since a public name can point at the host's own network.
+  - **Feeds would be the bot's first XML.** `fast-xml-parser` is MIT, maintained and runs no install script, at the cost
+    of six small dependencies.
+  - **Left out on purpose:** Reddit, which often refuses unauthenticated requests from cloud hosts, and Twitch, which
+    needs an application key.
+  - **Where it lives:** `/schedule feeds`, opening a panel that lists, adds and removes feeds (the command framework has
+    no subcommand groups, and a panel is the bot's usual shape for a list of records), and a **Feeds** screen under
+    Messages, capped per server like `SCHEDULE_LIMITS`. Build on the scheduled messages job (`nextAfter`,
+    `settleSchedule`), `fetchRaw`, `missingToPost`, `pingProblem` and `withoutPings`.
+- **Tags: saved replies staff post on request.** `/tag rules` posts the server's answer about its rules, so a moderator
+  stops retyping it. The name is autocompleted from the server's tags, never typed blind (anti-pattern 19), and
+  `t?rules` works on the prefix. A tag is an auto-responder that answers when it is asked rather than when it hears a
+  word, so it can share the record, the editor and the cap. The difference is a `mode`, and the prefix handler looks up
+  a tag only after no command matched. `/tag` would be the 99th top-level command. To keep both remaining slots, the
+  slash side could instead be a subcommand of `/auto-responder`. Build on `responderMatches`, `triggerKey`,
+  `AUTO_RESPONDER_LIMITS` and the Auto-responders screen.
+- **Temporary roles: give a role for a set time.** For a trial role, an event's role or a week as a contest winner:
+  `/role add @member @role duration:7d`, and a **for how long** choice on the member page's roles card. A record holds
+  the server, the member, the role and when it ends. A job claims each due one with a lease and takes the role away, as
+  reminders are delivered (`claimDueReminder`), so a restart mid-run takes it away later rather than never. Giving it
+  asks exactly what `/role add` asks: Manage Roles and the grant rule (`chooserProblem`, `grantableRoles`). Leaving the
+  server forgets the record, and `ERASURE` has to say what happens to the role when the member deletes their data. Build
+  on `parseDuration`, `REMINDER_RULES` for the limits, `auditReason` for the audit log, and the softban expiry job,
+  which already takes something back on a timer.
+- **Discord's own scheduled events, from the dashboard, with a reminder.** Create, edit and cancel a server's events in
+  the reader's own time zone, as scheduled messages are timed. A server can then have the bot post in a channel before
+  one starts, linking the event and pinging only a role a manager chose. **This week** (`readWeek`) would list them
+  beside the posts and draws already there. It asks what Discord asks, Manage Events, of the reader and of the bot. It
+  needs the `GuildScheduledEvents` intent, which is not privileged, so a host changes nothing in the developer portal.
+  **Where it lives:** an **Events** screen under Community and `/schedule events`, a panel listing the server's events
+  with a reminder switch on each. Build on the scheduled messages screen and job, `pingProblem` and `readWeek`.
+
+---
+
 ## 🧭 Journeys that could be smoother
 
 Found in the November 2026 audit. Each says what is awkward today, what would be better, and what to build on.

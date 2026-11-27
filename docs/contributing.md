@@ -206,8 +206,9 @@ formatting, pagination, the levelling curve, a repository, a panel renderer — 
   handler.
 - **Name the behaviour,** not the implementation: `"disables Use on an item that cannot be used"`.
 - **A test must be able to fail.** If you add one that enforces a rule, break the rule once and watch it go red.
-- **Repository tests use an in-memory MongoDB.** Without one they report as _skipped_, never as passed — and CI
-  sets `REQUIRE_DB_TESTS=1`, so a runner that cannot start a database fails rather than going quietly green.
+- **Repository tests use an in-memory MongoDB.** The first test run downloads it once, so `npm ci` does not. Without one
+  they report as _skipped_, never as passed — and CI sets `REQUIRE_DB_TESTS=1`, so a runner that cannot start a
+  database fails rather than going quietly green.
 
 The coverage floor is **75%** of statements, lines, functions and branches, checked by `npm run test:coverage` in
 CI. A new test should cover something no other test does, or pin what coverage cannot see — a bug, a refusal, a
