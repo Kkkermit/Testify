@@ -1,6 +1,6 @@
 {
 	"name": "@testify/dashboard",
-	"version": "2.5.1",
+	"version": "2.5.2",
 	"private": true,
 	"description": "The web dashboard and public website the bot serves, built with Vite and React.",
 	"license": "MIT",
@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit --incremental --tsBuildInfoFile ../node_modules/.cache/tsc/dashboard.tsbuildinfo"
 	},
 	"dependencies": {
 		"@tanstack/react-query": "5.108.4",
