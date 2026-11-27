@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit --incremental --tsBuildInfoFile ../node_modules/.cache/tsc/dashboard.tsbuildinfo"
 	},
 	"dependencies": {
 		"@tanstack/react-query": "5.108.4",

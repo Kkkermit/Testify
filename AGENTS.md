@@ -819,7 +819,7 @@ Rules:
    **A field that names a person is listed in `ERASURE`** in `accountRepository.ts`, saying what Delete my data does
    to it; the coverage test fails on a new one that is not (see
    [§21](#delete-my-data-wipes-what-is-theirs-at-once-and-for-good)).
-6. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
+6. Use `mongodb-memory-server-core` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
    model when it is not.
 7. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
    not appear on records written yesterday, however `required: true` it is — so the type the schema declares is a
@@ -1082,7 +1082,8 @@ Shared harness in `tests/helpers/` (these are not tests):
   Every method is already a `jest.fn()`, `overrides` spread last, and the factories are typed so a mock that
   drifts from the real Discord shape is a compile error. `createMockModel` is `hasOwnProperty`-aware so an
   override of `null`/`0`/`false` is honoured rather than falling through to the default.
-- **`mongo.ts`** — `mongodb-memory-server` setup.
+- **`mongo.ts`** — `mongodb-memory-server-core` setup. The core package runs no install script, so `npm ci` fetches
+  no MongoDB; the first test run does, into `~/.cache/mongodb-binaries`, where every later run and checkout finds it.
 - **`containers.ts`** — `idsOf()`, `buttonsOf()`, `textOf()` for walking a Components V2 tree. A container nests
   sections inside containers and buttons inside sections, so asserting on one means walking it.
 - **`apiHarness.ts`** — `ask()` against the real app, and for a route mounted on its own, `withSession()` for the
@@ -1170,7 +1171,9 @@ the husky hooks, whose shebang line then ends in a carriage return.
 **Every override in that config carries a comment explaining why.** Keep that — an unexplained override rots.
 
 `scripts/lintRunner.ts` drives the ESLint Node API: colourised per-file report, and **exits non-zero on errors
-only — warnings never fail the build.**
+only — warnings never fail the build.** `--cache` reuses results by content (`LINT_CACHE`), and is off by default:
+ESLint judges each file on its own while the type-aware rules read others, so adding a shop section can break the
+`switch-exhaustiveness-check` in a file nobody touched, and a cached result for that file would hide it.
 
 ### Code
 
@@ -1299,11 +1302,25 @@ work together — a rename sweep is one mechanical commit, not 100.
 
 ## 20. CI
 
-`.github/workflows/ci.yml` — four jobs (`check`, `test`, `build`, `audit`), triggered on `branches: ["**"]` for
-push and pull_request so a feature branch is verified before a PR exists. Node version comes from `.nvmrc`, not a
-hardcoded string. **`test` runs on Windows**, with coverage, because that is what most people clone this onto;
-Linux and macOS are tested every night. The `build` job **verifies the `dist/` artifact**, which is what catches the
-unrewritten alias problem.
+`.github/workflows/ci.yml` — five jobs (`check`, `test`, `dashboard-test`, `build`, `audit`), triggered on
+`branches: ["**"]` for push so a feature branch is verified before a PR exists. Node version comes from `.nvmrc`, not a
+hardcoded string. **`test` and `dashboard-test` run on Windows**, side by side and each against its own coverage
+threshold, because that is what most people clone this onto; Linux and macOS are tested every night. The `build` job
+**verifies the `dist/` artifact**, which is what catches the unrewritten alias problem. Four things about it are
+load-bearing:
+
+- **A pull request from a branch here runs nothing of its own.** The push already checked that commit, and its checks
+  show on the pull request, so every job asks `head.repo.fork` and only a fork's pull request runs. Without it each
+  push to a branch with an open pull request ran the whole workflow twice.
+- **Only `test` runs install scripts.** `musicVolume.test.ts` runs the real FFmpeg, and skips itself when
+  `ffmpeg-static` has none, so a script-free install there would quietly drop it. The other four install with
+  `--ignore-scripts`, each proved to pass that way from a clean checkout with no `shared/dist`.
+- **The type check starts from the last run's state** (`--incremental`, kept in `node_modules/.cache/tsc`), restored
+  from any earlier commit, because `tsc` re-checks everything a change can reach. An error in an untouched file, and
+  one left unfixed between runs, were both proved to still be reported. Cold 55 seconds, warm 6.
+- **Lint results are reused only for an identical tree.** The cache key hashes every linted file, configuration and
+  the lockfile, with no fallback key, for the reason under `lintRunner.ts` above; a re-run or a docs-only push lints in
+  seconds, and any code change lints everything. The test MongoDB is cached in `~/.cache/mongodb-binaries` too.
 
 `.github/workflows/nightly.yml` — `cron: "37 3 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests` on
 Windows, Linux and macOS, `npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false
